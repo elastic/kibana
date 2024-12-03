@@ -14,6 +14,7 @@ import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { Section } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
 import { ComponentTemplateList } from '../../components/component_templates';
+import { useAppContext } from '../../app_context';
 import { IndexList } from './index_list';
 import { EnrichPoliciesList } from './enrich_policies_list';
 import { IndexDetailsPage } from './index_list/details_page';
@@ -38,6 +39,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
+  const {
+    plugins: { console: consolePlugin },
+    privs,
+  } = useAppContext();
   const tabs = [
     {
       id: Section.Indices,
@@ -70,7 +75,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         />
       ),
     },
-    {
+  ];
+
+  if (privs.monitorEnrich) {
+    tabs.push({
       id: Section.EnrichPolicies,
       name: (
         <FormattedMessage
@@ -78,8 +86,8 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Enrich Policies"
         />
       ),
-    },
-  ];
+    });
+  }
 
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
@@ -139,8 +147,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           ]}
           component={ComponentTemplateList}
         />
-        <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
+        {privs.monitorEnrich && (
+          <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
+        )}
       </Routes>
+      {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
     </>
   );
   return (

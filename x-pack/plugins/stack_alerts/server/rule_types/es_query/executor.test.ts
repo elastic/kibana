@@ -101,11 +101,12 @@ describe('es_query executor', () => {
       savedObjectsClient: {
         get: () => ({ attributes: { consumer: 'alerts' } }),
       },
-      searchSourceClient: searchSourceClientMock,
+      getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceClientMock),
       alertsClient: mockAlertClient,
       alertWithLifecycle: jest.fn(),
       logger,
       shouldWriteAlerts: () => true,
+      getDataViews: jest.fn(),
     };
     const coreMock = {
       http: { basePath: { publicBaseUrl: 'https://localhost:5601' } },
@@ -188,7 +189,8 @@ describe('es_query executor', () => {
         params: { ...defaultProps, searchType: 'searchSource' },
         latestTimestamp: undefined,
         services: {
-          searchSourceClient: searchSourceClientMock,
+          getSearchSourceClient: expect.any(Function),
+          getDataViews: expect.any(Function),
           logger,
           share: undefined,
         },
@@ -299,9 +301,68 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '491',
           'kibana.alert.reason':
             'Document count is 491 in the last 5m. Alert when greater than or equal to 200.',
+          'kibana.alert.title': "rule 'test-rule-name' matched query",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+        },
+      });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should create alert if compare function returns true for ungrouped alert for multi threshold param', async () => {
+      mockFetchEsQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 491,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        // @ts-expect-error
+        params: {
+          ...defaultProps,
+          threshold: [200, 500],
+          thresholdComparator: 'between' as Comparator,
+        },
+      });
+
+      expect(mockReport).toHaveBeenCalledTimes(1);
+      expect(mockReport).toHaveBeenNthCalledWith(1, {
+        actionGroup: 'query matched',
+        context: {
+          conditions: 'Number of matching documents is between 200 and 500',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: 'Document count is 491 in the last 5m. Alert when between 200 and 500.',
+          title: "rule 'test-rule-name' matched query",
+          value: 491,
+        },
+        id: 'query matched',
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
+        },
+        payload: {
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents is between 200 and 500',
+          'kibana.alert.evaluation.threshold': null,
+          'kibana.alert.evaluation.value': '491',
+          'kibana.alert.reason':
+            'Document count is 491 in the last 5m. Alert when between 200 and 500.',
           'kibana.alert.title': "rule 'test-rule-name' matched query",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
@@ -317,16 +378,19 @@ describe('es_query executor', () => {
           results: [
             {
               group: 'host-1',
+              groups: [{ field: 'host.name', value: 'host-1' }],
               count: 291,
               hits: [],
             },
             {
               group: 'host-2',
+              groups: [{ field: 'host.name', value: 'host-2' }],
               count: 477,
               hits: [],
             },
             {
               group: 'host-3',
+              groups: [{ field: 'host.name', value: 'host-3' }],
               count: 999,
               hits: [],
             },
@@ -369,8 +433,10 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
+          'host.name': 'host-1',
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-1" is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '291',
           'kibana.alert.reason':
             'Document count is 291 in the last 5m for host-1. Alert when greater than or equal to 200.',
@@ -399,8 +465,10 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
+          'host.name': 'host-2',
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-2" is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '477',
           'kibana.alert.reason':
             'Document count is 477 in the last 5m for host-2. Alert when greater than or equal to 200.',
@@ -429,8 +497,10 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
+          'host.name': 'host-3',
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-3" is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '999',
           'kibana.alert.reason':
             'Document count is 999 in the last 5m for host-3. Alert when greater than or equal to 200.',
@@ -482,6 +552,7 @@ describe('es_query executor', () => {
         id: 'query matched',
         payload: {
           'kibana.alert.evaluation.conditions': 'Query matched documents',
+          'kibana.alert.evaluation.threshold': 0,
           'kibana.alert.evaluation.value': '198',
           'kibana.alert.reason':
             'Document count is 198 in the last 5m. Alert when greater than or equal to 0.',
@@ -582,10 +653,12 @@ describe('es_query executor', () => {
           message: 'Document count is 0 in the last 5m. Alert when greater than or equal to 500.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents is NOT greater than or equal to 500',
+          'kibana.alert.evaluation.threshold': 500,
           'kibana.alert.evaluation.value': '0',
           'kibana.alert.reason':
             'Document count is 0 in the last 5m. Alert when greater than or equal to 500.',
@@ -641,10 +714,12 @@ describe('es_query executor', () => {
             'Document count is 0 in the last 5m for host-1. Alert when greater than or equal to 200.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-1" is NOT greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '0',
           'kibana.alert.reason':
             'Document count is 0 in the last 5m for host-1. Alert when greater than or equal to 200.',
@@ -664,10 +739,12 @@ describe('es_query executor', () => {
             'Document count is 0 in the last 5m for host-2. Alert when greater than or equal to 200.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-2" is NOT greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '0',
           'kibana.alert.reason':
             'Document count is 0 in the last 5m for host-2. Alert when greater than or equal to 200.',
@@ -717,9 +794,11 @@ describe('es_query executor', () => {
           message: 'Document count is 0 in the last 5m. Alert when greater than 0.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions': 'Query did NOT match documents',
+          'kibana.alert.evaluation.threshold': 0,
           'kibana.alert.evaluation.value': '0',
           'kibana.alert.reason': 'Document count is 0 in the last 5m. Alert when greater than 0.',
           'kibana.alert.title': "rule 'test-rule-name' recovered",
@@ -729,6 +808,363 @@ describe('es_query executor', () => {
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should correctly handle alerts with sourceFields', async () => {
+      mockFetchEsQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'host-1',
+              count: 291,
+              hits: [],
+              sourceFields: {
+                'host.hostname': ['host-1'],
+                'host.id': ['1'],
+                'host.name': ['host-1'],
+              },
+            },
+          ],
+          truncated: false,
+        },
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        // @ts-expect-error
+        params: {
+          ...defaultProps,
+          threshold: [200],
+          thresholdComparator: '>=' as Comparator,
+          groupBy: 'top',
+          termSize: 10,
+          termField: 'host.name',
+          sourceFields: [
+            { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
+            { label: 'host.id', searchPath: 'host.id.keyword' },
+            { label: 'host.name', searchPath: 'host.name.keyword' },
+          ],
+        },
+      });
+
+      expect(mockReport).toHaveBeenCalledTimes(1);
+      expect(mockReport).toHaveBeenNthCalledWith(1, {
+        actionGroup: 'query matched',
+        context: {
+          conditions:
+            'Number of matching documents for group "host-1" is greater than or equal to 200',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message:
+            'Document count is 291 in the last 5m for host-1. Alert when greater than or equal to 200.',
+          title: "rule 'test-rule-name' matched query for group host-1",
+          value: 291,
+          sourceFields: {
+            'host.hostname': ['host-1'],
+            'host.id': ['1'],
+            'host.name': ['host-1'],
+          },
+        },
+        id: 'host-1',
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
+        },
+        payload: {
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-1" is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
+          'kibana.alert.evaluation.value': '291',
+          'kibana.alert.reason':
+            'Document count is 291 in the last 5m for host-1. Alert when greater than or equal to 200.',
+          'kibana.alert.title': "rule 'test-rule-name' matched query for group host-1",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          'host.hostname': ['host-1'],
+          'host.id': ['1'],
+          'host.name': ['host-1'],
+        },
+      });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should log messages for hits with out-of-range dates for search source', async () => {
+      const epoch = Date.now();
+      const oneYear = 1000 * 60 * 60 * 24 * 365;
+      const dateEarly = new Date(epoch - oneYear).toISOString();
+      const dateStart = new Date(epoch - 1000).toISOString();
+      const dateMiddle = new Date(epoch - 500).toISOString();
+      const dateEnd = new Date(epoch).toISOString();
+      const dateLate = new Date(epoch + oneYear).toISOString();
+
+      function getTimeRange() {
+        return { dateStart, dateEnd };
+      }
+
+      mockFetchSearchSourceQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 3,
+              hits: [
+                { _source: { '@timestamp': dateEarly, value: 1 } },
+                { _source: { '@timestamp': dateMiddle, value: 2 } },
+                { _source: { '@timestamp': dateLate, value: 3 } },
+              ],
+            },
+          ],
+        },
+        truncated: false,
+        query: 'the query would go here',
+      });
+
+      const executorOptions: ExecutorOptions<EsQueryRuleParams> = {
+        ...defaultExecutorOptions,
+        getTimeRange,
+        params: {
+          ...defaultProps,
+          searchType: 'searchSource',
+          timeField: '@timestamp',
+        },
+      };
+      await executor(coreMock, executorOptions);
+
+      const allLogCalls = loggerMock.collect(logger);
+      const messages: string[] = [];
+      for (const parms of allLogCalls.error) {
+        const message = parms.shift();
+        messages.push(`${message}`);
+      }
+
+      expect(messages).toEqual([
+        `For rule 'test-rule-id', the hit with date '${dateEarly}' from field '@timestamp' is outside the query time range. Query: <\"the query would go here\">. Document: <{\"_source\":{\"@timestamp\":\"${dateEarly}\",\"value\":1}}>`,
+        `For rule 'test-rule-id', the hit with date '${dateLate}' from field '@timestamp' is outside the query time range. Query: <\"the query would go here\">. Document: <{\"_source\":{\"@timestamp\":\"${dateLate}\",\"value\":3}}>`,
+      ]);
+      expect(allLogCalls).toMatchInlineSnapshot(`
+        Object {
+          "debug": Array [],
+          "error": Array [
+            Array [
+              Object {
+                "tags": Array [
+                  "query-result-out-of-time-range",
+                ],
+              },
+            ],
+            Array [
+              Object {
+                "tags": Array [
+                  "query-result-out-of-time-range",
+                ],
+              },
+            ],
+          ],
+          "fatal": Array [],
+          "info": Array [],
+          "log": Array [],
+          "trace": Array [],
+          "warn": Array [],
+        }
+      `);
+    });
+
+    it('should log messages for bad start / end dates for search source', async () => {
+      function getTimeRange() {
+        return { dateStart: 'x', dateEnd: 'y' };
+      }
+
+      mockFetchSearchSourceQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 1,
+              hits: [{ _source: { '@timestamp': new Date().toISOString() } }],
+            },
+          ],
+        },
+        truncated: false,
+        query: 'the query would go here',
+      });
+
+      const executorOptions: ExecutorOptions<EsQueryRuleParams> = {
+        ...defaultExecutorOptions,
+        getTimeRange,
+        params: {
+          ...defaultProps,
+          searchType: 'searchSource',
+          timeField: '@timestamp',
+        },
+      };
+      await executor(coreMock, executorOptions);
+
+      const allLogCalls = loggerMock.collect(logger);
+      const messages: string[] = [];
+      for (const parms of allLogCalls.error) {
+        const message = parms.shift();
+        messages.push(`${message}`);
+      }
+
+      expect(messages).toEqual([
+        `For rule 'test-rule-id', hits were returned with invalid time range start date 'x' from field '@timestamp' using query <"the query would go here">`,
+        `For rule 'test-rule-id', hits were returned with invalid time range end date 'y' from field '@timestamp' using query <"the query would go here">`,
+      ]);
+      expect(allLogCalls.error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('should log messages for hits with out-of-range dates for query dsl', async () => {
+      const epoch = Date.now();
+      const oneYear = 1000 * 60 * 60 * 24 * 365;
+      const dateEarly = new Date(epoch - oneYear).toISOString();
+      const dateStart = new Date(epoch - 1000).toISOString();
+      const dateMiddle = new Date(epoch - 500).toISOString();
+      const dateEnd = new Date(epoch).toISOString();
+      const dateLate = new Date(epoch + oneYear).toISOString();
+
+      function getTimeRange() {
+        return { dateStart, dateEnd };
+      }
+
+      mockFetchEsQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 3,
+              hits: [
+                { _source: { '@timestamp': dateEarly, value: 1 } },
+                { _source: { '@timestamp': dateMiddle, value: 2 } },
+                { _source: { '@timestamp': dateLate, value: 3 } },
+              ],
+            },
+          ],
+        },
+        truncated: false,
+        query: 'the query would go here',
+      });
+
+      const executorOptions: ExecutorOptions<EsQueryRuleParams> = {
+        ...defaultExecutorOptions,
+        getTimeRange,
+        params: {
+          ...defaultProps,
+          searchType: 'esQuery',
+          timeField: '@timestamp',
+        },
+      };
+      await executor(coreMock, executorOptions);
+
+      const allLogCalls = loggerMock.collect(logger);
+      const messages: string[] = [];
+      for (const parms of allLogCalls.error) {
+        const message = parms.shift();
+        messages.push(`${message}`);
+      }
+
+      expect(messages).toEqual([
+        `For rule 'test-rule-id', the hit with date '${dateEarly}' from field '@timestamp' is outside the query time range. Query: <\"the query would go here\">. Document: <{\"_source\":{\"@timestamp\":\"${dateEarly}\",\"value\":1}}>`,
+        `For rule 'test-rule-id', the hit with date '${dateLate}' from field '@timestamp' is outside the query time range. Query: <\"the query would go here\">. Document: <{\"_source\":{\"@timestamp\":\"${dateLate}\",\"value\":3}}>`,
+      ]);
+      expect(allLogCalls.error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('should log messages for bad start / end dates for query dsl', async () => {
+      function getTimeRange() {
+        return { dateStart: 'x', dateEnd: 'y' };
+      }
+
+      mockFetchEsQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 1,
+              hits: [{ _source: { '@timestamp': new Date().toISOString() } }],
+            },
+          ],
+        },
+        truncated: false,
+        query: 'the query would go here',
+      });
+
+      const executorOptions: ExecutorOptions<EsQueryRuleParams> = {
+        ...defaultExecutorOptions,
+        getTimeRange,
+        params: {
+          ...defaultProps,
+          searchType: 'esQuery',
+          timeField: '@timestamp',
+        },
+      };
+      await executor(coreMock, executorOptions);
+
+      const allLogCalls = loggerMock.collect(logger);
+      const messages: string[] = [];
+      for (const parms of allLogCalls.error) {
+        const message = parms.shift();
+        messages.push(`${message}`);
+      }
+
+      expect(messages).toEqual([
+        `For rule 'test-rule-id', hits were returned with invalid time range start date 'x' from field '@timestamp' using query <"the query would go here">`,
+        `For rule 'test-rule-id', hits were returned with invalid time range end date 'y' from field '@timestamp' using query <"the query would go here">`,
+      ]);
+      expect(allLogCalls.error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+        ]
+      `);
     });
   });
 

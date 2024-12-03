@@ -1,16 +1,25 @@
 {
   "type": "plugin",
   "id": "@kbn/elastic-assistant-plugin",
-  "owner": "@elastic/security-solution",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "security",
+  "visibility": "private",
   "description": "Server APIs for the Elastic AI Assistant",
   "plugin": {
     "id": "elasticAssistant",
-    "server": true,
     "browser": false,
+    "server": true,
     "requiredPlugins": [
       "actions",
       "data",
-      "ml"
+      "ml",
+      "taskManager",
+      "licensing",
+      "inference",
+      "spaces",
+      "security"
     ]
   }
 }

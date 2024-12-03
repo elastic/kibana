@@ -9,7 +9,8 @@ import { v5 as uuidv5 } from 'uuid';
 import { uniqBy } from 'lodash';
 import type { SavedObjectsImportSuccess } from '@kbn/core-saved-objects-common';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
-import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
+import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/server';
+import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common/types';
 
 import type { KibanaAssetType } from '../../../../../common';
 import type { PackageSpecTags } from '../../../../types';
@@ -179,7 +180,7 @@ async function ensureManagedTag(
       description: '',
       color: MANAGED_TAG_COLOR,
     },
-    { id: managedTagId, overwrite: true, refresh: false }
+    { id: managedTagId, overwrite: true, refresh: false, managed: true }
   );
 
   return managedTagId;
@@ -206,7 +207,7 @@ async function ensurePackageTag(
       description: '',
       color: PACKAGE_TAG_COLOR,
     },
-    { id: packageTagId, overwrite: true, refresh: false }
+    { id: packageTagId, overwrite: true, refresh: false, managed: true }
   );
 
   return packageTagId;
@@ -232,7 +233,7 @@ async function getPackageSpecTags(
             description: 'Tag defined in package-spec',
             color: getRandomColor(),
           },
-          { id: uniqueTagId, overwrite: true, refresh: false }
+          { id: uniqueTagId, overwrite: true, refresh: false, managed: true }
         );
       }
       const assetTypes = getAssetTypesObjectReferences(tag?.asset_types, taggableAssets);

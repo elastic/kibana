@@ -22,7 +22,6 @@
     "@kbn/dom-drag-drop",
     "@kbn/i18n-react",
     "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/kibana-utils-plugin",
     "@kbn/unified-search-plugin",
@@ -40,7 +39,9 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-notifications-browser",
-    "@kbn/core-saved-objects-api-browser"
+    "@kbn/core-saved-objects-api-browser",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/test-eui-helpers"
   ],
   "exclude": [
     "target/**/*",

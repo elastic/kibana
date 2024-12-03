@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { of, BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 
 import { type ServiceStatus, ServiceStatusLevels, type CoreStatus } from '@kbn/core-status-common';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
-import { first, take, toArray } from 'rxjs/operators';
+import { first, take, toArray } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';

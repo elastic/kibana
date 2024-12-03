@@ -38,7 +38,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -65,7 +65,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "src/plugins/unified_doc_viewer/public/index.tsx",
+        "path": "src/plugins/unified_doc_viewer/public/components/lazy_doc_viewer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -80,7 +80,91 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewerFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewerFlyout",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "UnifiedDocViewerFlyoutProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_doc_viewer/public/components/lazy_doc_viewer_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewerLogsOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewerLogsOverview",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "DocViewRenderProps",
+          " & { renderAIAssistant?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
+            "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
+          },
+          ") => JSX.Element) | undefined; } & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_doc_viewer/public/components/lazy_doc_viewer_logs_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerLogsOverview.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -97,7 +181,7 @@
           "\nCustom react hook for querying a single doc in ElasticSearch"
         ],
         "signature": [
-          "({\n  id,\n  index,\n  dataView,\n  requestSource,\n  textBasedHits,\n}: ",
+          "({\n  id,\n  index,\n  dataView,\n  requestSource,\n  textBasedHits,\n  onBeforeFetch,\n  onProcessRecord,\n}: ",
           "EsDocSearchProps",
           ") => [",
           {
@@ -108,7 +192,13 @@
             "text": "ElasticRequestState"
           },
           ", ",
-          "DataTableRecord",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
           " | null, () => void]"
         ],
         "path": "src/plugins/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
@@ -120,7 +210,7 @@
             "id": "def-public.useEsDocSearch.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  id,\n  index,\n  dataView,\n  requestSource,\n  textBasedHits,\n}",
+            "label": "{\n  id,\n  index,\n  dataView,\n  requestSource,\n  textBasedHits,\n  onBeforeFetch,\n  onProcessRecord,\n}",
             "description": [],
             "signature": [
               "EsDocSearchProps"
@@ -133,29 +223,36 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedDocViewer",
-        "id": "def-public.useUnifiedDocViewerServices",
-        "type": "Function",
-        "tags": [],
-        "label": "useUnifiedDocViewerServices",
-        "description": [],
-        "signature": [
-          "() => ",
-          "UnifiedDocViewerServices"
-        ],
-        "path": "src/plugins/unified_doc_viewer/public/hooks/use_doc_viewer_services.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.LogsOverviewProps",
+        "type": "Type",
+        "tags": [],
+        "label": "LogsOverviewProps",
+        "description": [],
+        "signature": [
+          "DocViewRenderProps",
+          " & { renderAIAssistant?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
+            "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
+          },
+          ") => JSX.Element) | undefined; }"
+        ],
+        "path": "src/plugins/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "unifiedDocViewer",
@@ -170,40 +267,23 @@
       "children": [
         {
           "parentPluginId": "unifiedDocViewer",
-          "id": "def-public.UnifiedDocViewerSetup.addDocView",
-          "type": "Function",
+          "id": "def-public.UnifiedDocViewerSetup.registry",
+          "type": "Object",
           "tags": [],
-          "label": "addDocView",
+          "label": "registry",
           "description": [],
           "signature": [
-            "(docViewRaw: ",
-            "DocViewInput",
-            " | ",
-            "DocViewInputFn",
-            ") => void"
+            {
+              "pluginId": "@kbn/unified-doc-viewer",
+              "scope": "common",
+              "docId": "kibKbnUnifiedDocViewerPluginApi",
+              "section": "def-common.DocViewsRegistry",
+              "text": "DocViewsRegistry"
+            }
           ],
           "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
           "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "unifiedDocViewer",
-              "id": "def-public.UnifiedDocViewerSetup.addDocView.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "docViewRaw",
-              "description": [],
-              "signature": [
-                "DocViewInput",
-                " | ",
-                "DocViewInputFn"
-              ],
-              "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -222,38 +302,23 @@
       "children": [
         {
           "parentPluginId": "unifiedDocViewer",
-          "id": "def-public.UnifiedDocViewerStart.getDocViews",
-          "type": "Function",
+          "id": "def-public.UnifiedDocViewerStart.registry",
+          "type": "Object",
           "tags": [],
-          "label": "getDocViews",
+          "label": "registry",
           "description": [],
           "signature": [
-            "(hit: ",
-            "DataTableRecord",
-            ") => ",
-            "DocView",
-            "[]"
+            {
+              "pluginId": "@kbn/unified-doc-viewer",
+              "scope": "common",
+              "docId": "kibKbnUnifiedDocViewerPluginApi",
+              "section": "def-common.DocViewsRegistry",
+              "text": "DocViewsRegistry"
+            }
           ],
           "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
           "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "unifiedDocViewer",
-              "id": "def-public.UnifiedDocViewerStart.getDocViews.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "hit",
-              "description": [],
-              "signature": [
-                "DataTableRecord"
-              ],
-              "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,12 +15,11 @@ import {
   SavedObjectSaveModal,
   SaveResult,
 } from '@kbn/saved-objects-plugin/public';
-
 import { CONTENT_ID } from '../../common';
-import { LinksAttributes } from '../../common/content_management';
-import { LinksByReferenceInput, LinksInput } from '../embeddable/types';
 import { checkForDuplicateTitle } from './duplicate_title_check';
-import { getLinksAttributeService } from '../services/attribute_service';
+import { linksClient } from './links_content_management_client';
+import { LinksRuntimeState } from '../types';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   defaultMessage: `Save {contentId} panel to library`,
@@ -29,10 +29,9 @@ const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
 });
 
 export const runSaveToLibrary = async (
-  newAttributes: LinksAttributes,
-  initialInput: LinksInput
-): Promise<LinksByReferenceInput | undefined> => {
-  return new Promise<LinksByReferenceInput | undefined>((resolve) => {
+  newState: LinksRuntimeState
+): Promise<LinksRuntimeState | undefined> => {
+  return new Promise<LinksRuntimeState | undefined>((resolve, reject) => {
     const onSave = async ({
       newTitle,
       newDescription,
@@ -47,7 +46,7 @@ export const runSaveToLibrary = async (
       if (
         !(await checkForDuplicateTitle({
           title: newTitle,
-          lastSavedTitle: newAttributes.title,
+          lastSavedTitle: newState.title ?? '',
           copyOnSave: false,
           onTitleDuplicate,
           isTitleDuplicateConfirmed,
@@ -56,28 +55,40 @@ export const runSaveToLibrary = async (
         return {};
       }
 
-      const stateToSave = {
-        ...newAttributes,
+      const { attributes, references } = serializeLinksAttributes(newState);
+
+      const newAttributes = {
+        ...attributes,
         ...stateFromSaveModal,
       };
 
-      const updatedInput = (await getLinksAttributeService().wrapAttributes(
-        stateToSave,
-        true,
-        initialInput
-      )) as unknown as LinksByReferenceInput;
-
-      resolve(updatedInput);
-      return { id: updatedInput.savedObjectId };
+      try {
+        const {
+          item: { id },
+        } = await linksClient.create({
+          data: { ...newAttributes, title: newTitle },
+          options: { references },
+        });
+        resolve({
+          ...newState,
+          defaultPanelTitle: newTitle,
+          defaultPanelDescription: newDescription,
+          savedObjectId: id,
+        });
+        return { id };
+      } catch (error) {
+        reject(error);
+        return { error };
+      }
     };
 
     const saveModal = (
       <SavedObjectSaveModal
         onSave={onSave}
         onClose={() => resolve(undefined)}
-        title={newAttributes.title}
+        title={newState.title ?? ''}
         customModalTitle={modalTitle}
-        description={newAttributes.description}
+        description={newState.description}
         showDescription
         showCopyOnSave={false}
         objectType={CONTENT_ID}

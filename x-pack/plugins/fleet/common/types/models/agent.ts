@@ -10,6 +10,7 @@ import type {
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
   FleetServerAgentComponentStatuses,
+  AgentStatuses,
 } from '../../constants';
 
 export type AgentType =
@@ -17,16 +18,8 @@ export type AgentType =
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
 
-export type AgentStatus =
-  | 'offline'
-  | 'error'
-  | 'online'
-  | 'inactive'
-  | 'enrolling'
-  | 'unenrolling'
-  | 'unenrolled'
-  | 'updating'
-  | 'degraded';
+type AgentStatusTuple = typeof AgentStatuses;
+export type AgentStatus = AgentStatusTuple[number];
 
 export type SimplifiedAgentStatus =
   | 'healthy'
@@ -68,6 +61,7 @@ export interface NewAgentAction {
   ack_data?: any;
   sent_at?: string;
   agents: string[];
+  namespaces?: string[];
   created_at?: string;
   id?: string;
   expiration?: string;
@@ -107,13 +101,21 @@ interface AgentBase {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'starting';
   last_checkin_message?: string;
-  user_provided_metadata: AgentMetadata;
+  user_provided_metadata?: AgentMetadata;
   local_metadata: AgentMetadata;
   tags?: string[];
   components?: FleetServerAgentComponent[];
   agent?: FleetServerAgentMetadata;
+  unhealthy_reason?: UnhealthyReason[];
+  namespaces?: string[];
+}
+
+export enum UnhealthyReason {
+  INPUT = 'input',
+  OUTPUT = 'output',
+  OTHER = 'other',
 }
 
 export interface AgentMetrics {
@@ -187,7 +189,7 @@ export interface AgentDiagnostics {
   name: string;
   createTime: string;
   filePath: string;
-  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS' | 'FAILED';
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'EXPIRED' | 'IN_PROGRESS' | 'FAILED';
   actionId: string;
   error?: string;
 }
@@ -270,7 +272,7 @@ export interface FleetServerAgent {
   /**
    * User provided metadata information for the Elastic Agent
    */
-  user_provided_metadata: AgentMetadata;
+  user_provided_metadata?: AgentMetadata;
   /**
    * Local metadata information for the Elastic Agent
    */
@@ -343,6 +345,16 @@ export interface FleetServerAgent {
    * Outputs map
    */
   outputs?: OutputMap;
+
+  /**
+   * Unhealthy reason: input, output, other
+   */
+  unhealthy_reason?: UnhealthyReason[];
+
+  /**
+   * Namespaces
+   */
+  namespaces?: string[];
 }
 
 /**
@@ -397,6 +409,8 @@ export interface FleetServerAgentAction {
    */
   agents?: string[];
 
+  namespaces?: string[];
+
   /**
    * Date when the agent should execute that agent. This field could be altered by Fleet server for progressive rollout of the action.
    */
@@ -437,6 +451,8 @@ export interface ActionStatusOptions {
   errorSize: number;
   page?: number;
   perPage?: number;
+  date?: string;
+  latest?: number;
 }
 
 export interface AgentUpgradeDetails {
@@ -446,7 +462,10 @@ export interface AgentUpgradeDetails {
   metadata?: {
     scheduled_at?: string;
     download_percent?: number;
+    download_rate?: number; // bytes per second
     failed_state?: AgentUpgradeStateType;
     error_msg?: string;
+    retry_error_msg?: string;
+    retry_until?: string;
   };
 }

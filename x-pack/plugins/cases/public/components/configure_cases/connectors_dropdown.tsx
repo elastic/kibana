@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSuperSelect } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { Suspense, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiIconTip,
+  EuiSuperSelect,
+  useEuiTheme,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
-import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon, isDeprecatedConnector } from '../utils';
 
 export interface Props {
@@ -21,32 +28,32 @@ export interface Props {
   isLoading: boolean;
   onChange: (id: string) => void;
   selectedConnector: string;
-  appendAddConnectorButton?: boolean;
 }
 
+const suspendedComponentWithProps = (ComponentToSuspend: React.ComponentType) => {
+  // eslint-disable-next-line react/display-name
+  return (props: Record<string, unknown>) => (
+    <Suspense fallback={<EuiLoadingSpinner size={'m'} />}>
+      <ComponentToSuspend {...props} />
+    </Suspense>
+  );
+};
+
 const ICON_SIZE = 'm';
-
-const EuiIconExtended = styled(EuiIcon)`
-  margin-right: 13px;
-  margin-bottom: 0 !important;
-`;
-
-const AddNewConnectorOption = styled.span`
-  font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-  font-weight: ${(props) => props.theme.eui.euiFontWeightMedium};
-  line-height: ${(props) => props.theme.eui.euiSizeL};
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
 
 const noConnectorOption = {
   value: 'none',
   inputDisplay: (
     <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
+        <EuiIcon
+          css={css`
+            margin-right: 13px;
+            margin-bottom: 0 !important;
+          `}
+          type="minusInCircle"
+          size={ICON_SIZE}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <span data-test-subj={`dropdown-connector-no-connector`}>{i18n.NO_CONNECTOR}</span>
@@ -56,31 +63,20 @@ const noConnectorOption = {
   'data-test-subj': 'dropdown-connector-no-connector',
 };
 
-const addNewConnector = {
-  value: 'add-connector',
-  inputDisplay: <AddNewConnectorOption>{i18n.ADD_NEW_CONNECTOR}</AddNewConnectorOption>,
-  'data-test-subj': 'dropdown-connector-add-connector',
-};
-
-const StyledEuiIconTip = euiStyled(EuiIconTip)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS}
-  margin-bottom: 0 !important;
-`;
-
 const ConnectorsDropdownComponent: React.FC<Props> = ({
   connectors,
   disabled,
   isLoading,
   onChange,
   selectedConnector,
-  appendAddConnectorButton = false,
 }) => {
   const { triggersActionsUi } = useKibana().services;
-  const { actions } = useApplicationCapabilities();
-  const canSave = actions.crud;
+  const { euiTheme } = useEuiTheme();
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
       (acc, connector) => {
+        const iconClass = getConnectorIcon(triggersActionsUi, connector.actionTypeId);
+
         return [
           ...acc,
           {
@@ -88,8 +84,16 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
             inputDisplay: (
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIconExtended
-                    type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}
+                  <EuiIcon
+                    css={css`
+                      margin-right: ${euiTheme.size.m};
+                      margin-bottom: 0 !important;
+                    `}
+                    type={
+                      typeof iconClass === 'string'
+                        ? iconClass
+                        : suspendedComponentWithProps(iconClass)
+                    }
                     size={ICON_SIZE}
                   />
                 </EuiFlexItem>
@@ -101,7 +105,11 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 </EuiFlexItem>
                 {isDeprecatedConnector(connector) && (
                   <EuiFlexItem grow={false}>
-                    <StyledEuiIconTip
+                    <EuiIconTip
+                      css={css`
+                        margin-left: ${euiTheme.size.s}
+                        margin-bottom: 0 !important;
+                      `}
                       aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
                       size={ICON_SIZE}
                       type="warning"
@@ -118,10 +126,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       },
       [noConnectorOption]
     );
-
-    if (appendAddConnectorButton && canSave) {
-      return [...connectorsFormatted, addNewConnector];
-    }
 
     return connectorsFormatted;
     // eslint-disable-next-line react-hooks/exhaustive-deps

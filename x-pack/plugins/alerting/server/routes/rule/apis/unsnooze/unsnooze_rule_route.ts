@@ -25,6 +25,7 @@ export const unsnoozeRuleRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_unsnooze`,
+      options: { access: 'internal' },
       validate: {
         params: unsnoozeParamsSchema,
         body: unsnoozeBodySchema,
@@ -32,7 +33,8 @@ export const unsnoozeRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const params: UnsnoozeRuleRequestParamsV1 = req.params;
         const body = transformUnsnoozeBodyV1(req.body);
         try {

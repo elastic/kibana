@@ -16,9 +16,16 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../hooks';
-import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
-
-const HIDDEN_FIELDS = [`${AGENTS_PREFIX}.actions`, '_id', '_index'];
+import {
+  AGENT_POLICY_MAPPINGS,
+  AGENT_MAPPINGS,
+  ENROLLMENT_API_KEY_MAPPINGS,
+  AGENTS_INDEX,
+  ENROLLMENT_API_KEYS_INDEX,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  INGEST_SAVED_OBJECT_INDEX,
+} from '../constants';
 
 const NoWrapQueryStringInput = styled(QueryStringInput)`
   .kbnQueryBar__textarea {
@@ -28,46 +35,92 @@ const NoWrapQueryStringInput = styled(QueryStringInput)`
 
 interface Props {
   value: string;
-  fieldPrefix?: string;
+  indexPattern: string;
+  fieldPrefix: string;
   onChange: (newValue: string, submit?: boolean) => void;
   placeholder?: string;
-  indexPattern?: string;
   dataTestSubj?: string;
 }
 
-/** Exported for testing only **/
-export const filterAndConvertFields = (
-  fields: FieldSpec[],
-  indexPattern?: string,
-  fieldPrefix?: string
-) => {
-  if (!fields) return {};
-  let filteredFields: FieldSpec[] = [];
-
-  if (fieldPrefix) {
-    // exclude fields from different indices
-    if (indexPattern === INDEX_NAME) {
-      filteredFields = fields.filter((field) => field.name.startsWith(fieldPrefix));
-    } else {
-      // filter out fields that have names to be hidden
-      filteredFields = fields.filter((field) => {
-        for (const hiddenField of HIDDEN_FIELDS) {
-          if (field.name.includes(hiddenField)) {
-            return false;
-          }
-        }
-        return true;
-      });
-    }
-  } else {
-    filteredFields = fields;
+const getMappings = (indexPattern: string, fieldPrefix: string) => {
+  switch (indexPattern) {
+    case AGENTS_INDEX:
+      return AGENT_MAPPINGS;
+    // Saved Objects are stored in .kibana_ingest.
+    // Currently, the search bar is only used to query agent policies.
+    case INGEST_SAVED_OBJECT_INDEX:
+      switch (fieldPrefix) {
+        case AGENT_POLICY_SAVED_OBJECT_TYPE:
+          return AGENT_POLICY_MAPPINGS;
+        case LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE:
+          return AGENT_POLICY_MAPPINGS;
+        default:
+          return {};
+      }
+    case ENROLLMENT_API_KEYS_INDEX:
+      return ENROLLMENT_API_KEY_MAPPINGS;
+    default:
+      return {};
   }
+};
 
-  const fieldsMap = filteredFields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
-    acc[curr.name] = curr;
-    return acc;
-  }, {});
-  return fieldsMap;
+const getFieldName = (indexPattern: string, fieldPrefix: string, name: string) => {
+  // Add Saved Object prefix if the field refers to a SO and is not already prefixed.
+  if (indexPattern !== INGEST_SAVED_OBJECT_INDEX || name.startsWith(fieldPrefix)) {
+    return name;
+  }
+  return `${fieldPrefix}.${name}`;
+};
+
+const getFieldType = (type: string) => {
+  switch (type) {
+    case 'keyword':
+      return 'string';
+    case 'text':
+      return 'string';
+    case 'version':
+      return 'string';
+    case 'integer':
+      return 'number';
+    case 'double':
+      return 'number';
+    default:
+      return type;
+  }
+};
+
+const concatKeys = (obj: any, parentKey = '') => {
+  let result: string[] = [];
+  for (const key in obj) {
+    if (typeof obj[key] === 'object') {
+      result = result.concat(concatKeys(obj[key], `${parentKey}${key}.`));
+    } else {
+      result.push(`${parentKey}${key}:${obj[key]}`);
+    }
+  }
+  return result;
+};
+
+/** Exported for testing only **/
+export const getFieldSpecs = (indexPattern: string, fieldPrefix: string) => {
+  const mapping = getMappings(indexPattern, fieldPrefix);
+  // @ts-ignore-next-line
+  const rawFields = concatKeys(mapping?.properties) || [];
+  const fields = rawFields
+    .map((field) => field.replaceAll(/.properties/g, ''))
+    .map((field) => field.replace(/.type/g, ''))
+    .map((field) => field.split(':'));
+
+  const fieldSpecs: FieldSpec[] = fields.map((field) => {
+    return {
+      name: getFieldName(indexPattern, fieldPrefix, field[0]),
+      type: getFieldType(field[1]),
+      searchable: true,
+      aggregatable: true,
+      esTypes: [field[1]],
+    };
+  });
+  return fieldSpecs;
 };
 
 export const SearchBar: React.FunctionComponent<Props> = ({
@@ -75,7 +128,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   fieldPrefix,
   onChange,
   placeholder,
-  indexPattern = INDEX_NAME,
+  indexPattern,
   dataTestSubj,
 }) => {
   const {
@@ -108,16 +161,11 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
-          pattern: indexPattern,
-        });
-        const fieldsMap = filterAndConvertFields(fields, indexPattern, fieldPrefix);
-        // Refetch only if fieldsMap is empty
-        const skipFetchField = !!fieldsMap;
-
+        const fieldSpecs = getFieldSpecs(indexPattern, fieldPrefix);
+        const fieldsMap = data.dataViews.fieldArrayToMap(fieldSpecs);
         const newDataView = await data.dataViews.create(
           { title: indexPattern, fields: fieldsMap },
-          skipFetchField
+          true
         );
         setDataView(newDataView);
       } catch (err) {

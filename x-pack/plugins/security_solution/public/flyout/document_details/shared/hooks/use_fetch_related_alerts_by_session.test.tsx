@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 
 import type {
   UseFetchRelatedAlertsBySessionParams,
   UseFetchRelatedAlertsBySessionResult,
 } from './use_fetch_related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from './use_fetch_related_alerts_by_session';
-import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
+import { useAlertPrevalence } from './use_alert_prevalence';
 
-jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
+jest.mock('./use_alert_prevalence');
 
 const entityId = 'entityId';
 const scopeId = 'scopeId';
 
 describe('useFetchRelatedAlertsBySession', () => {
   let hookResult: RenderHookResult<
-    UseFetchRelatedAlertsBySessionParams,
-    UseFetchRelatedAlertsBySessionResult
+    UseFetchRelatedAlertsBySessionResult,
+    UseFetchRelatedAlertsBySessionParams
   >;
 
   it('should return loading true while data is loading', () => {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -23,6 +24,7 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
+  GET_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
 import { runtimeResponseSchema } from '../../schema';
@@ -44,7 +46,7 @@ export const getRuntimeField = async ({
   name,
 }: GetRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
 
   const field = dataView.getRuntimeField(name);
 
@@ -52,11 +54,14 @@ export const getRuntimeField = async ({
     throw new ErrorIndexPatternFieldNotFound(id, name);
   }
 
-  return { dataView, fields: Object.values(dataView.getFieldsByRuntimeFieldName(name) || {}) };
+  return {
+    dataView,
+    fields: Object.values(dataView.getRuntimeFields({ fieldName: [name] })),
+  };
 };
 
 const getRuntimeFieldRouteFactory =
-  (path: string, serviceKey: SERVICE_KEY_TYPE) =>
+  (path: string, serviceKey: SERVICE_KEY_TYPE, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -65,9 +70,15 @@ const getRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public' }).addVersion(
+    router.versioned.get({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Authorization provided by saved objects client',
+          },
+        },
         validate: {
           request: {
             params: schema.object({
@@ -109,7 +120,7 @@ const getRuntimeFieldRouteFactory =
           name,
         });
 
-        const response: RuntimeResponseType = responseFormatter({
+        const response: RuntimeResponseType = await responseFormatter({
           serviceKey,
           dataView,
           fields: fields || [],
@@ -122,7 +133,8 @@ const getRuntimeFieldRouteFactory =
 
 export const registerGetRuntimeFieldRoute = getRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH,
-  SERVICE_KEY
+  SERVICE_KEY,
+  GET_RUNTIME_FIELD_DESCRIPTION
 );
 
 export const registerGetRuntimeFieldRouteLegacy = getRuntimeFieldRouteFactory(

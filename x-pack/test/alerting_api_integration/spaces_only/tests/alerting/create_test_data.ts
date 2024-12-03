@@ -15,6 +15,9 @@ export const END_DATE = '2020-01-01T00:00:00Z';
 export const DOCUMENT_SOURCE = 'queryDataEndpointTests';
 export const DOCUMENT_REFERENCE = '-na-';
 
+// Higher than the configured yml setting to avoid race conditions
+export const TEST_CACHE_EXPIRATION_TIME = 12000;
+
 export async function createEsDocuments(
   es: Client,
   esTestIndexTool: ESTestIndexTool,
@@ -93,7 +96,7 @@ export async function createEsDocumentsWithGroups({
   await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, DOCUMENT_REFERENCE, totalDocuments);
 }
 
-async function createEsDocument(
+export async function createEsDocument(
   es: Client,
   epochMillis: number,
   testedValue: number,
@@ -109,6 +112,11 @@ async function createEsDocument(
     testedValueFloat: 234.2534643,
     testedValueUnsigned: '18446744073709551615',
     '@timestamp': new Date(epochMillis).toISOString(),
+    host: {
+      hostname: 'host-1',
+      id: '1',
+      name: 'host-1',
+    },
     ...(group ? { group } : {}),
   };
 
@@ -146,6 +154,25 @@ export async function createDataStream(es: Client, name: string) {
             params: {
               enabled: false,
               type: 'object',
+            },
+            host: {
+              properties: {
+                hostname: {
+                  type: 'text',
+                  fields: {
+                    keyword: {
+                      type: 'keyword',
+                      ignore_above: 256,
+                    },
+                  },
+                },
+                id: {
+                  type: 'keyword',
+                },
+                name: {
+                  type: 'keyword',
+                },
+              },
             },
           },
         },

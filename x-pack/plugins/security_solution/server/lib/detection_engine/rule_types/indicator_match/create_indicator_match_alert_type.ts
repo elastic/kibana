@@ -12,13 +12,21 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { ThreatRuleParams } from '../../rule_schema';
 import { indicatorMatchExecutor } from './indicator_match';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
+import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, version } = createOptions;
+  const {
+    eventsTelemetry,
+    version,
+    licensing,
+    experimentalFeatures,
+    scheduleNotificationResponseActionsService,
+  } = createOptions;
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
@@ -40,6 +48,9 @@ export const createIndicatorMatchAlertType = (
           return mutatedRuleParams;
         },
       },
+    },
+    schemas: {
+      params: { type: 'zod', schema: ThreatRuleParams },
     },
     actionGroups: [
       {
@@ -71,11 +82,32 @@ export const createIndicatorMatchAlertType = (
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
-          inputIndexFields,
+          intendedTimestamp,
         },
         services,
+        spaceId,
         state,
       } = execOptions;
+      const runOpts = execOptions.runOpts;
+
+      const wrapSuppressedHits = (
+        events: SignalSourceHit[],
+        buildReasonMessage: BuildReasonMessage
+      ) =>
+        wrapSuppressedAlerts({
+          events,
+          spaceId,
+          completeRule,
+          mergeStrategy: runOpts.mergeStrategy,
+          indicesToQuery: runOpts.inputIndex,
+          buildReasonMessage,
+          alertTimestampOverride: runOpts.alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl: runOpts.publicBaseUrl,
+          primaryTimestamp,
+          secondaryTimestamp,
+          intendedTimestamp,
+        });
 
       const result = await indicatorMatchExecutor({
         inputIndex,
@@ -94,7 +126,11 @@ export const createIndicatorMatchAlertType = (
         secondaryTimestamp,
         exceptionFilter,
         unprocessedExceptions,
-        inputIndexFields,
+        wrapSuppressedHits,
+        runOpts,
+        licensing,
+        experimentalFeatures,
+        scheduleNotificationResponseActionsService,
       });
       return { ...result, state };
     },

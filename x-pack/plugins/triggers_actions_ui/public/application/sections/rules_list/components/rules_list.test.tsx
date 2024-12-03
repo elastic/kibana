@@ -81,8 +81,8 @@ jest.mock('../../../lib/rule_api/bulk_delete', () => ({
 jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api/health', () => ({
-  alertingFrameworkHealth: jest.fn(() => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => ({
+  fetchAlertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
@@ -91,11 +91,11 @@ jest.mock('../../../lib/rule_api/health', () => ({
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
 jest.mock('../../../lib/rule_api/rules_kuery_filter');
 
-jest.mock('../../../../common/lib/health_api', () => ({
-  triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => ({
+  fetchUiHealthStatus: jest.fn(() => ({ isRulesAvailable: true })),
 }));
-jest.mock('../../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest
+jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
+  fetchUiConfig: jest
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
@@ -122,6 +122,19 @@ jest.mock('../../../lib/capabilities', () => ({
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
+
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
+  return {
+    ...originalModule,
+    createKbnUrlStateStorage: jest.fn(() => ({
+      get: jest.fn(() => null),
+      set: jest.fn(() => null),
+    })),
+  };
+});
+
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
@@ -268,43 +281,22 @@ describe('rules_list component empty', () => {
     expect(await screen.findByTestId('createFirstRuleEmptyPrompt')).toBeInTheDocument();
   });
 
-  it('renders MaintenanceWindowCallout if one exists', async () => {
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
-    renderWithProviders(<RulesList />);
-    expect(
-      await screen.findByText(
-        'Rule notifications are stopped while maintenance windows are running.'
-      )
-    ).toBeInTheDocument();
-    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("hides MaintenanceWindowCallout if filterConsumers does not match the running maintenance window's category", async () => {
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
-      { ...RUNNING_MAINTENANCE_WINDOW_1, categoryIds: ['securitySolution'] },
-    ]);
-    renderWithProviders(<RulesList filterConsumers={['observability']} />);
-    await expect(
-      screen.findByText('Rule notifications are stopped while maintenance windows are running.')
-    ).rejects.toThrow();
-    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
-  });
-
   it('renders Create rule button', async () => {
     renderWithProviders(<RulesList showCreateRuleButtonInPrompt />);
 
     const createRuleEl = await screen.findByText('Create rule');
-    expect(screen.queryByTestId('addRuleFlyoutTitle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleTypeModal')).not.toBeInTheDocument();
 
     fireEvent.click(createRuleEl);
 
-    expect(await screen.findByTestId('addRuleFlyoutTitle')).toBeInTheDocument();
+    expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
   });
 });
 
 describe('rules_list ', () => {
   let ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract>;
   let actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract<unknown, unknown>>;
+
   beforeEach(() => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
@@ -384,13 +376,14 @@ describe('rules_list ', () => {
     );
     fireEvent.click((await screen.findAllByTestId('ruleStatusFilterButton'))[0]);
     fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-enabled'))[0]);
+
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        ruleStatusesFilter: ['disabled', 'enabled'],
+        ruleStatusesFilter: ['enabled', 'disabled'],
       })
     );
     expect(onStatusFilterChangeMock).toHaveBeenCalled();
-    expect(onStatusFilterChangeMock).toHaveBeenLastCalledWith(['disabled', 'enabled']);
+    expect(onStatusFilterChangeMock).toHaveBeenLastCalledWith(['enabled', 'disabled']);
   });
 
   it('can filter by last response', async () => {
@@ -1369,7 +1362,10 @@ describe('rules_list with show only capability', () => {
       const rows = await screen.findAllByTestId('rule-row');
       expect(rows[0].className).not.toContain('actRulesList__tableRowDisabled');
       expect(rows[1].className).toContain('actRulesList__tableRowDisabled');
-      fireEvent.mouseOver(await screen.findByText('Info'));
+      const tooltips = await screen.findAllByText('Info');
+
+      fireEvent.mouseOver(tooltips[tooltips.length - 1]);
+
       const tooltip = await screen.findByTestId('ruleDisabledByLicenseTooltip');
       expect(tooltip).toHaveTextContent('This rule type requires a Platinum license.');
     });
@@ -1383,5 +1379,101 @@ describe('rules_list with show only capability', () => {
       fireEvent.click((await screen.findAllByTestId('rulesListNotifyBadge-unsnoozed'))[0]);
       expect(await screen.findByTestId('snoozePanel')).toBeInTheDocument();
     });
+  });
+});
+
+describe('MaintenanceWindowsMock', () => {
+  beforeEach(() => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
+
+    loadRulesWithKueryFilter.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 0,
+      data: [],
+    });
+
+    loadActionTypes.mockResolvedValue([
+      {
+        id: 'test',
+        name: 'Test',
+      },
+      {
+        id: 'test2',
+        name: 'Test2',
+      },
+    ]);
+
+    loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    loadAllActions.mockResolvedValue([]);
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
+    loadRuleTags.mockResolvedValue({
+      data: ruleTags,
+      page: 1,
+      perPage: 50,
+      total: 4,
+    });
+
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const ruleTypeRegistry = ruleTypeRegistryMock.create();
+
+    ruleTypeRegistry.list.mockReturnValue([ruleType]);
+    actionTypeRegistry.list.mockReturnValue([]);
+    useKibanaMock().services.application.capabilities = {
+      ...useKibanaMock().services.application.capabilities,
+      [MAINTENANCE_WINDOW_FEATURE_ID]: {
+        save: true,
+        show: true,
+      },
+    };
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
+
+  it('renders MaintenanceWindowCallout if one exists', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+    renderWithProviders(<RulesList />);
+
+    expect(
+      await screen.findByText('One or more maintenance windows are running')
+    ).toBeInTheDocument();
+
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides MaintenanceWindowCallout if the category ID is not supported', async () => {
+    loadRuleTypes.mockResolvedValue([{ ...ruleTypeFromApi, category: 'observability' }]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      { ...RUNNING_MAINTENANCE_WINDOW_1, categoryIds: ['securitySolution'] },
+    ]);
+
+    renderWithProviders(<RulesList />);
+
+    await expect(
+      screen.findByText('Rule notifications are stopped while maintenance windows are running.')
+    ).rejects.toThrow();
+
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows MaintenanceWindowCallout for a specific category', async () => {
+    loadRuleTypes.mockResolvedValue([{ ...ruleTypeFromApi, category: 'observability' }]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      { ...RUNNING_MAINTENANCE_WINDOW_1, categoryIds: ['securitySolution', 'observability'] },
+    ]);
+
+    renderWithProviders(<RulesList />);
+
+    expect(
+      await screen.findByText('A maintenance window is running for Observability rules')
+    ).toBeInTheDocument();
+
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 });

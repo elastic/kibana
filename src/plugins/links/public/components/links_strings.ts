@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,6 +14,12 @@ export const LinksStrings = {
     i18n.translate('links.description', {
       defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
     }),
+  embeddable: {
+    getUnsupportedLinkTypeError: () =>
+      i18n.translate('links.embeddable.unsupportedLinkTypeError', {
+        defaultMessage: 'Unsupported link type',
+      }),
+  },
   editor: {
     getAddButtonLabel: () =>
       i18n.translate('links.editor.addButtonLabel', {
@@ -22,28 +29,21 @@ export const LinksStrings = {
       i18n.translate('links.editor.updateButtonLabel', {
         defaultMessage: 'Update link',
       }),
-    getEditLinkTitle: () =>
-      i18n.translate('links.editor.editLinkTitle', {
-        defaultMessage: 'Edit link',
+    getEditLinkTitle: (label?: string) =>
+      i18n.translate('links.editor.editLinkTitle.hasLabel', {
+        defaultMessage: 'Edit {label} link',
+        values: { label: label ?? '' },
       }),
-    getDeleteLinkTitle: () =>
+    getDeleteLinkTitle: (label?: string) =>
       i18n.translate('links.editor.deleteLinkTitle', {
-        defaultMessage: 'Delete link',
+        defaultMessage: 'Delete {label} link',
+        values: { label: label ?? '' },
       }),
     getCancelButtonLabel: () =>
       i18n.translate('links.editor.cancelButtonLabel', {
-        defaultMessage: 'Close',
+        defaultMessage: 'Cancel',
       }),
     panelEditor: {
-      getTechnicalPreviewTooltip: () =>
-        i18n.translate('links.panelEditor.technicalPreviewTooltip', {
-          defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-        }),
-      getTechnicalPreviewLabel: () =>
-        i18n.translate('links.panelEditor.technicalPreviewLabel', {
-          defaultMessage: 'Technical preview',
-        }),
       getLinksTitle: () =>
         i18n.translate('links.panelEditor.linksTitle', {
           defaultMessage: 'Links',
@@ -107,7 +107,7 @@ export const LinksStrings = {
         }),
       getErrorDuringSaveToastTitle: () =>
         i18n.translate('links.editor.unableToSaveToastTitle', {
-          defaultMessage: 'Error saving Link panel',
+          defaultMessage: 'Error saving links panel',
         }),
     },
     linkEditor: {

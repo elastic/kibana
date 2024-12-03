@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 
 /*
  * Filters:
@@ -138,7 +139,6 @@ export type {
   OptionedValueProp,
   ParsedInterval,
   // expressions
-  ExecutionContextSearch,
   ExpressionFunctionKql,
   ExpressionFunctionLucene,
   ExpressionFunctionKibana,
@@ -153,20 +153,13 @@ export type {
   // search
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
-  ISearchGeneric,
   ISearchSource,
   SearchRequest,
   SearchSourceFields,
   SerializedSearchSourceFields,
-  // errors
-  IEsError,
   WaitUntilNextSessionCompletesOptions,
 } from './search';
 
@@ -178,8 +171,6 @@ export {
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
-  isEsError,
-  getSearchErrorOverrideDisplay,
   SearchSource,
   SearchSessionState,
   SortDirection,
@@ -193,7 +184,6 @@ export type {
   SearchUsageCollector,
 } from './search';
 
-export type { ISearchOptions } from '../common';
 export { isRunningResponse } from '../common';
 
 // Search namespace

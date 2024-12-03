@@ -20,7 +20,8 @@
             "winlogbeat-*",
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
-            ".fleet-actions*"
+            ".fleet-actions*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read"]
         }
@@ -33,7 +34,8 @@
           "ml": ["read"],
           "siem": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
-          "securitySolutionCases": ["read"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
         },
@@ -65,7 +67,8 @@
             "winlogbeat-*",
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
-            ".fleet-actions*"
+            ".fleet-actions*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read"]
         }
@@ -78,7 +81,8 @@
           "ml": ["read"],
           "siem": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
-          "securitySolutionCases": ["read"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
         },
@@ -101,20 +105,27 @@
             "filebeat-*",
             "logs-*",
             "packetbeat-*",
-            "winlogbeat-*"
+            "winlogbeat-*",
+            "logstash-*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
         {
           "names": [".alerts-security*", ".siem-signals-*"],
-          "privileges": ["read", "write"]
+          "privileges": ["read", "write", "maintenance"]
         },
         {
           "names": [".lists*", ".items*"],
           "privileges": ["read", "write"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": [
+            "metrics-endpoint.metadata_current_*",
+            ".fleet-agents*", ".fleet-actions*",
+            "risk-score.risk-score-*",
+            ".entities.v1.latest.security_*"
+          ],
           "privileges": ["read"]
         }
       ],
@@ -139,10 +150,16 @@
             "actions_log_management_all",
             "file_operations_all"
           ],
-          "securitySolutionCases": ["all"],
+          "securitySolutionCasesV2": ["all"],
+          "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
-          "osquery": ["all"]
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []
@@ -165,7 +182,8 @@
             "packetbeat-*",
             "winlogbeat-*",
             ".lists*",
-            ".items*"
+            ".items*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
@@ -191,7 +209,8 @@
           "ml": ["read"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"]
         },
@@ -216,7 +235,8 @@
             "packetbeat-*",
             "winlogbeat-*",
             ".lists*",
-            ".items*"
+            ".items*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
@@ -242,7 +262,8 @@
           "ml": ["read"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },
@@ -271,7 +292,8 @@
             "filebeat-*",
             "logs-*",
             "packetbeat-*",
-            "winlogbeat-*"
+            "winlogbeat-*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["manage", "write", "read"]
         },
@@ -288,7 +310,8 @@
           "ml": ["all"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
           "dev_tools": ["all"]
@@ -319,7 +342,8 @@
             "winlogbeat-*",
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
-            ".fleet-actions*"
+            ".fleet-actions*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["all"]
         },
@@ -341,7 +365,8 @@
           "ml": ["all"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },

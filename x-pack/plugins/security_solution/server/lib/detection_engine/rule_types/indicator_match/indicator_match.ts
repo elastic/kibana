@@ -7,6 +7,7 @@
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import type {
   AlertInstanceContext,
@@ -14,14 +15,23 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
-import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import type { Filter } from '@kbn/es-query';
+import type {
+  RuleRangeTuple,
+  BulkCreate,
+  WrapHits,
+  WrapSuppressedHits,
+  RunOpts,
+  CreateRuleOptions,
+} from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { MAX_PER_PAGE } from './threat_mapping/get_event_count';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 export const indicatorMatchExecutor = async ({
   inputIndex,
@@ -40,7 +50,11 @@ export const indicatorMatchExecutor = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
-  inputIndexFields,
+  wrapSuppressedHits,
+  runOpts,
+  licensing,
+  experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -58,7 +72,11 @@ export const indicatorMatchExecutor = async ({
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  inputIndexFields: DataViewFieldBase[];
+  wrapSuppressedHits: WrapSuppressedHits;
+  runOpts: RunOpts<ThreatRuleParams>;
+  licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  experimentalFeatures: ExperimentalFeatures;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -71,7 +89,7 @@ export const indicatorMatchExecutor = async ({
       eventsTelemetry,
       filters: ruleParams.filters ?? [],
       inputIndex,
-      itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+      itemsPerSearch: ruleParams.itemsPerSearch ?? MAX_PER_PAGE,
       language: ruleParams.language,
       listClient,
       outputIndex: ruleParams.outputIndex,
@@ -89,12 +107,16 @@ export const indicatorMatchExecutor = async ({
       tuple,
       type: ruleParams.type,
       wrapHits,
+      wrapSuppressedHits,
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
       exceptionFilter,
       unprocessedExceptions,
-      inputIndexFields,
+      runOpts,
+      licensing,
+      experimentalFeatures,
+      scheduleNotificationResponseActionsService,
     });
   });
 };

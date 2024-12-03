@@ -15,7 +15,7 @@ import {
 import React from 'react';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 
 interface FlattenedItem {
   key: string; // flattened dot notation object path for CspFinding;

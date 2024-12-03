@@ -9,22 +9,18 @@ import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
+import type { EqlOptions } from '@kbn/timelines-plugin/common';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import { updateIsLoading } from '../../../../timelines/store/timeline/actions';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { TimelineModel } from '../../../..';
-import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
-import { sourcererActions } from '../../../../common/store/sourcerer';
-import {
-  dispatchUpdateTimeline,
-  queryTimelineById,
-} from '../../../../timelines/components/open_timeline/helpers';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar_field';
+import { sourcererActions } from '../../../../sourcerer/store';
+import { useQueryTimelineById } from '../../../../timelines/components/open_timeline/helpers';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
 import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
 export const RULE_FROM_EQL_URL_PARAM = 'createRuleFromEql';
@@ -34,14 +30,14 @@ export interface RuleFromTimeline {
   onOpenTimeline: (timeline: TimelineModel) => void;
 }
 
-type SetRuleQuery = ({
+export type SetRuleQuery = ({
   index,
   queryBar,
   eqlOptions,
 }: {
   index: string[];
   queryBar: FieldValueQueryBar;
-  eqlOptions?: EqlOptionsSelected;
+  eqlOptions?: EqlOptions;
 }) => void;
 
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
@@ -191,24 +187,18 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   }, [handleSetRuleFromTimeline, selectedDataViewBrowserFields]);
   // end set rule
 
+  const queryTimelineById = useQueryTimelineById();
+
   const getTimelineById = useCallback(
     (timelineId: string) => {
       if (selectedTimeline == null || timelineId !== selectedTimeline.id) {
         queryTimelineById({
           timelineId,
           onOpenTimeline,
-          updateIsLoading: ({
-            id: currentTimelineId,
-            isLoading,
-          }: {
-            id: string;
-            isLoading: boolean;
-          }) => dispatch(updateIsLoading({ id: currentTimelineId, isLoading })),
-          updateTimeline: dispatchUpdateTimeline(dispatch),
         });
       }
     },
-    [dispatch, onOpenTimeline, selectedTimeline]
+    [onOpenTimeline, queryTimelineById, selectedTimeline]
   );
 
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);

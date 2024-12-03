@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { AggName } from '../../../../../../../common/types/aggregations';
-import { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
+import type { AggName } from '../../../../../../../common/types/aggregations';
+import type { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
 
 export function getAggNameConflictToastMessages(
   aggName: AggName,
@@ -18,7 +18,7 @@ export function getAggNameConflictToastMessages(
   if (aggList[aggName] !== undefined) {
     return [
       i18n.translate('xpack.transform.stepDefineForm.aggExistsErrorMessage', {
-        defaultMessage: `An aggregation configuration with the name '{aggName}' already exists.`,
+        defaultMessage: `An aggregation configuration with the name ''{aggName}'' already exists.`,
         values: { aggName },
       }),
     ];
@@ -27,7 +27,7 @@ export function getAggNameConflictToastMessages(
   if (groupByList[aggName] !== undefined) {
     return [
       i18n.translate('xpack.transform.stepDefineForm.groupByExistsErrorMessage', {
-        defaultMessage: `A group by configuration with the name '{aggName}' already exists.`,
+        defaultMessage: `A group by configuration with the name ''{aggName}'' already exists.`,
         values: { aggName },
       }),
     ];
@@ -43,7 +43,7 @@ export function getAggNameConflictToastMessages(
     if (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) {
       conflicts.push(
         i18n.translate('xpack.transform.stepDefineForm.nestedConflictErrorMessage', {
-          defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggNameCheck}'.`,
+          defaultMessage: `Couldn't add configuration ''{aggName}'' because of a nesting conflict with ''{aggNameCheck}''.`,
           values: { aggName, aggNameCheck },
         })
       );
@@ -64,7 +64,7 @@ export function getAggNameConflictToastMessages(
       if (aggListNameCheck === aggName) {
         conflicts.push(
           i18n.translate('xpack.transform.stepDefineForm.nestedAggListConflictErrorMessage', {
-            defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggListName}'.`,
+            defaultMessage: `Couldn't add configuration ''{aggName}'' because of a nesting conflict with ''{aggListName}''.`,
             values: { aggName, aggListName },
           })
         );
@@ -89,7 +89,7 @@ export function getAggNameConflictToastMessages(
       if (groupByListNameCheck === aggName) {
         conflicts.push(
           i18n.translate('xpack.transform.stepDefineForm.nestedGroupByListConflictErrorMessage', {
-            defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{groupByListName}'.`,
+            defaultMessage: `Couldn't add configuration ''{aggName}'' because of a nesting conflict with ''{groupByListName}''.`,
             values: { aggName, groupByListName },
           })
         );

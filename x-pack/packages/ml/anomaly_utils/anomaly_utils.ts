@@ -37,7 +37,7 @@ export const ML_ENTITY_FIELD_OPERATIONS = {
  * Union type of entity field operations
  */
 export type MlEntityFieldOperation =
-  typeof ML_ENTITY_FIELD_OPERATIONS[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
+  (typeof ML_ENTITY_FIELD_OPERATIONS)[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
 
 /**
  * Interface of an entity field
@@ -59,6 +59,10 @@ export interface MlEntityField {
    * Optional entity field operation
    */
   operation?: MlEntityFieldOperation;
+  /**
+   * Optional cardinality of field
+   */
+  cardinality?: number;
 }
 
 // List of function descriptions for which actual values from record level results should be displayed.

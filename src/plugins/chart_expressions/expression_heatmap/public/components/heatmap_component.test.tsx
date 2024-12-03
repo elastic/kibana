@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -30,22 +31,13 @@ import HeatmapComponent from './heatmap_component';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
-});
-
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(
     () =>
       new Promise((resolve) =>
         setTimeout(async () => {
           await action();
-          resolve();
+          resolve(void 0);
         }, timer)
       )
   );
@@ -376,6 +368,63 @@ describe('HeatmapComponent', function () {
         ],
         type: 'bands',
       });
+    });
+  });
+
+  it('should keep the minimum open end', () => {
+    const newData: Datatable = {
+      type: 'datatable',
+      rows: [{ 'col-0-1': -3 }],
+      columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    };
+    const newProps = {
+      ...wrapperProps,
+      data: newData,
+      args: {
+        ...wrapperProps.args,
+        palette: {
+          params: {
+            colors: ['#6092c0', '#a8bfda', '#ebeff5', '#ecb385', '#e7664c'],
+            stops: [1, 2, 3, 4, 5],
+            range: 'number',
+            gradient: true,
+            continuity: 'above',
+            rangeMin: -Infinity,
+            rangeMax: null,
+          },
+        },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    expect(component.find(Heatmap).prop('colorScale')).toEqual({
+      bands: [
+        {
+          start: -Infinity,
+          end: 1,
+          color: '#6092c0',
+        },
+        {
+          start: 1,
+          end: 2,
+          color: '#a8bfda',
+        },
+        {
+          start: 2,
+          end: 3,
+          color: '#ebeff5',
+        },
+        {
+          start: 3,
+          end: 4,
+          color: '#ecb385',
+        },
+        {
+          start: 4,
+          end: Infinity,
+          color: '#e7664c',
+        },
+      ],
+      type: 'bands',
     });
   });
 

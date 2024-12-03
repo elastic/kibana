@@ -11,15 +11,17 @@ import { APP_ID, RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/cons
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
-import { indexStatusRequestQuery } from '../../../../common/api/risk_score';
+import { indexStatusRequestQuery } from '../../../../common/api/entity_analytics/risk_score';
 
 export const getRiskScoreIndexStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       access: 'internal',
       path: RISK_SCORE_INDEX_STATUS_API_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

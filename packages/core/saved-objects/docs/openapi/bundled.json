@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.3",
   "info": {
     "title": "Saved objects",
     "description": "OpenAPI schema for saved object endpoints",
@@ -17,24 +17,17 @@
       "url": "/"
     }
   ],
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ],
   "tags": [
     {
       "name": "saved objects",
-      "description": "Manage Kibana saved objects, including dashboards, visualizations, and more."
+      "x-displayName": "Saved objects",
+      "description": "Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.\n\nTo manage a specific type of saved object, use the corresponding APIs.\nFor example, use:\n\n* [Data views](../group/endpoint-data-views)\n* [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)\n* [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)\n\nWarning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.\n"
     }
   ],
   "paths": {
     "/api/encrypted_saved_objects/_rotate_key": {
       "post": {
-        "summary": "Rotate the encryption key for encrypted saved objects.",
+        "summary": "Rotate a key for encrypted saved objects",
         "operationId": "rotateEncryptionKey",
         "description": "Superuser role required.\n\nIf a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
@@ -116,7 +109,7 @@
     },
     "/api/saved_objects/_bulk_create": {
       "post": {
-        "summary": "Create multiple Kibana saved objects.",
+        "summary": "Create saved objects",
         "operationId": "bulkCreateSavedObjects",
         "deprecated": true,
         "tags": [
@@ -174,7 +167,7 @@
     },
     "/api/saved_objects/_bulk_delete": {
       "post": {
-        "summary": "Remove multiple Kibana saved objects.",
+        "summary": "Delete saved objects",
         "operationId": "bulkDeleteSavedObjects",
         "description": "WARNING: When you delete a saved object, it cannot be recovered.\n",
         "deprecated": true,
@@ -233,7 +226,7 @@
     },
     "/api/saved_objects/_bulk_get": {
       "post": {
-        "summary": "Retrieve multiple Kibana saved objects by identifier.",
+        "summary": "Get saved objects",
         "operationId": "bulkGetSavedObjects",
         "deprecated": true,
         "tags": [
@@ -283,10 +276,10 @@
     },
     "/api/saved_objects/_bulk_resolve": {
       "post": {
-        "summary": "Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist.",
+        "summary": "Resolve saved objects",
         "operationId": "bulkResolveSavedObjects",
         "deprecated": true,
-        "description": "Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.\n",
+        "description": "Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist. Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.\n",
         "tags": [
           "saved objects"
         ],
@@ -334,8 +327,9 @@
     },
     "/api/saved_objects/_bulk_update": {
       "post": {
-        "summary": "Update the attributes for multiple Kibana saved objects.",
+        "summary": "Update saved objects",
         "operationId": "bulkUpdateSavedObjects",
+        "description": "Update the attributes for multiple Kibana saved objects.",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -384,9 +378,9 @@
     },
     "/api/saved_objects/_export": {
       "post": {
-        "summary": "Retrieve sets of saved objects that you want to import into Kibana.",
-        "operationId": "exportSavedObjects",
-        "description": "\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "summary": "Export saved objects",
+        "operationId": "exportSavedObjectsDefault",
+        "description": "Retrieve sets of saved objects that you want to import into Kibana.\nYou must include `type` or `objects` in the request body.\n\nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n",
         "tags": [
           "saved objects"
         ],
@@ -474,8 +468,9 @@
     },
     "/api/saved_objects/_find": {
       "get": {
-        "summary": "Retrieve a paginated set of Kibana saved objects.",
+        "summary": "Search for saved objects",
         "operationId": "findSavedObjects",
+        "description": "Retrieve a paginated set of Kibana saved objects.",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -642,9 +637,9 @@
     },
     "/api/saved_objects/_import": {
       "post": {
-        "summary": "Create sets of Kibana saved objects from a file created by the export API.",
-        "operationId": "importSavedObjects",
-        "description": "Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "summary": "Import saved objects",
+        "operationId": "importSavedObjectsDefault",
+        "description": "Create sets of Kibana saved objects from a file created by the export API.\nSaved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n",
         "tags": [
           "saved objects"
         ],
@@ -750,14 +745,21 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "cURL",
+            "label": "Import with createNewCopies",
+            "source": "curl \\\n  -X POST api/saved_objects/_import?createNewCopies=true\n  -H \"kbn-xsrf: true\"\n  --form file=@file.ndjson\n"
+          }
+        ]
       }
     },
     "/api/saved_objects/_resolve_import_errors": {
       "post": {
-        "summary": "Resolve errors from the Import objects API.",
+        "summary": "Resolve import errors",
         "operationId": "resolveImportErrors",
-        "description": "To resolve errors, you can:\n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "To resolve errors from the Import objects API, you can:\n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n",
         "tags": [
           "saved objects"
         ],
@@ -915,8 +917,9 @@
     },
     "/api/saved_objects/{type}": {
       "post": {
-        "summary": "Create Kibana saved objects with randomly generated identifiers.",
+        "summary": "Create a saved object",
         "operationId": "createSavedObject",
+        "description": "Create a Kibana saved object with a randomly generated identifier.",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -987,8 +990,9 @@
     },
     "/api/saved_objects/{type}/{id}": {
       "get": {
-        "summary": "Retrieve a single Kibana saved object by identifier.",
+        "summary": "Get a saved object",
         "operationId": "getSavedObject",
+        "description": "Retrieve a single Kibana saved object by identifier.",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -1025,8 +1029,9 @@
         }
       },
       "post": {
-        "summary": "Create Kibana saved objects.",
+        "summary": "Create a saved object",
         "operationId": "createSavedObjectId",
+        "description": "Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -1098,8 +1103,9 @@
         }
       },
       "put": {
-        "summary": "Update the attributes for Kibana saved objects.",
+        "summary": "Update a saved object",
         "operationId": "updateSavedObject",
+        "description": "Update the attributes for Kibana saved objects.",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -1161,9 +1167,9 @@
     },
     "/api/saved_objects/resolve/{type}/{id}": {
       "get": {
-        "summary": "Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists.",
+        "summary": "Resolve a saved object",
         "operationId": "resolveSavedObject",
-        "description": "Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.\n",
+        "description": "Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists. Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -1202,18 +1208,6 @@
     }
   },
   "components": {
-    "securitySchemes": {
-      "basicAuth": {
-        "type": "http",
-        "scheme": "basic"
-      },
-      "apiKeyAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
-        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
-      }
-    },
     "examples": {
       "key_rotation_response": {
         "summary": "Encryption key rotation using default parameters.",

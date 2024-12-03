@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 
@@ -19,6 +19,7 @@ import {
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ExecutionContextSearch } from '@kbn/es-query';
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
@@ -130,7 +131,7 @@ export interface ExpressionsServiceSetup {
 }
 
 export interface ExpressionExecutionParams {
-  searchContext?: SerializableRecord;
+  searchContext?: ExecutionContextSearch;
 
   variables?: Record<string, unknown>;
 
@@ -173,6 +174,8 @@ export interface ExpressionExecutionParams {
    * @deafult 0
    */
   throttle?: number;
+
+  allowCache?: boolean;
 }
 
 /**

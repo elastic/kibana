@@ -21,8 +21,13 @@ export const getQueryDelaySettingsRoute = (
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_query_delay`,
       validate: {},
+      security: {
+        authz: {
+          requiredPrivileges: [`${API_PRIVILEGES.READ_QUERY_DELAY_SETTINGS}`],
+        },
+      },
       options: {
-        tags: [`access:${API_PRIVILEGES.READ_QUERY_DELAY_SETTINGS}`],
+        access: 'internal',
       },
     },
     router.handleLegacyErrors(

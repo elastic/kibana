@@ -68,7 +68,21 @@ describe('bulkGetMaintenanceWindowRoute', () => {
     );
 
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/_bulk_get');
-    expect(config.options?.tags?.[0]).toEqual('access:read-maintenance-window');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "read-maintenance-window",
+          ],
+        },
+      }
+    `);
 
     await handler(context, req, res);
 
@@ -110,7 +124,7 @@ describe('bulkGetMaintenanceWindowRoute', () => {
       { maintenanceWindowClient },
       { body: { ids: ['test-id-1', 'test-id-2', 'test-id-3'] } }
     );
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 
   test('ensures only platinum license can access API', async () => {
@@ -124,6 +138,6 @@ describe('bulkGetMaintenanceWindowRoute', () => {
     });
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 });

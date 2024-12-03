@@ -30,7 +30,7 @@ export type TestSubjects =
   | 'indexContextMenu'
   | 'indexManagementHeaderContent'
   | 'indexTable'
-  | 'indexTableIncludeHiddenIndicesToggle'
+  | 'checkboxToggles-includeHiddenIndices'
   | 'indexTableIndexNameLink'
   | 'indicesList'
   | 'indicesTab'
@@ -100,6 +100,7 @@ export type TestSubjects =
   | 'configuredByILMWarning'
   | 'show-filters-button'
   | 'filter-option-h'
+  | 'filter-option-d'
   | 'infiniteRetentionPeriod.input'
   | 'saveButton'
   | 'dsIsFullyManagedByILM'
@@ -109,4 +110,10 @@ export type TestSubjects =
   | 'dataRetentionEnabledField.input'
   | 'enrichPoliciesInsuficientPrivileges'
   | 'dataRetentionDetail'
-  | 'createIndexSaveButton';
+  | 'createIndexSaveButton'
+  | 'createIndexMessage'
+  | 'indicesSearch'
+  | 'noIndicesMessage'
+  | 'clearIndicesSearch'
+  | 'usingMaxRetention'
+  | 'componentTemplatesLink';

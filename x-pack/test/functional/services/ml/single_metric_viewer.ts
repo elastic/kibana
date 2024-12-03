@@ -16,6 +16,7 @@ export function MachineLearningSingleMetricViewerProvider(
 ) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertSingleMetricViewerEmptyListMessageExsist() {
@@ -71,6 +72,43 @@ export function MachineLearningSingleMetricViewerProvider(
 
     async assertChartExist() {
       await testSubjects.existOrFail('mlSingleMetricViewerChart');
+    },
+
+    async assertChartNotExist() {
+      await testSubjects.missingOrFail('mlSingleMetricViewerChart');
+    },
+
+    async assertAnomalyMarkerExist() {
+      await testSubjects.existOrFail('mlAnomalyMarker');
+    },
+
+    async openAnomalyMarkerActionsPopover() {
+      await testSubjects.click('mlAnomalyMarker');
+      await testSubjects.existOrFail('mlAnomaliesListRowActionsMenu');
+    },
+
+    async assertAnomalyActionDiscoverButtonExists() {
+      await testSubjects.existOrFail('mlAnomaliesListRowAction_viewInDiscoverButton');
+    },
+
+    async assertAnomalyActionJobRulesButtonExists() {
+      await testSubjects.existOrFail('mlAnomaliesListRowActionConfigureRulesButton');
+    },
+
+    async ensureAnomalyActionDiscoverButtonClicked() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.click('mlAnomaliesListRowAction_viewInDiscoverButton');
+        await testSubjects.existOrFail('discoverLayoutResizableContainer', { timeout: 10 * 1000 });
+      });
+    },
+
+    async ensureAnomalyActionJobRulesButtonClicked() {
+      await retry.tryForTime(3 * 1000, async () => {
+        await testSubjects.click('mlAnomaliesListRowActionConfigureRulesButton');
+        await testSubjects.existOrFail('mlRuleEditorFlyout');
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('mlRuleEditorFlyout');
+      });
     },
 
     async assertAnnotationsExists(state: string) {
@@ -147,7 +185,10 @@ export function MachineLearningSingleMetricViewerProvider(
         `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
         order
       );
-      await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
+      });
     },
 
     async assertToastMessageExists(dataTestSubj: string) {

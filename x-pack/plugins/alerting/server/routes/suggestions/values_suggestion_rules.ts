@@ -10,7 +10,7 @@ import { IRouter } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
@@ -49,6 +49,7 @@ export function registerRulesValueSuggestionsRoute(
   router.post(
     {
       path: '/internal/rules/suggestions/values',
+      options: { access: 'internal' },
       validate: RulesSuggestionsSchema,
     },
     router.handleLegacyErrors(
@@ -58,15 +59,14 @@ export function registerRulesValueSuggestionsRoute(
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const { savedObjects, elasticsearch } = await context.core;
 
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         let authorizationTuple;
         try {
-          authorizationTuple = await rulesClient
-            .getAuthorization()
-            .getFindAuthorizationFilter(
-              AlertingAuthorizationEntity.Rule,
-              alertingAuthorizationFilterOpts
-            );
+          authorizationTuple = await rulesClient.getAuthorization().getFindAuthorizationFilter({
+            authorizationEntity: AlertingAuthorizationEntity.Rule,
+            filterOpts: alertingAuthorizationFilterOpts,
+          });
         } catch (error) {
           rulesClient.getAuditLogger()?.log(
             ruleAuditEvent({

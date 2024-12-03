@@ -19,6 +19,7 @@ import {
   OnTimeChangeProps,
   EuiSwitch,
   EuiDataGridColumn,
+  EuiCallOut,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -45,7 +46,10 @@ import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_lin
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
-import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
+import {
+  useLoadRuleEventLogs,
+  UseLoadRuleEventLogsProps,
+} from '../../../hooks/use_load_rule_event_logs';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { RefreshToken } from './types';
 
@@ -150,7 +154,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   });
 
   // Date related states
-  const [dateStart, setDateStart] = useState<string>('now-24h');
+  const [dateStart, setDateStart] = useState<string>('now-15m');
   const [dateEnd, setDateEnd] = useState<string>('now');
   const [dateFormat] = useState(() => uiSettings?.get('dateFormat'));
   const [commonlyUsedRanges] = useState(() => {
@@ -195,8 +199,11 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onError = useCallback(
+  const onError = useCallback<NonNullable<UseLoadRuleEventLogsProps['onError']>>(
     (e) => {
+      if (e.body.statusCode === 413) {
+        return;
+      }
       notifications.toasts.addDanger({
         title: API_FAILED_MESSAGE,
         text: e.body?.message ?? e,
@@ -205,7 +212,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     [notifications]
   );
 
-  const { data, isLoading, loadEventLogs } = useLoadRuleEventLogs({
+  const { data, isLoading, hasExceedLogs, loadEventLogs } = useLoadRuleEventLogs({
     id: ruleId,
     sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
     outcomeFilter: filter,
@@ -305,7 +312,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, []);
 
   const onSearchChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.value === '') {
         setSearchText('');
       }
@@ -315,7 +322,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   );
 
   const onKeyUp = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         setSearchText(search);
       }
@@ -670,7 +677,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   return (
     <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="ruleEventLogListTable">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup gutterSize="m" alignItems="center">
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
@@ -724,7 +731,19 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         <EuiSpacer />
       </EuiFlexItem>
       <EuiFlexItem>
-        {renderList()}
+        {hasExceedLogs && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.exceedLog.refineSearch.prompt"
+                defaultMessage="Results are limited to 10,000 documents, refine your search to see others."
+              />
+            }
+            data-test-subj="exceedLimitLogsCallout"
+            size="m"
+          />
+        )}
+        {!hasExceedLogs && renderList()}
         {isOnLastPage && (
           <RefineSearchPrompt
             documentSize={actualTotalItemCount}

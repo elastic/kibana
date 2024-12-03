@@ -5,12 +5,13 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
@@ -18,9 +19,15 @@
   "kbn_references": [
     "@kbn/data-service",
     "@kbn/data-views-plugin",
+    "@kbn/data-view-utils",
     "@kbn/es-query",
     "@kbn/field-formats-plugin",
     "@kbn/field-types",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/expressions-plugin",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/i18n-react",
+    "@kbn/navigation-plugin",
+    "@kbn/ui-theme"
   ]
 }

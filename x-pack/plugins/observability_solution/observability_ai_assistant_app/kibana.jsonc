@@ -1,0 +1,47 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-ai-assistant-app-plugin",
+  "owner": [
+    "@elastic/obs-ai-assistant"
+  ],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "observabilityAIAssistantApp",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "observabilityAIAssistantApp"
+    ],
+    "requiredPlugins": [
+      "aiAssistantManagementSelection",
+      "observabilityAIAssistant",
+      "observabilityShared",
+      "observability",
+      "actions",
+      "data",
+      "dataViews",
+      "lens",
+      "ruleRegistry",
+      "uiActions",
+      "triggersActionsUi",
+      "share",
+      "licensing",
+      "ml",
+      "alerting",
+      "features",
+      "inference",
+      "logsDataAccess",
+      "llmTasks"
+    ],
+    "optionalPlugins": [
+      "cloud"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esqlDataGrid"
+    ],
+    "extraPublicDirs": []
+  }
+}

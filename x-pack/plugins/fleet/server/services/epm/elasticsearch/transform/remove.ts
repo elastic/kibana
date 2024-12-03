@@ -6,12 +6,16 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import pMap from 'p-map';
 
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { appContextService } from '../../../app_context';
+
+import { retryTransientEsErrors } from '../retry';
+import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
 
 export const stopTransforms = async (transformIds: string[], esClient: ElasticsearchClient) => {
   for (const transformId of transformIds) {
@@ -32,20 +36,26 @@ export const deleteTransforms = async (
   if (transformIds.length) {
     logger.info(`Deleting currently installed transform ids ${transformIds}`);
   }
-  await Promise.all(
-    transformIds.map(async (transformId) => {
+
+  await pMap(
+    transformIds,
+    async (transformId) => {
       await stopTransforms([transformId], esClient);
-      await esClient.transform.deleteTransform(
-        {
-          force: true,
-          transform_id: transformId,
-          // @ts-expect-error ES type needs to be updated
-          delete_dest_index: deleteDestinationIndices,
-        },
-        { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
+      await retryTransientEsErrors(() =>
+        esClient.transform.deleteTransform(
+          {
+            force: true,
+            transform_id: transformId,
+            delete_dest_index: deleteDestinationIndices,
+          },
+          { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
+        )
       );
       logger.info(`Deleted: ${transformId}`);
-    })
+    },
+    {
+      concurrency: MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
+    }
   );
 };
 

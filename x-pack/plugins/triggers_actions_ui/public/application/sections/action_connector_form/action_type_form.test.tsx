@@ -11,7 +11,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ActionConnector,
   ActionType,
-  RuleAction,
   GenericValidationResult,
   ActionConnectorMode,
   ActionVariables,
@@ -22,8 +21,9 @@ import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
-import { transformActionVariables } from '../../lib/action_variables';
-import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -52,8 +52,8 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../lib/action_variables', () => {
-  const original = jest.requireActual('../../lib/action_variables');
+jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
+  const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
   return {
     ...original,
     transformActionVariables: jest.fn(),
@@ -136,6 +136,7 @@ describe('action_type_form', () => {
     const wrapper = mountWithIntl(
       getActionTypeForm({
         index: 1,
+        ruleTypeId: '.es-query',
         actionItem: {
           id: '123',
           actionTypeId: '.pagerduty',
@@ -190,6 +191,7 @@ describe('action_type_form', () => {
       <I18nProvider>
         {getActionTypeForm({
           index: 1,
+          ruleTypeId: '.es-query',
           actionItem: {
             id: '123',
             actionTypeId: '.pagerduty',
@@ -217,6 +219,57 @@ describe('action_type_form', () => {
     });
   });
 
+  it('renders the alerts filters with the producerId set to SIEM', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFieldsWithExecutionMode,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
+    render(
+      <I18nProvider>
+        {getActionTypeForm({
+          index: 1,
+          ruleTypeId: 'siem.esqlRule',
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: undefined,
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
+            },
+          },
+          producerId: AlertConsumers.SIEM,
+          featureId: AlertConsumers.SIEM,
+        })}
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('alertsFilterQueryToggle')).toBeInTheDocument();
+      expect(screen.getByTestId('alertsFilterTimeframeToggle')).toBeInTheDocument();
+    });
+  });
+
   it('does not call "setActionParamsProperty" because dedupKey is not empty', async () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
@@ -238,6 +291,7 @@ describe('action_type_form', () => {
     const wrapper = mountWithIntl(
       getActionTypeForm({
         index: 1,
+        ruleTypeId: '.es-query',
         actionItem: {
           id: '123',
           actionTypeId: '.pagerduty',
@@ -290,6 +344,7 @@ describe('action_type_form', () => {
     const wrapper = mountWithIntl(
       getActionTypeForm({
         index: 1,
+        ruleTypeId: '.es-query',
         actionItem: {
           id: '123',
           actionTypeId: '.pagerduty',
@@ -363,6 +418,7 @@ describe('action_type_form', () => {
         {getActionTypeForm({
           index: 1,
           actionItem,
+          ruleTypeId: '.es-query',
           setActionFrequencyProperty: () => {
             actionItem.frequency = {
               notifyWhen: RuleNotifyWhen.ACTIVE,
@@ -501,9 +557,9 @@ describe('action_type_form', () => {
         <IntlProvider locale="en">
           {getActionTypeForm({
             index: 1,
+            ruleTypeId: '.es-query',
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
-            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
           })}
         </IntlProvider>
       );
@@ -555,9 +611,9 @@ describe('action_type_form', () => {
         <IntlProvider locale="en">
           {getActionTypeForm({
             index: 1,
+            ruleTypeId: '.es-query',
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
-            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
           })}
         </IntlProvider>
       );
@@ -596,12 +652,13 @@ function getActionTypeForm({
   messageVariables = { context: [], state: [], params: [] },
   summaryMessageVariables = { context: [], state: [], params: [] },
   notifyWhenSelectOptions,
-  defaultNotifyWhenValue,
   ruleTypeId,
+  producerId = AlertConsumers.INFRASTRUCTURE,
+  featureId = AlertConsumers.INFRASTRUCTURE,
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
-  actionItem?: RuleAction;
+  actionItem?: SanitizedRuleAction;
   defaultActionGroupId?: string;
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>;
   actionTypeIndex?: Record<string, ActionType>;
@@ -615,8 +672,9 @@ function getActionTypeForm({
   messageVariables?: ActionVariables;
   summaryMessageVariables?: ActionVariables;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
-  defaultNotifyWhenValue?: RuleNotifyWhenType;
-  ruleTypeId?: string;
+  ruleTypeId: string;
+  producerId?: string;
+  featureId?: string;
 }) {
   const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
@@ -631,7 +689,7 @@ function getActionTypeForm({
     secrets: {},
   };
 
-  const actionItemDefault: RuleAction = {
+  const actionItemDefault = {
     id: '123',
     actionTypeId: '.pagerduty',
     group: 'trigger',
@@ -708,9 +766,8 @@ function getActionTypeForm({
       messageVariables={messageVariables}
       summaryMessageVariables={summaryMessageVariables}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
-      defaultNotifyWhenValue={defaultNotifyWhenValue}
-      producerId="infrastructure"
-      featureId="infrastructure"
+      producerId={producerId}
+      featureId={featureId}
       ruleTypeId={ruleTypeId}
     />
   );

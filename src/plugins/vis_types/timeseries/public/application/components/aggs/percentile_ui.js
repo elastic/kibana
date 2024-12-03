@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import PropTypes from 'prop-types';
@@ -121,7 +122,7 @@ export class Percentiles extends Component {
                 {/* If the series is grouped by, then these colors are not respected,
                  no need to display the color picker */}
                 {!isGroupedBy && !['table', 'metric', 'markdown'].includes(panel.type) && (
-                  <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+                  <EuiFlexItem grow={false} css={{ justifyContent: 'center' }}>
                     <ColorPicker
                       disableTrash={true}
                       onChange={this.handleColorChange(model)}

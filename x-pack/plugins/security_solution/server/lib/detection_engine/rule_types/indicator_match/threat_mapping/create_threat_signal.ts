@@ -11,6 +11,7 @@ import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
 import type { CreateThreatSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { buildThreatEnrichment } from './build_threat_enrichment';
 export const createThreatSignal = async ({
@@ -34,7 +35,9 @@ export const createThreatSignal = async ({
   tuple,
   type,
   wrapHits,
+  wrapSuppressedHits,
   runtimeMappings,
+  runOpts,
   primaryTimestamp,
   secondaryTimestamp,
   exceptionFilter,
@@ -49,6 +52,9 @@ export const createThreatSignal = async ({
   allowedFieldsForTermsQuery,
   inputIndexFields,
   threatIndexFields,
+  sortOrder = 'desc',
+  isAlertSuppressionActive,
+  experimentalFeatures,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -75,6 +81,7 @@ export const createThreatSignal = async ({
       index: inputIndex,
       exceptionFilter,
       fields: inputIndexFields,
+      loadFields: true,
     });
 
     ruleExecutionLogger.debug(
@@ -98,7 +105,8 @@ export const createThreatSignal = async ({
       threatIndexFields,
     });
 
-    const result = await searchAfterAndBulkCreate({
+    let result: SearchAfterAndBulkCreateReturnType;
+    const searchAfterBulkCreateParams = {
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
       enrichment: threatEnrichment,
@@ -110,14 +118,27 @@ export const createThreatSignal = async ({
       pageSize: searchAfterSize,
       ruleExecutionLogger,
       services,
-      sortOrder: 'desc',
+      sortOrder,
       trackTotalHits: false,
       tuple,
       wrapHits,
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
-    });
+    };
+
+    if (isAlertSuppressionActive) {
+      result = await searchAfterAndBulkCreateSuppressedAlerts({
+        ...searchAfterBulkCreateParams,
+        wrapSuppressedHits,
+        alertTimestampOverride: runOpts.alertTimestampOverride,
+        alertWithSuppression: runOpts.alertWithSuppression,
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+        experimentalFeatures,
+      });
+    } else {
+      result = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);
+    }
 
     ruleExecutionLogger.debug(
       `${

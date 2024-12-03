@@ -44,7 +44,13 @@ export const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
+export const createAlertRoute = ({
+  router,
+  licenseState,
+  usageCounter,
+  isServerless,
+  docLinks,
+}: RouteOptions) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id?}`,
@@ -56,6 +62,20 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         ),
         body: bodySchema,
       },
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Create an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'POST',
+            newApiPath: '/api/alerting/rule/{id?}',
+          },
+        },
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (context, req, res) {
@@ -64,7 +84,9 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const rulesClient = (await context.alerting).getRulesClient();
+
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;
@@ -78,10 +100,11 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         });
 
         try {
-          const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
-            data: { ...alert, notifyWhen },
-            options: { id: params?.id },
-          });
+          const { systemActions, ...alertRes }: SanitizedRule<RuleTypeParams> =
+            await rulesClient.create<RuleTypeParams>({
+              data: { ...alert, notifyWhen },
+              options: { id: params?.id },
+            });
           return res.ok({
             body: alertRes,
           });

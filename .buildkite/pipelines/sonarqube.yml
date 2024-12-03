@@ -1,0 +1,12 @@
+env:
+  SKIP_NODE_SETUP: true
+
+steps:
+  - label: ':sonarqube: Continuous Code Inspection'
+    agents:
+      image: docker.elastic.co/cloud-ci/sonarqube/buildkite-scanner:latest
+      memory: 32G
+      cpu: 4
+    env:
+      SONAR_SCANNER_JAVA_OPTS: '-Xmx16384m'
+    command: /scan-source-code.sh

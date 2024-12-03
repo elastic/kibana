@@ -21,7 +21,7 @@ Unify all your team's content into a personalized search experience. https://www
 1. When developing locally, Enterprise Search should be running locally alongside Kibana on `localhost:3002`.
 2. Update `config/kibana.dev.yml` with `enterpriseSearch.host: 'http://localhost:3002'`
 
-Problems? If you're an Elastic Enterprise Search engineer, please reach out to @elastic/enterprise-search-frontend for questions or our in-depth Getting Started developer guide.
+Problems? If you're an Elastic Enterprise Search engineer, please reach out to @elastic/search-kibana for questions or our in-depth Getting Started developer guide.
 
 Don't forget to read Kibana's [contributing documentation](https://github.com/elastic/kibana/#building-and-running-kibana-andor-contributing-code) and developer guides for more general info on the Kibana ecosystem.
 
@@ -137,4 +137,4 @@ To track what Cypress is doing while running tests, you can pass in `--config vi
 
 See [our functional test runner README](../../test/functional_enterprise_search).
 
-Our automated accessibility tests can be found in [x-pack/test/accessibility/apps](../../test/accessibility/apps/enterprise_search.ts).
+Our automated accessibility tests can be found in [x-pack/test/accessibility/apps](../../test/accessibility/apps/group3/enterprise_search.ts).

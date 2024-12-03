@@ -27,6 +27,7 @@ describe('7.13.0 Endpoint Package Policy migration', () => {
         },
         id: 'mock-saved-object-id',
         policy_id: '',
+        policy_ids: [''],
         enabled: true,
         namespace: '',
         revision: 0,

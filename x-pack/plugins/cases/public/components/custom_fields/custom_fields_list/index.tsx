@@ -13,11 +13,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiButtonIcon,
+  useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
+import * as i18n from '../translations';
 
 import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
 import { builderMap } from '../builder';
-import { DeleteConfirmationModal } from '../delete_confirmation_modal';
+import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 
 export interface Props {
   customFields: CustomFieldsConfiguration;
@@ -28,6 +31,7 @@ export interface Props {
 const CustomFieldsListComponent: React.FC<Props> = (props) => {
   const { customFields, onDeleteCustomField, onEditCustomField } = props;
   const [selectedItem, setSelectedItem] = useState<CustomFieldsConfiguration[number] | null>(null);
+  const { euiTheme } = useEuiTheme();
 
   const renderTypeLabel = (type?: CustomFieldTypes) => {
     const createdBuilder = type && builderMap[type];
@@ -65,11 +69,16 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                   <EuiFlexItem grow={true}>
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiText>
+                        <EuiText size="s">
                           <h4>{customField.label}</h4>
                         </EuiText>
                       </EuiFlexItem>
-                      <EuiText color="subdued">{renderTypeLabel(customField.type)}</EuiText>
+                      <EuiBadge color={euiTheme.colors.body}>
+                        {renderTypeLabel(customField.type)}
+                      </EuiBadge>
+                      {customField.required && (
+                        <EuiBadge color={euiTheme.colors.body}>{i18n.REQUIRED}</EuiBadge>
+                      )}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -102,7 +111,8 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
         </EuiFlexItem>
         {showModal && selectedItem ? (
           <DeleteConfirmationModal
-            label={selectedItem.label}
+            title={i18n.DELETE_FIELD_TITLE(selectedItem.label)}
+            message={i18n.DELETE_FIELD_DESCRIPTION}
             onCancel={onCancel}
             onConfirm={onConfirm}
           />

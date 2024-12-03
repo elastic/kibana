@@ -6,12 +6,23 @@
  */
 
 import React from 'react';
+import { act } from '@testing-library/react';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { createFleetTestRendererMock } from '../../../mock';
 
-import { SearchBar, filterAndConvertFields } from './search_bar';
+import {
+  AGENTS_PREFIX,
+  FLEET_ENROLLMENT_API_PREFIX,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENTS_INDEX,
+  ENROLLMENT_API_KEYS_INDEX,
+  INGEST_SAVED_OBJECT_INDEX,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../constants';
+
+import { SearchBar, getFieldSpecs } from './search_bar';
 
 const fields = [
   {
@@ -36,39 +47,6 @@ const fields = [
   },
 ] as FieldSpec[];
 
-const allFields = [
-  {
-    name: 'test-index._id',
-    type: 'string',
-    esTypes: ['_id'],
-  },
-  {
-    name: 'test-index.api_key',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-  {
-    name: 'test-index.name',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-  {
-    name: 'another-index.version',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-  {
-    name: 'test2-index.name',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-  {
-    name: 'fleet-agents.actions',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-] as FieldSpec[];
-
 jest.mock('../hooks', () => {
   return {
     ...jest.requireActual('../hooks'),
@@ -87,23 +65,6 @@ jest.mock('../hooks', () => {
       },
       data: {
         dataViews: {
-          getFieldsForWildcard: jest.fn().mockResolvedValue([
-            {
-              name: '_id',
-              type: 'string',
-              esTypes: ['_id'],
-            },
-            {
-              name: 'api_key',
-              type: 'string',
-              esTypes: ['keyword'],
-            },
-            {
-              name: 'name',
-              type: 'string',
-              esTypes: ['keyword'],
-            },
-          ]),
           create: jest.fn().mockResolvedValue({
             fields,
           }),
@@ -153,6 +114,7 @@ jest.mock('../hooks', () => {
               },
             },
           ]),
+          hasQuerySuggestions: jest.fn().mockReturnValue(true),
         },
         ui: {
           IndexPatternSelect: jest.fn(),
@@ -197,6 +159,9 @@ describe('SearchBar', () => {
   );
 
   it('renders the search box', async () => {
+    await act(async () => {
+      result.queryByTestId('queryInput');
+    });
     const textArea = result.queryByTestId('queryInput');
     expect(textArea).not.toBeNull();
     expect(textArea?.getAttribute('placeholder')).toEqual('Filter your data using KQL syntax');
@@ -207,60 +172,241 @@ describe('SearchBar', () => {
   });
 });
 
-describe('filterAndConvertFields', () => {
-  it('leaves the fields names unchanged and does not hide any fields if fieldPrefix is not passed', async () => {
-    expect(filterAndConvertFields(fields, '.test-index')).toEqual({
-      _id: { esTypes: ['_id'], name: '_id', type: 'string' },
-      api_key: { esTypes: ['keyword'], name: 'api_key', type: 'string' },
-      name: { esTypes: ['keyword'], name: 'name', type: 'string' },
-      version: { esTypes: ['keyword'], name: 'version', type: 'string' },
-    });
+describe('getFieldSpecs', () => {
+  it('returns fieldSpecs for Fleet agents', () => {
+    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX)).toHaveLength(73);
   });
 
-  it('filters out the fields from other indices if indexPattern === .kibana-ingest', async () => {
-    expect(filterAndConvertFields(allFields, '.kibana_ingest', 'test-index')).toEqual({
-      'test-index._id': { esTypes: ['_id'], name: 'test-index._id', type: 'string' },
-      'test-index.api_key': { esTypes: ['keyword'], name: 'test-index.api_key', type: 'string' },
-      'test-index.name': { esTypes: ['keyword'], name: 'test-index.name', type: 'string' },
-    });
+  it('returns fieldSpecs for Fleet enrollment tokens', () => {
+    expect(getFieldSpecs(ENROLLMENT_API_KEYS_INDEX, FLEET_ENROLLMENT_API_PREFIX)).toEqual([
+      {
+        aggregatable: true,
+        esTypes: ['boolean'],
+        name: 'active',
+        searchable: true,
+        type: 'boolean',
+      },
+      {
+        aggregatable: true,
+        esTypes: ['keyword'],
+        name: 'api_key',
+        searchable: true,
+        type: 'string',
+      },
+      {
+        aggregatable: true,
+        esTypes: ['keyword'],
+        name: 'api_key_id',
+        searchable: true,
+        type: 'string',
+      },
+      {
+        aggregatable: true,
+        esTypes: ['date'],
+        name: 'created_at',
+        searchable: true,
+        type: 'date',
+      },
+      {
+        aggregatable: true,
+        esTypes: ['date'],
+        name: 'expire_at',
+        searchable: true,
+        type: 'date',
+      },
+      {
+        aggregatable: true,
+        esTypes: ['keyword'],
+        name: 'name',
+        searchable: true,
+        type: 'string',
+      },
+      {
+        aggregatable: true,
+        esTypes: ['keyword'],
+        name: 'policy_id',
+        searchable: true,
+        type: 'string',
+      },
+      {
+        aggregatable: true,
+        esTypes: ['date'],
+        name: 'updated_at',
+        searchable: true,
+        type: 'date',
+      },
+    ]);
   });
 
-  it('returns fields unchanged if fieldPrefix and indexPattern are not passed', async () => {
-    expect(filterAndConvertFields(allFields, undefined, undefined)).toEqual({
-      'another-index.version': {
-        esTypes: ['keyword'],
-        name: 'another-index.version',
-        type: 'string',
-      },
-      'fleet-agents.actions': {
-        esTypes: ['keyword'],
-        name: 'fleet-agents.actions',
-        type: 'string',
-      },
-      'test-index._id': {
-        esTypes: ['_id'],
-        name: 'test-index._id',
-        type: 'string',
-      },
-      'test-index.api_key': {
-        esTypes: ['keyword'],
-        name: 'test-index.api_key',
-        type: 'string',
-      },
-      'test-index.name': {
-        esTypes: ['keyword'],
-        name: 'test-index.name',
-        type: 'string',
-      },
-      'test2-index.name': {
-        esTypes: ['keyword'],
-        name: 'test2-index.name',
-        type: 'string',
-      },
-    });
+  it('returns fieldSpecs for Fleet agent policies', () => {
+    expect(getFieldSpecs(INGEST_SAVED_OBJECT_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE)).toEqual(
+      [
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.agent_features.name',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.agent_features.enabled',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.data_output_id',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['text'],
+          name: 'ingest-agent-policies.description',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.download_source_id',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.fleet_server_host_id',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['integer'],
+          name: 'ingest-agent-policies.inactivity_timeout',
+          searchable: true,
+          type: 'number',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.is_default',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.is_default_fleet_server',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.is_managed',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.is_preconfigured',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.is_protected',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.monitoring_enabled',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['false'],
+          name: 'ingest-agent-policies.monitoring_enabled.index',
+          searchable: true,
+          type: 'false',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.monitoring_output_id',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.name',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.namespace',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['integer'],
+          name: 'ingest-agent-policies.revision',
+          searchable: true,
+          type: 'number',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['version'],
+          name: 'ingest-agent-policies.schema_version',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.status',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['integer'],
+          name: 'ingest-agent-policies.unenroll_timeout',
+          searchable: true,
+          type: 'number',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['date'],
+          name: 'ingest-agent-policies.updated_at',
+          searchable: true,
+          type: 'date',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.updated_by',
+          searchable: true,
+          type: 'string',
+        },
+      ]
+    );
   });
 
-  it('returns empty object if fields is empty', async () => {
-    expect(filterAndConvertFields([], '.kibana_ingest', 'test-index')).toEqual({});
+  it('returns empty array if indexPattern is not one of the previous', async () => {
+    expect(getFieldSpecs(INGEST_SAVED_OBJECT_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE)).toEqual([]);
   });
 });

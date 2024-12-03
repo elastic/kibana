@@ -5,12 +5,25 @@
  * 2.0.
  */
 
-import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../common';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { GetFieldsData } from './use_get_fields_data';
+import { getField } from '../utils';
+
+export interface UseShowRelatedCasesParams {
+  /**
+   * Retrieves searchHit values for the provided field
+   */
+  getFieldsData: GetFieldsData;
+}
 
 /**
  * Returns true if the user has read privileges for cases, false otherwise
  */
-export const useShowRelatedCases = (): boolean => {
-  const userCasesPermissions = useGetUserCasesPermissions();
-  return userCasesPermissions.read;
+export const useShowRelatedCases = ({ getFieldsData }: UseShowRelatedCasesParams): boolean => {
+  const { cases } = useKibana().services;
+  const isAlert = getField(getFieldsData('event.kind')) === 'signal';
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+
+  return isAlert && userCasesPermissions.read;
 };

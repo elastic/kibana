@@ -16,7 +16,7 @@ import { config as coreConfig } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getLogsPath } from '@kbn/utils';
 
-import type { AuthenticationProvider } from '../common/model';
+import type { AuthenticationProvider } from '../common';
 
 export type ConfigType = ReturnType<typeof createConfig>;
 type RawConfigType = TypeOf<typeof ConfigSchema>;
@@ -294,22 +294,29 @@ export const ConfigSchema = schema.object({
         schema.object({
           actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          users: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
         })
       )
     ),
   }),
-  enabled: schema.boolean({ defaultValue: true }),
+
+  // config/serverless.oblt.yml contains an override to false for OBLT projects
+  roleManagementEnabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: true }),
+  }),
 
   // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({
     serverless: schema.object({
       userManagementEnabled: schema.boolean({ defaultValue: true }),
-      roleManagementEnabled: schema.boolean({ defaultValue: true }),
       roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
+  }),
+  fipsMode: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
 });
 
@@ -327,6 +334,9 @@ export function createConfig(
 
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
+
+  const hashedEncryptionKey = crypto.createHash('sha3-256').update(encryptionKey).digest('base64');
+  logger.info(`Hashed 'xpack.security.encryptionKey' for this instance: ${hashedEncryptionKey}`);
 
   let secureCookies = config.secureCookies;
 

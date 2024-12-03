@@ -163,12 +163,12 @@
                   "[core: ",
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<object, unknown>, config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<object, unknown>, config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -176,7 +176,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -187,12 +187,12 @@
                   ", context: ",
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -200,7 +200,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
                 ],
                 "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
                 "deprecated": false,
@@ -234,7 +234,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              "; columns?: string[] | undefined; layout?: { id?: ",
+              "; columns?: string[] | undefined; browserTimezone: string; objectType: string; title: string; version: string; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -244,7 +244,9 @@
               },
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
-              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }>"
+              "> | undefined; zoom?: number | undefined; } | undefined; pagingStrategy: ",
+              "CsvPagingStrategy",
+              "; }>"
             ],
             "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
             "deprecated": false,
@@ -290,6 +292,8 @@
                 "section": "def-common.TaskPayloadCSV",
                 "text": "TaskPayloadCSV"
               },
+              ", taskInstanceFields: ",
+              "TaskInstanceFields",
               ", cancellationToken: ",
               {
                 "pluginId": "@kbn/reporting-common",
@@ -349,6 +353,21 @@
                 "id": "def-server.CsvSearchSourceExportType.runTask.$3",
                 "type": "Object",
                 "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-csv",
+                "id": "def-server.CsvSearchSourceExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
                 "label": "cancellationToken",
                 "description": [],
                 "signature": [
@@ -367,7 +386,7 @@
               },
               {
                 "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceExportType.runTask.$4",
+                "id": "def-server.CsvSearchSourceExportType.runTask.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",
@@ -376,346 +395,6 @@
                   "Writable"
                 ],
                 "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-export-types-csv",
-        "id": "def-server.CsvSearchSourceImmediateExportType",
-        "type": "Class",
-        "tags": [],
-        "label": "CsvSearchSourceImmediateExportType",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/reporting-export-types-csv",
-            "scope": "server",
-            "docId": "kibKbnReportingExportTypesCsvPluginApi",
-            "section": "def-server.CsvSearchSourceImmediateExportType",
-            "text": "CsvSearchSourceImmediateExportType"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/reporting-server",
-            "scope": "server",
-            "docId": "kibKbnReportingServerPluginApi",
-            "section": "def-server.ExportType",
-            "text": "ExportType"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/reporting-export-types-csv-common",
-            "scope": "common",
-            "docId": "kibKbnReportingExportTypesCsvCommonPluginApi",
-            "section": "def-common.JobParamsDownloadCSV",
-            "text": "JobParamsDownloadCSV"
-          },
-          ", ",
-          "ImmediateExecuteFn",
-          ", ",
-          {
-            "pluginId": "@kbn/reporting-server",
-            "scope": "server",
-            "docId": "kibKbnReportingServerPluginApi",
-            "section": "def-server.BaseExportTypeSetupDeps",
-            "text": "BaseExportTypeSetupDeps"
-          },
-          ", CsvSearchSourceImmediateExportTypeStartDeps>"
-        ],
-        "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv",
-            "id": "def-server.CsvSearchSourceImmediateExportType.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv",
-            "id": "def-server.CsvSearchSourceImmediateExportType.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv",
-            "id": "def-server.CsvSearchSourceImmediateExportType.jobType",
-            "type": "string",
-            "tags": [],
-            "label": "jobType",
-            "description": [],
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv",
-            "id": "def-server.CsvSearchSourceImmediateExportType.jobContentEncoding",
-            "type": "string",
-            "tags": [],
-            "label": "jobContentEncoding",
-            "description": [],
-            "signature": [
-              "\"base64\""
-            ],
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv",
-            "id": "def-server.CsvSearchSourceImmediateExportType.jobContentExtension",
-            "type": "string",
-            "tags": [],
-            "label": "jobContentExtension",
-            "description": [],
-            "signature": [
-              "\"csv\""
-            ],
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv",
-            "id": "def-server.CsvSearchSourceImmediateExportType.validLicenses",
-            "type": "Array",
-            "tags": [],
-            "label": "validLicenses",
-            "description": [],
-            "signature": [
-              "(\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
-            ],
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv",
-            "id": "def-server.CsvSearchSourceImmediateExportType.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceImmediateExportType.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "args",
-                "description": [],
-                "signature": [
-                  "[core: ",
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>, config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.ByteSizeValue",
-                    "text": "ByteSizeValue"
-                  },
-                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
-                  {
-                    "pluginId": "@kbn/logging",
-                    "scope": "common",
-                    "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-common.Logger",
-                    "text": "Logger"
-                  },
-                  ", context: ",
-                  {
-                    "pluginId": "@kbn/core-plugins-server",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-common.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.ByteSizeValue",
-                    "text": "ByteSizeValue"
-                  },
-                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
-                ],
-                "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv",
-            "id": "def-server.CsvSearchSourceImmediateExportType.createJob",
-            "type": "Function",
-            "tags": [],
-            "label": "createJob",
-            "description": [],
-            "signature": [
-              "() => Promise<never>"
-            ],
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv",
-            "id": "def-server.CsvSearchSourceImmediateExportType.runTask",
-            "type": "Function",
-            "tags": [],
-            "label": "runTask",
-            "description": [],
-            "signature": [
-              "(_jobId: string | null, immediateJobParams: ",
-              {
-                "pluginId": "@kbn/reporting-export-types-csv-common",
-                "scope": "common",
-                "docId": "kibKbnReportingExportTypesCsvCommonPluginApi",
-                "section": "def-common.JobParamsDownloadCSV",
-                "text": "JobParamsDownloadCSV"
-              },
-              ", context: ",
-              "ReportingRequestHandlerContext",
-              ", stream: ",
-              "Writable",
-              ", req: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => Promise<",
-              "TaskRunResult",
-              ">"
-            ],
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceImmediateExportType.runTask.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "_jobId",
-                "description": [],
-                "signature": [
-                  "string | null"
-                ],
-                "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceImmediateExportType.runTask.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "immediateJobParams",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/reporting-export-types-csv-common",
-                    "scope": "common",
-                    "docId": "kibKbnReportingExportTypesCsvCommonPluginApi",
-                    "section": "def-common.JobParamsDownloadCSV",
-                    "text": "JobParamsDownloadCSV"
-                  }
-                ],
-                "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceImmediateExportType.runTask.$3",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ReportingRequestHandlerContext"
-                ],
-                "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceImmediateExportType.runTask.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "stream",
-                "description": [],
-                "signature": [
-                  "Writable"
-                ],
-                "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceImmediateExportType.runTask.$5",
-                "type": "Object",
-                "tags": [],
-                "label": "req",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -881,12 +560,12 @@
                   "[core: ",
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<object, unknown>, config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<object, unknown>, config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -894,7 +573,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -905,12 +584,12 @@
                   ", context: ",
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -918,7 +597,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
                 ],
                 "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
                 "deprecated": false,
@@ -949,12 +628,12 @@
               ", req: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>) => Promise<{ title: string; objectType: string; isDeprecated: boolean; version: string; layout?: { id?: ",
+              "<unknown, unknown, unknown, any>) => Promise<{ title: string; objectType: \"search\"; pagingStrategy: \"scroll\" | \"pit\"; version: string; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -1026,9 +705,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1057,6 +736,8 @@
                 "section": "def-common.TaskPayloadCsvFromSavedObject",
                 "text": "TaskPayloadCsvFromSavedObject"
               },
+              ", taskInstanceFields: ",
+              "TaskInstanceFields",
               ", cancellationToken: ",
               {
                 "pluginId": "@kbn/reporting-common",
@@ -1093,7 +774,7 @@
               {
                 "parentPluginId": "@kbn/reporting-export-types-csv",
                 "id": "def-server.CsvV2ExportType.runTask.$2",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "job",
                 "description": [],
@@ -1116,6 +797,21 @@
                 "id": "def-server.CsvV2ExportType.runTask.$3",
                 "type": "Object",
                 "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-csv",
+                "id": "def-server.CsvV2ExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
                 "label": "cancellationToken",
                 "description": [],
                 "signature": [
@@ -1134,7 +830,7 @@
               },
               {
                 "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvV2ExportType.runTask.$4",
+                "id": "def-server.CsvV2ExportType.runTask.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",

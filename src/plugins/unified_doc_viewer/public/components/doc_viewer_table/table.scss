@@ -1,55 +1,3 @@
-.kbnDocViewer {
-  .euiTableRowCell {
-    vertical-align: top;
-  }
-}
-
-.kbnDocViewer__tableRow {
-  font-size: $euiFontSizeXS;
-  font-family: $euiCodeFontFamily;
-
-  // set min-width for each column except actions
-  .euiTableRowCell:nth-child(n+2) {
-    min-width: $euiSizeM * 9;
-  }
-
-  .kbnDocViewer__buttons {
-    // Show all icons if one is focused,
-    &:focus-within {
-      .kbnDocViewer__actionButton {
-        opacity: 1;
-      }
-    }
-  }
-
-  &:hover {
-    .kbnDocViewer__actionButton {
-      opacity: 1;
-    }
-  }
-
-  .kbnDocViewer__actionButton {
-    @include euiBreakpoint('m', 'l', 'xl') {
-      opacity: 0;
-    }
-
-    &:focus {
-      opacity: 1;
-    }
-  }
-}
-
-.kbnDocViewer__tableActionsCell,
-.kbnDocViewer__tableFieldNameCell {
-  align-items: flex-start;
-  padding: $euiSizeXS;
-}
-
-.kbnDocViewer__tableValueCell {
-  flex-direction: column;
-  align-items: flex-start;
-}
-
 .kbnDocViewer__value {
   word-break: break-all;
   word-wrap: break-word;
@@ -57,4 +5,49 @@
   line-height: $euiLineHeight;
   color: $euiColorFullShade;
   vertical-align: top;
+
+  &--highlighted {
+    font-weight: $euiFontWeightBold;
+  }
+
+  .euiDataGridRowCell__popover & {
+    font-size: $euiFontSizeS;
+  }
+}
+
+.kbnDocViewer__fieldsGrid {
+  &.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader {
+    border-top: none;
+  }
+
+  &.euiDataGrid--headerUnderline .euiDataGridHeader {
+    border-bottom: $euiBorderThin;
+  }
+
+  &.euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
+    background-color: tintOrShade($euiColorLightShade, 50%, 0);
+  }
+
+  & [data-gridcell-column-id='name'] .euiDataGridRowCell__content {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  & [data-gridcell-column-id='pin_field'] .euiDataGridRowCell__content {
+    padding: calc($euiSizeXS / 2) 0 0 $euiSizeXS;
+  }
+
+  .kbnDocViewer__fieldsGrid__pinAction {
+    opacity: 0;
+  }
+
+  & [data-gridcell-column-id='pin_field']:focus-within {
+    .kbnDocViewer__fieldsGrid__pinAction {
+      opacity: 1;
+    }
+  }
+
+  .euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction {
+    opacity: 1;
+  }
 }

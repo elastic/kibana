@@ -43,6 +43,18 @@ export const translation = composeSelectors(cameraStateSelector, cameraSelectors
 
 export const detectedBounds = composeSelectors(dataStateSelector, dataSelectors.detectedBounds);
 
+export const agentId = composeSelectors(dataStateSelector, dataSelectors.agentId);
+
+export const overriddenTimeBounds = composeSelectors(
+  dataStateSelector,
+  dataSelectors.overriddenTimeBounds
+);
+
+export const currentAppliedTimeRange = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentAppliedTimeRange
+);
+
 /**
  * A matrix that when applied to a Vector2 converts it from screen coordinates to world coordinates.
  * See https://en.wikipedia.org/wiki/Orthographic_projection

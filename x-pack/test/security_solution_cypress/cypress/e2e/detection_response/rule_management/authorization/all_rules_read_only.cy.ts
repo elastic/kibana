@@ -23,17 +23,16 @@ import {
 } from '../../../../tasks/common/callouts';
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
-  before(() => {
-    createRule(getNewRule({ rule_id: '1', enabled: false }));
-  });
-
   beforeEach(() => {
+    deleteAlertsAndRules();
+    createRule(getNewRule({ rule_id: '1', enabled: false }));
     login(ROLES.t1_analyst);
-    visitRulesManagementTable(ROLES.t1_analyst);
+    visitRulesManagementTable();
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 

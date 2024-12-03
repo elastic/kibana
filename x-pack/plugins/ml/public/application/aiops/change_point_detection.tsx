@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 
 import { useDataSource } from '../contexts/ml/data_source_context';
-import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '../components/field_stats_flyout';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
@@ -48,8 +50,10 @@ export const ChangePointDetectionPage: FC = () => {
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
-          appDependencies={{
+          appContextValue={{
+            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
             ...pick(services, [
+              'analytics',
               'application',
               'cases',
               'charts',
@@ -61,7 +65,6 @@ export const ChangePointDetectionPage: FC = () => {
               'i18n',
               'lens',
               'notifications',
-              'presentationUtil',
               'share',
               'storage',
               'theme',

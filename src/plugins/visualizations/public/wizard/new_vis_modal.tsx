@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -21,7 +22,7 @@ import { AggBasedSelection } from './agg_based_selection';
 import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
 import './dialog.scss';
 
-interface TypeSelectionProps {
+export interface TypeSelectionProps {
   contentClient: ContentClient;
   isOpen: boolean;
   onClose: () => void;
@@ -40,8 +41,9 @@ interface TypeSelectionProps {
 
 interface TypeSelectionState {
   showSearchVisModal: boolean;
-  showGroups: boolean;
+  isMainDialogShown: boolean;
   visType?: BaseVisType;
+  tab: 'recommended' | 'legacy';
 }
 
 // TODO: redirect logic is specific to visualise & dashboard
@@ -63,10 +65,15 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     this.state = {
       showSearchVisModal: Boolean(this.props.selectedVisType),
-      showGroups: !this.props.showAggsSelection,
+      isMainDialogShown: !this.props.showAggsSelection,
       visType: this.props.selectedVisType,
+      tab: 'recommended',
     };
   }
+
+  public setTab = (tab: 'recommended' | 'legacy') => {
+    this.setState({ tab });
+  };
 
   public render() {
     if (!this.props.isOpen) {
@@ -81,7 +88,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       }
     );
 
-    const WizardComponent = this.state.showGroups ? GroupSelection : AggBasedSelection;
+    const WizardComponent = this.state.isMainDialogShown ? GroupSelection : AggBasedSelection;
 
     const selectionModal =
       this.state.showSearchVisModal && this.state.visType ? (
@@ -97,15 +104,22 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       ) : (
         <EuiModal
           onClose={this.onCloseModal}
-          className={this.state.showGroups ? 'visNewVisDialog' : 'visNewVisDialog--aggbased'}
+          className={this.state.isMainDialogShown ? 'visNewVisDialog' : 'visNewVisDialog--aggbased'}
           aria-label={visNewVisDialogAriaLabel}
         >
           <WizardComponent
-            showExperimental={true}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
             docLinks={this.props.docLinks}
-            toggleGroups={(flag: boolean) => this.setState({ showGroups: flag })}
+            setTab={this.setTab}
+            tab={this.state.tab}
+            showMainDialog={(shouldMainBeShown: boolean) => {
+              this.setState({ isMainDialogShown: shouldMainBeShown });
+              if (shouldMainBeShown) {
+                this.setTab('legacy');
+              }
+            }}
+            openedAsRoot={this.props.showAggsSelection && !this.props.selectedVisType}
           />
         </EuiModal>
       );

@@ -9,6 +9,14 @@
   font-family: $euiCodeFontFamily;
 }
 
+.unifiedDataTable__cell--expanded {
+  background-color: $euiColorHighlight;
+}
+
+.unifiedDataTable__cell--selected {
+  background-color: $euiColorHighlight;
+}
+
 .unifiedDataTable__cellPopover {
   // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
   .lines-content.monaco-editor-background {
@@ -32,27 +40,70 @@
     background: transparent;
   }
 
-  .euiDataGrid__controls {
-    border-top: $euiBorderThin;
+  .euiDataGrid--bordersHorizontal .euiDataGridHeader {
+    border-top: none;
   }
 
-  .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  .euiDataGrid--headerUnderline .euiDataGridHeader {
     border-bottom: $euiBorderThin;
   }
 
+  .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
-  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id^='additionalRowControl_'],
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id^='additionalRowControl_'] {
     padding-left: 0;
+    padding-right: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='additionalRowControl_menuControl'] .euiDataGridRowCell__content {
+    padding-bottom: 0;
+  }
+
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='select'] {
+    padding-left: $euiSizeXS;
     padding-right: 0;
   }
 
-  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,
-  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover .euiDataGridRowCell__actions--overlay {
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='colorIndicator'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] {
+    padding: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
+    height: 100%;
+    border-bottom: 0;
+  }
+
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
   }
 
   .euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight {
     background-color: transparent; // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
+  }
+
+  .euiDataGridRowCell__content--autoHeight,
+  .euiDataGridRowCell__content--lineCountHeight,
+  .euiDataGridHeaderCell__content {
+    white-space: pre-wrap;
+  }
+}
+
+// Custom styles for data grid header cell.
+// It can also be inside a portal (outside of `unifiedDataTable__inner`) when dragged.
+.unifiedDataTable__headerCell {
+  align-items: start;
+
+  .euiDataGridHeaderCell__draggableIcon {
+    padding-block: calc($euiSizeXS / 2); // to align with a token height
+  }
+
+  .euiDataGridHeaderCell__button {
+    margin-block: -$euiSizeXS; // to override Eui value for Density "Expanded"
   }
 }
 
@@ -60,36 +111,6 @@
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-.unifiedDataTable__flyoutHeader {
-  white-space: nowrap;
-}
-
-.unifiedDataTable__flyoutDocumentNavigation {
-  justify-content: flex-end;
-}
-
-// We only truncate if the cell is not a control column.
-.euiDataGridHeader {
-
-  .euiDataGridHeaderCell__content {
-    @include euiTextTruncate;
-    overflow: hidden;
-    white-space: pre-wrap;
-    flex-grow: 1;
-  }
-
-  .euiDataGridHeaderCell__popover {
-    flex-grow: 0;
-    flex-basis: auto;
-    width: auto;
-    padding-left: $euiSizeXS;
-  }
-}
-
-.euiDataGridRowCell--numeric {
-  text-align: right;
 }
 
 .euiDataGrid__loading,
@@ -109,15 +130,23 @@
 
 .unifiedDataTable__rowControl {
   // fine-tuning the vertical alignment with the text for any row height setting
-  margin-top: -3px;
-  .euiDataGridRowCell__defaultHeight & { // "Single line" row height setting
-    margin-top: 0;
+  margin-top: -1px;
+
+  // Compact density - 'auto & custom' row height
+  .euiDataGrid--fontSizeSmall .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--defaultHeight) & {
+    margin-top: -2.5px;
+  }
+
+  // Compact density - 'single' row height
+  .euiDataGrid--fontSizeSmall .euiDataGridRowCell__content--defaultHeight & {
+    align-self: flex-start;
+    margin-top: -3px;
   }
 }
 
 .unifiedDataTable__descriptionList {
   // force the content truncation when "Single line" row height setting is active
-  .euiDataGridRowCell__defaultHeight & {
+  .euiDataGridRowCell__content--defaultHeight & {
     -webkit-line-clamp: 1;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -131,6 +160,7 @@
   padding-inline: 0;
   background: transparent;
   font-weight: $euiFontWeightBold;
+  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
 }
 
 .unifiedDataTable__descriptionListDescription {
@@ -138,6 +168,7 @@
   padding-inline: 0;
   word-break: break-all;
   white-space: normal;
+  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
 
   // Special handling for images coming from the image field formatter
   img {
@@ -163,7 +194,7 @@
 }
 
 // Ensure full screen data grids are not covered by elements with a z-index
-.euiDataGrid__restrictBody *:not(
+.unifiedDataTable__fullScreen *:not(
 .euiDataGrid--fullScreen,
 .euiDataGrid--fullScreen *,
 [data-euiportal='true'],

@@ -1,33 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { Redirect, RouteProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { createSearchSessionMock } from '../__mocks__/search_session';
 import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
-import { CustomDiscoverRoutes, DiscoverRouter, DiscoverRoutes } from './discover_router';
+import { DiscoverRoutes } from './discover_router';
 import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
-import { createProfileRegistry } from '../customizations/profile_registry';
-import { addProfile } from '../../common/customizations';
-import { NotFoundRoute } from './not_found';
-
-let mockProfile: string | undefined;
-
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-  return {
-    ...originalModule,
-    useParams: () => ({ profile: mockProfile }),
-  };
-});
+import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
+import { MainRouteProps } from './main/discover_main_route';
 
 let pathMap: Record<string, never> = {};
 
@@ -43,156 +34,54 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
   });
 };
 
-const props = {
-  isDev: false,
-  customizationCallbacks: [],
+const mockExperimentalFeatures = {};
+
+const props: MainRouteProps = {
+  customizationContext: mockCustomizationContext,
 };
-
-describe('DiscoverRoutes', () => {
-  describe('Without prefix', () => {
-    beforeAll(() => {
-      pathMap = {};
-      gatherRoutes(shallow(<DiscoverRoutes {...props} />));
-    });
-
-    it('should show DiscoverMainRoute component for / route', () => {
-      expect(pathMap['/']).toMatchObject(<DiscoverMainRoute {...props} />);
-    });
-
-    it('should show DiscoverMainRoute component for /view/:id route', () => {
-      expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute {...props} />);
-    });
-
-    it('should show Redirect component for /doc/:dataView/:index/:type route', () => {
-      const redirectParams = {
-        match: {
-          params: {
-            dataView: '123',
-            index: '456',
-          },
-        },
-      };
-      const redirect = pathMap['/doc/:dataView/:index/:type'] as Function;
-      expect(typeof redirect).toBe('function');
-      expect(redirect(redirectParams)).toMatchObject(<Redirect to="/doc/123/456" />);
-    });
-
-    it('should show SingleDocRoute component for /doc/:dataViewId/:index route', () => {
-      expect(pathMap['/doc/:dataViewId/:index']).toMatchObject(<SingleDocRoute />);
-    });
-
-    it('should show ContextAppRoute component for /context/:dataViewId/:id route', () => {
-      expect(pathMap['/context/:dataViewId/:id']).toMatchObject(<ContextAppRoute />);
-    });
-  });
-
-  const prefix = addProfile('', 'test');
-
-  describe('With prefix', () => {
-    beforeAll(() => {
-      pathMap = {};
-      gatherRoutes(shallow(<DiscoverRoutes prefix={prefix} {...props} />));
-    });
-
-    it(`should show DiscoverMainRoute component for ${prefix} route`, () => {
-      expect(pathMap[`${prefix}/`]).toMatchObject(<DiscoverMainRoute {...props} />);
-    });
-
-    it(`should show DiscoverMainRoute component for ${prefix}/view/:id route`, () => {
-      expect(pathMap[`${prefix}/view/:id`]).toMatchObject(<DiscoverMainRoute {...props} />);
-    });
-
-    it(`should show Redirect component for ${prefix}/doc/:dataView/:index/:type route`, () => {
-      const redirectParams = {
-        match: {
-          params: {
-            dataView: '123',
-            index: '456',
-          },
-        },
-      };
-      const redirect = pathMap[`${prefix}/doc/:dataView/:index/:type`] as Function;
-      expect(typeof redirect).toBe('function');
-      expect(redirect(redirectParams)).toMatchObject(<Redirect to={`${prefix}/doc/123/456`} />);
-    });
-
-    it(`should show SingleDocRoute component for ${prefix}/doc/:dataViewId/:index route`, () => {
-      expect(pathMap[`${prefix}/doc/:dataViewId/:index`]).toMatchObject(<SingleDocRoute />);
-    });
-
-    it(`should show ContextAppRoute component for ${prefix}/context/:dataViewId/:id route`, () => {
-      expect(pathMap[`${prefix}/context/:dataViewId/:id`]).toMatchObject(<ContextAppRoute />);
-    });
-  });
-});
-
-const profileRegistry = createProfileRegistry();
-const callbacks = [jest.fn()];
-
-profileRegistry.set({
-  id: 'default',
-  customizationCallbacks: callbacks,
-});
-
-profileRegistry.set({
-  id: 'test',
-  customizationCallbacks: callbacks,
-});
-
-describe('CustomDiscoverRoutes', () => {
-  afterEach(() => {
-    mockProfile = undefined;
-  });
-
-  it('should show DiscoverRoutes for a valid profile', () => {
-    mockProfile = 'test';
-    const component = shallow(
-      <CustomDiscoverRoutes profileRegistry={profileRegistry} isDev={props.isDev} />
-    );
-    expect(component.find(DiscoverRoutes).getElement()).toMatchObject(
-      <DiscoverRoutes
-        prefix={addProfile('', mockProfile)}
-        customizationCallbacks={callbacks}
-        isDev={props.isDev}
-      />
-    );
-  });
-
-  it('should show NotFoundRoute for an invalid profile', () => {
-    mockProfile = 'invalid';
-    const component = shallow(
-      <CustomDiscoverRoutes profileRegistry={profileRegistry} isDev={props.isDev} />
-    );
-    expect(component.find(NotFoundRoute).getElement()).toMatchObject(<NotFoundRoute />);
-  });
-});
-
-const profilePath = addProfile('', ':profile');
 
 describe('DiscoverRouter', () => {
   beforeAll(() => {
     pathMap = {};
     const { history } = createSearchSessionMock();
     const component = shallow(
-      <DiscoverRouter
+      <DiscoverRoutes
         services={mockDiscoverServices}
         history={history}
-        profileRegistry={profileRegistry}
-        isDev={props.isDev}
+        customizationContext={mockCustomizationContext}
+        experimentalFeatures={mockExperimentalFeatures}
       />
     );
     gatherRoutes(component);
   });
 
-  it('should show DiscoverRoutes component for / route', () => {
-    expect(pathMap['/']).toMatchObject(
-      <DiscoverRoutes customizationCallbacks={callbacks} isDev={props.isDev} />
-    );
+  it('should show DiscoverMainRoute component for / route', () => {
+    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute {...props} />);
   });
 
-  it(`should show CustomDiscoverRoutes component for ${profilePath} route`, () => {
-    expect(pathMap[profilePath]).toMatchObject(
-      <CustomDiscoverRoutes profileRegistry={profileRegistry} isDev={props.isDev} />
-    );
+  it('should show DiscoverMainRoute component for /view/:id route', () => {
+    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute {...props} />);
+  });
+
+  it('should show Redirect component for /doc/:dataView/:index/:type route', () => {
+    const redirectParams = {
+      match: {
+        params: {
+          dataView: '123',
+          index: '456',
+        },
+      },
+    };
+    const redirect = pathMap['/doc/:dataView/:index/:type'] as Function;
+    expect(typeof redirect).toBe('function');
+    expect(redirect(redirectParams)).toMatchObject(<Redirect to="/doc/123/456" />);
+  });
+
+  it('should show SingleDocRoute component for /doc/:dataViewId/:index route', () => {
+    expect(pathMap['/doc/:dataViewId/:index']).toMatchObject(<SingleDocRoute />);
+  });
+
+  it('should show ContextAppRoute component for /context/:dataViewId/:id route', () => {
+    expect(pathMap['/context/:dataViewId/:id']).toMatchObject(<ContextAppRoute />);
   });
 });

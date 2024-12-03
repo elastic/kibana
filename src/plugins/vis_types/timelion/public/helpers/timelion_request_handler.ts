@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,8 +12,8 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { DataView } from '@kbn/data-plugin/common';
 import { Filter, buildEsQuery, TimeRange, Query } from '@kbn/es-query';
 import { KibanaContext, getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { TimelionVisDependencies } from '../plugin';
-import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
 import { getDataSearch, getIndexPatterns } from './plugin_services';
 import { VisSeries } from '../../common/vis_data';
@@ -58,7 +59,7 @@ export function getTimelionRequestHandler({
 }: TimelionVisDependencies & {
   expressionAbortSignal: AbortSignal;
 }) {
-  const timezone = getTimezone(uiSettings);
+  const timezone = getTimeZone(uiSettings);
 
   return async function ({
     timeRange,

@@ -10,6 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 import { ConfigType } from '..';
+import { GlobalConfigService } from '../services/global_config_service';
 
 export const mockLogger = loggingSystemMock.createLogger().get();
 
@@ -36,6 +37,7 @@ export const mockConfig = {
 export const mockDependencies = {
   // Mock router should be handled on a per-test basis
   config: mockConfig,
+  globalConfigService: new GlobalConfigService(),
   log: mockLogger,
   enterpriseSearchRequestHandler: mockRequestHandler as any,
   ml: mockMl,

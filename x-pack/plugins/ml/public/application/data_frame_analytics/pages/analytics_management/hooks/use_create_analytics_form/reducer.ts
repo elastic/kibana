@@ -24,30 +24,25 @@ import {
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '@kbn/ml-data-frame-analytics-utils';
-
-import { isValidIndexName } from '../../../../../../../common/util/es_utils';
-
-import { Action, ACTION } from './actions';
-import {
-  getInitialState,
-  getFormStateFromJobConfig,
-  getJobConfigFromFormState,
-  State,
-} from './state';
-import {
-  isJobIdValid,
-  validateModelMemoryLimitUnits,
-} from '../../../../../../../common/util/job_utils';
 import {
   composeValidators,
   maxLengthValidator,
   memoryInputValidator,
   requiredValidator,
-} from '../../../../../../../common/util/validators';
-import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
-} from '../../../../../../../common/constants/validation';
+} from '@kbn/ml-validators';
+
+import { isValidIndexName } from '../../../../../../../common/util/es_utils';
+
+import type { Action } from './actions';
+import { ACTION } from './actions';
+import type { State } from './state';
+import { getInitialState, getFormStateFromJobConfig, getJobConfigFromFormState } from './state';
+import {
+  isJobIdValid,
+  validateModelMemoryLimitUnits,
+} from '../../../../../../../common/util/job_utils';
 import { isAdvancedConfig } from '../../components/action_clone/clone_action_name';
 
 const { collapseLiteralStrings } = XJson;

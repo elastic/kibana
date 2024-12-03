@@ -6,21 +6,32 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import { useDispatch, connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { FilterItems } from '@kbn/unified-search-plugin/public';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../common/lib/kibana';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { State, inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import type { KqlMode, TimelineModel } from '../../../store/timeline/model';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineActions, timelineSelectors } from '../../../store';
+import type { KqlMode, TimelineModel } from '../../../store/model';
+import { timelineDefaults } from '../../../store/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
+import { setDataProviderVisibility } from '../../../store/actions';
+import { getNonDropAreaFilters } from '../helpers';
+import * as i18n from './translations';
 
 interface OwnProps {
   filterManager: FilterManager;
@@ -28,6 +39,9 @@ interface OwnProps {
 }
 
 type Props = OwnProps & PropsFromRedux;
+
+export const isDataView = (obj: unknown): obj is DataView =>
+  obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
 
 const StatefulSearchOrFilterComponent = React.memo<Props>(
   ({
@@ -48,13 +62,80 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     toStr,
     updateKqlMode,
     updateReduxTime,
+    timelineType,
   }) => {
-    const setFiltersInTimeline = useCallback(
-      (newFilters: Filter[]) =>
+    const dispatch = useDispatch();
+
+    const { addError } = useAppToasts();
+
+    const [dataView, setDataView] = useState<DataView>();
+    const {
+      services: { data },
+    } = useKibana();
+
+    const { sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+
+    const getIsDataProviderVisible = useMemo(
+      () => timelineSelectors.dataProviderVisibilitySelector(),
+      []
+    );
+
+    const isDataProviderVisible = useDeepEqualSelector((state) =>
+      getIsDataProviderVisible(state, timelineId)
+    );
+
+    useEffect(() => {
+      let dv: DataView;
+      const createDataView = async () => {
+        try {
+          dv = await data.dataViews.create(sourcererDataView);
+          setDataView(dv);
+        } catch (error) {
+          addError(error, { title: i18n.ERROR_PROCESSING_INDEX_PATTERNS });
+        }
+      };
+      createDataView();
+
+      return () => {
+        if (dv?.id) {
+          data.dataViews.clearInstanceCache(dv?.id);
+        }
+      };
+    }, [data.dataViews, filterQuery, addError, sourcererDataView]);
+
+    const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
+
+    // Keep filter manager in sync with redux filters
+    useEffect(() => {
+      if (!deepEqual(filterManager.getFilters(), filters)) {
+        filterManager.setFilters(filters);
+      }
+    }, [filterManager, filters]);
+
+    // When a filter update comes in through the filter manager, update redux
+    useEffect(() => {
+      const subscription = filterManager.getUpdates$().subscribe(() => {
+        const filtersWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
+        if (!deepEqual(filtersWithoutDropArea, filters)) {
+          setFilters({
+            id: timelineId,
+            filters: filtersWithoutDropArea,
+          });
+        }
+      });
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, [filterManager, timelineId, setFilters, filters]);
+
+    // Sync redux filters with updated from <FilterItems />
+    const onFiltersUpdated = useCallback(
+      (newFilters: Filter[]) => {
         setFilters({
           id: timelineId,
           filters: newFilters,
-        }),
+        });
+      },
       [timelineId, setFilters]
     );
 
@@ -67,26 +148,82 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       [timelineId, setSavedQueryId]
     );
 
+    const toggleDataProviderVisibility = useCallback(() => {
+      dispatch(
+        setDataProviderVisibility({ id: timelineId, isDataProviderVisible: !isDataProviderVisible })
+      );
+    }, [isDataProviderVisible, timelineId, dispatch]);
+
+    useEffect(() => {
+      /*
+       * If there is a change in data providers
+       *    - data provider has some data and it was hidden,
+       *        * it must be made visible
+       *
+       *    - data provider has no data and it was visible,
+       *        * it must be hidden
+       *
+       * */
+      if (dataProviders?.length > 0) {
+        dispatch(setDataProviderVisibility({ id: timelineId, isDataProviderVisible: true }));
+      } else if (dataProviders?.length === 0) {
+        dispatch(setDataProviderVisibility({ id: timelineId, isDataProviderVisible: false }));
+      }
+    }, [dataProviders, dispatch, timelineId]);
+
     return (
-      <SearchOrFilter
-        dataProviders={dataProviders}
-        filters={filters}
-        filterManager={filterManager}
-        filterQuery={filterQuery}
-        from={from}
-        fromStr={fromStr}
-        isRefreshPaused={isRefreshPaused}
-        kqlMode={kqlMode}
-        refreshInterval={refreshInterval}
-        savedQueryId={savedQueryId}
-        setFilters={setFiltersInTimeline}
-        setSavedQueryId={setSavedQueryInTimeline}
-        timelineId={timelineId}
-        to={to}
-        toStr={toStr}
-        updateKqlMode={updateKqlMode}
-        updateReduxTime={updateReduxTime}
-      />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <EuiFlexGroup
+            className="eui-scrollBar"
+            direction="row"
+            alignItems="center"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={true}>
+              <SearchOrFilter
+                dataProviders={dataProviders}
+                filters={filters}
+                filterManager={filterManager}
+                filterQuery={filterQuery}
+                from={from}
+                fromStr={fromStr}
+                isRefreshPaused={isRefreshPaused}
+                kqlMode={kqlMode}
+                refreshInterval={refreshInterval}
+                savedQueryId={savedQueryId}
+                setSavedQueryId={setSavedQueryInTimeline}
+                timelineId={timelineId}
+                to={to}
+                toStr={toStr}
+                updateKqlMode={updateKqlMode}
+                updateReduxTime={updateReduxTime}
+                toggleDataProviderVisibility={toggleDataProviderVisibility}
+                isDataProviderVisible={isDataProviderVisible}
+                timelineType={timelineType}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {filters && filters.length > 0 ? (
+          <EuiFlexItem>
+            <EuiFlexGroup
+              data-test-subj="timeline-filters-container"
+              direction="row"
+              gutterSize="xs"
+              wrap={true}
+              responsive={false}
+            >
+              <FilterItems
+                filters={filters}
+                onFiltersUpdated={onFiltersUpdated}
+                indexPatterns={arrDataView}
+              />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
     );
   },
   (prevProps, nextProps) => {
@@ -104,7 +241,8 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       deepEqual(prevProps.filterQuery, nextProps.filterQuery) &&
       deepEqual(prevProps.kqlMode, nextProps.kqlMode) &&
       deepEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
-      deepEqual(prevProps.timelineId, nextProps.timelineId)
+      deepEqual(prevProps.timelineId, nextProps.timelineId) &&
+      prevProps.timelineType === nextProps.timelineType
     );
   }
 );
@@ -135,8 +273,10 @@ const makeMapStateToProps = () => {
       to: input.timerange.to,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       toStr: input.timerange.toStr!,
+      timelineType: timeline.timelineType,
     };
   };
+
   return mapStateToProps;
 };
 

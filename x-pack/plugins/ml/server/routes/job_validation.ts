@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
@@ -28,7 +28,7 @@ import {
 } from '../models/job_validation';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
-import { CombinedJob } from '../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '../../common/types/anomaly_detection_jobs';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 
@@ -63,22 +63,18 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
     );
   }
 
-  /**
-   * @apiGroup JobValidation
-   *
-   * @api {post} /internal/ml/validate/estimate_bucket_span Estimate bucket span
-   * @apiName EstimateBucketSpan
-   * @apiDescription  Estimates minimum viable bucket span based on the characteristics of a pre-viewed subset of the data
-   *
-   * @apiSchema (body) estimateBucketSpanSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/estimate_bucket_span`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Estimates bucket span',
+      description:
+        'Estimates the minimum viable bucket span based on the characteristics of a pre-viewed subset of the data.',
     })
     .addVersion(
       {
@@ -114,24 +110,17 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
       })
     );
 
-  /**
-   * @apiGroup JobValidation
-   *
-   * @api {post} /internal/ml/validate/calculate_model_memory_limit Calculates model memory limit
-   * @apiName CalculateModelMemoryLimit
-   * @apiDescription Calls _estimate_model_memory endpoint to retrieve model memory estimation.
-   *
-   * @apiSchema (body) modelMemoryLimitSchema
-   *
-   * @apiSuccess {String} modelMemoryLimit
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/calculate_model_memory_limit`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Calculates model memory limit',
+      description: 'Calls _estimate_model_memory endpoint to retrieve model memory estimation.',
     })
     .addVersion(
       {
@@ -155,22 +144,17 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
       })
     );
 
-  /**
-   * @apiGroup JobValidation
-   *
-   * @api {post} /internal/ml/validate/cardinality Validate cardinality
-   * @apiName ValidateCardinality
-   * @apiDescription Validates cardinality for the given job configuration
-   *
-   * @apiSchema (body) validateCardinalitySchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/cardinality`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Validates cardinality',
+      description: 'Validates cardinality for the given job configuration.',
     })
     .addVersion(
       {
@@ -195,22 +179,17 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
       })
     );
 
-  /**
-   * @apiGroup JobValidation
-   *
-   * @api {post} /internal/ml/validate/job Validates job
-   * @apiName ValidateJob
-   * @apiDescription Validates the given job configuration
-   *
-   * @apiSchema (body) validateJobSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/job`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Validates job',
+      description: 'Validates the given job configuration.',
     })
     .addVersion(
       {
@@ -240,22 +219,17 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
       })
     );
 
-  /**
-   * @apiGroup DataFeedPreviewValidation
-   *
-   * @api {post} /internal/ml/validate/datafeed_preview Validates datafeed preview
-   * @apiName ValidateDataFeedPreview
-   * @apiDescription Validates that the datafeed preview runs successfully and produces results
-   *
-   * @apiSchema (body) validateDatafeedPreviewSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/datafeed_preview`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Validates datafeed preview',
+      description: 'Validates that the datafeed preview runs successfully and produces results.',
     })
     .addVersion(
       {

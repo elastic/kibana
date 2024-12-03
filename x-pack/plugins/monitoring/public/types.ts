@@ -16,6 +16,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
@@ -26,6 +27,7 @@ export interface MonitoringStartPluginDependencies {
   dashboard?: DashboardStart;
   fleet?: FleetStart;
   infra?: InfraClientStartExports;
+  share: SharePluginStart;
 }
 
 interface LegacyStartDependencies {

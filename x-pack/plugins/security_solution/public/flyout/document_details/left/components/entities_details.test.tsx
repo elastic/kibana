@@ -8,20 +8,20 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { EntitiesDetails } from './entities_details';
 import { ENTITIES_DETAILS_TEST_ID, HOST_DETAILS_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -64,8 +64,10 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-jest.mock('../../../../common/containers/sourcerer', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
+jest.mock('../../../../sourcerer/containers', () => ({
+  useSourcererDataView: jest
+    .fn()
+    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
@@ -86,7 +88,7 @@ const mockUseHostDetails = useHostDetails as jest.Mock;
 jest.mock('../../../../common/containers/related_entities/related_users');
 const mockUseHostsRelatedUsers = useHostRelatedUsers as jest.Mock;
 
-jest.mock('../../../../explore/containers/risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
 
 jest.mock('../../../../explore/users/containers/users/observed_details');
@@ -100,12 +102,12 @@ const HOST_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID);
 
 const NO_DATA_MESSAGE = 'Host and user information are unavailable for this alert.';
 
-const renderEntitiesDetails = (contextValue: LeftPanelContext) =>
+const renderEntitiesDetails = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <EntitiesDetails />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

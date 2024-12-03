@@ -12,9 +12,15 @@ import {
   builtInComparators,
   builtInAggregationTypes,
   builtInGroupByTypes,
-  COMPARATORS,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { MAX_SELECTABLE_GROUP_BY_TERMS } from '../../../common/constants';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import {
+  MAX_SELECTABLE_SOURCE_FIELDS,
+  MAX_SELECTABLE_GROUP_BY_TERMS,
+  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
+  MAX_HITS_FOR_GROUP_BY,
+} from '../../../common/constants';
 import { EsQueryRuleParams, SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
@@ -24,7 +30,7 @@ import {
   SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
 } from './constants';
 
-const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
+const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: boolean) => {
   const {
     size,
     threshold,
@@ -35,6 +41,7 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
     groupBy,
     termSize,
     termField,
+    sourceFields,
   } = ruleParams;
   const errors: typeof COMMON_EXPRESSION_ERRORS = defaultsDeep({}, COMMON_EXPRESSION_ERRORS);
 
@@ -65,6 +72,21 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
     errors.termSize.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermSizedText', {
         defaultMessage: 'Term size is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy] &&
+    builtInGroupByTypes[groupBy].sizeRequired &&
+    size &&
+    size > MAX_HITS_FOR_GROUP_BY
+  ) {
+    errors.size.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.sizeTooLargeForGroupByText', {
+        defaultMessage: 'Size cannot exceed {max} when using a group by field.',
+        values: { max: MAX_HITS_FOR_GROUP_BY },
       })
     );
   }
@@ -140,11 +162,27 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
       })
     );
   }
-  if ((size && size < 0) || size > 10000) {
+  const maxSize = isServerless
+    ? ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS
+    : ES_QUERY_MAX_HITS_PER_EXECUTION;
+  if ((size && size < 0) || size > maxSize) {
     errors.size.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.invalidSizeRangeText', {
         defaultMessage: 'Size must be between 0 and {max, number}.',
-        values: { max: 10000 },
+        values: { max: maxSize },
+      })
+    );
+  }
+
+  if (
+    sourceFields &&
+    Array.isArray(sourceFields) &&
+    sourceFields.length > MAX_SELECTABLE_SOURCE_FIELDS
+  ) {
+    errors.sourceFields.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.sourceFields', {
+        defaultMessage: `Cannot select more than {max} fields`,
+        values: { max: MAX_SELECTABLE_SOURCE_FIELDS },
       })
     );
   }
@@ -280,10 +318,13 @@ const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQu
   return errors;
 };
 
-export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
+export const validateExpression = (
+  ruleParams: EsQueryRuleParams,
+  isServerless?: boolean
+): ValidationResult => {
   const validationResult = { errors: {} };
 
-  const commonErrors = validateCommonParams(ruleParams);
+  const commonErrors = validateCommonParams(ruleParams, isServerless);
   validationResult.errors = commonErrors;
 
   /**
@@ -314,8 +355,11 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
   return validationResult;
 };
 
-export const hasExpressionValidationErrors = (ruleParams: EsQueryRuleParams) => {
-  const { errors: validationErrors } = validateExpression(ruleParams);
+export const hasExpressionValidationErrors = (
+  ruleParams: EsQueryRuleParams,
+  isServerless: boolean
+) => {
+  const { errors: validationErrors } = validateExpression(ruleParams, isServerless);
   return Object.keys(validationErrors).some(
     (key) => validationErrors[key] && validationErrors[key].length
   );

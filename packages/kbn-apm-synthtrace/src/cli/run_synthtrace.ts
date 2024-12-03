@@ -1,24 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import datemath from '@kbn/datemath';
 import { Argv } from 'yargs';
 import yargs from 'yargs/yargs';
+import { readdirSync } from 'fs';
+import path from 'path';
 import { intervalToMs } from './utils/interval_to_ms';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { startHistoricalDataUpload } from './utils/start_historical_data_upload';
 import { startLiveDataUpload } from './utils/start_live_data_upload';
 
+function getBuiltinScenarios() {
+  return readdirSync(path.resolve(__dirname, '../scenarios')).map((s) => s.replace(/\.ts$/, ''));
+}
+
 function options(y: Argv) {
   return y
+    .usage('$0 <file>')
     .positional('file', {
-      describe: 'File that contains the trace scenario',
+      describe: 'Name of scenario',
       demandOption: true,
       string: true,
+      choices: getBuiltinScenarios(),
     })
     .option('target', {
       describe: 'Elasticsearch target',
@@ -38,6 +48,11 @@ function options(y: Argv) {
       description: 'Generate and index data continuously',
       boolean: true,
     })
+    .option('liveBucketSize', {
+      description: 'Bucket size in ms for live streaming',
+      default: 1000,
+      number: true,
+    })
     .option('clean', {
       describe: 'Clean APM indices before indexing new data',
       default: false,
@@ -52,12 +67,9 @@ function options(y: Argv) {
       number: true,
       default: 1,
     })
-    .option('versionOverride', {
-      describe: 'Package/observer version override',
-      string: true,
-    })
     .option('logLevel', {
       describe: 'Log level',
+      choices: ['trace', 'debug', 'info', 'error'],
       default: 'info',
     })
     .option('scenarioOpts', {
@@ -66,7 +78,18 @@ function options(y: Argv) {
         return arg as Record<string, any> | undefined;
       },
     })
-    .showHelpOnFail(false);
+    .option('assume-package-version', {
+      describe: 'Assumes passed package version to avoid calling Fleet API to install',
+      string: true,
+    })
+    .example(
+      '$0 simple_logs --target=http://admin:changeme@localhost:9200',
+      'Ingest data to specific Elasticsearch cluster'
+    )
+    .example('$0 simple_logs --live', 'Continuously ingest data to local development cluster')
+    .example('$0 simple_logs --from=now-24h --to=now', 'Ingest data for a fixed time window')
+    .showHelpOnFail(false)
+    .wrap(null);
 }
 
 async function run(argv: RunCliFlags) {

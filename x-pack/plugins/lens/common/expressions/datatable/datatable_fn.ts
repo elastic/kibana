@@ -8,20 +8,19 @@
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import type {
-  Datatable,
-  DatatableColumnMeta,
-  ExecutionContext,
-} from '@kbn/expressions-plugin/common';
+import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '../../types';
-import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
-import { getSortingCriteria } from './sorting';
 import type { DatatableExpressionFunction } from './types';
+import { transposeTable } from './transpose_helpers';
 
-function isRange(meta: { params?: { id?: string } } | undefined) {
-  return meta?.params?.id === 'range';
-}
+/**
+ * Available datatables logged to inspector
+ */
+export const DatatableInspectorTables = {
+  Default: 'default',
+  Transpose: 'transpose',
+};
 
 export const datatableFn =
   (
@@ -45,12 +44,10 @@ export const datatableFn =
         true
       );
 
-      context.inspectorAdapters.tables.logDatatable('default', logTable);
+      context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Default, logTable);
     }
 
     let untransposedData: Datatable | undefined;
-    // do the sorting at this level to propagate it also at CSV download
-    const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
 
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
     const formatFactory = await getFormatFactory(context);
@@ -63,18 +60,30 @@ export const datatableFn =
     if (hasTransposedColumns) {
       // store original shape of data separately
       untransposedData = cloneDeep(table);
-      // transposes table and args inplace
+      // transposes table and args in-place
       transposeTable(args, table, formatters);
+
+      if (context?.inspectorAdapters?.tables) {
+        const logTransposedTable = prepareLogTable(
+          table,
+          [
+            [
+              args.columns.map((column) => column.columnId),
+              i18n.translate('xpack.lens.datatable.column.help', {
+                defaultMessage: 'Datatable column',
+              }),
+            ],
+          ],
+          true
+        );
+
+        context.inspectorAdapters.tables.logDatatable(
+          DatatableInspectorTables.Transpose,
+          logTransposedTable
+        );
+        context.inspectorAdapters.tables.initialSelectedTable = DatatableInspectorTables.Transpose;
+      }
     }
-
-    const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
-
-    const columnsReverseLookup = table.columns.reduce<
-      Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-    >((memo, { id, name, meta }, i) => {
-      memo[id] = { name, index: i, meta };
-      return memo;
-    }, {});
 
     const columnsWithSummary = args.columns.filter((c) => c.summaryRow);
     for (const column of columnsWithSummary) {
@@ -86,35 +95,13 @@ export const datatableFn =
       );
     }
 
-    if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
-      const sortingHint = args.columns.find((col) => col.columnId === sortBy)?.sortingHint;
-      // Sort on raw values for these types, while use the formatted value for the rest
-      const sortingCriteria = getSortingCriteria(
-        sortingHint ??
-          (isRange(columnsReverseLookup[sortBy]?.meta)
-            ? 'range'
-            : columnsReverseLookup[sortBy]?.meta?.type),
-        sortBy,
-        formatters[sortBy],
-        sortDirection
-      );
-      // replace the table here
-      context.inspectorAdapters.tables[layerId].rows = (table.rows || [])
-        .slice()
-        .sort(sortingCriteria);
-      // replace also the local copy
-      table.rows = context.inspectorAdapters.tables[layerId].rows;
-    } else {
-      args.sortingColumnId = undefined;
-      args.sortingDirection = 'none';
-    }
-
     return {
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
         data: table,
         untransposedData,
+        syncColors: context.isSyncColorsEnabled?.() ?? false,
         args: {
           ...args,
           title: (context.variables.embeddableTitle as string) ?? args.title,

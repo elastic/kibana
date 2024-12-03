@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,18 +19,16 @@ interface Props {
 }
 
 export const ClassificationExploration: FC<Props> = ({ jobId }) => (
-  <div className="mlDataFrameAnalyticsClassification">
-    <ExplorationPageWrapper
-      jobId={jobId}
-      title={i18n.translate(
-        'xpack.ml.dataframe.analytics.classificationExploration.tableJobIdTitle',
-        {
-          defaultMessage: 'Destination index for classification job ID {jobId}',
-          values: { jobId },
-        }
-      )}
-      EvaluatePanel={EvaluatePanel}
-      FeatureImportanceSummaryPanel={FeatureImportanceSummaryPanel}
-    />
-  </div>
+  <ExplorationPageWrapper
+    jobId={jobId}
+    title={i18n.translate(
+      'xpack.ml.dataframe.analytics.classificationExploration.tableJobIdTitle',
+      {
+        defaultMessage: 'Destination index for classification job ID {jobId}',
+        values: { jobId },
+      }
+    )}
+    EvaluatePanel={EvaluatePanel}
+    FeatureImportanceSummaryPanel={FeatureImportanceSummaryPanel}
+  />
 );

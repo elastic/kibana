@@ -13,9 +13,13 @@ import pRetry from 'p-retry';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import semverGt from 'semver/functions/gt';
+import semverRcompare from 'semver/functions/rcompare';
+import semverLt from 'semver/functions/lt';
 import semverCoerce from 'semver/functions/coerce';
 
 import { REPO_ROOT } from '@kbn/repo-info';
+
+import { differsOnlyInPatch } from '../../../common/services';
 
 import { appContextService } from '..';
 
@@ -24,18 +28,43 @@ const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_lis
 
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
+const MAX_REQUEST_TIMEOUT = 60 * 1000; // Only attempt to fetch product versions for one minute total
 
 // Cache available versions in memory for 1 hour
 const CACHE_DURATION = 1000 * 60 * 60;
 let CACHED_AVAILABLE_VERSIONS: string[] | undefined;
 let LAST_FETCHED: number | undefined;
 
-export const getLatestAvailableVersion = async (
-  includeCurrentVersion?: boolean
-): Promise<string> => {
-  const versions = await getAvailableVersions({ includeCurrentVersion });
+/**
+ * Fetch the latest available version of Elastic Agent that is compatible with the current Kibana version.
+ *
+ * e.g. if the current Kibana version is 8.12.0, and there is an 8.12.2 patch release of agent available,
+ * this function will return "8.12.2".
+ */
+export const getLatestAvailableAgentVersion = async ({
+  includeCurrentVersion = false,
+  ignoreCache = false,
+}: {
+  includeCurrentVersion?: boolean;
+  ignoreCache?: boolean;
+} = {}): Promise<string> => {
+  const kibanaVersion = appContextService.getKibanaVersion();
 
-  return versions[0];
+  let latestCompatibleVersion;
+
+  const versions = await getAvailableVersions({ includeCurrentVersion, ignoreCache });
+  versions.sort(semverRcompare);
+
+  if (versions && versions.length > 0 && versions.indexOf(kibanaVersion) !== 0) {
+    latestCompatibleVersion =
+      versions.find((version) => {
+        return semverLt(version, kibanaVersion) || differsOnlyInPatch(version, kibanaVersion);
+      }) || versions[0];
+  } else {
+    latestCompatibleVersion = kibanaVersion;
+  }
+
+  return latestCompatibleVersion;
 };
 
 export const getAvailableVersions = async ({
@@ -80,18 +109,21 @@ export const getAvailableVersions = async ({
   // fetch from the live API more than `TIME_BETWEEN_FETCHES` milliseconds.
   const apiVersions = await fetchAgentVersionsFromApi();
 
-  // Coerce each version to a semver object and compare to our `MINIMUM_SUPPORTED_VERSION` - we
+  // Take each version and compare to our `MINIMUM_SUPPORTED_VERSION` - we
   // only want support versions in the final result. We'll also sort by newest version first.
-  availableVersions = uniq([...availableVersions, ...apiVersions])
-    .map((item: any) => semverCoerce(item)?.version || '')
-    .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
-    .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
+  availableVersions = uniq(
+    [...availableVersions, ...apiVersions]
+      .map((item: any) => (item.includes('+build') ? item : semverCoerce(item)?.version || ''))
+      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1))
+  );
 
-  // If the current stack version isn't included in the list of available versions, add it
-  // at the front of the array
-  const hasCurrentVersion = availableVersions.some((v) => v === kibanaVersion);
-  if (includeCurrentVersion && !hasCurrentVersion) {
-    availableVersions = [kibanaVersion, ...availableVersions];
+  // if api versions are empty (air gapped or API not available), we add current kibana version, as the build file might not contain the latest released version
+  if (
+    includeCurrentVersion ||
+    (apiVersions.length === 0 && !config?.internal?.onlyAllowAgentUpgradeToKnownVersions)
+  ) {
+    availableVersions = uniq([kibanaVersion, ...availableVersions]);
   }
 
   // Allow upgrading to the current stack version if this override flag is provided via `kibana.yml`.
@@ -110,6 +142,11 @@ export const getAvailableVersions = async ({
 };
 
 async function fetchAgentVersionsFromApi() {
+  // If the airgapped flag is set, do not attempt to reach out to the product versions API
+  if (appContextService.getConfig()?.isAirGapped) {
+    return [];
+  }
+
   const logger = appContextService.getLogger();
 
   const options = {
@@ -118,21 +155,29 @@ async function fetchAgentVersionsFromApi() {
     },
   };
 
-  const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), { retries: 1 });
-  const rawBody = await response.text();
+  try {
+    const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), {
+      retries: 1,
+      maxRetryTime: MAX_REQUEST_TIMEOUT,
+    });
+    const rawBody = await response.text();
 
-  // We need to handle non-200 responses gracefully here to support airgapped environments where
-  // Kibana doesn't have internet access to query this API
-  if (response.status >= 400) {
-    logger.debug(`Status code ${response.status} received from versions API: ${rawBody}`);
+    // We need to handle non-200 responses gracefully here to support airgapped environments where
+    // Kibana doesn't have internet access to query this API
+    if (response.status >= 400) {
+      logger.debug(`Status code ${response.status} received from versions API: ${rawBody}`);
+      return [];
+    }
+
+    const jsonBody = JSON.parse(rawBody);
+
+    const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
+      .filter((item: any) => item?.title?.includes('Elastic Agent'))
+      .map((item: any) => item?.version_number);
+
+    return versions;
+  } catch (error) {
+    logger.debug(`Error fetching available versions from API: ${error.message}`);
     return [];
   }
-
-  const jsonBody = JSON.parse(rawBody);
-
-  const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
-    .filter((item: any) => item?.title?.includes('Elastic Agent'))
-    .map((item: any) => item?.version_number);
-
-  return versions;
 }

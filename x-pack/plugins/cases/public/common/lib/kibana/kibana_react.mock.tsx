@@ -9,6 +9,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { PublicAppInfo } from '@kbn/core/public';
+import { AppStatus } from '@kbn/core/public';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -52,7 +53,21 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
 
   services.application.currentAppId$ = new BehaviorSubject<string>('testAppId');
   services.application.applications$ = new BehaviorSubject<Map<string, PublicAppInfo>>(
-    new Map([['testAppId', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
+    new Map([
+      [
+        'testAppId',
+        {
+          id: 'testAppId',
+          title: 'test-title',
+          category: { id: 'test-label-id', label: 'Test' },
+          status: AppStatus.accessible,
+          visibleIn: ['globalSearch'],
+          appRoute: `/app/some-id`,
+          keywords: [],
+          deepLinks: [],
+        },
+      ],
+    ])
   );
 
   services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
@@ -68,13 +83,16 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
   services.application.capabilities = {
     ...services.application.capabilities,
     actions: { save: true, show: true },
-    generalCases: {
+    generalCasesV2: {
       create_cases: true,
       read_cases: true,
       update_cases: true,
       delete_cases: true,
       push_cases: true,
       cases_connectors: true,
+      cases_settings: true,
+      case_reopen: true,
+      create_comment: true,
     },
     visualize: { save: true, show: true },
     dashboard: { show: true, createNew: true },

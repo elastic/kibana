@@ -1,0 +1,1573 @@
+openapi: 3.0.3
+info:
+  description: >-
+    You can create Timelines and Timeline templates via the API, as well as
+    import new Timelines from an ndjson file.
+  title: Security Timeline API (Elastic Cloud Serverless)
+  version: '2023-10-31'
+servers:
+  - url: http://{kibana_host}:{port}
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/note:
+    delete:
+      description: Delete a note from a Timeline using the note ID.
+      operationId: DeleteNote
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - nullable: true
+                  type: object
+                  properties:
+                    noteId:
+                      type: string
+                  required:
+                    - noteId
+                - nullable: true
+                  type: object
+                  properties:
+                    noteIds:
+                      items:
+                        type: string
+                      nullable: true
+                      type: array
+                  required:
+                    - noteIds
+        description: The ID of the note to delete.
+        required: true
+      responses:
+        '200':
+          description: Indicates the note was successfully deleted.
+      summary: Delete a note
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+    get:
+      description: Get all notes for a given document.
+      operationId: GetNotes
+      parameters:
+        - in: query
+          name: documentIds
+          schema:
+            $ref: '#/components/schemas/DocumentIds'
+        - in: query
+          name: savedObjectIds
+          schema:
+            $ref: '#/components/schemas/SavedObjectIds'
+        - in: query
+          name: page
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: perPage
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: search
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: sortField
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: sortOrder
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: filter
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: createdByFilter
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: associatedFilter
+          schema:
+            $ref: '#/components/schemas/AssociatedFilterType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetNotesResult'
+          description: Indicates the requested notes were returned.
+      summary: Get notes
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+    patch:
+      description: Add a note to a Timeline or update an existing note.
+      operationId: PersistNoteRoute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventDataView:
+                  nullable: true
+                  type: string
+                eventIngested:
+                  nullable: true
+                  type: string
+                eventTimestamp:
+                  nullable: true
+                  type: string
+                note:
+                  $ref: '#/components/schemas/BareNote'
+                noteId:
+                  nullable: true
+                  type: string
+                overrideOwner:
+                  nullable: true
+                  type: boolean
+                version:
+                  nullable: true
+                  type: string
+              required:
+                - note
+        description: The note to add or update, along with additional metadata.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNote'
+          description: Indicates the note was successfully created.
+      summary: Add or update a note
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/pinned_event:
+    patch:
+      description: Pin an event to an existing Timeline.
+      operationId: PersistPinnedEventRoute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventId:
+                  type: string
+                pinnedEventId:
+                  nullable: true
+                  type: string
+                timelineId:
+                  type: string
+              required:
+                - eventId
+                - timelineId
+        description: The pinned event to add or update, along with additional metadata.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistPinnedEventResponse'
+          description: Indicates the event was successfully pinned to the Timeline.
+      summary: Pin an event
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timeline:
+    delete:
+      description: Delete one or more Timelines or Timeline templates.
+      operationId: DeleteTimelines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                savedObjectIds:
+                  items:
+                    type: string
+                  type: array
+                searchIds:
+                  description: >-
+                    Saved search ids that should be deleted alongside the
+                    timelines
+                  items:
+                    type: string
+                  type: array
+              required:
+                - savedObjectIds
+        description: The IDs of the Timelines or Timeline templates to delete.
+        required: true
+      responses:
+        '200':
+          description: Indicates the Timeline was successfully deleted.
+      summary: Delete Timelines or Timeline templates
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+    get:
+      description: Get the details of an existing saved Timeline or Timeline template.
+      operationId: GetTimeline
+      parameters:
+        - description: The ID of the template timeline to retrieve
+          in: query
+          name: template_timeline_id
+          schema:
+            type: string
+        - description: The ID of the Timeline to retrieve.
+          in: query
+          name: id
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineResponse'
+          description: Indicates that the (template) Timeline was found and returned.
+      summary: Get Timeline or Timeline template details
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+    patch:
+      description: >-
+        Update an existing Timeline. You can update the title, description, date
+        range, pinned events, pinned queries, and/or pinned saved queries of an
+        existing Timeline.
+      operationId: PatchTimeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeline:
+                  $ref: '#/components/schemas/SavedTimeline'
+                timelineId:
+                  nullable: true
+                  type: string
+                version:
+                  nullable: true
+                  type: string
+              required:
+                - timelineId
+                - version
+                - timeline
+        description: The Timeline updates, along with the Timeline ID and version.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistTimelineResponse'
+          description: >-
+            Indicates that the draft Timeline was successfully created. In the
+            event the user already has a draft Timeline, the existing draft
+            Timeline is cleared and returned.
+        '405':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: >-
+            Indicates that the user does not have the required access to create
+            a draft Timeline.
+      summary: Update a Timeline
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+    post:
+      description: Create a new Timeline or Timeline template.
+      operationId: CreateTimelines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/TimelineStatus'
+                  nullable: true
+                templateTimelineId:
+                  nullable: true
+                  type: string
+                templateTimelineVersion:
+                  nullable: true
+                  type: number
+                timeline:
+                  $ref: '#/components/schemas/SavedTimeline'
+                timelineId:
+                  nullable: true
+                  type: string
+                timelineType:
+                  $ref: '#/components/schemas/TimelineType'
+                  nullable: true
+                version:
+                  nullable: true
+                  type: string
+              required:
+                - timeline
+        description: >-
+          The required Timeline fields used to create a new Timeline, along with
+          optional fields that will be created if not provided.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistTimelineResponse'
+          description: Indicates the Timeline was successfully created.
+        '405':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Indicates that there was an error in the Timeline creation.
+      summary: Create a Timeline or Timeline template
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timeline/_copy:
+    get:
+      description: |
+        Copies and returns a timeline or timeline template.
+      operationId: CopyTimeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeline:
+                  $ref: '#/components/schemas/SavedTimeline'
+                timelineIdToCopy:
+                  type: string
+              required:
+                - timeline
+                - timelineIdToCopy
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistTimelineResponse'
+          description: Indicates that the timeline has been successfully copied.
+      summary: Copies timeline or timeline template
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timeline/_draft:
+    get:
+      description: >-
+        Get the details of the draft Timeline  or Timeline template for the
+        current user. If the user doesn't have a draft Timeline, an empty
+        Timeline is returned.
+      operationId: GetDraftTimelines
+      parameters:
+        - in: query
+          name: timelineType
+          required: true
+          schema:
+            $ref: '#/components/schemas/TimelineType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistTimelineResponse'
+          description: Indicates that the draft Timeline was successfully retrieved.
+        '403':
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+          description: >-
+            If a draft Timeline was not found and we attempted to create one, it
+            indicates that the user does not have the required permissions to
+            create a draft Timeline.
+        '409':
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+          description: >-
+            This should never happen, but if a draft Timeline was not found and
+            we attempted to create one, it indicates that there is already a
+            draft Timeline with the given `timelineId`.
+      summary: Get draft Timeline or Timeline template details
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+    post:
+      description: >
+        Create a clean draft Timeline or Timeline template for the current user.
+
+        > info
+
+        > If the user already has a draft Timeline, the existing draft Timeline
+        is cleared and returned.
+      operationId: CleanDraftTimelines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timelineType:
+                  $ref: '#/components/schemas/TimelineType'
+              required:
+                - timelineType
+        description: >-
+          The type of Timeline to create. Valid values are `default` and
+          `template`.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistTimelineResponse'
+          description: >-
+            Indicates that the draft Timeline was successfully created. In the
+            event the user already has a draft Timeline, the existing draft
+            Timeline is cleared and returned.
+        '403':
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+          description: >-
+            Indicates that the user does not have the required permissions to
+            create a draft Timeline.
+        '409':
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+          description: >-
+            Indicates that there is already a draft Timeline with the given
+            `timelineId`.
+      summary: Create a clean draft Timeline or Timeline template
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timeline/_export:
+    post:
+      description: Export Timelines as an NDJSON file.
+      operationId: ExportTimelines
+      parameters:
+        - description: The name of the file to export
+          in: query
+          name: file_name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  items:
+                    type: string
+                  nullable: true
+                  type: array
+        description: The IDs of the Timelines to export.
+        required: true
+      responses:
+        '200':
+          content:
+            application/ndjson:
+              schema:
+                description: NDJSON of the exported Timelines
+                type: string
+          description: Indicates the Timelines were successfully exported.
+        '400':
+          content:
+            application/ndjson:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Indicates that the export size limit was exceeded.
+      summary: Export Timelines
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timeline/_favorite:
+    patch:
+      description: Favorite a Timeline or Timeline template for the current user.
+      operationId: PersistFavoriteRoute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                templateTimelineId:
+                  nullable: true
+                  type: string
+                templateTimelineVersion:
+                  nullable: true
+                  type: number
+                timelineId:
+                  nullable: true
+                  type: string
+                timelineType:
+                  $ref: '#/components/schemas/TimelineType'
+                  nullable: true
+              required:
+                - timelineId
+                - templateTimelineId
+                - templateTimelineVersion
+                - timelineType
+        description: The required fields used to favorite a (template) Timeline.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoriteTimelineResponse'
+          description: Indicates the favorite status was successfully updated.
+        '403':
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: >-
+            Indicates the user does not have the required permissions to persist
+            the favorite status.
+      summary: Favorite a Timeline or Timeline template
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timeline/_import:
+    post:
+      description: Import Timelines.
+      operationId: ImportTimelines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file: {}
+                isImmutable:
+                  enum:
+                    - 'true'
+                    - 'false'
+                  type: string
+              required:
+                - file
+        description: The Timelines to import as a readable stream.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportTimelineResult'
+          description: Indicates the import of Timelines was successful.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  id:
+                    type: string
+                  statusCode:
+                    type: number
+          description: >-
+            Indicates the import of Timelines was unsuccessful because of an
+            invalid file extension.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  statusCode:
+                    type: number
+          description: >-
+            Indicates that we were unable to locate the saved object client
+            necessary to handle the import.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  id:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Indicates the import of Timelines was unsuccessful.
+      summary: Import Timelines
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timeline/_prepackaged:
+    post:
+      description: Install or update prepackaged Timelines.
+      operationId: InstallPrepackedTimelines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prepackagedTimelines:
+                  items:
+                    $ref: '#/components/schemas/TimelineSavedToReturnObject'
+                    nullable: true
+                  type: array
+                timelinesToInstall:
+                  items:
+                    $ref: '#/components/schemas/ImportTimelines'
+                    nullable: true
+                  type: array
+                timelinesToUpdate:
+                  items:
+                    $ref: '#/components/schemas/ImportTimelines'
+                    nullable: true
+                  type: array
+              required:
+                - timelinesToInstall
+                - timelinesToUpdate
+                - prepackagedTimelines
+        description: The Timelines to install or update.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportTimelineResult'
+          description: Indicates the installation of prepackaged Timelines was successful.
+        '500':
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: >-
+            Indicates the installation of prepackaged Timelines was
+            unsuccessful.
+      summary: Install prepackaged Timelines
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timeline/resolve:
+    get:
+      operationId: ResolveTimeline
+      parameters:
+        - description: The ID of the template timeline to resolve
+          in: query
+          name: template_timeline_id
+          schema:
+            type: string
+        - description: The ID of the timeline to resolve
+          in: query
+          name: id
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolvedTimeline'
+          description: The (template) Timeline has been found
+        '400':
+          description: The request is missing parameters
+        '404':
+          description: The (template) Timeline was not found
+      summary: Get an existing saved Timeline or Timeline template
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timelines:
+    get:
+      description: Get a list of all saved Timelines or Timeline templates.
+      operationId: GetTimelines
+      parameters:
+        - description: >-
+            If true, only timelines that are marked as favorites by the user are
+            returned.
+          in: query
+          name: only_user_favorite
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+            nullable: true
+            type: string
+        - in: query
+          name: timeline_type
+          schema:
+            $ref: '#/components/schemas/TimelineType'
+            nullable: true
+        - in: query
+          name: sort_field
+          schema:
+            $ref: '#/components/schemas/SortFieldTimeline'
+        - in: query
+          name: sort_order
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - in: query
+          name: page_size
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: page_index
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: search
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/TimelineStatus'
+            nullable: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  customTemplateTimelineCount:
+                    type: number
+                  defaultTimelineCount:
+                    type: number
+                  elasticTemplateTimelineCount:
+                    type: number
+                  favoriteCount:
+                    type: number
+                  templateTimelineCount:
+                    type: number
+                  timeline:
+                    items:
+                      $ref: '#/components/schemas/TimelineResponse'
+                    type: array
+                  totalCount:
+                    type: number
+                required:
+                  - timeline
+                  - totalCount
+          description: Indicates that the (template) Timelines were found and returned.
+        '400':
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Bad request. The user supplied invalid data.
+      summary: Get Timelines or Timeline templates
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+components:
+  schemas:
+    AssociatedFilterType:
+      description: Filter notes based on their association with a document or saved object.
+      enum:
+        - all
+        - document_only
+        - saved_object_only
+        - document_and_saved_object
+        - orphan
+      type: string
+    BareNote:
+      type: object
+      properties:
+        created:
+          nullable: true
+          type: number
+        createdBy:
+          nullable: true
+          type: string
+        eventId:
+          nullable: true
+          type: string
+        note:
+          nullable: true
+          type: string
+        timelineId:
+          type: string
+        updated:
+          nullable: true
+          type: number
+        updatedBy:
+          nullable: true
+          type: string
+      required:
+        - timelineId
+    BarePinnedEvent:
+      type: object
+      properties:
+        created:
+          nullable: true
+          type: number
+        createdBy:
+          nullable: true
+          type: string
+        eventId:
+          type: string
+        timelineId:
+          type: string
+        updated:
+          nullable: true
+          type: number
+        updatedBy:
+          nullable: true
+          type: string
+      required:
+        - eventId
+        - timelineId
+    ColumnHeaderResult:
+      type: object
+      properties:
+        aggregatable:
+          nullable: true
+          type: boolean
+        category:
+          nullable: true
+          type: string
+        columnHeaderType:
+          nullable: true
+          type: string
+        description:
+          nullable: true
+          type: string
+        example:
+          nullable: true
+          type: string
+        id:
+          nullable: true
+          type: string
+        indexes:
+          items:
+            type: string
+          nullable: true
+          type: array
+        name:
+          nullable: true
+          type: string
+        placeholder:
+          nullable: true
+          type: string
+        searchable:
+          nullable: true
+          type: boolean
+        type:
+          nullable: true
+          type: string
+    DataProviderQueryMatch:
+      type: object
+      properties:
+        enabled:
+          nullable: true
+          type: boolean
+        excluded:
+          nullable: true
+          type: boolean
+        id:
+          nullable: true
+          type: string
+        kqlQuery:
+          nullable: true
+          type: string
+        name:
+          nullable: true
+          type: string
+        queryMatch:
+          $ref: '#/components/schemas/QueryMatchResult'
+          nullable: true
+        type:
+          $ref: '#/components/schemas/DataProviderType'
+          nullable: true
+    DataProviderResult:
+      type: object
+      properties:
+        and:
+          items:
+            $ref: '#/components/schemas/DataProviderQueryMatch'
+          nullable: true
+          type: array
+        enabled:
+          nullable: true
+          type: boolean
+        excluded:
+          nullable: true
+          type: boolean
+        id:
+          nullable: true
+          type: string
+        kqlQuery:
+          nullable: true
+          type: string
+        name:
+          nullable: true
+          type: string
+        queryMatch:
+          $ref: '#/components/schemas/QueryMatchResult'
+          nullable: true
+        type:
+          $ref: '#/components/schemas/DataProviderType'
+          nullable: true
+    DataProviderType:
+      description: >-
+        The type of data provider to create. Valid values are `default` and
+        `template`.
+      enum:
+        - default
+        - template
+      type: string
+    DocumentIds:
+      oneOf:
+        - items:
+            type: string
+          type: array
+        - type: string
+    FavoriteTimelineResponse:
+      type: object
+      properties:
+        favorite:
+          items:
+            $ref: '#/components/schemas/FavoriteTimelineResult'
+          type: array
+        savedObjectId:
+          type: string
+        templateTimelineId:
+          nullable: true
+          type: string
+        templateTimelineVersion:
+          nullable: true
+          type: number
+        timelineType:
+          $ref: '#/components/schemas/TimelineType'
+        version:
+          type: string
+      required:
+        - savedObjectId
+        - version
+    FavoriteTimelineResult:
+      type: object
+      properties:
+        favoriteDate:
+          nullable: true
+          type: number
+        fullName:
+          nullable: true
+          type: string
+        userName:
+          nullable: true
+          type: string
+    FilterTimelineResult:
+      type: object
+      properties:
+        exists:
+          nullable: true
+          type: string
+        match_all:
+          nullable: true
+          type: string
+        meta:
+          nullable: true
+          type: object
+          properties:
+            alias:
+              nullable: true
+              type: string
+            controlledBy:
+              nullable: true
+              type: string
+            disabled:
+              nullable: true
+              type: boolean
+            field:
+              nullable: true
+              type: string
+            formattedValue:
+              nullable: true
+              type: string
+            index:
+              nullable: true
+              type: string
+            key:
+              nullable: true
+              type: string
+            negate:
+              nullable: true
+              type: boolean
+            params:
+              nullable: true
+              type: string
+            type:
+              nullable: true
+              type: string
+            value:
+              nullable: true
+              type: string
+        missing:
+          nullable: true
+          type: string
+        query:
+          nullable: true
+          type: string
+        range:
+          nullable: true
+          type: string
+        script:
+          nullable: true
+          type: string
+    GetNotesResult:
+      type: object
+      properties:
+        notes:
+          items:
+            $ref: '#/components/schemas/Note'
+          type: array
+        totalCount:
+          type: number
+      required:
+        - totalCount
+        - notes
+    ImportTimelineResult:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+              id:
+                type: string
+          type: array
+        success:
+          type: boolean
+        success_count:
+          type: number
+        timelines_installed:
+          type: number
+        timelines_updated:
+          type: number
+    ImportTimelines:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            eventNotes:
+              items:
+                $ref: '#/components/schemas/BareNote'
+              nullable: true
+              type: array
+            globalNotes:
+              items:
+                $ref: '#/components/schemas/BareNote'
+              nullable: true
+              type: array
+            pinnedEventIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            savedObjectId:
+              nullable: true
+              type: string
+            version:
+              nullable: true
+              type: string
+          required:
+            - savedObjectId
+            - version
+            - pinnedEventIds
+            - eventNotes
+            - globalNotes
+    Note:
+      allOf:
+        - $ref: '#/components/schemas/BareNote'
+        - type: object
+          properties:
+            noteId:
+              type: string
+            version:
+              type: string
+          required:
+            - noteId
+            - version
+    PersistPinnedEventResponse:
+      oneOf:
+        - $ref: '#/components/schemas/PinnedEvent'
+        - type: object
+          properties:
+            unpinned:
+              type: boolean
+          required:
+            - unpinned
+    PersistTimelineResponse:
+      $ref: '#/components/schemas/TimelineResponse'
+    PinnedEvent:
+      allOf:
+        - $ref: '#/components/schemas/BarePinnedEvent'
+        - type: object
+          properties:
+            pinnedEventId:
+              type: string
+            version:
+              type: string
+          required:
+            - pinnedEventId
+            - version
+    QueryMatchResult:
+      type: object
+      properties:
+        displayField:
+          nullable: true
+          type: string
+        displayValue:
+          nullable: true
+          type: string
+        field:
+          nullable: true
+          type: string
+        operator:
+          nullable: true
+          type: string
+        value:
+          oneOf:
+            - nullable: true
+              type: string
+            - items:
+                type: string
+              nullable: true
+              type: array
+    ResolvedTimeline:
+      type: object
+      properties:
+        alias_purpose:
+          $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+        alias_target_id:
+          type: string
+        outcome:
+          $ref: '#/components/schemas/SavedObjectResolveOutcome'
+        timeline:
+          $ref: '#/components/schemas/TimelineSavedToReturnObject'
+      required:
+        - timeline
+        - outcome
+    ResponseNote:
+      type: object
+      properties:
+        note:
+          $ref: '#/components/schemas/Note'
+      required:
+        - note
+    RowRendererId:
+      enum:
+        - alert
+        - alerts
+        - auditd
+        - auditd_file
+        - library
+        - netflow
+        - plain
+        - registry
+        - suricata
+        - system
+        - system_dns
+        - system_endgame_process
+        - system_file
+        - system_fim
+        - system_security_event
+        - system_socket
+        - threat_match
+        - zeek
+      type: string
+    SavedObjectIds:
+      oneOf:
+        - items:
+            type: string
+          type: array
+        - type: string
+    SavedObjectResolveAliasPurpose:
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
+      type: string
+    SavedObjectResolveOutcome:
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
+      type: string
+    SavedTimeline:
+      type: object
+      properties:
+        columns:
+          items:
+            $ref: '#/components/schemas/ColumnHeaderResult'
+          nullable: true
+          type: array
+        created:
+          nullable: true
+          type: number
+        createdBy:
+          nullable: true
+          type: string
+        dataProviders:
+          items:
+            $ref: '#/components/schemas/DataProviderResult'
+          nullable: true
+          type: array
+        dataViewId:
+          nullable: true
+          type: string
+        dateRange:
+          nullable: true
+          type: object
+          properties:
+            end:
+              oneOf:
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
+            start:
+              oneOf:
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
+        description:
+          nullable: true
+          type: string
+        eqlOptions:
+          nullable: true
+          type: object
+          properties:
+            eventCategoryField:
+              nullable: true
+              type: string
+            query:
+              nullable: true
+              type: string
+            size:
+              oneOf:
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
+            tiebreakerField:
+              nullable: true
+              type: string
+            timestampField:
+              nullable: true
+              type: string
+        eventType:
+          nullable: true
+          type: string
+        excludedRowRendererIds:
+          items:
+            $ref: '#/components/schemas/RowRendererId'
+          nullable: true
+          type: array
+        favorite:
+          items:
+            $ref: '#/components/schemas/FavoriteTimelineResult'
+          nullable: true
+          type: array
+        filters:
+          items:
+            $ref: '#/components/schemas/FilterTimelineResult'
+          nullable: true
+          type: array
+        indexNames:
+          items:
+            type: string
+          nullable: true
+          type: array
+        kqlMode:
+          nullable: true
+          type: string
+        kqlQuery:
+          $ref: '#/components/schemas/SerializedFilterQueryResult'
+          nullable: true
+        savedQueryId:
+          nullable: true
+          type: string
+        savedSearchId:
+          nullable: true
+          type: string
+        sort:
+          $ref: '#/components/schemas/Sort'
+          nullable: true
+        status:
+          enum:
+            - active
+            - draft
+            - immutable
+          nullable: true
+          type: string
+        templateTimelineId:
+          nullable: true
+          type: string
+        templateTimelineVersion:
+          nullable: true
+          type: number
+        timelineType:
+          $ref: '#/components/schemas/TimelineType'
+          nullable: true
+        title:
+          nullable: true
+          type: string
+        updated:
+          nullable: true
+          type: number
+        updatedBy:
+          nullable: true
+          type: string
+    SavedTimelineWithSavedObjectId:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            savedObjectId:
+              type: string
+            version:
+              type: string
+          required:
+            - savedObjectId
+            - version
+    SerializedFilterQueryResult:
+      type: object
+      properties:
+        filterQuery:
+          nullable: true
+          type: object
+          properties:
+            kuery:
+              nullable: true
+              type: object
+              properties:
+                expression:
+                  nullable: true
+                  type: string
+                kind:
+                  nullable: true
+                  type: string
+            serializedQuery:
+              nullable: true
+              type: string
+    Sort:
+      oneOf:
+        - $ref: '#/components/schemas/SortObject'
+        - items:
+            $ref: '#/components/schemas/SortObject'
+          type: array
+    SortFieldTimeline:
+      description: The field to sort the timelines by.
+      enum:
+        - title
+        - description
+        - updated
+        - created
+      type: string
+    SortObject:
+      type: object
+      properties:
+        columnId:
+          nullable: true
+          type: string
+        columnType:
+          nullable: true
+          type: string
+        sortDirection:
+          nullable: true
+          type: string
+    TimelineResponse:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - $ref: '#/components/schemas/SavedTimelineWithSavedObjectId'
+        - type: object
+          properties:
+            eventIdToNoteIds:
+              items:
+                $ref: '#/components/schemas/Note'
+              nullable: true
+              type: array
+            noteIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            notes:
+              items:
+                $ref: '#/components/schemas/Note'
+              nullable: true
+              type: array
+            pinnedEventIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            pinnedEventsSaveObject:
+              items:
+                $ref: '#/components/schemas/PinnedEvent'
+              nullable: true
+              type: array
+    TimelineSavedToReturnObject:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            eventIdToNoteIds:
+              items:
+                $ref: '#/components/schemas/Note'
+              nullable: true
+              type: array
+            noteIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            notes:
+              items:
+                $ref: '#/components/schemas/Note'
+              nullable: true
+              type: array
+            pinnedEventIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            pinnedEventsSaveObject:
+              items:
+                $ref: '#/components/schemas/PinnedEvent'
+              nullable: true
+              type: array
+            savedObjectId:
+              type: string
+            version:
+              type: string
+          required:
+            - savedObjectId
+            - version
+    TimelineStatus:
+      description: >-
+        The status of the timeline. Valid values are `active`, `draft`, and
+        `immutable`.
+      enum:
+        - active
+        - draft
+        - immutable
+      type: string
+    TimelineType:
+      description: >-
+        The type of timeline to create. Valid values are `default` and
+        `template`.
+      enum:
+        - default
+        - template
+      type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: >-
+      You can create Timelines and Timeline templates via the API, as well as
+      import new Timelines from an ndjson file.
+    name: Security Timeline API
+    x-displayName: Security timeline

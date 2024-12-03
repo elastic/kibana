@@ -7,6 +7,9 @@
 import { schema } from '@kbn/config-schema';
 
 export const bulkUntrackBodySchema = schema.object({
-  indices: schema.arrayOf(schema.string()),
-  alertUuids: schema.arrayOf(schema.string()),
+  isUsingQuery: schema.boolean(),
+  indices: schema.maybe(schema.arrayOf(schema.string())),
+  alertUuids: schema.maybe(schema.arrayOf(schema.string())),
+  query: schema.maybe(schema.arrayOf(schema.any())),
+  ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
 });

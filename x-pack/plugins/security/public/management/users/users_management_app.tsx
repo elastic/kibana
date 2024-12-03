@@ -6,20 +6,19 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import type { Observable } from 'rxjs';
 
-import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
+import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
-import type { AuthenticationServiceSetup } from '../../authentication';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
   Breadcrumb,
@@ -46,7 +45,7 @@ export const usersManagementApp = Object.freeze({
       id: this.id,
       order: 10,
       title,
-      async mount({ element, theme$, setBreadcrumbs, history }) {
+      async mount({ element, setBreadcrumbs, history }) {
         const [
           [coreStart],
           { UsersGridPage },
@@ -64,7 +63,6 @@ export const usersManagementApp = Object.freeze({
         render(
           <Providers
             services={coreStart}
-            theme$={theme$}
             history={history}
             authc={authc}
             onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
@@ -134,29 +132,25 @@ export const usersManagementApp = Object.freeze({
 
 export interface ProvidersProps {
   services: CoreStart;
-  theme$: Observable<CoreTheme>;
   history: History;
   authc: AuthenticationServiceSetup;
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
-  theme$,
   history,
   authc,
   onChange,
   children,
 }) => (
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <Router history={history}>
-            <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-          </Router>
-        </KibanaThemeProvider>
-      </I18nProvider>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
+  <KibanaRenderContextProvider {...services}>
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <Router history={history}>
+          <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+        </Router>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>
 );

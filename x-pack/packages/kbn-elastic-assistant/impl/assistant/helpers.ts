@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { FetchConnectorExecuteResponse } from './api';
+import { isEmpty, some } from 'lodash';
+import { AIConnector } from '../connectorland/connector_selector';
+import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
-import type { Message } from '../assistant_context/types';
-import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
+import type { ClientMessage } from '../assistant_context/types';
 
-export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResponse): Message => {
+export const getMessageFromRawResponse = (
+  rawResponse: FetchConnectorExecuteResponse
+): ClientMessage => {
   const { response, isStream, isError } = rawResponse;
-  const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
+  const dateTimeString = new Date().toISOString(); // TODO: Pull from response
   if (rawResponse) {
     return {
       role: 'assistant',
@@ -22,6 +24,7 @@ export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResp
         : { content: response as string }),
       timestamp: dateTimeString,
       isError,
+      traceData: rawResponse.traceData,
     };
   } else {
     return {
@@ -33,56 +36,57 @@ export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResp
   }
 };
 
-export const getBlockBotConversation = (
-  conversation: Conversation,
-  isAssistantEnabled: boolean
-): Conversation => {
-  if (!isAssistantEnabled) {
-    if (
-      conversation.messages.length === 0 ||
-      conversation.messages[conversation.messages.length - 1].content !==
-        enterpriseMessaging[0].content
-    ) {
-      return {
-        ...conversation,
-        messages: [...conversation.messages, ...enterpriseMessaging],
-      };
+export const mergeBaseWithPersistedConversations = (
+  baseConversations: Record<string, Conversation>,
+  conversationsData: FetchConversationsResponse
+): Record<string, Conversation> => {
+  return [...(conversationsData?.data ?? []), ...Object.values(baseConversations)].reduce<
+    Record<string, Conversation>
+  >((transformed, conversation) => {
+    if (!isEmpty(conversation.id)) {
+      transformed[conversation.id] = conversation;
+    } else {
+      if (!some(Object.values(transformed), ['title', conversation.title])) {
+        transformed[conversation.title] = conversation;
+      }
     }
-    return conversation;
-  }
-
-  return {
-    ...conversation,
-    messages: [...conversation.messages, ...WELCOME_CONVERSATION.messages],
-  };
+    return transformed;
+  }, {});
 };
-
 /**
  * Returns a default connector if there is only one connector
  * @param connectors
  */
 export const getDefaultConnector = (
-  connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> | undefined
-): ActionConnector<Record<string, unknown>, Record<string, unknown>> | undefined =>
-  connectors?.length === 1 ? connectors[0] : undefined;
-
-/**
- * When `content` is a JSON string, prefixed with "```json\n"
- * and suffixed with "\n```", this function will attempt to parse it and return
- * the `action_input` property if it exists.
- */
-export const getFormattedMessageContent = (content: string): string => {
-  const formattedContentMatch = content.match(/```json\n([\s\S]+)\n```/);
-
-  if (formattedContentMatch) {
-    try {
-      const parsedContent = JSON.parse(formattedContentMatch[1]);
-
-      return parsedContent.action_input ?? content;
-    } catch {
-      // we don't want to throw an error here, so we'll fall back to the original content
-    }
+  connectors: AIConnector[] | undefined
+): AIConnector | undefined => {
+  const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
+  if (validConnectors?.length) {
+    return validConnectors[0];
   }
 
-  return content;
+  return undefined;
 };
+
+interface OptionalRequestParams {
+  alertsIndexPattern?: string;
+  size?: number;
+}
+
+export const getOptionalRequestParams = ({
+  alertsIndexPattern,
+  size,
+}: {
+  alertsIndexPattern?: string;
+  size?: number;
+}): OptionalRequestParams => {
+  const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
+  const optionalSize = size ? { size } : undefined;
+
+  return {
+    ...optionalAlertsIndexPattern,
+    ...optionalSize,
+  };
+};
+
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

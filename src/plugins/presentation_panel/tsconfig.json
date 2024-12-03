@@ -1,0 +1,35 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["*.ts", "common/**/*", "public/**/*", "../../../typings/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/ui-actions-plugin",
+    "@kbn/data-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/presentation-containers",
+    "@kbn/es-query",
+    "@kbn/i18n-react",
+    "@kbn/unified-search-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/std",
+    "@kbn/ui-theme",
+    "@kbn/expressions-plugin",
+    "@kbn/utility-types",
+    "@kbn/content-management-plugin",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/panel-loader",
+    "@kbn/search-errors",
+    "@kbn/shared-ux-markdown",
+    "@kbn/react-hooks"
+  ],
+  "exclude": ["target/**/*"]
+}

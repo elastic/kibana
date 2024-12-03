@@ -7,16 +7,21 @@
 
 import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from '../../explorer_constants';
-import { Action } from '../../explorer_dashboard_service';
+import type { ExplorerActionPayloads, ExplorerActions } from '../../explorer_dashboard_service';
 import { getClearedSelectedAnomaliesState } from '../../explorer_utils';
 
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
 import { jobSelectionChange } from './job_selection_change';
-import { ExplorerState, getExplorerDefaultState } from './state';
+import type { ExplorerState } from './state';
+import { getExplorerDefaultState } from './state';
 import { setKqlQueryBarPlaceholder } from './set_kql_query_bar_placeholder';
 
-export const explorerReducer = (state: ExplorerState, nextAction: Action): ExplorerState => {
-  const { type, payload } = nextAction;
+export const explorerReducer = (
+  state: ExplorerState,
+  nextAction: ExplorerActions
+): ExplorerState => {
+  const { type } = nextAction;
+  const payload = 'payload' in nextAction ? nextAction.payload : {};
 
   let nextState: ExplorerState;
 
@@ -39,7 +44,10 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       break;
 
     case EXPLORER_ACTION.JOB_SELECTION_CHANGE:
-      nextState = jobSelectionChange(state, payload);
+      nextState = jobSelectionChange(
+        state,
+        payload as ExplorerActionPayloads[typeof EXPLORER_ACTION.JOB_SELECTION_CHANGE]
+      );
       break;
 
     case EXPLORER_ACTION.SET_CHARTS_DATA_LOADING:
@@ -51,7 +59,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       break;
 
     case EXPLORER_ACTION.SET_EXPLORER_DATA:
-      nextState = { ...state, ...payload };
+      nextState = { ...state, ...(payload as Partial<ExplorerState>) };
       break;
 
     default:

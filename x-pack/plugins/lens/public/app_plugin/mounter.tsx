@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
@@ -19,28 +19,21 @@ import {
   Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
 
 import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
-import {
-  LensEmbeddableInput,
-  LensByReferenceInput,
-  LensByValueInput,
-} from '../embeddable/embeddable';
-import { LensAttributeService } from '../lens_attribute_service';
+import { LensAttributesService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import {
   makeConfigureStore,
@@ -57,6 +50,7 @@ import {
   MainHistoryLocationState,
 } from '../../common/locator/locator';
 import { SavedObjectIndexStore } from '../persistence';
+import { LensSerializedState } from '../react_embeddable/types';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -85,7 +79,7 @@ function getInitialContext(history: AppMountParameters['history']) {
 export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
-  attributeService: LensAttributeService,
+  attributeService: LensAttributesService,
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   locator?: LensAppLocator
 ): Promise<LensAppServices> {
@@ -122,20 +116,11 @@ export async function getLensServices(
     savedObjectsTagging,
     attributeService,
     eventAnnotationService,
-    executionContext: coreStart.executionContext,
-    http: coreStart.http,
     uiActions: startDependencies.uiActions,
-    chrome: coreStart.chrome,
-    overlays: coreStart.overlays,
-    uiSettings: coreStart.uiSettings,
-    settings: coreStart.settings,
-    application: coreStart.application,
-    notifications: coreStart.notifications,
     savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
-    dashboard: startDependencies.dashboard,
     charts: startDependencies.charts,
     getOriginatingAppName: () => {
       const originatingApp =
@@ -143,14 +128,12 @@ export async function getLensServices(
       return originatingApp ? stateTransfer?.getAppNameFromId(originatingApp) : undefined;
     },
     dataViews: startDependencies.dataViews,
-    // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
     spaces,
     share,
     unifiedSearch,
-    docLinks: coreStart.docLinks,
     locator,
     serverless,
+    ...coreStart,
   };
 }
 
@@ -159,19 +142,12 @@ export async function mountApp(
   params: AppMountParameters,
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
-    attributeService: LensAttributeService;
-    getPresentationUtilContext: () => FC;
+    attributeService: LensAttributesService;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
     locator?: LensAppLocator;
   }
 ) {
-  const {
-    createEditorFrame,
-    attributeService,
-    getPresentationUtilContext,
-    topNavMenuEntryGenerators,
-    locator,
-  } = mountProps;
+  const { createEditorFrame, attributeService, topNavMenuEntryGenerators, locator } = mountProps;
   const [[coreStart, startDependencies], instance] = await Promise.all([
     core.getStartServices(),
     createEditorFrame(),
@@ -188,7 +164,7 @@ export async function mountApp(
     locator
   );
 
-  const { stateTransfer, data, savedObjectStore } = lensServices;
+  const { stateTransfer, data, savedObjectStore, share } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -208,12 +184,12 @@ export async function mountApp(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
 
-  const getInitialInput = (id?: string, editByValue?: boolean): LensEmbeddableInput | undefined => {
+  const getInitialInput = (id?: string, editByValue?: boolean): LensSerializedState | undefined => {
     if (editByValue) {
-      return embeddableEditorIncomingState?.valueInput as LensByValueInput;
+      return embeddableEditorIncomingState?.valueInput as LensSerializedState;
     }
     if (id) {
-      return { savedObjectId: id } as LensByReferenceInput;
+      return { savedObjectId: id } as LensSerializedState;
     }
   };
 
@@ -240,14 +216,14 @@ export async function mountApp(
     if (initialContext && 'embeddableId' in initialContext) {
       embeddableId = initialContext.embeddableId;
     }
-    if (stateTransfer && props?.input) {
-      const { input, isCopied } = props;
+    if (stateTransfer && props?.state) {
+      const { state, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackage(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
-          input,
+          input: { ...state, savedObject: state.savedObjectId },
           searchSessionId: data.search.session.getSessionId(),
         },
       });
@@ -346,7 +322,24 @@ export async function mountApp(
           coreStart,
           dataViews: data.dataViews,
           dataViewEditor: startDependencies.dataViewEditor,
+          share,
         };
+        const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+        const AnalyticsNoDataPageKibanaProvider = withSuspense(
+          React.lazy(() =>
+            importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+              return { default: NoDataProvider };
+            })
+          )
+        );
+        const AnalyticsNoDataPage = withSuspense(
+          React.lazy(() =>
+            importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+              return { default: NoDataPage };
+            })
+          )
+        );
+
         return (
           <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
             <AnalyticsNoDataPage
@@ -407,35 +400,29 @@ export async function mountApp(
 
   params.element.classList.add('lnsAppWrapper');
 
-  const PresentationUtilContext = getPresentationUtilContext();
-
   render(
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-      <I18nProvider>
-        <KibanaContextProvider services={lensServices}>
-          <PresentationUtilContext>
-            <HashRouter>
-              <Routes>
-                <Route exact path="/edit/:id" component={EditorRoute} />
-                <Route
-                  exact
-                  path={`/${LENS_EDIT_BY_VALUE}`}
-                  render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-                />
-                <Route exact path="/" component={EditorRoute} />
-                <Route path="/" component={NotFound} />
-              </Routes>
-            </HashRouter>
-          </PresentationUtilContext>
-        </KibanaContextProvider>
-      </I18nProvider>
-    </KibanaThemeProvider>,
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaContextProvider services={lensServices}>
+        <HashRouter>
+          <Routes>
+            <Route exact path="/edit/:id" component={EditorRoute} />
+            <Route
+              exact
+              path={`/${LENS_EDIT_BY_VALUE}`}
+              render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
+            />
+            <Route exact path="/" component={EditorRoute} />
+            <Route path="/" component={NotFound} />
+          </Routes>
+        </HashRouter>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     params.element
   );
   return () => {
     data.search.session.clear();
     unmountComponentAtNode(params.element);
-    lensServices.inspector.close();
+    lensServices.inspector.closeInspector();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
     stateTransfer.clearEditorState?.(APP_ID);

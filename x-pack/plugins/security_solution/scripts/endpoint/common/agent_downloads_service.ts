@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import { mkdir, readdir, stat, unlink } from 'fs/promises';
 import { join } from 'path';
 import fs from 'fs';
 import nodeFetch from 'node-fetch';
 import { finished } from 'stream/promises';
+import { handleProcessInterruptions } from './nodejs_utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { SettingsStorage } from './settings_storage';
 
@@ -23,7 +25,7 @@ export interface DownloadedAgentInfo {
 
 interface AgentDownloadStorageSettings {
   /**
-   * Last time a cleanup was ran. Date in ISO format
+   * Last time a cleanup was performed. Date in ISO format
    */
   lastCleanup: string;
 
@@ -46,7 +48,7 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
   constructor() {
     super('agent_download_storage_settings.json', {
       defaultSettings: {
-        maxFileAge: 1.728e8, // 2 days
+        maxFileAge: 1.728e8, // 2 days in milliseconds
         lastCleanup: new Date().toISOString(),
       },
     });
@@ -54,18 +56,25 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     this.downloadsDirFullPath = this.buildPath(this.downloadsDirName);
   }
 
+  /**
+   * Ensures the download directory exists on disk
+   */
   protected async ensureExists(): Promise<void> {
     await super.ensureExists();
 
     if (!this.downloadsFolderExists) {
       await mkdir(this.downloadsDirFullPath, { recursive: true });
-      this.log.debug(`Created directory [this.downloadsDirFullPath] for cached agent downloads`);
+      this.log.debug(`Created directory [${this.downloadsDirFullPath}] for cached agent downloads`);
       this.downloadsFolderExists = true;
     }
   }
 
-  public getPathsForUrl(agentDownloadUrl: string): DownloadedAgentInfo {
-    const filename = agentDownloadUrl.replace(/^https?:\/\//gi, '').replace(/\//g, '#');
+  /**
+   * Gets the file paths for a given download URL and optional file name.
+   */
+  public getPathsForUrl(agentDownloadUrl: string, agentFileName?: string): DownloadedAgentInfo {
+    const filename =
+      agentFileName || agentDownloadUrl.replace(/^https?:\/\//gi, '').replace(/\//g, '#');
     const directory = this.downloadsDirFullPath;
     const fullFilePath = this.buildPath(join(this.downloadsDirName, filename));
 
@@ -76,56 +85,73 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     };
   }
 
-  public async downloadAndStore(agentDownloadUrl: string): Promise<DownloadedAgentInfo> {
-    this.log.debug(`Downloading and storing: ${agentDownloadUrl}`);
-
-    // TODO: should we add "retry" attempts to file downloads?
+  /**
+   * Downloads the agent and stores it locally. Reuses existing downloads if available.
+   */
+  public async downloadAndStore(
+    agentDownloadUrl: string,
+    agentFileName?: string
+  ): Promise<DownloadedAgentInfo> {
+    this.log.debug(`Starting download: ${agentDownloadUrl}`);
 
     await this.ensureExists();
+    const newDownloadInfo = this.getPathsForUrl(agentDownloadUrl, agentFileName);
 
-    const newDownloadInfo = this.getPathsForUrl(agentDownloadUrl);
-
-    // If download is already present on disk, then just return that info. No need to re-download it
+    // Return cached version if the file already exists
     if (fs.existsSync(newDownloadInfo.fullFilePath)) {
       this.log.debug(`Download already cached at [${newDownloadInfo.fullFilePath}]`);
       return newDownloadInfo;
     }
 
     try {
-      const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
+      await pRetry(
+        async (attempt) => {
+          this.log.info(
+            `Attempt ${attempt} - Downloading agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
+          );
+          const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
 
-      await handleProcessInterruptions(
-        async () => {
-          const { body } = await nodeFetch(agentDownloadUrl);
-          await finished(body.pipe(outputStream));
+          await handleProcessInterruptions(
+            async () => {
+              try {
+                const { body } = await nodeFetch(agentDownloadUrl);
+                await finished(body.pipe(outputStream));
+              } catch (error) {
+                this.log.error(`Error during download attempt ${attempt}: ${error.message}`);
+                // Ensure any errors here propagate and trigger retry
+                throw error;
+              }
+            },
+            () => fs.unlinkSync(newDownloadInfo.fullFilePath) // Clean up on interruption
+          );
+          this.log.info(`Successfully downloaded agent to [${newDownloadInfo.fullFilePath}]`);
         },
-        () => {
-          fs.unlinkSync(newDownloadInfo.fullFilePath);
+        {
+          retries: 2, // 2 retries = 3 total attempts (1 initial + 2 retries)
+          onFailedAttempt: (error) => {
+            this.log.error(`Download attempt ${error.attemptNumber} failed: ${error.message}`);
+            // Cleanup failed download
+            return unlink(newDownloadInfo.fullFilePath);
+          },
         }
       );
-    } catch (e) {
-      // Try to clean up download case it failed halfway through
-      await unlink(newDownloadInfo.fullFilePath);
-
-      throw e;
+    } catch (error) {
+      throw new Error(`Download failed after multiple attempts: ${error.message}`);
     }
 
     await this.cleanupDownloads();
-
     return newDownloadInfo;
   }
 
   public async cleanupDownloads(): Promise<{ deleted: string[] }> {
-    this.log.debug(`Performing cleanup of cached Agent downlaods`);
+    this.log.debug('Performing cleanup of cached Agent downloads');
 
     const settings = await this.get();
-    const maxAgeDate = new Date();
+    const maxAgeDate = new Date(Date.now() - settings.maxFileAge);
     const response: { deleted: string[] } = { deleted: [] };
 
-    maxAgeDate.setMilliseconds(settings.maxFileAge * -1); // `* -1` to set time back
-
-    // If cleanup already happen within the file age, then nothing to do. Exit.
     if (settings.lastCleanup > maxAgeDate.toISOString()) {
+      this.log.debug('Skipping cleanup, as it was performed recently.');
       return response;
     }
 
@@ -134,65 +160,48 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
       lastCleanup: new Date().toISOString(),
     });
 
-    const deleteFilePromises: Array<Promise<unknown>> = [];
-    const allFiles = await readdir(this.downloadsDirFullPath);
+    try {
+      const allFiles = await readdir(this.downloadsDirFullPath);
+      const deleteFilePromises = allFiles.map(async (fileName) => {
+        const filePath = join(this.downloadsDirFullPath, fileName);
+        const fileStats = await stat(filePath);
+        if (fileStats.isFile() && fileStats.birthtime < maxAgeDate) {
+          try {
+            await unlink(filePath);
+            response.deleted.push(filePath);
+          } catch (err) {
+            this.log.error(`Failed to delete file [${filePath}]: ${err.message}`);
+          }
+        }
+      });
 
-    for (const fileName of allFiles) {
-      const filePath = join(this.downloadsDirFullPath, fileName);
-      const fileStats = await stat(filePath);
-
-      if (fileStats.isFile() && fileStats.birthtime < maxAgeDate) {
-        deleteFilePromises.push(unlink(filePath));
-        response.deleted.push(filePath);
-      }
+      await Promise.allSettled(deleteFilePromises);
+      this.log.debug(`Deleted ${response.deleted.length} file(s)`);
+      return response;
+    } catch (err) {
+      this.log.error(`Error during cleanup: ${err.message}`);
+      return response;
     }
+  }
 
-    await Promise.allSettled(deleteFilePromises);
-
-    this.log.debug(`Deleted [${response.deleted.length}] file(s)`);
-    this.log.verbose(`files deleted:\n`, response.deleted.join('\n'));
-
-    return response;
+  /**
+   * Checks if a specific agent download is available locally.
+   */
+  public isAgentDownloadFromDiskAvailable(filename: string): DownloadedAgentInfo | undefined {
+    const filePath = join(this.downloadsDirFullPath, filename);
+    if (fs.existsSync(filePath)) {
+      return {
+        filename,
+        /** The local directory where downloads are stored */
+        directory: this.downloadsDirFullPath,
+        /** The full local file path and name */
+        fullFilePath: filePath,
+      };
+    }
   }
 }
 
-const handleProcessInterruptions = async <T>(
-  runFn: (() => T) | (() => Promise<T>),
-  /** The synchronous cleanup callback */
-  cleanup: () => void
-): Promise<T> => {
-  const eventNames = ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'];
-  const stopListeners = () => {
-    for (const eventName of eventNames) {
-      process.off(eventName, cleanup);
-    }
-  };
-
-  for (const eventName of eventNames) {
-    process.on(eventName, cleanup);
-  }
-
-  let runnerResponse: T | Promise<T>;
-
-  try {
-    runnerResponse = runFn();
-  } catch (e) {
-    stopListeners();
-    throw e;
-  }
-
-  if ('finally' in runnerResponse) {
-    (runnerResponse as Promise<T>).finally(() => {
-      stopListeners();
-    });
-  } else {
-    stopListeners();
-  }
-
-  return runnerResponse;
-};
-
-const agentDownloadsClient = new AgentDownloadStorage();
+export const agentDownloadsClient = new AgentDownloadStorage();
 
 export interface DownloadAndStoreAgentResponse extends DownloadedAgentInfo {
   url: string;
@@ -203,11 +212,16 @@ export interface DownloadAndStoreAgentResponse extends DownloadedAgentInfo {
  * already exists on disk, then no download is actually done - the information about the cached
  * version is returned instead
  * @param agentDownloadUrl
+ * @param agentFileName
  */
 export const downloadAndStoreAgent = async (
-  agentDownloadUrl: string
+  agentDownloadUrl: string,
+  agentFileName?: string
 ): Promise<DownloadAndStoreAgentResponse> => {
-  const downloadedAgent = await agentDownloadsClient.downloadAndStore(agentDownloadUrl);
+  const downloadedAgent = await agentDownloadsClient.downloadAndStore(
+    agentDownloadUrl,
+    agentFileName
+  );
 
   return {
     url: agentDownloadUrl,
@@ -216,8 +230,17 @@ export const downloadAndStoreAgent = async (
 };
 
 /**
- * Cleans up the old agent downloads on disk.
+ * Cleans up old agent downloads on disk.
  */
 export const cleanupDownloads = async (): ReturnType<AgentDownloadStorage['cleanupDownloads']> => {
   return agentDownloadsClient.cleanupDownloads();
+};
+
+/**
+ * Checks if a specific agent download is available from disk.
+ */
+export const isAgentDownloadFromDiskAvailable = (
+  fileName: string
+): DownloadedAgentInfo | undefined => {
+  return agentDownloadsClient.isAgentDownloadFromDiskAvailable(fileName);
 };

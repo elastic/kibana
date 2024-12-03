@@ -1,72 +1,71 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { apiCanExpandPanels, CanExpandPanels } from '@kbn/presentation-containers';
+import {
+  apiHasParentApi,
+  apiHasUniqueId,
+  EmbeddableApiContext,
+  HasParentApi,
+  HasUniqueId,
+} from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { skip } from 'rxjs';
+import { DASHBOARD_ACTION_GROUP } from '.';
 
-import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../dashboard_container';
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 
-function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
-  return embeddable.type === DASHBOARD_CONTAINER_TYPE;
-}
+export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
 
-function isExpanded(embeddable: IEmbeddable) {
-  if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-    throw new IncompatibleActionError();
-  }
+const isApiCompatible = (api: unknown | null): api is ExpandPanelActionApi =>
+  Boolean(apiHasUniqueId(api) && apiHasParentApi(api) && apiCanExpandPanels(api.parentApi));
 
-  return embeddable.id === (embeddable.parent as DashboardContainer).getExpandedPanelId();
-}
-
-export interface ExpandPanelActionContext {
-  embeddable: IEmbeddable;
-}
-
-export class ExpandPanelAction implements Action<ExpandPanelActionContext> {
+export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPAND_PANEL;
   public readonly id = ACTION_EXPAND_PANEL;
-  public order = 7;
+  public order = 9;
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
-  constructor() {}
-
-  public getDisplayName({ embeddable }: ExpandPanelActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
-
-    return isExpanded(embeddable)
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    return embeddable.parentApi.expandedPanelId.value
       ? dashboardExpandPanelActionStrings.getMinimizeTitle()
       : dashboardExpandPanelActionStrings.getMaximizeTitle();
   }
 
-  public getIconType({ embeddable }: ExpandPanelActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
-    return isExpanded(embeddable) ? 'minimize' : 'expand';
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    return embeddable.parentApi.expandedPanelId.value ? 'minimize' : 'expand';
   }
 
-  public async isCompatible({ embeddable }: ExpandPanelActionContext) {
-    return Boolean(embeddable.parent && isDashboard(embeddable.parent));
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable);
   }
 
-  public async execute({ embeddable }: ExpandPanelActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
-    const newValue = isExpanded(embeddable) ? undefined : embeddable.id;
-    (embeddable.parent as DashboardContainer).setExpandedPanelId(newValue);
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return apiHasParentApi(embeddable) && apiCanExpandPanels(embeddable.parentApi);
+  }
 
-    if (!newValue) {
-      (embeddable.parent as DashboardContainer).setScrollToPanelId(embeddable.id);
-    }
+  public subscribeToCompatibilityChanges(
+    { embeddable }: EmbeddableApiContext,
+    onChange: (isCompatible: boolean, action: ExpandPanelAction) => void
+  ) {
+    if (!isApiCompatible(embeddable)) return;
+    return embeddable.parentApi.expandedPanelId.pipe(skip(1)).subscribe(() => {
+      onChange(isApiCompatible(embeddable), this);
+    });
+  }
+
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    embeddable.parentApi.expandPanel(embeddable.uuid);
   }
 }

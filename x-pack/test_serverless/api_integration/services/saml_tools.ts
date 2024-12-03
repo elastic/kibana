@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 
-import { createSAMLResponse } from '@kbn/mock-idp-plugin/common';
+import { createSAMLResponse } from '@kbn/mock-idp-utils';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SamlToolsProvider({ getService }: FtrProviderContext) {

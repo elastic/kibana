@@ -6,18 +6,24 @@
  */
 
 import { parse } from 'query-string';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { basicResolvers } from '../../resolvers';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath, useMlKibana, useNavigateToPath } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import { useMlApi, useMlKibana, useNavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { Page } from '../../../jobs/new_job/recognize';
-import { mlJobService } from '../../../services/job_service';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
 import { DataSourceContextProvider } from '../../../contexts/ml';
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../jobs/new_job/recognize')).Page,
+}));
 
 export const recognizeRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -47,10 +53,11 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
 
 const PageWrapper: FC<PageProps> = ({ location }) => {
   const { id } = parse(location.search, { sort: false });
+  const mlApi = useMlApi();
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
     ...basicResolvers(),
-    existingJobsAndGroups: mlJobService.getJobAndGroupIds,
+    existingJobsAndGroups: () => mlApi.jobs.getAllJobAndGroupIds(),
   });
 
   return (
@@ -68,7 +75,7 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
   const {
     services: {
       notifications: { toasts },
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
@@ -91,7 +98,7 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
       // If so, load the jobs in the Anomaly Explorer.
       // Otherwise open the data recognizer wizard for the module.
       // Always want to call reject() so as not to load original page.
-      mlApiServices
+      mlApi
         .dataRecognizerModuleJobsExist({ moduleId })
         .then(async (resp: any) => {
           if (resp.jobsExist === true) {
@@ -105,18 +112,16 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
           }
         })
         .catch(async (err: Error) => {
-          // eslint-disable-next-line no-console
-          console.error(`Error checking whether jobs in module ${moduleId} exists`, err);
-          toasts.addWarning({
+          toasts.addError(err, {
             title: i18n.translate('xpack.ml.newJob.recognize.moduleCheckJobsExistWarningTitle', {
               defaultMessage: 'Error checking module {moduleId}',
               values: { moduleId },
             }),
-            text: i18n.translate(
+            toastMessage: i18n.translate(
               'xpack.ml.newJob.recognize.moduleCheckJobsExistWarningDescription',
               {
                 defaultMessage:
-                  'An error occurred trying to check whether the jobs in the module have been created.',
+                  'An error occurred checking whether the jobs in the module have been created. Search the list for matching jobs or create new jobs.',
               }
             ),
           });

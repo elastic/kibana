@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, renderHook } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/react';
 
-import { MaintenanceWindow } from '../pages/maintenance_windows/types';
+import { waitFor, renderHook, act } from '@testing-library/react';
+
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 import { useArchiveMaintenanceWindow } from './use_archive_maintenance_window';
 
@@ -37,7 +36,7 @@ const { archiveMaintenanceWindow } = jest.requireMock(
   '../services/maintenance_windows_api/archive'
 );
 
-const maintenanceWindow: MaintenanceWindow = {
+const maintenanceWindow = {
   title: 'archive',
   duration: 1,
   rRule: {

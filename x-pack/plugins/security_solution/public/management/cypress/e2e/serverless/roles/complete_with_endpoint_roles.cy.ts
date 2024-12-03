@@ -14,32 +14,39 @@ import type { EndpointArtifactPageId } from '../../../screens';
 import {
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
+  ensureFleetPermissionDeniedScreen,
   ensurePolicyListPageAuthzAccess,
   getArtifactListEmptyStateAddButton,
+  getConsoleHelpPanelResponseActionTestSubj,
   getEndpointManagementPageList,
   getEndpointManagementPageMap,
+  getFleetAgentListTable,
   getNoPrivilegesPage,
   openConsoleFromEndpointList,
+  openConsoleHelpPanel,
   openRowActionMenu,
   visitEndpointList,
-  visitPolicyList,
-  ensureFleetPermissionDeniedScreen,
-  getFleetAgentListTable,
   visitFleetAgentList,
-  getConsoleHelpPanelResponseActionTestSubj,
-  openConsoleHelpPanel,
+  visitPolicyList,
 } from '../../../screens';
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
         ],
+        // This is not needed for this test, but it's a good example of
+        // how to enable experimental features in the Cypress tests.
+        // kbnServerArgs: [
+        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        //     'featureFlagName',
+        //   ])}`,
+        // ],
       },
     },
   },
@@ -118,7 +125,8 @@ describe(
         'kill-process',
         'suspend-process',
         'get-file',
-        'upload'
+        'upload',
+        'scan'
       );
 
       const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');

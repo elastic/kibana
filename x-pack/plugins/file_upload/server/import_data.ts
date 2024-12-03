@@ -21,7 +21,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    ingestPipeline: IngestPipelineWrapper,
+    ingestPipeline: IngestPipelineWrapper | undefined,
     data: InputData
   ): Promise<ImportResponse> {
     let createdIndex;
@@ -29,7 +29,8 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     const docCount = data.length;
 
     try {
-      const { id: pipelineId, pipeline } = ingestPipeline;
+      const pipelineId = ingestPipeline?.id;
+      const pipeline = ingestPipeline?.pipeline;
 
       if (id === undefined) {
         // first chunk of data, create the index and id to return
@@ -109,7 +110,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     await asCurrentUser.indices.create({ index, body }, { maxRetries: 0 });
   }
 
-  async function indexData(index: string, pipelineId: string, data: InputData) {
+  async function indexData(index: string, pipelineId: string | undefined, data: InputData) {
     try {
       const body = [];
       for (let i = 0; i < data.length; i++) {
@@ -122,7 +123,10 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         bulkRequest.pipeline = pipelineId;
       }
 
-      const resp = await asCurrentUser.bulk(bulkRequest, { maxRetries: 0 });
+      const resp = await asCurrentUser.bulk(bulkRequest, {
+        maxRetries: 0,
+        requestTimeout: 3600000,
+      });
       if (resp.errors) {
         throw resp;
       } else {

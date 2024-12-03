@@ -7,47 +7,53 @@
 
 import { i18n } from '@kbn/i18n';
 import type { VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { getBasePath, getEditPath } from '../common/constants';
+import {
+  APP_ID,
+  getBasePath,
+  getEditPath,
+  LENS_EMBEDDABLE_TYPE,
+  LENS_ICON,
+  STAGE_ID,
+} from '../common/constants';
 import { getLensClient } from './persistence/lens_client';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
   alias: {
     path: getBasePath(),
-    app: 'lens',
+    app: APP_ID,
   },
-  name: 'lens',
+  name: APP_ID,
   promotion: true,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
     defaultMessage: 'Lens',
   }),
   description: i18n.translate('xpack.lens.visTypeAlias.description', {
     defaultMessage:
-      'Create visualizations with our drag and drop editor. Switch between visualization types at any time.',
+      'Create visualizations using an intuitive drag-and-drop interface. Smart suggestions help you follow best practices and find the chart types that best match your data.',
   }),
-  note: i18n.translate('xpack.lens.visTypeAlias.note', {
-    defaultMessage: 'Recommended for most users.',
-  }),
-  icon: 'lensApp',
-  stage: 'production',
+  order: 60,
+  icon: LENS_ICON,
+  stage: STAGE_ID,
   appExtensions: {
     visualizations: {
-      docTypes: ['lens'],
+      docTypes: [LENS_EMBEDDABLE_TYPE],
       searchFields: ['title^3'],
       clientOptions: { update: { overwrite: true } },
       client: getLensClient,
       toListItem(savedObject) {
-        const { id, type, updatedAt, attributes } = savedObject;
+        const { id, type, updatedAt, attributes, managed } = savedObject;
         const { title, description } = attributes as { title: string; description?: string };
         return {
           id,
           title,
           description,
           updatedAt,
+          managed,
           editor: { editUrl: getEditPath(id), editApp: 'lens' },
-          icon: 'lensApp',
-          stage: 'production',
+          icon: LENS_ICON,
+          stage: STAGE_ID,
           savedObjectType: type,
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           typeTitle: i18n.translate('xpack.lens.visTypeAlias.type', { defaultMessage: 'Lens' }),
         };
       },

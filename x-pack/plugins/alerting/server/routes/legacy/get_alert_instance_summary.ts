@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -30,7 +31,9 @@ const rewriteBodyRes = ({ ruleTypeId, alerts, ...rest }: AlertSummary) => ({
 export const getAlertInstanceSummaryRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  docLinks: DocLinksServiceSetup,
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.get(
     {
@@ -39,6 +42,18 @@ export const getAlertInstanceSummaryRoute = (
         params: paramSchema,
         query: querySchema,
       },
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Get an alert summary',
+        tags: ['oas-tag:alerting'],
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'remove',
+          },
+        },
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
@@ -46,7 +61,8 @@ export const getAlertInstanceSummaryRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       trackLegacyRouteUsage('instanceSummary', usageCounter);
-      const rulesClient = (await context.alerting).getRulesClient();
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
       const { id } = req.params;
       const { dateStart } = req.query;
       const summary = await rulesClient.getAlertSummary({ id, dateStart });

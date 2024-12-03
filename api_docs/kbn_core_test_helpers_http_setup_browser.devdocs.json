@@ -42,17 +42,17 @@
           ">; fatalErrors: jest.Mocked<",
           {
             "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-common.FatalErrorsSetup",
+            "section": "def-public.FatalErrorsSetup",
             "text": "FatalErrorsSetup"
           },
           ">; http: ",
           {
             "pluginId": "@kbn/core-http-browser-internal",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
-            "section": "def-common.InternalHttpSetup",
+            "section": "def-public.InternalHttpSetup",
             "text": "InternalHttpSetup"
           },
           "; }"
@@ -103,9 +103,9 @@
           ">, fatalErrors: jest.Mocked<",
           {
             "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-common.FatalErrorsSetup",
+            "section": "def-public.FatalErrorsSetup",
             "text": "FatalErrorsSetup"
           },
           ">) => void"
@@ -125,11 +125,13 @@
             "signature": [
               "{ getBasePath: jest.MockInstance<string, [], unknown>; getServerBasePath: jest.MockInstance<string, [], unknown>; getPublicBaseUrl: jest.MockInstance<string | undefined, [], unknown>; getAssetsHrefBase: jest.MockInstance<string, [], unknown>; getKibanaBuildNumber: jest.MockInstance<number, [], unknown>; getKibanaBranch: jest.MockInstance<string, [], unknown>; getKibanaVersion: jest.MockInstance<string, [], unknown>; getCspConfig: jest.MockInstance<{ warnLegacyBrowsers: boolean; }, [], unknown>; getExternalUrlConfig: jest.MockInstance<{ policy: ",
               "InjectedMetadataExternalUrlPolicy",
-              "[]; }, [], unknown>; getTheme: jest.MockInstance<{ darkMode: boolean; version: \"v8\"; }, [], unknown>; getElasticsearchInfo: jest.MockInstance<",
+              "[]; }, [], unknown>; getTheme: jest.MockInstance<",
+              "InjectedMetadataTheme",
+              ", [], unknown>; getElasticsearchInfo: jest.MockInstance<",
               "InjectedMetadataClusterInfo",
               ", [], unknown>; getPlugins: jest.MockInstance<",
               "InjectedMetadataPlugin",
-              "[], [], unknown>; getAnonymousStatusPage: jest.MockInstance<boolean, [], unknown>; getLegacyMetadata: jest.MockInstance<{ uiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; globalUiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; }, [], unknown>; getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any], unknown>; getInjectedVars: jest.MockInstance<{ [key: string]: unknown; }, [], unknown>; getCustomBranding: jest.MockInstance<",
+              "[], [], unknown>; getAnonymousStatusPage: jest.MockInstance<boolean, [], unknown>; getLegacyMetadata: jest.MockInstance<{ uiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; globalUiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; }, [], unknown>; getCustomBranding: jest.MockInstance<",
               {
                 "pluginId": "@kbn/core-custom-branding-common",
                 "scope": "common",
@@ -137,7 +139,7 @@
                 "section": "def-common.CustomBranding",
                 "text": "CustomBranding"
               },
-              ", [], unknown>; } & ",
+              ", [], unknown>; getFeatureFlags: jest.MockInstance<{ overrides: Record<string, unknown>; } | undefined, [], unknown>; } & ",
               "InternalInjectedMetadataSetup"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
@@ -157,17 +159,17 @@
               "<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorInfo",
+                "section": "def-public.FatalErrorInfo",
                 "text": "FatalErrorInfo"
               },
               ">, [], unknown>; } & ",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorsSetup",
+                "section": "def-public.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
               }
             ],

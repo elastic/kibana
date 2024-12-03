@@ -8,20 +8,21 @@ import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { LicenseService } from '../../../common/license';
 import { createDefaultPolicy } from './create_default_policy';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import { policyFactory } from '../../../common/endpoint/models/policy_config';
+import * as PolicyConfigHelpers from '../../../common/endpoint/models/policy_config_helpers';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type {
   AnyPolicyCreateConfig,
   PolicyCreateCloudConfig,
   PolicyCreateEndpointConfig,
 } from '../types';
-import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
-import { createAppFeaturesServiceMock } from '../../lib/app_features_service/mocks';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
+import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -31,7 +32,7 @@ describe('Create Default Policy tests ', () => {
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: '' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
-  let appFeaturesService: AppFeaturesService;
+  let productFeaturesService: ProductFeaturesService;
 
   const createDefaultPolicyCallback = async (
     config: AnyPolicyCreateConfig | undefined
@@ -39,7 +40,7 @@ describe('Create Default Policy tests ', () => {
     const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
     esClientInfo.cluster_name = '';
     esClientInfo.cluster_uuid = '';
-    return createDefaultPolicy(licenseService, config, cloud, esClientInfo, appFeaturesService);
+    return createDefaultPolicy(licenseService, config, cloud, esClientInfo, productFeaturesService);
   };
 
   beforeEach(() => {
@@ -47,7 +48,7 @@ describe('Create Default Policy tests ', () => {
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
     licenseEmitter.next(Platinum); // set license level to platinum
-    appFeaturesService = createAppFeaturesServiceMock();
+    productFeaturesService = createProductFeaturesServiceMock();
   });
 
   describe('When no config is set', () => {
@@ -210,9 +211,9 @@ describe('Create Default Policy tests ', () => {
       expect(policy).toMatchObject(defaultPolicy);
     });
 
-    it('should set policy to event collection only if endpointPolicyProtections appFeature is disabled', async () => {
-      appFeaturesService = createAppFeaturesServiceMock(
-        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
+    it('should set policy to event collection only if endpointPolicyProtections productFeature is disabled', async () => {
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
       );
 
       await expect(
@@ -237,6 +238,21 @@ describe('Create Default Policy tests ', () => {
           ransomware: { mode: 'off' },
         },
       });
+    });
+
+    it('should set meta.billable', async () => {
+      const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+      const config = createEndpointConfig({ preset: 'DataCollection' });
+
+      isBillablePolicySpy.mockReturnValue(false);
+      let policy = await createDefaultPolicyCallback(config);
+      expect(policy.meta.billable).toBe(false);
+
+      isBillablePolicySpy.mockReturnValue(true);
+      policy = await createDefaultPolicyCallback(config);
+      expect(policy.meta.billable).toBe(true);
+
+      isBillablePolicySpy.mockRestore();
     });
   });
 

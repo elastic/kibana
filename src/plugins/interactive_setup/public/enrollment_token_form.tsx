@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -183,7 +184,7 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
           defaultMessage="Connect to"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
+      <EuiFlexItem grow={false} css={{ overflow: 'hidden' }}>
         <TextTruncate>
           <strong>{token.adr[0]}</strong>
         </TextTruncate>

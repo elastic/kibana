@@ -9,20 +9,26 @@ import type { ReactPortal } from 'react';
 import React from 'react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender } from '@testing-library/react';
+import type {
+  RenderOptions,
+  RenderResult,
+  RenderHookResult,
+  RenderHookOptions,
+} from '@testing-library/react';
+import {
+  render as reactRender,
+  waitFor,
+  renderHook as reactRenderHook,
+} from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
 import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as reactRenderHoook } from '@testing-library/react-hooks';
-import type {
-  ReactHooksRenderer,
-  WrapperComponent,
-} from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
+import type { DeepReadonly } from 'utility-types';
+import type { UserPrivilegesState } from '../../components/user_privileges/user_privileges_context';
+import { getUserPrivilegesMockDefaultValue } from '../../components/user_privileges/__mocks__';
 import type { AppLinkItems } from '../../links/types';
 import { ExperimentalFeaturesService } from '../../experimental_features_service';
 import { applyIntersectionObserverMock } from '../intersection_observer_mock';
@@ -30,19 +36,18 @@ import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import type { MiddlewareActionSpyHelper } from '../../store/test_utils';
 import { createSpyMiddleware } from '../../store/test_utils';
-import { kibanaObservable } from '../test_providers';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
-import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
+import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaServices } from '../../lib/kibana';
-import { links } from '../../links/app_links';
+import { appLinks } from '../../../app_links';
 import { fleetGetPackageHttpMock } from '../../../management/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 
 const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 
@@ -99,17 +104,16 @@ export type WaitForReactHookState =
     >
   | false;
 
-type HookRendererFunction<TProps, TResult> = (props: TProps) => TResult;
+type HookRendererFunction<TResult, TProps> = (props: TProps) => TResult;
 
 /**
  * A utility renderer for hooks that return React Query results
  */
 export type ReactQueryHookRenderer<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TProps = any,
+  TProps = unknown,
   TResult extends UseBaseQueryResult = UseBaseQueryResult
 > = (
-  hookFn: HookRendererFunction<TProps, TResult>,
+  hookFn: HookRendererFunction<TResult, TProps>,
   /**
    * If defined (default is `isSuccess`), the renderer will wait for the given react
    * query response state value to be true
@@ -117,6 +121,11 @@ export type ReactQueryHookRenderer<
   waitForHook?: WaitForReactHookState,
   options?: RenderHookOptions<TProps>
 ) => Promise<TResult>;
+
+export interface UserPrivilegesMockSetter {
+  set: (privileges: Partial<EndpointPrivileges>) => void;
+  reset: () => void;
+}
 
 /**
  * Mocked app root context renderer
@@ -143,7 +152,15 @@ export interface AppContextTestRender {
   /**
    * Renders a hook within a mocked security solution app context
    */
-  renderHook: ReactHooksRenderer['renderHook'];
+  renderHook: <TResult, TProps>(
+    hookFn: HookRendererFunction<TResult, TProps>,
+    options?: RenderHookOptions<TProps>
+  ) => RenderHookResult<TResult, TProps>;
+
+  /**
+   * Waits the return value of the callback provided to is truthy
+   */
+  waitFor: typeof waitFor;
 
   /**
    * A helper utility for rendering specifically hooks that wrap ReactQuery
@@ -156,6 +173,42 @@ export interface AppContextTestRender {
    * @param flags
    */
   setExperimentalFlag: (flags: Partial<ExperimentalFeatures>) => void;
+
+  /**
+   * A helper method that will return an interface to more easily manipulate Endpoint related user authz.
+   * Works in conjunction with `jest.mock()` at the test level.
+   * @param useUserPrivilegesHookMock
+   *
+   * @example
+   *
+   * // in your test
+   * import { useUserPrivileges as _useUserPrivileges } from 'path/to/user_privileges'
+   *
+   * jest.mock('path/to/user_privileges');
+   *
+   * const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+   *
+   * // If you test - or more likely, in the `beforeEach` and `afterEach`
+   * let authMockSetter: UserPrivilegesMockSetter;
+   *
+   * beforeEach(() => {
+   *   const appTestSetup = createAppRootMockRenderer();
+   *
+   *   authMockSetter = appTestSetup.getUserPrivilegesMockSetter(useUserPrivilegesMock);
+   * })
+   *
+   * afterEach(() => {
+   *   authMockSetter.reset();
+   * }
+   *
+   * // Manipulate the authz in your test
+   * it('does something', () => {
+   *   authMockSetter({ canReadPolicyManagement: false });
+   * });
+   */
+  getUserPrivilegesMockSetter: (
+    useUserPrivilegesHookMock: jest.MockedFn<() => DeepReadonly<UserPrivilegesState>>
+  ) => UserPrivilegesMockSetter;
 
   /**
    * The React Query client (setup to support jest testing)
@@ -201,7 +254,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = createCoreStartMock(history);
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
-  const { storage } = createSecuritySolutionStorageMock();
   const startServices: StartServices = createStartServicesMock(coreStart);
 
   const storeReducer = {
@@ -211,11 +263,11 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createStore(
-    mockGlobalState,
+  const store = createMockStore(
+    undefined,
     storeReducer,
-    kibanaObservable,
-    storage,
+    undefined,
+    undefined,
     // @ts-expect-error ts upgrade v4.7.4
     [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
   );
@@ -232,14 +284,16 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     // hide react-query output in console
     logger: {
       error: () => {},
+
       // eslint-disable-next-line no-console
       log: console.log,
+
       // eslint-disable-next-line no-console
       warn: console.warn,
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <AppRootProvider
       store={store}
       history={history}
@@ -261,12 +315,12 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     });
   };
 
-  const renderHook: ReactHooksRenderer['renderHook'] = <TProps, TResult>(
-    hookFn: HookRendererFunction<TProps, TResult>,
+  const renderHook = <TResult, TProps>(
+    hookFn: HookRendererFunction<TResult, TProps>,
     options: RenderHookOptions<TProps> = {}
-  ): RenderHookResult<TProps, TResult> => {
-    return reactRenderHoook<TProps, TResult>(hookFn, {
-      wrapper: AppWrapper as WrapperComponent<TProps>,
+  ) => {
+    return reactRenderHook<TResult, TProps>(hookFn, {
+      wrapper: AppWrapper as React.FC<React.PropsWithChildren>,
       ...options,
     });
   };
@@ -275,16 +329,17 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     TProps,
     TResult extends UseBaseQueryResult = UseBaseQueryResult
   >(
-    hookFn: HookRendererFunction<TProps, TResult>,
+    hookFn: HookRendererFunction<TResult, TProps>,
+    /**
+     * If defined (default is `isSuccess`), the renderer will wait for the given react query to be truthy
+     */
     waitForHook: WaitForReactHookState = 'isSuccess',
     options: RenderHookOptions<TProps> = {}
   ) => {
-    const { result: hookResult, waitFor } = renderHook<TProps, TResult>(hookFn, options);
+    const { result: hookResult } = renderHook<TResult, TProps>(hookFn, options);
 
     if (waitForHook) {
-      await waitFor(() => {
-        return hookResult.current[waitForHook];
-      });
+      await waitFor(() => expect(hookResult.current[waitForHook]).toBe(true));
     }
 
     return hookResult.current;
@@ -304,6 +359,23 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
       type: UpdateExperimentalFeaturesTestActionType,
       payload: flags,
     });
+  };
+
+  const getUserPrivilegesMockSetter: AppContextTestRender['getUserPrivilegesMockSetter'] = (
+    useUserPrivilegesHookMock
+  ) => {
+    return {
+      set: (authOverrides) => {
+        const newAuthz = getUserPrivilegesMockDefaultValue();
+
+        Object.assign(newAuthz.endpointPrivileges, authOverrides);
+        useUserPrivilegesHookMock.mockReturnValue(newAuthz);
+      },
+      reset: () => {
+        useUserPrivilegesHookMock.mockReset();
+        useUserPrivilegesHookMock.mockReturnValue(getUserPrivilegesMockDefaultValue());
+      },
+    };
   };
 
   // Initialize the singleton `KibanaServices` with global services created for this test instance.
@@ -337,7 +409,9 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     renderHook,
     renderReactQueryHook,
     setExperimentalFlag,
+    getUserPrivilegesMockSetter,
     queryClient,
+    waitFor,
   };
 };
 
@@ -346,7 +420,7 @@ const createCoreStartMock = (
 ): ReturnType<typeof coreMock.createStart> => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
 
-  const linkPaths = getLinksPaths(links);
+  const linkPaths = getLinksPaths(appLinks);
 
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
   coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
@@ -379,8 +453,8 @@ const createCoreStartMock = (
   return coreStart;
 };
 
-const getLinksPaths = (appLinks: AppLinkItems): Record<string, string> => {
-  return appLinks.reduce((result: Record<string, string>, link) => {
+const getLinksPaths = (links: AppLinkItems): Record<string, string> => {
+  return links.reduce((result: Record<string, string>, link) => {
     if (link.path) {
       result[link.id] = link.path;
     }

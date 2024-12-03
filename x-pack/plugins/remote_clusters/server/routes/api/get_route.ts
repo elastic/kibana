@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, chunk, assign } from 'lodash';
 
 import { RequestHandler } from '@kbn/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { RouteDependencies } from '../../types';
+
+const CLUSTER_STATUS_CHUNK_SIZE = 10;
 
 export const register = (deps: RouteDependencies): void => {
   const {
@@ -33,6 +35,33 @@ export const register = (deps: RouteDependencies): void => {
 
       const clustersByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
+
+      const clusterNamesChunks = chunk(clusterNames, CLUSTER_STATUS_CHUNK_SIZE);
+      const promises = clusterNamesChunks.map(async (clustersChunk) => {
+        try {
+          return await clusterClient.asCurrentUser.indices.resolveCluster(
+            {
+              name: clustersChunk.map((cluster) => `${cluster}:*`),
+              filter_path: '*.connected',
+            },
+            {
+              // Set a longer timeout given that sometimes unresponsive clusters
+              // can take a while to respond.
+              // We should be able to be more aggresive with this timeout once
+              // https://github.com/elastic/elasticsearch/issues/114020 is resolved.
+              requestTimeout: '60s',
+            }
+          );
+        } catch (error) {
+          return Promise.resolve(null);
+        }
+      });
+
+      const resolvedClusterStatus = await Promise.all(promises);
+      // Flatten the resolved cluster status and filter out any null values
+      const flattenedClusterStatus = resolvedClusterStatus.flat().filter(Boolean);
+      // Combine the resolved cluster status into a single object
+      const clusterStatus = assign({}, ...flattenedClusterStatus);
 
       const body = clusterNames.map((clusterName: string): any => {
         const cluster = clustersByName[clusterName];
@@ -59,6 +88,9 @@ export const register = (deps: RouteDependencies): void => {
             config.isCloudEnabled
           ),
           isConfiguredByNode,
+          // We prioritize the cluster status from the resolve cluster API, and fallback to
+          // the cluster connected status in case it's not present.
+          isConnected: clusterStatus[clusterName]?.connected || cluster.connected,
         };
       });
 

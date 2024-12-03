@@ -5,43 +5,58 @@
  * 2.0.
  */
 
-import type { AssistantTelemetry } from '@kbn/elastic-assistant';
+import { type AssistantTelemetry } from '@kbn/elastic-assistant';
 import { useCallback } from 'react';
-import { useConversationStore } from '../use_conversation_store';
 import { useKibana } from '../../common/lib/kibana';
-
+import { useBaseConversations } from '../use_conversation_store';
+import type {
+  ReportAssistantInvokedParams,
+  ReportAssistantMessageSentParams,
+  ReportAssistantQuickPromptParams,
+  ReportAssistantSettingToggledParams,
+} from '../../common/lib/telemetry';
+import { AssistantEventTypes } from '../../common/lib/telemetry';
 export const useAssistantTelemetry = (): AssistantTelemetry => {
-  const { conversations } = useConversationStore();
   const {
     services: { telemetry },
   } = useKibana();
+  const baseConversations = useBaseConversations();
 
-  const getAnonymizedConversationId = useCallback(
-    (id) => {
-      const convo = conversations[id] ?? { isDefault: false };
-      return convo.isDefault ? id : 'Custom';
+  const getAnonymizedConversationTitle = useCallback(
+    async (title: string) => {
+      // With persistent storage for conversation replacing id to title, because id is UUID now
+      // and doesn't make any value for telemetry tracking
+      return baseConversations[title] ? title : 'Custom';
     },
-    [conversations]
+    [baseConversations]
   );
 
   const reportTelemetry = useCallback(
-    ({
-      fn,
+    async ({
+      eventType,
       params: { conversationId, ...rest },
-    }): { fn: keyof AssistantTelemetry; params: AssistantTelemetry[keyof AssistantTelemetry] } =>
-      fn({
+    }: {
+      eventType: AssistantEventTypes;
+      params:
+        | ReportAssistantInvokedParams
+        | ReportAssistantMessageSentParams
+        | ReportAssistantQuickPromptParams;
+    }) =>
+      telemetry.reportEvent(eventType, {
         ...rest,
-        conversationId: getAnonymizedConversationId(conversationId),
+        conversationId: await getAnonymizedConversationTitle(conversationId),
       }),
-    [getAnonymizedConversationId]
+    [getAnonymizedConversationTitle, telemetry]
   );
 
   return {
-    reportAssistantInvoked: (params) =>
-      reportTelemetry({ fn: telemetry.reportAssistantInvoked, params }),
-    reportAssistantMessageSent: (params) =>
-      reportTelemetry({ fn: telemetry.reportAssistantMessageSent, params }),
-    reportAssistantQuickPrompt: (params) =>
-      reportTelemetry({ fn: telemetry.reportAssistantQuickPrompt, params }),
+    reportAssistantInvoked: (params: ReportAssistantInvokedParams) =>
+      reportTelemetry({ eventType: AssistantEventTypes.AssistantInvoked, params }),
+    reportAssistantMessageSent: (params: ReportAssistantMessageSentParams) =>
+      reportTelemetry({ eventType: AssistantEventTypes.AssistantMessageSent, params }),
+    reportAssistantQuickPrompt: (params: ReportAssistantQuickPromptParams) =>
+      reportTelemetry({ eventType: AssistantEventTypes.AssistantQuickPrompt, params }),
+    reportAssistantSettingToggled: (params: ReportAssistantSettingToggledParams) =>
+      telemetry.reportEvent(AssistantEventTypes.AssistantSettingToggled, params),
   };
 };

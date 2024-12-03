@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NewOutput } from '../types';
+import type { NewOutput, OutputType, ValueOf } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
@@ -26,7 +26,10 @@ export const DEFAULT_OUTPUT: NewOutput = {
   hosts: [''],
 };
 
+export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
+
 export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
+export const LICENCE_FOR_OUTPUT_PER_INTEGRATION = 'enterprise';
 
 /**
  * Kafka constants
@@ -61,6 +64,11 @@ export const kafkaPartitionType = {
   Random: 'random',
   RoundRobin: 'round_robin',
   Hash: 'hash',
+} as const;
+
+export const kafkaTopicsType = {
+  Static: 'static',
+  Dynamic: 'dynamic',
 } as const;
 
 export const kafkaTopicWhenType = {
@@ -118,4 +126,57 @@ export const kafkaSupportedVersions = [
   '2.5.0',
   '2.5.1',
   '2.6.0',
+];
+
+export const RESERVED_CONFIG_YML_KEYS = [
+  'bulk_max_size',
+  'compression_level',
+  'connection_idle_timeout',
+  'queue.mem.events',
+  'queue.mem.flush.min_events',
+  'queue.mem.flush.timeout',
+  'worker',
+];
+
+export const kafkaTopicsOptions = [
+  {
+    id: kafkaTopicsType.Static,
+    label: 'Static Topic',
+    'data-test-subj': 'kafkaTopicStaticRadioButton',
+  },
+  {
+    id: kafkaTopicsType.Dynamic,
+    label: 'Dynamic Topic',
+    'data-test-subj': 'kafkaTopicDynamicRadioButton',
+  },
+];
+
+export const KAFKA_DYNAMIC_FIELDS = [
+  'data_stream.type',
+  'data_stream.dataset',
+  'data_stream.namespace',
+  '@timestamp',
+  'event.dataset',
+];
+
+export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+];
+
+export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
+
+export const LOGSTASH_API_KEY_CLUSTER_PERMISSIONS = ['monitor', 'manage_own_api_key'];
+
+export const LOGSTASH_API_KEY_INDICES_PRIVILEGES = ['auto_configure', 'create_doc'];
+
+export const LOGSTASH_API_KEY_INDICES = [
+  'logs-*-*',
+  'metrics-*-*',
+  'traces-*-*',
+  'synthetics-*-*',
+  '.logs-endpoint.diagnostic.collection-*',
+  '.logs-endpoint.action.responses-*',
+  'profiling-*',
+  '.profiling-*',
 ];

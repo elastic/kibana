@@ -8,16 +8,22 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 import { serializeAsESPolicy } from '../../../../common/lib';
-import { normalizeFieldsList, getIndices, FieldCapsList, getCommonFields } from './helpers';
-import type { SerializedEnrichPolicy } from '../../../../common';
+import {
+  normalizeFieldsList,
+  getIndices,
+  FieldCapsList,
+  getCommonFields,
+  getDataStreams,
+} from './helpers';
 
 const validationSchema = schema.object({
   policy: schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 1000 }),
     type: schema.oneOf([
       schema.literal('match'),
       schema.literal('range'),
@@ -100,6 +106,33 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
         const indices = await getIndices(client, pattern);
 
         return response.ok({ body: { indices } });
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
+    }
+  );
+  router.post(
+    {
+      path: addInternalBasePath('/enrich_policies/get_matching_data_streams'),
+      validate: { body: getMatchingIndicesSchema },
+    },
+    async (context, request, response) => {
+      let { pattern } = request.body;
+      const client = (await context.core).elasticsearch.client as IScopedClusterClient;
+
+      // Add wildcards to the search query to match the behavior of the
+      // index pattern search in the Kibana UI.
+      if (!pattern.startsWith('*')) {
+        pattern = `*${pattern}`;
+      }
+      if (!pattern.endsWith('*')) {
+        pattern = `${pattern}*`;
+      }
+
+      try {
+        const dataStreams = await getDataStreams(client, pattern);
+
+        return response.ok({ body: { dataStreams } });
       } catch (error) {
         return handleEsError({ error, response });
       }

@@ -19,6 +19,8 @@ import {
   EuiFlexItem,
   EuiCallOut,
   EuiDatePicker,
+  EuiFieldText,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -26,10 +28,15 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
+import semverValid from 'semver/functions/valid';
 
-import { AGENT_UPGRADE_COOLDOWN_IN_MIN } from '../../../../../../../common/services';
+import {
+  AGENT_UPGRADE_COOLDOWN_IN_MIN,
+  getMinVersion,
+  getFleetServerVersionMessage,
+  isAgentVersionLessThanFleetServer,
+} from '../../../../../../../common/services';
 
-import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import {
   AGENT_UPDATING_TIMEOUT_HOURS,
   isStuckInUpdating,
@@ -44,9 +51,15 @@ import {
   useConfig,
   sendGetAgentStatus,
   useAgentVersion,
+  sendGetAllFleetServerAgents,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
+import {
+  differsOnlyInPatch,
+  getNotUpgradeableMessage,
+  isAgentUpgradeableToVersion,
+} from '../../../../../../../common/services/is_agent_upgradeable';
 
 import {
   FALLBACK_VERSIONS,
@@ -80,7 +93,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   isScheduled = false,
   isUpdating = false,
 }) => {
-  const { notifications } = useStartServices();
+  const { notifications, docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion() || '';
   const config = useConfig();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,7 +107,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const [updatingAgents, setUpdatingAgents] = useState<number>(0);
   const [updatingQuery, setUpdatingQuery] = useState<Agent[] | string>('');
 
+  const [fleetServerAgents, setFleetServerAgents] = useState<Agent[]>([]);
+
   const QUERY_STUCK_UPDATING = `status:updating AND upgrade_started_at:* AND NOT upgraded_at:* AND upgrade_started_at < now-${AGENT_UPDATING_TIMEOUT_HOURS}h`;
+  const EMPTY_VALUE = useMemo(() => ({ label: '', value: '' }), []);
+  const [isInvalid, setIsInvalid] = useState(false);
 
   useEffect(() => {
     const getStuckUpdatingAgentCount = async (agentsOrQuery: Agent[] | string) => {
@@ -126,7 +143,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         return;
       }
     };
-
     if (!isUpdating) return;
 
     getStuckUpdatingAgentCount(agents);
@@ -148,6 +164,19 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     getVersions();
   }, [kibanaVersion]);
 
+  useEffect(() => {
+    const fetchFleetServerAgents = async () => {
+      try {
+        const { allFleetServerAgents } = await sendGetAllFleetServerAgents();
+        setFleetServerAgents(allFleetServerAgents);
+      } catch (error) {
+        return;
+      }
+    };
+
+    fetchFleetServerAgents();
+  }, []);
+
   const minVersion = useMemo(() => {
     if (!Array.isArray(agents)) {
       // when agent is a query, don't set minVersion, so the versions are available to select
@@ -164,7 +193,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
   const versionOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const displayVersions = minVersion
-      ? availableVersions.filter((v) => semverGt(v, minVersion))
+      ? availableVersions.filter(
+          (v) => semverGt(v, minVersion) || differsOnlyInPatch(v, minVersion, false)
+        )
       : availableVersions;
 
     const options = displayVersions.map((option) => ({
@@ -172,10 +203,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       value: option,
     }));
     if (options.length === 0) {
-      return [{ label: '', value: '' }];
+      return [EMPTY_VALUE];
     }
     return options;
-  }, [availableVersions, minVersion]);
+  }, [availableVersions, minVersion, EMPTY_VALUE]);
   const noVersions = !availableVersions || versionOptions[0]?.value === '';
 
   const maintenanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTENANCE_VALUES.map(
@@ -199,6 +230,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     },
   ];
   const [selectedVersion, setSelectedVersion] = useState(preselected);
+  const [selectedVersionStr, setSelectedVersionStr] = useState('');
 
   // latest agent version might be earlier than kibana version
   const latestAgentVersion = useAgentVersion();
@@ -213,12 +245,72 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     }
   }, [latestAgentVersion]);
 
+  const warningMessage = useMemo(() => {
+    if (
+      isSingleAgent &&
+      selectedVersion[0]?.value &&
+      !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)
+    ) {
+      return `The selected agent is not upgradeable: ${getNotUpgradeableMessage(
+        agents[0],
+        latestAgentVersion,
+        selectedVersion[0].value
+      )}`;
+    }
+    if (
+      selectedVersion[0]?.value &&
+      !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)
+    ) {
+      return `Please choose another version. ${getFleetServerVersionMessage(
+        selectedVersion[0].value,
+        fleetServerAgents
+      )}`;
+    }
+  }, [agents, fleetServerAgents, isSingleAgent, latestAgentVersion, selectedVersion]);
+
+  const semverErrors = useMemo(() => {
+    if (!selectedVersion[0].value) return undefined;
+    if (!semverValid(selectedVersion[0].value)) {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.upgradeAgents.invalidSemverError"
+          defaultMessage="Invalid version, please use a valid semver version, e.g. 8.14.0"
+        />
+      );
+    }
+  }, [selectedVersion]);
+
   const [selectedMaintenanceWindow, setSelectedMaintenanceWindow] = useState([
     isSmallBatch ? maintenanceOptions[0] : maintenanceOptions[1],
   ]);
 
   const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
     useScheduleDateTime();
+
+  const isSingleAgentFleetServer =
+    isSingleAgent && fleetServerAgents.map((agent) => agent.id).includes(agents[0].id);
+
+  const isSubmitButtonDisabled = useMemo(() => {
+    if (!isSubmitting && isUpdating && isSingleAgent && isStuckInUpdating(agents[0])) return false;
+    return (
+      isSubmitting ||
+      (isUpdating && updatingAgents === 0) ||
+      !selectedVersion[0].value ||
+      (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
+      (isSingleAgent &&
+        !isSingleAgentFleetServer &&
+        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents))
+    );
+  }, [
+    agents,
+    fleetServerAgents,
+    isSingleAgent,
+    isSubmitting,
+    isUpdating,
+    selectedVersion,
+    updatingAgents,
+    isSingleAgentFleetServer,
+  ]);
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -235,7 +327,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       const getQuery = (agentsOrQuery: Agent[] | string) =>
         Array.isArray(agentsOrQuery) ? agentsOrQuery.map((agent) => agent.id) : agentsOrQuery;
       const { error } =
-        isSingleAgent && !isScheduled
+        isSingleAgent &&
+        !isScheduled &&
+        isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)
           ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
               version,
               force: isUpdating,
@@ -244,6 +338,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               version,
               agents: getQuery(isUpdating ? updatingQuery : agents),
               force: isUpdating,
+              includeInactive: true,
               ...rolloutOptions,
             });
       if (error) {
@@ -265,9 +360,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.fleet.upgradeAgents.fatalErrorNotificationTitle', {
-          defaultMessage:
-            'Error upgrading {count, plural, one {agent} other {{count} agents} =true {all selected agents}}',
-          values: { count: isAllAgents || agentCount },
+          defaultMessage: `Error upgrading {isAllAgents, select,
+            true {all selected agents}
+            other {{count, plural, one {agent} other {# agents}}}
+          }`,
+          values: { isAllAgents, count: agentCount },
         }),
       });
     }
@@ -281,6 +378,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       value: normalizedSearchValue,
     };
     setSelectedVersion([newOption]);
+    setIsInvalid(!normalizedSearchValue);
   };
 
   return (
@@ -303,20 +401,39 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           ) : isScheduled ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.scheduleUpgradeMultipleTitle"
-              defaultMessage="Schedule upgrade for {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-              values={{ count: isAllAgents || agentCount }}
+              defaultMessage="Schedule upgrade for {isAllAgents, select,
+                true {all selected agents}
+                other {{count, plural, one {agent} other {# agents}}}
+              }"
+              values={{
+                isAllAgents,
+                count: agentCount,
+              }}
             />
           ) : isUpdating ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.restartUpgradeMultipleTitle"
-              defaultMessage="Restart upgrade on {updating} out of {count, plural, one {agent} other {{count} agents} =true {all agents}} stuck in updating"
-              values={{ count: isAllAgents || agentCount, updating: updatingAgents }}
+              defaultMessage="Restart upgrade on {updating} out of {isAllAgents, select,
+                true {all agents}
+                other {{count, plural, one {agent} other {# agents}}}
+              } stuck in updating"
+              values={{
+                isAllAgents,
+                count: agentCount,
+                updating: updatingAgents,
+              }}
             />
           ) : (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.upgradeMultipleTitle"
-              defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-              values={{ count: isAllAgents || agentCount }}
+              defaultMessage="Upgrade {isAllAgents, select,
+                true {all selected agents}
+                other {{count, plural, one {agent} other {# agents}}}
+              }"
+              values={{
+                isAllAgents,
+                count: agentCount,
+              }}
             />
           )}
         </>
@@ -329,7 +446,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           defaultMessage="Cancel"
         />
       }
-      confirmButtonDisabled={isSubmitting || noVersions || (isUpdating && updatingAgents === 0)}
+      confirmButtonDisabled={isSubmitButtonDisabled}
       confirmButtonText={
         isSingleAgent ? (
           <FormattedMessage
@@ -344,14 +461,23 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         ) : isUpdating ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.restartConfirmMultipleButtonLabel"
-            defaultMessage="Restart upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-            values={{ count: updatingAgents }}
+            defaultMessage="Restart upgrade {isAllAgents, select,
+              true {all selected agents}
+              other {{count, plural, one {agent} other {# agents}}}
+            }"
+            values={{
+              isAllAgents: typeof updatingAgents === 'boolean',
+              count: updatingAgents,
+            }}
           />
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.confirmMultipleButtonLabel"
-            defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-            values={{ count: isAllAgents || agentCount }}
+            defaultMessage="Upgrade {isAllAgents, select,
+              true {all selected agents}
+              other {{count, plural, one {agent} other {# agents}}}
+            }"
+            values={{ isAllAgents, count: agentCount }}
           />
         )
       }
@@ -360,40 +486,62 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         {noVersions ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.noVersionsText"
-            defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
+            defaultMessage="No newer versions found to upgrade to. You may type in a custom version."
           />
         ) : isSingleAgent ? (
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
-                defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
-                values={{
-                  hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
-                  version: getVersion(selectedVersion),
-                }}
-              />
-            </p>
-            {isUpdating && (
+          warningMessage ? (
+            <UpgradeModalWarningCallout warningMessage={warningMessage} />
+          ) : (
+            <>
               <p>
-                <em>
-                  <FormattedMessage
-                    id="xpack.fleet.upgradeAgents.upgradeSingleTimeout"
-                    // TODO: Add link to docs regarding agent upgrade cooldowns
-                    defaultMessage="Note that you may only restart an upgrade every {minutes} minutes to ensure that the upgrade will not be rolled back."
-                    values={{
-                      minutes: AGENT_UPGRADE_COOLDOWN_IN_MIN,
-                    }}
-                  />
-                </em>
+                <FormattedMessage
+                  id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
+                  defaultMessage="This action will upgrade the agent running on ''{hostName}''{version}. This action can not be undone. Are you sure you wish to continue?"
+                  values={{
+                    hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
+                    version: selectedVersion[0].value
+                      ? ' to version ' + getVersion(selectedVersion)
+                      : '',
+                  }}
+                />
               </p>
-            )}
-          </>
+              {isUpdating && (
+                <p>
+                  <em>
+                    <FormattedMessage
+                      id="xpack.fleet.upgradeAgents.upgradeSingleTimeout"
+                      defaultMessage="Note that you may only restart an upgrade every {minutes} minutes to ensure that the upgrade will not be rolled back. {learnMore}"
+                      values={{
+                        minutes: AGENT_UPGRADE_COOLDOWN_IN_MIN,
+                        learnMore: (
+                          <div>
+                            <EuiLink
+                              href={docLinks.links.fleet.upgradeElasticAgent}
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                                defaultMessage="Learn more"
+                              />
+                            </EuiLink>
+                          </div>
+                        ),
+                      }}
+                    />
+                  </em>
+                </p>
+              )}
+            </>
+          )
+        ) : warningMessage ? (
+          <UpgradeModalWarningCallout warningMessage={warningMessage} />
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"
-            defaultMessage="This action will upgrade multiple agents to version {version}. This action can not be undone. Are you sure you wish to continue?"
-            values={{ version: getVersion(selectedVersion) }}
+            defaultMessage="This action will upgrade multiple agents{version}. This action can not be undone. Are you sure you wish to continue?"
+            values={{
+              version: selectedVersion[0].value ? ' to version ' + getVersion(selectedVersion) : '',
+            }}
           />
         )}
       </p>
@@ -402,26 +550,55 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           defaultMessage: 'Upgrade version',
         })}
         fullWidth
+        isInvalid={isInvalid || !!semverErrors}
+        error={
+          isInvalid ? (
+            <FormattedMessage
+              id="xpack.fleet.upgradeAgents.versionRequiredText"
+              defaultMessage="Version is required"
+            />
+          ) : !!semverErrors ? (
+            semverErrors
+          ) : undefined
+        }
       >
-        <EuiComboBox
-          data-test-subj="agentUpgradeModal.VersionCombobox"
-          fullWidth
-          singleSelection={{ asPlainText: true }}
-          options={versionOptions}
-          isDisabled={noVersions}
-          isClearable={false}
-          selectedOptions={selectedVersion}
-          onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
-            if (!selected.length) {
-              return;
+        {noVersions ? (
+          <EuiFieldText
+            fullWidth
+            placeholder="Enter version"
+            value={selectedVersionStr}
+            data-test-subj="agentUpgradeModal.VersionInput"
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setSelectedVersionStr(newValue);
+              setSelectedVersion([{ label: newValue, value: newValue }]);
+            }}
+            isInvalid={!!semverErrors}
+          />
+        ) : (
+          <EuiComboBox
+            data-test-subj="agentUpgradeModal.VersionCombobox"
+            fullWidth
+            singleSelection={{ asPlainText: true }}
+            options={versionOptions}
+            isClearable={true}
+            selectedOptions={selectedVersion}
+            onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
+              if (!selected.length) {
+                setSelectedVersion([EMPTY_VALUE]);
+                setIsInvalid(true);
+              } else {
+                setSelectedVersion(selected);
+                setIsInvalid(false);
+              }
+            }}
+            onCreateOption={
+              config?.internal?.onlyAllowAgentUpgradeToKnownVersions ? undefined : onCreateOption
             }
-            setSelectedVersion(selected);
-          }}
-          onCreateOption={
-            config?.internal?.onlyAllowAgentUpgradeToKnownVersions ? undefined : onCreateOption
-          }
-          customOptionText="Use custom agent version {searchValue} (not recommended)"
-        />
+            customOptionText="Use custom agent version {searchValue} (not recommended)"
+            isInvalid={isInvalid}
+          />
+        )}
       </EuiFormRow>
       {!isSingleAgent &&
       Array.isArray(agents) &&
@@ -517,9 +694,61 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
                 'Error upgrading the selected {count, plural, one {agent} other {{count} agents}}',
               values: { count: isSingleAgent },
             })}
-          />
+          >
+            <FormattedMessage
+              id="xpack.fleet.upgradeAgents.warningCalloutErrorMessage"
+              defaultMessage="{originalMessage}. {learnMore}"
+              values={{
+                originalMessage: errors,
+                learnMore: (
+                  <div>
+                    <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                      <FormattedMessage
+                        id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  </div>
+                ),
+              }}
+            />
+          </EuiCallOut>
         </>
       ) : null}
     </EuiConfirmModal>
+  );
+};
+
+export const UpgradeModalWarningCallout: React.FunctionComponent<{ warningMessage: string }> = ({
+  warningMessage,
+}) => {
+  const { docLinks } = useStartServices();
+  return (
+    <EuiCallOut
+      data-test-subj="agentUpgradeModal.notUpgradeableCallout"
+      color="warning"
+      iconType="warning"
+      title={
+        <FormattedMessage id="xpack.fleet.upgradeAgents.notUpgradeable" defaultMessage="Warning" />
+      }
+    >
+      <FormattedMessage
+        id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
+        defaultMessage="{reason} {learnMore}"
+        values={{
+          reason: warningMessage,
+          learnMore: (
+            <div>
+              <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            </div>
+          ),
+        }}
+      />
+    </EuiCallOut>
   );
 };

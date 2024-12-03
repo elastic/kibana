@@ -9,25 +9,28 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
+import { CodeEditorField } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../../../../common/model';
+import { RemoteClusterComboBox } from './remote_clusters_combo_box';
+import type { RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../../../../common';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import type { RoleValidator } from '../../validate_role';
 
@@ -48,6 +51,7 @@ interface Props {
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   validator: RoleValidator;
+  isDarkMode?: boolean;
 }
 
 interface State {
@@ -124,48 +128,19 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   }
 
   private getPrivilegeForm = () => {
-    const remoteClusterOptions: EuiComboBoxOptionOption[] = [];
-    if (this.props.remoteClusters) {
-      const incompatibleOptions: EuiComboBoxOptionOption[] = [];
-      this.props.remoteClusters.forEach((item, i) => {
-        const disabled = item.securityModel !== 'api_key';
-        if (!disabled) {
-          remoteClusterOptions.push({
-            label: item.name,
-          });
-        } else {
-          incompatibleOptions.push({
-            label: item.name,
-            disabled,
-            append: disabled ? (
-              <EuiIconTip
-                type="warning"
-                color="inherit"
-                content={
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.indexPrivilegeForm.remoteIndicesSecurityModelWarning"
-                    defaultMessage="This cluster is configured with the certificate based security model and does not support remote index privileges. Connect this cluster with the API key based security model instead to use remote index privileges."
-                  />
-                }
-              />
-            ) : undefined,
-          });
-        }
-      });
-      if (incompatibleOptions.length) {
-        remoteClusterOptions.push(
-          {
-            label: 'Incompatible clusters',
-            isGroupLabelOption: true,
-          },
-          ...incompatibleOptions
-        );
-      }
-    }
-
     return (
       <>
-        <EuiFlexGroup>
+        <EuiFlexGrid
+          css={css`
+            grid-template-columns: repeat(
+              ${this.props.indexType === 'remote_indices' ? 3 : 2},
+              minmax(0, 1fr)
+            );
+            @media (max-width: ${euiThemeVars.euiBreakpoints.s}px) {
+              grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+          `}
+        >
           {this.props.indexType === 'remote_indices' ? (
             <EuiFlexItem>
               <EuiFormRow
@@ -180,9 +155,8 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   this.props.indexPrivilege as RoleRemoteIndexPrivilege
                 )}
               >
-                <EuiComboBox
+                <RemoteClusterComboBox
                   data-test-subj={`clustersInput${this.props.formIndex}`}
-                  options={remoteClusterOptions}
                   selectedOptions={('clusters' in this.props.indexPrivilege &&
                   this.props.indexPrivilege.clusters
                     ? this.props.indexPrivilege.clusters
@@ -195,6 +169,8 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                     'xpack.security.management.editRole.indexPrivilegeForm.clustersPlaceholder',
                     { defaultMessage: 'Add a remote cluster…' }
                   )}
+                  remoteClusters={this.props.remoteClusters ?? []}
+                  type="remote_indexes"
                   fullWidth
                 />
               </EuiFormRow>
@@ -261,7 +237,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
               />
             </EuiFormRow>
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexGrid>
 
         {this.getFieldLevelControls()}
         {this.getGrantedDocumentsControl()}
@@ -460,6 +436,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   )}
                   value={indexPrivilege.query ?? ''}
                   onChange={this.onQueryChange}
+                  useDarkTheme={this.props.isDarkMode}
                   options={{
                     readOnly: this.props.isRoleReadOnly,
                     minimap: {

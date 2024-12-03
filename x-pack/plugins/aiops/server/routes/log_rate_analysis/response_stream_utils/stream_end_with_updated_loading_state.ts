@@ -10,10 +10,9 @@ import { i18n } from '@kbn/i18n';
 import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import {
-  updateLoadingStateAction,
+  updateLoadingState,
   type AiopsLogRateAnalysisApiAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 /**
  * Helper function that will push a message to the stream that it's done and
@@ -21,13 +20,13 @@ import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../c
  * This is implemented as a factory that receives the necessary dependencies
  * which then returns the actual helper function.
  */
-export const streamEndWithUpdatedLoadingStateFactory = <T extends ApiVersion>(
+export const streamEndWithUpdatedLoadingStateFactory = (
   streamEndCallback: () => void,
-  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push']
+  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction>['push']
 ) => {
   return function endWithUpdatedLoadingState() {
     push(
-      updateLoadingStateAction({
+      updateLoadingState({
         ccsWarning: false,
         loaded: 1,
         loadingState: i18n.translate('xpack.aiops.logRateAnalysis.loadingState.doneMessage', {

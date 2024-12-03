@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
+
 import {
   getSpecificSelectorId,
   SETTINGS_CONFIRM_MODAL_BTN,
@@ -21,20 +23,231 @@ import {
   loadESOutput,
   loadKafkaOutput,
   loadLogstashOutput,
+  loadRemoteESOutput,
   resetKafkaOutputForm,
+  selectESOutput,
   selectKafkaOutput,
+  selectRemoteESOutput,
   shouldDisplayError,
   validateOutputTypeChangeToKafka,
   validateSavedKafkaOutputForm,
 } from '../screens/fleet_outputs';
 
 import { login } from '../tasks/login';
-
 import { visit } from '../tasks/common';
+
+export const fillYamlConfigBox = (query: string) => {
+  cy.get('[data-test-subj="kibanaCodeEditor"] textarea').type(query, { force: true });
+};
+
+export const clearYamlConfigBox = () => {
+  cy.get('[data-test-subj="kibanaCodeEditor"] textarea').clear({ force: true });
+};
 
 describe('Outputs', () => {
   beforeEach(() => {
+    cy.intercept('GET', '/api/fleet/agents/setup', {
+      body: {
+        isReady: true,
+        is_secrets_storage_enabled: true,
+        missing_requirements: [],
+        missing_optional_features: [],
+      },
+    });
+
     login();
+  });
+
+  describe('Elasticsearch', () => {
+    describe('Preset input', () => {
+      afterEach(() => {
+        clearYamlConfigBox();
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).select('balanced');
+      });
+
+      it('is set to balanced by default', () => {
+        selectESOutput();
+
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).should('have.value', 'balanced');
+      });
+
+      for (const keyword of RESERVED_CONFIG_YML_KEYS) {
+        it(`forces custom when reserved key ${keyword} is included in config YAML box`, () => {
+          selectESOutput();
+
+          fillYamlConfigBox(`${keyword}: value`);
+
+          cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
+            .should('have.value', 'custom')
+            .should('be.disabled');
+        });
+      }
+
+      it('handles expanded syntax for reserved keys', () => {
+        selectESOutput();
+
+        fillYamlConfigBox(`
+queue:
+  mem:
+    flush:
+      min_events: 100
+          `);
+
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
+          .should('have.value', 'custom')
+          .should('be.disabled');
+      });
+
+      it('allows balanced when reserved key is not included in config yaml box', () => {
+        selectESOutput();
+
+        fillYamlConfigBox('some_random_key: foo');
+
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
+          .should('have.value', 'balanced')
+          .should('be.enabled');
+      });
+
+      const cases = [
+        {
+          name: 'Preset: Balanced',
+          preset: 'balanced',
+        },
+        {
+          name: 'Preset: Custom',
+          preset: 'custom',
+        },
+        {
+          name: 'Preset: Throughput',
+          preset: 'throughput',
+        },
+        {
+          name: 'Preset: Scale',
+          preset: 'scale',
+        },
+        {
+          name: 'Preset: Latency',
+          preset: 'latency',
+        },
+      ];
+
+      for (const type of ['elasticsearch', 'remote_elasticsearch']) {
+        for (const testCase of cases) {
+          describe(`When type is ${type} and preset is ${testCase.preset}`, () => {
+            it('successfully creates output', () => {
+              if (type === 'elasticsearch') {
+                selectESOutput();
+              } else if (type === 'remote_elasticsearch') {
+                selectRemoteESOutput();
+              }
+
+              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type(`${type} - ${testCase.name}`);
+              cy.get(`[placeholder="Specify host URL"]`).type(
+                `http://${testCase.preset}.elasticsearch.com:9200`
+              );
+              cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).select(testCase.preset);
+
+              if (type === 'remote_elasticsearch') {
+                cy.getBySel('serviceTokenSecretInput').type('secret');
+              }
+
+              cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
+              cy.getBySel(SETTINGS_SAVE_BTN).click();
+
+              cy.wait('@saveOutput').then((interception) => {
+                const responseBody = interception.response?.body;
+                cy.visit(`/app/fleet/settings/outputs/${responseBody?.item?.id}`);
+              });
+
+              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).should(
+                'have.value',
+                `${type} - ${testCase.name}`
+              );
+              cy.get(`[placeholder="Specify host URL"]`).should(
+                'have.value',
+                `http://${testCase.preset}.elasticsearch.com:9200`
+              );
+              cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).should('have.value', testCase.preset);
+            });
+          });
+        }
+      }
+    });
+  });
+
+  describe('Remote ES', () => {
+    it('displays proper error messages', () => {
+      selectRemoteESOutput();
+      cy.getBySel(SETTINGS_SAVE_BTN).click();
+
+      cy.contains('Name is required');
+      cy.contains('URL is required');
+      cy.contains('Service token is required');
+      shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
+      shouldDisplayError('serviceTokenSecretInput');
+    });
+
+    describe('Form submit', () => {
+      let outputId: string;
+
+      before(() => {
+        interceptOutputId((id) => {
+          outputId = id;
+        });
+      });
+
+      after(() => {
+        cleanupOutput(outputId);
+      });
+
+      it('saves the output', () => {
+        selectRemoteESOutput();
+
+        cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type('name');
+        cy.get('[placeholder="Specify host URL"').clear().type('https://localhost:5000');
+        cy.getBySel('serviceTokenSecretInput').type('service_token');
+
+        cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
+
+        cy.getBySel(SETTINGS_SAVE_BTN).click();
+
+        cy.wait('@saveOutput').then((interception) => {
+          const responseBody = interception.response?.body;
+          cy.visit(`/app/fleet/settings/outputs/${responseBody?.item?.id}`);
+          // There is no Fleet server, therefore the service token should have been saved in plain text.
+          expect(responseBody?.item.service_token).to.equal('service_token');
+          expect(responseBody?.item.secrets).to.equal(undefined);
+        });
+
+        cy.get('[placeholder="Specify host URL"').should('have.value', 'https://localhost:5000');
+        cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).should('have.value', 'name');
+      });
+    });
+
+    describe('Form edit', () => {
+      let outputId: string;
+
+      before(() => {
+        loadRemoteESOutput().then((data) => {
+          outputId = data.item.id;
+        });
+      });
+      after(() => {
+        cleanupOutput(outputId);
+      });
+
+      it('edits the output', () => {
+        visit(`/app/fleet/settings/outputs/${outputId}`);
+
+        cy.get('[placeholder="Specify host URL"').clear().type('https://localhost:5001');
+
+        cy.getBySel(SETTINGS_SAVE_BTN).click();
+        cy.getBySel(SETTINGS_CONFIRM_MODAL_BTN).click();
+        visit(`/app/fleet/settings/outputs/${outputId}`);
+
+        cy.get('[placeholder="Specify host URL"').should('have.value', 'https://localhost:5001');
+      });
+    });
   });
 
   describe('Kafka', () => {
@@ -68,7 +281,7 @@ describe('Outputs', () => {
         });
 
         // Verify SSL fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SSL_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SSL_OPTION).find('label').click();
         cy.get('[placeholder="Specify certificate authority"]');
         cy.get('[placeholder="Specify ssl certificate"]');
         cy.get('[placeholder="Specify certificate key"]');
@@ -79,7 +292,7 @@ describe('Outputs', () => {
 
         // Verify None fields
 
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_NONE_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_NONE_OPTION).find('label').click();
 
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SELECT).should('not.exist');
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT).should('not.exist');
@@ -95,14 +308,16 @@ describe('Outputs', () => {
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_CONNECTION_TYPE_PLAIN_OPTION);
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_CONNECTION_TYPE_ENCRYPTION_OPTION);
 
-        cy.getBySel(
-          SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_CONNECTION_TYPE_ENCRYPTION_OPTION
-        ).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_CONNECTION_TYPE_ENCRYPTION_OPTION)
+          .find('label')
+          .click();
 
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_VERIFICATION_MODE_INPUT);
         cy.get('[placeholder="Specify certificate authority"]');
 
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION)
+          .find('label')
+          .click();
 
         // Verify Partitioning fields
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_PANEL).within(() => {
@@ -114,42 +329,18 @@ describe('Outputs', () => {
         });
 
         // Verify Round Robin fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_RANDOM_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_RANDOM_OPTION).find('label').click();
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_EVENTS_INPUT);
 
         // Verify Hash fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_OPTION).find('label').click();
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_RANDOM_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_RANDOM_OPTION).find('label').click();
 
         // Topics
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_PANEL).within(() => {
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
-          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON);
         });
-
-        // Verify one topic processor fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT);
-
-        // Verify additional topic processor fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT);
-        cy.getBySel(getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT, 1));
-        cy.getBySel(getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT, 1));
-        cy.getBySel(getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT, 1));
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_DRAG_HANDLE_ICON);
-
-        // Verify remove topic processors
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_REMOVE_ROW_BUTTON).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_REMOVE_ROW_BUTTON).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT).should('not.exist');
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT).should('not.exist');
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT).should('not.exist');
 
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_PANEL).within(() => {
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_KEY_INPUT);
@@ -198,7 +389,6 @@ describe('Outputs', () => {
       it('displays proper error messages', () => {
         selectKafkaOutput();
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT).clear();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
         cy.getBySel(SETTINGS_SAVE_BTN).click();
 
         cy.contains('Name is required');
@@ -206,17 +396,13 @@ describe('Outputs', () => {
         cy.contains('Username is required');
         cy.contains('Password is required');
         cy.contains('Default topic is required');
-        cy.contains('Topic is required');
         cy.contains(
           'Client ID is invalid. Only letters, numbers, dots, underscores, and dashes are allowed.'
         );
-        cy.contains('Must be a key, value pair i.e. "http.response.code: 200"');
         shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
-        shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
-        shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT);
       });
     });
@@ -271,7 +457,7 @@ describe('Outputs', () => {
       it('saves the output', () => {
         selectKafkaOutput();
 
-        fillInKafkaOutputForm();
+        fillInKafkaOutputForm(true);
 
         cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
 
@@ -388,6 +574,36 @@ describe('Outputs', () => {
         cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).should('have.value', 'logstash');
         cy.getBySel(kafkaOutputFormValues.name.selector).should('have.value', 'kafka_to_logstash');
       });
+    });
+  });
+
+  describe('Outputs List', () => {
+    beforeEach(() => {
+      cy.intercept('/api/fleet/outputs', {
+        items: [
+          {
+            id: 'fleet-default-output',
+            name: 'default',
+            type: 'elasticsearch',
+            is_default: true,
+            is_default_monitoring: true,
+          },
+          {
+            id: 'internal-fleet-output',
+            name: 'internal output',
+            type: 'elasticsearch',
+            is_default: false,
+            is_default_monitoring: false,
+            is_internal: true,
+          },
+        ],
+      });
+
+      cy.visit('/app/fleet/settings');
+    });
+
+    it('should not display internal outputs', () => {
+      cy.getBySel(SETTINGS_OUTPUTS.TABLE).should('not.contain', 'internal output');
     });
   });
 });

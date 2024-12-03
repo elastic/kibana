@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { of } from 'rxjs';
+import React, { FC, PropsWithChildren } from 'react';
+import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
+// FIXME: adds inefficient boilerplate that should not be required. See https://github.com/elastic/kibana/issues/180725
 import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { TriggersAndActionsUiServices } from '../..';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -24,12 +25,14 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: TriggersAndActionsUiServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: FC<PropsWithChildren<unknown>>;
 }
 
-export const createAppMockRenderer = (): AppMockRenderer => {
+export const createAppMockRenderer = (
+  queryClientContext?: QueryClientProviderProps['context']
+): AppMockRenderer => {
   const services = createStartServicesMock();
-  const theme$ = of({ darkMode: false });
+  const core = coreMock.createStart();
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -48,13 +51,15 @@ export const createAppMockRenderer = (): AppMockRenderer => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
+  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-        </KibanaThemeProvider>
-      </KibanaContextProvider>
+      <KibanaRenderContextProvider {...core}>
+        <KibanaContextProvider services={services}>
+          <QueryClientProvider client={queryClient} context={queryClientContext}>
+            {children}
+          </QueryClientProvider>
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>
     </I18nProvider>
   ));
 

@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "id": "action_task_params:b9af6280-0052-11ec-917b-f7aa317691ed",
     "source": {
       "type": "action_task_params",
@@ -33,7 +33,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "id": "action_task_params:0205a520-0054-11ec-917b-f7aa317691ed",
     "source": {
       "type": "action_task_params",

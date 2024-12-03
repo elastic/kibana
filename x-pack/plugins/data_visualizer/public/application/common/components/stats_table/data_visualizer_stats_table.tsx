@@ -7,15 +7,15 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { EuiBasicTableColumn, HorizontalAlignment } from '@elastic/eui';
 import {
   CENTER_ALIGNMENT,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
   EuiToolTip,
-  HorizontalAlignment,
+  EuiIconTip,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
   EuiResizeObserver,
@@ -24,9 +24,10 @@ import {
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
 import { css } from '@emotion/react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import type { SupportedFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
@@ -34,24 +35,21 @@ import { IndexBasedNumberContentPreview } from './components/field_data_row/numb
 
 import { useTableSettings } from './use_table_settings';
 import { TopValuesPreview } from './components/field_data_row/top_values_preview';
-import {
-  FieldVisConfig,
-  FileBasedFieldVisConfig,
-  isIndexBasedFieldVisConfig,
-} from '../../../../../common/types/field_vis_config';
+import { isIndexBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 import { calculateTableColumnsDimensions } from './utils';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { FieldTypeIcon } from '../field_type_icon';
 import './_index.scss';
+import type { FieldStatisticTableEmbeddableProps } from '../../../index_data_visualizer/embeddables/grid_embeddable/types';
+import type { DataVisualizerTableItem } from './types';
 
 const FIELD_NAME = 'fieldName';
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
-type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
-interface DataVisualizerTableProps<T> {
+interface DataVisualizerTableProps<T extends object> {
   items: T[];
   pageState: DataVisualizerTableState;
   updatePageState: (update: DataVisualizerTableState) => void;
@@ -63,9 +61,12 @@ interface DataVisualizerTableProps<T> {
   loading?: boolean;
   totalCount?: number;
   overallStatsRunning: boolean;
+  renderFieldName?: FieldStatisticTableEmbeddableProps['renderFieldName'];
+  error?: Error | string;
+  isEsql?: boolean;
 }
 
-export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
+const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   items,
   pageState,
   updatePageState,
@@ -76,6 +77,9 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   loading,
   totalCount,
   overallStatsRunning,
+  renderFieldName,
+  error,
+  isEsql = false,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -85,7 +89,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   const { onTableChange, pagination, sorting } = useTableSettings<T>(
     items,
     pageState,
-    updatePageState
+    updatePageState,
+    isEsql
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
   const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
@@ -103,13 +108,16 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     },
     [items]
   );
+  const isMounted = useMountedState();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       // When window or table is resized,
       // update the column widths and other settings accordingly
-      setDimensions(calculateTableColumnsDimensions(e.width));
+      if (isMounted()) {
+        setDimensions(calculateTableColumnsDimensions(e.width));
+      }
     }, 500),
     []
   );
@@ -213,7 +221,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
           return (
             <EuiText size="xs" data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>
-              {displayName}
+              {renderFieldName ? renderFieldName(fieldName, item) : displayName}
             </EuiText>
           );
         },
@@ -227,19 +235,13 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
               defaultMessage: 'Documents (%)',
             })}
-            {
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip',
-                  {
-                    defaultMessage:
-                      'Document count found is based on a smaller set of sampled records.',
-                  }
-                )}
-              >
-                <EuiIcon type="questionInCircle" />
-              </EuiToolTip>
-            }
+            <EuiIconTip
+              content={i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip', {
+                defaultMessage:
+                  'Document count found is based on a smaller set of sampled records.',
+              })}
+              type="questionInCircle"
+            />
           </div>
         ),
 
@@ -275,9 +277,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             );
           }
 
-          return (
-            <DistinctValues cardinality={item?.stats?.cardinality} showIcon={dimensions.showIcon} />
-          );
+          return <DistinctValues config={item} showIcon={dimensions.showIcon} />;
         },
         sortable: (item: DataVisualizerTableItem) => item?.stats?.cardinality,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
@@ -343,7 +343,10 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             return <TopValuesPreview config={item} />;
           }
 
-          if (item.type === SUPPORTED_FIELD_TYPES.NUMBER) {
+          if (
+            item.type === SUPPORTED_FIELD_TYPES.NUMBER ||
+            item.secondaryType === SUPPORTED_FIELD_TYPES.NUMBER
+          ) {
             if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
               // If the cardinality is only low, show the top values instead of a distribution chart
               return item.stats?.distribution?.percentiles.length <= 2 ? (
@@ -395,7 +398,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       backgroundColor: euiTheme.colors.emptyShade,
       boxShadow: `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`,
     },
-    '.euiTableRow > .euiTableRowCel': {
+    '.euiTableRow > .euiTableRowCell': {
       borderTop: 0,
     },
     [useEuiMinBreakpoint('s')]: {
@@ -463,27 +466,38 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
     },
   });
+
+  const message = useMemo(() => {
+    if (!overallStatsRunning && error) {
+      return i18n.translate('xpack.dataVisualizer.dataGrid.errorMessage', {
+        defaultMessage: 'An error occured fetching field statistics',
+      });
+    }
+
+    if (loading) {
+      return i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
+        defaultMessage: 'Searching',
+      });
+    }
+    return undefined;
+  }, [error, loading, overallStatsRunning]);
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
-        <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
+        <div
+          data-test-subj="dataVisualizerTableContainer"
+          ref={resizeRef}
+          data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
+        >
           <EuiInMemoryTable<T>
-            message={
-              loading
-                ? i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
-                    defaultMessage: 'Searching',
-                  })
-                : undefined
-            }
+            message={message}
             css={dvTableCss}
             items={items}
             itemId={FIELD_NAME}
             columns={columns}
             pagination={pagination}
             sorting={sorting}
-            isExpandable={true}
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isSelectable={false}
             onTableChange={onTableChange}
             data-test-subj={`dataVisualizerTable-${loading ? 'loading' : 'loaded'}`}
             rowProps={(item) => ({
@@ -495,3 +509,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     </EuiResizeObserver>
   );
 };
+
+export const DataVisualizerTable = React.memo(
+  UnmemoizedDataVisualizerTable
+) as typeof UnmemoizedDataVisualizerTable;

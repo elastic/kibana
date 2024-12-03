@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ByteSizeValue, offeringBasedSchema, schema } from '@kbn/config-schema';
@@ -59,22 +60,31 @@ const CaptureSchema = schema.object({
 const CsvSchema = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
-  enablePanelActionDownload: schema.boolean({ defaultValue: true }),
+  enablePanelActionDownload: schema.maybe(schema.boolean({ defaultValue: false })), // unused as of 9.0
   maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
     defaultValue: ByteSizeValue.parse('250mb'),
   }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
+    strategy: schema.oneOf(
+      [
+        // point-in-time API or scroll API is supported
+        schema.literal('pit'),
+        schema.literal('scroll'),
+      ],
+      { defaultValue: 'pit' }
+    ),
     duration: schema.string({
-      defaultValue: '30s', // this value is passed directly to ES, so string only format is preferred
+      defaultValue: '30s', // values other than "auto" are passed directly to ES, so string only format is preferred
       validate(value) {
-        if (!/^[0-9]+(d|h|m|s|ms|micros|nanos)$/.test(value)) {
-          return 'must be a duration string';
+        if (!/(^[0-9]+(d|h|m|s|ms|micros|nanos)|auto)$/.test(value)) {
+          return 'must be either "auto" or a duration string';
         }
       },
     }),
     size: schema.number({ defaultValue: 500 }),
   }),
+  maxConcurrentShardRequests: schema.number({ defaultValue: 5 }),
 });
 
 const EncryptionKeySchema = schema.conditional(

@@ -10,25 +10,24 @@ import type { Logger } from '@kbn/core/server';
 import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import type { SetupPlugins } from '../../../../plugin';
-
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { bulkCreateSavedObjects } from '../helpers/bulk_create_saved_objects';
-import { createPrebuiltSavedObjectsRequestBody } from '../../../../../common/api/risk_score';
+import { createPrebuiltSavedObjectsRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const createPrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  security: SetupPlugins['security']
+  logger: Logger
 ) => {
   router.versioned
     .post({
       access: 'internal',
       path: PREBUILT_SAVED_OBJECTS_BULK_CREATE,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -46,7 +45,7 @@ export const createPrebuiltSavedObjectsRoute = (
 
         const spaceId = securitySolution?.getSpaceId();
 
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const frameworkRequest = await buildFrameworkRequest(context, request);
         const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
         const result = await bulkCreateSavedObjects({
           savedObjectsClient,

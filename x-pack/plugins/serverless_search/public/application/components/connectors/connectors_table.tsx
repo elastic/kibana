@@ -38,14 +38,13 @@ import React, { useEffect, useState } from 'react';
 import { generatePath } from 'react-router-dom';
 import {
   CONNECTORS_LABEL,
-  CONNECTOR_LABEL,
   COPY_CONNECTOR_ID_LABEL,
   DELETE_CONNECTOR_LABEL,
 } from '../../../../common/i18n_string';
 import { useConnectors } from '../../hooks/api/use_connectors';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { EDIT_CONNECTOR_PATH } from '../connectors_router';
+import { EDIT_CONNECTOR_PATH } from '../../constants';
 import { DeleteConnectorModal } from './delete_connector_modal';
 
 export const ConnectorsTable: React.FC = () => {
@@ -54,7 +53,7 @@ export const ConnectorsTable: React.FC = () => {
   const [query, setQuery] = useState<string>('');
 
   const { data, isError, isLoading } = useConnectors();
-  const { data: connectorTypes } = useConnectorTypes();
+  const connectorTypes = useConnectorTypes();
   const {
     application: { navigateToUrl },
   } = useKibanaServices();
@@ -128,7 +127,7 @@ export const ConnectorsTable: React.FC = () => {
       field: 'service_type',
       name: typeLabel,
       render: (serviceType: string | null) => {
-        const typeData = (connectorTypes?.connectors || []).find(
+        const typeData = connectorTypes.find(
           (connector) => connector.serviceType === (serviceType ?? '')
         );
         if (!typeData) {
@@ -212,7 +211,12 @@ export const ConnectorsTable: React.FC = () => {
           onClick: (connector: Connector) => copyToClipboard(connector.id),
         },
         {
-          render: (connector: Connector) => <DeleteConnectorModalAction connector={connector} />,
+          render: (connector: Connector) => (
+            <DeleteConnectorModalAction
+              connector={connector}
+              disabled={!data?.canManageConnectors}
+            />
+          ),
         },
       ],
       name: i18n.translate('xpack.serverlessSearch.connectors.actionsLabel', {
@@ -227,12 +231,17 @@ export const ConnectorsTable: React.FC = () => {
         filter ? `${connector[filter]}`.toLowerCase().includes(query.toLowerCase()) : true
       )
       .slice(pageIndex * pageSize, (pageIndex + 1) * pageSize) ?? [];
-
   return (
     <>
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
-          <EuiSearchBar onChange={({ queryText }) => setQuery(queryText ?? '')} query={query} />
+          <EuiSearchBar
+            box={{
+              'data-test-subj': `serverlessSearchConnectorsTableSearchBar`,
+            }}
+            onChange={({ queryText }) => setQuery(queryText ?? '')}
+            query={query}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
@@ -251,8 +260,8 @@ export const ConnectorsTable: React.FC = () => {
             connectors: <strong>{CONNECTORS_LABEL}</strong>,
             items: (
               <strong>
-                <EuiI18nNumber value={pageIndex * pageSize + 1} />-
-                <EuiI18nNumber value={pageIndex * pageSize + 1 + items.length} />
+                <EuiI18nNumber value={pageIndex * pageSize} />-
+                <EuiI18nNumber value={pageIndex * pageSize + items.length} />
               </strong>
             ),
             count: <EuiI18nNumber value={data?.connectors.length ?? 0} />,
@@ -262,6 +271,7 @@ export const ConnectorsTable: React.FC = () => {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
+        data-test-subj="serverlessSearchConnectorTable"
         columns={columns}
         loading={isLoading}
         items={items}
@@ -282,7 +292,10 @@ export const ConnectorsTable: React.FC = () => {
   );
 };
 
-const DeleteConnectorModalAction: React.FC<{ connector: Connector }> = ({ connector }) => {
+const DeleteConnectorModalAction: React.FC<{ connector: Connector; disabled: boolean }> = ({
+  connector,
+  disabled,
+}) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   return (
@@ -291,11 +304,12 @@ const DeleteConnectorModalAction: React.FC<{ connector: Connector }> = ({ connec
         <DeleteConnectorModal
           closeDeleteModal={() => setModalIsOpen(false)}
           connectorId={connector.id}
-          connectorName={connector.name || CONNECTOR_LABEL}
+          connectorName={connector.name}
         />
       )}
       <EuiToolTip content={DELETE_CONNECTOR_LABEL}>
         <EuiButtonIcon
+          disabled={disabled}
           data-test-subj="serverlessSearchDeleteConnectorModalActionButton"
           aria-label={DELETE_CONNECTOR_LABEL}
           onClick={() => setModalIsOpen(true)}

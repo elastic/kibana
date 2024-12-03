@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
-import { EuiProgress } from '@elastic/eui';
-import { difference, head, isEmpty } from 'lodash/fp';
-import styled, { css } from 'styled-components';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiTableSelectionType } from '@elastic/eui';
+import { EuiProgress, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import deepEqual from 'react-fast-compare';
 
-import type {
-  CaseUI,
-  CaseStatusWithAllStatus,
-  FilterOptions,
-  CasesUI,
-} from '../../../common/ui/types';
-import type { CasesOwners } from '../../client/helpers/can_use_cases';
-import type { EuiBasicTableOnChange, Solution } from './types';
+import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
+import type { EuiBasicTableOnChange } from './types';
 
-import { SortFieldCase, StatusAll } from '../../../common/ui/types';
-import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
-import { OWNER_INFO } from '../../../common/constants';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { SortFieldCase } from '../../../common/ui/types';
+import type { CaseStatuses } from '../../../common/types/domain';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
-import { CASES_TABLE_PERPAGE_VALUES } from './types';
+import { CASES_TABLE_PER_PAGE_VALUES } from './types';
 import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CasesMetrics } from './cases_metrics';
@@ -37,38 +29,17 @@ import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
 import { useAllCasesState } from './use_all_cases_state';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
-
-const ProgressLoader = styled(EuiProgress)`
-  ${({ $isShow }: { $isShow: boolean }) =>
-    $isShow
-      ? css`
-          top: 2px;
-          border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-          z-index: ${({ theme }) => theme.eui.euiZHeader};
-        `
-      : `
-      display: none;
-    `}
-`;
+import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
+import { CasesTableUtilityBar } from './utility_bar';
 
 const getSortField = (field: string): SortFieldCase =>
   // @ts-ignore
   SortFieldCase[field] ?? SortFieldCase.title;
 
-const isValidSolution = (solution: string): solution is CasesOwners =>
-  Object.keys(OWNER_INFO).includes(solution);
-
-const mapToReadableSolutionName = (solution: string): Solution => {
-  if (isValidSolution(solution)) {
-    return OWNER_INFO[solution];
-  }
-
-  return { id: solution, label: solution, iconType: '' };
-};
-
 export interface AllCasesListProps {
-  hiddenStatuses?: CaseStatusWithAllStatus[];
+  hiddenStatuses?: CaseStatuses[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
 }
@@ -78,18 +49,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { owner, permissions } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
     const isLoading = useIsLoadingCases();
+    const { euiTheme } = useEuiTheme();
 
     const hasOwner = !!owner.length;
-    const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
-    const initialFilterOptions = {
-      ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
-      owner: hasOwner ? owner : availableSolutions,
-    };
 
-    const { queryParams, setQueryParams, filterOptions, setFilterOptions } = useAllCasesState(
-      isSelectorView,
-      initialFilterOptions
-    );
+    const { queryParams, setQueryParams, filterOptions, setFilterOptions } =
+      useAllCasesState(isSelectorView);
+
     const [selectedCases, setSelectedCases] = useState<CasesUI>([]);
 
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
@@ -129,11 +95,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [queryParams.sortField, queryParams.sortOrder]
     );
 
-    const tableRef = useRef<EuiBasicTable | null>(null);
-
     const deselectCases = useCallback(() => {
       setSelectedCases([]);
-      tableRef.current?.setSelection([]);
     }, [setSelectedCases]);
 
     const tableOnChangeCallback = useCallback(
@@ -161,59 +124,16 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
-        if (
-          newFilterOptions?.status === CaseStatuses.closed &&
-          queryParams.sortField === SortFieldCase.createdAt
-        ) {
-          setQueryParams({ sortField: SortFieldCase.closedAt });
-        } else if (
-          newFilterOptions.status &&
-          [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
-            newFilterOptions.status
-          ) &&
-          queryParams.sortField === SortFieldCase.closedAt
-        ) {
-          setQueryParams({ sortField: SortFieldCase.createdAt });
-        }
-
         deselectCases();
-        setFilterOptions({
-          ...newFilterOptions,
-          /**
-           * If the user selects and deselects all solutions
-           * then the owner is set to an empty array. This results in fetching all cases the user has access to including
-           * the ones with read access. We want to show only the cases the user has full access to.
-           * For that reason we fallback to availableSolutions if the owner is empty.
-           *
-           * If the consumer of cases has passed an owner we fallback to the provided owner
-           */
-          ...(newFilterOptions.owner != null && !hasOwner
-            ? {
-                owner:
-                  newFilterOptions.owner.length === 0 ? availableSolutions : newFilterOptions.owner,
-              }
-            : newFilterOptions.owner != null && hasOwner
-            ? {
-                owner: newFilterOptions.owner.length === 0 ? owner : newFilterOptions.owner,
-              }
-            : {}),
-        });
+        setFilterOptions(newFilterOptions);
       },
-      [
-        queryParams.sortField,
-        deselectCases,
-        setFilterOptions,
-        hasOwner,
-        availableSolutions,
-        owner,
-        setQueryParams,
-      ]
+      [deselectCases, setFilterOptions]
     );
 
     const { selectedColumns, setSelectedColumns } = useCasesColumnsSelection();
 
-    const { columns, isLoadingColumns } = useCasesColumns({
-      filterStatus: filterOptions.status ?? StatusAll,
+    const { columns, isLoadingColumns, rowHeader } = useCasesColumns({
+      filterStatus: filterOptions.status ?? [],
       userProfiles: userProfiles ?? new Map(),
       isSelectorView,
       connectors,
@@ -227,7 +147,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         pageIndex: queryParams.page - 1,
         pageSize: queryParams.perPage,
         totalItemCount: data.total ?? 0,
-        pageSizeOptions: CASES_TABLE_PERPAGE_VALUES,
+        pageSizeOptions: CASES_TABLE_PER_PAGE_VALUES,
       }),
       [data, queryParams]
     );
@@ -235,7 +155,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<CaseUI>>(
       () => ({
         onSelectionChange: setSelectedCases,
-        initialSelected: selectedCases,
+        selected: selectedCases,
         selectable: () => !isReadOnlyPermissions(permissions),
       }),
       [permissions, selectedCases]
@@ -249,48 +169,66 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       []
     );
 
-    const availableSolutionsLabels = availableSolutions.map((solution) =>
-      mapToReadableSolutionName(solution)
-    );
-
     const onCreateCasePressed = useCallback(() => {
       onRowClick?.(undefined, true);
     }, [onRowClick]);
 
+    const onClearFilters = useCallback(() => {
+      setFilterOptions(DEFAULT_CASES_TABLE_STATE.filterOptions);
+    }, [setFilterOptions]);
+
+    const showClearFiltersButton = !deepEqual(
+      DEFAULT_CASES_TABLE_STATE.filterOptions,
+      filterOptions
+    );
+
     return (
       <>
-        <ProgressLoader
+        <EuiProgress
           size="xs"
           color="accent"
           className="essentialAnimation"
-          $isShow={isLoading || isLoadingCases || isLoadingColumns}
+          css={
+            isLoading || isLoadingCases || isLoadingColumns
+              ? css`
+                  top: ${euiTheme.size.xxs};
+                  border-radius: ${euiTheme.border.radius};
+                  z-index: ${euiTheme.levels.header};
+                `
+              : css`
+                  display: none;
+                `
+          }
         />
+
         {!isSelectorView ? <CasesMetrics /> : null}
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}
           countInProgressCases={data.countInProgressCases}
           onFilterChanged={onFilterChangedCallback}
-          availableSolutions={hasOwner ? [] : availableSolutionsLabels}
-          initial={{
-            search: filterOptions.search,
-            searchFields: filterOptions.searchFields,
-            assignees: filterOptions.assignees,
-            reporters: filterOptions.reporters,
-            tags: filterOptions.tags,
-            status: filterOptions.status,
-            owner: filterOptions.owner,
-            severity: filterOptions.severity,
-            category: filterOptions.category,
-          }}
+          availableSolutions={hasOwner ? [] : availableSolutions}
           hiddenStatuses={hiddenStatuses}
           onCreateCasePressed={onCreateCasePressed}
           isSelectorView={isSelectorView}
           isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}
+          filterOptions={filterOptions}
+        />
+        <CasesTableUtilityBar
+          pagination={pagination}
+          isSelectorView={isSelectorView}
+          totalCases={data.total ?? 0}
+          selectedCases={selectedCases}
+          deselectCases={deselectCases}
+          selectedColumns={selectedColumns}
+          onSelectedColumnsChange={setSelectedColumns}
+          onClearFilters={onClearFilters}
+          showClearFiltersButton={showClearFiltersButton}
         />
         <CasesTable
           columns={columns}
+          rowHeader={rowHeader}
           data={data}
           goToCreateCase={onRowClick ? onCreateCasePressed : undefined}
           isCasesLoading={isLoadingCases}
@@ -300,14 +238,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           isSelectorView={isSelectorView}
           onChange={tableOnChangeCallback}
           pagination={pagination}
-          selectedCases={selectedCases}
           selection={euiBasicTableSelectionProps}
           sorting={sorting}
-          tableRef={tableRef}
           tableRowProps={tableRowProps}
-          deselectCases={deselectCases}
-          selectedColumns={selectedColumns}
-          onSelectedColumnsChange={setSelectedColumns}
         />
       </>
     );

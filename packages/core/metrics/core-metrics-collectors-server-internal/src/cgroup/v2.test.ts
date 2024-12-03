@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import mockFs from 'mock-fs';
@@ -22,10 +23,17 @@ system_usec 125968
 nr_periods 123
 nr_throttled 1
 throttled_usec 123123`,
+      '/sys/fs/cgroup/memory.current': '9000',
+      '/sys/fs/cgroup/memory.swap.current': '42',
     });
 
-    expect(await gatherV2CgroupMetrics({ cpuAcctPath: '/', cpuPath: '/' })).toMatchInlineSnapshot(`
+    const metrics = await gatherV2CgroupMetrics('/');
+    expect(metrics).toMatchInlineSnapshot(`
         Object {
+          "cgroup_memory": Object {
+            "current_in_bytes": 9000,
+            "swap_current_in_bytes": 42,
+          },
           "cpu": Object {
             "cfs_period_micros": 100000,
             "cfs_quota_micros": -1,
@@ -54,11 +62,17 @@ system_usec 125968
 nr_periods 123
 nr_throttled 1
 throttled_usec 123123`,
+      '/sys/fs/cgroup/mypath/memory.current': '9876',
+      '/sys/fs/cgroup/mypath/memory.swap.current': '132645',
     });
 
-    expect(await gatherV2CgroupMetrics({ cpuAcctPath: '/mypath', cpuPath: '/mypath' }))
-      .toMatchInlineSnapshot(`
+    const metrics = await gatherV2CgroupMetrics('/mypath');
+    expect(metrics).toMatchInlineSnapshot(`
         Object {
+          "cgroup_memory": Object {
+            "current_in_bytes": 9876,
+            "swap_current_in_bytes": 132645,
+          },
           "cpu": Object {
             "cfs_period_micros": 100000,
             "cfs_quota_micros": 111,

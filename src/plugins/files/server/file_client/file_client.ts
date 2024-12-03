@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
 import { Readable } from 'stream';
 import mimeType from 'mime';
-import cuid from 'cuid';
+import { createId } from '@paralleldrive/cuid2';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -129,7 +130,7 @@ export class FileClientImpl implements FileClient {
   public async create<M = unknown>({ id, metadata }: CreateArgs): Promise<File<M>> {
     const serializedMetadata = serializeJSON({ ...metadata, mimeType: metadata.mime });
     const result = await this.metadataClient.create({
-      id: id || cuid(),
+      id: id || createId(),
       metadata: {
         ...createDefaultFileAttributes(),
         ...serializedMetadata,

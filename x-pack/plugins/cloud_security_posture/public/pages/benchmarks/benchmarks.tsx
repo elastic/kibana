@@ -21,19 +21,25 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { extractErrorMessage } from '@kbn/cloud-security-posture-common';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { BenchmarksTable } from './benchmarks_table';
 import {
-  useCspBenchmarkIntegrations,
+  useCspBenchmarkIntegrationsV2,
   UseCspBenchmarkIntegrationsProps,
 } from './use_csp_benchmark_integrations';
-import { extractErrorMessage } from '../../../common/utils/helpers';
+import { getBenchmarkCisName } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
-import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../common/constants';
+import {
+  LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY,
+  NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
+} from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { NoFindingsStates } from '../../components/no_findings_states';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -102,7 +108,7 @@ const TotalIntegrationsCount = ({
     <EuiTextColor color="subdued">
       <FormattedMessage
         id="xpack.csp.benchmarks.totalIntegrationsCountMessage"
-        defaultMessage="Showing {pageCount} of {totalCount, plural, one {# integration} other {# integrations}}"
+        defaultMessage="Showing {pageCount} of {totalCount, plural, one {# benchmark} other {# benchmarks}}"
         values={{ pageCount, totalCount }}
       />
     </EuiTextColor>
@@ -126,7 +132,7 @@ const BenchmarkSearchField = ({
           isLoading={isLoading}
           placeholder={i18n.translate(
             'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
-            { defaultMessage: 'Search by Integration Name' }
+            { defaultMessage: 'Search by Benchmark Name' }
           )}
           incremental
         />
@@ -145,8 +151,26 @@ export const Benchmarks = () => {
     sortOrder: 'asc',
   });
 
-  const queryResult = useCspBenchmarkIntegrations(query);
-  const totalItemCount = queryResult.data?.total || 0;
+  const queryResult = useCspBenchmarkIntegrationsV2();
+  const lowerCaseQueryName = query.name.toLowerCase();
+  const benchmarkResult =
+    queryResult.data?.items.filter((obj) =>
+      getBenchmarkCisName(obj.id)?.toLowerCase().includes(lowerCaseQueryName)
+    ) || [];
+  const totalItemCount = queryResult.data?.items.length || 0;
+
+  // Check if we have any CSP Integration or not
+  const getSetupStatus = useCspSetupStatusApi({
+    refetchInterval: NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
+  });
+
+  const kspmStatus = getSetupStatus.data?.kspm?.status;
+  const cspmStatus = getSetupStatus.data?.cspm?.status;
+
+  const showNoFindingsStates =
+    (kspmStatus === 'not-installed' && cspmStatus === 'not-installed') ||
+    cspmStatus === 'unprivileged' ||
+    kspmStatus === 'unprivileged';
 
   return (
     <CloudPosturePage>
@@ -154,8 +178,8 @@ export const Benchmarks = () => {
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={
           <CloudPosturePageTitle
-            title={i18n.translate('xpack.csp.benchmarks.benchmarksPageHeader.benchmarkRulesTitle', {
-              defaultMessage: 'Benchmark Rules',
+            title={i18n.translate('xpack.csp.benchmarks.benchmarksPageHeader.benchmarksTitle', {
+              defaultMessage: 'Benchmarks',
             })}
           />
         }
@@ -163,46 +187,51 @@ export const Benchmarks = () => {
         bottomBorder
       />
       <EuiSpacer />
-      <BenchmarkSearchField
-        isLoading={queryResult.isFetching}
-        onSearch={(name) => setQuery((current) => ({ ...current, name }))}
-      />
-      <EuiSpacer />
-      <TotalIntegrationsCount
-        pageCount={(queryResult.data?.items || []).length}
-        totalCount={totalItemCount}
-      />
-      <EuiSpacer size="s" />
-      <BenchmarksTable
-        benchmarks={queryResult.data?.items || []}
-        data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}
-        error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
-        loading={queryResult.isFetching}
-        pageIndex={query.page}
-        pageSize={pageSize || query.perPage}
-        sorting={{
-          // @ts-expect-error - EUI types currently do not support sorting by nested fields
-          sort: { field: query.sortField, direction: query.sortOrder },
-          allowNeutralSort: false,
-        }}
-        totalItemCount={totalItemCount}
-        setQuery={({ page, sort }) => {
-          setPageSize(page.size);
-          setQuery((current) => ({
-            ...current,
-            page: page.index,
-            perPage: page.size,
-            sortField:
-              (sort?.field as UseCspBenchmarkIntegrationsProps['sortField']) || current.sortField,
-            sortOrder: sort?.direction || current.sortOrder,
-          }));
-        }}
-        noItemsMessage={
-          queryResult.isSuccess && !queryResult.data.total ? (
-            <BenchmarkEmptyState name={query.name} />
-          ) : undefined
-        }
-      />
+      {showNoFindingsStates ? (
+        <NoFindingsStates postureType={'all'} />
+      ) : (
+        <>
+          <BenchmarkSearchField
+            isLoading={queryResult.isFetching}
+            onSearch={(name) => setQuery((current) => ({ ...current, name }))}
+          />
+          <EuiSpacer />
+          <TotalIntegrationsCount
+            pageCount={(queryResult.data?.items || []).length}
+            totalCount={totalItemCount}
+          />
+          <EuiSpacer size="s" />
+          <BenchmarksTable
+            benchmarks={benchmarkResult}
+            data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}
+            error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
+            loading={queryResult.isFetching}
+            pageIndex={query.page}
+            pageSize={pageSize || query.perPage}
+            sorting={{
+              // @ts-expect-error - EUI types currently do not support sorting by nested fields
+              sort: { field: query.sortField, direction: query.sortOrder },
+              allowNeutralSort: false,
+            }}
+            totalItemCount={totalItemCount}
+            setQuery={({ page, sort }) => {
+              setPageSize(page.size);
+              setQuery((current) => ({
+                ...current,
+                page: page.index,
+                perPage: page.size,
+                sortField:
+                  (sort?.field as UseCspBenchmarkIntegrationsProps['sortField']) ||
+                  current.sortField,
+                sortOrder: sort?.direction || current.sortOrder,
+              }));
+            }}
+            noItemsMessage={
+              queryResult.isSuccess ? <BenchmarkEmptyState name={query.name} /> : undefined
+            }
+          />
+        </>
+      )}
     </CloudPosturePage>
   );
 };

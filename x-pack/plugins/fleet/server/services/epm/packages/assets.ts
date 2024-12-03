@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '../../../types';
-import { getArchiveFilelist, getAsset } from '../archive';
-import type { ArchiveEntry } from '../archive';
+import type { ArchiveEntry } from '../../../../common/types';
+import type { AssetsMap, PackageInfo } from '../../../types';
+import { getAssetFromAssetsMap } from '../archive';
 
 const maybeFilterByDataset =
   (packageInfo: Pick<PackageInfo, 'version' | 'name' | 'type'>, datasetName: string) =>
@@ -21,18 +21,13 @@ const maybeFilterByDataset =
     return comparePaths.some((comparePath) => path.includes(comparePath));
   };
 
-// paths from RegistryPackage are routes to the assets on EPR
-// e.g. `/package/nginx/1.2.0/data_stream/access/fields/fields.yml`
-// paths for ArchiveEntry are routes to the assets in the archive
-// e.g. `nginx-1.2.0/data_stream/access/fields/fields.yml`
-// RegistryPackage paths have a `/package/` prefix compared to ArchiveEntry paths
-// and different package and version structure
-export function getAssets(
+export function getAssetsFromAssetsMap(
   packageInfo: Pick<PackageInfo, 'version' | 'name' | 'type'>,
+  assetsMap: AssetsMap,
   filter = (path: string): boolean => true,
   datasetName?: string
 ): string[] {
-  const paths = getArchiveFilelist(packageInfo);
+  const paths = [...assetsMap.keys()];
 
   if (!paths || paths.length === 0) return [];
 
@@ -46,15 +41,15 @@ export function getAssets(
   return assets.filter(filter);
 }
 
-export function getAssetsData(
+export function getAssetsDataFromAssetsMap(
   packageInfo: Pick<PackageInfo, 'version' | 'name' | 'type'>,
+  assetsMap: AssetsMap,
   filter = (path: string): boolean => true,
   datasetName?: string
-): ArchiveEntry[] {
-  // Gather all asset data
-  const assets = getAssets(packageInfo, filter, datasetName);
+) {
+  const assets = getAssetsFromAssetsMap(packageInfo, assetsMap, filter, datasetName);
   const entries: ArchiveEntry[] = assets.map((path) => {
-    const buffer = getAsset(path);
+    const buffer = getAssetFromAssetsMap(assetsMap, path);
 
     return { path, buffer };
   });

@@ -10,15 +10,18 @@ import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { EuiLink, EuiMark } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { getScopedActions } from '../../../../helpers';
-import { setActiveTabTimeline } from '../../../../timelines/store/timeline/actions';
-import { useRightPanelContext } from '../context';
-import { isInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { setActiveTabTimeline } from '../../../../timelines/store/actions';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const timelineId = 'timeline-1';
@@ -27,10 +30,14 @@ const timelineId = 'timeline-1';
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
 export const AnalyzerPreviewContainer: React.FC = () => {
-  const { dataAsNestedObject } = useRightPanelContext();
+  const { dataAsNestedObject, isPreview, eventId, indexName, scopeId, isPreviewMode } =
+    useDocumentDetailsContext();
 
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
   // decide whether to show the analyzer preview or not
-  const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject);
+  const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
@@ -39,9 +46,9 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   });
 
   // open timeline to the analyzer tab because the expandable flyout left panel Visualize => Analyzer tab is not ready
-  const goToAnalyzerTab = useCallback(() => {
+  const goToAnalyzerTab = useCallback(async () => {
     // open timeline
-    investigateInTimelineAlertClick();
+    await investigateInTimelineAlertClick();
 
     // open analyzer tab
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
@@ -54,6 +61,13 @@ export const AnalyzerPreviewContainer: React.FC = () => {
     dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
   }, [dataAsNestedObject, dispatch, investigateInTimelineAlertClick, startTransaction]);
 
+  const { navigateToAnalyzer } = useNavigateToAnalyzer({
+    eventId,
+    indexName,
+    isFlyoutOpen: true,
+    scopeId,
+  });
+
   return (
     <ExpandablePanel
       header={{
@@ -63,18 +77,25 @@ export const AnalyzerPreviewContainer: React.FC = () => {
             defaultMessage="Analyzer preview"
           />
         ),
-        iconType: 'timeline',
-        ...(isEnabled && {
-          link: {
-            callback: goToAnalyzerTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip"
-                defaultMessage="Show analyzer graph"
-              />
-            ),
-          },
-        }),
+        iconType: visualizationInFlyoutEnabled ? 'arrowStart' : 'timeline',
+        ...(isEnabled &&
+          !isPreview &&
+          !isPreviewMode && {
+            link: {
+              callback: visualizationInFlyoutEnabled ? navigateToAnalyzer : goToAnalyzerTab,
+              tooltip: visualizationInFlyoutEnabled ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewOpenAnalyzerTooltip"
+                  defaultMessage="Open analyzer graph"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewInvestigateTooltip"
+                  defaultMessage="Investigate in timeline"
+                />
+              ),
+            },
+          }),
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >

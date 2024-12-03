@@ -7,7 +7,6 @@
 
 import { get } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
-import type { ISavedObjectsRepository } from '@kbn/core/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -27,20 +26,45 @@ import type {
   FileAttachmentAggregationResults,
   FileAttachmentAggsResult,
   AttachmentFrameworkAggsResult,
+  CustomFieldsTelemetry,
+  AlertBuckets,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
+import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
+import type { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
     date_range: {
       field: `${savedObjectType}.attributes.created_at`,
-      format: 'dd/MM/YYYY',
+      format: 'dd/MM/yyyy',
       ranges: [
         { from: 'now-1d', to: 'now' },
         { from: 'now-1w', to: 'now' },
         { from: 'now-1M', to: 'now' },
       ],
+    },
+  },
+});
+
+export const getAlertsCountsAggregationQuery = () => ({
+  counts: {
+    date_range: {
+      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_at`,
+      format: 'dd/MM/yyyy',
+      ranges: [
+        { from: 'now-1d', to: 'now' },
+        { from: 'now-1w', to: 'now' },
+        { from: 'now-1M', to: 'now' },
+      ],
+    },
+    aggregations: {
+      topAlertsPerBucket: {
+        cardinality: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+        },
+      },
     },
   },
 });
@@ -70,6 +94,55 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
           },
         },
       },
+    },
+  },
+});
+
+export const getAlertsMaxBucketOnCaseAggregationQuery = () => ({
+  references: {
+    nested: {
+      path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+    },
+    aggregations: {
+      cases: {
+        filter: {
+          term: {
+            [`${CASE_COMMENT_SAVED_OBJECT}.references.type`]: CASE_SAVED_OBJECT,
+          },
+        },
+        aggregations: {
+          ids: {
+            terms: {
+              field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+            },
+            aggregations: {
+              reverse: {
+                reverse_nested: {},
+                aggregations: {
+                  topAlerts: {
+                    cardinality: {
+                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          max: {
+            max_bucket: {
+              buckets_path: 'ids>reverse.topAlerts',
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+export const getUniqueAlertCommentsCountQuery = () => ({
+  uniqueAlertCommentsCount: {
+    cardinality: {
+      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
     },
   },
 });
@@ -119,23 +192,73 @@ export const getCountsFromBuckets = (buckets: Buckets['buckets']) => ({
   monthly: buckets?.[0]?.doc_count ?? 0,
 });
 
+export const getAlertsCountsFromBuckets = (buckets: AlertBuckets['buckets']) => ({
+  daily: buckets?.[2]?.topAlertsPerBucket?.value ?? 0,
+  weekly: buckets?.[1]?.topAlertsPerBucket?.value ?? 0,
+  monthly: buckets?.[0]?.topAlertsPerBucket?.value ?? 0,
+});
+
+export const getCountsAndMaxAlertsData = async ({
+  savedObjectsClient,
+}: {
+  savedObjectsClient: TelemetrySavedObjectsClient;
+}) => {
+  const filter = getOnlyAlertsCommentsFilter();
+
+  const res = await savedObjectsClient.find<
+    unknown,
+    {
+      counts: AlertBuckets;
+      references: MaxBucketOnCaseAggregation['references'];
+      uniqueAlertCommentsCount: { value: number };
+    }
+  >({
+    page: 0,
+    perPage: 0,
+    filter,
+    type: CASE_COMMENT_SAVED_OBJECT,
+    namespaces: ['*'],
+    aggs: {
+      ...getAlertsCountsAggregationQuery(),
+      ...getAlertsMaxBucketOnCaseAggregationQuery(),
+      ...getUniqueAlertCommentsCountQuery(),
+    },
+  });
+
+  const countsBuckets = res.aggregations?.counts?.buckets ?? [];
+  const totalAlerts = res.aggregations?.uniqueAlertCommentsCount.value ?? 0;
+  const maxOnACase = res.aggregations?.references?.cases?.max?.value ?? 0;
+
+  return {
+    all: {
+      total: totalAlerts,
+      ...getAlertsCountsFromBuckets(countsBuckets),
+      maxOnACase,
+    },
+  };
+};
+
 export const getCountsAndMaxData = async ({
   savedObjectsClient,
   savedObjectType,
   filter,
 }: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsClient: TelemetrySavedObjectsClient;
   savedObjectType: string;
   filter?: KueryNode;
 }) => {
   const res = await savedObjectsClient.find<
     unknown,
-    { counts: Buckets; references: MaxBucketOnCaseAggregation['references'] }
+    {
+      counts: Buckets;
+      references: MaxBucketOnCaseAggregation['references'];
+    }
   >({
     page: 0,
     perPage: 0,
     filter,
     type: savedObjectType,
+    namespaces: ['*'],
     aggs: {
       ...getCountsAggregationQuery(savedObjectType),
       ...getMaxBucketOnCaseAggregationQuery(savedObjectType),
@@ -196,6 +319,28 @@ export const getSolutionValues = ({
       totalWithAtLeastOne:
         caseAggregations?.[owner].assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
     },
+  };
+};
+
+export const getCustomFieldsTelemetry = (
+  customFields?: ConfigurationPersistedAttributes['customFields']
+): CustomFieldsTelemetry => {
+  const customFiledTypes: Record<string, number> = {};
+
+  const totalsByType = customFields?.reduce((a, c) => {
+    if (c?.type) {
+      Object.assign(customFiledTypes, { [c.type]: (customFiledTypes[c.type] ?? 0) + 1 });
+    }
+
+    return customFiledTypes;
+  }, {});
+
+  const allRequiredCustomFields = customFields?.filter((field) => field?.required).length;
+
+  return {
+    totalsByType: totalsByType ?? {},
+    totals: customFields?.length ?? 0,
+    required: allRequiredCustomFields ?? 0,
   };
 };
 

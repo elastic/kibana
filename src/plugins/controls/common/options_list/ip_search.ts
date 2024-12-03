@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import ipaddr from 'ipaddr.js';
@@ -16,6 +17,10 @@ interface IpSegments {
   segments: string[];
   type: 'ipv4' | 'ipv6' | 'unknown';
 }
+
+export const getIsValidFullIp = (searchString: string) => {
+  return ipaddr.IPv4.isValidFourPartDecimal(searchString) || ipaddr.IPv6.isValid(searchString);
+};
 
 export const getIpSegments = (searchString: string): IpSegments => {
   if (searchString.indexOf('.') !== -1) {

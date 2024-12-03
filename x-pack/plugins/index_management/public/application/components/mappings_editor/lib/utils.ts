@@ -7,45 +7,61 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { cloneDeep } from 'lodash';
+import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
-  DataType,
-  Fields,
-  Field,
-  NormalizedFields,
-  NormalizedField,
-  FieldMeta,
-  MainType,
-  SubType,
   ChildFieldName,
-  ParameterName,
   ComboBoxOption,
+  DataType,
+  Field,
+  FieldMeta,
+  Fields,
   GenericObject,
-  RuntimeFields,
+  MainType,
+  NormalizedField,
+  NormalizedFields,
   NormalizedRuntimeFields,
+  State,
+  ParameterName,
+  RuntimeFields,
+  SubType,
+  SemanticTextField,
 } from '../types';
 
 import {
-  SUB_TYPE_MAP_TO_MAIN,
+  MAIN_DATA_TYPE_DEFINITION,
   MAX_DEPTH_DEFAULT_EDITOR,
   PARAMETERS_DEFINITION,
+  SUB_TYPE_MAP_TO_MAIN,
+  TYPE_DEFINITION,
   TYPE_NOT_ALLOWED_MULTIFIELD,
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
-  TYPE_DEFINITION,
-  MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
-import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
+import { FieldConfig } from '../shared_imports';
 
 export const getUniqueId = () => uuidv4();
 
+const fieldsWithoutMultiFields: DataType[] = [
+  // @ts-expect-error aggregate_metric_double is not yet supported by the editor
+  'aggregate_metric_double',
+  'constant_keyword',
+  'flattened',
+  'geo_shape',
+  'join',
+  'percolator',
+  'point',
+  'shape',
+];
 export const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
-  if (dataType === 'text' || dataType === 'keyword' || dataType === 'ip') {
-    return 'fields';
+  if (fieldsWithoutMultiFields.includes(dataType)) {
+    return undefined;
   } else if (dataType === 'object' || dataType === 'nested') {
     return 'properties';
   }
-  return undefined;
+  return 'fields';
 };
 
 export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta => {
@@ -591,3 +607,193 @@ export const deNormalizeRuntimeFields = (fields: NormalizedRuntimeFields): Runti
     };
   }, {} as RuntimeFields);
 };
+
+/**
+ * get all the fields from given state which matches selected DataTypes from filter
+ *
+ * @param state The state that we are using depending on the context (when adding new fields, static state is used)
+ * @param filteredDataTypes data types array from which fields are filtered from given state
+ */
+
+export const getFieldsMatchingFilterFromState = (
+  state: State,
+  filteredDataTypes: string[]
+): {
+  [id: string]: NormalizedField;
+} => {
+  return Object.fromEntries(
+    Object.entries(state.fields.byId).filter(([_, fieldId]) =>
+      filteredDataTypes.includes(getTypeLabelFromField(state.fields.byId[fieldId.id].source))
+    )
+  );
+};
+
+/** accepts Generics argument and returns value, if value is not null or undefined
+ * @param value
+ */
+function isNotNullish<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
+/** returns normalized field that matches the dataTypes from the filteredDataTypes array
+ * @param normalizedFields fields that we are using, depending on the context (when adding new fields, static state is used)
+ * @param filteredDataTypes data types array from which fields are filtered from given state. When there are no filter selected, array would be undefined
+ */
+export const getFieldsFromState = (
+  normalizedFields: NormalizedFields,
+  filteredDataTypes?: string[]
+): NormalizedField[] => {
+  const getField = (fieldId: string) => {
+    if (filteredDataTypes) {
+      if (
+        filteredDataTypes.includes(getTypeLabelFromField(normalizedFields.byId[fieldId].source))
+      ) {
+        return normalizedFields.byId[fieldId];
+      }
+    } else {
+      return normalizedFields.byId[fieldId];
+    }
+  };
+  const fields: Array<NormalizedField | undefined> = filteredDataTypes
+    ? Object.entries(normalizedFields.byId).map(([key, _]) => getField(key))
+    : normalizedFields.rootLevelFields.map((id) => getField(id));
+  return fields.filter(isNotNullish);
+};
+/**
+ * returns true if given value is first occurence of array
+ * useful when filtering unique values of an array
+ */
+function filterUnique<T>(value: T, index: number, array: T[]) {
+  return array.indexOf(value) === index;
+}
+/**
+ * returns array consisting of all field types from state's fields including nested fields
+ * @param fields
+ */
+const getallFieldsIncludingNestedFields = (fields: Fields, fieldsArray: DataType[]) => {
+  const fieldsValue = Object.values(fields);
+  for (const field of fieldsValue) {
+    if (field.type) fieldsArray.push(field.type);
+    if (field.fields) getallFieldsIncludingNestedFields(field.fields, fieldsArray);
+    if (field.properties) getallFieldsIncludingNestedFields(field.properties, fieldsArray);
+  }
+  return fieldsArray;
+};
+
+/** returns all field types from the fields, including multifield and child fields
+ * @param allFields fields from state
+ */
+export const getAllFieldTypesFromState = (allFields: Fields): DataType[] => {
+  const fields: DataType[] = [];
+  return getallFieldsIncludingNestedFields(allFields, fields).filter(filterUnique);
+};
+
+export function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
+  return Boolean(field.inference_id && field.type === 'semantic_text');
+}
+
+/**
+ * Returns deep copy of state with `copy_to` added to text fields that are referenced by new semantic text fields
+ * @param state
+ * @returns state
+ */
+
+export function getStateWithCopyToFields(state: State): State {
+  // Make sure we don't accidentally modify existing state
+  let updatedState = cloneDeep(state);
+  for (const field of Object.values(updatedState.fields.byId)) {
+    if (field.source.type === 'semantic_text' && field.source.reference_field) {
+      // Check fields already added to the list of to-update fields first
+      // API will not accept reference_field so removing it now
+      const { reference_field: referenceField, ...source } = field.source;
+      if (typeof referenceField !== 'string') {
+        // should never happen
+        throw new Error('Reference field is not a string');
+      }
+      field.source = source;
+      const existingTextField =
+        getFieldByPathName(updatedState.fields, referenceField) ||
+        getFieldByPathName(updatedState.mappingViewFields || { byId: {} }, referenceField);
+      if (existingTextField) {
+        // Add copy_to to existing text field's copy_to array
+        const updatedTextField: NormalizedField = {
+          ...existingTextField,
+          source: {
+            ...existingTextField.source,
+            copy_to: existingTextField.source.copy_to
+              ? [
+                  ...(Array.isArray(existingTextField.source.copy_to)
+                    ? existingTextField.source.copy_to
+                    : [existingTextField.source.copy_to]),
+                  field.path.join('.'),
+                ]
+              : [field.path.join('.')],
+          },
+        };
+
+        updatedState = {
+          ...updatedState,
+          fields: {
+            ...updatedState.fields,
+            byId: {
+              ...updatedState.fields.byId,
+              [existingTextField.id]: updatedTextField,
+            },
+          },
+        };
+        addChildFieldsToState(updatedTextField, updatedState);
+        if (existingTextField.parentId) {
+          let currentField = existingTextField;
+          let hasParent = true;
+          while (hasParent) {
+            if (!currentField.parentId) {
+              // reached the top of the tree, push current field to root level fields
+              updatedState.fields.rootLevelFields.push(currentField.id);
+              hasParent = false;
+            } else if (updatedState.fields.byId[currentField.parentId]) {
+              // parent is already in state, don't need to do anything
+              hasParent = false;
+            } else {
+              // parent is not in state yet
+              updatedState.fields.byId[currentField.parentId] =
+                updatedState.mappingViewFields.byId[currentField.parentId];
+              addChildFieldsToState(
+                updatedState.mappingViewFields.byId[currentField.parentId],
+                updatedState
+              );
+              currentField = updatedState.fields.byId[currentField.parentId];
+            }
+          }
+        } else {
+          updatedState.fields.rootLevelFields.push(existingTextField.id);
+        }
+      } else {
+        throw new Error(`Semantic text field ${field.path.join('.')} has invalid reference field`);
+      }
+    }
+  }
+  return updatedState;
+}
+
+function addChildFieldsToState(field: NormalizedField, state: State): State {
+  if (!field.childFields || field.childFields.length === 0) {
+    return state;
+  }
+  for (const childFieldId of field.childFields) {
+    if (!state.fields.byId[childFieldId]) {
+      state.fields.byId[childFieldId] = state.mappingViewFields.byId[childFieldId];
+      state = addChildFieldsToState(state.fields.byId[childFieldId], state);
+    }
+  }
+  return state;
+}
+
+export const getFieldByPathName = (fields: NormalizedFields, name: string) => {
+  return Object.values(fields.byId).find((field) => field.path.join('.') === name);
+};
+
+export function isLocalModel(
+  model: InferenceServiceSettings
+): model is LocalInferenceServiceSettings {
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
+}

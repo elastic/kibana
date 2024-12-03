@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockReadFile } from './plugin_manifest_parser.test.mocks';
@@ -19,6 +20,7 @@ const packageInfo: PackageInfo = {
   branch: 'master',
   buildNum: 1,
   buildSha: '',
+  buildShaShort: '',
   version: '7.0.0-alpha1',
   dist: false,
   buildDate: new Date('2023-05-15T23:12:09.000Z'),
@@ -59,7 +61,7 @@ test('return error when manifest content is not a valid JSON', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: `Unexpected token o in JSON at position 1 (invalid-manifest, ${pluginManifestPath})`,
+    message: `Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });

@@ -7,12 +7,10 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
-
-import { AlertsHealth } from './rule';
-
 export * from './rule';
 export * from './rules_settings';
 export * from './rule_type';
+export * from './lib';
 export type {
   ThrottledActions,
   LastScheduledActions,
@@ -25,6 +23,7 @@ export type {
   RuleTaskState,
   RuleTaskParams,
 } from '@kbn/alerting-state-types';
+export type { AlertingFrameworkHealth, Flapping } from '@kbn/alerting-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './bulk_edit';
@@ -38,6 +37,8 @@ export * from './rule_tags_aggregation';
 export * from './iso_weekdays';
 export * from './saved_objects/rules/mappings';
 export * from './rule_circuit_breaker_error_message';
+export * from './maintenance_window_scoped_query_error_message';
+export * from './action_ref_prefix';
 
 export type {
   MaintenanceWindowModificationMetadata,
@@ -48,6 +49,7 @@ export type {
   MaintenanceWindowCreateBody,
   MaintenanceWindowClientContext,
   MaintenanceWindowDeepLinkIds,
+  ScopedQueryAttributes,
 } from './maintenance_window';
 
 export {
@@ -68,12 +70,6 @@ export {
   contextToSchemaName,
 } from './alert_schema';
 
-export interface AlertingFrameworkHealth {
-  isSufficientlySecure: boolean;
-  hasPermanentEncryptionKey: boolean;
-  alertingFrameworkHealth: AlertsHealth;
-}
-
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
@@ -87,6 +83,13 @@ export const INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH =
 export const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH =
   `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_active` as const;
 
-export const ALERTS_FEATURE_ID = 'alerts';
+export const INTERNAL_ALERTING_BACKFILL_API_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill` as const;
+export const INTERNAL_ALERTING_BACKFILL_FIND_API_PATH =
+  `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_find` as const;
+export const INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH =
+  `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_schedule` as const;
+
+export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
 export const ENABLE_MAINTENANCE_WINDOWS = true;

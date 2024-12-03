@@ -7,7 +7,7 @@
 
 import { isEmpty, isEqual, omit } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { Observable } from 'rxjs';
+import { filter, firstValueFrom, Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -45,7 +45,7 @@ import {
 import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
-import { setAlertsToUntracked, SetAlertsToUntrackedOpts } from './lib/set_alerts_to_untracked';
+import { setAlertsToUntracked, SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -58,6 +58,8 @@ interface AlertsServiceParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   timeoutMs?: number;
   dataStreamAdapter: DataStreamAdapter;
+  elasticsearchAndSOAvailability$: Observable<boolean>;
+  isServerless: boolean;
 }
 
 export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
@@ -119,6 +121,7 @@ export type PublicFrameworkAlertsService = PublicAlertsService & {
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
+  private isServerless: boolean;
   private isInitializing: boolean = false;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
@@ -128,10 +131,14 @@ export class AlertsService implements IAlertsService {
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
 
+    this.isServerless = options.isServerless;
     this.dataStreamAdapter = options.dataStreamAdapter;
 
     // Kick off initialization of common assets and save the promise
-    this.commonInitPromise = this.initializeCommon(this.options.timeoutMs);
+    this.commonInitPromise = this.initializeCommon(
+      this.options.elasticsearchAndSOAvailability$,
+      this.options.timeoutMs
+    );
 
     // Create helper for initializing context-specific resources
     this.resourceInitializationHelper = createResourceInstallationHelper(
@@ -181,7 +188,10 @@ export class AlertsService implements IAlertsService {
       if (!this.initialized) {
         if (!this.isInitializing) {
           this.options.logger.info(`Retrying common resource initialization`);
-          initPromise = this.initializeCommon(this.options.timeoutMs);
+          initPromise = this.initializeCommon(
+            this.options.elasticsearchAndSOAvailability$,
+            this.options.timeoutMs
+          );
         } else {
           this.options.logger.info(
             `Skipped retrying common resource initialization because it is already being retried.`
@@ -227,13 +237,18 @@ export class AlertsService implements IAlertsService {
       ActionGroupIds,
       RecoveryActionGroupId
     >({
+      alertingEventLogger: opts.alertingEventLogger,
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       ruleType: opts.ruleType,
+      maintenanceWindowsService: opts.maintenanceWindowsService,
       namespace: opts.namespace,
+      request: opts.request,
       rule: opts.rule,
+      spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
       dataStreamAdapter: this.dataStreamAdapter,
+      isServerless: this.isServerless,
     });
   }
 
@@ -283,7 +298,7 @@ export class AlertsService implements IAlertsService {
       return;
     }
 
-    this.options.logger.info(`Registering resources for context "${context}".`);
+    this.options.logger.debug(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, opts);
 
     // When a context is registered, we install resources in the default namespace by default
@@ -295,8 +310,16 @@ export class AlertsService implements IAlertsService {
    * - ILM policy - common policy shared by all AAD indices
    * - Component template - common mappings for fields populated and used by the framework
    */
-  private async initializeCommon(timeoutMs?: number): Promise<InitializationPromise> {
+  private async initializeCommon(
+    elasticsearchAndSOAvailability$: Observable<boolean>,
+    timeoutMs?: number
+  ): Promise<InitializationPromise> {
     this.isInitializing = true;
+    // Wait to install resources until ES is ready
+    await firstValueFrom(
+      elasticsearchAndSOAvailability$.pipe(filter((areESAndSOAvailable) => areESAndSOAvailable))
+    );
+
     try {
       this.options.logger.debug(`Initializing resources for AlertsService`);
       const esClient = await this.options.elasticsearchClientPromise;
@@ -466,7 +489,7 @@ export class AlertsService implements IAlertsService {
     }
   }
 
-  public async setAlertsToUntracked(opts: SetAlertsToUntrackedOpts) {
+  public async setAlertsToUntracked(opts: SetAlertsToUntrackedParams) {
     return setAlertsToUntracked({
       logger: this.options.logger,
       esClient: await this.options.elasticsearchClientPromise,

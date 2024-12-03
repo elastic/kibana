@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list-view';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
 
@@ -77,7 +79,9 @@ export const App: FunctionComponent = () => {
         initialFilter=""
         initialPageSize={50}
         listingLimit={1000}
-        onClickTitle={({ attributes }) => setSelectedFile(attributes as unknown as FileJSON)}
+        getOnClickTitle={({ attributes }) =>
+          () =>
+            setSelectedFile(attributes as unknown as FileJSON)}
         deleteItems={async (items) => {
           await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
         }}

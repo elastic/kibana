@@ -17,6 +17,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -57,7 +58,7 @@ describe('copy to space', () => {
       createResolveSavedObjectsImportErrorsMock()
     );
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -72,7 +73,7 @@ describe('copy to space', () => {
       usageStatsServiceMock.createSetupContract(usageStatsClient)
     );
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -85,6 +86,7 @@ describe('copy to space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [[ctsRouteDefinition, ctsRouteHandler], [resolveRouteDefinition, resolveRouteHandler]] =

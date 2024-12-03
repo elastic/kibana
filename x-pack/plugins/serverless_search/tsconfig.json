@@ -9,7 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
   ],
   "exclude": [
     "target/**/*"
@@ -18,7 +18,6 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/management-plugin",
-    "@kbn/shared-ux-chrome-navigation",
     "@kbn/doc-links",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
@@ -30,6 +29,7 @@
     "@kbn/management-cards-navigation",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-api-panels",
+    "@kbn/search-index-documents",
     "@kbn/serverless-search-settings",
     "@kbn/core-lifecycle-browser",
     "@kbn/react-kibana-context-theme",
@@ -38,5 +38,23 @@
     "@kbn/data-views-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/index-management-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/es-types",
+    "@kbn/console-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/discover-plugin",
+    "@kbn/search-connectors-plugin",
+    "@kbn/index-management-shared-types",
+    "@kbn/react-kibana-context-render",
+    "@kbn/security-api-key-management",
+    "@kbn/search-inference-endpoints",
+    "@kbn/security-plugin-types-common",
+    "@kbn/search-indices",
+    "@kbn/core-http-server",
+    "@kbn/logging",
+    "@kbn/security-plugin-types-public",
+    "@kbn/deeplinks-search",
+    "@kbn/core-application-browser",
   ]
 }

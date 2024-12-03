@@ -9,7 +9,6 @@ import type {
   Logger,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
-  SavedObjectsBulkResponse,
   SavedObjectsFindResult,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsUpdateResponse,
@@ -17,7 +16,6 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
-  SavedObject,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -30,13 +28,13 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import { decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,
   SavedObjectsBulkResponseWithErrors,
   SOWithErrors,
 } from '../../common/types';
-import { defaultSortField, flattenCaseSavedObject, isSOError } from '../../common/utils';
+import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
@@ -48,7 +46,7 @@ import {
 } from './transform';
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
-import { createCaseError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import type {
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
@@ -276,7 +274,7 @@ export class CasesService {
     options?: SavedObjectsBulkDeleteOptions;
   }) {
     try {
-      this.log.debug(`Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
+      this.log.debug(() => `Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
       await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
     } catch (error) {
       this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);
@@ -330,37 +328,28 @@ export class CasesService {
 
   public async getCases({
     caseIds,
-  }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseTransformedAttributes>> {
+  }: GetCasesArgs): Promise<SavedObjectsBulkResponseWithErrors<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
       const cases = await this.unsecuredSavedObjectsClient.bulkGet<CasePersistedAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
 
-      const res = cases.saved_objects.reduce((acc, theCase) => {
+      const res = cases.saved_objects.map((theCase) => {
         if (isSOError(theCase)) {
-          acc.push(theCase);
-          return acc;
+          return theCase;
         }
 
         const so = Object.assign(theCase, transformSavedObjectToExternalModel(theCase));
         const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(so.attributes);
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
-        acc.push(soWithDecodedRes);
-
-        return acc;
-      }, [] as Array<SavedObject<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
+        return soWithDecodedRes;
+      });
 
       return Object.assign(cases, {
         saved_objects: res,
-        /**
-         * The case is needed here because
-         * the SavedObjectsBulkResponse is wrong.
-         * It assumes that the attributes exist
-         * on an error which is not true.
-         */
-      }) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+      });
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
       throw error;

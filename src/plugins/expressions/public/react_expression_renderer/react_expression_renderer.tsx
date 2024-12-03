@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useRef } from 'react';
 import classNames from 'classnames';
-import { EuiLoadingChart, EuiProgress, useEuiTheme } from '@elastic/eui';
+import { PanelLoader } from '@kbn/panel-loader';
+import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
@@ -34,6 +36,7 @@ export function ReactExpressionRenderer({
   dataAttrs,
   padding,
   renderError,
+  abortController,
   ...expressionRendererOptions
 }: ReactExpressionRendererProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -56,9 +59,9 @@ export function ReactExpressionRenderer({
 
   return (
     <div {...dataAttrs} className={classes}>
-      {isEmpty && <EuiLoadingChart mono size="l" />}
+      {isEmpty && <PanelLoader />}
       {isLoading && (
-        <EuiProgress size="xs" color="accent" position="absolute" style={{ zIndex: 1 }} />
+        <EuiProgress size="xs" color="accent" position="absolute" css={{ zIndex: 1 }} />
       )}
       {!isLoading && error && renderError?.(error.message, error)}
       <div className="expExpressionRenderer__expression" style={expressionStyles} ref={nodeRef} />

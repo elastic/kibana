@@ -12,7 +12,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type {
-  PluginSetupContract as FeaturesSetupContract,
+  FeaturesPluginSetup as FeaturesSetupContract,
   KibanaFeature,
 } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';

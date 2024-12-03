@@ -11,3 +11,4 @@ export const VISUALIZE_TAB_TEST_ID = `${PREFIX}VisualizeTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightsTab` as const;
 export const INVESTIGATION_TAB_TEST_ID = `${PREFIX}InvestigationTab` as const;
 export const RESPONSE_TAB_TEST_ID = `${PREFIX}ResponseTab` as const;
+export const NOTES_TAB_TEST_ID = `${PREFIX}NotesTab` as const;

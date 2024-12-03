@@ -89,7 +89,9 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
           defaultItem
             ? { ...generateEmptyItem(columns), ...defaultItem }
             : generateEmptyItem(columns),
+        // @ts-expect-error upgrade typescript v5.1.6
         editExistingItem: (_, { item }) => item,
+        // @ts-expect-error upgrade typescript v5.1.6
         setEditingItemValue: (_, { item }) => item,
       },
     ],
@@ -98,6 +100,7 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
       {
         doneEditing: () => ({}),
         setEditingItemValue: () => ({}),
+        // @ts-expect-error upgrade typescript v5.1.6
         setFieldErrors: (_, { fieldErrors }) => fieldErrors,
       },
     ],
@@ -106,6 +109,7 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
       {
         doneEditing: () => [],
         setEditingItemValue: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         setRowErrors: (_, { rowErrors }) => rowErrors,
       },
     ],

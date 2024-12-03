@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { RuleRunType } from '../../../../../../../../../common/api/detection_engine/rule_monitoring';
 
 type AlertCounts = estypes.AggregationsMultiBucketAggregateBase & {
   buckets: {
@@ -32,6 +33,7 @@ export type ExecutionUuidAggBucket = estypes.AggregationsStringTermsBucketKeys &
     totalSearchDuration: estypes.AggregationsMaxAggregate;
     numTriggeredActions: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
+    backfill: estypes.AggregationsTopHitsAggregate;
   };
   alertCounts: AlertCounts;
   actionExecution: {
@@ -58,4 +60,5 @@ export interface ExecutionEventAggregationOptions {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+  runTypeFilters: RuleRunType[];
 }

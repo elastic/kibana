@@ -5,136 +5,72 @@
  * 2.0.
  */
 
-import moment from 'moment';
-
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import {
-  CONNECTORS_INDEX,
-  CONNECTORS_JOBS_INDEX,
-  ConnectorStatus,
-  SyncStatus,
-} from '@kbn/search-connectors';
+import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '@kbn/search-connectors';
 
 import { SyncJobsStats } from '../../../common/stats';
 
+import {
+  getConnectedCountQuery,
+  getErrorCountQuery,
+  getIdleJobsCountQuery,
+  getIncompleteCountQuery,
+  getInProgressJobsCountQuery,
+  getOrphanedJobsCountQuery,
+} from '../../utils/get_sync_jobs_queries';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
-export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<SyncJobsStats> => {
+export const fetchSyncJobsStats = async (
+  client: IScopedClusterClient,
+  isCrawler?: boolean
+): Promise<SyncJobsStats> => {
   try {
     const connectorIdsResult = await client.asCurrentUser.search({
       index: CONNECTORS_INDEX,
       scroll: '10s',
       stored_fields: [],
     });
-    const ids = connectorIdsResult.hits.hits.map((hit) => hit._id);
+    const ids = connectorIdsResult.hits.hits.map((hit) => hit._id!);
     const orphanedJobsCountResponse = await client.asCurrentUser.count({
       index: CONNECTORS_JOBS_INDEX,
-      query: {
-        bool: {
-          must_not: [
-            {
-              terms: {
-                'connector.id': ids,
-              },
-            },
-          ],
-        },
-      },
+      query: getOrphanedJobsCountQuery(ids, isCrawler),
     });
 
     const inProgressJobsCountResponse = await client.asCurrentUser.count({
       index: CONNECTORS_JOBS_INDEX,
-      query: {
-        term: {
-          status: SyncStatus.IN_PROGRESS,
-        },
-      },
+      query: getInProgressJobsCountQuery(isCrawler),
     });
 
-    const idleJobsCountResponse = await client.asCurrentUser.count({
-      index: CONNECTORS_JOBS_INDEX,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                status: SyncStatus.IN_PROGRESS,
-              },
-            },
-            {
-              range: {
-                last_seen: {
-                  lt: moment().subtract(1, 'minute').toISOString(),
-                },
-              },
-            },
-          ],
-        },
-      },
-    });
+    // Idle syncs don't make sense for Crawler, because it does not have concept of "Idle" syncs at all.
+    // We tried tracking idle syncs in a way similar to connectors, but it results in all crawler jobs
+    // marked as idle.
+    const idleJobsCountResponse = isCrawler
+      ? undefined
+      : await client.asCurrentUser.count({
+          index: CONNECTORS_JOBS_INDEX,
+          query: getIdleJobsCountQuery(),
+        });
 
     const errorResponse = await client.asCurrentUser.count({
       index: CONNECTORS_INDEX,
-      query: {
-        term: {
-          last_sync_status: SyncStatus.ERROR,
-        },
-      },
+      query: getErrorCountQuery(isCrawler),
     });
 
     const connectedResponse = await client.asCurrentUser.count({
       index: CONNECTORS_INDEX,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                status: ConnectorStatus.CONNECTED,
-              },
-            },
-            {
-              range: {
-                last_seen: {
-                  gte: moment().subtract(30, 'minutes').toISOString(),
-                },
-              },
-            },
-          ],
-        },
-      },
+      query: getConnectedCountQuery(isCrawler),
     });
 
     const incompleteResponse = await client.asCurrentUser.count({
       index: CONNECTORS_INDEX,
-      query: {
-        bool: {
-          should: [
-            {
-              bool: {
-                must_not: {
-                  terms: {
-                    status: [ConnectorStatus.CONNECTED, ConnectorStatus.ERROR],
-                  },
-                },
-              },
-            },
-            {
-              range: {
-                last_seen: {
-                  lt: moment().subtract(30, 'minutes').toISOString(),
-                },
-              },
-            },
-          ],
-        },
-      },
+      query: getIncompleteCountQuery(isCrawler),
     });
 
     const response = {
       connected: connectedResponse.count,
       errors: errorResponse.count,
-      idle: idleJobsCountResponse.count,
+      idle: idleJobsCountResponse?.count || 0,
       in_progress: inProgressJobsCountResponse.count,
       incomplete: incompleteResponse.count,
       orphaned_jobs: orphanedJobsCountResponse.count,

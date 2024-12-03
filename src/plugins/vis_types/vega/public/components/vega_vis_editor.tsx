@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { XJsonLang } from '@kbn/monaco';
@@ -15,7 +16,7 @@ import compactStringify from 'json-stringify-pretty-compact';
 import { i18n } from '@kbn/i18n';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { CodeEditor, HJsonLang } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, HJsonLang } from '@kbn/code-editor';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';

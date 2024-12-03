@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
-import { mapTo, tap } from 'rxjs/operators';
+import { mapTo, tap } from 'rxjs';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import { ACTION } from '../components/actions';
@@ -22,7 +23,7 @@ import {
 import { ISessionsClient } from '../../sessions_client';
 import { SearchUsageCollector } from '../../../collectors';
 import { SearchSessionsFindResponse, SearchSessionStatus } from '../../../../../common';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 type LocatorsStart = SharePluginStart['url']['locators'];
 

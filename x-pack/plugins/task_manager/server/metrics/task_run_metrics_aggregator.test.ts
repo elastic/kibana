@@ -6,6 +6,7 @@
  */
 
 import * as uuid from 'uuid';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskStatus } from '../task';
 import {
@@ -16,6 +17,8 @@ import {
 } from '../task_events';
 import { TaskRunResult } from '../task_running';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
+
+const logger = loggingSystemMock.createLogger();
 
 export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false) => {
   const id = uuid.v4();
@@ -81,18 +84,36 @@ export const getTaskManagerStatEvent = (value: number, id: TaskManagerStats = 'r
 describe('TaskRunMetricsAggregator', () => {
   let taskRunMetricsAggregator: TaskRunMetricsAggregator;
   beforeEach(() => {
-    taskRunMetricsAggregator = new TaskRunMetricsAggregator();
+    taskRunMetricsAggregator = new TaskRunMetricsAggregator(logger);
   });
 
   test('should correctly initialize', () => {
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [], values: [] } },
+      overall: {
+        success: 0,
+        not_timed_out: 0,
+        total: 0,
+        framework_errors: 0,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 0,
+        delay_values: [],
+      },
     });
   });
 
   test('should correctly return initialMetrics', () => {
     expect(taskRunMetricsAggregator.initialMetric()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [], values: [] } },
+      overall: {
+        success: 0,
+        not_timed_out: 0,
+        total: 0,
+        framework_errors: 0,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 0,
+        delay_values: [],
+      },
       by_type: {},
     });
   });
@@ -101,9 +122,25 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 2, not_timed_out: 2, total: 2, delay: { counts: [], values: [] } },
+      overall: {
+        success: 2,
+        not_timed_out: 2,
+        total: 2,
+        framework_errors: 0,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 0,
+        delay_values: [],
+      },
       by_type: {
-        telemetry: { success: 2, not_timed_out: 2, total: 2 },
+        telemetry: {
+          success: 2,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
       },
     });
   });
@@ -111,7 +148,16 @@ describe('TaskRunMetricsAggregator', () => {
   test('should correctly process task manager runDelay stat', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(3.343));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [1], values: [10] } },
+      overall: {
+        success: 0,
+        not_timed_out: 0,
+        total: 0,
+        framework_errors: 0,
+        user_errors: 0,
+        delay: { counts: [1], values: [10] },
+        total_errors: 0,
+        delay_values: [3],
+      },
     });
   });
 
@@ -120,7 +166,16 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskManagerStatEvent(3.343, 'pollingDelay')
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [], values: [] } },
+      overall: {
+        success: 0,
+        not_timed_out: 0,
+        total: 0,
+        framework_errors: 0,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 0,
+        delay_values: [],
+      },
     });
   });
 
@@ -128,9 +183,25 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry', true));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry', true));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 2, not_timed_out: 0, total: 2, delay: { counts: [], values: [] } },
+      overall: {
+        success: 2,
+        not_timed_out: 0,
+        total: 2,
+        framework_errors: 0,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 0,
+        delay_values: [],
+      },
       by_type: {
-        telemetry: { success: 2, not_timed_out: 0, total: 2 },
+        telemetry: {
+          success: 2,
+          not_timed_out: 0,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
       },
     });
   });
@@ -139,9 +210,25 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 2, total: 2, delay: { counts: [], values: [] } },
+      overall: {
+        success: 0,
+        not_timed_out: 2,
+        total: 2,
+        framework_errors: 2,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 2,
+        delay_values: [],
+      },
       by_type: {
-        telemetry: { success: 0, not_timed_out: 2, total: 2 },
+        telemetry: {
+          success: 0,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
       },
     });
   });
@@ -150,9 +237,25 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry', true));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry', true));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 2, delay: { counts: [], values: [] } },
+      overall: {
+        success: 0,
+        not_timed_out: 0,
+        total: 2,
+        framework_errors: 2,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 2,
+        delay_values: [],
+      },
       by_type: {
-        telemetry: { success: 0, not_timed_out: 0, total: 2 },
+        telemetry: {
+          success: 0,
+          not_timed_out: 0,
+          total: 2,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
       },
     });
   });
@@ -163,10 +266,33 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report', true));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 3, not_timed_out: 3, total: 4, delay: { counts: [], values: [] } },
+      overall: {
+        success: 3,
+        not_timed_out: 3,
+        total: 4,
+        framework_errors: 1,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 1,
+        delay_values: [],
+      },
       by_type: {
-        report: { success: 2, not_timed_out: 1, total: 2 },
-        telemetry: { success: 1, not_timed_out: 2, total: 2 },
+        report: {
+          success: 2,
+          not_timed_out: 1,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        telemetry: {
+          success: 1,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 1,
+          user_errors: 0,
+          total_errors: 1,
+        },
       },
     });
   });
@@ -193,16 +319,81 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskRunSuccessEvent('alerting:.index-threshold', true)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, not_timed_out: 12, total: 14, delay: { counts: [], values: [] } },
+      overall: {
+        success: 11,
+        not_timed_out: 12,
+        total: 14,
+        framework_errors: 3,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 3,
+        delay_values: [],
+      },
       by_type: {
-        actions: { success: 3, not_timed_out: 3, total: 3 },
-        'actions:__email': { success: 1, not_timed_out: 1, total: 1 },
-        'actions:webhook': { success: 2, not_timed_out: 2, total: 2 },
-        alerting: { success: 5, not_timed_out: 5, total: 7 },
-        'alerting:example': { success: 3, not_timed_out: 4, total: 5 },
-        'alerting:__index-threshold': { success: 2, not_timed_out: 1, total: 2 },
-        report: { success: 2, not_timed_out: 2, total: 2 },
-        telemetry: { success: 1, not_timed_out: 2, total: 2 },
+        actions: {
+          success: 3,
+          not_timed_out: 3,
+          total: 3,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        'actions:__email': {
+          success: 1,
+          not_timed_out: 1,
+          total: 1,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        'actions:webhook': {
+          success: 2,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        alerting: {
+          success: 5,
+          not_timed_out: 5,
+          total: 7,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
+        'alerting:example': {
+          success: 3,
+          not_timed_out: 4,
+          total: 5,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
+        'alerting:__index-threshold': {
+          success: 2,
+          not_timed_out: 1,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        report: {
+          success: 2,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        telemetry: {
+          success: 1,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 1,
+          user_errors: 0,
+          total_errors: 1,
+        },
       },
     });
   });
@@ -239,31 +430,156 @@ describe('TaskRunMetricsAggregator', () => {
         not_timed_out: 12,
         total: 14,
         delay: { counts: [3, 0, 1], values: [10, 20, 30] },
+        delay_values: [3, 25, 6, 9],
+        framework_errors: 3,
+        user_errors: 0,
+        total_errors: 3,
       },
       by_type: {
-        actions: { success: 3, not_timed_out: 3, total: 3 },
-        'actions:__email': { success: 1, not_timed_out: 1, total: 1 },
-        'actions:webhook': { success: 2, not_timed_out: 2, total: 2 },
-        alerting: { success: 5, not_timed_out: 5, total: 7 },
-        'alerting:example': { success: 3, not_timed_out: 4, total: 5 },
-        'alerting:__index-threshold': { success: 2, not_timed_out: 1, total: 2 },
-        report: { success: 2, not_timed_out: 2, total: 2 },
-        telemetry: { success: 1, not_timed_out: 2, total: 2 },
+        actions: {
+          success: 3,
+          not_timed_out: 3,
+          total: 3,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        'actions:__email': {
+          success: 1,
+          not_timed_out: 1,
+          total: 1,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        'actions:webhook': {
+          success: 2,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        alerting: {
+          success: 5,
+          not_timed_out: 5,
+          total: 7,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
+        'alerting:example': {
+          success: 3,
+          not_timed_out: 4,
+          total: 5,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
+        'alerting:__index-threshold': {
+          success: 2,
+          not_timed_out: 1,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        report: {
+          success: 2,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        telemetry: {
+          success: 1,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 1,
+          user_errors: 0,
+          total_errors: 1,
+        },
       },
     });
 
     taskRunMetricsAggregator.reset();
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [], values: [] } },
+      overall: {
+        success: 0,
+        not_timed_out: 0,
+        total: 0,
+        framework_errors: 0,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 0,
+        delay_values: [],
+      },
       by_type: {
-        actions: { success: 0, not_timed_out: 0, total: 0 },
-        'actions:__email': { success: 0, not_timed_out: 0, total: 0 },
-        'actions:webhook': { success: 0, not_timed_out: 0, total: 0 },
-        alerting: { success: 0, not_timed_out: 0, total: 0 },
-        'alerting:example': { success: 0, not_timed_out: 0, total: 0 },
-        'alerting:__index-threshold': { success: 0, not_timed_out: 0, total: 0 },
-        report: { success: 0, not_timed_out: 0, total: 0 },
-        telemetry: { success: 0, not_timed_out: 0, total: 0 },
+        actions: {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        'actions:__email': {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        'actions:webhook': {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        alerting: {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        'alerting:example': {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        'alerting:__index-threshold': {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        report: {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        telemetry: {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
       },
     });
   });

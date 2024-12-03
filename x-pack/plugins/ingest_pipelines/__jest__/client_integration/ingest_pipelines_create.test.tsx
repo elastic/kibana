@@ -16,8 +16,8 @@ import { nestedProcessorsErrorFixture } from './fixtures';
 
 const { setup } = pageHelpers.pipelinesCreate;
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -62,25 +62,21 @@ describe('<PipelinesCreate />', () => {
     test('should toggle the version field', async () => {
       const { actions, exists } = testBed;
 
-      // Version field should be hidden by default
-      expect(exists('versionField')).toBe(false);
+      // Version field toggle should be disabled by default
+      expect(actions.getToggleValue('versionToggle')).toBe(false);
 
-      actions.toggleVersionSwitch();
+      await actions.toggleSwitch('versionToggle');
 
       expect(exists('versionField')).toBe(true);
     });
 
     test('should toggle the _meta field', async () => {
-      const { exists, component, actions } = testBed;
+      const { exists, actions } = testBed;
 
-      // Meta editor should be hidden by default
-      expect(exists('metaEditor')).toBe(false);
+      // Meta field toggle should be disabled by default
+      expect(actions.getToggleValue('metaToggle')).toBe(false);
 
-      await act(async () => {
-        actions.toggleMetaSwitch();
-      });
-
-      component.update();
+      await actions.toggleSwitch('metaToggle');
 
       expect(exists('metaEditor')).toBe(true);
     });
@@ -149,12 +145,10 @@ describe('<PipelinesCreate />', () => {
       });
 
       test('should send the correct payload', async () => {
-        const { component, actions } = testBed;
+        const { actions } = testBed;
 
-        await act(async () => {
-          actions.toggleMetaSwitch();
-        });
-        component.update();
+        await actions.toggleSwitch('metaToggle');
+
         const metaData = {
           field1: 'hello',
           field2: 10,

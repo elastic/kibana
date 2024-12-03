@@ -16,6 +16,7 @@ import type {
 
 export interface FleetConfigType {
   enabled: boolean;
+  isAirGapped?: boolean;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
@@ -29,26 +30,44 @@ export interface FleetConfigType {
       hosts?: string[];
     };
   };
+  agentless?: {
+    enabled: boolean;
+    api?: {
+      url?: string;
+      tls?: {
+        certificate?: string;
+        key?: string;
+        ca?: string;
+      };
+    };
+  };
+  spaceSettings?: Array<{
+    space_id: string;
+    allowed_namespace_prefixes: string[] | null;
+  }>;
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
+  eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
   packageVerification?: {
     gpgKeyPath?: string;
   };
   setup?: {
     agentPolicySchemaUpgradeBatchSize?: number;
+    uninstallTokenVerificationBatchSize?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;
     testSecretsIndex?: string;
+    disableBundledPackagesCache?: boolean;
   };
   internal?: {
+    useMeteringApi?: boolean;
     disableILMPolicies: boolean;
-    disableProxies: boolean;
     fleetServerStandalone: boolean;
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;

@@ -7,7 +7,7 @@
 
 import { EuiConfirmModal, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors';
+import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useKibanaServices } from '../../hooks/use_kibana';
@@ -19,6 +19,10 @@ interface DeleteConnectorModalProps {
   onSuccess?: () => void;
 }
 
+const DELETE_LABEL = i18n.translate('xpack.serverlessSearch.connectors.deleteModal.deleteLabel', {
+  defaultMessage: 'DELETE',
+});
+
 export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
   connectorId,
   connectorName,
@@ -28,10 +32,10 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
   const { http } = useKibanaServices();
   const { isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async () => {
-      const result = await http.delete<{ connector: Connector }>(
+      const result = await http.delete<AcknowledgedResponseBase>(
         `/internal/serverless_search/connectors/${connectorId}`
       );
-      return result.connector;
+      return result.acknowledged;
     },
   });
 
@@ -50,7 +54,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
     <EuiConfirmModal
       title={i18n.translate('xpack.serverlessSearch.connectors.deleteModal.title', {
         defaultMessage: 'Are you sure you want to delete connector {connectorName}',
-        values: { connectorName },
+        values: { connectorName: connectorName || connectorId },
       })}
       onCancel={() => {
         closeDeleteModal();
@@ -70,12 +74,12 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
       confirmButtonText={i18n.translate(
         'xpack.serverlessSearch.connectors.deleteModal.confirmButton.title',
         {
-          defaultMessage: 'Delete index',
+          defaultMessage: 'Delete connector',
         }
       )}
       defaultFocusedButton="confirm"
       buttonColor="danger"
-      confirmButtonDisabled={inputConnectorName.trim() !== connectorName}
+      confirmButtonDisabled={inputConnectorName.trim() !== (connectorName || DELETE_LABEL)}
       isLoading={isLoading}
     >
       <p>
@@ -83,7 +87,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
           'xpack.serverlessSearch.connectors.deleteModal.syncsWarning.connectorNameDescription',
           {
             defaultMessage: 'This action cannot be undone. Please type {connectorName} to confirm.',
-            values: { connectorName },
+            values: { connectorName: connectorName || DELETE_LABEL },
           }
         )}
       </p>

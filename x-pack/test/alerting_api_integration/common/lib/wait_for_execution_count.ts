@@ -13,7 +13,7 @@ async function delay(millis: number): Promise<void> {
 }
 
 export function createWaitForExecutionCount(
-  st: supertest.SuperTest<supertest.Test>,
+  st: supertest.Agent,
   spaceId?: string,
   delayMs: number = 3000
 ) {

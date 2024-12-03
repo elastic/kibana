@@ -4,22 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RawRule } from '../../../types';
 import { RuleDomain } from '../types';
-import { RuleAttributes } from '../../../data/rule/types';
 import { getMappedParams } from '../../../rules_client/common';
+import { DenormalizedAction } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
-  legacyId: RuleAttributes['legacyId'];
-  actionsWithRefs: RuleAttributes['actions'];
-  paramsWithRefs: RuleAttributes['params'];
-  meta?: RuleAttributes['meta'];
+  legacyId: RawRule['legacyId'];
+  paramsWithRefs: RawRule['params'];
+  meta?: RawRule['meta'];
 }
 
-export const transformRuleDomainToRuleAttributes = (
-  rule: Omit<RuleDomain, 'actions' | 'params'>,
-  params: TransformRuleToEsParams
-): RuleAttributes => {
-  const { legacyId, actionsWithRefs, paramsWithRefs, meta } = params;
+export const transformRuleDomainToRuleAttributes = ({
+  actionsWithRefs,
+  rule,
+  params,
+}: {
+  actionsWithRefs: DenormalizedAction[];
+  rule: Omit<RuleDomain, 'actions' | 'params' | 'systemActions'>;
+  params: TransformRuleToEsParams;
+}): RawRule => {
+  const { legacyId, paramsWithRefs, meta } = params;
   const mappedParams = getMappedParams(paramsWithRefs);
 
   return {
@@ -48,17 +53,23 @@ export const transformRuleDomainToRuleAttributes = (
     muteAll: rule.muteAll,
     mutedInstanceIds: rule.mutedInstanceIds,
     ...(meta ? { meta } : {}),
-    executionStatus: {
-      status: rule.executionStatus.status,
-      lastExecutionDate: rule.executionStatus.lastExecutionDate.toISOString(),
-      ...(rule.executionStatus.lastDuration
-        ? { lastDuration: rule.executionStatus.lastDuration }
-        : {}),
-      ...(rule.executionStatus.error !== undefined ? { error: rule.executionStatus.error } : {}),
-      ...(rule.executionStatus.warning !== undefined
-        ? { warning: rule.executionStatus.warning }
-        : {}),
-    },
+    ...(rule.executionStatus
+      ? {
+          executionStatus: {
+            status: rule.executionStatus.status,
+            lastExecutionDate: rule.executionStatus.lastExecutionDate.toISOString(),
+            ...(rule.executionStatus.lastDuration
+              ? { lastDuration: rule.executionStatus.lastDuration }
+              : {}),
+            ...(rule.executionStatus.error !== undefined
+              ? { error: rule.executionStatus.error }
+              : {}),
+            ...(rule.executionStatus.warning !== undefined
+              ? { warning: rule.executionStatus.warning }
+              : {}),
+          },
+        }
+      : {}),
     ...(rule.monitoring ? { monitoring: rule.monitoring } : {}),
     ...(rule.snoozeSchedule ? { snoozeSchedule: rule.snoozeSchedule } : {}),
     ...(rule.isSnoozedUntil !== undefined
@@ -68,5 +79,7 @@ export const transformRuleDomainToRuleAttributes = (
     ...(rule.nextRun !== undefined ? { nextRun: rule.nextRun?.toISOString() || null } : {}),
     revision: rule.revision,
     ...(rule.running !== undefined ? { running: rule.running } : {}),
-  };
+    ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
+    ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),
+  } as RawRule;
 };

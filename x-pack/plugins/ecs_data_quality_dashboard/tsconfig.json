@@ -21,6 +21,12 @@
     "@kbn/i18n",
     "@kbn/core-http-router-server-mocks",
     "@kbn/logging-mocks",
+    "@kbn/data-stream-adapter",
+    "@kbn/spaces-plugin",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-security-common",
+    "@kbn/datemath",
   ],
   "exclude": [
     "target/**/*",

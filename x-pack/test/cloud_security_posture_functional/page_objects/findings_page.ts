@@ -12,6 +12,10 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 // Defined in CSP plugin
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
 const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+export const VULNERABILITIES_INDEX_DEFAULT_NS =
+  'logs-cloud_security_posture.vulnerabilities-default';
+export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
+  'logs-cloud_security_posture.vulnerabilities_latest-default';
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -35,49 +39,49 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       log.debug('CSP plugin is initialized');
     });
 
+  const deleteByQuery = async (index: string) => {
+    await es.deleteByQuery({
+      index,
+      query: {
+        match_all: {},
+      },
+      ignore_unavailable: true,
+      refresh: true,
+    });
+  };
+
+  const insertOperation = (index: string, findingsMock: Array<Record<string, unknown>>) => {
+    return findingsMock.flatMap((doc) => [{ index: { _index: index } }, doc]);
+  };
+
   const index = {
     remove: () =>
+      Promise.all([deleteByQuery(FINDINGS_INDEX), deleteByQuery(FINDINGS_LATEST_INDEX)]),
+    add: async (findingsMock: Array<Record<string, unknown>>) => {
+      await es.bulk({
+        refresh: true,
+        operations: [
+          ...insertOperation(FINDINGS_INDEX, findingsMock),
+          ...insertOperation(FINDINGS_LATEST_INDEX, findingsMock),
+        ],
+      });
+    },
+  };
+
+  const vulnerabilitiesIndex = {
+    remove: () =>
       Promise.all([
-        es.deleteByQuery({
-          index: FINDINGS_INDEX,
-          query: {
-            match_all: {},
-          },
-          ignore_unavailable: true,
-          refresh: true,
-        }),
-        es.deleteByQuery({
-          index: FINDINGS_LATEST_INDEX,
-          query: {
-            match_all: {},
-          },
-          ignore_unavailable: true,
-          refresh: true,
-        }),
+        deleteByQuery(VULNERABILITIES_INDEX_DEFAULT_NS),
+        deleteByQuery(CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
       ]),
     add: async (findingsMock: Array<Record<string, unknown>>) => {
-      await Promise.all([
-        ...findingsMock.map((finding) =>
-          es.index({
-            index: FINDINGS_INDEX,
-            body: {
-              ...finding,
-              '@timestamp': finding['@timestamp'] ?? new Date().toISOString(),
-            },
-            refresh: true,
-          })
-        ),
-        ...findingsMock.map((finding) =>
-          es.index({
-            index: FINDINGS_LATEST_INDEX,
-            body: {
-              ...finding,
-              '@timestamp': finding['@timestamp'] ?? new Date().toISOString(),
-            },
-            refresh: true,
-          })
-        ),
-      ]);
+      await es.bulk({
+        refresh: true,
+        operations: [
+          ...insertOperation(VULNERABILITIES_INDEX_DEFAULT_NS, findingsMock),
+          ...insertOperation(CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, findingsMock),
+        ],
+      });
     },
   };
 
@@ -102,13 +106,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const createNotInstalledObject = (notInstalledSubject: string) => ({
     getElement() {
-      return testSubjects.find(notInstalledSubject);
+      return testSubjects.find(notInstalledSubject, 15 * 1000);
     },
 
     async navigateToAction(actionTestSubject: string) {
       return await retry.try(async () => {
         await testSubjects.click(actionTestSubject);
         await PageObjects.header.waitUntilLoadingHasFinished();
+
         const result = await testSubjects.exists('createPackagePolicy_pageTitle');
 
         if (!result) {
@@ -130,9 +135,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getColumnIndex(columnName: string) {
       const element = await this.getElement();
-      const columnIndex = await (
+      const columnIndexAttr = await (
         await element.findByCssSelector(`[data-gridcell-column-id="${columnName}"]`)
       ).getAttribute('data-gridcell-column-index');
+      expect(columnIndexAttr).to.not.be(null);
+      const columnIndex = parseInt(columnIndexAttr ?? '-1', 10);
       expect(columnIndex).to.be.greaterThan(-1);
       return columnIndex;
     },
@@ -220,156 +227,76 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const flyoutButton = await table.findAllByTestSubject('docTableExpandToggleColumn');
       await flyoutButton[rowIndex].click();
     },
+
+    async toggleEditDataViewFieldsOption(columnId: string) {
+      const element = await this.getElement();
+      const column = await element.findByCssSelector(`[data-gridcell-column-id="${columnId}"]`);
+      const button = await column.findByCssSelector('.euiDataGridHeaderCell__button');
+      return await button.click();
+    },
   });
 
-  const createTableObject = (tableTestSubject: string) => ({
-    getElement() {
-      return testSubjects.find(tableTestSubject);
-    },
-
-    async getHeaders() {
-      const element = await this.getElement();
-      return await element.findAllByCssSelector('thead tr :is(th,td)');
-    },
-
-    async getColumnIndex(columnName: string) {
-      const headers = await this.getHeaders();
-      const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
-      const columnIndex = texts.findIndex((i) => i === columnName);
-      expect(columnIndex).to.be.greaterThan(-1);
-      return columnIndex + 1;
-    },
-
-    async getColumnHeaderCell(columnName: string) {
-      const headers = await this.getHeaders();
-      const headerIndexes = await Promise.all(headers.map((header) => header.getVisibleText()));
-      const columnIndex = headerIndexes.findIndex((i) => i === columnName);
-      return headers[columnIndex];
-    },
-
-    async getRowsCount() {
-      const element = await this.getElement();
-      const rows = await element.findAllByCssSelector('tbody tr');
-      return rows.length;
-    },
-
-    async getFindingsCount(type: 'passed' | 'failed') {
-      const element = await this.getElement();
-      const items = await element.findAllByCssSelector(`span[data-test-subj="${type}_finding"]`);
-      return items.length;
-    },
-
-    async getRowIndexForValue(columnName: string, value: string) {
-      const values = await this.getColumnValues(columnName);
-      const rowIndex = values.indexOf(value);
-      expect(rowIndex).to.be.greaterThan(-1);
-      return rowIndex + 1;
-    },
-
-    async getFilterElementButton(rowIndex: number, columnIndex: number, negated = false) {
-      const tableElement = await this.getElement();
-      const button = negated
-        ? 'findings_table_cell_add_negated_filter'
-        : 'findings_table_cell_add_filter';
-      const selector = `tbody tr:nth-child(${rowIndex}) td:nth-child(${columnIndex}) button[data-test-subj="${button}"]`;
-      return tableElement.findByCssSelector(selector);
-    },
-
-    async addCellFilter(columnName: string, cellValue: string, negated = false) {
-      const columnIndex = await this.getColumnIndex(columnName);
-      const rowIndex = await this.getRowIndexForValue(columnName, cellValue);
-      const filterElement = await this.getFilterElementButton(rowIndex, columnIndex, negated);
-      await filterElement.click();
-    },
-
-    async getColumnValues(columnName: string) {
-      const elementsWithNoFilterCell = ['CIS Section', '@timestamp'];
-      const tableElement = await this.getElement();
-      const columnIndex = await this.getColumnIndex(columnName);
-      const selector = elementsWithNoFilterCell.includes(columnName)
-        ? `tbody tr td:nth-child(${columnIndex})`
-        : `tbody tr td:nth-child(${columnIndex}) div[data-test-subj="filter_cell_value"]`;
-      const columnCells = await tableElement.findAllByCssSelector(selector);
-
-      return await Promise.all(columnCells.map((cell) => cell.getVisibleText()));
-    },
-
-    async hasColumnValue(columnName: string, value: string) {
-      const values = await this.getColumnValues(columnName);
-      return values.includes(value);
-    },
-
-    async toggleColumnSort(columnName: string, direction: 'asc' | 'desc') {
-      const element = await this.getColumnHeaderCell(columnName);
-      const currentSort = await element.getAttribute('aria-sort');
-      if (currentSort === 'none') {
-        // a click is needed to focus on Eui column header
-        await element.click();
-
-        // default is ascending
-        if (direction === 'desc') {
-          const nonStaleElement = await this.getColumnHeaderCell(columnName);
-          await nonStaleElement.click();
+  const navigateToLatestFindingsPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
         }
-      }
-      if (
-        (currentSort === 'ascending' && direction === 'desc') ||
-        (currentSort === 'descending' && direction === 'asc')
-      ) {
-        // Without getting the element again, the click throws an error (stale element reference)
-        const nonStaleElement = await this.getColumnHeaderCell(columnName);
-        await nonStaleElement.click();
-      }
-    },
+      : {
+          shouldUseHashForSubUrl: false,
+        };
 
-    async openFlyoutAt(rowIndex: number) {
-      const table = await this.getElement();
-      const flyoutButton = await table.findAllByTestSubject('findings_table_expand_column');
-      await flyoutButton[rowIndex].click();
-    },
-  });
-
-  const navigateToLatestFindingsPage = async () => {
-    await PageObjects.common.navigateToUrl(
-      'securitySolution', // Defined in Security Solution plugin
-      'cloud_security_posture/findings',
-      { shouldUseHashForSubUrl: false }
-    );
-  };
-
-  const navigateToVulnerabilities = async () => {
-    await PageObjects.common.navigateToUrl(
-      'securitySolution', // Defined in Security Solution plugin
-      'cloud_security_posture/findings/vulnerabilities',
-      { shouldUseHashForSubUrl: false }
-    );
-  };
-
-  const navigateToMisconfigurations = async () => {
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/configurations',
-      { shouldUseHashForSubUrl: false }
+      options
+    );
+  };
+
+  const navigateToLatestVulnerabilitiesPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+    await PageObjects.common.navigateToUrl(
+      'securitySolution', // Defined in Security Solution plugin
+      'cloud_security_posture/findings/vulnerabilities',
+      options
+    );
+  };
+
+  const navigateToMisconfigurations = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
+    await PageObjects.common.navigateToUrl(
+      'securitySolution', // Defined in Security Solution plugin
+      'cloud_security_posture/findings/configurations',
+      options
     );
   };
 
   const latestFindingsTable = createDataTableObject('latest_findings_table');
-  const resourceFindingsTable = createTableObject('resource_findings_table');
-  const findingsByResourceTable = {
-    ...createTableObject('findings_by_resource_table'),
-    async clickResourceIdLink(resourceId: string, sectionName: string) {
-      const table = await this.getElement();
-      const row = await table.findByCssSelector(
-        `[data-test-subj="findings_resource_table_row_${resourceId}/${sectionName}"]`
-      );
-      const link = await row.findByCssSelector(
-        '[data-test-subj="findings_by_resource_table_resource_id_column"'
-      );
-      await link.click();
-    },
-  };
+  const latestVulnerabilitiesTable = createDataTableObject('latest_vulnerabilities_table');
+
   const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
   const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
+  const thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt = createNotInstalledObject(
+    '3p-integrations-no-vulnerabilities-findings-prompt'
+  );
+  const thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt = createNotInstalledObject(
+    '3p-integrations-no-misconfigurations-findings-prompt'
+  );
 
   const vulnerabilityDataGrid = {
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
@@ -399,39 +326,74 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const misconfigurationsFlyout = createFlyoutObject('findings_flyout');
 
-  const toastMessage = async (testSubj = 'csp:toast-success') => ({
+  const groupSelector = (testSubj = 'group-selector-dropdown') => ({
     async getElement() {
       return await testSubjects.find(testSubj);
     },
-    async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
+    async setValue(value: string) {
+      const contextMenu = await testSubjects.find('groupByContextMenu');
+      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+      const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
+      const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
+      await menuItems[menuItemValueIndex].click();
+      return await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+    },
+    async openDropDown() {
       const element = await this.getElement();
-      const link = await element.findByTestSubject(linkTestSubj);
-      await link.click();
+      await element.click();
     },
   });
 
+  const findingsGrouping = async (testSubj = 'cloudSecurityGrouping') => ({
+    async getElement() {
+      return await testSubjects.find(testSubj);
+    },
+    async getGroupCount() {
+      const element = await this.getElement();
+      const groupCount = await element.findByTestSubject('group-count');
+      return await groupCount.getVisibleText();
+    },
+    async getUnitCount() {
+      const element = await this.getElement();
+      const unitCount = await element.findByTestSubject('unit-count');
+      return await unitCount.getVisibleText();
+    },
+    async getRowAtIndex(rowIndex: number) {
+      const element = await this.getElement();
+      const row = await element.findAllByTestSubject('grouping-accordion');
+      return await row[rowIndex];
+    },
+  });
   const isLatestFindingsTableThere = async () => {
     const table = await testSubjects.findAll('docTable');
-    const trueOrFalse = table.length > 0 ? true : false;
-    return trueOrFalse;
+    return table.length > 0;
+  };
+
+  const getUnprivilegedPrompt = async () => {
+    return await testSubjects.find('status-api-unprivileged');
   };
 
   return {
     navigateToLatestFindingsPage,
-    navigateToVulnerabilities,
+    navigateToLatestVulnerabilitiesPage,
     navigateToMisconfigurations,
     latestFindingsTable,
-    resourceFindingsTable,
-    findingsByResourceTable,
+    latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
+    thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt,
+    thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt,
     index,
+    vulnerabilitiesIndex,
     waitForPluginInitialized,
     distributionBar,
     vulnerabilityDataGrid,
     misconfigurationsFlyout,
-    toastMessage,
     detectionRuleApi,
+    groupSelector,
+    findingsGrouping,
+    createDataTableObject,
     isLatestFindingsTableThere,
+    getUnprivilegedPrompt,
   };
 }

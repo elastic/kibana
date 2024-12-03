@@ -1,0 +1,38 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-playground",
+  "owner": "@elastic/search-kibana",
+  // TODO @kbn/enterprise-search-plugin (platform) and @kbn/serverless-search (search) depend on it
+  // cc sphilipse
+  "group": "search",
+  "visibility": "private",
+  "plugin": {
+    "id": "searchPlayground",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchPlayground"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "data",
+      "encryptedSavedObjects",
+      "ml",
+      "navigation",
+      "share",
+      "security",
+      "stackConnectors",
+      "triggersActionsUi",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "usageCollection",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "unifiedDocViewer"
+    ]
+  }
+}

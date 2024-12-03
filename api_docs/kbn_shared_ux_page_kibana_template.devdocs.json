@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-page-kibana-template",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-        "id": "def-common.KibanaPageTemplate",
+        "id": "def-public.KibanaPageTemplate",
         "type": "Function",
         "tags": [],
         "label": "KibanaPageTemplate",
@@ -50,21 +34,21 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-            "id": "def-common.KibanaPageTemplate.$1",
-            "type": "CompoundType",
+            "id": "def-public.KibanaPageTemplate.$1",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-            "id": "def-common.KibanaPageTemplate.$2",
+            "id": "def-public.KibanaPageTemplate.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -72,7 +56,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -81,7 +65,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-        "id": "def-common.KibanaPageTemplateKibanaProvider",
+        "id": "def-public.KibanaPageTemplateKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "KibanaPageTemplateKibanaProvider",
@@ -91,7 +75,7 @@
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
           "NoDataCardKibanaDependencies",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
         "deprecated": false,
@@ -99,10 +83,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-            "id": "def-common.KibanaPageTemplateKibanaProvider.$1",
+            "id": "def-public.KibanaPageTemplateKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -120,7 +104,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-        "id": "def-common.KibanaPageTemplateProvider",
+        "id": "def-public.KibanaPageTemplateProvider",
         "type": "Function",
         "tags": [],
         "label": "KibanaPageTemplateProvider",
@@ -130,7 +114,7 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "NoDataCardServices",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
         "deprecated": false,
@@ -138,7 +122,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-            "id": "def-common.KibanaPageTemplateProvider.$1",
+            "id": "def-public.KibanaPageTemplateProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
@@ -163,7 +147,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-        "id": "def-common.KibanaPageTemplateKibanaDependencies",
+        "id": "def-public.KibanaPageTemplateKibanaDependencies",
         "type": "Type",
         "tags": [],
         "label": "KibanaPageTemplateKibanaDependencies",
@@ -180,24 +164,26 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-        "id": "def-common.KibanaPageTemplateProps",
+        "id": "def-public.KibanaPageTemplateProps",
         "type": "Type",
         "tags": [],
         "label": "KibanaPageTemplateProps",
         "description": [],
         "signature": [
           "_EuiPageOuterProps",
-          " & Omit<any, \"border\" | \"component\"> & ",
+          " & Omit<",
+          "_EuiPageInnerProps",
+          "<\"main\">, \"border\" | \"component\"> & ",
           "_EuiPageRestrictWidth",
           " & ",
           "_EuiPageBottomBorder",
-          " & { contentBorder?: any; minHeight?: ",
+          " & { contentBorder?: boolean | undefined; minHeight?: ",
           "Property",
           ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
           "CommonProps",
           " & React.HTMLAttributes<HTMLElement>) | undefined; component?: ",
           "ComponentTypes",
-          " | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          " | undefined; } & { isEmptyState?: boolean | undefined; emptyPageBody?: React.ReactNode; solutionNav?: ",
           {
             "pluginId": "@kbn/shared-ux-page-solution-nav",
             "scope": "common",
@@ -220,7 +206,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-        "id": "def-common.KibanaPageTemplateServices",
+        "id": "def-public.KibanaPageTemplateServices",
         "type": "Type",
         "tags": [],
         "label": "KibanaPageTemplateServices",
@@ -237,7 +223,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template",
-        "id": "def-common.NoDataConfig",
+        "id": "def-public.NoDataConfig",
         "type": "Type",
         "tags": [],
         "label": "NoDataConfig",
@@ -251,6 +237,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

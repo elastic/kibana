@@ -14,6 +14,13 @@ export const INSTALL_ALL = i18n.translate(
   }
 );
 
+export const INSTALL_ALL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonAriaLabel',
+  {
+    defaultMessage: 'Install all Elastic rules',
+  }
+);
+
 export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
   return i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.addRules.installSelectedRules',
@@ -35,5 +42,34 @@ export const INSTALL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.installButtonLabel',
   {
     defaultMessage: 'Install',
+  }
+);
+
+export const INSTALL_WITHOUT_ENABLING_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.installWithoutEnablingButtonLabel',
+  {
+    defaultMessage: 'Install without enabling',
+  }
+);
+
+export const INSTALL_AND_ENABLE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.installAndEnableButtonLabel',
+  {
+    defaultMessage: 'Install and enable',
+  }
+);
+
+export const INSTALL_RULE_BUTTON_ARIA_LABEL = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.addRules.installRuleButton.ariaLabel', {
+    defaultMessage: 'Install "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });
+
+export const INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.installOverflowButton.ariaLabel',
+  {
+    defaultMessage: 'More install options',
   }
 );

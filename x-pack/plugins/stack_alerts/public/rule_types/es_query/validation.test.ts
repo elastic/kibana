@@ -175,7 +175,7 @@ describe('expression params validation', () => {
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe(`Query field is required.`);
-    expect(hasExpressionValidationErrors(initialParams)).toBe(true);
+    expect(hasExpressionValidationErrors(initialParams, false)).toBe(true);
   });
 
   test('if searchConfiguration property is not set should return proper error message', () => {
@@ -302,6 +302,25 @@ describe('expression params validation', () => {
     );
   });
 
+  test('if size property is > 100, in serverless, should return proper error message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
+      size: 250,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
+    };
+    expect(validateExpression(initialParams, true).errors.size.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams, true).errors.size[0]).toBe(
+      'Size must be between 0 and 100.'
+    );
+  });
+
   test('should not return error messages if all is correct', () => {
     const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
@@ -316,7 +335,7 @@ describe('expression params validation', () => {
       groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.size.length).toBe(0);
-    expect(hasExpressionValidationErrors(initialParams)).toBe(false);
+    expect(hasExpressionValidationErrors(initialParams, false)).toBe(false);
   });
 
   test('if esqlQuery property is not set should return proper error message', () => {
@@ -375,6 +394,50 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.threshold0.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold0[0]).toBe(
       'Threshold is required to be 0.'
+    );
+  });
+
+  test('if sourceFields property is an array but has more than 5 items, should return proper error message', () => {
+    const sourceField = { label: 'test', searchPath: 'test' };
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+      termSize: 10,
+      termField: ['term'],
+      sourceFields: [sourceField, sourceField, sourceField, sourceField, sourceField, sourceField],
+    };
+    expect(validateExpression(initialParams).errors.sourceFields.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.sourceFields[0]).toBe(
+      'Cannot select more than 5 fields'
+    );
+  });
+
+  test('if groupBy is defined and size is greater than max allowed, should return proper errror message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 101,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+      termSize: 5,
+      termField: ['term'],
+    };
+    expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.size[0]).toBe(
+      'Size cannot exceed 100 when using a group by field.'
     );
   });
 });

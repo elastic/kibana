@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Data views
   description: OpenAPI schema for data view endpoints
@@ -9,20 +9,18 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: /
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
+  - url: https://{kibana_url}
+    variables:
+      kibana_url:
+        default: localhost:5601
 tags:
   - name: data views
     description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
 paths:
   /api/data_views:
     get:
-      summary: Retrieves a list of all data views.
-      operationId: getAllDataViews
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Get all data views
+      operationId: getAllDataViewsDefault
       tags:
         - data views
       responses:
@@ -61,10 +59,8 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view:
     post:
-      summary: Creates a data view.
-      operationId: createDataView
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Create a data view
+      operationId: createDataViewDefaultw
       tags:
         - data views
       parameters:
@@ -93,10 +89,8 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}:
     get:
-      summary: Retrieves a single data view by identifier.
-      operationId: getDataView
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Get a data view
+      operationId: getDataViewDefault
       tags:
         - data views
       parameters:
@@ -118,13 +112,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Deletes a data view.
-      operationId: deleteDataView
+      summary: Delete a data view
+      operationId: deleteDataViewDefault
       description: |
-        WARNING: When you delete a data view, it cannot be recovered. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        WARNING: When you delete a data view, it cannot be recovered.
       tags:
         - data views
       parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
       responses:
         '204':
@@ -136,10 +131,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     post:
-      summary: Updates a data view.
-      operationId: updateDataView
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Update a data view
+      operationId: updateDataViewDefault
       tags:
         - data views
       parameters:
@@ -169,10 +162,10 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}/fields:
     post:
-      summary: Update fields presentation metadata such as count, customLabel and format.
-      operationId: updateFieldsMetadata
+      summary: Update data view fields metadata
+      operationId: updateFieldsMetadataDefault
       description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.
+        Update fields presentation metadata such as count, customLabel, customDescription, and format.
       tags:
         - data views
       parameters:
@@ -211,10 +204,8 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}/runtime_field:
     post:
-      summary: Creates a runtime field.
-      operationId: createRuntimeField
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Create a runtime field
+      operationId: createRuntimeFieldDefault
       tags:
         - data views
       parameters:
@@ -241,11 +232,16 @@ paths:
             examples:
               createRuntimeFieldRequest:
                 $ref: '#/components/examples/create_runtime_field_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
     put:
-      summary: Create or update an existing runtime field.
-      operationId: createUpdateRuntimeField
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Create or update a runtime field
+      operationId: createUpdateRuntimeFieldDefault
       tags:
         - data views
       parameters:
@@ -290,9 +286,8 @@ paths:
                     type: object
                   fields:
                     type: array
-              examples:
-                createRuntimeFieldResponse:
-                  $ref: '#/components/examples/create_runtime_field_response'
+                    items:
+                      type: object
         '400':
           description: Bad request
           content:
@@ -301,10 +296,8 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     get:
-      summary: Retrieves a runtime field.
-      operationId: getRuntimeField
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Get a runtime field
+      operationId: getRuntimeFieldDefault
       tags:
         - data views
       parameters:
@@ -334,10 +327,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Delete a runtime field from a data view.
-      operationId: deleteRuntimeField
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Delete a runtime field from a data view
+      operationId: deleteRuntimeFieldDefault
       tags:
         - data views
       parameters:
@@ -353,10 +344,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     post:
-      summary: Update an existing runtime field.
-      operationId: updateRuntimeField
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Update a runtime field
+      operationId: updateRuntimeFieldDefault
       tags:
         - data views
       parameters:
@@ -394,10 +383,8 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/default:
     get:
-      summary: Retrieves the default data view identifier.
-      operationId: getDefaultDataView
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Get the default data view
+      operationId: getDefaultDataViewDefault
       tags:
         - data views
       responses:
@@ -420,10 +407,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
     post:
-      summary: Sets the default data view identifier.
-      operationId: setDefaultDatailView
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      summary: Set the default data view
+      operationId: setDefaultDatailViewDefault
       tags:
         - data views
       parameters:
@@ -438,9 +423,8 @@ paths:
                 - data_view_id
               properties:
                 data_view_id:
-                  type:
-                    - string
-                    - 'null'
+                  type: string
+                  nullable: true
                   description: |
                     The data view identifier. NOTE: The API does not validate whether it is a valid identifier. Use `null` to unset the default data view.
                 force:
@@ -466,16 +450,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+  /api/data_views/swap_references:
+    post:
+      summary: Swap saved object references
+      operationId: swapDataViewsDefault
+      description: |
+        Changes saved object references from one data view identifier to another. WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/swap_data_view_request_object'
+            examples:
+              swapDataViewRequest:
+                $ref: '#/components/examples/swap_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleteStatus:
+                    type: object
+                    properties:
+                      deletePerformed:
+                        type: boolean
+                      remainingRefs:
+                        type: integer
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: A saved object identifier.
+                        type:
+                          type: string
+                          description: The saved object type.
+  /api/data_views/swap_references/_preview:
+    post:
+      summary: Preview a saved object reference swap
+      operationId: previewSwapDataViewsDefault
+      description: |
+        Preview the impact of swapping saved object references from one data view identifier to another.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/swap_data_view_request_object'
+            examples:
+              previewSwapDataViewRequest:
+                $ref: '#/components/examples/preview_swap_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: A saved object identifier.
+                        type:
+                          type: string
+                          description: The saved object type.
 components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   examples:
     get_data_views_response:
       summary: The get all data views API returns a list of data views.
@@ -1445,11 +1503,15 @@ components:
           name: Kibana Sample Data eCommerce
         refresh_fields: true
     update_field_metadata_request:
-      summary: Set popularity count for field foo.
+      summary: Update metadata for multiple fields.
       value:
         fields:
-          foo:
+          field1:
             count: 123
+            customLabel: Field 1 label
+          field2:
+            customLabel: Field 2 label
+            customDescription: Field 2 description
     create_runtime_field_request:
       summary: Create a runtime field.
       value:
@@ -1458,13 +1520,6 @@ components:
           type: long
           script:
             source: emit(doc["foo"].value)
-    create_runtime_field_response:
-      summary: The API returns created runtime field object array and updated data view object.
-      value:
-        data_view:
-          ...: null
-        fields:
-          - ...
     get_runtime_field_response:
       summary: The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).
       value:
@@ -1979,6 +2034,17 @@ components:
       value:
         data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
         force: true
+    swap_data_view_request:
+      summary: Swap references from data view ID "abcd-efg" to "xyz-123" and remove the data view that is no longer referenced.
+      value:
+        fromId: abcd-efg
+        toId: xyz-123
+        delete: true
+    preview_swap_data_view_request:
+      summary: Preview swapping references from data view ID "abcd-efg" to "xyz-123".
+      value:
+        fromId: abcd-efg
+        toId: xyz-123
   schemas:
     400_response:
       title: Bad request
@@ -2002,6 +2068,17 @@ components:
     fieldattrs:
       type: object
       description: A map of field attributes by field name.
+      properties:
+        count:
+          type: integer
+          description: Popularity count for the field.
+        customDescription:
+          type: string
+          description: Custom description for the field.
+          maxLength: 300
+        customLabel:
+          type: string
+          description: Custom label for the field.
     fieldformats:
       type: object
       description: A map of field formats by field name.
@@ -2014,9 +2091,29 @@ components:
     runtimefieldmap:
       type: object
       description: A map of runtime field definitions by field name.
+      required:
+        - script
+        - type
+      properties:
+        script:
+          type: object
+          properties:
+            source:
+              type: string
+              description: Script for the runtime field.
+        type:
+          type: string
+          description: Mapping type of the runtime field.
     sourcefilters:
       type: array
       description: The array of field names you want to filter out in Discover.
+      items:
+        type: object
+        required:
+          - value
+        properties:
+          value:
+            type: string
     timefieldname:
       type: string
       description: The timestamp field name, which you use for time-based data views.
@@ -2029,6 +2126,16 @@ components:
     typemeta:
       type: object
       description: When you use rollup indices, contains the field list for the rollup data view API endpoints.
+      required:
+        - aggs
+        - params
+      properties:
+        aggs:
+          type: object
+          description: A map of rollup restrictions by aggregation type and field name.
+        params:
+          type: object
+          description: Properties for retrieving rollup fields.
     create_data_view_request_object:
       title: Create data view request
       type: object
@@ -2044,7 +2151,9 @@ components:
             allowNoIndex:
               $ref: '#/components/schemas/allownoindex'
             fieldAttrs:
-              $ref: '#/components/schemas/fieldattrs'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/fieldattrs'
             fieldFormats:
               $ref: '#/components/schemas/fieldformats'
             fields:
@@ -2057,7 +2166,9 @@ components:
             namespaces:
               $ref: '#/components/schemas/namespaces'
             runtimeFieldMap:
-              $ref: '#/components/schemas/runtimefieldmap'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/runtimefieldmap'
             sourceFilters:
               $ref: '#/components/schemas/sourcefilters'
             timeFieldName:
@@ -2074,6 +2185,17 @@ components:
           type: boolean
           description: Override an existing data view if a data view with the provided title already exists.
           default: false
+    typemeta_response:
+      type: object
+      description: When you use rollup indices, contains the field list for the rollup data view API endpoints.
+      nullable: true
+      properties:
+        aggs:
+          type: object
+          description: A map of rollup restrictions by aggregation type and field name.
+        params:
+          type: object
+          description: Properties for retrieving rollup fields.
     data_view_response_object:
       title: Data view response properties
       type: object
@@ -2084,7 +2206,9 @@ components:
             allowNoIndex:
               $ref: '#/components/schemas/allownoindex'
             fieldAttrs:
-              $ref: '#/components/schemas/fieldattrs'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/fieldattrs'
             fieldFormats:
               $ref: '#/components/schemas/fieldformats'
             fields:
@@ -2098,7 +2222,9 @@ components:
             namespaces:
               $ref: '#/components/schemas/namespaces'
             runtimeFieldMap:
-              $ref: '#/components/schemas/runtimefieldmap'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/runtimefieldmap'
             sourceFilters:
               $ref: '#/components/schemas/sourcefilters'
             timeFieldName:
@@ -2106,7 +2232,7 @@ components:
             title:
               $ref: '#/components/schemas/title'
             typeMeta:
-              $ref: '#/components/schemas/typemeta'
+              $ref: '#/components/schemas/typemeta_response'
             version:
               type: string
               example: WzQ2LDJd
@@ -2146,7 +2272,9 @@ components:
             name:
               type: string
             runtimeFieldMap:
-              $ref: '#/components/schemas/runtimefieldmap'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/runtimefieldmap'
             sourceFilters:
               $ref: '#/components/schemas/sourcefilters'
             timeFieldName:
@@ -2161,6 +2289,36 @@ components:
           type: boolean
           description: Reloads the data view fields after the data view is updated.
           default: false
+    swap_data_view_request_object:
+      title: Data view reference swap request
+      type: object
+      required:
+        - fromId
+        - toId
+      properties:
+        delete:
+          type: boolean
+          description: Deletes referenced saved object if all references are removed.
+        forId:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          description: Limit the affected saved objects to one or more by identifier.
+        forType:
+          type: string
+          description: Limit the affected saved objects by type.
+        fromId:
+          type: string
+          description: The saved object reference to change.
+        fromType:
+          type: string
+          description: |
+            Specify the type of the saved object reference to alter. The default value is `index-pattern` for data views.
+        toId:
+          type: string
+          description: New saved object reference value to replace the old value.
   parameters:
     kbn_xsrf:
       schema:

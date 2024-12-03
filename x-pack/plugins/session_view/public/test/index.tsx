@@ -11,7 +11,6 @@ import { render as reactRender, RenderOptions, RenderResult } from '@testing-lib
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { History } from 'history';
-import useObservable from 'react-use/lib/useObservable';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -68,8 +67,8 @@ const AppRootProvider = memo<{
   history: History;
   coreStart: CoreStart;
   children: ReactNode | ReactNode[];
-}>(({ history, coreStart: { http, notifications, uiSettings, application }, children }) => {
-  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+}>(({ history, coreStart: { http, notifications, theme, application }, children }) => {
+  const isDarkMode = theme.getTheme().darkMode;
   const services = useMemo(
     () => ({ http, notifications, application }),
     [application, http, notifications]
@@ -117,7 +116,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <AppRootProvider history={history} coreStart={coreStart}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </AppRootProvider>

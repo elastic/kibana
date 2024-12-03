@@ -1,13 +1,15 @@
 openapi: 3.0.0
 info:
   title: Read Rule API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/rules:
     get:
-      operationId: ReadRule
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      description: Read a single rule
+      operationId: ReadRule
+      summary: Retrieve a detection rule
+      description: Retrieve a detection rule using the `rule_id` or `id` field.
       tags:
         - Rules API
       parameters:

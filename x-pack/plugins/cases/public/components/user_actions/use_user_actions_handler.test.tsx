@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { basicCase } from '../../containers/mock';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
@@ -28,7 +29,9 @@ const patchComment = jest.fn();
 const clearDraftComment = jest.fn();
 const openLensModal = jest.fn();
 
-const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</TestProviders>;
+const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+  <TestProviders>{children}</TestProviders>
+);
 
 describe('useUserActionsHandler', () => {
   beforeAll(() => {

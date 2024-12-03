@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { getKibanaDir } from '#pipeline-utils';
 
 const GITHUB_CONTEXT = 'Build and Publish Webpack bundle analyzer reports';
 
@@ -54,7 +56,12 @@ const upload = () => {
 
     fs.writeFileSync('index.html', html);
     console.log('--- Uploading Webpack Bundle Analyzer reports');
+    const activateScript = path.relative(
+      process.cwd(),
+      path.join(getKibanaDir(), '.buildkite', 'scripts', 'common', 'activate_service_account.sh')
+    );
     exec(`
+      ${activateScript} gs://ci-artifacts.kibana.dev
       gsutil -q -m cp -r -z html '*' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/latest/'
     `);

@@ -524,10 +524,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "files",
-      "id": "def-public.FilesSetup",
+      "id": "def-public.FilesPublicSetup",
       "type": "Interface",
       "tags": [],
-      "label": "FilesSetup",
+      "label": "FilesPublicSetup",
       "description": [
         "\nPublic setup-phase contract"
       ],
@@ -537,7 +537,7 @@
       "children": [
         {
           "parentPluginId": "files",
-          "id": "def-public.FilesSetup.filesClientFactory",
+          "id": "def-public.FilesPublicSetup.filesClientFactory",
           "type": "Object",
           "tags": [
             "track-adoption"
@@ -587,7 +587,11 @@
             },
             {
               "plugin": "imageEmbeddable",
-              "path": "src/plugins/image_embeddable/public/plugin.ts"
+              "path": "src/plugins/image_embeddable/public/components/image_editor/open_image_editor.tsx"
+            },
+            {
+              "plugin": "imageEmbeddable",
+              "path": "src/plugins/image_embeddable/public/image_embeddable/get_image_embeddable_factory.tsx"
             },
             {
               "plugin": "filesManagement",
@@ -597,7 +601,7 @@
         },
         {
           "parentPluginId": "files",
-          "id": "def-public.FilesSetup.registerFileKind",
+          "id": "def-public.FilesPublicSetup.registerFileKind",
           "type": "Function",
           "tags": [],
           "label": "registerFileKind",
@@ -621,7 +625,7 @@
           "children": [
             {
               "parentPluginId": "files",
-              "id": "def-public.FilesSetup.registerFileKind.$1",
+              "id": "def-public.FilesPublicSetup.registerFileKind.$1",
               "type": "Object",
               "tags": [],
               "label": "fileKind",
@@ -651,10 +655,10 @@
     },
     "start": {
       "parentPluginId": "files",
-      "id": "def-public.FilesStart",
+      "id": "def-public.FilesPublicStart",
       "type": "Type",
       "tags": [],
-      "label": "FilesStart",
+      "label": "FilesPublicStart",
       "description": [],
       "signature": [
         "Pick<",
@@ -662,8 +666,8 @@
           "pluginId": "files",
           "scope": "public",
           "docId": "kibFilesPluginApi",
-          "section": "def-public.FilesSetup",
-          "text": "FilesSetup"
+          "section": "def-public.FilesPublicSetup",
+          "text": "FilesPublicSetup"
         },
         ", \"filesClientFactory\"> & { getFileKindDefinition: (id: string) => ",
         {
@@ -943,7 +947,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; helpers: ",
+              "default",
+              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -975,9 +981,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; helpers: ",
-              "default",
-              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1013,6 +1017,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "BulkResponse",
+              ">; }; capabilities: { (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TODO",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -1070,6 +1100,8 @@
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
               ">; }; cluster: ",
+              "default",
+              "; connector: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -1180,6 +1212,8 @@
               ">; }; enrich: ",
               "default",
               "; eql: ",
+              "default",
+              "; esql: ",
               "default",
               "; exists: { (this: That, params: ",
               "ExistsRequest",
@@ -1433,6 +1467,8 @@
               "WriteResponseBase",
               ">; }; indices: ",
               "default",
+              "; inference: ",
+              "default",
               "; info: { (this: That, params?: ",
               "InfoRequest",
               " | ",
@@ -1661,7 +1697,9 @@
               "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
+              " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               " | ",
               "PutScriptRequest",
@@ -1687,7 +1725,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
-              ">; }; rankEval: { (this: That, params: ",
+              ">; }; queryRules: ",
+              "default",
+              "; rankEval: { (this: That, params: ",
               "RankEvalRequest",
               " | ",
               "RankEvalRequest",
@@ -1930,6 +1970,8 @@
               "; security: ",
               "default",
               "; shutdown: ",
+              "default",
+              "; simulate: ",
               "default",
               "; slm: ",
               "default",
@@ -3434,9 +3476,9 @@
               "(req: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3464,9 +3506,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -5267,7 +5309,7 @@
               "\nAttributes to update."
             ],
             "signature": [
-              "{ name: string; meta: unknown; alt: string | undefined; }"
+              "{ meta: unknown; name: string; alt: string | undefined; }"
             ],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
@@ -5317,10 +5359,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "files",
-      "id": "def-server.FilesSetup",
+      "id": "def-server.FilesServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "FilesSetup",
+      "label": "FilesServerSetup",
       "description": [
         "\nFiles plugin setup contract"
       ],
@@ -5330,7 +5372,7 @@
       "children": [
         {
           "parentPluginId": "files",
-          "id": "def-server.FilesSetup.registerFileKind",
+          "id": "def-server.FilesServerSetup.registerFileKind",
           "type": "Function",
           "tags": [
             "track-adoption"
@@ -5393,12 +5435,16 @@
             {
               "plugin": "cases",
               "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
             }
           ],
           "children": [
             {
               "parentPluginId": "files",
-              "id": "def-server.FilesSetup.registerFileKind.$1",
+              "id": "def-server.FilesServerSetup.registerFileKind.$1",
               "type": "Object",
               "tags": [],
               "label": "fileKind",
@@ -5428,10 +5474,10 @@
     },
     "start": {
       "parentPluginId": "files",
-      "id": "def-server.FilesStart",
+      "id": "def-server.FilesServerStart",
       "type": "Interface",
       "tags": [],
-      "label": "FilesStart",
+      "label": "FilesServerStart",
       "description": [
         "\nFiles plugin start contract"
       ],
@@ -5441,7 +5487,7 @@
       "children": [
         {
           "parentPluginId": "files",
-          "id": "def-server.FilesStart.fileServiceFactory",
+          "id": "def-server.FilesServerStart.fileServiceFactory",
           "type": "Object",
           "tags": [
             "track-adoption"
@@ -6859,7 +6905,7 @@
           "\nThe set of file metadata that can be updated."
         ],
         "signature": [
-          "{ name: string; meta: Meta | undefined; alt: string | undefined; }"
+          "{ meta: Meta | undefined; name: string; alt: string | undefined; }"
         ],
         "path": "src/plugins/files/common/types.ts",
         "deprecated": false,

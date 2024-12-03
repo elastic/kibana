@@ -12,18 +12,15 @@ import { useValues } from 'kea';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
-import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
-import { VersionMismatchPage } from '../shared/version_mismatch';
+import { EndpointsHeaderAction } from '../shared/layout/endpoints_header_action';
 
 import { AppLogic } from './app_logic';
 import { Credentials } from './components/credentials';
 import { EngineRouter } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
-import { ErrorConnecting } from './components/error_connecting';
 import { KibanaHeaderActions } from './components/layout';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
@@ -46,24 +43,10 @@ import {
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
-  const { enterpriseSearchVersion, kibanaVersion } = props;
-  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
-
   const showView = () => {
     if (!config.host) {
       return <AppSearchUnconfigured />;
-    } else if (incompatibleVersions) {
-      return (
-        <VersionMismatchPage
-          enterpriseSearchVersion={enterpriseSearchVersion}
-          kibanaVersion={kibanaVersion}
-        />
-      );
-    } else if (errorConnectingMessage) {
-      return <ErrorConnecting />;
     }
-
     return <AppSearchConfigured {...(props as Required<InitialAppData>)} />;
   };
 
@@ -77,16 +60,22 @@ export const AppSearch: React.FC<InitialAppData> = (props) => {
   );
 };
 
-export const AppSearchUnconfigured: React.FC = () => (
-  <Routes>
-    <Route>
-      <Redirect to={SETUP_GUIDE_PATH} />
-    </Route>
-  </Routes>
-);
+export const AppSearchUnconfigured: React.FC = () => {
+  const { renderHeaderActions } = useValues(KibanaLogic);
+  renderHeaderActions(EndpointsHeaderAction);
+
+  return (
+    <Routes>
+      <Route>
+        <Redirect to={SETUP_GUIDE_PATH} />
+      </Route>
+    </Routes>
+  );
+};
 
 export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
+    showGateForm,
     myRole: {
       canManageEngines,
       canManageMetaEngines,
@@ -101,7 +90,7 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
     renderHeaderActions(KibanaHeaderActions);
   }, []);
 
-  return (
+  return !showGateForm ? (
     <Routes>
       {process.env.NODE_ENV === 'development' && (
         <Route path={LIBRARY_PATH}>
@@ -142,6 +131,18 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <RoleMappings />
         </Route>
       )}
+      <Route>
+        <NotFound />
+      </Route>
+    </Routes>
+  ) : (
+    <Routes>
+      <Route exact path={ROOT_PATH}>
+        <Redirect to={ENGINES_PATH} />
+      </Route>
+      <Route exact path={ENGINES_PATH}>
+        <EnginesOverview />
+      </Route>
       <Route>
         <NotFound />
       </Route>

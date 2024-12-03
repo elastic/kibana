@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -108,7 +109,7 @@ export const buildDataViewMock = ({
     fields: dataViewFields,
     type: 'default',
     getName: () => name,
-    getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
+    getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, runtimeFields: {} }),
     getSourceFiltering: () => ({}),
     getIndexPattern: () => `${name}-title`,
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
@@ -122,6 +123,12 @@ export const buildDataViewMock = ({
     getTimeField: () => {
       return dataViewFields.find((field) => field.name === timeFieldName);
     },
+    getScriptedField: () => {
+      return dataViewFields.find((field) => field.name === timeFieldName);
+    },
+    getRuntimeField: () => null,
+    getAllowHidden: () => false,
+    setFieldCount: jest.fn(),
   } as unknown as DataView;
 
   dataView.isTimeBased = () => !!timeFieldName;
@@ -132,4 +139,10 @@ export const buildDataViewMock = ({
 export const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
   fields: shallowMockedFields,
+});
+
+export const dataViewMockWithTimeField = buildDataViewMock({
+  name: 'the-data-view',
+  fields: shallowMockedFields,
+  timeFieldName: '@timestamp',
 });

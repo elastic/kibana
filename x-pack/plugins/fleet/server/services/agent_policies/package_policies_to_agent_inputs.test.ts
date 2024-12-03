@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
+
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
 import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
@@ -39,6 +41,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     updated_at: '',
     updated_by: '',
     policy_id: '',
+    policy_ids: [''],
     enabled: true,
     namespace: 'default',
     inputs: [],
@@ -219,6 +222,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
               version: '0.0.0',
             },
             inputs: [mockInput, mockInput2],
+            output_id: 'new-output',
           },
           {
             ...mockPackagePolicy,
@@ -240,7 +244,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         revision: 1,
         type: 'test-logs',
         data_stream: { namespace: 'default' },
-        use_output: 'default',
+        use_output: 'new-output',
         meta: {
           package: {
             name: 'mock_package',
@@ -267,7 +271,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         revision: 1,
         type: 'test-metrics',
         data_stream: { namespace: 'default' },
-        use_output: 'default',
+        use_output: 'new-output',
         meta: {
           package: {
             name: 'mock_package',
@@ -467,6 +471,457 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           },
           { id: 'test-logs-bar', data_stream: { dataset: 'bar', type: 'logs' } },
         ],
+      },
+    ]);
+  });
+  it('returns agent inputs using package policy namespace if defined', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+                streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
+              },
+            ],
+            namespace: 'packagepolicyspace',
+          },
+        ],
+        packageInfoCache,
+        'default',
+        'agentpolicyspace'
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'packagepolicyspace' },
+        use_output: 'default',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+        ],
+      },
+    ]);
+  });
+  it('returns agent inputs using agent policy namespace if package policy namespace is blank', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+                streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
+              },
+            ],
+            namespace: '',
+          },
+        ],
+        packageInfoCache,
+        'default',
+        'agentpolicyspace'
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'agentpolicyspace' },
+        use_output: 'default',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs merged with overrides from package policies if available for that input', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+              },
+            ],
+            namespace: '',
+            overrides: {
+              inputs: {
+                'test-logs-some-uuid': {
+                  log_level: 'debug',
+                },
+              },
+            },
+          },
+        ],
+        packageInfoCache,
+        'default',
+        'agentpolicyspace'
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'agentpolicyspace' },
+        use_output: 'default',
+        log_level: 'debug',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+          {
+            data_stream: {
+              dataset: 'bar',
+              type: 'logs',
+            },
+            id: 'test-logs-bar',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs merged with overrides based on passed input id', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [mockInput, mockInput2],
+            namespace: '',
+            overrides: {
+              inputs: {
+                'test-logs-some-uuid': {
+                  log_level: 'debug',
+                },
+              },
+            },
+          },
+        ],
+        packageInfoCache
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        log_level: 'debug',
+        data_stream: {
+          namespace: 'default',
+        },
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        streams: [
+          {
+            data_stream: {
+              dataset: 'foo',
+              type: 'logs',
+            },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+            id: 'test-logs-foo',
+          },
+          {
+            data_stream: {
+              dataset: 'bar',
+              type: 'logs',
+            },
+            id: 'test-logs-bar',
+          },
+        ],
+        type: 'test-logs',
+        use_output: 'default',
+      },
+      {
+        data_stream: {
+          namespace: 'default',
+        },
+        id: 'test-metrics-some-template-some-uuid',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        streams: [
+          {
+            data_stream: {
+              dataset: 'foo',
+              type: 'metrics',
+            },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+            id: 'test-metrics-foo',
+          },
+        ],
+        type: 'test-metrics',
+        use_output: 'default',
+      },
+    ]);
+  });
+
+  it('returns unchanged agent inputs if overrides are empty', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+                streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
+              },
+            ],
+            namespace: '',
+            overrides: {
+              inputs: {},
+            },
+          },
+        ],
+        packageInfoCache,
+        'default',
+        'agentpolicyspace'
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'agentpolicyspace' },
+        use_output: 'default',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs with add fields process if global data tags are defined', async () => {
+    const excludedInputs: PackagePolicyInput[] = [];
+    const expectedExcluded = [];
+
+    for (const input of GLOBAL_DATA_TAG_EXCLUDED_INPUTS) {
+      excludedInputs.push({
+        type: input,
+        enabled: true,
+        vars: {
+          inputVar: { value: 'input-value' },
+          inputVar2: { value: undefined },
+          inputVar3: {
+            type: 'yaml',
+            value: 'testField: test',
+          },
+          inputVar4: { value: '' },
+        },
+        streams: [],
+      });
+
+      expectedExcluded.push({
+        data_stream: {
+          namespace: 'default',
+        },
+        id: `${input}-some-uuid`,
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: input,
+        use_output: 'default',
+      });
+    }
+
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [
+              ...excludedInputs,
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+              {
+                ...mockInput2,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        [
+          { name: 'testName', value: 'testValue' },
+          { name: 'testName2', value: 'testValue2' },
+        ]
+      )
+    ).toEqual([
+      ...expectedExcluded,
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              fields: {
+                testName: 'testValue',
+                testName2: 'testValue2',
+              },
+              target: '',
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        inputVar: 'input-value',
+      },
+      {
+        id: 'test-metrics-some-template-some-uuid',
+        data_stream: {
+          namespace: 'default',
+        },
+        inputVar: 'input-value',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              target: '',
+              fields: {
+                testName: 'testValue',
+                testName2: 'testValue2',
+              },
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-metrics',
+        use_output: 'default',
+      },
+    ]);
+  });
+
+  it('does not include processor add_fields when global tags array is empty', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        []
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        inputVar: 'input-value',
       },
     ]);
   });

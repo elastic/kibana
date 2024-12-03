@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo, useRef } from 'react';
@@ -18,6 +19,8 @@ import {
   LayoutDirection,
   Placement,
   Tooltip,
+  LegendValue,
+  BrushEndListener,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -113,15 +116,13 @@ export const TimelionVisComponent = ({
   const chartRef = useRef<Chart>(null);
   const chart = seriesList.list;
   const chartsService = getCharts();
-
-  const chartTheme = chartsService.theme.useChartsTheme();
   const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
     isDateHistogram: true,
   });
 
-  const brushEndListener = useCallback(
+  const brushEndListener = useCallback<BrushEndListener>(
     ({ x }) => {
       if (!x) {
         return;
@@ -209,14 +210,13 @@ export const TimelionVisComponent = ({
           debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
-          showLegendExtra={true}
+          legendValues={[LegendValue.CurrentAndLastValue]}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
           externalPointerEvents={{
             tooltip: { visible: syncTooltips, placement: Placement.Right },
           }}
-          theme={chartTheme}
           baseTheme={chartBaseTheme}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}

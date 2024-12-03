@@ -51,6 +51,10 @@ export const TOGGLE_LABEL = i18n.translate('xpack.cases.customFields.toggleLabel
   defaultMessage: 'Toggle',
 });
 
+export const NUMBER_LABEL = i18n.translate('xpack.cases.customFields.textLabel', {
+  defaultMessage: 'Number',
+});
+
 export const FIELD_TYPE = i18n.translate('xpack.cases.customFields.fieldType', {
   defaultMessage: 'Field type',
 });
@@ -59,12 +63,20 @@ export const FIELD_OPTIONS = i18n.translate('xpack.cases.customFields.fieldOptio
   defaultMessage: 'Options',
 });
 
+export const DEFAULT_VALUE = i18n.translate('xpack.cases.customFields.defaultValue', {
+  defaultMessage: 'Default value',
+});
+
 export const FIELD_OPTION_REQUIRED = i18n.translate(
   'xpack.cases.customFields.fieldOptions.Required',
   {
     defaultMessage: 'Make this field required',
   }
 );
+
+export const REQUIRED = i18n.translate('xpack.cases.customFields.required', {
+  defaultMessage: 'Required',
+});
 
 export const REQUIRED_FIELD = (fieldName: string): string =>
   i18n.translate('xpack.cases.customFields.requiredField', {
@@ -98,3 +110,24 @@ export const DELETE_FIELD_DESCRIPTION = i18n.translate(
 export const DELETE = i18n.translate('xpack.cases.customFields.fieldOptions.Delete', {
   defaultMessage: 'Delete',
 });
+
+export const TOGGLE_FIELD_ON_LABEL = i18n.translate(
+  'xpack.cases.customFields.tableFilters.toggle.on',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const TOGGLE_FIELD_OFF_LABEL = i18n.translate(
+  'xpack.cases.customFields.tableFilters.toggle.off',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const POPULATED_WITH_DEFAULT = i18n.translate(
+  'xpack.cases.customFields.fieldOptions.populatedWithDefault',
+  {
+    defaultMessage: 'This field is populated with the default value.',
+  }
+);

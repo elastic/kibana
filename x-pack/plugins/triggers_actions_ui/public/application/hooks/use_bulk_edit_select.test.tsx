@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useBulkEditSelect } from './use_bulk_edit_select';
 import { RuleTableItem } from '../../types';
 
@@ -45,8 +45,7 @@ describe('useBulkEditSelectTest', () => {
       useBulkEditSelect({
         items,
         totalItemCount: 4,
-        tagsFilter: ['test: 123'],
-        searchText: 'rules*',
+        filters: { tags: ['test: 123'], searchText: 'rules*' },
       })
     );
 
@@ -58,8 +57,7 @@ describe('useBulkEditSelectTest', () => {
       useBulkEditSelect({
         items,
         totalItemCount: 4,
-        tagsFilter: ['test: 123'],
-        searchText: 'rules*',
+        filters: { tags: ['test: 123'], searchText: 'rules*' },
       })
     );
 
@@ -107,8 +105,7 @@ describe('useBulkEditSelectTest', () => {
       useBulkEditSelect({
         items,
         totalItemCount: 4,
-        tagsFilter: ['test: 123'],
-        searchText: 'rules*',
+        filters: { tags: ['test: 123'], searchText: 'rules*' },
       })
     );
 
@@ -124,8 +121,10 @@ describe('useBulkEditSelectTest', () => {
       useBulkEditSelect({
         items,
         totalItemCount: 4,
-        tagsFilter: ['test: 123'],
-        searchText: 'rules*',
+        filters: {
+          tags: ['test: 123'],
+          searchText: 'rules*',
+        },
       })
     );
 

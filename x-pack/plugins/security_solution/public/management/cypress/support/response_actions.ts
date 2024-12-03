@@ -39,6 +39,9 @@ export const responseActionTasks = (
       }
 
       const signed = get(newActionDoc, '_source.signed');
+      if (!signed) {
+        throw new Error('no signed data in the action doc');
+      }
       const signedDataBuffer = Buffer.from(signed.data, 'base64');
       const signedDataJson = JSON.parse(signedDataBuffer.toString());
       const tamperedData = {
@@ -54,7 +57,8 @@ export const responseActionTasks = (
           data: tamperedDataString,
         },
       };
-      return updateActionDoc(esClient, newActionDoc._id, tamperedDoc);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return updateActionDoc(esClient, newActionDoc._id!, tamperedDoc);
     },
   });
 };

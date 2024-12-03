@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { defaults, get } from 'lodash';
 import { Duplex } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ByteSizeValue } from '@kbn/config-schema';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ReportSource } from '@kbn/reporting-common/types';
+import {
+  REPORTING_DATA_STREAM_ALIAS,
+  REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+} from '@kbn/reporting-server';
 import type { ReportingCore } from '..';
 
-/**
- * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
- * But the update/index request also contains JSON-serialized query parameters.
- * 1Kb span should be enough for that.
- */
-const REQUEST_SPAN_SIZE_IN_BYTES = 1024;
+const ONE_MB = 1024 * 1024;
 
 type Callback = (error?: Error) => void;
 type SearchRequest = estypes.SearchRequest;
@@ -38,6 +35,7 @@ interface ChunkOutput {
 }
 
 interface ChunkSource {
+  '@timestamp': string;
   parent_id: string;
   output: ChunkOutput;
 }
@@ -52,21 +50,6 @@ interface ContentStreamParameters {
 }
 
 export class ContentStream extends Duplex {
-  /**
-   * @see https://en.wikipedia.org/wiki/Base64#Output_padding
-   */
-  private static getMaxBase64EncodedSize(max: number) {
-    return Math.floor(max / 4) * 3;
-  }
-
-  /**
-   * @note Raw data might be escaped during JSON serialization.
-   * In the worst-case, every character is escaped, so the max raw data length is twice less.
-   */
-  private static getMaxJsonEscapedSize(max: number) {
-    return Math.floor(max / 2);
-  }
-
   private buffers: Buffer[] = [];
   private bytesBuffered = 0;
 
@@ -74,7 +57,6 @@ export class ContentStream extends Duplex {
   private chunksRead = 0;
   private chunksWritten = 0;
   private jobSize?: number;
-  private maxChunkSize?: number;
   private parameters: Required<ContentStreamParameters>;
   private primaryTerm?: number;
   private seqNo?: number;
@@ -84,6 +66,14 @@ export class ContentStream extends Duplex {
    * Does not include data that is still queued for writing.
    */
   bytesWritten = 0;
+
+  /**
+   * The chunking size of reporting files. Larger CSV files will be split into
+   * multiple documents, where the stream is chunked into pieces of approximately
+   * this size. The actual document size will be slightly larger due to Base64
+   * encoding and JSON metadata.
+   */
+  chunkSize = 4 * ONE_MB;
 
   constructor(
     private client: ElasticsearchClient,
@@ -103,33 +93,9 @@ export class ContentStream extends Duplex {
     return buffer.toString(this.parameters.encoding === 'base64' ? 'base64' : undefined);
   }
 
-  private async getMaxContentSize() {
-    const body = await this.client.cluster.getSettings({ include_defaults: true });
-    const { persistent, transient, defaults: defaultSettings } = body;
-    const settings = defaults({}, persistent, transient, defaultSettings);
-    const maxContentSize = get(settings, 'http.max_content_length', '100mb');
-
-    return ByteSizeValue.parse(maxContentSize).getValueInBytes();
-  }
-
-  private async getMaxChunkSize() {
-    if (!this.maxChunkSize) {
-      const maxContentSize = (await this.getMaxContentSize()) - REQUEST_SPAN_SIZE_IN_BYTES;
-
-      this.maxChunkSize =
-        this.parameters.encoding === 'base64'
-          ? ContentStream.getMaxBase64EncodedSize(maxContentSize)
-          : ContentStream.getMaxJsonEscapedSize(maxContentSize);
-
-      this.logger.debug(`Chunk size is ${this.maxChunkSize} bytes.`);
-    }
-
-    return this.maxChunkSize;
-  }
-
   private async readHead() {
     const { id, index } = this.document;
-    const body: SearchRequest['body'] = {
+    const body: SearchRequest = {
       _source: { includes: ['output.content', 'output.size', 'jobtype'] },
       query: {
         constant_score: {
@@ -149,13 +115,14 @@ export class ContentStream extends Duplex {
     const hits = response?.hits?.hits?.[0];
 
     this.jobSize = hits?._source?.output?.size;
+    this.logger.debug(`Reading job of size ${this.jobSize}`);
 
     return hits?._source?.output?.content;
   }
 
   private async readChunk() {
-    const { id, index } = this.document;
-    const body: SearchRequest['body'] = {
+    const { id } = this.document;
+    const body: SearchRequest = {
       _source: { includes: ['output.content'] },
       query: {
         constant_score: {
@@ -171,7 +138,10 @@ export class ContentStream extends Duplex {
 
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
-    const response = await this.client.search<ChunkSource>({ body, index });
+    const response = await this.client.search<ChunkSource>({
+      body,
+      index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+    });
     const hits = response?.hits?.hits?.[0];
 
     return hits?._source?.output.content;
@@ -218,10 +188,11 @@ export class ContentStream extends Duplex {
   }
 
   private async writeHead(content: string) {
-    this.logger.debug(`Updating report contents.`);
+    this.logger.debug(`Updating chunk #0 (${this.document.id}).`);
 
     const body = await this.client.update<ReportSource>({
       ...this.document,
+      refresh: 'wait_for',
       body: {
         doc: {
           output: { content },
@@ -233,16 +204,19 @@ export class ContentStream extends Duplex {
   }
 
   private async writeChunk(content: string) {
-    const { id: parentId, index } = this.document;
+    const { id: parentId } = this.document;
     const id = uuidv4();
 
     this.logger.debug(`Writing chunk #${this.chunksWritten} (${id}).`);
 
     await this.client.index<ChunkSource>({
       id,
-      index,
+      index: REPORTING_DATA_STREAM_ALIAS,
+      refresh: 'wait_for',
+      op_type: 'create',
       body: {
         parent_id: parentId,
+        '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
         output: {
           content,
           chunk: this.chunksWritten,
@@ -306,10 +280,8 @@ export class ContentStream extends Duplex {
   }
 
   private async flushAllFullChunks() {
-    const maxChunkSize = await this.getMaxChunkSize();
-
-    while (this.bytesBuffered >= maxChunkSize && this.buffers.length) {
-      await this.flush(maxChunkSize);
+    while (this.bytesBuffered >= this.chunkSize && this.buffers.length) {
+      await this.flush(this.chunkSize);
     }
   }
 

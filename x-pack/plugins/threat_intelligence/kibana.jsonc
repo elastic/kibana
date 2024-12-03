@@ -1,21 +1,26 @@
 {
   "type": "plugin",
   "id": "@kbn/threat-intelligence-plugin",
-  "owner": "@elastic/protections-experience",
+  "owner": [
+    "@elastic/security-threat-hunting-investigations"
+  ],
+  "group": "security",
+  "visibility": "private",
   "description": "Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats",
   "plugin": {
     "id": "threatIntelligence",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "cases",
       "data",
       "dataViews",
+      "inspector",
+      "kibanaReact",
       "kibanaUtils",
       "navigation",
-      "kibanaReact",
-      "triggersActionsUi",
-      "inspector"
+      "security",
+      "triggersActionsUi"
     ],
     "requiredBundles": [
       "data",

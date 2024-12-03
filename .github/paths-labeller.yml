@@ -1,23 +1,36 @@
 ---
-  - "Feature:Embedding":
-    - "src/plugins/embeddable/**/*.*"
-    - "src/plugins/dashboard_embeddable_container/**/*.*"
-  - "Feature:Drilldowns":
-    - "x-pack/plugins/drilldowns/**/*.*"
-    - "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/**/*.*"
-  - "Feature:ExpressionLanguage":
-    - "src/plugins/expressions/**/*.*"
-    - "src/plugins/bfetch/**/*.*"
-  - "Team:apm":
-    - "x-pack/plugins/apm/**/*.*"
-    - "x-pack/test/apm_api_integration/**/*.*"
-    - "packages/kbn-apm-synthtrace/**/*.*"
-    - "packages/kbn-apm-synthtrace-client/**/*.*"
-    - "packages/kbn-apm-utils/**/*.*"
-  - "Team:Fleet":
-    - "x-pack/plugins/fleet/**/*.*"
-    - "x-pack/test/fleet_api_integration/**/*.*"
-  - "Team:uptime":
-    - "x-pack/plugins/synthetics/**/*.*"
-    - "x-pack/plugins/ux/**/*.*"
-    - "x-pack/plugins/observability/public/components/shared/exploratory_view/**/*.*"
+- 'Feature:Embedding':
+    - 'src/plugins/embeddable/**/*.*'
+    - 'src/plugins/dashboard_embeddable_container/**/*.*'
+- 'Feature:Drilldowns':
+    - 'x-pack/plugins/drilldowns/**/*.*'
+    - 'x-pack/plugins/dashboard_enhanced/public/services/drilldowns/**/*.*'
+- 'Feature:ExpressionLanguage':
+    - 'src/plugins/expressions/**/*.*'
+    - 'src/plugins/bfetch/**/*.*'
+- 'Team:obs-ux-infra_services':
+    - 'x-pack/plugins/observability_solution/apm/**/*.*'
+    - 'x-pack/test/apm_api_integration/**/*.*'
+    - 'packages/kbn-apm-synthtrace/**/*.*'
+    - 'packages/kbn-apm-synthtrace-client/**/*.*'
+    - 'packages/kbn-apm-utils/**/*.*'
+    - 'x-pack/plugins/observability_solution/ux/**/*.*'
+- 'Team:Fleet':
+    - 'x-pack/plugins/fleet/**/*.*'
+    - 'x-pack/test/fleet_api_integration/**/*.*'
+- 'Team:obs-ux-management':
+    - 'x-pack/plugins/observability_solution/observability/**/*.*'
+    - 'x-pack/plugins/observability_solution/slo/**/*.*'
+    - 'x-pack/plugins/observability_solution/synthetics/**/*.*'
+    - 'x-pack/plugins/observability_solution/exploratory_view/**/*.*'
+- 'Team:Obs AI Assistant':
+    - 'x-pack/plugins/observability_solution/observability_ai_assistant/**/*.*'
+    - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
+    - 'x-pack/test/observability_ai_assistant_api_integration/**/*.*'
+    - 'x-pack/test/observability_ai_assistant_functional/**/*.*'
+- 'ci:project-deploy-observability':
+    - 'packages/kbn-apm-*/**/*.*'
+    - 'x-pack/plugins/observability_solution/**/*.*'
+    - 'x-pack/plugins/serverless_observability/**/*.*'
+    - 'x-pack/test/apm_api_integration/**/*.*'
+    - 'x-pack/test/observability_*/**/*.*'

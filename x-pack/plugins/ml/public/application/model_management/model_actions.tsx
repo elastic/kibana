@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   BUILT_IN_MODEL_TAG,
   DEPLOYMENT_STATE,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
-import {
-  ELASTIC_MODEL_TAG,
-  MODEL_STATE,
-} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { MODEL_STATE } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
@@ -30,8 +28,9 @@ import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable, isDfaTrainedModel } from './test_models';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useCloudCheck } from '../components/node_available_warning/hooks';
 
 export function useModelActions({
   onDfaTestAction,
@@ -42,26 +41,34 @@ export function useModelActions({
   isLoading,
   fetchModels,
   modelAndDeploymentIds,
+  onModelDownloadRequest,
 }: {
   isLoading: boolean;
   onDfaTestAction: (model: ModelItem) => void;
   onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (models: ModelItem[]) => void;
   onModelDeployRequest: (model: ModelItem) => void;
+  onModelDownloadRequest: (modelId: string) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
 }): Array<Action<ModelItem>> {
+  const isMobileLayout = useIsWithinMaxBreakpoint('l');
+
   const {
     services: {
       application: { navigateToUrl },
       overlays,
-      theme,
-      i18n: i18nStart,
       docLinks,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
+      ...startServices
     },
   } = useMlKibana();
+
+  const { showNodeInfo } = useEnabledFeatures();
+  const { nlpSettings } = useMlServerInfo();
+
+  const cloudInfo = useCloudCheck();
 
   const [
     canCreateTrainedModels,
@@ -89,7 +96,7 @@ export function useModelActions({
 
   useEffect(() => {
     let isMounted = true;
-    mlApiServices
+    mlApi
       .hasPrivileges({
         cluster: ['manage_ingest_pipelines'],
       })
@@ -104,22 +111,24 @@ export function useModelActions({
     return () => {
       isMounted = false;
     };
-  }, [mlApiServices]);
+  }, [mlApi]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme, i18nStart),
-    [i18nStart, overlays, theme]
+    () => getUserConfirmationProvider(overlays, startServices),
+    [overlays, startServices]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
       getUserInputModelDeploymentParamsProvider(
         overlays,
-        theme,
-        i18nStart,
-        startModelDeploymentDocUrl
+        startServices,
+        startModelDeploymentDocUrl,
+        cloudInfo,
+        showNodeInfo,
+        nlpSettings
       ),
-    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
+    [overlays, startServices, startModelDeploymentDocUrl, cloudInfo, showNodeInfo, nlpSettings]
   );
 
   const isBuiltInModel = useCallback(
@@ -127,7 +136,7 @@ export function useModelActions({
     []
   );
 
-  return useMemo(
+  return useMemo<Array<Action<ModelItem>>>(
     () => [
       {
         name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataNameActionLabel', {
@@ -197,14 +206,22 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
-        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'play',
-        type: 'button',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
+        color: 'success',
         enabled: (item) => {
-          return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
+          return canStartStopTrainedModels && !isLoading;
         },
-        available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
+        available: (item) => {
+          return (
+            item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+            !!item.state &&
+            item.state !== MODEL_STATE.DOWNLOADING &&
+            item.state !== MODEL_STATE.NOT_DOWNLOADED
+          );
+        },
         onClick: async (item) => {
           const modelDeploymentParams = await getUserInputModelDeploymentParams(
             item,
@@ -216,21 +233,19 @@ export function useModelActions({
 
           try {
             onLoading(true);
-            await trainedModelsApiService.startModelAllocation(item.model_id, {
-              number_of_allocations: modelDeploymentParams.numOfAllocations,
-              threads_per_allocation: modelDeploymentParams.threadsPerAllocations!,
-              priority: modelDeploymentParams.priority!,
-              deployment_id: !!modelDeploymentParams.deploymentId
-                ? modelDeploymentParams.deploymentId
-                : item.model_id,
-            });
-            displaySuccessToast(
-              i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
-                defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
+            await trainedModelsApiService.startModelAllocation(
+              item.model_id,
+              {
+                priority: modelDeploymentParams.priority!,
+                threads_per_allocation: modelDeploymentParams.threads_per_allocation!,
+                number_of_allocations: modelDeploymentParams.number_of_allocations,
+                deployment_id: modelDeploymentParams.deployment_id,
+              },
+              {
+                ...(modelDeploymentParams.adaptive_allocations?.enabled
+                  ? { adaptive_allocations: modelDeploymentParams.adaptive_allocations }
+                  : {}),
+              }
             );
             await fetchModels();
           } catch (e) {
@@ -267,24 +282,29 @@ export function useModelActions({
           !isLoading &&
           !!item.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED),
         onClick: async (item) => {
-          const deploymentToUpdate = item.deployment_ids[0];
+          const deploymentIdToUpdate = item.deployment_ids[0];
 
-          const deploymentParams = await getUserInputModelDeploymentParams(item, {
-            deploymentId: deploymentToUpdate,
-            numOfAllocations: item.stats!.deployment_stats.find(
-              (v) => v.deployment_id === deploymentToUpdate
-            )!.number_of_allocations,
-          });
+          const targetDeployment = item.stats!.deployment_stats.find(
+            (v) => v.deployment_id === deploymentIdToUpdate
+          )!;
+
+          const deploymentParams = await getUserInputModelDeploymentParams(item, targetDeployment);
 
           if (!deploymentParams) return;
 
           try {
             onLoading(true);
+
             await trainedModelsApiService.updateModelDeployment(
               item.model_id,
-              deploymentParams.deploymentId!,
+              deploymentParams.deployment_id!,
               {
-                number_of_allocations: deploymentParams.numOfAllocations,
+                ...(deploymentParams.adaptive_allocations
+                  ? { adaptive_allocations: deploymentParams.adaptive_allocations }
+                  : {
+                      number_of_allocations: deploymentParams.number_of_allocations!,
+                      adaptive_allocations: { enabled: false },
+                    }),
               }
             );
             displaySuccessToast(
@@ -327,7 +347,15 @@ export function useModelActions({
         available: (item) =>
           item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
           canStartStopTrainedModels &&
-          (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING),
+          // Deployment can be either started, starting, or exist in a failed state
+          (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING) &&
+          // Only show the action if there is at least one deployment that is not used by the inference service
+          (!Array.isArray(item.inference_apis) ||
+            item.deployment_ids.some(
+              (dId) =>
+                Array.isArray(item.inference_apis) &&
+                !item.inference_apis.some((inference) => inference.inference_id === dId)
+            )),
         enabled: (item) => !isLoading,
         onClick: async (item) => {
           const requireForceStop = isPopulatedObject(item.pipelines);
@@ -350,16 +378,6 @@ export function useModelActions({
               {
                 force: requireForceStop,
               }
-            );
-            displaySuccessToast(
-              i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
-                defaultMessage:
-                  '{numberOfDeployments, plural, one {Deployment} other {Deployments}}  for "{modelId}" has been stopped successfully.',
-                values: {
-                  modelId: item.model_id,
-                  numberOfDeployments: deploymentIds.length,
-                },
-              })
             );
             if (Object.values(results).some((r) => r.error !== undefined)) {
               Object.entries(results).forEach(([id, r]) => {
@@ -400,41 +418,15 @@ export function useModelActions({
           defaultMessage: 'Download',
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
-        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'download',
-        type: 'button',
+        color: 'text',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
-        available: (item) =>
-          canCreateTrainedModels &&
-          item.tags.includes(ELASTIC_MODEL_TAG) &&
-          item.state === MODEL_STATE.NOT_DOWNLOADED,
+        available: (item) => canCreateTrainedModels && item.state === MODEL_STATE.NOT_DOWNLOADED,
         enabled: (item) => !isLoading,
         onClick: async (item) => {
-          try {
-            onLoading(true);
-            await trainedModelsApiService.installElasticTrainedModelConfig(item.model_id);
-            displaySuccessToast(
-              i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
-                defaultMessage: '"{modelId}" model download has been started successfully.',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
-            );
-            // Need to fetch model state updates
-            await fetchModels();
-          } catch (e) {
-            displayErrorToast(
-              e,
-              i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
-                defaultMessage: 'Failed to download "{modelId}"',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
-            );
-            onLoading(false);
-          }
+          onModelDownloadRequest(item.model_id);
         },
       },
       {
@@ -486,35 +478,52 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          const hasDeployments = model.state === MODEL_STATE.STARTED;
-          return (
-            <EuiToolTip
-              position="left"
-              content={
-                hasDeployments
-                  ? i18n.translate(
-                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
-                      {
-                        defaultMessage: 'Model has started deployments',
-                      }
-                    )
-                  : null
-              }
-            >
-              <>
-                {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                  defaultMessage: 'Delete model',
-                })}
-              </>
-            </EuiToolTip>
+          return model.state === MODEL_STATE.DOWNLOADING ? (
+            <>
+              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </>
+          ) : (
+            <>
+              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Delete',
+              })}
+            </>
           );
         },
-        description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-          defaultMessage: 'Delete model',
-        }),
+        description: (model: ModelItem) => {
+          const hasDeployments = model.deployment_ids.length > 0;
+          const { hasInferenceServices } = model;
+
+          if (model.state === MODEL_STATE.DOWNLOADING) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.cancelDownloadActionLabel', {
+              defaultMessage: 'Cancel download',
+            });
+          } else if (hasInferenceServices) {
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.deleteDisabledWithInferenceServicesTooltip',
+              {
+                defaultMessage: 'Model is used by the _inference API',
+              }
+            );
+          } else if (hasDeployments) {
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+              {
+                defaultMessage: 'Model has started deployments',
+              }
+            );
+          } else {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+              defaultMessage: 'Delete model',
+            });
+          }
+        },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',
-        type: 'icon',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         color: 'danger',
         isPrimary: false,
         onClick: (model) => {
@@ -535,16 +544,17 @@ export function useModelActions({
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
-          defaultMessage: 'Test model',
+          defaultMessage: 'Test',
         }),
         description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
           defaultMessage: 'Test model',
         }),
         'data-test-subj': 'mlModelsTableRowTestAction',
         icon: 'inputOutput',
-        type: 'icon',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
-        available: isTestable,
+        available: (item) => isTestable(item, true),
         onClick: (item) => {
           if (isDfaTrainedModel(item) && !isBuiltInModel(item)) {
             onDfaTestAction(item);
@@ -553,7 +563,7 @@ export function useModelActions({
           }
         },
         enabled: (item) => {
-          return canTestTrainedModels && isTestable(item, true) && !isLoading;
+          return canTestTrainedModels && !isLoading;
         },
       },
       {
@@ -614,6 +624,8 @@ export function useModelActions({
       onTestAction,
       trainedModelsApiService,
       urlLocator,
+      onModelDownloadRequest,
+      isMobileLayout,
     ]
   );
 }

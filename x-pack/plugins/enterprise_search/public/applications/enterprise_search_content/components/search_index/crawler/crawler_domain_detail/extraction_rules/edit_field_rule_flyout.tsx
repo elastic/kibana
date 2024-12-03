@@ -199,6 +199,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                   >
                     <EuiRadioGroup
                       data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleSource"
+                      name="source_type_radiogroup"
                       options={[
                         {
                           id: FieldType.HTML,
@@ -357,10 +358,11 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                       }
                     )}
                     isInvalid={!!error && isTouched}
-                    error={error}
+                    error={error as React.ReactNode}
                   >
                     <EuiRadioGroup
                       data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleExtraction"
+                      name="content_from.value_type_radiogroup"
                       options={[
                         {
                           id: ContentFrom.EXTRACTED,
@@ -408,6 +410,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                           >
                             <EuiRadioGroup
                               data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleMultipleObjects"
+                              name="multiple_objects_handling_radiogroup"
                               options={[
                                 {
                                   id: MultipleObjectsHandling.STRING,

@@ -5,29 +5,33 @@
  * 2.0.
  */
 
-import type { TimelineSavedObject, TimelineTypeLiteral } from '../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import type { TimelineResponse } from '../../../../common/api/timeline';
+import {
+  type TimelineType,
+  TimelineTypeEnum,
+  TimelineStatusEnum,
+} from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';
 
 interface TimelineObjectProps {
   id: string | null | undefined;
-  type: TimelineTypeLiteral;
+  type: TimelineType;
   version: string | number | null | undefined;
   frameworkRequest: FrameworkRequest;
 }
 
 export class TimelineObject {
   public readonly id: string | null;
-  private type: TimelineTypeLiteral;
+  private type: TimelineType;
   public readonly version: string | number | null;
   private frameworkRequest: FrameworkRequest;
 
-  public data: TimelineSavedObject | null;
+  public data: TimelineResponse | null;
 
   constructor({
     id = null,
-    type = TimelineType.default,
+    type = TimelineTypeEnum.default,
     version = null,
     frameworkRequest,
   }: TimelineObjectProps) {
@@ -42,7 +46,7 @@ export class TimelineObject {
   public async getTimeline() {
     this.data =
       this.id != null
-        ? this.type === TimelineType.template
+        ? this.type === TimelineTypeEnum.template
           ? await getTimelineTemplateOrNull(this.frameworkRequest, this.id)
           : await getTimelineOrNull(this.frameworkRequest, this.id)
         : null;
@@ -54,7 +58,7 @@ export class TimelineObject {
   }
 
   private get isImmutable() {
-    return this.data?.status === TimelineStatus.immutable;
+    return this.data?.status === TimelineStatusEnum.immutable;
   }
 
   public get isExists() {
@@ -70,7 +74,7 @@ export class TimelineObject {
   }
 
   public get isUpdatableViaImport() {
-    return this.type === TimelineType.template && this.isExists;
+    return this.type === TimelineTypeEnum.template && this.isExists;
   }
 
   public get getVersion() {

@@ -29,7 +29,8 @@
           "ml": ["read"],
           "siem": ["read", "read_alerts"],
           "securitySolutionAssistant": ["none"],
-          "securitySolutionCases": ["read"],
+          "securitySolutionAttackDiscovery": ["none"],
+          "securitySolutionCasesV2": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
         },
@@ -77,7 +78,8 @@
           "ml": ["read"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"]
         },
@@ -125,8 +127,26 @@
           "ml": ["read"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "builtInAlerts": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "no_risk_engine_privileges": {
+    "name": "no_risk_engine_privileges",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "siem": ["read"]
         },
         "spaces": ["*"],
         "base": []

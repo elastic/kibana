@@ -60,7 +60,6 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         endDate={endDate}
         filterQuery={mergedFilterQuery}
         id={ID}
-        indexNames={indexNames}
         setQuery={setQuery}
         startDate={startDate}
         {...histogramConfigs}

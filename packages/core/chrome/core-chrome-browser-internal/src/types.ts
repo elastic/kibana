@@ -1,19 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
-  ChromeProjectNavigation,
   ChromeStart,
+  ChromeBreadcrumb,
   SideNavComponent,
-  ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
+  ChromeProjectNavigationNode,
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  NavigationTreeDefinitionUI,
+  CloudURLs,
+  SolutionNavigationDefinitions,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
 import type { Observable } from 'rxjs';
 
 /** @internal */
@@ -45,10 +51,10 @@ export interface InternalChromeStart extends ChromeStart {
     setHome(homeHref: string): void;
 
     /**
-     * Sets the cloud's projects page.
-     * @param projectsUrl
+     * Sets the cloud's URLs.
+     * @param cloudUrls
      */
-    setProjectsUrl(projectsUrl: string): void;
+    setCloudUrls(cloudUrls: CloudURLs): void;
 
     /**
      * Sets the project name.
@@ -56,20 +62,16 @@ export interface InternalChromeStart extends ChromeStart {
      */
     setProjectName(projectName: string): void;
 
-    /**
-     * Sets the project url.
-     * @param projectUrl
-     */
-    setProjectUrl(projectUrl: string): void;
+    initNavigation<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(
+      id: SolutionId,
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+    ): void;
 
-    /**
-     * Sets the project navigation config to be used for rendering project navigation.
-     * It is used for default project sidenav, project breadcrumbs, tracking active deep link.
-     * @param projectNavigation The project navigation config
-     *
-     * Use {@link ServerlessPluginStart.setNavigation} to set project navigation config.
-     */
-    setNavigation(projectNavigation: ChromeProjectNavigation): void;
+    getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
 
     /**
      * Returns an observable of the active nodes in the project navigation.
@@ -86,6 +88,9 @@ export interface InternalChromeStart extends ChromeStart {
      */
     setSideNavComponent(component: SideNavComponent | null): void;
 
+    /** Get an Observable of the current project breadcrumbs */
+    getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+
     /**
      * Set project breadcrumbs
      * @param breadcrumbs
@@ -94,8 +99,25 @@ export interface InternalChromeStart extends ChromeStart {
      * Use {@link ServerlessPluginStart.setBreadcrumbs} to set project breadcrumbs.
      */
     setBreadcrumbs(
-      breadcrumbs: ChromeProjectBreadcrumb[] | ChromeProjectBreadcrumb,
+      breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+
+    /**
+     * Update the solution navigation definitions.
+     *
+     * @param solutionNavs The solution navigation definitions to update.
+     * @param replace Flag to indicate if the previous solution navigation definitions should be replaced.
+     * If `false`, the new solution navigation definitions will be merged with the existing ones.
+     */
+    updateSolutionNavigations(solutionNavs: SolutionNavigationDefinitions, replace?: boolean): void;
+
+    /**
+     * Change the active solution navigation.
+     *
+     * @param id The id of the active solution navigation. If `null` is provided, the solution navigation
+     * will be replaced with the legacy Kibana navigation.
+     */
+    changeActiveSolutionNavigation(id: SolutionId | null): void;
   };
 }

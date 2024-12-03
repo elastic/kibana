@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -33,6 +34,7 @@ import {
   ALERT_SUPPRESSION_VALUE,
   ALERT_SYSTEM_STATUS,
   ALERT_WORKFLOW_REASON,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_USER,
   ECS_VERSION,
 } from '@kbn/rule-data-utils';
@@ -170,6 +172,11 @@ export const legacyAlertFieldMap = {
   },
   [ALERT_WORKFLOW_USER]: {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_WORKFLOW_STATUS_UPDATED_AT]: {
+    type: 'date',
     array: false,
     required: false,
   },

@@ -17,12 +17,13 @@ Task Manager runs background tasks by polling for work on an interval.  You can 
 The maximum number of times a task will be attempted before being abandoned as failed.  Defaults to 3.
 
 `xpack.task_manager.poll_interval`::
-How often, in milliseconds, the task manager will look for more work.  Defaults to 3000 and cannot be lower than 100.
+How often, in milliseconds, the task manager will look for more work.  Defaults to 500 and cannot be lower than 100.
 
 `xpack.task_manager.request_capacity`::
 How many requests can Task Manager buffer before it rejects new requests.  Defaults to 1000.
 
 `xpack.task_manager.max_workers`::
+deprecated:[8.16.0]
 The maximum number of tasks that this Kibana instance will run simultaneously.  Defaults to 10.
 Starting in 8.0, it will not be possible to set the value greater than 100.
 
@@ -47,6 +48,9 @@ Enables event loop delay monitoring, which will log a warning when a task causes
 
 `xpack.task_manager.event_loop_delay.warn_threshold`::
 Sets the amount of event loop delay during a task execution which will cause a warning to be logged. Defaults to 5000 milliseconds (5 seconds).
+
+`xpack.task_manager.capacity`::
+Controls the number of tasks that can be run at one time. The minimum value is 5 and the maximum is 50. Defaults to 10.
 
 [float]
 [[task-manager-health-settings]]

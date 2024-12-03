@@ -38,7 +38,7 @@ import { TemplateDeleteModal, SectionError, Error } from '../../../../components
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { useServices } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
-import { TemplateTypeIndicator } from '../components';
+import { TemplateTypeIndicator, TemplateDeprecatedBadge } from '../components';
 import { TabSummary, TabPreview } from './tabs';
 
 const SUMMARY_TAB_ID = 'summary';
@@ -120,6 +120,12 @@ export const TemplateDetailsContent = ({
             {templateName}
             {templateDetails && (
               <>
+                {templateDetails.deprecated && (
+                  <>
+                    &nbsp;
+                    <TemplateDeprecatedBadge />
+                  </>
+                )}
                 &nbsp;
                 <TemplateTypeIndicator templateType={templateDetails._kbnMeta.type} />
               </>
@@ -165,7 +171,7 @@ export const TemplateDetailsContent = ({
         [SETTINGS_TAB_ID]: <TabSettings settings={settings} />,
         [MAPPINGS_TAB_ID]: <TabMappings mappings={mappings} />,
         [ALIASES_TAB_ID]: <TabAliases aliases={aliases} />,
-        [PREVIEW_TAB_ID]: <TabPreview templateDetails={templateDetails} />,
+        [PREVIEW_TAB_ID]: <TabPreview templateName={templateName} />,
       };
 
       const tabContent = tabToComponentMap[activeTab];

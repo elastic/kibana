@@ -7,15 +7,18 @@
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
-import { services } from '../../../api_integration/services';
+import { services as baseServices } from './services';
+import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
 interface CreateTestConfigOptions {
   license: string;
   ssl?: boolean;
+  services?: any;
 }
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases',
   '.email',
   '.index',
   '.pagerduty',
@@ -32,7 +35,7 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(options: CreateTestConfigOptions, testFiles?: string[]) {
-  const { license = 'trial', ssl = false } = options;
+  const { license = 'trial', ssl = false, services = baseServices } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -51,7 +54,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
       servers,
       services,
       junit: {
-        reportName: 'X-Pack Detection Engine API Integration Tests',
+        reportName: 'X-Pack Security Solution API Integration Tests',
       },
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
@@ -83,20 +86,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'riskScoringRoutesEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',
-          `--xpack.actions.preconfigured=${JSON.stringify({
-            'my-test-email': {
-              actionTypeId: '.email',
-              name: 'TestEmail#xyz',
-              config: {
-                from: 'me@test.com',
-                service: '__json',
-              },
-              secrets: {
-                user: 'user',
-                password: 'password',
-              },
-            },
-          })}`,
+          `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
@@ -106,7 +96,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
         ],
       },
       mochaOpts: {
-        grep: '/^(?!.*@brokenInEss).*@ess.*/',
+        grep: '/^(?!.*@skipInEss).*@ess.*/',
       },
     };
   };

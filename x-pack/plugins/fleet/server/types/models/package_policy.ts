@@ -9,23 +9,31 @@ import { schema } from '@kbn/config-schema';
 
 import { isValidNamespace } from '../../../common/services';
 
-export const NamespaceSchema = schema.string({
-  minLength: 1,
+export const PackagePolicyNamespaceSchema = schema.string({
   validate: (value) => {
-    const namespaceValidation = isValidNamespace(value || '');
+    const namespaceValidation = isValidNamespace(value || '', true);
     if (!namespaceValidation.valid && namespaceValidation.error) {
       return namespaceValidation.error;
     }
   },
+  meta: {
+    description:
+      "The package policy namespace. Leave blank to inherit the agent policy's namespace.",
+  },
 });
 
-const ConfigRecordSchema = schema.recordOf(
+export const ConfigRecordSchema = schema.recordOf(
   schema.string(),
   schema.object({
     type: schema.maybe(schema.string()),
     value: schema.maybe(schema.any()),
     frozen: schema.maybe(schema.boolean()),
-  })
+  }),
+  {
+    meta: {
+      description: 'Package variable (see integration documentation for more information)',
+    },
+  }
 );
 
 const PackagePolicyStreamsSchema = {
@@ -51,37 +59,22 @@ const PackagePolicyStreamsSchema = {
     ),
   }),
   vars: schema.maybe(ConfigRecordSchema),
-  config: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        type: schema.maybe(schema.string()),
-        value: schema.maybe(schema.any()),
-      })
-    )
-  ),
+  config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
 };
 
-const PackagePolicyInputsSchema = {
+export const PackagePolicyInputsSchema = {
+  id: schema.maybe(schema.string()),
   type: schema.string(),
   policy_template: schema.maybe(schema.string()),
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   vars: schema.maybe(ConfigRecordSchema),
-  config: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        type: schema.maybe(schema.string()),
-        value: schema.maybe(schema.any()),
-      })
-    )
-  ),
+  config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
 };
 
-const ExperimentalDataStreamFeatures = schema.arrayOf(
+export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
   schema.object({
     data_stream: schema.string(),
     features: schema.object({
@@ -93,25 +86,102 @@ const ExperimentalDataStreamFeatures = schema.arrayOf(
   })
 );
 
-const PackagePolicyBaseSchema = {
-  name: schema.string(),
-  description: schema.maybe(schema.string()),
-  namespace: NamespaceSchema,
-  policy_id: schema.string(),
-  enabled: schema.boolean(),
-  is_managed: schema.maybe(schema.boolean()),
-  package: schema.maybe(
-    schema.object({
-      name: schema.string(),
-      title: schema.string(),
-      version: schema.string(),
-      experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+export const PackagePolicyPackageSchema = schema.object({
+  name: schema.string({
+    meta: {
+      description: 'Package name',
+    },
+  }),
+  title: schema.maybe(schema.string()),
+  version: schema.string({
+    meta: {
+      description: 'Package version',
+    },
+  }),
+  experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeaturesSchema),
+  requires_root: schema.maybe(schema.boolean()),
+});
+
+export const PackagePolicyBaseSchema = {
+  name: schema.string({
+    meta: {
+      description: 'Package policy name (should be unique)',
+    },
+  }),
+  description: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Package policy description',
+      },
     })
   ),
-  // Deprecated TODO create remove issue
-  output_id: schema.maybe(schema.string()),
+  namespace: schema.maybe(PackagePolicyNamespaceSchema),
+  policy_id: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.string({
+        meta: {
+          description: 'Agent policy ID where that package policy will be added',
+          deprecated: true,
+        },
+      }),
+    ])
+  ),
+  policy_ids: schema.maybe(
+    schema.arrayOf(
+      schema.string({
+        meta: {
+          description: 'Agent policy IDs where that package policy will be added',
+        },
+      })
+    )
+  ),
+  output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  enabled: schema.boolean(),
+  is_managed: schema.maybe(schema.boolean()),
+  package: schema.maybe(PackagePolicyPackageSchema),
+
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
   vars: schema.maybe(ConfigRecordSchema),
+  overrides: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.object(
+        {
+          inputs: schema.maybe(
+            schema.recordOf(schema.string(), schema.any(), {
+              validate: (val) => {
+                if (
+                  Object.keys(val).some(
+                    (key) =>
+                      key.match(/^compiled_inputs(\.)?/) || key.match(/^compiled_stream(\.)?/)
+                  )
+                ) {
+                  return 'Overrides of compiled_inputs and compiled_stream are not allowed';
+                }
+              },
+            })
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.',
+          },
+        }
+      ),
+    ])
+  ),
+  supports_agentless: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: 'Indicates whether the package policy belongs to an agentless agent policy.',
+        },
+      })
+    )
+  ),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -122,19 +192,8 @@ export const NewPackagePolicySchema = schema.object({
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
-  namespace: schema.maybe(NamespaceSchema),
-  policy_id: schema.maybe(schema.string()),
   enabled: schema.maybe(schema.boolean()),
-  package: schema.maybe(
-    schema.object({
-      name: schema.string(),
-      title: schema.maybe(schema.string()),
-      version: schema.string(),
-      experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
-    })
-  ),
-  // Deprecated TODO create remove issue
-  output_id: schema.maybe(schema.string()),
+  package: schema.maybe(PackagePolicyPackageSchema),
   inputs: schema.arrayOf(
     schema.object({
       ...PackagePolicyInputsSchema,
@@ -145,11 +204,24 @@ const CreatePackagePolicyProps = {
 
 export const CreatePackagePolicyRequestBodySchema = schema.object({
   ...CreatePackagePolicyProps,
-  id: schema.maybe(schema.string()),
-  force: schema.maybe(schema.boolean()),
+  id: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Package policy unique identifier',
+      },
+    })
+  ),
+  force: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Force package policy creation even if package is not verified, or if the agent policy is managed.',
+      },
+    })
+  ),
 });
 
-const SimplifiedVarsSchema = schema.recordOf(
+export const SimplifiedVarsSchema = schema.recordOf(
   schema.string(),
   schema.nullable(
     schema.oneOf([
@@ -158,42 +230,100 @@ const SimplifiedVarsSchema = schema.recordOf(
       schema.number(),
       schema.arrayOf(schema.string()),
       schema.arrayOf(schema.number()),
+      // Secrets
+      schema.object({
+        id: schema.string(),
+        isSecretRef: schema.boolean(),
+      }),
     ])
+  ),
+  {
+    meta: {
+      description:
+        'Input/stream level variable (see integration documentation for more information)',
+    },
+  }
+);
+
+export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
+  schema.recordOf(
+    schema.string(),
+    schema.object({
+      enabled: schema.maybe(
+        schema.boolean({
+          meta: {
+            description: 'enable or disable that input, (default to true)',
+          },
+        })
+      ),
+      vars: schema.maybe(SimplifiedVarsSchema),
+      streams: schema.maybe(
+        schema.recordOf(
+          schema.string(),
+          schema.object({
+            enabled: schema.maybe(
+              schema.boolean({
+                meta: {
+                  description: 'enable or disable that stream, (default to true)',
+                },
+              })
+            ),
+            vars: schema.maybe(SimplifiedVarsSchema),
+          }),
+          {
+            meta: {
+              description:
+                'Input streams (see integration documentation to know what streams are available)',
+            },
+          }
+        )
+      ),
+    }),
+    {
+      meta: {
+        description:
+          'Package policy inputs (see integration documentation to know what inputs are available)',
+      },
+    }
   )
 );
 
-export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
+export const SimplifiedPackagePolicyBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  policy_id: schema.string(),
-  namespace: schema.string({ defaultValue: 'default' }),
-  package: schema.object({
-    name: schema.string(),
-    version: schema.string(),
-    experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
-  }),
-  force: schema.maybe(schema.boolean()),
+  namespace: schema.maybe(schema.string()),
+  output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   vars: schema.maybe(SimplifiedVarsSchema),
-  inputs: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        enabled: schema.maybe(schema.boolean()),
-        vars: schema.maybe(SimplifiedVarsSchema),
-        streams: schema.maybe(
-          schema.recordOf(
-            schema.string(),
-            schema.object({
-              enabled: schema.maybe(schema.boolean()),
-              vars: schema.maybe(SimplifiedVarsSchema),
-            })
-          )
-        ),
+  inputs: SimplifiedPackagePolicyInputsSchema,
+  supports_agentless: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: 'Indicates whether the package policy belongs to an agentless agent policy.',
+        },
       })
     )
   ),
 });
+
+export const SimplifiedPackagePolicyPreconfiguredSchema = SimplifiedPackagePolicyBaseSchema.extends(
+  {
+    id: schema.string(),
+    package: schema.object({
+      name: schema.string(),
+    }),
+  }
+);
+
+export const SimplifiedCreatePackagePolicyRequestBodySchema =
+  SimplifiedPackagePolicyBaseSchema.extends({
+    policy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+    policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+    force: schema.maybe(schema.boolean()),
+    package: PackagePolicyPackageSchema,
+  });
 
 export const UpdatePackagePolicyRequestBodySchema = schema.object({
   ...CreatePackagePolicyProps,
@@ -224,15 +354,19 @@ export const PackagePolicySchema = schema.object({
   updated_by: schema.string(),
   created_at: schema.string(),
   created_by: schema.string(),
-  elasticsearch: schema.maybe(
-    schema.object({
-      privileges: schema.maybe(
-        schema.object({
-          cluster: schema.maybe(schema.arrayOf(schema.string())),
-        })
-      ),
-    })
-  ),
+  elasticsearch: schema
+    .maybe(
+      schema.object({
+        privileges: schema.maybe(
+          schema.object({
+            cluster: schema.maybe(schema.arrayOf(schema.string())),
+          })
+        ),
+      })
+    )
+    .extendsDeep({
+      unknowns: 'allow',
+    }),
   inputs: schema.arrayOf(
     schema.object({
       ...PackagePolicyInputsSchema,
@@ -246,4 +380,47 @@ export const PackagePolicySchema = schema.object({
       })
     )
   ),
+});
+
+export const PackagePolicyResponseSchema = PackagePolicySchema.extends({
+  vars: schema.maybe(schema.oneOf([ConfigRecordSchema, schema.maybe(SimplifiedVarsSchema)])),
+  inputs: schema.oneOf([
+    schema.arrayOf(
+      schema.object({
+        ...PackagePolicyInputsSchema,
+        compiled_input: schema.maybe(schema.any()),
+      })
+    ),
+    SimplifiedPackagePolicyInputsSchema,
+  ]),
+  spaceIds: schema.maybe(schema.arrayOf(schema.string())),
+  agents: schema.maybe(schema.number()),
+});
+
+export const OrphanedPackagePoliciesResponseSchema = schema.object({
+  items: schema.arrayOf(PackagePolicyResponseSchema),
+  total: schema.number(),
+});
+
+export const DryRunPackagePolicySchema = schema.object({
+  ...PackagePolicyBaseSchema,
+  id: schema.maybe(schema.string()),
+  force: schema.maybe(schema.boolean()),
+  errors: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        message: schema.string(),
+        key: schema.maybe(schema.string()),
+      })
+    )
+  ),
+  missingVars: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const PackagePolicyStatusResponseSchema = schema.object({
+  id: schema.string(),
+  success: schema.boolean(),
+  name: schema.maybe(schema.string()),
+  statusCode: schema.maybe(schema.number()),
+  body: schema.maybe(schema.object({ message: schema.string() })),
 });

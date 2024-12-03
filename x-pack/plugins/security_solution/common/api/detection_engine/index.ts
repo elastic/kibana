@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './alert_assignees';
 export * from './alert_tags';
 export * from './fleet_integrations';
 export * from './index_management';

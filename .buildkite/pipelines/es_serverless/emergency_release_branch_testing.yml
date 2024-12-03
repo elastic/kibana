@@ -1,0 +1,18 @@
+# https://buildkite.com/elastic/kibana-serverless-emergency-release-branch-testing
+
+## Triggers the artifacts container image build for emergency releases
+agents:
+  image: family/kibana-ubuntu-2004
+  imageProject: elastic-images-prod
+  provider: gcp
+  machineType: n2-standard-2
+
+notify:
+  - slack: "#kibana-mission-control"
+    if: "build.state == 'passed' || build.state == 'failed' || build.state == 'scheduled'"
+
+steps:
+  - command: "ts-node .buildkite/scripts/serverless/emergency_release/trigger_container_build.ts"
+    label: "Trigger container build if there are new commits"
+    env:
+      DRY_RUN: $DRY_RUN

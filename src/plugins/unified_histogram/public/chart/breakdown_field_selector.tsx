@@ -1,96 +1,137 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiSelectableOption } from '@elastic/eui';
+import {
+  FieldIcon,
+  getFieldIconProps,
+  comboBoxFieldOptionMatcher,
+  fieldSupportsBreakdown,
+} from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { isESQLColumnGroupable } from '@kbn/esql-utils';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
 import { UnifiedHistogramBreakdownContext } from '../types';
-import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
+import {
+  ToolbarSelector,
+  ToolbarSelectorProps,
+  EMPTY_OPTION,
+  SelectableEntry,
+} from './toolbar_selector';
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
   breakdown: UnifiedHistogramBreakdownContext;
+  esqlColumns?: DatatableColumn[];
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
 
-const TRUNCATION_PROPS = { truncation: 'middle' as const };
-const SINGLE_SELECTION = { asPlainText: true };
+const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
+  if (esqlColumns) {
+    return (
+      // filter out unsupported field types and counter time series metrics
+      esqlColumns
+        .filter(isESQLColumnGroupable)
+        .map((column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)))
+    );
+  }
+
+  return dataView.fields.filter(fieldSupportsBreakdown);
+};
 
 export const BreakdownFieldSelector = ({
   dataView,
   breakdown,
+  esqlColumns,
   onBreakdownFieldChange,
 }: BreakdownFieldSelectorProps) => {
-  const fieldOptions = dataView.fields
-    .filter(fieldSupportsBreakdown)
-    .map((field) => ({ label: field.displayName, value: field.name }))
-    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+  const fields = useMemo(() => mapToDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
+  const fieldOptions: SelectableEntry[] = useMemo(() => {
+    const options: SelectableEntry[] = fields
+      .map((field) => ({
+        key: field.name,
+        name: field.name,
+        label: field.displayName,
+        value: field.name,
+        checked:
+          breakdown?.field?.name === field.name
+            ? ('on' as EuiSelectableOption['checked'])
+            : undefined,
+        prepend: (
+          <span
+            css={css`
+              .euiToken {
+                vertical-align: middle;
+              }
+            `}
+          >
+            <FieldIcon {...getFieldIconProps(field)} />
+          </span>
+        ),
+      }))
+      .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 
-  const selectedFields = breakdown.field
-    ? [{ label: breakdown.field.displayName, value: breakdown.field.name }]
-    : [];
+    options.unshift({
+      key: EMPTY_OPTION,
+      value: EMPTY_OPTION,
+      label: i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
+        defaultMessage: 'No breakdown',
+      }),
+      checked: !breakdown?.field ? ('on' as EuiSelectableOption['checked']) : undefined,
+    });
 
-  const onFieldChange = useCallback(
-    (newOptions: EuiComboBoxOptionOption[]) => {
-      const field = newOptions.length
-        ? dataView.fields.find((currentField) => currentField.name === newOptions[0].value)
+    return options;
+  }, [fields, breakdown?.field]);
+
+  const onChange = useCallback<NonNullable<ToolbarSelectorProps['onChange']>>(
+    (chosenOption) => {
+      const breakdownField = chosenOption?.value
+        ? fields.find((currentField) => currentField.name === chosenOption.value)
         : undefined;
-
-      onBreakdownFieldChange?.(field);
+      onBreakdownFieldChange?.(breakdownField);
     },
-    [dataView.fields, onBreakdownFieldChange]
+    [fields, onBreakdownFieldChange]
   );
-
-  const [fieldPopoverDisabled, setFieldPopoverDisabled] = useState(false);
-  const disableFieldPopover = useCallback(() => setFieldPopoverDisabled(true), []);
-  const enableFieldPopover = useCallback(
-    () => setTimeout(() => setFieldPopoverDisabled(false)),
-    []
-  );
-
-  const { euiTheme } = useEuiTheme();
-  const breakdownCss = css`
-    width: 100%;
-    max-width: ${euiTheme.base * 22}px;
-    &:focus-within {
-      max-width: ${euiTheme.base * 30}px;
-    }
-  `;
 
   return (
-    <EuiToolTip
-      position="top"
-      content={fieldPopoverDisabled ? undefined : breakdown.field?.displayName}
-      anchorProps={{ css: breakdownCss }}
-    >
-      <EuiComboBox
-        data-test-subj="unifiedHistogramBreakdownFieldSelector"
-        prepend={i18n.translate('unifiedHistogram.breakdownFieldSelectorLabel', {
-          defaultMessage: 'Break down by',
-        })}
-        placeholder={i18n.translate('unifiedHistogram.breakdownFieldSelectorPlaceholder', {
-          defaultMessage: 'Select field',
-        })}
-        aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
-          defaultMessage: 'Break down by',
-        })}
-        singleSelection={SINGLE_SELECTION}
-        options={fieldOptions}
-        selectedOptions={selectedFields}
-        onChange={onFieldChange}
-        truncationProps={TRUNCATION_PROPS}
-        compressed
-        fullWidth={true}
-        onFocus={disableFieldPopover}
-        onBlur={enableFieldPopover}
-      />
-    </EuiToolTip>
+    <ToolbarSelector
+      data-test-subj="unifiedHistogramBreakdownSelector"
+      data-selected-value={breakdown?.field?.name}
+      searchable
+      buttonLabel={
+        breakdown?.field?.displayName
+          ? i18n.translate('unifiedHistogram.breakdownFieldSelector.breakdownByButtonLabel', {
+              defaultMessage: 'Breakdown by {fieldName}',
+              values: {
+                fieldName: breakdown?.field?.displayName,
+              },
+            })
+          : i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
+              defaultMessage: 'No breakdown',
+            })
+      }
+      popoverTitle={i18n.translate(
+        'unifiedHistogram.breakdownFieldSelector.breakdownFieldPopoverTitle',
+        {
+          defaultMessage: 'Select breakdown field',
+        }
+      )}
+      optionMatcher={comboBoxFieldOptionMatcher}
+      options={fieldOptions}
+      onChange={onChange}
+    />
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default BreakdownFieldSelector;

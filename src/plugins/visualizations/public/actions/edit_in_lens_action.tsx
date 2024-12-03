@@ -1,35 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { take } from 'rxjs/operators';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { VisualizeEmbeddable } from '../embeddable';
-import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
 import {
-  getUiActions,
+  apiCanAccessViewMode,
+  apiHasUniqueId,
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  HasUniqueId,
+  PublishesUnifiedSearch,
+  PublishesPanelDescription,
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
+import { take } from 'rxjs';
+import { apiHasVisualizeConfig, HasVisualizeConfig } from '../legacy/embeddable';
+import {
+  apiHasExpressionVariables,
+  HasExpressionVariables,
+} from '../embeddable/interfaces/has_expression_variables';
+import {
   getApplication,
-  getEmbeddable,
-  getUsageCollection,
   getCapabilities,
+  getEmbeddable,
+  getUiActions,
+  getUsageCollection,
 } from '../services';
+import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
 
 export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';
-
-export interface EditInLensContext {
-  embeddable: IEmbeddable;
-}
 
 const displayName = i18n.translate('visualizations.actions.editInLens.displayName', {
   defaultMessage: 'Convert to Lens',
@@ -50,11 +61,20 @@ const MenuItem: React.FC = () => {
   );
 };
 
-const isVisualizeEmbeddable = (embeddable: IEmbeddable): embeddable is VisualizeEmbeddable => {
-  return 'getVis' in embeddable;
-};
+type EditInLensActionApi = HasUniqueId &
+  HasVisualizeConfig &
+  CanAccessViewMode &
+  Partial<
+    PublishesUnifiedSearch &
+      HasExpressionVariables &
+      PublishesPanelTitle &
+      PublishesPanelDescription
+  >;
 
-export class EditInLensAction implements Action<EditInLensContext> {
+const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is EditInLensActionApi =>
+  apiHasUniqueId(api) && apiCanAccessViewMode(api) && apiHasVisualizeConfig(api);
+
+export class EditInLensAction implements Action<EmbeddableApiContext> {
   public id = ACTION_EDIT_IN_LENS;
   public readonly type = ACTION_EDIT_IN_LENS;
   public order = 49;
@@ -63,7 +83,7 @@ export class EditInLensAction implements Action<EditInLensContext> {
 
   constructor(private readonly timefilter: TimefilterContract) {}
 
-  async execute(context: ActionExecutionContext<EditInLensContext>): Promise<void> {
+  async execute(context: EmbeddableApiContext): Promise<void> {
     const application = getApplication();
     if (application?.currentAppId$) {
       application.currentAppId$
@@ -73,66 +93,73 @@ export class EditInLensAction implements Action<EditInLensContext> {
         getEmbeddable().getStateTransfer().isTransferInProgress = false;
       });
     }
+
     const { embeddable } = context;
-    if (isVisualizeEmbeddable(embeddable)) {
-      const vis = embeddable.getVis();
-      const navigateToLensConfig = await vis.type.navigateToLens?.(vis, this.timefilter);
-      // Filters and query set on the visualization level
-      const visFilters = vis.data.searchSource?.getField('filter');
-      const visQuery = vis.data.searchSource?.getField('query');
-      const parentSearchSource = vis.data.searchSource?.getParent();
-      const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
-      const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
-      const title = vis.title || embeddable.getOutput().title;
-      const updatedWithMeta = {
-        ...navigateToLensConfig,
-        title,
-        visTypeTitle: vis.type.title,
-        embeddableId: embeddable.id,
-        originatingApp: this.currentAppId,
-        searchFilters,
-        searchQuery,
-        isEmbeddable: true,
-        description: vis.description || embeddable.getOutput().description,
-        panelTimeRange: embeddable.getInput()?.timeRange,
-      };
-      if (navigateToLensConfig) {
-        if (this.currentAppId) {
-          getUsageCollection().reportUiCounter(
-            this.currentAppId,
-            METRIC_TYPE.CLICK,
-            ACTION_EDIT_IN_LENS
-          );
-        }
-        getEmbeddable().getStateTransfer().isTransferInProgress = true;
-        getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
+    if (!compatibilityCheck(embeddable)) return;
+
+    const vis = embeddable.getVis();
+    const navigateToLensConfig = await vis.type.navigateToLens?.(vis, this.timefilter);
+    // Filters and query set on the visualization level
+    const visFilters = vis.data.searchSource?.getField('filter');
+    const visQuery = vis.data.searchSource?.getField('query');
+    const parentSearchSource = vis.data.searchSource?.getParent();
+    const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
+    const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
+    const title = vis.title || embeddable.panelTitle?.getValue();
+    const panelTimeRange = embeddable.timeRange$?.getValue();
+    const updatedWithMeta = {
+      ...navigateToLensConfig,
+      title,
+      visTypeTitle: vis.type.title,
+      embeddableId: embeddable.uuid,
+      originatingApp: this.currentAppId,
+      searchFilters,
+      searchQuery,
+      isEmbeddable: true,
+      description: vis.description || embeddable.panelDescription?.getValue(),
+      panelTimeRange,
+    };
+    if (navigateToLensConfig) {
+      if (this.currentAppId) {
+        getUsageCollection().reportUiCounter(
+          this.currentAppId,
+          METRIC_TYPE.CLICK,
+          ACTION_EDIT_IN_LENS
+        );
       }
+      getEmbeddable().getStateTransfer().isTransferInProgress = true;
+      getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
     }
   }
 
-  getDisplayName(context: ActionExecutionContext<EditInLensContext>): string {
+  getDisplayName(): string {
     return displayName;
   }
 
   MenuItem = MenuItem;
 
-  getIconType(context: ActionExecutionContext<EditInLensContext>): string | undefined {
+  getIconType(): string {
     return 'merge';
   }
 
-  async isCompatible(context: ActionExecutionContext<EditInLensContext>) {
+  async isCompatible(context: EmbeddableApiContext) {
     const { embeddable } = context;
-    const { visualize } = getCapabilities();
-    if (!isVisualizeEmbeddable(embeddable) || !visualize.show) {
+    if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== ViewMode.EDIT)
       return false;
-    }
+
     const vis = embeddable.getVis();
-    if (!vis) {
+    const { visualize } = getCapabilities();
+    if (!vis || !visualize.show) {
       return false;
     }
-    const canNavigateToLens =
-      embeddable.getExpressionVariables?.()?.canNavigateToLens ??
-      (await vis.type.navigateToLens?.(vis, this.timefilter));
-    return Boolean(canNavigateToLens && embeddable.getInput().viewMode === ViewMode.EDIT);
+
+    // determine whether navigation to lens is available
+    if (
+      apiHasExpressionVariables(embeddable) &&
+      embeddable.getExpressionVariables()?.canNavigateToLens
+    ) {
+      return true;
+    }
+    return Boolean(await vis.type.navigateToLens?.(vis, this.timefilter));
   }
 }

@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       const type = await chartSwitcher.getVisibleText();
-      expect(type).to.be('Bar horizontal');
+      expect(type).to.be('Bar');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
         expect(layerCount).to.be(1);
@@ -115,8 +115,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-advanced-accordion');
-      const reducedTimeRange = await testSubjects.find('indexPattern-dimension-reducedTimeRange');
-      expect(await reducedTimeRange.getVisibleText()).to.be('1 minute (1m)');
+      const reducedTimeRange = await testSubjects.find(
+        'indexPattern-dimension-reducedTimeRange > comboBoxSearchInput'
+      );
+      expect(await reducedTimeRange.getAttribute('value')).to.be('1 minute (1m)');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
         expect(layerCount).to.be(1);

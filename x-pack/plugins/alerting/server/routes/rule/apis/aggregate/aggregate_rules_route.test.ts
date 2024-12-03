@@ -145,6 +145,7 @@ describe('aggregateRulesRoute', () => {
       {
         body: {
           default_search_operator: 'AND',
+          rule_type_ids: ['foo'],
         },
       },
       ['ok']
@@ -237,6 +238,9 @@ describe('aggregateRulesRoute', () => {
           },
           "options": Object {
             "defaultSearchOperator": "AND",
+            "ruleTypeIds": Array [
+              "foo",
+            ],
           },
         },
       ]
@@ -316,7 +320,7 @@ describe('aggregateRulesRoute', () => {
       },
       ['ok']
     );
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });

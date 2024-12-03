@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 export function InfraSourceConfigurationFormProvider({
   getService,
@@ -30,7 +30,9 @@ export function InfraSourceConfigurationFormProvider({
     async getMetricIndicesInput(): Promise<WebElementWrapper> {
       return await testSubjects.findDescendant('~metricIndicesInput', await this.getForm());
     },
-
+    async selectIndicesPanel(): Promise<void> {
+      return await testSubjects.click('logIndicesCheckableCard');
+    },
     /**
      * Logs
      */
@@ -107,6 +109,26 @@ export function InfraSourceConfigurationFormProvider({
       }
       await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
       await common.sleep(KEY_PRESS_DELAY_MS);
+    },
+
+    /**
+     * Infra Metrics bottom actions bar
+     */
+    async getSaveButton(): Promise<WebElementWrapper> {
+      return await testSubjects.find('infraBottomBarActionsButton');
+    },
+
+    async saveInfraSettings() {
+      await (await this.getSaveButton()).click();
+
+      await retry.try(async () => {
+        const element = await this.getSaveButton();
+        return !(await element.isDisplayed());
+      });
+    },
+
+    async discardInfraSettingsChanges() {
+      await (await testSubjects.find('infraBottomBarActionsDiscardChangesButton')).click();
     },
 
     /**

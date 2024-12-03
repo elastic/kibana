@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -41,7 +42,10 @@ class ErrorBoundaryInternal extends React.Component<
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: Partial<React.ErrorInfo>) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
+    console.error(error); // eslint-disable-line no-console
+
     const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
     this.setState(() => {
       return { error, errorInfo, componentName: name, isFatal };

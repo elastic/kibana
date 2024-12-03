@@ -8,10 +8,12 @@
 import moment from 'moment';
 import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
 import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
-import type { RuleAlertType } from '../../../rule_schema';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
+  BulkActionEditPayloadInvestigationFields,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -63,9 +65,52 @@ const shouldSkipIndexPatternsBulkAction = (
   return false;
 };
 
+// Check if the investigation fields added to the rule already exist in it
+const hasInvestigationFields = (
+  investigationFields: InvestigationFieldsCombined | undefined,
+  action: BulkActionEditPayloadInvestigationFields
+) =>
+  action.value.field_names.every((field) =>
+    (Array.isArray(investigationFields)
+      ? investigationFields
+      : investigationFields?.field_names ?? []
+    ).includes(field)
+  );
+
+// Check if the investigation fields to be deleted don't exist in the rule
+const hasNoInvestigationFields = (
+  investigationFields: InvestigationFieldsCombined | undefined,
+  action: BulkActionEditPayloadInvestigationFields
+) =>
+  action.value.field_names.every(
+    (field) =>
+      !(
+        Array.isArray(investigationFields)
+          ? investigationFields
+          : investigationFields?.field_names ?? []
+      ).includes(field)
+  );
+
+const shouldSkipInvestigationFieldsBulkAction = (
+  investigationFields: InvestigationFieldsCombined | undefined,
+  action: BulkActionEditPayloadInvestigationFields
+) => {
+  if (action.type === BulkActionEditTypeEnum.add_investigation_fields) {
+    return hasInvestigationFields(investigationFields, action);
+  }
+
+  if (action.type === BulkActionEditTypeEnum.delete_investigation_fields) {
+    return hasNoInvestigationFields(investigationFields, action);
+  }
+
+  return false;
+};
+
+// eslint-disable-next-line complexity
 const applyBulkActionEditToRuleParams = (
   existingRuleParams: RuleAlertType['params'],
-  action: BulkActionEditForRuleParams
+  action: BulkActionEditForRuleParams,
+  experimentalFeatures: ExperimentalFeatures
 ): {
   ruleParams: RuleAlertType['params'];
   isActionSkipped: boolean;
@@ -151,6 +196,54 @@ const applyBulkActionEditToRuleParams = (
       ruleParams.index = action.value;
       break;
     }
+    // investigation_fields actions
+    case BulkActionEditTypeEnum.add_investigation_fields: {
+      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
+        isActionSkipped = true;
+        break;
+      }
+
+      ruleParams.investigationFields = {
+        field_names: addItemsToArray(
+          (Array.isArray(ruleParams.investigationFields)
+            ? ruleParams.investigationFields
+            : ruleParams.investigationFields?.field_names) ?? [],
+          action.value.field_names
+        ),
+      };
+      break;
+    }
+    case BulkActionEditTypeEnum.delete_investigation_fields: {
+      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
+        isActionSkipped = true;
+        break;
+      }
+
+      if (ruleParams.investigationFields) {
+        const fieldNames = deleteItemsFromArray(
+          (Array.isArray(ruleParams.investigationFields)
+            ? ruleParams.investigationFields
+            : ruleParams.investigationFields?.field_names) ?? [],
+          action.value.field_names
+        );
+        ruleParams.investigationFields =
+          fieldNames.length > 0
+            ? {
+                field_names: fieldNames,
+              }
+            : undefined;
+      }
+      break;
+    }
+    case BulkActionEditTypeEnum.set_investigation_fields: {
+      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
+        isActionSkipped = true;
+        break;
+      }
+
+      ruleParams.investigationFields = action.value;
+      break;
+    }
     // timeline actions
     case BulkActionEditTypeEnum.set_timeline: {
       ruleParams = {
@@ -192,18 +285,23 @@ const applyBulkActionEditToRuleParams = (
  */
 export const ruleParamsModifier = (
   existingRuleParams: RuleAlertType['params'],
-  actions: BulkActionEditForRuleParams[]
+  actions: BulkActionEditForRuleParams[],
+  experimentalFeatures: ExperimentalFeatures
 ): RuleParamsModifierResult<RuleAlertType['params']> => {
   let isParamsUpdateSkipped = true;
 
   const modifiedParams = actions.reduce((acc, action) => {
-    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(acc, action);
+    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(
+      acc,
+      action,
+      experimentalFeatures
+    );
 
     // The rule was updated with at least one action, so mark our rule as updated
     if (!isActionSkipped) {
       isParamsUpdateSkipped = false;
     }
-    return { ...acc, ...ruleParams };
+    return { ...acc, ...ruleParams } as RuleAlertType['params'];
   }, existingRuleParams);
 
   // increment version even if actions are empty, as attributes can be modified as well outside of ruleParamsModifier

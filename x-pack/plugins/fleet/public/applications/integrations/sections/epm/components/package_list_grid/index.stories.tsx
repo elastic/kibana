@@ -9,7 +9,7 @@ import React from 'react';
 
 import { action } from '@storybook/addon-actions';
 
-import type { Props } from '.';
+import type { PackageListGridProps } from '.';
 import { PackageListGrid } from '.';
 
 export default {
@@ -17,12 +17,17 @@ export default {
   title: 'Sections/EPM/Package List Grid',
 };
 
-type Args = Pick<Props, 'title' | 'isLoading' | 'showMissingIntegrationMessage'>;
+type Args = Pick<
+  PackageListGridProps,
+  'title' | 'isLoading' | 'showMissingIntegrationMessage' | 'showControls' | 'showSearchTools'
+>;
 
 const args: Args = {
   title: 'Installed integrations',
   isLoading: false,
   showMissingIntegrationMessage: false,
+  showControls: true,
+  showSearchTools: true,
 };
 const categories = [
   {
@@ -70,6 +75,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_two'],
+        installStatus: 'installed',
       },
       {
         title: 'Package Two',
@@ -82,6 +88,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_one'],
+        installStatus: 'installed',
       },
       {
         title: 'Package Three',
@@ -94,6 +101,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['web'],
+        installStatus: 'installed',
       },
       {
         title: 'Package Four',
@@ -106,6 +114,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_one'],
+        installStatus: 'install_failed',
       },
       {
         title: 'Package Five',
@@ -118,6 +127,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_two'],
+        installStatus: 'install_failed',
       },
       {
         title: 'Package Six',
@@ -130,6 +140,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_two'],
+        installStatus: 'install_failed',
       },
     ]}
     searchTerm=""

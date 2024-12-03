@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { ChromeNavControl, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  ChromeNavControl,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { SearchBar } from './components/search_bar';
+import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
 
 export interface GlobalSearchBarPluginStartDeps {
@@ -22,7 +28,13 @@ export interface GlobalSearchBarPluginStartDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
-export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
+export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBarPluginStartDeps> {
+  private config: GlobalSearchBarConfigType;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<GlobalSearchBarConfigType>();
+  }
+
   public setup({ analytics }: CoreSetup) {
     eventTypes.forEach((eventType) => {
       analytics.registerEventType(eventType);
@@ -38,26 +50,23 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
 
   private getNavControl(deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps) {
     const { core, globalSearch, savedObjectsTagging, usageCollection } = deps;
-    const { application, http, theme, uiSettings } = core;
+    const { application, http, theme, i18n } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
     const navControl: ChromeNavControl = {
       order: 1000,
       mount: (container) => {
         ReactDOM.render(
-          <KibanaThemeProvider theme$={theme.theme$}>
-            <I18nProvider>
-              <SearchBar
-                globalSearch={globalSearch}
-                navigateToUrl={application.navigateToUrl}
-                taggingApi={savedObjectsTagging}
-                basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
-                darkMode={uiSettings.get('theme:darkMode')}
-                chromeStyle$={core.chrome.getChromeStyle$()}
-                reportEvent={reportEvent}
-              />
-            </I18nProvider>
-          </KibanaThemeProvider>,
+          <KibanaRenderContextProvider theme={theme} i18n={i18n}>
+            <SearchBar
+              globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
+              navigateToUrl={application.navigateToUrl}
+              taggingApi={savedObjectsTagging}
+              basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
+              chromeStyle$={core.chrome.getChromeStyle$()}
+              reportEvent={reportEvent}
+            />
+          </KibanaRenderContextProvider>,
           container
         );
 

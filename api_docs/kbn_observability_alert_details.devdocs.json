@@ -27,7 +27,7 @@
         "label": "AlertActiveTimeRangeAnnotation",
         "description": [],
         "signature": [
-          "({ alertStart, alertEnd, color, id }: Props) => JSX.Element"
+          "({ alertStart, alertEnd, color, id }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/packages/observability/alert_details/src/components/alert_active_time_range_annotation.tsx",
         "deprecated": false,
@@ -60,7 +60,7 @@
         "label": "AlertAnnotation",
         "description": [],
         "signature": [
-          "({ alertStart, color, dateFormat, id }: Props) => JSX.Element"
+          "({ alertStart, color, dateFormat, id }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/packages/observability/alert_details/src/components/alert_annotation.tsx",
         "deprecated": false,
@@ -93,7 +93,7 @@
         "label": "AlertThresholdAnnotation",
         "description": [],
         "signature": [
-          "({ threshold, color, id }: Props) => JSX.Element"
+          "({ threshold, color, id }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_annotation.tsx",
         "deprecated": false,
@@ -126,7 +126,7 @@
         "label": "AlertThresholdTimeRangeRect",
         "description": [],
         "signature": [
-          "({ alertStarted, color, id, threshold }: Props) => JSX.Element"
+          "({ color, id, threshold }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_time_range_rect.tsx",
         "deprecated": false,
@@ -137,7 +137,7 @@
             "id": "def-common.AlertThresholdTimeRangeRect.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ alertStarted, color, id, threshold }",
+            "label": "{ color, id, threshold }",
             "description": [],
             "signature": [
               "Props"
@@ -153,62 +153,13 @@
       },
       {
         "parentPluginId": "@kbn/observability-alert-details",
-        "id": "def-common.getPaddedAlertTimeRange",
-        "type": "Function",
-        "tags": [],
-        "label": "getPaddedAlertTimeRange",
-        "description": [],
-        "signature": [
-          "(alertStart: string, alertEnd?: string | undefined) => ",
-          "TimeRange"
-        ],
-        "path": "x-pack/packages/observability/alert_details/src/helpers/get_padded_alert_time_range.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/observability-alert-details",
-            "id": "def-common.getPaddedAlertTimeRange.$1",
-            "type": "string",
-            "tags": [],
-            "label": "alertStart",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/packages/observability/alert_details/src/helpers/get_padded_alert_time_range.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/observability-alert-details",
-            "id": "def-common.getPaddedAlertTimeRange.$2",
-            "type": "string",
-            "tags": [],
-            "label": "alertEnd",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/packages/observability/alert_details/src/helpers/get_padded_alert_time_range.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/observability-alert-details",
         "id": "def-common.useAlertsHistory",
         "type": "Function",
         "tags": [],
         "label": "useAlertsHistory",
         "description": [],
         "signature": [
-          "({ featureIds, ruleId, dateRange, http }: ",
+          "({\n  featureIds,\n  ruleId,\n  dateRange,\n  http,\n  instanceId,\n}: ",
           "Props",
           ") => ",
           "UseAlertsHistory"
@@ -222,7 +173,7 @@
             "id": "def-common.useAlertsHistory.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ featureIds, ruleId, dateRange, http }",
+            "label": "{\n  featureIds,\n  ruleId,\n  dateRange,\n  http,\n  instanceId,\n}",
             "description": [],
             "signature": [
               "Props"

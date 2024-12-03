@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiContextMenu,
   EuiContextMenuItem,
@@ -23,22 +23,13 @@ import type { Observable } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config/src/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { UserMenuLink } from '@kbn/security-plugin-types-public';
 import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
 
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 
-export interface UserMenuLink {
-  label: string;
-  iconType: IconType;
-  href: string;
-  order?: number;
-  setAsProfile?: boolean;
-  /** Render a custom ReactNode instead of the default <EuiContextMenuItem /> */
-  content?: ReactNode;
-}
-
-type ContextMenuItem = EuiContextMenuPanelItemDescriptor & { content?: ReactNode };
+type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content'> & { content?: ReactNode };
 
 interface ContextMenuProps {
   items: ContextMenuItem[];
@@ -188,19 +179,18 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       panelPaddingSize="none"
       buffer={0}
     >
-      <div data-test-subj="userMenu">
-        <EuiContextMenu
-          className="chrNavControl__userMenu"
-          initialPanelId={0}
-          panels={[
-            {
-              id: 0,
-              title: displayName,
-              content: <ContextMenuContent items={items} />,
-            },
-          ]}
-        />
-      </div>
+      <EuiContextMenu
+        className="chrNavControl__userMenu"
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: displayName,
+            content: <ContextMenuContent items={items} />,
+          },
+        ]}
+        data-test-subj="userMenu"
+      />
     </EuiPopover>
   );
 };

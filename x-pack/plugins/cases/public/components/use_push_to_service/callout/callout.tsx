@@ -12,6 +12,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import type { ErrorMessage } from './types';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
 import * as i18n from './translations';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 export interface CallOutProps {
   handleButtonClick: (
@@ -32,8 +33,10 @@ const CallOutComponent = ({
   type,
   hasLicenseError,
 }: CallOutProps) => {
+  const { permissions } = useCasesContext();
+
   const handleCallOut = useCallback(
-    (e) => handleButtonClick(e, id, type),
+    (e: React.MouseEvent) => handleButtonClick(e, id, type),
     [handleButtonClick, id, type]
   );
 
@@ -57,7 +60,7 @@ const CallOutComponent = ({
       size="s"
     >
       <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
-      {!isCaseClosed && !hasLicenseError && (
+      {!isCaseClosed && !hasLicenseError && permissions.settings && (
         <EuiButton
           data-test-subj={`callout-onclick-${id}`}
           color={type === 'success' ? 'success' : type}

@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { execSync } from 'child_process';
 import axios from 'axios';
+import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
-  const match = /^kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
+  const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
   try {
     return (
       await Promise.all([
@@ -23,7 +25,7 @@ async function getPrProjects() {
       .flat()
       .filter((project) => project.name.match(match))
       .map((project) => {
-        const [, prNumber, projectType] = project.name.match(match);
+        const [, , prNumber, projectType] = project.name.match(match);
         return {
           id: project.id,
           name: project.name,
@@ -43,12 +45,19 @@ async function getPrProjects() {
 async function deleteProject({
   type,
   id,
+  name,
 }: {
   type: 'elasticsearch' | 'observability' | 'security';
   id: number;
+  name: string;
 }) {
   try {
     await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
+
+    execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
+      cwd: getKibanaDir(),
+      stdio: 'inherit',
+    });
   } catch (e) {
     if (e.isAxiosError) {
       const message =
@@ -61,17 +70,16 @@ async function deleteProject({
 
 async function purgeProjects() {
   const prProjects = await getPrProjects();
-  const projectsToPurge = [];
+  const projectsToPurge: typeof prProjects = [];
   for (const project of prProjects) {
     const NOW = new Date().getTime() / 1000;
     const DAY_IN_SECONDS = 60 * 60 * 24;
     const prJson = execSync(
-      `gh pr view '${project.prNumber}' --json state,labels,commits`
+      `gh pr view '${project.prNumber}' --json state,labels,updatedAt`
     ).toString();
     const pullRequest = JSON.parse(prJson);
     const prOpen = pullRequest.state === 'OPEN';
-    const lastCommit = pullRequest.commits.slice(-1)[0];
-    const lastCommitTimestamp = new Date(lastCommit.committedDate).getTime() / 1000;
+    const lastCommitTimestamp = new Date(pullRequest.updatedAt).getTime() / 1000;
 
     const persistDeployment = Boolean(
       pullRequest.labels.filter((label: any) => label.name === 'ci:project-persist-deployment')
@@ -89,7 +97,7 @@ async function purgeProjects() {
     } else if (
       !Boolean(
         pullRequest.labels.filter((label: any) =>
-          /^ci:project-deploy-(elasticearch|security|observability)$/.test(label.name)
+          /^ci:project-deploy-(elasticsearch|security|observability)$/.test(label.name)
         ).length
       )
     ) {

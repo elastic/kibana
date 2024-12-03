@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -13,7 +14,7 @@ import { DataViewsService } from '../../../../common/data_views';
 import { RuntimeField } from '../../../../common/types';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSchemaUpdate } from '../../../../common/schemas';
+import { runtimeFieldSchemaUpdate } from '../../../schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
@@ -25,6 +26,7 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
+  UPDATE_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
 import { runtimeResponseSchema } from '../../schema';
@@ -48,7 +50,7 @@ export const updateRuntimeField = async ({
   runtimeField,
 }: UpdateRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
   const existingRuntimeField = dataView.getRuntimeField(name);
 
   if (!existingRuntimeField) {
@@ -56,7 +58,7 @@ export const updateRuntimeField = async ({
   }
 
   dataView.removeRuntimeField(name);
-  const fields = dataView.addRuntimeField(name, {
+  const fields = await dataView.addRuntimeField(name, {
     ...existingRuntimeField,
     ...runtimeField,
   });
@@ -67,7 +69,7 @@ export const updateRuntimeField = async ({
 };
 
 const updateRuntimeFieldRouteFactory =
-  (path: string, serviceKey: SERVICE_KEY_TYPE) =>
+  (path: string, serviceKey: SERVICE_KEY_TYPE, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -76,9 +78,14 @@ const updateRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            requiredPrivileges: ['indexPatterns:manage'],
+          },
+        },
         validate: {
           request: {
             params: schema.object({
@@ -126,7 +133,11 @@ const updateRuntimeFieldRouteFactory =
           runtimeField,
         });
 
-        const response: RuntimeResponseType = responseFormatter({ serviceKey, dataView, fields });
+        const response: RuntimeResponseType = await responseFormatter({
+          serviceKey,
+          dataView,
+          fields,
+        });
 
         return res.ok(response);
       })
@@ -135,7 +146,8 @@ const updateRuntimeFieldRouteFactory =
 
 export const registerUpdateRuntimeFieldRoute = updateRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH,
-  SERVICE_KEY
+  SERVICE_KEY,
+  UPDATE_RUNTIME_FIELD_DESCRIPTION
 );
 
 export const registerUpdateRuntimeFieldRouteLegacy = updateRuntimeFieldRouteFactory(

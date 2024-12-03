@@ -29,7 +29,10 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>
 
   return {
     id: sourceId ?? so.id,
-    ...attributes,
+    name: attributes.name,
+    host: attributes.host,
+    is_default: attributes.is_default,
+    proxy_id: attributes.proxy_id,
   };
 }
 
@@ -41,7 +44,7 @@ class DownloadSourceService {
     );
 
     if (soResponse.error) {
-      throw new Error(soResponse.error.message);
+      throw new FleetError(soResponse.error.message);
     }
 
     return savedObjectToDownloadSource(soResponse);
@@ -69,6 +72,9 @@ class DownloadSourceService {
     downloadSource: DownloadSourceBase,
     options?: { id?: string; overwrite?: boolean }
   ): Promise<DownloadSource> {
+    const logger = appContextService.getLogger();
+    logger.debug(`Creating new download source`);
+
     const data: DownloadSourceSOAttributes = downloadSource;
 
     await this.requireUniqueName(soClient, {
@@ -100,6 +106,7 @@ class DownloadSourceService {
         overwrite: options?.overwrite ?? false,
       }
     );
+    logger.debug(`Creating new download source ${options?.id}`);
     return savedObjectToDownloadSource(newSo);
   }
 
@@ -108,6 +115,8 @@ class DownloadSourceService {
     id: string,
     newData: Partial<DownloadSource>
   ) {
+    const logger = appContextService.getLogger();
+    logger.debug(`Updating download source ${id} with ${newData}`);
     const updateData: Partial<DownloadSourceSOAttributes> = newData;
 
     if (updateData.proxy_id) {
@@ -134,22 +143,26 @@ class DownloadSourceService {
       updateData
     );
     if (soResponse.error) {
-      throw new Error(soResponse.error.message);
+      throw new FleetError(soResponse.error.message);
+    } else {
+      logger.debug(`Updated download source ${id}`);
     }
   }
 
   public async delete(soClient: SavedObjectsClientContract, id: string) {
+    const logger = appContextService.getLogger();
+    logger.debug(`Deleting download source ${id}`);
+
     const targetDS = await this.get(soClient, id);
 
     if (targetDS.is_default) {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
     }
     await agentPolicyService.removeDefaultSourceFromAll(
-      soClient,
       appContextService.getInternalUserESClient(),
       id
     );
-
+    logger.debug(`Deleted download source ${id}`);
     return soClient.delete(DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE, id);
   }
 

@@ -6,28 +6,32 @@
  */
 
 import Handlebars from 'handlebars';
-import { safeLoad, safeDump } from 'js-yaml';
+import { load, dump } from 'js-yaml';
+import type { Logger } from '@kbn/core/server';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
 import { toCompiledSecretRef } from '../../secrets';
+import { PackageInvalidArchiveError } from '../../../errors';
+import { appContextService } from '../..';
 
 const handlebars = Handlebars.create();
 
 export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
-  const { vars, yamlValues } = buildTemplateVariables(variables, templateStr);
+  const logger = appContextService.getLogger();
+  const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
     const template = handlebars.compile(templateStr, { noEscape: true });
     compiledTemplate = template(vars);
   } catch (err) {
-    throw new Error(`Error while compiling agent template: ${err.message}`);
+    throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-  const yamlFromCompiledTemplate = safeLoad(compiledTemplate, {});
+  const yamlFromCompiledTemplate = load(compiledTemplate, {});
 
   // Hack to keep empty string ('') values around in the end yaml because
-  // `safeLoad` replaces empty strings with null
+  // `load` replaces empty strings with null
   const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
     (acc, [key, value]) => {
       if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
@@ -64,21 +68,26 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
+function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRecord) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
+    logger.debug(`Building agent template variables`);
 
     if (!lastKeyPart || !isValidKey(lastKeyPart)) {
-      throw new Error('Invalid key');
+      throw new PackageInvalidArchiveError(
+        `Error while compiling agent template: Invalid key ${lastKeyPart}`
+      );
     }
 
     let varPart = acc;
     for (const keyPart of keyParts) {
       if (!isValidKey(keyPart)) {
-        throw new Error('Invalid key');
+        throw new PackageInvalidArchiveError(
+          `Error while compiling agent template: Invalid key ${keyPart}`
+        );
       }
       if (!varPart[keyPart]) {
         varPart[keyPart] = {};
@@ -89,7 +98,7 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
-      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
+      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? load(recordEntry.value) : null;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
       varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
     } else {
@@ -117,9 +126,22 @@ handlebars.registerHelper('contains', containsHelper);
 // and to respect any incoming newline we also need to double them, otherwise
 // they will be replaced with a space.
 function escapeStringHelper(str: string) {
+  if (!str) return undefined;
   return "'" + str.replace(/\'/g, "''").replace(/\n/g, '\n\n') + "'";
 }
 handlebars.registerHelper('escape_string', escapeStringHelper);
+
+/**
+ * escapeMultilineStringHelper will escape a multiline string by doubling the newlines
+ * and escaping single quotes.
+ * This is useful when the string is multiline and needs to be escaped in a yaml file
+ * without wrapping it in single quotes.
+ */
+function escapeMultilineStringHelper(str: string) {
+  if (!str) return undefined;
+  return str.replace(/\'/g, "''").replace(/\n/g, '\n\n');
+}
+handlebars.registerHelper('escape_multiline_string', escapeMultilineStringHelper);
 
 // toJsonHelper will convert any object to a Json string.
 function toJsonHelper(value: any) {
@@ -131,6 +153,22 @@ function toJsonHelper(value: any) {
 }
 handlebars.registerHelper('to_json', toJsonHelper);
 
+// urlEncodeHelper returns a string encoded as a URI component.
+function urlEncodeHelper(input: string) {
+  let encodedString = encodeURIComponent(input);
+  // encodeURIComponent does not encode the characters -.!~*'(), known as "unreserved marks",
+  // which do not have a reserved purpose but are allowed in a URI "as is". So, these have are
+  // explicitly encoded. The following creates the sequences %27 %28 %29 %2A. Since the valid
+  // encoding of "*" is %2A, it is necessary to call toUpperCase() to properly encode.
+  encodedString = encodedString.replace(
+    /[!'()*]/g,
+    (char) => '%' + char.charCodeAt(0).toString(16).toUpperCase()
+  );
+
+  return encodedString;
+}
+handlebars.registerHelper('url_encode', urlEncodeHelper);
+
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
     return yamlTemplate;
@@ -138,9 +176,8 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
 
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
-    patchedTemplate = patchedTemplate.replace(
-      new RegExp(`^"${key}"`, 'gm'),
-      val ? safeDump(val) : ''
+    patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), () =>
+      val ? dump(val) : ''
     );
   });
 

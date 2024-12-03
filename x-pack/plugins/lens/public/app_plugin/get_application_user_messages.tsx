@@ -11,6 +11,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import { Dispatch } from '@reduxjs/toolkit';
+import { partition } from 'lodash';
 import {
   updateDatasourceState,
   type DataViewsState,
@@ -28,6 +29,25 @@ import type {
   Visualization,
 } from '../types';
 import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
+import {
+  EDITOR_MISSING_DATAVIEW,
+  EDITOR_MISSING_EXPRESSION_DATAVIEW,
+  EDITOR_MISSING_VIS_TYPE,
+  EDITOR_UNKNOWN_DATASOURCE_TYPE,
+  EDITOR_UNKNOWN_VIS_TYPE,
+} from '../user_messages_ids';
+import { nonNullable } from '../utils';
+import type { LensPublicCallbacks } from '../react_embeddable/types';
+
+export interface UserMessageGetterProps {
+  visualizationType: string | null | undefined;
+  visualization: Visualization | undefined;
+  visualizationState: VisualizationState | undefined;
+  activeDatasource: Datasource | null | undefined;
+  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
+  dataViews: DataViewsState;
+  core: CoreStart;
+}
 
 /**
  * Provides a place to register general user messages that don't belong in the datasource or visualization objects
@@ -40,15 +60,7 @@ export const getApplicationUserMessages = ({
   activeDatasourceState,
   dataViews,
   core,
-}: {
-  visualizationType: string | null | undefined;
-  visualization: Visualization | undefined;
-  visualizationState: VisualizationState | undefined;
-  activeDatasource: Datasource | null | undefined;
-  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
-  dataViews: DataViewsState;
-  core: CoreStart;
-}): UserMessage[] => {
+}: UserMessageGetterProps): UserMessage[] => {
   const messages: UserMessage[] = [];
 
   if (!visualizationType) {
@@ -78,6 +90,7 @@ export const getApplicationUserMessages = ({
 
 function getMissingVisTypeError(): UserMessage {
   return {
+    uniqueId: EDITOR_MISSING_VIS_TYPE,
     severity: 'error',
     displayLocations: [{ id: 'visualizationOnEmbeddable' }],
     fixableInEditor: true,
@@ -90,6 +103,7 @@ function getMissingVisTypeError(): UserMessage {
 
 function getUnknownVisualizationTypeError(visType: string): UserMessage {
   return {
+    uniqueId: EDITOR_UNKNOWN_VIS_TYPE,
     severity: 'error',
     fixableInEditor: false,
     displayLocations: [{ id: 'visualization' }],
@@ -107,6 +121,7 @@ function getUnknownVisualizationTypeError(visType: string): UserMessage {
 
 function getUnknownDatasourceTypeError(): UserMessage {
   return {
+    uniqueId: EDITOR_UNKNOWN_DATASOURCE_TYPE,
     severity: 'error',
     fixableInEditor: false,
     displayLocations: [{ id: 'visualization' }],
@@ -130,6 +145,7 @@ function getMissingIndexPatternsErrors(
   const canFix = isManagementEnabled && isIndexPatternManagementEnabled;
   return [
     {
+      uniqueId: EDITOR_MISSING_DATAVIEW,
       severity: 'error',
       fixableInEditor: canFix,
       displayLocations: [{ id: 'visualizationInEditor' }],
@@ -176,6 +192,7 @@ function getMissingIndexPatternsErrors(
       ),
     },
     {
+      uniqueId: EDITOR_MISSING_EXPRESSION_DATAVIEW,
       severity: 'error',
       fixableInEditor: canFix,
       displayLocations: [{ id: 'visualizationOnEmbeddable' }],
@@ -189,21 +206,38 @@ function getMissingIndexPatternsErrors(
   ];
 }
 
+export const handleMessageOverwriteFromConsumer = (
+  messages: UserMessage[],
+  onBeforeBadgesRender?: LensPublicCallbacks['onBeforeBadgesRender']
+) => {
+  if (onBeforeBadgesRender) {
+    // we need something else to better identify those errors
+    const [messagesToHandle, originalMessages] = partition(messages, (message) =>
+      message.displayLocations.some((location) => location.id === 'embeddableBadge')
+    );
+
+    if (messagesToHandle.length > 0) {
+      const customBadgeMessages = onBeforeBadgesRender(messagesToHandle);
+      return originalMessages.concat(customBadgeMessages);
+    }
+  }
+
+  return messages;
+};
+
 export const filterAndSortUserMessages = (
   userMessages: UserMessage[],
   locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[],
   { dimensionId, severity }: UserMessageFilters = {}
 ) => {
-  const locationIds = Array.isArray(locationId)
-    ? locationId
-    : typeof locationId === 'string'
-    ? [locationId]
-    : [];
+  const locationIds = new Set(
+    (Array.isArray(locationId) ? locationId : [locationId]).filter(nonNullable)
+  );
 
   const filteredMessages = userMessages.filter((message) => {
-    if (locationIds.length) {
+    if (locationIds.size) {
       const hasMatch = message.displayLocations.some((location) => {
-        if (!locationIds.includes(location.id)) {
+        if (!locationIds.has(location.id)) {
           return false;
         }
 
@@ -215,11 +249,7 @@ export const filterAndSortUserMessages = (
       }
     }
 
-    if (severity && message.severity !== severity) {
-      return false;
-    }
-
-    return true;
+    return !severity || message.severity === severity;
   });
 
   return filteredMessages.sort(bySeverity);
@@ -315,7 +345,7 @@ export const useApplicationUserMessages = ({
 
   const getUserMessages: UserMessagesGetter = (locationId, filterArgs) =>
     filterAndSortUserMessages(
-      [...userMessages, ...Object.values(additionalUserMessages)],
+      userMessages.concat(Object.values(additionalUserMessages)),
       locationId,
       filterArgs ?? {}
     );

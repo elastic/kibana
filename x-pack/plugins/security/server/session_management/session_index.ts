@@ -20,9 +20,9 @@ import type {
 import semver from 'semver';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 
-import type { AuthenticationProvider } from '../../common/model';
-import type { AuditLogger } from '../audit';
+import type { AuthenticationProvider } from '../../common';
 import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
@@ -276,6 +276,11 @@ export class SessionIndex {
         ({ body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
           ignore404: false,
         }));
+        if (statusCode !== 201) {
+          this.options.logger.error(
+            `Failed to write a new session (status code: ${statusCode}): ${JSON.stringify(body)}.`
+          );
+        }
       }
 
       return {
@@ -482,7 +487,7 @@ export class SessionIndex {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
         const operations = sessionValues.map(({ _id, _source }) => {
           const { usernameHash, provider } = _source!;
-          auditLogger.log(sessionCleanupEvent({ sessionId: _id, usernameHash, provider }));
+          auditLogger.log(sessionCleanupEvent({ sessionId: _id!, usernameHash, provider }));
           return { delete: { _id } };
         });
 
@@ -852,6 +857,7 @@ export class SessionIndex {
           size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
           sort: '_shard_doc',
           track_total_hits: false, // for performance
+          allow_partial_search_results: true,
         });
         const { hits } = searchResponse.hits;
         if (hits.length > 0) {
@@ -1024,7 +1030,9 @@ export class SessionIndex {
           return [];
         }
 
-        return response.hits?.hits?.map((hit) => ({ sid: hit._id, ...sessionGroups[index] })) ?? [];
+        return (
+          response.hits?.hits?.map((hit) => ({ sid: hit._id!, ...sessionGroups[index] })) ?? []
+        );
       }
     );
 

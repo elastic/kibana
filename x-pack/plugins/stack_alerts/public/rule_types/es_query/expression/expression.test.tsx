@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import 'brace';
 import React, { useState } from 'react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -29,8 +28,8 @@ import { act } from 'react-dom/test-utils';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ReactWrapper } from 'enzyme';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor
@@ -154,6 +153,12 @@ const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
 (dataViewsMock.getIds as jest.Mock) = jest.fn().mockImplementation(() => Promise.resolve([]));
 dataViewsMock.getDefaultDataView = jest.fn(() => Promise.resolve(null));
 dataViewsMock.get = jest.fn();
+dataViewsMock.create.mockResolvedValue({
+  title: 'test-index',
+  type: 'esql',
+  id: 'test-index',
+  getIndexPattern: () => 'test-index',
+} as DataView);
 (dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
   Promise.resolve(savedQueryMock)
 );

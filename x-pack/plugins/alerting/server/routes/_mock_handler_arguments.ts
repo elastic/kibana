@@ -9,8 +9,13 @@ import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
-import { rulesSettingsClientMock, RulesSettingsClientMock } from '../rules_settings_client.mock';
+import {
+  rulesSettingsClientMock,
+  RulesSettingsClientMock,
+} from '../rules_settings/rules_settings_client.mock';
 import {
   maintenanceWindowClientMock,
   MaintenanceWindowClientMock,
@@ -21,6 +26,7 @@ import type { AlertingRequestHandlerContext } from '../types';
 export function mockHandlerArguments(
   {
     rulesClient = rulesClientMock.create(),
+    actionsClient = actionsClientMock.create(),
     rulesSettingsClient = rulesSettingsClientMock.create(),
     maintenanceWindowClient = maintenanceWindowClientMock.create(),
     listTypes: listTypesRes = [],
@@ -28,6 +34,7 @@ export function mockHandlerArguments(
     areApiKeysEnabled,
   }: {
     rulesClient?: RulesClientMock;
+    actionsClient?: ActionsClientMock;
     rulesSettingsClient?: RulesSettingsClientMock;
     maintenanceWindowClient?: MaintenanceWindowClientMock;
     listTypes?: RuleType[];
@@ -43,12 +50,16 @@ export function mockHandlerArguments(
   KibanaResponseFactory
 ] {
   const listTypes = jest.fn(() => listTypesRes);
+  const actionsClientMocked = actionsClient || actionsClientMock.create();
+
+  actionsClient.isSystemAction.mockImplementation((id) => id === 'system_action-id');
+
   return [
     {
       alerting: {
         listTypes,
         getRulesClient() {
-          return rulesClient || rulesClientMock.create();
+          return Promise.resolve(rulesClient || rulesClientMock.create());
         },
         getRulesSettingsClient() {
           return rulesSettingsClient || rulesSettingsClientMock.create();
@@ -58,6 +69,11 @@ export function mockHandlerArguments(
         },
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
+      },
+      actions: {
+        getActionsClient() {
+          return actionsClientMocked;
+        },
       },
     } as unknown as AlertingRequestHandlerContext,
     request as KibanaRequest<unknown, unknown, unknown>,

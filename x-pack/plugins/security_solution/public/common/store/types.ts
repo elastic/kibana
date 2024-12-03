@@ -14,10 +14,10 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { AppState } from './app/reducer';
 import type { InputsState } from './inputs/reducer';
-import type { SourcererState } from './sourcerer/reducer';
+import type { SourcererState } from '../../sourcerer/store/reducer';
 import type { HostsPluginState } from '../../explore/hosts/store';
 import type { DragAndDropState } from './drag_and_drop/reducer';
-import type { TimelinePluginState } from '../../timelines/store/timeline';
+import type { TimelinePluginState } from '../../timelines/store';
 import type { NetworkPluginState } from '../../explore/network/store';
 import type { ManagementPluginState } from '../../management';
 import type { UsersPluginState } from '../../explore/users/store';
@@ -25,11 +25,11 @@ import type { GlobalUrlParam } from './global_url_param';
 import type { GroupState } from './grouping/types';
 import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { AnalyzerState } from '../../resolver/types';
+import type { NotesState } from '../../notes/store/notes.slice';
 
 export type State = HostsPluginState &
   UsersPluginState &
   NetworkPluginState &
-  UsersPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
@@ -40,7 +40,7 @@ export type State = HostsPluginState &
     discover: SecuritySolutionDiscoverState;
   } & DataTableState &
   GroupState &
-  AnalyzerState;
+  AnalyzerState & { notes: NotesState };
 /**
  * The Redux store type for the Security app.
  */

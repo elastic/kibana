@@ -35,7 +35,7 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions } from '../../../timelines/store';
 import { useKibana } from '../../lib/kibana';
 import { usersActions } from '../../../explore/users/store';
 import { hostsActions } from '../../../explore/hosts/store';
@@ -305,7 +305,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, [sourcererDataView, fieldFormats]);
 
     const onTimeRangeChange = useCallback(
-      ({ query, dateRange }) => {
+      ({ dateRange }: { dateRange: TimeRange }) => {
         const isQuickSelection = dateRange.from.includes('now') || dateRange.to.includes('now');
         updateSearch({
           end: dateRange.to,
@@ -313,7 +313,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           id,
           isInvalid: false,
           isQuickSelection,
-          query,
           setTablesActivePageToZero,
           start: dateRange.from,
           updateTime: true,

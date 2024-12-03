@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
-  createAction,
+  createConnector,
   createAlert,
   createAlertManualCleanup,
   createFailingAlert,
@@ -17,21 +17,40 @@ import {
 } from '../../../lib/alert_api_actions';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
+import { getTestAlertData } from '../../../lib/get_test_data';
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
+export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const header = getPageObject('header');
   const objectRemover = new ObjectRemover(supertest);
+  const toasts = getService('toasts');
 
   async function refreshAlertsList() {
+    const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
+    const existsRefreshButton = await testSubjects.exists('refreshRulesButton');
+    if (existsClearFilter) {
+      await testSubjects.click('rules-list-clear-filter');
+    } else if (existsRefreshButton) {
+      await testSubjects.click('refreshRulesButton');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+    }
     await testSubjects.click('logsTab');
     await testSubjects.click('rulesTab');
   }
 
-  describe('rules list', function () {
+  const getAlertSummary = async (ruleId: string) => {
+    const { body: summary } = await supertest
+      .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
+      .expect(200);
+    return summary;
+  };
+
+  // FLAKY: https://github.com/elastic/kibana/issues/157623
+  describe.skip('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -177,6 +196,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('disableButton');
 
+      await testSubjects.click('confirmModalConfirmButton');
+
       await refreshAlertsList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
@@ -187,12 +208,93 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
     });
 
+    it('should untrack disable rule if untrack switch is true', async () => {
+      const { body: createdRule } = await supertest
+        .post(`/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            rule_type_id: 'test.always-firing',
+            schedule: { interval: '24h' },
+            params: {
+              instances: [{ id: 'alert-id' }],
+            },
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(createdRule.id, 'alert', 'alerts');
+
+      await retry.try(async () => {
+        const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+        expect(Object.keys(alertInstances).length).to.eql(1);
+        expect(alertInstances['alert-id'].tracked).to.eql(true);
+      });
+
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await testSubjects.click('disableButton');
+
+      await testSubjects.click('untrackAlertsModalSwitch');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.try(async () => {
+        const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+        expect(alertInstances['alert-id'].tracked).to.eql(false);
+      });
+    });
+
+    it('should not untrack disable rule if untrack switch if false', async () => {
+      const { body: createdRule } = await supertest
+        .post(`/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            rule_type_id: 'test.always-firing',
+            schedule: { interval: '24h' },
+            params: {
+              instances: [{ id: 'alert-id' }],
+            },
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(createdRule.id, 'alert', 'alerts');
+
+      await retry.try(async () => {
+        const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+        expect(Object.keys(alertInstances).length).to.eql(1);
+        expect(alertInstances['alert-id'].tracked).to.eql(true);
+      });
+
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await testSubjects.click('disableButton');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.try(async () => {
+        const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+        expect(alertInstances['alert-id'].tracked).to.eql(true);
+      });
+    });
+
     it('should re-enable single alert', async () => {
       const createdAlert = await createAlert({
         supertest,
         objectRemover,
       });
-      await disableAlert({ supertest, alertId: createdAlert.id });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -204,8 +306,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('disableButton');
 
-      await refreshAlertsList();
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
+
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+        createdAlert.name,
+        'statusDropdown',
+        'disabled'
+      );
+
+      await testSubjects.click('collapsedItemActions');
+
+      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
+        return await testSubjects.isDisplayed('disableButton');
+      });
+
+      await testSubjects.click('disableButton');
+
+      await header.waitUntilLoadingHasFinished();
 
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
@@ -229,7 +348,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
@@ -247,8 +366,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDisable');
 
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
+
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Disabled 1 rule');
       });
 
@@ -326,7 +449,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
       await infoIcon.click();
 
-      await testSubjects.click('cancelSaveEditedRuleButton');
+      await testSubjects.click('rulePageFooterCancelButton');
     });
 
     it('should delete all selection', async () => {
@@ -347,7 +470,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
@@ -483,7 +606,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         supertest,
         objectRemover,
       });
-      const action = await createAction({ supertest, objectRemover });
+      const action = await createConnector({ supertest, objectRemover });
       const noopAlertWithAction = await createAlert({
         supertest,
         objectRemover,
@@ -664,7 +787,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should not prevent rules with action execution capabilities from being edited', async () => {
-      const action = await createAction({ supertest, objectRemover });
+      const action = await createConnector({ supertest, objectRemover });
       await createAlert({
         supertest,
         objectRemover,

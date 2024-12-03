@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
@@ -26,10 +27,13 @@ describe('Elasticsearch blob storage', () => {
 
   beforeAll(async () => {
     ElasticsearchBlobStorageClient.configureConcurrentTransfers(Infinity);
-    const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
+
+    const { startES, startKibana } = createTestServers({
+      adjustTimeout: jest.setTimeout,
+    });
     manageES = await startES();
     manageKbn = await startKibana();
-    esClient = manageKbn.coreStart.elasticsearch.client.asInternalUser;
+    esClient = manageKbn.coreStart.elasticsearch.createClient('es.test').asInternalUser;
   });
 
   afterAll(async () => {
@@ -107,7 +111,7 @@ describe('Elasticsearch blob storage', () => {
     esBlobStorage = createEsBlobStorage({ chunkSize: '1024B' });
     const { id } = await esBlobStorage.upload(Readable.from([fileString]));
     expect(await getAllDocCount()).toMatchObject({ count: 37 });
-    esRefreshIndexSpy.mockReset();
+    esRefreshIndexSpy.mockClear();
     const rs = await esBlobStorage.download({ id });
     expect(esRefreshIndexSpy).toHaveBeenCalled(); // Make sure we refresh the index before downloading the chunks
     const chunks: string[] = [];
@@ -141,7 +145,7 @@ describe('Elasticsearch blob storage', () => {
     const { id } = await esBlobStorage.upload(Readable.from([fileString]));
     const { id: id2 } = await esBlobStorage.upload(Readable.from([fileString2]));
     expect(await getAllDocCount()).toMatchObject({ count: 10 });
-    esRefreshIndexSpy.mockReset();
+    esRefreshIndexSpy.mockClear();
     await esBlobStorage.delete(id);
     expect(esRefreshIndexSpy).toHaveBeenCalled(); // Make sure we refresh the index before deleting the chunks
     expect(await getAllDocCount()).toMatchObject({ count: 2 });

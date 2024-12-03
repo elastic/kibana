@@ -13,8 +13,7 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 import * as i18n from './translations';
 import { parseMimeType } from './utils';
 import { FileNameLink } from './file_name_link';
-import { FileDownloadButton } from './file_download_button';
-import { FileDeleteButton } from './file_delete_button';
+import { FileActionsPopoverButton } from './file_actions_popover_button';
 
 export interface FilesTableColumnsProps {
   caseId: string;
@@ -28,8 +27,9 @@ export const useFilesTableColumns = ({
   return [
     {
       name: i18n.NAME,
+      field: 'name',
       'data-test-subj': 'cases-files-table-filename',
-      render: (file: FileJSON) => (
+      render: (name: string, file: FileJSON) => (
         <FileNameLink file={file} showPreview={() => showPreview(file)} />
       ),
       width: '60%',
@@ -52,17 +52,9 @@ export const useFilesTableColumns = ({
       width: '120px',
       actions: [
         {
-          name: 'Download',
-          isPrimary: true,
-          description: i18n.DOWNLOAD_FILE,
-          render: (file: FileJSON) => <FileDownloadButton fileId={file.id} isIcon={true} />,
-        },
-        {
-          name: 'Delete',
-          isPrimary: true,
-          description: i18n.DELETE_FILE,
-          render: (file: FileJSON) => (
-            <FileDeleteButton caseId={caseId} fileId={file.id} isIcon={true} />
+          name: i18n.ACTIONS,
+          render: (theFile: FileJSON) => (
+            <FileActionsPopoverButton caseId={caseId} theFile={theFile} />
           ),
         },
       ],

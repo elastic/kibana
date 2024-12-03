@@ -7,26 +7,40 @@
 
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { isEqualWith } from 'lodash';
+import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
-import { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
+import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { endTimelineSaving, startTimelineSaving } from '../../../timelines/store/timeline/actions';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { useDiscoverState } from '../../../timelines/components/timeline/tabs/esql/use_discover_state';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 import { TimelineId } from '../../../../common/types';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { savedSearchComparator } from '../../../timelines/components/timeline/tabs/esql/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
 } from './translations';
+
+function defaultDiscoverAppState(): DiscoverAppState {
+  return {
+    query: {
+      esql: '',
+    },
+    sort: [['@timestamp', 'desc']],
+    columns: [],
+    interval: 'auto',
+    filters: [],
+    hideChart: true,
+    grid: {},
+  };
+}
 
 export const defaultDiscoverTimeRange: TimeRange = {
   from: 'now-15m',
@@ -37,29 +51,28 @@ export const defaultDiscoverTimeRange: TimeRange = {
 export const useDiscoverInTimelineActions = (
   discoverStateContainer: RefObject<DiscoverStateContainer | undefined>
 ) => {
+  const { setDiscoverAppState } = useDiscoverState();
   const { addError } = useAppToasts();
 
   const {
-    services: {
-      customDataService: discoverDataService,
-      savedSearch: savedSearchService,
-      dataViews: dataViewService,
-    },
+    services: { customDataService: discoverDataService, savedSearch: savedSearchService },
   } = useKibana();
 
   const dispatch = useDispatch();
-
-  const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline = useShallowEqualSelector(
     (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
   );
-  const { savedSearchId } = timeline;
+  const { savedSearchId, version } = timeline;
+
+  // We're using a ref here to prevent a cyclic hook-dependency chain of updateSavedSearch
+  const timelineRef = useRef(timeline);
+  timelineRef.current = timeline;
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync: saveSavedSearch } = useMutation({
+  const { mutateAsync: saveSavedSearch, status: saveSavedSearchStatus } = useMutation({
     mutationFn: ({
       savedSearch,
       savedSearchOptions,
@@ -67,29 +80,19 @@ export const useDiscoverInTimelineActions = (
       savedSearch: SavedSearch;
       savedSearchOptions: SaveSavedSearchOptions;
     }) => savedSearchService.save(savedSearch, savedSearchOptions),
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidate and refetch
+      if (data) {
+        dispatch(
+          timelineActions.endTimelineSaving({
+            id: TimelineId.active,
+          })
+        );
+      }
       queryClient.invalidateQueries({ queryKey: ['savedSearchById', savedSearchId] });
     },
+    mutationKey: [version],
   });
-
-  const getDefaultDiscoverAppState: () => Promise<DiscoverAppState> = useCallback(async () => {
-    const localDataViewId = dataViewId ?? 'security-solution-default';
-
-    const dataView = await dataViewService.get(localDataViewId);
-
-    return {
-      query: {
-        esql: dataView ? `from ${dataView.getIndexPattern()} | limit 10` : '',
-      },
-      sort: [['@timestamp', 'desc']],
-      columns: [],
-      interval: 'auto',
-      filters: [],
-      hideChart: true,
-      grid: {},
-    };
-  }, [dataViewService, dataViewId]);
 
   /*
    * generates Appstate from a given saved Search object
@@ -110,36 +113,43 @@ export const useDiscoverInTimelineActions = (
   );
 
   /*
-   * restores the url state of discover in timeline
-   *
-   * @param savedSearch
-   * */
-  const restoreDiscoverAppStateFromSavedSearch = useCallback(
-    (savedSearch: SavedSearch) => {
-      const { appState } = getAppStateFromSavedSearch(savedSearch);
-      if (!appState) return;
-      discoverStateContainer.current?.appState.set(appState);
-      const timeRangeFromSavedSearch = savedSearch.timeRange;
-      discoverStateContainer.current?.globalState.set({
-        ...discoverStateContainer.current?.globalState.get(),
-        time: timeRangeFromSavedSearch ?? defaultDiscoverTimeRange,
-      });
-    },
-    [getAppStateFromSavedSearch, discoverStateContainer]
-  );
-
-  /*
    * resets discover state to a default value
    *
    * */
-  const resetDiscoverAppState = useCallback(async () => {
-    const defaultDiscoverAppState = await getDefaultDiscoverAppState();
-    discoverStateContainer.current?.appState.replaceUrlState(defaultDiscoverAppState);
-    discoverStateContainer.current?.globalState.set({
-      ...discoverStateContainer.current?.globalState.get(),
-      time: defaultDiscoverTimeRange,
-    });
-  }, [getDefaultDiscoverAppState, discoverStateContainer]);
+  const resetDiscoverAppState = useCallback(
+    async (newSavedSearchId?: string | null) => {
+      if (newSavedSearchId && discoverStateContainer.current) {
+        let savedSearch;
+        try {
+          savedSearch = await discoverStateContainer.current?.savedSearchState.load(
+            newSavedSearchId
+          );
+          const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
+          discoverStateContainer.current?.appState.initAndSync();
+          await discoverStateContainer.current?.appState.replaceUrlState(
+            savedSearchState?.appState ?? {}
+          );
+          setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState());
+          discoverStateContainer.current?.globalState.set({
+            ...discoverStateContainer.current?.globalState.get(),
+            time: savedSearch.timeRange ?? defaultDiscoverTimeRange,
+          });
+        } catch (e) {
+          /* empty */
+        }
+      } else {
+        const defaultState = defaultDiscoverAppState();
+        discoverStateContainer.current?.appState.resetToState(defaultState);
+        await discoverStateContainer.current?.appState.replaceUrlState({});
+        setDiscoverAppState(defaultState);
+        discoverStateContainer.current?.globalState.set({
+          ...discoverStateContainer.current?.globalState.get(),
+          time: defaultDiscoverTimeRange,
+        });
+      }
+    },
+    [discoverStateContainer, getAppStateFromSavedSearch, setDiscoverAppState]
+  );
 
   const persistSavedSearch = useCallback(
     async (savedSearch: SavedSearch, savedSearchOption: SaveSavedSearchOptions) => {
@@ -153,7 +163,6 @@ export const useDiscoverInTimelineActions = (
       function onError(error: Error) {
         addError(error, { title: DISCOVER_SEARCH_SAVE_ERROR_TITLE });
       }
-
       try {
         const id = await saveSavedSearch({
           savedSearch,
@@ -176,70 +185,100 @@ export const useDiscoverInTimelineActions = (
    *
    * */
   const updateSavedSearch = useCallback(
-    async (savedSearch: SavedSearch, timelineId: string) => {
-      dispatch(
-        startTimelineSaving({
-          id: timelineId,
-        })
-      );
+    async (savedSearch: SavedSearch, timelineId: string, onUpdate?: () => void) => {
       savedSearch.timeRestore = true;
       savedSearch.timeRange =
         savedSearch.timeRange ?? discoverDataService.query.timefilter.timefilter.getTime();
       savedSearch.tags = ['security-solution-default'];
 
+      // If there is already a saved search, only update the local state
       if (savedSearchId) {
         savedSearch.id = savedSearchId;
-      }
-      try {
-        const response = await persistSavedSearch(savedSearch, {
-          onTitleDuplicate: () => {},
-          copyOnSave: !savedSearchId,
-        });
-
-        if (!response || !response.id) {
-          throw new Error('Unknown Error occured');
-        }
-
-        if (!savedSearchId) {
+        if (!timelineRef.current.savedSearch) {
           dispatch(
-            timelineActions.updateSavedSearchId({
+            timelineActions.initializeSavedSearch({
               id: TimelineId.active,
-              savedSearchId: response.id,
+              savedSearch,
             })
           );
-          // Also save the timeline, this will only happen once, in case there is no saved search id yet
-          dispatch(timelineActions.saveTimeline({ id: TimelineId.active }));
+        } else if (
+          !isEqualWith(timelineRef.current.savedSearch, savedSearch, savedSearchComparator)
+        ) {
+          dispatch(
+            timelineActions.updateSavedSearch({
+              id: TimelineId.active,
+              savedSearch,
+            })
+          );
         }
-      } catch (err) {
-        addError(DISCOVER_SEARCH_SAVE_ERROR_TITLE, {
-          title: DISCOVER_SEARCH_SAVE_ERROR_TITLE,
-          toastMessage: String(err),
-        });
-      } finally {
-        dispatch(
-          endTimelineSaving({
-            id: timelineId,
-          })
-        );
+      } else {
+        // If no saved search exists. Create a new saved search instance and associate it with the timeline.
+        try {
+          // Make sure we're not creating a saved search while a previous creation call is in progress
+          if (saveSavedSearchStatus === 'loading') {
+            return;
+          }
+          dispatch(
+            timelineActions.startTimelineSaving({
+              id: TimelineId.active,
+            })
+          );
+          const response = await persistSavedSearch(savedSearch, {
+            onTitleDuplicate: () => {},
+            copyOnSave: !savedSearchId,
+          });
+
+          const responseIsEmpty = !response || !response?.id;
+          if (responseIsEmpty) {
+            throw new Error('Response is empty');
+          } else if (!savedSearchId && !responseIsEmpty) {
+            dispatch(
+              timelineActions.updateSavedSearchId({
+                id: TimelineId.active,
+                savedSearchId: response.id,
+              })
+            );
+            // Also save the timeline, this will only happen once, in case there is no saved search id yet
+            dispatch(timelineActions.saveTimeline({ id: TimelineId.active, saveAsNew: false }));
+            onUpdate?.();
+          }
+        } catch (err) {
+          dispatch(
+            timelineActions.endTimelineSaving({
+              id: TimelineId.active,
+            })
+          );
+        }
       }
     },
-    [persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]
+    [persistSavedSearch, savedSearchId, dispatch, discoverDataService, saveSavedSearchStatus]
+  );
+
+  const initializeLocalSavedSearch = useCallback(
+    async (savedSearch: SavedSearch, timelineId: string) => {
+      dispatch(
+        timelineActions.initializeSavedSearch({
+          id: TimelineId.active,
+          savedSearch,
+        })
+      );
+    },
+    [dispatch]
   );
 
   const actions = useMemo(
     () => ({
       resetDiscoverAppState,
-      restoreDiscoverAppStateFromSavedSearch,
       updateSavedSearch,
+      initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
-      getDefaultDiscoverAppState,
+      defaultDiscoverAppState: defaultDiscoverAppState(),
     }),
     [
       resetDiscoverAppState,
-      restoreDiscoverAppStateFromSavedSearch,
       updateSavedSearch,
+      initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
-      getDefaultDiscoverAppState,
     ]
   );
 

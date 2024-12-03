@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
-import type { AppFeatureCasesKey, CasesSubFeatureId } from '../app_features_keys';
-import type { AppFeatureKibanaConfig } from '../types';
+import type { ProductFeatureCasesKey, CasesSubFeatureId } from '../product_features_keys';
+import type { ProductFeatureKibanaConfig } from '../types';
 
 export interface CasesFeatureParams {
   uiCapabilities: CasesUiCapabilities;
@@ -15,7 +14,7 @@ export interface CasesFeatureParams {
   savedObjects: { files: string[] };
 }
 
-export type DefaultCasesAppFeaturesConfig = Record<
-  AppFeatureCasesKey,
-  AppFeatureKibanaConfig<CasesSubFeatureId>
+export type DefaultCasesProductFeaturesConfig = Record<
+  ProductFeatureCasesKey,
+  ProductFeatureKibanaConfig<CasesSubFeatureId>
 >;

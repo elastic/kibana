@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: Post Evaluate API endpoint
+  version: "1"
+paths:
+  /internal/elastic_assistant/evaluate:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: PostEvaluate
+      description: Perform an evaluation using sample data against a combination of Graphs and Connectors
+      summary: Performs an evaluation of the Elastic Assistant
+      tags:
+        - Evaluation API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostEvaluateBody"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  evaluationId:
+                    type: string
+                  success:
+                    type: boolean
+                required:
+                  - evaluationId
+                  - success
+        "400":
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+components:
+  schemas:
+    PostEvaluateBody:
+      type: object
+      required:
+        - graphs
+        - datasetName
+        - connectorIds
+      properties:
+        graphs:
+          type: array
+          items:
+            type: string
+        datasetName:
+          type: string
+        evaluatorConnectorId:
+          type: string
+        connectorIds:
+          type: array
+          items:
+            type: string
+        runName:
+          type: string
+        alertsIndexPattern:
+          type: string
+          default: ".alerts-security.alerts-default"
+        langSmithApiKey:
+          type: string
+        langSmithProject:
+          type: string
+        replacements:
+          $ref: "../conversations/common_attributes.schema.yaml#/components/schemas/Replacements"
+          default: {}
+        size:
+          type: number
+          default: 20

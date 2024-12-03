@@ -13,12 +13,11 @@ import { TimeRangeBar } from '../timerange_bar';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabbedContent,
-  EuiCallOut,
   EuiButton,
-  EuiText,
   LEFT_ALIGNMENT,
   CENTER_ALIGNMENT,
   SortableProperties,
@@ -28,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
+import { MlNodeAvailableWarningShared } from '../../node_available_warning';
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];
 const GROUP_FILTER_FIELDS = ['id'];
@@ -43,11 +43,15 @@ export function JobSelectorTable({
   withTimeRangeSelector,
 }) {
   const [sortableProperties, setSortableProperties] = useState();
+  const [mlNodesAvailable, setMlNodesAvailable] = useState(true);
   const [currentTab, setCurrentTab] = useState('Jobs');
 
   const {
     services: {
-      application: { navigateToApp },
+      application: {
+        navigateToApp,
+        capabilities: { ml: mlCapabilities },
+      },
     },
   } = useMlKibana();
 
@@ -258,25 +262,33 @@ export function JobSelectorTable({
 
   return (
     <Fragment>
+      <MlNodeAvailableWarningShared nodeAvailableCallback={setMlNodesAvailable} />
       {jobs.length === 0 && (
-        <EuiCallOut
+        <EuiEmptyPrompt
+          titleSize="xs"
+          iconType="warning"
           title={
-            <FormattedMessage
-              id="xpack.ml.jobSelector.noJobsFoundTitle"
-              defaultMessage="No anomaly detection jobs found"
-            />
+            <h4>
+              <FormattedMessage
+                id="xpack.ml.jobSelector.noJobsFoundTitle"
+                defaultMessage="No anomaly detection jobs found"
+              />
+            </h4>
           }
-          iconType="iInCircle"
-        >
-          <EuiText textAlign="center">
-            <EuiButton color="primary" onClick={navigateToWizard}>
+          body={
+            <EuiButton
+              fill
+              color="primary"
+              onClick={navigateToWizard}
+              disabled={mlCapabilities.canCreateJob === false || mlNodesAvailable === false}
+            >
               <FormattedMessage
                 id="xpack.ml.jobSelector.createJobButtonLabel"
                 defaultMessage="Create job"
               />
             </EuiButton>
-          </EuiText>
-        </EuiCallOut>
+          }
+        />
       )}
       {jobs.length !== 0 && singleSelection === true && renderJobsTable()}
       {jobs.length !== 0 && !singleSelection && renderTabs()}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,6 +16,8 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 import './field_item_button.scss';
+
+const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
 
 /**
  * Props of FieldItemButton component
@@ -28,7 +31,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   infoIcon?: FieldButtonProps['fieldInfoIcon'];
   className?: FieldButtonProps['className'];
   flush?: FieldButtonProps['flush'];
-  dragHandle?: FieldButtonProps['dragHandle'];
+  withDragIcon?: boolean;
   getCustomFieldType?: GetCustomFieldType<T>;
   dataTestSubj?: string;
   size?: FieldButtonProps['size'];
@@ -52,6 +55,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
  * @param getCustomFieldType
  * @param dataTestSubj
  * @param size
+ * @param withDragIcon
  * @param onClick
  * @param shouldAlwaysShowAction
  * @param buttonAddFieldToWorkspaceProps
@@ -73,6 +77,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   getCustomFieldType,
   dataTestSubj,
   size,
+  withDragIcon,
   onClick,
   shouldAlwaysShowAction,
   buttonAddFieldToWorkspaceProps,
@@ -104,7 +109,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       [`unifiedFieldListItemButton--${type}`]: type,
       [`unifiedFieldListItemButton--exists`]: !isEmpty,
       [`unifiedFieldListItemButton--missing`]: isEmpty,
-      [`unifiedFieldListItemButton--withDragHandle`]: Boolean(otherProps.dragHandle),
+      [`unifiedFieldListItemButton--withDragIcon`]: Boolean(withDragIcon),
     },
     className
   );
@@ -196,7 +201,16 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           },
         }),
       }}
-      fieldIcon={<FieldIcon {...iconProps} />}
+      fieldIcon={
+        <div className="unifiedFieldListItemButton__fieldIconContainer">
+          <div className="unifiedFieldListItemButton__fieldIcon">
+            <FieldIcon {...iconProps} />
+          </div>
+          {withDragIcon && (
+            <div className="unifiedFieldListItemButton__fieldIconDrag">{DRAG_ICON}</div>
+          )}
+        </div>
+      }
       fieldName={
         <EuiHighlight
           search={getFieldSearchMatchingHighlight(displayName, fieldSearchHighlight)}

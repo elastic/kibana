@@ -1,41 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
-import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs/operators';
+import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
+import { catchError, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
+import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { IAsyncSearchRequestParams } from '../..';
-import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
+import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
-import type {
-  IAsyncSearchOptions,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ISearchOptions,
-} from '../../../../common';
-import { pollSearch } from '../../../../common';
+import type { IAsyncSearchOptions } from '../../../../common';
+import { DataViewType, isRunningResponse, pollSearch } from '../../../../common';
 import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
-import { toAsyncKibanaSearchResponse } from './response_utils';
+import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
 import { SearchUsage, searchUsageObserver } from '../../collectors/search';
-import {
-  getDefaultSearchParams,
-  getShardTimeout,
-  getTotalLoaded,
-  shimHitsTotal,
-} from '../es_search';
-import { SearchConfigSchema } from '../../../../config';
+import { getDefaultSearchParams, getShardTimeout } from '../es_search';
+import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
+import { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (
@@ -45,56 +38,97 @@ export const enhancedEsSearchStrategyProvider = (
   usage?: SearchUsage,
   useInternalUser: boolean = false
 ): ISearchStrategy<IEsSearchRequest<IAsyncSearchRequestParams>> => {
-  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+  function cancelAsyncSearch(id: string, { esClient }: SearchStrategyDependencies) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     return client.asyncSearch.delete({ id });
+  }
+
+  async function asyncSearchStatus(
+    { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
+    options: IAsyncSearchOptions,
+    { esClient }: Pick<SearchStrategyDependencies, 'esClient'>
+  ) {
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    const keepAlive =
+      request.params?.keep_alive ?? getDefaultAsyncGetParams(searchConfig, options).keep_alive;
+
+    const { body, headers } = await client.asyncSearch.status(
+      // @ts-expect-error keep_alive was recently added and the types haven't been updated yet
+      { id: id!, keep_alive: keepAlive },
+      { ...options.transport, signal: options.abortSignal, meta: true }
+    );
+    return toAsyncKibanaSearchStatusResponse(body, headers?.warning);
+  }
+
+  // Gets the current status of the async search request. If the request is complete, then queries for the results.
+  async function getAsyncSearch(
+    { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
+    options: IAsyncSearchOptions,
+    { esClient }: SearchStrategyDependencies
+  ) {
+    if (!options.retrieveResults) {
+      // First, request the status of the async search, and return the status if incomplete
+      const status = await asyncSearchStatus({ id, ...request }, options, { esClient });
+      if (isRunningResponse(status)) return status;
+    }
+
+    // Then, if the search is complete, request & return the final results
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    const params = {
+      ...getDefaultAsyncGetParams(searchConfig, options),
+      ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
+      ...(request.params?.wait_for_completion_timeout
+        ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
+        : {}),
+    };
+    const { body, headers, meta } = await client.asyncSearch.get(
+      { ...params, id: id! },
+      {
+        ...options.transport,
+        signal: options.abortSignal,
+        meta: true,
+        asStream: options.stream,
+      }
+    );
+
+    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
+  }
+
+  async function submitAsyncSearch(
+    request: IEsSearchRequest<IAsyncSearchRequestParams>,
+    options: IAsyncSearchOptions,
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
+  ) {
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    const params = {
+      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
+      ...request.params,
+    };
+    const { body, headers, meta } = await client.asyncSearch.submit(params, {
+      ...options.transport,
+      signal: options.abortSignal,
+      meta: true,
+      asStream: options.stream,
+    });
+
+    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
   }
 
   function asyncSearch(
     { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
-    { esClient, uiSettingsClient }: SearchStrategyDependencies
+    deps: SearchStrategyDependencies
   ) {
-    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-
     const search = async () => {
-      const params = id
-        ? {
-            ...getDefaultAsyncGetParams(searchConfig, options),
-            ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
-            ...(request.params?.wait_for_completion_timeout
-              ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
-              : {}),
-          }
-        : {
-            ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
-            ...request.params,
-          };
-      const { body, headers, meta } = id
-        ? await client.asyncSearch.get(
-            { ...params, id },
-            { ...options.transport, signal: options.abortSignal, meta: true }
-          )
-        : await client.asyncSearch.submit(params, {
-            ...options.transport,
-            signal: options.abortSignal,
-            meta: true,
-          });
-
-      const response = shimHitsTotal(body.response, options);
-
-      return toAsyncKibanaSearchResponse(
-        { ...body, response },
-        headers?.warning,
-        // do not return requestParams on polling calls
-        id ? undefined : meta?.request?.params
-      );
+      return id
+        ? await getAsyncSearch({ id, ...request }, options, deps)
+        : await submitAsyncSearch(request, options, deps);
     };
 
     const cancel = async () => {
       if (!id || options.isStored) return;
       try {
-        await cancelAsyncSearch(id, esClient);
+        await cancelAsyncSearch(id, deps);
       } catch (e) {
         // A 404 means either this search request does not exist, or that it is already cancelled
         if (e.meta?.statusCode === 404) return;
@@ -169,15 +203,12 @@ export const enhancedEsSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
-      if (request.indexType && request.indexType !== 'rollup') {
-        throw new KbnSearchError('Unknown indexType', 400);
-      }
+      logger.debug(() => `search ${JSON.stringify(request.params) || request.id}`);
 
-      if (request.indexType === undefined || !deps.rollupsEnabled) {
-        return asyncSearch(request, options, deps);
-      } else {
+      if (request.indexType === DataViewType.ROLLUP && deps.rollupsEnabled) {
         return from(rollupSearch(request, options, deps));
+      } else {
+        return asyncSearch(request, options, deps);
       }
     },
     /**
@@ -187,10 +218,10 @@ export const enhancedEsSearchStrategyProvider = (
      * @returns `Promise<void>`
      * @throws `KbnServerError`
      */
-    cancel: async (id, options, { esClient }) => {
+    cancel: async (id, options, deps) => {
       logger.debug(`cancel ${id}`);
       try {
-        await cancelAsyncSearch(id, esClient);
+        await cancelAsyncSearch(id, deps);
       } catch (e) {
         throw getKbnServerError(e);
       }

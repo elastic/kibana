@@ -47,7 +47,9 @@ export interface ActionsConfigurationUtilities {
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
-  getMicrosoftGraphApiUrl: () => undefined | string;
+  getMicrosoftGraphApiUrl: () => string;
+  getMicrosoftGraphApiScope: () => string;
+  getMicrosoftExchangeUrl: () => string;
   getMaxAttempts: ({
     actionTypeMaxAttempts,
     actionTypeId,
@@ -120,15 +122,20 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
     proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
     proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
-    proxySSLSettings: getSSLSettingsFromConfig(
-      config.ssl?.proxyVerificationMode,
-      config.proxyRejectUnauthorizedCertificates
-    ),
+    proxySSLSettings: getSSLSettingsFromConfig(config.ssl?.proxyVerificationMode),
   };
 }
 
-function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): undefined | string {
+function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): string {
   return config.microsoftGraphApiUrl;
+}
+
+function getMicrosoftGraphApiScopeFromConfig(config: ActionsConfig): string {
+  return config.microsoftGraphApiScope;
+}
+
+function getMicrosoftExchangeUrlFromConfig(config: ActionsConfig): string {
+  return config.microsoftExchangeUrl;
 }
 
 function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
@@ -190,8 +197,7 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
-    getSSLSettings: () =>
-      getSSLSettingsFromConfig(config.ssl?.verificationMode, config.rejectUnauthorized),
+    getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
@@ -209,6 +215,8 @@ export function getActionsConfigurationUtilities(
     },
     getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
     getMicrosoftGraphApiUrl: () => getMicrosoftGraphApiUrlFromConfig(config),
+    getMicrosoftGraphApiScope: () => getMicrosoftGraphApiScopeFromConfig(config),
+    getMicrosoftExchangeUrl: () => getMicrosoftExchangeUrlFromConfig(config),
     validateEmailAddresses: (addresses: string[], options: ValidateEmailAddressesOptions) =>
       validatedEmailCurried(addresses, options),
     getMaxAttempts: ({ actionTypeMaxAttempts, actionTypeId }) => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 
 import type {
   ShowRelatedAlertsBySameSourceEventParams,
@@ -14,22 +14,28 @@ import type {
 } from './use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySameSourceEvent } from './use_show_related_alerts_by_same_source_event';
 
+const eventId = 'eventId';
+
 describe('useShowRelatedAlertsBySameSourceEvent', () => {
   let hookResult: RenderHookResult<
-    ShowRelatedAlertsBySameSourceEventParams,
-    ShowRelatedAlertsBySameSourceEventResult
+    ShowRelatedAlertsBySameSourceEventResult,
+    ShowRelatedAlertsBySameSourceEventParams
   >;
 
-  it('should return false if getFieldsData returns null', () => {
+  it('should return eventId if getFieldsData returns null', () => {
     const getFieldsData = () => null;
-    hookResult = renderHook(() => useShowRelatedAlertsBySameSourceEvent({ getFieldsData }));
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsBySameSourceEvent({ getFieldsData, eventId })
+    );
 
-    expect(hookResult.result.current).toEqual({ show: false });
+    expect(hookResult.result.current).toEqual({ show: true, originalEventId: 'eventId' });
   });
 
   it('should return true if getFieldsData has the correct field', () => {
     const getFieldsData = () => 'original_event';
-    hookResult = renderHook(() => useShowRelatedAlertsBySameSourceEvent({ getFieldsData }));
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsBySameSourceEvent({ getFieldsData, eventId })
+    );
 
     expect(hookResult.result.current).toEqual({ show: true, originalEventId: 'original_event' });
   });

@@ -15,15 +15,16 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type {
+  ArchiveEntry,
   InstallablePackage,
   InstallSource,
   PackageAssetReference,
 } from '../../../../common/types';
+import { PackageInvalidArchiveError, PackageNotFoundError } from '../../../errors';
 
 import { appContextService } from '../../app_context';
 
-import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from '.';
-import type { ArchiveEntry } from '.';
+import { setPackageInfo } from '.';
 import { filterAssetPathForParseAndVerifyArchive, parseAndVerifyArchive } from './parse';
 
 const ONE_BYTE = 1024 * 1024;
@@ -70,13 +71,13 @@ export async function archiveEntryToESDocument(opts: {
 
   // validation: filesize? asset type? anything else
   if (dataUtf8.length > currentMaxAssetBytes) {
-    throw new Error(
+    throw new PackageInvalidArchiveError(
       `File at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
   }
 
   if (dataBase64.length > currentMaxAssetBytes) {
-    throw new Error(
+    throw new PackageInvalidArchiveError(
       `After base64 encoding file at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
   }
@@ -103,17 +104,18 @@ export async function removeArchiveEntries(opts: {
   );
 }
 
-export async function saveArchiveEntries(opts: {
+export async function saveArchiveEntriesFromAssetsMap(opts: {
   savedObjectsClient: SavedObjectsClientContract;
   paths: string[];
+  assetsMap: Map<string, Buffer | undefined>;
   packageInfo: InstallablePackage;
   installSource: InstallSource;
 }) {
-  const { savedObjectsClient, paths, packageInfo, installSource } = opts;
+  const { savedObjectsClient, paths, packageInfo, assetsMap, installSource } = opts;
   const bulkBody = await Promise.all(
     paths.map((path) => {
-      const buffer = getArchiveEntry(path);
-      if (!buffer) throw new Error(`Could not find ArchiveEntry at ${path}`);
+      const buffer = assetsMap.get(path);
+      if (!buffer) throw new PackageNotFoundError(`Could not find ArchiveEntry at ${path}`);
       const { name, version } = packageInfo;
       return archiveEntryToBulkCreateObject({ path, buffer, name, version, installSource });
     })
@@ -207,26 +209,26 @@ export const getEsPackage = async (
     return undefined;
   }
 
-  const assetsMap: Record<string, Buffer> = {};
+  const parseAndVerifyAssetsMap: Record<string, Buffer> = {};
+  const assetsMap = new Map<string, Buffer | undefined>();
   const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
   const paths: string[] = [];
   entries.forEach(({ path, buffer }) => {
     if (path && buffer) {
-      setArchiveEntry(path, buffer);
+      assetsMap.set(path, buffer);
       paths.push(path);
     }
     if (buffer && filterAssetPathForParseAndVerifyArchive(path)) {
-      assetsMap[path] = buffer;
+      parseAndVerifyAssetsMap[path] = buffer;
     }
   });
-  // Add asset references to cache
-  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
 
-  const packageInfo = parseAndVerifyArchive(paths, assetsMap);
+  const packageInfo = parseAndVerifyArchive(paths, parseAndVerifyAssetsMap);
   setPackageInfo({ name: pkgName, version: pkgVersion, packageInfo });
 
   return {
     packageInfo,
     paths,
+    assetsMap,
   };
 };

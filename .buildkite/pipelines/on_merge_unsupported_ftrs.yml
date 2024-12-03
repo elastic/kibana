@@ -3,16 +3,23 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/build_kibana.sh
-    label: Build Kibana Distribution and Plugins
+    label: Build Kibana Distribution
     agents:
-      queue: n2-16-spot
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+      preemptible: true
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
@@ -24,7 +31,11 @@ steps:
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     label: 'APM Cypress Tests'
     agents:
-      queue: n2-4-spot
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -35,9 +46,13 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/profiling_cypress.sh
-    label: 'Profling Cypress Tests'
+    label: 'Profiling Cypress Tests'
     agents:
-      queue: n2-4-spot
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -50,11 +65,32 @@ steps:
   - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
-      queue: n2-4-spot
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
     depends_on: build
     timeout_in_minutes: 120
     artifact_paths:
-      - 'x-pack/plugins/synthetics/e2e/.journeys/**/*'
+      - 'x-pack/plugins/observability_solution/synthetics/e2e/.journeys/**/*'
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/inventory_cypress.sh
+    label: 'Inventory Cypress Tests'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on: build
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '-1'

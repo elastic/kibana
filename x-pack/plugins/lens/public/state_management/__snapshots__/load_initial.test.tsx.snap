@@ -24,10 +24,10 @@ Object {
     "isLinkedToOriginatingApp": false,
     "isLoading": false,
     "isSaveable": true,
+    "managed": false,
     "persistedDoc": Object {
       "exactMatchDoc": Object {
         "attributes": Object {
-          "expression": "definitely a valid expression",
           "references": Array [
             Object {
               "id": "1",
@@ -38,7 +38,10 @@ Object {
           "savedObjectId": "1234",
           "state": Object {
             "datasourceStates": Object {
-              "testDatasource": "datasource",
+              "testDatasource": Object {
+                "isLoading": false,
+                "state": Object {},
+              },
             },
             "filters": Array [
               Object {
@@ -52,7 +55,10 @@ Object {
                 },
               },
             ],
-            "query": "kuery",
+            "query": Object {
+              "language": "kuery",
+              "query": "test",
+            },
             "visualization": Object {},
           },
           "title": "An extremely cool default document!",
@@ -89,8 +95,8 @@ Object {
       "query": "",
     },
     "resolvedDateRange": Object {
-      "fromDate": "2021-01-10T04:00:00.000Z",
-      "toDate": "2021-01-10T08:00:00.000Z",
+      "fromDate": "now-7d",
+      "toDate": "now",
     },
     "searchSessionId": "sessionId-1",
     "sharingSavedObjectProps": Object {
@@ -99,9 +105,7 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
-      "state": Object {
-        "newState": "newState",
-      },
+      "state": "testVis initial state",
     },
   },
 }

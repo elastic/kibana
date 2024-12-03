@@ -66,7 +66,9 @@ describe('When using `getActionDetailsById()', () => {
     await expect(
       getActionDetailsById(esClient, endpointAppContextService.getEndpointMetadataService(), '123')
     ).resolves.toEqual({
+      action: '123',
       agents: ['agent-a'],
+      agentType: 'endpoint',
       hosts: { 'agent-a': { name: 'Host-agent-a' } },
       command: 'kill-process',
       completedAt: '2022-04-30T16:08:47.449Z',
@@ -83,17 +85,17 @@ describe('When using `getActionDetailsById()', () => {
       outputs: {
         'agent-a': {
           content: {
-            code: 'ra_get-file_success_done',
-            contents: [
-              {
-                file_name: 'bad_file.txt',
-                path: '/some/path/bad_file.txt',
-                sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-                size: 1234,
-                type: 'file',
-              },
-            ],
-            zip_size: 123,
+            code: 'ra_execute_success_done',
+            cwd: '/some/path',
+            output_file_id: 'some-output-file-id',
+            output_file_stderr_truncated: false,
+            output_file_stdout_truncated: true,
+            shell: 'bash',
+            shell_code: 0,
+            stderr: expect.any(String),
+            stderr_truncated: true,
+            stdout: expect.any(String),
+            stdout_truncated: true,
           },
           type: 'json',
         },
@@ -124,15 +126,9 @@ describe('When using `getActionDetailsById()', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { term: { action_id: '123' } },
-                { term: { input_type: 'endpoint' } },
-                { term: { type: 'INPUT_ACTION' } },
-              ],
-            },
+        query: {
+          bool: {
+            filter: [{ term: { action_id: '123' } }],
           },
         },
       }),

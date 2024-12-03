@@ -6,7 +6,7 @@
  */
 
 import type { MlCustomUrlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
-import { Detector } from '../../../common/types/anomaly_detection_jobs';
+import type { Detector } from '../../../common/types/anomaly_detection_jobs';
 
 import {
   replaceStringTokens,
@@ -15,6 +15,7 @@ import {
   mlEscape,
   escapeForElasticsearchQuery,
   escapeKueryForEmbeddableFieldValuePair,
+  stringMatch,
 } from './string_utils';
 
 describe('ML - string utils', () => {
@@ -168,6 +169,21 @@ describe('ML - string utils', () => {
       expect(escapeKueryForEmbeddableFieldValuePair('@#specialCharsName%', '<>:;[})')).toBe(
         '@#specialCharsName%:\\<\\>\\:;[}\\)'
       );
+    });
+  });
+
+  describe('stringMatch', () => {
+    test('should return true for partial match', () => {
+      expect(stringMatch('foobar', 'Foo')).toBe(true);
+    });
+    test('should return true for exact match', () => {
+      expect(stringMatch('foobar', 'foobar')).toBe(true);
+    });
+    test('should return false for no match', () => {
+      expect(stringMatch('foobar', 'nomatch')).toBe(false);
+    });
+    test('should catch error for invalid regex substring and return false', () => {
+      expect(stringMatch('foobar', '?')).toBe(false);
     });
   });
 });

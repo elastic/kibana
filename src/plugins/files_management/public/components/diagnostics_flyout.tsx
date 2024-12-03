@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useQuery } from '@tanstack/react-query';
@@ -21,7 +22,15 @@ import {
   EuiSpacer,
   EuiFlexItem,
 } from '@elastic/eui';
-import { Chart, Axis, Position, HistogramBarSeries, ScaleType } from '@elastic/charts';
+import {
+  Chart,
+  Axis,
+  Position,
+  HistogramBarSeries,
+  ScaleType,
+  Settings,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -90,6 +99,10 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 <h3>{i18nTexts.diagnosticsBreakdownsStatus}</h3>
               </EuiTitle>
               <Chart size={{ height: 200, width: '100%' }}>
+                <Settings
+                  // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                  baseTheme={LEGACY_LIGHT_THEME}
+                />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
                 <HistogramBarSeries

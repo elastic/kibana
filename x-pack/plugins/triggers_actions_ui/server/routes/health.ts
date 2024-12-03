@@ -26,6 +26,9 @@ export function createHealthRoute(
     {
       path,
       validate: false,
+      options: {
+        access: 'internal',
+      },
     },
     handler
   );
@@ -36,7 +39,7 @@ export function createHealthRoute(
   ): Promise<IKibanaResponse> {
     const result = { isAlertsAvailable };
 
-    logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
+    logger.debug(() => `route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }

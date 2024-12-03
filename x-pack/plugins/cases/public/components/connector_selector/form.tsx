@@ -8,12 +8,20 @@
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { EuiFormRow } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { i18n } from '@kbn/i18n';
 import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
+
+const ADD_CONNECTOR_HELPER_TEXT = i18n.translate(
+  'xpack.cases.connectorSelector.addConnectorHelperText',
+  {
+    defaultMessage: 'Go to Cases > Settings to add an external incident management system',
+  }
+);
 
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];
@@ -24,12 +32,6 @@ interface ConnectorSelectorProps {
   isLoading: boolean;
   handleChange?: (newValue: string) => void;
 }
-
-const EuiFormRowWrapper = styled(EuiFormRow)`
-  .euiFormErrorText {
-    display: none;
-  }
-`;
 
 export const ConnectorSelector = ({
   connectors,
@@ -51,13 +53,22 @@ export const ConnectorSelector = ({
     [handleChange, field]
   );
 
+  const isConnectorAvailable = Boolean(
+    connectors.find((connector) => connector.id === field.value)
+  );
+
   return (
-    <EuiFormRowWrapper
+    <EuiFormRow
+      css={css`
+        .euiFormErrorText {
+          display: none;
+        }
+      `}
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
       error={errorMessage}
       fullWidth
-      helpText={field.helpText}
+      helpText={ADD_CONNECTOR_HELPER_TEXT}
       isInvalid={isInvalid}
       label={field.label}
       labelAppend={field.labelAppend}
@@ -67,9 +78,9 @@ export const ConnectorSelector = ({
         disabled={disabled}
         isLoading={isLoading}
         onChange={onChange}
-        selectedConnector={isEmpty(field.value) ? 'none' : field.value}
+        selectedConnector={isEmpty(field.value) || !isConnectorAvailable ? 'none' : field.value}
       />
-    </EuiFormRowWrapper>
+    </EuiFormRow>
   );
 };
 ConnectorSelector.displayName = 'ConnectorSelector';

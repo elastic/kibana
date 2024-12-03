@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { MlEntitySelector } from './ml_entity_selector';
-import { useMlApiContext } from '../../contexts/kibana';
-import { MlApiServices } from '../../services/ml_api_service';
+import { useMlApi } from '../../contexts/kibana';
+import type { MlApi } from '../../services/ml_api_service';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 jest.mock('../../contexts/kibana');
@@ -32,7 +32,7 @@ describe('MlEntitySelector', () => {
     return Promise.resolve([{ model_id: 'model_01' }]);
   });
 
-  (useMlApiContext as jest.MockedFunction<typeof useMlApiContext>).mockImplementation(() => {
+  (useMlApi as jest.MockedFunction<typeof useMlApi>).mockImplementation(() => {
     return {
       jobs: {
         getAllJobAndGroupIds,
@@ -43,7 +43,7 @@ describe('MlEntitySelector', () => {
       trainedModels: {
         getTrainedModels,
       },
-    } as unknown as jest.Mocked<MlApiServices>;
+    } as unknown as jest.Mocked<MlApi>;
   });
 
   beforeEach(() => {});
@@ -132,7 +132,7 @@ describe('MlEntitySelector', () => {
   });
 
   test('provide current selection update on change with duplicates handling', async () => {
-    (useMlApiContext as jest.MockedFunction<typeof useMlApiContext>).mockImplementationOnce(() => {
+    (useMlApi as jest.MockedFunction<typeof useMlApi>).mockImplementationOnce(() => {
       return {
         jobs: {
           getAllJobAndGroupIds,
@@ -149,7 +149,7 @@ describe('MlEntitySelector', () => {
         trainedModels: {
           getTrainedModels,
         },
-      } as unknown as jest.Mocked<MlApiServices>;
+      } as unknown as jest.Mocked<MlApi>;
     });
 
     const onChangeSpy = jest.fn();
@@ -182,14 +182,14 @@ describe('MlEntitySelector', () => {
     const displayErrorToast = jest.fn();
     const sampleError = new Error('try a bit later');
 
-    (useMlApiContext as jest.MockedFunction<typeof useMlApiContext>).mockImplementationOnce(() => {
+    (useMlApi as jest.MockedFunction<typeof useMlApi>).mockImplementationOnce(() => {
       return {
         jobs: {
           getAllJobAndGroupIds: jest.fn(() => {
             throw sampleError;
           }),
         },
-      } as unknown as jest.Mocked<MlApiServices>;
+      } as unknown as jest.Mocked<MlApi>;
     });
     (
       useToastNotificationService as jest.MockedFunction<typeof useToastNotificationService>

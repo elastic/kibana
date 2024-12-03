@@ -9,13 +9,9 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
+  EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { BaseDataGenerator } from './base_data_generator';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts/constants';
@@ -39,7 +35,7 @@ type UpdateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
 > &
   Pick<UpdateExceptionListItemSchema, 'meta' | 'expire_time'>;
 
-const exceptionItemToCreateExceptionItem = (
+export const exceptionItemToCreateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): CreateExceptionListItemSchemaWithNonNullProps => {
   const {
@@ -150,7 +146,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   generateTrustedApp(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
     return this.generate({
       name: `Trusted app (${this.randomString(5)})`,
-      list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       ...overrides,
     });
   }
@@ -173,10 +169,33 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     };
   }
 
+  generateTrustedAppSignerEntry(os = 'windows'): EntriesArray {
+    return [
+      {
+        field: os === 'windows' ? 'process.Ext.code_signature' : 'process.code_signature',
+        entries: [
+          {
+            field: 'trusted',
+            value: 'true',
+            type: 'match',
+            operator: 'included',
+          },
+          {
+            field: 'subject_name',
+            value: 'foo',
+            type: 'match',
+            operator: 'included',
+          },
+        ],
+        type: 'nested',
+      },
+    ];
+  }
+
   generateEventFilter(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
     return this.generate({
       name: `Event filter (${this.randomString(5)})`,
-      list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       entries: [
         {
           field: 'process.pe.company',
@@ -224,7 +243,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   ): ExceptionListItemSchema {
     return this.generate({
       name: `Host Isolation (${this.randomString(5)})`,
-      list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
       os_types: ['macos', 'linux', 'windows'],
       entries: [
         {
@@ -308,7 +327,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
     return this.generate({
       name: `Blocklist ${this.randomString(5)}`,
-      list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       item_id: `generator_endpoint_blocklist_${this.seededUUIDv4()}`,
       tags: [this.randomChoice([BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG])],
       os_types: [os],

@@ -8,33 +8,38 @@
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
+  ACTION_AGENT_FILE_INFO_ROUTE,
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
-  GET_PROCESSES_ROUTE,
   BASE_ENDPOINT_ACTION_ROUTE,
-  KILL_PROCESS_ROUTE,
-  SUSPEND_PROCESS_ROUTE,
-  GET_FILE_ROUTE,
-  ACTION_AGENT_FILE_INFO_ROUTE,
   EXECUTE_ROUTE,
-  UPLOAD_ROUTE,
+  GET_FILE_ROUTE,
+  GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
+  KILL_PROCESS_ROUTE,
+  SCAN_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
+  UPLOAD_ROUTE,
 } from '../../../common/endpoint/constants';
-import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
-import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
+import {
+  httpHandlerMockFactory,
+  type ResponseProvidersInterface,
+} from '../../common/mock/endpoint/http_handler_mock_factory';
 import type {
-  ActionDetailsApiResponse,
-  ActionListApiResponse,
-  ResponseActionApiResponse,
-  PendingActionsResponse,
   ActionDetails,
+  ActionDetailsApiResponse,
+  ActionFileInfoApiResponse,
+  ActionListApiResponse,
   GetProcessesActionOutputContent,
+  PendingActionsResponse,
+  ResponseActionApiResponse,
+  ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ActionFileInfoApiResponse,
-  ResponseActionExecuteOutputContent,
+  ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
+  ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
 } from '../../../common/endpoint/types';
@@ -66,6 +71,8 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
     ResponseActionUploadOutputContent,
     ResponseActionUploadParameters
   >;
+
+  scan: () => ActionDetailsApiResponse<ResponseActionScanOutputContent>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -126,6 +133,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
       const response = new EndpointActionGenerator('seed').generateActionDetails();
 
       return {
+        agentTypes: ['endpoint'],
         elasticAgentIds: ['agent-a'],
         commands: ['isolate'],
         page: 0,
@@ -207,6 +215,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           name: 'test.txt',
           size: 1234,
           status: 'READY',
+          agentType: 'endpoint',
         },
       };
     },
@@ -243,6 +252,25 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         ResponseActionUploadParameters
       >({
         command: 'upload',
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'scan',
+    path: SCAN_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionScanOutputContent,
+      ResponseActionScanParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionScanOutputContent,
+        ResponseActionScanParameters
+      >({
+        command: 'scan',
       });
 
       return { data: response };

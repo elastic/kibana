@@ -12,10 +12,9 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
       button={
         <EuiExpression
           description={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="when"
               id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
-              values={Object {}}
             />
           }
           isActive={false}
@@ -34,10 +33,9 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     >
       <div>
         <EuiPopoverTitle>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="When"
             id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
-            values={Object {}}
           />
         </EuiPopoverTitle>
         <div
@@ -80,7 +78,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
       button={
         <EuiExpression
           description={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="is {operator}"
               id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
               values={
@@ -107,10 +105,9 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     >
       <div>
         <EuiPopoverTitle>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Is"
             id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
-            values={Object {}}
           />
         </EuiPopoverTitle>
         <div
@@ -200,10 +197,9 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
       button={
         <EuiExpression
           description={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="when"
               id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
-              values={Object {}}
             />
           }
           isActive={false}
@@ -222,10 +218,9 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     >
       <div>
         <EuiPopoverTitle>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="When"
             id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
-            values={Object {}}
           />
         </EuiPopoverTitle>
         <div
@@ -267,7 +262,7 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
       button={
         <EuiExpression
           description={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="is {operator}"
               id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
               values={
@@ -294,10 +289,9 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     >
       <div>
         <EuiPopoverTitle>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Is"
             id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
-            values={Object {}}
           />
         </EuiPopoverTitle>
         <div

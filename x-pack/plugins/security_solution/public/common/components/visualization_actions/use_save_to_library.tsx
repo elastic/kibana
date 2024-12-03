@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { unmountComponentAtNode } from 'react-dom';
-import type { SaveProps } from '@kbn/lens-plugin/public/plugin';
 import { useKibana } from '../../lib/kibana';
 import type { LensAttributes } from './types';
 import { useRedirectToDashboardFromLens } from './use_redirect_to_dashboard_from_lens';
@@ -21,8 +20,9 @@ export const useSaveToLibrary = ({
 }: {
   attributes: LensAttributes | undefined | null;
 }) => {
-  const { lens, theme, i18n } = useKibana().services;
-  const { SaveModalComponent, canUseEditor } = lens;
+  const startServices = useKibana().services;
+  const canSaveVisualization = !!startServices.application.capabilities.visualize?.save;
+  const { SaveModalComponent } = startServices.lens;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { redirectTo, getEditOrCreateDashboardPath } = useRedirectToDashboardFromLens({
     getSecuritySolutionUrl,
@@ -33,27 +33,25 @@ export const useSaveToLibrary = ({
     const mount = toMountPoint(
       <SaveModalComponent
         initialInput={attributes as unknown as LensEmbeddableInput}
-        onSave={(saveProps: SaveProps) => {
-          unmountComponentAtNode(targetDomElement);
-        }}
-        onClose={() => {
-          unmountComponentAtNode(targetDomElement);
-        }}
+        onSave={() => unmountComponentAtNode(targetDomElement)}
+        onClose={() => unmountComponentAtNode(targetDomElement)}
         originatingApp={APP_UI_ID}
         getOriginatingPath={(dashboardId) =>
           `${SecurityPageName.dashboards}/${getEditOrCreateDashboardPath(dashboardId)}`
         }
+        // Type 'string' is not assignable to type 'RedirectToProps | undefined'.
+        // @ts-expect-error
         redirectTo={redirectTo}
       />,
-      { theme, i18n }
+      startServices
     );
 
     mount(targetDomElement);
-  }, [SaveModalComponent, attributes, getEditOrCreateDashboardPath, i18n, redirectTo, theme]);
+  }, [SaveModalComponent, attributes, getEditOrCreateDashboardPath, redirectTo, startServices]);
 
   const disableVisualizations = useMemo(
-    () => !canUseEditor() || attributes == null,
-    [attributes, canUseEditor]
+    () => !canSaveVisualization || attributes == null,
+    [attributes, canSaveVisualization]
   );
 
   return { openSaveVisualizationFlyout, disableVisualizations };

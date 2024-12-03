@@ -521,7 +521,7 @@
         "label": "AvailableAnnotationIcon",
         "description": [],
         "signature": [
-          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"circle\" | \"triangle\""
+          "\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\""
         ],
         "path": "packages/kbn-event-annotation-common/types.ts",
         "deprecated": false,
@@ -562,6 +562,18 @@
         "signature": [
           "\"#F04E981A\""
         ],
+        "path": "packages/kbn-event-annotation-common/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-annotation-common",
+        "id": "def-common.defaultRangeAnnotationLabel",
+        "type": "string",
+        "tags": [],
+        "label": "defaultRangeAnnotationLabel",
+        "description": [],
         "path": "packages/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -628,9 +640,9 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/content-management-table-list-view-table",
+            "pluginId": "@kbn/content-management-table-list-view-common",
             "scope": "common",
-            "docId": "kibKbnContentManagementTableListViewTablePluginApi",
+            "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },

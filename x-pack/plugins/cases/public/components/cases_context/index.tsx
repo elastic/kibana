@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { Dispatch, ReactNode } from 'react';
+import type { Dispatch, ReactNode, FC, PropsWithChildren } from 'react';
 
 import { merge } from 'lodash';
-import React, { useCallback, useEffect, useState, useReducer } from 'react';
-import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
-
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
+import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { CasesContextStoreAction } from './cases_context_reducer';
 import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
@@ -30,19 +28,18 @@ import { CasesGlobalComponents } from './cases_global_components';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
-import { useApplication } from './use_application';
-import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
+import type { CasesContextStoreAction } from './state/cases_context_reducer';
+import { casesContextReducer, getInitialCasesContextState } from './state/cases_context_reducer';
+import { CasesStateContext } from './state/cases_state_context';
 import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
 
-export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
+type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   owner: string[];
-  appId: string;
-  appTitle: string;
   permissions: CasesPermissions;
   basePath: string;
   features: CasesFeaturesAllRequired;
@@ -66,12 +63,12 @@ export interface CasesContextProps
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
-export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' | 'appTitle'> {
-  appId?: string;
-  appTitle?: string;
-}
-
-export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
+export const CasesProvider: FC<
+  PropsWithChildren<{
+    value: CasesContextProps;
+    queryClient?: QueryClient;
+  }>
+> = ({
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,
@@ -83,49 +80,59 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     releasePhase = 'ga',
     getFilesClient,
   },
+  queryClient = casesQueryClient,
 }) => {
-  const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
-  const [value, setValue] = useState<CasesContextStateValue>(() => ({
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
-    owner,
-    permissions,
-    basePath,
+
+  const value: CasesContextValue = useMemo(
+    () => ({
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      owner,
+      permissions: {
+        all: permissions.all,
+        connectors: permissions.connectors,
+        create: permissions.create,
+        delete: permissions.delete,
+        push: permissions.push,
+        read: permissions.read,
+        settings: permissions.settings,
+        update: permissions.update,
+        reopenCase: permissions.reopenCase,
+        createComment: permissions.createComment,
+      },
+      basePath,
+      /**
+       * The empty object at the beginning avoids the mutation
+       * of the DEFAULT_FEATURES object
+       */
+      features: merge<object, CasesFeaturesAllRequired, CasesFeatures>(
+        {},
+        DEFAULT_FEATURES,
+        features
+      ),
+      releasePhase,
+      dispatch,
+    }),
     /**
-     * The empty object at the beginning avoids the mutation
-     * of the DEFAULT_FEATURES object
+     * We want to trigger a rerender only when the permissions will change.
+     * The registries, the owner, and the rest of the values should
+     * not change during the lifecycle of the cases application.
      */
-    features: merge<object, CasesFeaturesAllRequired, CasesFeatures>(
-      {},
-      DEFAULT_FEATURES,
-      features
-    ),
-    releasePhase,
-    dispatch,
-  }));
-
-  /**
-   * Only update the context if the nested permissions fields changed, this avoids a rerender when the object's reference
-   * changes.
-   */
-  useDeepCompareEffect(() => {
-    setValue((prev) => ({ ...prev, permissions }));
-  }, [permissions]);
-
-  /**
-   * `appId` and `appTitle` are dynamically retrieved from kibana context.
-   * We need to update the state if any of these values change, the rest of props are never updated.
-   */
-  useEffect(() => {
-    if (appId && appTitle) {
-      setValue((prev) => ({
-        ...prev,
-        appId,
-        appTitle,
-      }));
-    }
-  }, [appTitle, appId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      permissions.all,
+      permissions.connectors,
+      permissions.create,
+      permissions.delete,
+      permissions.push,
+      permissions.read,
+      permissions.settings,
+      permissions.update,
+      permissions.reopenCase,
+      permissions.createComment,
+    ]
+  );
 
   const applyFilesContext = useCallback(
     (contextChildren: ReactNode) => {
@@ -148,24 +155,23 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     [getFilesClient, owner]
   );
 
-  return isCasesContextValue(value) ? (
-    <QueryClientProvider client={casesQueryClient}>
-      <CasesContext.Provider value={value}>
-        {applyFilesContext(
-          <>
-            <CasesGlobalComponents state={state} />
-            {children}
-          </>
-        )}
-      </CasesContext.Provider>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <CasesStateContext.Provider value={state}>
+        <CasesContext.Provider value={value}>
+          {applyFilesContext(
+            <>
+              <CasesGlobalComponents state={state} />
+              {children}
+            </>
+          )}
+        </CasesContext.Provider>
+      </CasesStateContext.Provider>
     </QueryClientProvider>
-  ) : null;
+  );
 };
-CasesProvider.displayName = 'CasesProvider';
 
-function isCasesContextValue(value: CasesContextStateValue): value is CasesContextValue {
-  return value.appId != null && value.appTitle != null && value.permissions != null;
-}
+CasesProvider.displayName = 'CasesProvider';
 
 // eslint-disable-next-line import/no-default-export
 export default CasesProvider;

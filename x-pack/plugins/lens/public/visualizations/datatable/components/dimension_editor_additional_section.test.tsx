@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { render, screen } from '@testing-library/react';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
   DatasourcePublicAPI,
   FramePublicAPI,
@@ -15,15 +17,12 @@ import {
 } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditorAdditionalSection } from './dimension_editor_addtional_section';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { ColumnState } from '../../../../common/expressions';
 
 describe('data table dimension editor additional section', () => {
   let frame: FramePublicAPI;
   let state: DatatableVisualizationState;
-  let setState: (newState: DatatableVisualizationState) => void;
   let props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
   };
@@ -35,6 +34,7 @@ describe('data table dimension editor additional section', () => {
       columns: [
         {
           columnId: 'foo',
+          summaryRow: undefined,
         },
       ],
     };
@@ -54,21 +54,20 @@ describe('data table dimension editor additional section', () => {
             id: 'foo',
             name: 'foo',
             meta: {
-              type: 'string',
+              type: 'number',
             },
           },
         ],
         rows: [],
       },
     };
-    setState = jest.fn();
     props = {
       accessor: 'foo',
       frame,
       groupId: 'columns',
       layerId: 'first',
       state,
-      setState,
+      setState: jest.fn(),
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
       addLayer: jest.fn(),
@@ -77,55 +76,50 @@ describe('data table dimension editor additional section', () => {
     };
   });
 
-  it('should set the summary row function default to "none"', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
-    const instance = mountWithIntl(<TableDimensionEditorAdditionalSection {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiComboBox)
-        .prop('selectedOptions')
-    ).toEqual([{ value: 'none', label: 'None' }]);
+  const renderComponent = (
+    overrideProps?: Partial<
+      VisualizationDimensionEditorProps<DatatableVisualizationState> & {
+        paletteService: PaletteRegistry;
+      }
+    >
+  ) => {
+    return render(<TableDimensionEditorAdditionalSection {...props} {...overrideProps} />);
+  };
 
-    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
+  it('should set the summary row fn default to "none"', () => {
+    state.columns[0].summaryRow = undefined;
+    renderComponent();
+    expect(screen.getByRole('combobox')).toHaveValue('None');
+    expect(screen.queryByTestId('lnsDatatable_summaryrow_label')).not.toBeInTheDocument();
   });
 
-  it('should show the summary row label input ony when summary row is different from "none"', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
-    state.columns[0].summaryRow = 'sum';
-    const instance = mountWithIntl(<TableDimensionEditorAdditionalSection {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiComboBox)
-        .prop('selectedOptions')
-    ).toEqual([{ value: 'sum', label: 'Sum' }]);
-
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
-        .find(EuiFieldText)
-        .prop('value')
-    ).toBe('Sum');
-  });
+  it.each<[summaryRow: ColumnState['summaryRow'], label: string]>([
+    ['sum', 'Sum'],
+    ['avg', 'Average'],
+    ['count', 'Value count'],
+    ['min', 'Minimum'],
+    ['max', 'Maximum'],
+  ])(
+    'should show the summary row label input ony when summary row fn is "%s"',
+    (summaryRow, label) => {
+      state.columns[0].summaryRow = summaryRow;
+      renderComponent();
+      expect(screen.getByRole('combobox')).toHaveValue(label);
+      expect(screen.getByTestId('lnsDatatable_summaryrow_label')).toHaveValue(label);
+    }
+  );
 
   it("should show the correct summary row name when user's changes summary label", () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
     state.columns[0].summaryRow = 'sum';
     state.columns[0].summaryLabel = 'MySum';
-    const instance = mountWithIntl(<TableDimensionEditorAdditionalSection {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiComboBox)
-        .prop('selectedOptions')
-    ).toEqual([{ value: 'sum', label: 'Sum' }]);
+    renderComponent();
+    expect(screen.getByRole('combobox')).toHaveValue('Sum');
+    expect(screen.getByTestId('lnsDatatable_summaryrow_label')).toHaveValue('MySum');
+  });
 
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
-        .find(EuiFieldText)
-        .prop('value')
-    ).toBe('MySum');
+  it('should not show the summary field for non numeric columns', () => {
+    frame.activeData!.first.columns[0].meta.type = 'string';
+    expect(screen.queryByTestId('lnsDatatable_summaryrow_function')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lnsDatatable_summaryrow_label')).not.toBeInTheDocument();
   });
 });

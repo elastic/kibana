@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DEFAULT_INDEX_TYPES_MAP } from './src/constants';
+export { DEFAULT_INDEX_TYPES_MAP, HASH_TO_VERSION_MAP } from './src/constants';
 export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './src/legacy_alias';
 export {
   getProperty,
@@ -41,8 +42,18 @@ export type {
   MigrationResult,
   MigrationStatus,
   MigrateDocumentOptions,
+  IDocumentMigrator,
+  DocumentMigrateOptions,
+  IsDowngradeRequiredOptions,
 } from './src/migration';
-export { parseObjectKey, getObjectKey, getIndexForType } from './src/utils';
+export {
+  parseObjectKey,
+  getObjectKey,
+  getIndexForType,
+  getFieldListFromTypeMapping,
+  getFieldListMapFromMappingDefinitions,
+  type FieldListMap,
+} from './src/utils';
 export {
   modelVersionVirtualMajor,
   globalSwitchToModelVersionAt,
@@ -55,6 +66,7 @@ export {
   getCurrentVirtualVersion,
   getLatestMigrationVersion,
   getVirtualVersionMap,
+  getLatestMappingsVirtualVersionMap,
   type ModelVersionMap,
   type VirtualVersionMap,
   compareVirtualVersions,
@@ -68,4 +80,6 @@ export {
   buildModelVersionTransformFn,
   aggregateMappingAdditions,
   convertModelVersionBackwardConversionSchema,
+  getVersionAddedMappings,
+  getVersionAddedFields,
 } from './src/model_version';

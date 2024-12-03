@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-cancellable-search",
+  "owner": [
+    "@elastic/ml-ui"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

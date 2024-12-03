@@ -11,7 +11,14 @@ import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, RecursivePartial } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  RecursivePartial,
+} from '@elastic/eui';
 import type {
   OpsgenieActionParams,
   OpsgenieCloseAlertParams,
@@ -95,7 +102,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
 }) => {
   const isAliasInvalid =
     (errors['subActionParams.alias'] !== undefined &&
-      errors['subActionParams.alias'].length > 0 &&
+      Number(errors['subActionParams.alias'].length) > 0 &&
       subActionParams?.alias !== undefined) ||
     showSaveError;
 
@@ -110,10 +117,15 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
       <EuiFormRow
         data-test-subj="opsgenie-alias-row"
         fullWidth
-        error={errors['subActionParams.alias']}
+        error={errors['subActionParams.alias'] as React.ReactNode}
         isInvalid={isAliasInvalid}
-        label={i18n.ALIAS_REQUIRED_FIELD_LABEL}
+        label={i18n.ALIAS_FIELD_LABEL}
         helpText={i18n.OPSGENIE_ALIAS_HELP}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.REQUIRED_LABEL}
+          </EuiText>
+        }
       >
         <TextFieldWithMessageVariables
           index={index}

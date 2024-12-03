@@ -10,11 +10,10 @@ import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
-import type { AppLeaveHandler } from '@kbn/core/public';
 
 import { APP_ID } from '../../common/constants';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
-import { useGetUserCasesPermissions, useKibana } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
 import type { AppAction } from '../common/store/actions';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { NotFoundPage } from './404';
@@ -23,13 +22,12 @@ import { HomePage } from './home';
 interface RouterProps {
   children: React.ReactNode;
   history: History;
-  onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-const PageRouterComponent: FC<RouterProps> = ({ children, history, onAppLeave }) => {
+const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch<(action: AppAction) => void>();
   useEffect(() => {
     return () => {

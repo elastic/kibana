@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../../common/utils/get_mapped_non_ecs_value';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 import type { CellValueElementProps } from '.';
@@ -33,6 +33,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   scopeId,
   truncate,
   asPlainText,
+  context,
 }) => {
   const asPlainTextDefault = useMemo(() => {
     return (
@@ -49,7 +50,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     : 'eui-displayInlineBlock eui-textTruncate';
   return (
     <StyledContent className={styledContentClassName} $isDetails={isDetails}>
-      {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+      {getColumnRenderer(header.id, columnRenderers, data, context).renderColumn({
         asPlainText: asPlainText ?? asPlainTextDefault, // we want to render value with links as plain text but keep other formatters like badge. Except rule name for non preview tables
         columnName: header.id,
         ecsData,
@@ -62,6 +63,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         scopeId,
         truncate,
         values,
+        context,
       })}
     </StyledContent>
   );

@@ -30,13 +30,16 @@ describe('<Overview />', () => {
           case '/internal/serverless_search/connectors':
             resolve({});
             return;
+          case '/internal/serverless_search/ingest_pipelines':
+            resolve({ pipelines: [] });
+            return;
           default:
             return reject(`unknown path requested ${fetchedUrl}`);
         }
       });
     });
     const pathname = '/app/elasticsearch';
-    (useLocation as jest.Mock).mockImplementationOnce(() => ({
+    (useLocation as jest.Mock).mockImplementation(() => ({
       pathname,
     }));
   });
@@ -82,6 +85,14 @@ describe('<Overview />', () => {
   test('build query', () => {
     const { getByRole } = render(<Overview />);
     expect(getByRole('heading', { name: 'Build your first search query' })).toBeDefined();
+  });
+  test('preprocess data', () => {
+    const { getByRole } = render(<Overview />);
+    expect(
+      getByRole('heading', {
+        name: 'Preprocess your data by enriching, transforming or filtering with pipelines',
+      })
+    ).toBeDefined();
   });
   test("what's next?", () => {
     const { getByRole } = render(<Overview />);

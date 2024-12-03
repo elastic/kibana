@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { KbnFieldType, getKbnFieldType } from '@kbn/field-types';
@@ -69,6 +70,10 @@ export class DataViewField implements DataViewFieldBase {
     this.spec.count = count;
   }
 
+  public get defaultFormatter() {
+    return this.spec.defaultFormatter;
+  }
+
   /**
    * Returns runtime field definition or undefined if field is not runtime field.
    */
@@ -129,6 +134,22 @@ export class DataViewField implements DataViewFieldBase {
    */
   public set customLabel(customLabel) {
     this.spec.customLabel = customLabel;
+  }
+
+  /**
+   * Returns custom description if set, otherwise undefined.
+   */
+
+  public get customDescription() {
+    return this.spec.customDescription;
+  }
+
+  /**
+   * Sets custom description for field, or unsets if passed undefined.
+   * @param customDescription custom label value
+   */
+  public set customDescription(customDescription) {
+    this.spec.customDescription = customDescription;
   }
 
   /**
@@ -278,6 +299,10 @@ export class DataViewField implements DataViewFieldBase {
    * Returns true if field is sortable
    */
   public get sortable() {
+    if (this.scripted && this.spec.type === 'date') {
+      return false;
+    }
+
     return (
       this.name === '_score' ||
       ((this.spec.indexed || this.aggregatable) && this.kbnFieldType.sortable)
@@ -303,6 +328,14 @@ export class DataViewField implements DataViewFieldBase {
   public get visualizable() {
     const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
     return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
+  }
+
+  /**
+   * Returns true if field is Empty
+   */
+
+  public get isNull() {
+    return Boolean(this.spec.isNull);
   }
 
   /**
@@ -362,6 +395,8 @@ export class DataViewField implements DataViewFieldBase {
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
       customLabel: this.customLabel,
+      customDescription: this.customDescription,
+      defaultFormatter: this.defaultFormatter,
     };
   }
 
@@ -388,6 +423,7 @@ export class DataViewField implements DataViewFieldBase {
       subType: this.subType,
       format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
       customLabel: this.customLabel,
+      customDescription: this.customDescription,
       shortDotsEnable: this.spec.shortDotsEnable,
       runtimeField: this.runtimeField,
       isMapped: this.isMapped,
@@ -395,6 +431,7 @@ export class DataViewField implements DataViewFieldBase {
       timeSeriesMetric: this.spec.timeSeriesMetric,
       timeZone: this.spec.timeZone,
       fixedInterval: this.spec.fixedInterval,
+      defaultFormatter: this.defaultFormatter,
     };
 
     // Filter undefined values from the spec

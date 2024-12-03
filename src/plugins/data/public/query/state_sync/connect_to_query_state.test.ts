@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Subscription } from 'rxjs';
@@ -66,7 +67,7 @@ describe('connect_to_global_state', () => {
   let aF2: Filter;
 
   beforeEach(() => {
-    const queryService = new QueryService();
+    const queryService = new QueryService(1000);
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
@@ -121,10 +122,20 @@ describe('connect_to_global_state', () => {
 
   test('when refresh interval changes, state container contains updated refresh interval', () => {
     const stop = connectToQueryGlobalState(queryServiceStart, globalState);
+    timeFilter.setRefreshInterval({ pause: true, value: 5000 });
+    expect(globalState.get().refreshInterval).toEqual({
+      pause: true,
+      value: 5000,
+    });
+    stop();
+  });
+
+  test('when refresh interval is set below min, state container contains min refresh interval', () => {
+    const stop = connectToQueryGlobalState(queryServiceStart, globalState);
     timeFilter.setRefreshInterval({ pause: true, value: 100 });
     expect(globalState.get().refreshInterval).toEqual({
       pause: true,
-      value: 100,
+      value: 1000,
     });
     stop();
   });
@@ -135,14 +146,14 @@ describe('connect_to_global_state', () => {
     globalState.set({
       ...globalState.get(),
       filters: [gF1, gF2],
-      refreshInterval: { pause: true, value: 100 },
+      refreshInterval: { pause: true, value: 5000 },
       time: { from: 'now-30m', to: 'now' },
     });
 
     expect(globalStateChangeTriggered).toBeCalledTimes(1);
 
     expect(filterManager.getGlobalFilters()).toHaveLength(2);
-    expect(timeFilter.getRefreshInterval()).toEqual({ pause: true, value: 100 });
+    expect(timeFilter.getRefreshInterval()).toEqual({ pause: true, value: 5000 });
     expect(timeFilter.getTime()).toEqual({ from: 'now-30m', to: 'now' });
     stop();
   });

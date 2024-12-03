@@ -29,7 +29,7 @@
           "\nThe content for the Sample Data Tab in the `home` plugin."
         ],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "packages/home/sample_data_tab/src/sample_data_tab.tsx",
         "deprecated": false,
@@ -50,7 +50,7 @@
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
           "SampleDataTabKibanaDependencies",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
@@ -61,7 +61,7 @@
             "id": "def-common.SampleDataTabKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -89,7 +89,7 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "SampleDataTabServices",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
@@ -100,7 +100,7 @@
             "id": "def-common.SampleDataTabProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",

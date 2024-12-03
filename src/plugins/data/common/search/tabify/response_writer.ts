@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEmpty } from 'lodash';
@@ -50,15 +51,25 @@ export class TabbedAggResponseWriter {
   row() {
     const rowBuffer: TabbedAggRow = {};
 
-    this.bucketBuffer.forEach((bucket) => {
+    for (let i = 0; i < this.bucketBuffer.length; i++) {
+      const bucket = this.bucketBuffer[i];
       rowBuffer[bucket.id] = bucket.value;
-    });
+    }
 
-    this.metricBuffer.forEach((metric) => {
+    for (let i = 0; i < this.metricBuffer.length; i++) {
+      const metric = this.metricBuffer[i];
       rowBuffer[metric.id] = metric.value;
-    });
+    }
 
-    const isPartialRow = !this.columns.every((column) => rowBuffer.hasOwnProperty(column.id));
+    let isPartialRow = false;
+    for (let i = 0; i < this.columns.length; i++) {
+      const column = this.columns[i];
+      if (!Object.hasOwn(rowBuffer, column.id)) {
+        isPartialRow = true;
+        break;
+      }
+    }
+
     const removePartial = isPartialRow && !this.partialRows;
     if (!isEmpty(rowBuffer) && !removePartial) {
       this.rows.push(rowBuffer);

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
-import { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  PerformRuleInstallationResponseBody,
+  RelatedIntegration,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { generateEvent } from '../../../../objects/event';
 import { createDocument, deleteDataStream } from '../../../../tasks/api_calls/elasticsearch';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
@@ -18,7 +20,7 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import {
   installPrebuiltRuleAssets,
-  installAllPrebuiltRulesRequest,
+  installSpecificPrebuiltRulesRequest,
   SAMPLE_PREBUILT_RULE,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { cleanFleet } from '../../../../tasks/api_calls/fleet';
@@ -40,39 +42,69 @@ import {
 } from '../../../../tasks/alerts_detection_rules';
 import { fetchRuleAlerts } from '../../../../tasks/api_calls/alerts';
 import {
-  enablesRule,
+  clickEnableRuleSwitch,
   visitRuleDetailsPage,
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
 
-describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
+// https://github.com/elastic/kibana/issues/179943
+
+describe('Related integrations', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
-  const RULE_RELATED_INTEGRATIONS: IntegrationDefinition[] = [
+  const RELATED_INTEGRATIONS: RelatedIntegration[] = [
+    {
+      package: 'auditd',
+      version: '1.16.0',
+    },
     {
       package: 'aws',
       version: '1.17.0',
       integration: 'cloudfront',
-      installed: true,
-      enabled: true,
     },
     {
       package: 'aws',
       version: '1.17.0',
       integration: 'cloudtrail',
-      installed: true,
-      enabled: false,
     },
-    { package: 'aws', version: '1.17.0', integration: 'unknown', installed: false, enabled: false },
-    { package: 'system', version: '1.17.0', installed: true, enabled: true },
+    {
+      package: 'aws',
+      version: '1.17.0',
+      integration: 'unknown',
+    },
+    { package: 'system', version: '1.17.0' },
   ];
   const PREBUILT_RULE = createRuleAssetSavedObject({
     name: PREBUILT_RULE_NAME,
     index: [DATA_STREAM_NAME],
     query: '*:*',
     rule_id: 'rule_1',
-    related_integrations: RULE_RELATED_INTEGRATIONS.map((x) => omit(x, ['installed', 'enabled'])),
+    related_integrations: RELATED_INTEGRATIONS,
   });
+  const EXPECTED_RELATED_INTEGRATIONS: ExpectedRelatedIntegration[] = [
+    {
+      title: 'Auditd Logs',
+      status: 'Not installed',
+    },
+    {
+      title: 'AWS Amazon cloudfront',
+      status: 'Enabled',
+    },
+    {
+      title: 'AWS Aws cloudtrail',
+      status: 'Disabled',
+    },
+    {
+      title: 'Aws Unknown',
+    },
+    {
+      title: 'System',
+      status: 'Enabled',
+    },
+  ];
+  const EXPECTED_KNOWN_RELATED_INTEGRATIONS = EXPECTED_RELATED_INTEGRATIONS.filter((x) =>
+    Boolean(x.status)
+  );
 
   beforeEach(() => {
     login();
@@ -91,7 +123,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
       it('should display a badge with the installed integrations', () => {
         cy.get(INTEGRATIONS_POPOVER).should(
           'have.text',
-          `0/${RULE_RELATED_INTEGRATIONS.length} integrations`
+          `0/${EXPECTED_RELATED_INTEGRATIONS.length} integrations`
         );
       });
 
@@ -100,15 +132,19 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
 
         cy.get(INTEGRATIONS_POPOVER_TITLE).should(
           'have.text',
-          `[${RULE_RELATED_INTEGRATIONS.length}] Related integrations available`
+          `[${EXPECTED_RELATED_INTEGRATIONS.length}] Related integrations available`
         );
-        cy.get(INTEGRATION_LINK).should('have.length', RULE_RELATED_INTEGRATIONS.length);
-        cy.get(INTEGRATION_STATUS).should('have.length', RULE_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
 
-        RULE_RELATED_INTEGRATIONS.forEach((integration, index) => {
-          cy.get(INTEGRATION_LINK).eq(index).contains(getIntegrationName(integration), {
-            matchCase: false,
-          });
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
+        });
+
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((_, index) => {
           cy.get(INTEGRATION_STATUS).eq(index).should('have.text', 'Not installed');
         });
       });
@@ -120,13 +156,17 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
       });
 
       it('should display the integrations in the definition section', () => {
-        cy.get(INTEGRATION_LINK).should('have.length', RULE_RELATED_INTEGRATIONS.length);
-        cy.get(INTEGRATION_STATUS).should('have.length', RULE_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
 
-        RULE_RELATED_INTEGRATIONS.forEach((integration, index) => {
-          cy.get(INTEGRATION_LINK).eq(index).contains(getIntegrationName(integration), {
-            matchCase: false,
-          });
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
+        });
+
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((_, index) => {
           cy.get(INTEGRATION_STATUS).eq(index).should('have.text', 'Not installed');
         });
       });
@@ -157,12 +197,9 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
       });
 
       it('should display a badge with the installed integrations', () => {
-        const enabledIntegrations = RULE_RELATED_INTEGRATIONS.filter((x) => x.enabled).length;
-        const totalIntegrations = RULE_RELATED_INTEGRATIONS.length;
-
         cy.get(INTEGRATIONS_POPOVER).should(
           'have.text',
-          `${enabledIntegrations}/${totalIntegrations} integrations`
+          `2/${EXPECTED_RELATED_INTEGRATIONS.length} integrations`
         );
       });
 
@@ -171,18 +208,20 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
 
         cy.get(INTEGRATIONS_POPOVER_TITLE).should(
           'have.text',
-          `[${RULE_RELATED_INTEGRATIONS.length}] Related integrations available`
+          `[${EXPECTED_RELATED_INTEGRATIONS.length}] Related integrations available`
         );
-        cy.get(INTEGRATION_LINK).should('have.length', RULE_RELATED_INTEGRATIONS.length);
-        cy.get(INTEGRATION_STATUS).should('have.length', RULE_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
 
-        RULE_RELATED_INTEGRATIONS.forEach((integration, index) => {
-          cy.get(INTEGRATION_LINK).eq(index).contains(getIntegrationName(integration), {
-            matchCase: false,
-          });
-          cy.get(INTEGRATION_STATUS)
-            .eq(index)
-            .should('have.text', getIntegrationStatus(integration));
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
+        });
+
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_STATUS).eq(index).should('have.text', expected.status);
         });
       });
     });
@@ -194,16 +233,18 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
       });
 
       it('should display the integrations in the definition section', () => {
-        cy.get(INTEGRATION_LINK).should('have.length', RULE_RELATED_INTEGRATIONS.length);
-        cy.get(INTEGRATION_STATUS).should('have.length', RULE_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
 
-        RULE_RELATED_INTEGRATIONS.forEach((integration, index) => {
-          cy.get(INTEGRATION_LINK).eq(index).contains(getIntegrationName(integration), {
-            matchCase: false,
-          });
-          cy.get(INTEGRATION_STATUS)
-            .eq(index)
-            .should('have.text', getIntegrationStatus(integration));
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
+        });
+
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_STATUS).eq(index).should('have.text', expected.status);
         });
       });
 
@@ -213,7 +254,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
         deleteDataStream(DATA_STREAM_NAME);
         createDocument(DATA_STREAM_NAME, generateEvent());
 
-        enablesRule();
+        clickEnableRuleSwitch();
         waitForAlertsToPopulate();
 
         fetchRuleAlerts({
@@ -222,9 +263,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
           size: 1,
         }).then((alertsResponse) => {
           expect(alertsResponse.body.hits.hits[0].fields).to.deep.equal({
-            [RELATED_INTEGRATION_FIELD]: RULE_RELATED_INTEGRATIONS.map((x) =>
-              omit(x, ['installed', 'enabled'])
-            ),
+            [RELATED_INTEGRATION_FIELD]: RELATED_INTEGRATIONS,
           });
         });
       });
@@ -232,18 +271,15 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
   });
 
   describe('related Integrations Advanced Setting is disabled', () => {
-    before(() => {
-      disableRelatedIntegrations();
-    });
-
-    after(() => {
-      enableRelatedIntegrations();
-    });
-
     describe('rules management table', () => {
       beforeEach(() => {
+        disableRelatedIntegrations();
         visitRulesManagementTable();
         disableAutoRefresh();
+      });
+
+      afterEach(() => {
+        enableRelatedIntegrations();
       });
 
       it('should not display a badge with the installed integrations', () => {
@@ -258,13 +294,17 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
       });
 
       it('should display the integrations in the definition section', () => {
-        cy.get(INTEGRATION_LINK).should('have.length', RULE_RELATED_INTEGRATIONS.length);
-        cy.get(INTEGRATION_STATUS).should('have.length', RULE_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
 
-        RULE_RELATED_INTEGRATIONS.forEach((integration, index) => {
-          cy.get(INTEGRATION_LINK).eq(index).contains(getIntegrationName(integration), {
-            matchCase: false,
-          });
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
+        });
+
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((_, index) => {
           cy.get(INTEGRATION_STATUS).eq(index).should('have.text', 'Not installed');
         });
       });
@@ -276,7 +316,7 @@ const INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS = 'prebuiltRules';
 
 function addAndInstallPrebuiltRules(rules: Array<typeof SAMPLE_PREBUILT_RULE>): void {
   installPrebuiltRuleAssets(rules);
-  installAllPrebuiltRulesRequest().as(INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS);
+  installSpecificPrebuiltRulesRequest(rules).as(INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS);
 }
 
 function visitFirstInstalledPrebuiltRuleDetailsPage(): void {
@@ -285,22 +325,9 @@ function visitFirstInstalledPrebuiltRuleDetailsPage(): void {
   ).then((response) => visitRuleDetailsPage(response.body.results.created[0].id));
 }
 
-interface IntegrationDefinition {
-  package: string;
-  version: string;
-  installed: boolean;
-  enabled: boolean;
-  integration?: string;
-}
-
-function getIntegrationName(integration: IntegrationDefinition): string {
-  return `${integration.package} ${integration.integration ?? ''}`.trim();
-}
-
-function getIntegrationStatus(integration: IntegrationDefinition): string {
-  return `${integration.installed ? 'Installed' : 'Not installed'}${
-    integration.enabled ? ': enabled' : ''
-  }`.trim();
+interface ExpectedRelatedIntegration {
+  title: string;
+  status?: string;
 }
 
 /**

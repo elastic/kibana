@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UserProvidedValues, UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type {
+  UserProvidedValues,
+  UiSettingsParams,
+  GetUiSettingsContext,
+} from '@kbn/core-ui-settings-common';
 
 interface ValueValidation {
   valid: boolean;
@@ -29,11 +34,11 @@ export interface IUiSettingsClient {
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  get: <T = any>(key: string) => Promise<T>;
+  get: <T = any>(key: string, context?: GetUiSettingsContext) => Promise<T>;
   /**
    * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  getAll: <T = any>() => Promise<Record<string, T>>;
+  getAll: <T = any>(context?: GetUiSettingsContext) => Promise<Record<string, T>>;
   /**
    * Retrieves a set of all uiSettings values set by the user.
    */
@@ -53,7 +58,10 @@ export interface IUiSettingsClient {
   /**
    * Removes multiple uiSettings values by keys.
    */
-  removeMany: (keys: string[]) => Promise<void>;
+  removeMany: (
+    keys: string[],
+    options?: { validateKeys?: boolean; handleWriteErrors?: boolean }
+  ) => Promise<void>;
   /**
    * Shows whether the uiSettings value set by the user.
    */

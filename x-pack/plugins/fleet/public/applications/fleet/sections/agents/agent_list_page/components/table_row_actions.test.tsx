@@ -58,7 +58,10 @@ describe('TableRowActions', () => {
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,
+        readAgents: true,
+        allAgents: true,
       },
+      integrations: {},
     } as any);
     mockedUseAgentVersion.mockReturnValue('8.10.2');
   });
@@ -85,6 +88,24 @@ describe('TableRowActions', () => {
       } as any);
       const res = renderAndGetDiagnosticsButton({
         agent: { active: true } as Agent,
+        agentPolicy: {} as AgentPolicy,
+      });
+      expect(res).toBe(null);
+    });
+
+    it('should not render action if authz do not have Agents:All', async () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          allAgents: false,
+        },
+        integrations: {},
+      } as any);
+      const res = renderAndGetDiagnosticsButton({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+        } as any,
         agentPolicy: {} as AgentPolicy,
       });
       expect(res).toBe(null);
@@ -168,6 +189,26 @@ describe('TableRowActions', () => {
       expect(res).not.toBe(null);
       expect(res).toBeEnabled();
     });
+    it('should not render action if authz do not have Agents:Read', async () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          readAgents: false,
+        },
+        integrations: {},
+      } as any);
+      const res = renderAndGetRestartUpgradeButton({
+        agent: {
+          active: true,
+          status: 'updating',
+          upgrade_started_at: '2022-11-21T12:27:24Z',
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
 
     it('should not render action if agent is not stuck in updating', async () => {
       const res = renderAndGetRestartUpgradeButton({
@@ -216,7 +257,7 @@ describe('TableRowActions', () => {
       expect(res).toBeEnabled();
     });
 
-    it('should render a disabled action button if agent version is latest', async () => {
+    it('should render an enabled action button if agent version is latest', async () => {
       const res = renderAndGetUpgradeButton({
         agent: {
           active: true,
@@ -229,7 +270,7 @@ describe('TableRowActions', () => {
       });
 
       expect(res).not.toBe(null);
-      expect(res).not.toBeEnabled();
+      expect(res).toBeEnabled();
     });
   });
 });

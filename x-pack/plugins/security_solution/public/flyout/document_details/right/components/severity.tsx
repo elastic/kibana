@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { CellActionsMode } from '@kbn/cell-actions';
-import { getSourcererScopeId } from '../../../../helpers';
-import { SecurityCellActions } from '../../../../common/components/cell_actions';
-import { SecurityCellActionsTrigger } from '../../../../actions/constants';
-import { useRightPanelContext } from '../context';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { CellActions } from '../../shared/components/cell_actions';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 
 const isSeverity = (x: unknown): x is Severity =>
   x === 'low' || x === 'medium' || x === 'high' || x === 'critical';
@@ -22,8 +18,8 @@ const isSeverity = (x: unknown): x is Severity =>
 /**
  * Document details severity displayed in flyout right section header
  */
-export const DocumentSeverity: FC = memo(() => {
-  const { getFieldsData, scopeId } = useRightPanelContext();
+export const DocumentSeverity = memo(() => {
+  const { getFieldsData } = useDocumentDetailsContext();
   const fieldsData = getFieldsData(ALERT_SEVERITY);
 
   if (!fieldsData) {
@@ -40,19 +36,9 @@ export const DocumentSeverity: FC = memo(() => {
   }
 
   return (
-    <SecurityCellActions
-      data={{
-        field: ALERT_SEVERITY,
-        value: alertSeverity,
-      }}
-      mode={CellActionsMode.HOVER_RIGHT}
-      triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-      visibleCellActions={6}
-      sourcererScopeId={getSourcererScopeId(scopeId)}
-      metadata={{ scopeId }}
-    >
+    <CellActions field={ALERT_SEVERITY} value={alertSeverity}>
       <SeverityBadge value={alertSeverity} />
-    </SecurityCellActions>
+    </CellActions>
   );
 });
 

@@ -434,7 +434,7 @@ Array [
                     "reporting",
                   ],
                 },
-                "name": "Download CSV reports from Saved Search panels",
+                "name": "Generate CSV reports from Saved Search panels",
                 "savedObject": Object {
                   "all": Array [],
                   "read": Array [],
@@ -546,6 +546,8 @@ Array [
         },
       },
       "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
         "store_search_session",
       ],
       "app": Array [
@@ -555,9 +557,12 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -581,6 +586,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "tag",
         ],
@@ -598,6 +604,10 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -613,6 +623,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "dashboard",
           "query",
@@ -707,9 +718,12 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -867,6 +881,9 @@ exports[`buildOSSFeatures with a basic license returns the indexPatterns feature
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "indexPatterns:manage",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1003,6 +1020,17 @@ Array [
     },
     "privilegeId": "all",
   },
+  Object {
+    "privilege": Object {
+      "disabled": true,
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
 ]
 `;
 
@@ -1029,9 +1057,12 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1157,6 +1188,8 @@ Array [
         },
       },
       "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
         "store_search_session",
       ],
       "app": Array [
@@ -1166,9 +1199,12 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1192,6 +1228,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "tag",
         ],
@@ -1209,6 +1246,10 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -1224,6 +1265,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "dashboard",
           "query",
@@ -1318,9 +1360,12 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1478,6 +1523,9 @@ exports[`buildOSSFeatures with a enterprise license returns the indexPatterns fe
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "indexPatterns:manage",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1614,6 +1662,17 @@ Array [
     },
     "privilegeId": "all",
   },
+  Object {
+    "privilege": Object {
+      "disabled": true,
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
 ]
 `;
 
@@ -1640,9 +1699,12 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [

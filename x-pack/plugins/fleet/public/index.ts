@@ -7,7 +7,11 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 
+import { lazy } from 'react';
+
 import { FleetPlugin } from './plugin';
+export type { GetPackagesResponse } from './types';
+export { installationStatuses } from '../common/constants';
 
 export type { FleetSetup, FleetStart, FleetStartServices } from './plugin';
 
@@ -16,6 +20,7 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 };
 
 export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
+export { SetupTechnology } from './types';
 export type {
   AgentDetailsReassignPolicyAction,
   AgentPolicyDetailsDeployAgentAction,
@@ -51,7 +56,7 @@ export type {
   UIExtensionsStorage,
 } from './types/ui_extensions';
 
-export { pagePathGetters } from './constants';
+export { pagePathGetters, EPM_API_ROUTES } from './constants';
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';
@@ -61,5 +66,26 @@ export { PackagePolicyEditorDatastreamPipelines } from './applications/fleet/sec
 export type { PackagePolicyEditorDatastreamPipelinesProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
 export { PackagePolicyEditorDatastreamMappings } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings';
 export type { PackagePolicyEditorDatastreamMappingsProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings';
-
 export type { DynamicPagePathValues } from './constants';
+
+// This Type export is added to prevent error TS4023
+export type { InputFieldProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field';
+
+export const LazyPackagePolicyInputVarField = lazy(() =>
+  import(
+    './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field'
+  ).then((module) => ({ default: module.PackagePolicyInputVarField }))
+);
+export type { PackageListGridProps } from './applications/integrations/sections/epm/components/package_list_grid';
+export type { AvailablePackagesHookType } from './applications/integrations/sections/epm/screens/home/hooks/use_available_packages';
+export type { IntegrationCardItem } from './applications/integrations/sections/epm/screens/home';
+export type { CategoryFacet } from './applications/integrations/sections/epm/screens/home/category_facets';
+
+export const PackageList = () => {
+  return import('./applications/integrations/sections/epm/components/package_list_grid');
+};
+export const AvailablePackagesHook = () => {
+  return import(
+    './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
+  );
+};

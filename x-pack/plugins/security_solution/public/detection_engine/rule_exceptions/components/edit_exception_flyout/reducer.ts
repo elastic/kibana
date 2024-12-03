@@ -19,6 +19,8 @@ export interface State {
   entryErrorExists: boolean;
   expireTime: Moment | undefined;
   expireErrorExists: boolean;
+  wildcardWarningExists: boolean;
+  partialCodeSignatureWarningExists: boolean;
 }
 
 export type Action =
@@ -61,6 +63,14 @@ export type Action =
   | {
       type: 'setExpireError';
       errorExists: boolean;
+    }
+  | {
+      type: 'setWildcardWithWrongOperator';
+      warningExists: boolean;
+    }
+  | {
+      type: 'setPartialCodeSignature';
+      warningExists: boolean;
     };
 
 export const createExceptionItemsReducer =
@@ -148,6 +158,20 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           expireErrorExists: errorExists,
+        };
+      }
+      case 'setWildcardWithWrongOperator': {
+        const { warningExists } = action;
+        return {
+          ...state,
+          wildcardWarningExists: warningExists,
+        };
+      }
+      case 'setPartialCodeSignature': {
+        const { warningExists } = action;
+        return {
+          ...state,
+          partialCodeSignatureWarningExists: warningExists,
         };
       }
       default:

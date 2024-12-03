@@ -9,13 +9,11 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import '../../../../common/mock/match_media';
 import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
+  createMockStore,
+  mockDataViewSpec,
   mockGlobalState,
   mockIndexPattern,
-  SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
@@ -24,8 +22,6 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 import { HostsType, HostsTableType } from '../../store/model';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../../common/lib/kibana', () => {
@@ -73,21 +69,14 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 jest.mock('../../../../common/components/visualization_actions/actions');
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
-const myState: State = mockGlobalState;
-const { storage } = createSecuritySolutionStorageMock();
-const myStore = createStore(
-  {
-    ...myState,
-    dataTable: {
-      tableById: {
-        [TableId.hostsPageEvents]: myState.dataTable.tableById['table-test'],
-      },
+const myStore = createMockStore({
+  ...mockGlobalState,
+  dataTable: {
+    tableById: {
+      [TableId.hostsPageEvents]: mockGlobalState.dataTable.tableById['table-test'],
     },
   },
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  storage
-);
+});
 
 describe('body', () => {
   const scenariosMap = {
@@ -121,7 +110,7 @@ describe('body', () => {
               setQuery={jest.fn()}
               hostDetailsPagePath={hostDetailsPagePath}
               indexNames={[]}
-              indexPattern={mockIndexPattern}
+              dataViewSpec={mockDataViewSpec}
               type={HostsType.details}
               hostDetailsFilter={mockHostDetailsPageFilters}
               filterQuery={filterQuery}
@@ -140,34 +129,32 @@ describe('body', () => {
         startDate: '2020-07-07T08:20:18.966Z',
         type: 'details',
         indexPattern: {
-          fields: [
-            { name: '@timestamp', searchable: true, type: 'date', aggregatable: true },
-            { name: '@version', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.ephemeral_id', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.hostname', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.id', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test1', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test2', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test3', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test4', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test5', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test6', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test7', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test8', searchable: true, type: 'string', aggregatable: true },
-            { name: 'host.name', searchable: true, type: 'string', aggregatable: true },
-            {
+          fields: {
+            '@timestamp': { searchable: true, type: 'date', aggregatable: true },
+            '@version': { searchable: true, type: 'string', aggregatable: true },
+            'agent.ephemeral_id': { searchable: true, type: 'string', aggregatable: true },
+            'agent.hostname': { searchable: true, type: 'string', aggregatable: true },
+            'agent.id': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test1': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test2': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test3': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test4': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test5': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test6': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test7': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test8': { searchable: true, type: 'string', aggregatable: true },
+            'host.name': { searchable: true, type: 'string', aggregatable: true },
+            'nestedField.firstAttributes': {
               aggregatable: false,
-              name: 'nestedField.firstAttributes',
               searchable: true,
               type: 'string',
             },
-            {
+            'nestedField.secondAttributes': {
               aggregatable: false,
-              name: 'nestedField.secondAttributes',
               searchable: true,
               type: 'string',
             },
-          ],
+          },
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
         hostName: 'host-1',

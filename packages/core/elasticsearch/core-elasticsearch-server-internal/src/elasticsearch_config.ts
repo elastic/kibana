@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
+import { readFileSync } from 'fs';
+import { Duration } from 'moment';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
-import { Duration } from 'moment';
-import { readFileSync } from 'fs';
+import { schema, offeringBasedSchema, ByteSizeValue, type TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
 import type {
@@ -40,8 +41,11 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
-  maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
+  maxSockets: schema.number({ defaultValue: 800, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
+  maxResponseSize: schema.oneOf([schema.literal(false), schema.byteSize()], {
+    defaultValue: false,
+  }),
   idleSocketTimeout: schema.duration({ defaultValue: '60s' }),
   compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
@@ -94,7 +98,7 @@ export const configSchema = schema.object({
       }),
     ],
     {
-      defaultValue: ['authorization'],
+      defaultValue: ['authorization', 'es-client-authentication'],
     }
   ),
   customHeaders: schema.recordOf(schema.string(), schema.string(), {
@@ -144,7 +148,10 @@ export const configSchema = schema.object({
     }
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
-  healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
+  healthCheck: schema.object({
+    delay: schema.duration({ defaultValue: 2500 }),
+    startupDelay: schema.duration({ defaultValue: 500 }),
+  }),
   ignoreVersionMismatch: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
     traditional: schema.conditional(
@@ -183,6 +190,8 @@ export const configSchema = schema.object({
     }),
     { defaultValue: [] }
   ),
+  dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
+  publicBaseUrl: schema.maybe(hostURISchema),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -301,10 +310,13 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly skipStartupConnectionCheck: boolean;
   /**
-   * The interval between health check requests Kibana sends to the Elasticsearch.
+   * The interval between health check requests Kibana sends to the Elasticsearch before the first green signal.
+   */
+  public readonly healthCheckStartupDelay: Duration;
+  /**
+   * The interval between health check requests Kibana sends to the Elasticsearch after the first green signal.
    */
   public readonly healthCheckDelay: Duration;
-
   /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
@@ -326,6 +338,12 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly maxIdleSockets: number;
 
   /**
+   * The maximum allowed response size (both compressed and uncompressed).
+   * When defined, responses with a size higher than the set limit will be aborted with an error.
+   */
+  public readonly maxResponseSize?: ByteSizeValue;
+
+  /**
    * The timeout for idle sockets kept open between Kibana and Elasticsearch. If the socket is idle for longer than this timeout, it will be closed.
    */
   public readonly idleSocketTimeout: Duration;
@@ -340,6 +358,13 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    * be used as seeds to discover the rest of your cluster.
    */
   public readonly hosts: string[];
+
+  /**
+   * Optional host that users can use to connect to your Elasticsearch cluster,
+   * this URL will be shown in Kibana as the Elasticsearch URL
+   */
+
+  public readonly publicBaseUrl?: string;
 
   /**
    * List of Kibana client-side headers to send to Elasticsearch when request
@@ -421,6 +446,12 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 
+  /**
+   * The maximum time to retain the DNS lookup resolutions.
+   * Set to 0 to disable the cache (default Node.js behavior)
+   */
+  public readonly dnsCacheTtl: Duration;
+
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
@@ -435,16 +466,21 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;
     this.sniffInterval = rawConfig.sniffInterval;
     this.healthCheckDelay = rawConfig.healthCheck.delay;
+    this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
     this.maxSockets = rawConfig.maxSockets;
     this.maxIdleSockets = rawConfig.maxIdleSockets;
+    this.maxResponseSize =
+      rawConfig.maxResponseSize !== false ? rawConfig.maxResponseSize : undefined;
     this.idleSocketTimeout = rawConfig.idleSocketTimeout;
     this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
+    this.dnsCacheTtl = rawConfig.dnsCacheTtl;
+    this.publicBaseUrl = rawConfig.publicBaseUrl;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
@@ -465,6 +501,10 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
   let keyPassphrase: string | undefined;
   let certificate: string | undefined;
   let certificateAuthorities: string[] | undefined;
+
+  const readFile = (file: string) => {
+    return readFileSync(file, 'utf8');
+  };
 
   const addCAs = (ca: string[] | undefined) => {
     if (ca && ca.length) {
@@ -521,8 +561,4 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
     certificate,
     certificateAuthorities,
   };
-};
-
-const readFile = (file: string) => {
-  return readFileSync(file, 'utf8');
 };

@@ -32,7 +32,8 @@ async function createPolicy(
  * We only specify a rough structure based on https://www.elastic.co/guide/en/elasticsearch/reference/current/_actions.html.
  */
 const bodySchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
+  deprecated: schema.maybe(schema.boolean()),
   phases: schema.object({
     hot: schema.any(),
     warm: schema.maybe(schema.any()),

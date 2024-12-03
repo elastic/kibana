@@ -26,9 +26,8 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     login();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170482
-  describe.skip('File operations:', () => {
-    const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
+  describe('File operations:', () => {
+    const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home/ubuntu';
 
     const fileContent = 'This is a test file for the get-file command.';
     const filePath = `${homeFilePath}/test_file.txt`;
@@ -45,7 +44,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
 
           return enableAllPolicyProtections(policy.id).then(() => {
             // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
+            return createEndpointHost(policy.policy_ids[0]).then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
             });
           });
@@ -68,38 +67,52 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('"get-file --path" - should retrieve a file', () => {
+      const downloadsFolder = Cypress.config('downloadsFolder');
+
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       cy.task('createFileOnEndpoint', {
         hostname: createdHost.hostname,
         path: filePath,
         content: fileContent,
       });
+
+      // initiate get file action and wait for the API to complete
+      cy.intercept('api/endpoint/action/get_file').as('getFileAction');
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`get-file --path ${filePath}`);
       submitCommand();
-      cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
+      cy.wait('@getFileAction', { timeout: 60000 });
+
+      // verify that the file was retrieved
+      // and that the file download link is available
+      cy.getByTestSubj('getFileSuccess').within(() => {
         cy.contains('File retrieved from the host.');
         cy.contains('(ZIP file passcode: elastic)');
         cy.contains(
           'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
         );
-        cy.contains('Click here to download').click();
-        const downloadsFolder = Cypress.config('downloadsFolder');
-        cy.readFile(`${downloadsFolder}/upload.zip`);
+        cy.contains('Click here to download').should('exist');
+      });
 
-        cy.task('uploadFileToEndpoint', {
-          hostname: createdHost.hostname,
-          srcPath: `${downloadsFolder}/upload.zip`,
-          destPath: `${homeFilePath}/upload.zip`,
-        });
+      cy.contains('Click here to download').click();
 
-        cy.task('readZippedFileContentOnEndpoint', {
-          hostname: createdHost.hostname,
-          path: `${homeFilePath}/upload.zip`,
-          password: 'elastic',
-        }).then((unzippedFileContent) => {
-          expect(unzippedFileContent).to.equal(fileContent);
-        });
+      // wait for file to be downloaded
+      cy.readFile(`${downloadsFolder}/upload.zip`, { timeout: 120000 }).should('exist');
+
+      // move the zip file to VM
+      cy.task('uploadFileToEndpoint', {
+        hostname: createdHost.hostname,
+        srcPath: `${downloadsFolder}/upload.zip`,
+        destPath: `${homeFilePath}/upload.zip`,
+      });
+
+      // unzip the file and read its content
+      cy.task('readZippedFileContentOnEndpoint', {
+        hostname: createdHost.hostname,
+        path: `${homeFilePath}/upload.zip`,
+        password: 'elastic',
+      }).then((unzippedFileContent) => {
+        expect(unzippedFileContent).to.contain(fileContent);
       });
     });
 

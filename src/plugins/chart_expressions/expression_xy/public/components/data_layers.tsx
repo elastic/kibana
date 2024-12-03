@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   AreaSeries,
   BarSeries,
+  BarSeriesProps,
   CurveType,
   LabelOverflowConstraint,
   LineSeries,
@@ -47,10 +50,11 @@ interface Props {
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
   formattedDatatables: DatatablesWithFormatInfo;
-  syncColors?: boolean;
-  timeZone?: string;
+  syncColors: boolean;
+  timeZone: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
+  minBarHeight: number;
   shouldShowValueLabels?: boolean;
   valueLabels: ValueLabelMode;
   defaultXScaleType: XScaleType;
@@ -68,6 +72,7 @@ export const DataLayers: FC<Props> = ({
   syncColors,
   valueLabels,
   fillOpacity,
+  minBarHeight,
   formatFactory,
   paletteService,
   fittingFunction,
@@ -189,14 +194,13 @@ export const DataLayers: FC<Props> = ({
                 />
               );
             case SeriesTypes.BAR:
-              const valueLabelsSettings = {
+              const valueLabelsSettings: Pick<BarSeriesProps, 'displayValueSettings'> = {
                 displayValueSettings: {
                   // This format double fixes two issues in elastic-chart
                   // * when rotating the chart, the formatter is not correctly picked
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
                   valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
                   showValueLabel: shouldShowValueLabels && valueLabels !== ValueLabelModes.HIDE,
-                  isValueContainedInElement: false,
                   isAlternatingValueLabel: false,
                   overflowConstraints: [
                     LabelOverflowConstraint.ChartEdges,
@@ -204,7 +208,14 @@ export const DataLayers: FC<Props> = ({
                   ],
                 },
               };
-              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
+              return (
+                <BarSeries
+                  key={index}
+                  {...seriesProps}
+                  {...valueLabelsSettings}
+                  minBarHeight={minBarHeight}
+                />
+              );
             case SeriesTypes.AREA:
               return (
                 <AreaSeries

@@ -9,13 +9,15 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { EditConnector } from './connectors/edit_connector';
 import { ConnectorsOverview } from './connectors_overview';
-
-export const BASE_CONNECTORS_PATH = 'connectors';
-export const EDIT_CONNECTOR_PATH = `${BASE_CONNECTORS_PATH}/:id`;
+import { ConnectorsElasticManaged } from './connectors_elastic_managed';
+import { ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
 
 export const ConnectorsRouter: React.FC = () => {
   return (
     <Routes>
+      <Route exact path={ELASTIC_MANAGED_CONNECTOR_PATH}>
+        <ConnectorsElasticManaged />
+      </Route>
       <Route exact path={'/:id'}>
         <EditConnector />
       </Route>

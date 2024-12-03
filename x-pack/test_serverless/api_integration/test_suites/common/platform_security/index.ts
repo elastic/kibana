@@ -24,5 +24,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./user_profiles'));
     loadTestFile(require.resolve('./views'));
+    loadTestFile(require.resolve('./feature_check'));
   });
 }

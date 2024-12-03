@@ -18,20 +18,22 @@ import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
+import { documentationService } from '../../../public/application/services/documentation';
 import { humanizeTimeStamp } from '../../../public/application/sections/home/data_stream_list/humanize_time_stamp';
 import { createDataStreamPayload } from '../home/data_streams_tab.helpers';
 import {
   testIndexEditableSettingsAll,
   testIndexEditableSettingsLimited,
   testIndexMappings,
+  testIndexMappingsWithSemanticText,
   testIndexMock,
   testIndexName,
   testIndexSettings,
   testIndexStats,
 } from './mocks';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -58,6 +60,7 @@ describe('<IndexDetailsPage />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+  jest.spyOn(documentationService, 'setup');
 
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
@@ -67,6 +70,7 @@ describe('<IndexDetailsPage />', () => {
     httpRequestsMockHelpers.setLoadIndexStatsResponse(testIndexName, testIndexStats);
     httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, testIndexMappings);
     httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, testIndexSettings);
+    httpRequestsMockHelpers.setInferenceModels([]);
 
     await act(async () => {
       testBed = await setup({
@@ -100,8 +104,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('resends a request when reload button is clicked', async () => {
-      // already sent 2 requests while setting up the component
-      const numberOfRequests = 2;
+      // already sent 4 requests while setting up the component
+      const numberOfRequests = 4;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
       await testBed.actions.errorSection.clickReloadButton();
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -109,7 +113,7 @@ describe('<IndexDetailsPage />', () => {
 
     it('renders an error section when no index name is provided', async () => {
       // already sent 2 requests while setting up the component
-      const numberOfRequests = 2;
+      const numberOfRequests = 4;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
       await act(async () => {
         testBed = await setup({ httpSetup, initialEntry: '/indices/index_details' });
@@ -121,11 +125,86 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
+  describe('Semantic text index errors', () => {
+    it('does not render an error callout by default', () => {
+      expect(testBed.actions.overview.indexErrorCalloutExists()).toBe(false);
+    });
+    it('renders an error callout when the mapping contains semantic text errors', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(
+        testIndexName,
+        testIndexMappingsWithSemanticText.mappings
+      );
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            docLinks: {
+              links: {
+                ml: '',
+                enterpriseSearch: '',
+              },
+            },
+            core: {
+              application: { capabilities: { ml: { canGetTrainedModels: true } } },
+            },
+            plugins: {
+              ml: {
+                mlApi: {
+                  trainedModels: {
+                    getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
+                    getTrainedModels: jest.fn().mockResolvedValue([
+                      {
+                        model_id: '.elser_model_2',
+                        model_type: 'pytorch',
+                        model_package: {
+                          packaged_model_id: '.elser_model_2',
+                          model_repository: 'https://ml-models.elastic.co',
+                          minimum_version: '11.0.0',
+                          size: 438123914,
+                          sha256: '',
+                          metadata: {},
+                          tags: [],
+                          vocabulary_file: 'elser_model_2.vocab.json',
+                        },
+                        description: 'Elastic Learned Sparse EncodeR v2',
+                        tags: ['elastic'],
+                      },
+                    ]),
+                    getTrainedModelStats: jest.fn().mockResolvedValue({
+                      count: 1,
+                      trained_model_stats: [
+                        {
+                          model_id: '.elser_model_2',
+
+                          deployment_stats: {
+                            deployment_id: '.elser_model_2',
+                            model_id: '.elser_model_2',
+                            threads_per_allocation: 1,
+                            number_of_allocations: 1,
+                            queue_capacity: 1024,
+                            state: 'started',
+                          },
+                        },
+                      ],
+                    }),
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      expect(testBed.actions.overview.indexErrorCalloutExists()).toBe(true);
+    });
+  });
+
   describe('Stats tab', () => {
     it('updates the breadcrumbs to index details stats', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
-        IndexManagementBreadcrumb.indexDetailsStats
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Statistics' }
       );
     });
 
@@ -205,8 +284,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 3 requests while setting up the component
-        const numberOfRequests = 3;
+        // already sent 7 requests while setting up the component
+        const numberOfRequests = 7;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.stats.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -215,7 +294,7 @@ describe('<IndexDetailsPage />', () => {
   });
 
   it('loads index details from the API', async () => {
-    expect(httpSetup.get).toHaveBeenLastCalledWith(
+    expect(httpSetup.get).toHaveBeenCalledWith(
       `${INTERNAL_API_BASE_PATH}/indices/${testIndexName}`,
       requestOptions
     );
@@ -227,10 +306,20 @@ describe('<IndexDetailsPage />', () => {
     expect(header).toEqual(testIndexName);
   });
 
+  it('changes the tab when its header is clicked', async () => {
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+    expect(testBed.exists('indexDetailsMappingsCodeBlock')).toBe(false);
+    expect(testBed.exists('fieldsList')).toBe(true);
+    expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+    expect(testBed.exists('indexDetailsSettingsCodeBlock')).toBe(true);
+  });
+
   describe('Overview tab', () => {
     it('updates the breadcrumbs to index details overview', async () => {
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
-        IndexManagementBreadcrumb.indexDetailsOverview
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Overview' }
       );
     });
 
@@ -368,8 +457,8 @@ describe('<IndexDetailsPage />', () => {
           `Data streamUnable to load data stream detailsReloadLast update`
         );
 
-        // already sent 3 requests while setting up the component
-        const numberOfRequests = 3;
+        // already sent 7 requests while setting up the component
+        const numberOfRequests = 7;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.overview.reloadDataStreamDetails();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -445,34 +534,338 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Mappings tab', () => {
-    it('updates the breadcrumbs to index details mappings', async () => {
+    beforeEach(async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+    });
+    it('updates the breadcrumbs to index details mappings', async () => {
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
-        IndexManagementBreadcrumb.indexDetailsMappings
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Mappings' }
       );
     });
     it('loads mappings from the API', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       expect(httpSetup.get).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/mapping/${testIndexName}`,
         requestOptions
       );
     });
+    it('filter, searchbar, toggle button, add field button exists', async () => {
+      expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+      expect(testBed.exists('indexDetailsMappingsToggleViewButton')).toBe(true);
+      expect(testBed.exists('indexDetailsMappingsFieldSearch')).toBe(true);
+      expect(testBed.exists('indexDetailsMappingsFilter')).toBe(true);
+    });
+
+    it('displays the mappings in the table view', async () => {
+      const tabContent = testBed.actions.mappings.getTreeViewContent('@timestampField-fieldName');
+      expect(tabContent).toContain('@timestamp');
+    });
+
+    it('search bar is disabled in JSON view', async () => {
+      await testBed.actions.mappings.clickToggleViewButton();
+      expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(true);
+    });
 
     it('displays the mappings in the code block', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-
+      await testBed.actions.mappings.clickToggleViewButton();
       const tabContent = testBed.actions.mappings.getCodeBlockContent();
       expect(tabContent).toEqual(JSON.stringify(testIndexMappings, null, 2));
     });
 
+    it('search bar is enabled in Tree view', async () => {
+      expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
+    });
+
+    it('semantic text banner is not visible', async () => {
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(false);
+    });
+
     it('sets the docs link href from the documentation service', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       const docsLinkHref = testBed.actions.mappings.getDocsLinkHref();
       // the url from the mocked docs mock
       expect(docsLinkHref).toEqual(
         'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping.html'
       );
+    });
+    describe('Filter field by filter Type', () => {
+      const mockIndexMappingResponse: any = {
+        ...testIndexMappings.mappings,
+        properties: {
+          ...testIndexMappings.mappings.properties,
+          name: {
+            type: 'text',
+          },
+        },
+      };
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponse,
+        });
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      });
+      test('popover is visible and shows list of available field types', async () => {
+        await testBed.actions.mappings.clickFilterByFieldType();
+        expect(testBed.exists('euiSelectableList')).toBe(true);
+        expect(testBed.exists('indexDetailsMappingsFilterByFieldTypeSearch')).toBe(true);
+        expect(testBed.exists('euiSelectableList')).toBe(true);
+      });
+      test('can select a field type and list view changes', async () => {
+        await testBed.actions.mappings.clickFilterByFieldType();
+        await testBed.actions.mappings.selectFilterFieldType(
+          'indexDetailsMappingsSelectFilter-text'
+        );
+        expect(testBed.actions.mappings.getTreeViewContent('nameField-fieldName')).toContain(
+          'name'
+        );
+        expect(testBed.find('@timestampField-fieldName')).not.toContain('@timestamp');
+      });
+      test('can search field with filter', async () => {
+        expect(testBed.find('fieldName')).toHaveLength(2);
+
+        // set filter
+        await testBed.actions.mappings.clickFilterByFieldType();
+        await testBed.actions.mappings.selectFilterFieldType(
+          'indexDetailsMappingsSelectFilter-text'
+        );
+
+        await testBed.actions.mappings.setSearchBarValue('na');
+        expect(testBed.find('fieldName')).toHaveLength(1);
+        expect(testBed.actions.mappings.findSearchResult()).not.toBe('@timestamp');
+        expect(testBed.actions.mappings.findSearchResult()).toBe('name');
+      });
+    });
+    describe('Add a new field ', () => {
+      const mockIndexMappingResponse: any = {
+        ...testIndexMappings.mappings,
+        properties: {
+          ...testIndexMappings.mappings.properties,
+          name: {
+            type: 'text',
+          },
+        },
+      };
+      beforeEach(async () => {
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+        await testBed.actions.mappings.clickAddFieldButton();
+      });
+
+      it('add field button opens pending block and save mappings is disabled by default', async () => {
+        expect(testBed.exists('indexDetailsMappingsPendingBlock')).toBe(true);
+        expect(testBed.find('indexDetailsMappingsSaveMappings').props().disabled);
+      });
+      it('can cancel adding new field', async () => {
+        expect(testBed.exists('indexDetailsMappingsPendingBlock')).toBe(true);
+        expect(testBed.exists('cancelButton')).toBe(true);
+
+        testBed.find('cancelButton').simulate('click');
+
+        expect(testBed.exists('indexDetailsMappingsPendingBlock')).toBe(false);
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+      });
+
+      it('can add new fields and can save mappings', async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponse,
+        });
+        await testBed.actions.mappings.addNewMappingFieldNameAndType([
+          { name: 'name', type: 'text' },
+        ]);
+        await testBed.actions.mappings.clickSaveMappingsButton();
+
+        // add field button is available again
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+
+        expect(httpSetup.put).toHaveBeenCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
+          body: '{"name":{"type":"text"}}',
+        });
+
+        expect(httpSetup.get).toHaveBeenCalledTimes(9);
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/mapping/${testIndexName}`,
+          requestOptions
+        );
+
+        // refresh mappings and page re-renders
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+        expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
+
+        const treeViewContent = testBed.actions.mappings.getTreeViewContent('nameField');
+        expect(treeViewContent).toContain('name');
+
+        await testBed.actions.mappings.clickToggleViewButton();
+        const jsonContent = testBed.actions.mappings.getCodeBlockContent();
+        expect(jsonContent).toEqual(
+          JSON.stringify({ mappings: mockIndexMappingResponse }, null, 2)
+        );
+      });
+
+      it('there is a callout with error message when save mappings fail', async () => {
+        const error = {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Error saving mapping:',
+        };
+        httpRequestsMockHelpers.setUpdateIndexMappingsResponse(testIndexName, undefined, error);
+
+        await testBed.actions.mappings.addNewMappingFieldNameAndType([
+          { name: 'test_field', type: 'boolean' },
+        ]);
+        await testBed.actions.mappings.clickSaveMappingsButton();
+        expect(testBed.actions.mappings.isSaveMappingsErrorDisplayed()).toBe(true);
+      });
+      describe('Add Semantic text field', () => {
+        const customInferenceModel = 'my-elser-model';
+        const mockLicense = {
+          isActive: true,
+          hasAtLeast: jest.fn((type) => true),
+        };
+        const INFERENCE_LOCATOR = 'SEARCH_INFERENCE_ENDPOINTS';
+        const createMockLocator = (id: string) => ({
+          useUrl: jest.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
+        });
+        const mockInferenceManagementLocator = createMockLocator(INFERENCE_LOCATOR);
+        beforeEach(async () => {
+          httpRequestsMockHelpers.setInferenceModels({
+            data: [
+              {
+                inference_id: customInferenceModel,
+                task_type: 'sparse_embedding',
+                service: 'elser',
+                service_settings: {
+                  num_allocations: 1,
+                  num_threads: 1,
+                  model_id: '.elser_model_2',
+                },
+                task_settings: {},
+              },
+            ],
+          });
+          await act(async () => {
+            testBed = await setup({
+              httpSetup,
+              dependencies: {
+                docLinks: {
+                  links: {
+                    ml: '',
+                    inferenceManagement: {
+                      inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
+                    },
+                  },
+                },
+                core: {
+                  application: { capabilities: { ml: { canGetTrainedModels: true } } },
+                },
+                plugins: {
+                  licensing: {
+                    license$: {
+                      subscribe: jest.fn((callback) => {
+                        callback(mockLicense);
+                        return { unsubscribe: jest.fn() };
+                      }),
+                    },
+                  },
+                  ml: {
+                    mlApi: {
+                      trainedModels: {
+                        getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
+                        getTrainedModels: jest.fn().mockResolvedValue([
+                          {
+                            model_id: '.elser_model_2',
+                            model_type: 'pytorch',
+                            model_package: {
+                              packaged_model_id: customInferenceModel,
+                              model_repository: 'https://ml-models.elastic.co',
+                              minimum_version: '11.0.0',
+                              size: 438123914,
+                              sha256: '',
+                              metadata: {},
+                              tags: [],
+                              vocabulary_file: 'elser_model_2.vocab.json',
+                            },
+                            description: 'Elastic Learned Sparse EncodeR v2',
+                            tags: ['elastic'],
+                          },
+                        ]),
+                        getTrainedModelStats: jest.fn().mockResolvedValue({
+                          count: 1,
+                          trained_model_stats: [
+                            {
+                              model_id: '.elser_model_2',
+
+                              deployment_stats: {
+                                deployment_id: customInferenceModel,
+                                model_id: '.elser_model_2',
+                                threads_per_allocation: 1,
+                                number_of_allocations: 1,
+                                queue_capacity: 1024,
+                                state: 'started',
+                              },
+                            },
+                            {
+                              model_id: '.elser_model_2',
+
+                              deployment_stats: {
+                                deployment_id: '.elser_model_2',
+                                model_id: '.elser_model_2',
+                                threads_per_allocation: 1,
+                                number_of_allocations: 1,
+                                queue_capacity: 1024,
+                                state: 'started',
+                              },
+                            },
+                          ],
+                        }),
+                      },
+                    },
+                  },
+                  share: {
+                    url: {
+                      locators: {
+                        get: jest.fn((id) => {
+                          switch (id) {
+                            case INFERENCE_LOCATOR:
+                              return mockInferenceManagementLocator;
+                            default:
+                              throw new Error(`Unknown locator id: ${id}`);
+                          }
+                        }),
+                      },
+                    },
+                  },
+                },
+              },
+            });
+          });
+          testBed.component.update();
+          await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+          await testBed.actions.mappings.clickAddFieldButton();
+        });
+        it('can select semantic_text field', async () => {
+          await testBed.actions.mappings.selectSemanticTextField(
+            'semantic_text_name',
+            'Semantic text'
+          );
+
+          testBed.actions.mappings.isReferenceFieldVisible();
+          testBed.actions.mappings.selectInferenceIdButtonExists();
+          testBed.actions.mappings.openSelectInferencePopover();
+          testBed.actions.mappings.expectCustomInferenceModelToExists(
+            `custom-inference_${customInferenceModel}`
+          );
+
+          // can cancel new field
+          expect(testBed.exists('cancelButton')).toBe(true);
+          testBed.find('cancelButton').simulate('click');
+        });
+      });
     });
 
     describe('error loading mappings', () => {
@@ -494,11 +887,26 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 3 requests while setting up the component
-        const numberOfRequests = 3;
+        // already sent 8 requests while setting up the component
+        const numberOfRequests = 8;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+      });
+
+      it('handles errors from json.stringify function', async () => {
+        const circularReference: any = { otherData: 123 };
+        circularReference.myself = circularReference;
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: circularReference,
+        });
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+        expect(testBed.actions.mappings.isErrorDisplayed()).toBe(true);
       });
     });
 
@@ -529,7 +937,8 @@ describe('<IndexDetailsPage />', () => {
     it('updates the breadcrumbs to index details settings', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
-        IndexManagementBreadcrumb.indexDetailsSettings
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Settings' }
       );
     });
 
@@ -576,8 +985,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 3 requests while setting up the component
-        const numberOfRequests = 3;
+        // already sent 7 requests while setting up the component
+        const numberOfRequests = 7;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.settings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -628,7 +1037,7 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('reloads the settings after an update', async () => {
-        const numberOfRequests = 2;
+        const numberOfRequests = 4;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
@@ -650,11 +1059,31 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
-  it('navigates back to indices', async () => {
-    jest.spyOn(testBed.routerMock.history, 'push');
-    await testBed.actions.clickBackToIndicesButton();
-    expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
-    expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+  describe('navigates back to the indices list', () => {
+    it('without indices list params', async () => {
+      jest.spyOn(testBed.routerMock.history, 'push');
+      await testBed.actions.clickBackToIndicesButton();
+      expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+      expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+    });
+    it('with indices list params', async () => {
+      const filter = 'isFollower:true';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          initialEntry: `/indices/index_details?indexName=${testIndexName}&filter=${encodeURIComponent(
+            filter
+          )}&includeHiddenIndices=true`,
+        });
+      });
+      testBed.component.update();
+      jest.spyOn(testBed.routerMock.history, 'push');
+      await testBed.actions.clickBackToIndicesButton();
+      expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+      expect(testBed.routerMock.history.push).toHaveBeenCalledWith(
+        `/indices?filter=${encodeURIComponent(filter)}&includeHiddenIndices=true`
+      );
+    });
   });
 
   it('renders a link to discover', () => {
@@ -670,8 +1099,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('closes an index', async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 requests while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -693,8 +1122,8 @@ describe('<IndexDetailsPage />', () => {
       });
       testBed.component.update();
 
-      // already sent 2 requests while setting up the component
-      const numberOfRequests = 2;
+      // already sent 6 requests while setting up the component
+      const numberOfRequests = 6;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -706,8 +1135,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('forcemerges an index', async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 request while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -720,8 +1149,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('refreshes an index', async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 request while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -733,8 +1162,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it(`clears an index's cache`, async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 request while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -746,8 +1175,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it(`flushes an index`, async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 requests while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -761,7 +1190,7 @@ describe('<IndexDetailsPage />', () => {
     it(`deletes an index`, async () => {
       jest.spyOn(testBed.routerMock.history, 'push');
       // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -786,8 +1215,8 @@ describe('<IndexDetailsPage />', () => {
       });
       testBed.component.update();
 
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 2;
+      // already sent 6 requests while setting up the component
+      const numberOfRequests = 6;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -820,7 +1249,7 @@ describe('<IndexDetailsPage />', () => {
       testBed.component.update();
     });
     it('loads the index details with the encoded index name', () => {
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
+      expect(httpSetup.get).toHaveBeenCalledWith(
         `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(percentSignName)}`,
         requestOptions
       );
@@ -894,6 +1323,34 @@ describe('<IndexDetailsPage />', () => {
       await testBed.actions.clickIndexDetailsTab(testTabId);
       const content = testBed.actions.getActiveTabContent();
       expect(content).toEqual(testContent);
+    });
+
+    it("sets breadcrumbs for the tab using the tab's name", async () => {
+      await testBed.actions.clickIndexDetailsTab(testTabId);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'Test tab' }
+      );
+    });
+
+    it('sets breadcrumbs for the tab using the tab property', async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [{ ...additionalTab, breadcrumb: { text: 'special breadcrumb' } }],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(testTabId);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetails,
+        { text: 'special breadcrumb' }
+      );
     });
 
     it('additional tab is the first in the order', () => {

@@ -5,233 +5,86 @@
  * 2.0.
  */
 
+import type { ComponentProps } from 'react';
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
 
-import type { NewTimelineProps } from './helpers';
-import { AddToFavoritesButton, NewTimeline } from './helpers';
-import { useCreateTimelineButton } from './use_create_timeline';
-import { kibanaObservable, TestProviders } from '../../../../common/mock/test_providers';
-import { timelineActions } from '../../../store/timeline';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import {
-  createSecuritySolutionStorageMock,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../../common/mock';
-import { createStore } from '../../../../common/store';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { NotesButton } from './helpers';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { ThemeProvider } from 'styled-components';
 
-jest.mock('./use_create_timeline');
+const toggleShowNotesMock = jest.fn();
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: {
-        navigateToApp: () => Promise.resolve(),
-        capabilities: {
-          siem: {
-            crud: true,
-          },
-        },
-      },
-    },
-  }),
-}));
+const defaultProps: ComponentProps<typeof NotesButton> = {
+  ariaLabel: 'Sample Notes',
+  isDisabled: false,
+  toggleShowNotes: toggleShowNotesMock,
+  eventId: 'event-id',
+  notesCount: 1,
+  timelineType: TimelineTypeEnum.default,
+  toolTip: 'Sample Tooltip',
+};
 
-describe('NewTimeline', () => {
-  const mockGetButton = jest.fn().mockReturnValue('<></>');
+const TestWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  return <ThemeProvider theme={{ eui: { euiColorDanger: 'red' } }}>{children}</ThemeProvider>;
+};
 
-  const props: NewTimelineProps = {
-    closeGearMenu: jest.fn(),
-    timelineId: 'mockTimelineId',
-    title: 'mockTitle',
+const renderTestComponent = (props?: Partial<ComponentProps<typeof NotesButton>>) => {
+  const localProps = {
+    ...defaultProps,
+    ...props,
   };
 
-  describe('render', () => {
-    describe('default', () => {
-      beforeAll(() => {
-        (useCreateTimelineButton as jest.Mock).mockReturnValue({ getButton: mockGetButton });
-        mount(<NewTimeline {...props} />);
-      });
+  render(<NotesButton {...localProps} />, { wrapper: TestWrapper });
+};
 
-      afterAll(() => {
-        jest.clearAllMocks();
-      });
-
-      test('it should not render outline', () => {
-        expect(mockGetButton.mock.calls[0][0].outline).toEqual(false);
-      });
-
-      test('it should render title', () => {
-        expect(mockGetButton.mock.calls[0][0].title).toEqual(props.title);
-      });
-    });
-
-    describe('show outline', () => {
-      beforeAll(() => {
-        (useCreateTimelineButton as jest.Mock).mockReturnValue({ getButton: mockGetButton });
-
-        const enableOutline = {
-          ...props,
-          outline: true,
-        };
-        mount(<NewTimeline {...enableOutline} />);
-      });
-
-      afterAll(() => {
-        jest.clearAllMocks();
-      });
-
-      test('it should  render outline', () => {
-        expect(mockGetButton.mock.calls[0][0].outline).toEqual(true);
-      });
-
-      test('it should render title', () => {
-        expect(mockGetButton.mock.calls[0][0].title).toEqual(props.title);
-      });
-    });
+describe('helpers', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
   });
-});
+  test('should show the notes button correctly', () => {
+    renderTestComponent();
 
-describe('Favorite Button', () => {
-  describe('Non Elastic prebuilt templates', () => {
-    test('should render favorite button', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AddToFavoritesButton timelineId={TimelineId.test} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').exists()).toBeTruthy();
-    });
-
-    test('Favorite button should be enabled ', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AddToFavoritesButton timelineId={TimelineId.test} />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').first().prop('disabled')
-      ).toEqual(false);
-    });
-
-    test('Should update isFavorite after clicking on favorite button', async () => {
-      const spy = jest.spyOn(timelineActions, 'updateIsFavorite');
-      const wrapper = mount(
-        <TestProviders>
-          <AddToFavoritesButton timelineId={TimelineId.test} />
-        </TestProviders>
-      );
-
-      waitFor(() => {
-        wrapper.simulate('click');
-        expect(spy).toHaveBeenCalled();
-      });
-    });
-
-    test('should disable favorite button with filled star', () => {
-      const { storage } = createSecuritySolutionStorageMock();
-
-      const store = createStore(
-        {
-          ...mockGlobalState,
-          timeline: {
-            ...mockGlobalState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                isFavorite: true,
-              },
-            },
-          },
-        },
-        SUB_PLUGINS_REDUCER,
-        kibanaObservable,
-        storage
-      );
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <AddToFavoritesButton timelineId={TimelineId.test} />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find('[data-test-subj="timeline-favorite-filled-star"]').exists()
-      ).toBeTruthy();
-    });
+    expect(screen.getByTestId('timeline-notes-button-small')).toBeVisible();
   });
 
-  describe('Elast prebuilt templates', () => {
-    test('should disable favorite button', () => {
-      const { storage } = createSecuritySolutionStorageMock();
+  test('should show the notification dot correctly when notes are available', () => {
+    renderTestComponent();
 
-      const store = createStore(
-        {
-          ...mockGlobalState,
-          timeline: {
-            ...mockGlobalState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                status: TimelineStatus.immutable,
-                timelineType: TimelineType.template,
-                templateTimelineId: 'mock-template-timeline-id',
-                templateTimelineVersion: 1,
-              },
-            },
-          },
-        },
-        SUB_PLUGINS_REDUCER,
-        kibanaObservable,
-        storage
-      );
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <AddToFavoritesButton timelineId={TimelineId.test} />
-        </TestProviders>
-      );
-      expect(
-        wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').first().prop('disabled')
-      ).toEqual(true);
-    });
+    expect(screen.getByTestId('timeline-notes-button-small')).toBeVisible();
+    expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
   });
 
-  describe('Custom templates', () => {
-    test('should enable favorite button', () => {
-      const { storage } = createSecuritySolutionStorageMock();
-
-      const store = createStore(
-        {
-          ...mockGlobalState,
-          timeline: {
-            ...mockGlobalState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                status: TimelineStatus.active,
-                timelineType: TimelineType.template,
-                templateTimelineId: 'mock-template-timeline-id',
-                templateTimelineVersion: 1,
-              },
-            },
-          },
-        },
-        SUB_PLUGINS_REDUCER,
-        kibanaObservable,
-        storage
-      );
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <AddToFavoritesButton timelineId="test" />
-        </TestProviders>
-      );
-      expect(
-        wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').first().prop('disabled')
-      ).toEqual(false);
+  test('should not show the notification dot where there are no notes available', () => {
+    renderTestComponent({
+      notesCount: 0,
     });
+
+    expect(screen.getByTestId('timeline-notes-button-small')).toBeVisible();
+    expect(screen.queryByTestId('timeline-notes-notification-dot')).not.toBeInTheDocument();
+  });
+
+  test('should call the toggleShowNotes function when the button is clicked', () => {
+    renderTestComponent();
+
+    const button = screen.getByTestId('timeline-notes-button-small');
+
+    fireEvent.click(button);
+
+    expect(toggleShowNotesMock).toHaveBeenCalledTimes(1);
+    expect(toggleShowNotesMock).toHaveBeenCalledWith('event-id');
+  });
+
+  test('should call the toggleShowNotes correctly when the button is clicked and eventId is not available', () => {
+    renderTestComponent({
+      eventId: undefined,
+    });
+
+    const button = screen.getByTestId('timeline-notes-button-small');
+
+    fireEvent.click(button);
+
+    expect(toggleShowNotesMock).toHaveBeenCalledTimes(1);
+    expect(toggleShowNotesMock).toHaveBeenCalledWith();
   });
 });

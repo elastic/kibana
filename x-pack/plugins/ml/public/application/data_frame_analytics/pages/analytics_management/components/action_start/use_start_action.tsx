@@ -7,15 +7,16 @@
 
 import React, { useMemo, useState } from 'react';
 
+import type {
+  DataFrameAnalyticsListAction,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
 import {
   isCompletedAnalyticsJob,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
-  DataFrameAnalyticsListAction,
-  DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
-import { startAnalytics } from '../../services/analytics_service';
-import { useToastNotificationService } from '../../../../../services/toast_notification_service';
+import { useStartAnalytics } from '../../services/analytics_service';
 
 import { startActionNameText, StartActionName } from './start_action_name';
 
@@ -25,13 +26,13 @@ export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {
 
   const [item, setItem] = useState<DataFrameAnalyticsListRow>();
 
-  const toastNotificationService = useToastNotificationService();
+  const startAnalytics = useStartAnalytics();
 
   const closeModal = () => setModalVisible(false);
   const startAndCloseModal = () => {
     if (item !== undefined) {
       setModalVisible(false);
-      startAnalytics(item, toastNotificationService);
+      startAnalytics(item);
     }
   };
 

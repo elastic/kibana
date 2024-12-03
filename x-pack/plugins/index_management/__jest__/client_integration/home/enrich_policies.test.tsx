@@ -14,8 +14,8 @@ import { createTestEnrichPolicy } from '../helpers/fixtures';
 import { EnrichPoliciesTestBed, setup } from './enrich_policies.helpers';
 import { notificationService } from '../../../public/application/services/notification';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -38,11 +38,6 @@ describe('Enrich policies tab', () => {
   describe('empty states', () => {
     beforeEach(async () => {
       setDelayResponse(false);
-
-      httpRequestsMockHelpers.setGetPrivilegesResponse({
-        hasAllPrivileges: true,
-        missingPrivileges: { cluster: [] },
-      });
     });
 
     test('displays a loading prompt', async () => {
@@ -82,24 +77,6 @@ describe('Enrich policies tab', () => {
     });
   });
 
-  describe('permissions check', () => {
-    it('shows a permissions error when the user does not have sufficient privileges', async () => {
-      httpRequestsMockHelpers.setGetPrivilegesResponse({
-        hasAllPrivileges: false,
-        missingPrivileges: { cluster: ['manage_enrich'] },
-      });
-
-      testBed = await setup(httpSetup);
-      await act(async () => {
-        testBed.actions.goToEnrichPoliciesTab();
-      });
-
-      testBed.component.update();
-
-      expect(testBed.exists('enrichPoliciesInsuficientPrivileges')).toBe(true);
-    });
-  });
-
   describe('policies list', () => {
     let testPolicy: ReturnType<typeof createTestEnrichPolicy>;
     beforeEach(async () => {
@@ -109,11 +86,6 @@ describe('Enrich policies tab', () => {
         testPolicy,
         createTestEnrichPolicy('policy-range', 'range'),
       ]);
-
-      httpRequestsMockHelpers.setGetPrivilegesResponse({
-        hasAllPrivileges: true,
-        missingPrivileges: { cluster: [] },
-      });
 
       testBed = await setup(httpSetup);
       await act(async () => {

@@ -23,6 +23,7 @@
 // ***********************************************************
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+import 'cypress-data-session';
 // @ts-ignore
 import registerCypressGrep from '@cypress/grep';
 
@@ -101,7 +102,7 @@ Cypress.Commands.add(
 
 Cypress.on('uncaught:exception', () => false);
 
-// Login as a SOC_MANAGER to properly initialize Security Solution App
+// Before any tests runs, Login and visit the Alerts page so that it properly initializes the Security Solution App
 before(() => {
   login(ROLE.soc_manager);
   loadPage('/app/security/alerts');

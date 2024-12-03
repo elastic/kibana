@@ -7,24 +7,21 @@
 
 /* eslint-disable no-continue */
 
-import React, { memo, useMemo, Fragment } from 'react';
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiBreadcrumb } from '@elastic/eui';
-import {
-  EuiSpacer,
-  EuiText,
-  EuiDescriptionList,
-  EuiHorizontalRule,
-  EuiTextColor,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { StyledPanel } from '../styles';
 import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
-import { CopyablePanelField } from './copyable_panel_field';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
+import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
@@ -75,9 +72,7 @@ export const EventDetail = memo(function EventDetail({
   );
 
   return isLoading ? (
-    <StyledPanel hasBorder>
-      <PanelLoading id={id} />
-    </StyledPanel>
+    <PanelLoading id={id} />
   ) : event ? (
     <EventDetailContents
       id={id}
@@ -87,9 +82,7 @@ export const EventDetail = memo(function EventDetail({
       eventType={eventType}
     />
   ) : (
-    <StyledPanel hasBorder>
-      <PanelContentError id={id} translatedErrorMessage={eventDetailRequestError} />
-    </StyledPanel>
+    <PanelContentError id={id} translatedErrorMessage={eventDetailRequestError} />
   );
 });
 
@@ -124,7 +117,7 @@ const EventDetailContents = memo(function ({
   const nodeName = processEvent ? eventModel.processNameSafeVersion(processEvent) : null;
 
   return (
-    <StyledPanel hasBorder data-test-subj="resolver:panel:event-detail">
+    <div data-test-subj="resolver:panel:event-detail">
       <EventDetailBreadcrumbs
         id={id}
         nodeID={nodeID}
@@ -159,17 +152,19 @@ const EventDetailContents = memo(function ({
         </GeneratedText>
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
-      <EventDetailFields event={event} />
-    </StyledPanel>
+      <EventDetailFields event={event} id={id} />
+    </div>
   );
 });
 
-function EventDetailFields({ event }: { event: SafeResolverEvent }) {
-  const sections = useMemo(() => {
-    const returnValue: Array<{
-      namespace: React.ReactNode;
-      descriptions: Array<{ title: React.ReactNode; description: React.ReactNode }>;
-    }> = [];
+interface EventDetailsTableView {
+  title: string;
+  description: string;
+}
+
+function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string }) {
+  const descriptions = useMemo(() => {
+    const returnValue: EventDetailsTableView[] = [];
     const expandedEventObject: object = expandDottedObject(event);
     for (const [key, value] of Object.entries(expandedEventObject)) {
       // ignore these keys
@@ -177,59 +172,73 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
         continue;
       }
 
-      const section = {
-        // Group the fields by their top-level namespace
-        namespace: <GeneratedText>{key}</GeneratedText>,
-        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => {
-          // The field name is the 'namespace' key as well as the rest of the path, joined with '.'
-          const fieldName = [key, ...path].join('.');
+      const description = deepObjectEntries(value).map(([path, fieldValue]) => {
+        // The field name is the 'namespace' key as well as the rest of the path, joined with '.'
+        const fieldName = [key, ...path].join('.');
 
-          return {
-            title: <GeneratedText>{fieldName}</GeneratedText>,
-            description: (
-              <CopyablePanelField
-                textToCopy={String(fieldValue)}
-                content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
-              />
-            ),
-          };
-        }),
-      };
-      returnValue.push(section);
+        return {
+          title: fieldName,
+          description: String(fieldValue),
+        };
+      });
+      returnValue.push(...description);
     }
     return returnValue;
   }, [event]);
-  return (
-    <>
-      {sections.map(({ namespace, descriptions }, index) => {
+
+  const search: EuiSearchBarProps = {
+    box: {
+      incremental: true,
+      schema: true,
+    },
+  };
+  const columns: Array<EuiBasicTableColumn<EventDetailsTableView>> = [
+    {
+      field: 'title',
+      'data-test-subj': 'resolver:panel:event-detail:event-field-title',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.resolver.panel.eventDetail.fieldTitle"
+          defaultMessage="Field"
+        />
+      ),
+      width: 'fit-content(8em)',
+      sortable: true,
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.resolver.panel.eventDetail.valueTitle"
+          defaultMessage="Value"
+        />
+      ),
+      render(data: EventDetailsTableView) {
         return (
-          <Fragment key={index}>
-            {index === 0 ? null : <EuiSpacer size="m" />}
-            <EuiTitle size="xxxs">
-              <EuiTextColor color="subdued">
-                <StyledFlexTitle>
-                  {namespace}
-                  <TitleHr />
-                </StyledFlexTitle>
-              </EuiTextColor>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <StyledDescriptionList
-              type="column"
-              columnWidths={['fit-content(8em)', 'auto']} // sets a max width of 8em on the title column
-              align="left"
-              titleProps={{
-                className: 'desc-title',
-                'data-test-subj': 'resolver:panel:event-detail:event-field-title',
-              }}
-              compressed
-              listItems={descriptions}
-            />
-            {index === sections.length - 1 ? null : <EuiSpacer size="m" />}
-          </Fragment>
+          <SecurityCellActions
+            data={{
+              field: data.title,
+              value: data.description,
+            }}
+            visibleCellActions={5}
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            mode={CellActionsMode.HOVER_DOWN}
+            sourcererScopeId={getSourcererScopeId(id)}
+            metadata={{ scopeId: id }}
+          >
+            {data.description}
+          </SecurityCellActions>
         );
-      })}
-    </>
+      },
+    },
+  ];
+  return (
+    <EuiInMemoryTable<EventDetailsTableView>
+      items={descriptions}
+      columns={columns}
+      search={search}
+      pagination={true}
+      sorting
+    />
   );
 }
 
@@ -329,30 +338,8 @@ function EventDetailBreadcrumbs({
   return <Breadcrumbs breadcrumbs={breadcrumbs} />;
 }
 
-const StyledDescriptionList = memo(styled(EuiDescriptionList)`
-  .euiDescriptionList__title {
-    word-break: normal;
-  }
-  .euiDescriptionList__title,
-  .euiDescriptionList__description {
-    overflow-wrap: break-word;
-  }
-`);
-
 // Also prevents horizontal scrollbars on long descriptive names
 const StyledDescriptiveName = memo(styled(EuiText)`
   padding-right: 1em;
   overflow-wrap: break-word;
 `);
-
-const StyledFlexTitle = memo(styled('h3')`
-  align-items: center;
-  display: flex;
-  flex-flow: row;
-  font-size: 1.2em;
-`);
-
-// eslint-disable-next-line react/display-name
-const TitleHr = memo(() => {
-  return <EuiHorizontalRule margin="none" size="half" />;
-});

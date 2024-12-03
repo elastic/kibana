@@ -26,6 +26,11 @@ import {
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import {
+  RULE_SAVED_OBJECT_TYPE,
+  API_KEY_PENDING_INVALIDATION_TYPE,
+} from '@kbn/alerting-plugin/server';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
@@ -84,13 +89,13 @@ export function defineRoutes(
       }
 
       const encryptedSavedObjectsWithAlerts = await encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['alert'],
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
       });
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         // Exclude the security and spaces wrappers to get around the safeguards those have in place to prevent
         // us from doing what we want to do - brute force replace the ApiKey
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
-        includedHiddenTypes: ['alert'],
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
       });
 
       let namespace: string | undefined;
@@ -120,12 +125,12 @@ export function defineRoutes(
         `/api/alerts_fixture/${id}/replace_api_key`,
         async () => {
           return await savedObjectsWithAlerts.update<RawRule>(
-            'alert',
+            RULE_SAVED_OBJECT_TYPE,
             id,
             {
               ...(
                 await encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawRule>(
-                  'alert',
+                  RULE_SAVED_OBJECT_TYPE,
                   id,
                   {
                     namespace,
@@ -182,7 +187,7 @@ export function defineRoutes(
 
       const [{ savedObjects }] = await core.getStartServices();
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
-        includedHiddenTypes: ['alert'],
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
       });
       const savedAlert = await savedObjectsWithAlerts.get<RawRule>(type, id);
       const result = await retryIfConflicts(
@@ -223,7 +228,7 @@ export function defineRoutes(
 
       const [{ savedObjects }] = await core.getStartServices();
       const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
-        includedHiddenTypes: ['task', 'alert'],
+        includedHiddenTypes: ['task', RULE_SAVED_OBJECT_TYPE],
       });
       const result = await retryIfConflicts(
         logger,
@@ -260,9 +265,9 @@ export function defineRoutes(
 
       const [{ savedObjects }] = await core.getStartServices();
       const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
-        includedHiddenTypes: ['task', 'alert'],
+        includedHiddenTypes: ['task', RULE_SAVED_OBJECT_TYPE],
       });
-      const alert = await savedObjectsWithTasksAndAlerts.get<RawRule>('alert', id);
+      const alert = await savedObjectsWithTasksAndAlerts.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id);
       const result = await retryIfConflicts(
         logger,
         `/api/alerts_fixture/{id}/reset_task_status`,
@@ -291,10 +296,10 @@ export function defineRoutes(
       try {
         const [{ savedObjects }] = await core.getStartServices();
         const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
-          includedHiddenTypes: ['api_key_pending_invalidation'],
+          includedHiddenTypes: [API_KEY_PENDING_INVALIDATION_TYPE],
         });
         const findResult = await savedObjectsWithTasksAndAlerts.find<InvalidatePendingApiKey>({
-          type: 'api_key_pending_invalidation',
+          type: API_KEY_PENDING_INVALIDATION_TYPE,
         });
         return res.ok({
           body: { apiKeysToInvalidate: findResult.saved_objects },
@@ -393,6 +398,26 @@ export function defineRoutes(
     }
   );
 
+  router.post(
+    {
+      path: `/api/alerts_fixture/api_key_invalidation/_run_soon`,
+      validate: {},
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskId = `Alerts-alerts_invalidate_api_keys`;
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
   router.get(
     {
       path: '/api/alerts_fixture/rule/{id}/_get_api_key',
@@ -422,9 +447,9 @@ export function defineRoutes(
           attributes: { apiKey, apiKeyOwner },
         }: SavedObject<RawRule> = await encryptedSavedObjects
           .getClient({
-            includedHiddenTypes: ['alert'],
+            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
           })
-          .getDecryptedAsInternalUser('alert', id, {
+          .getDecryptedAsInternalUser(RULE_SAVED_OBJECT_TYPE, id, {
             namespace,
           });
 
@@ -515,10 +540,53 @@ export function defineRoutes(
 
       const emailService = notifications.getEmailService();
 
-      emailService.sendPlainTextEmail({ to, subject, message });
-      emailService.sendHTMLEmail({ to, subject, message, messageHTML });
+      await emailService.sendPlainTextEmail({ to, subject, message });
+      await emailService.sendHTMLEmail({ to, subject, message, messageHTML });
 
       return res.ok({ body: { ok: true } });
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/{id}/_execute_connector',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          params: schema.recordOf(schema.string(), schema.any()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [_, { actions }] = await core.getStartServices();
+
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await actionsClient.execute({
+            actionId: req.params.id,
+            params: req.body.params,
+            source: {
+              type: ActionExecutionSourceType.HTTP_REQUEST,
+              source: req,
+            },
+            relatedSavedObjects: [],
+          }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
+      }
     }
   );
 }

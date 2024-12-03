@@ -7,14 +7,13 @@
   "include": ["public/**/*", "server/**/*", "common/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/config-schema",
     "@kbn/std",
     "@kbn/i18n",
-    "@kbn/analytics-client",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": ["target/**/*"]
 }

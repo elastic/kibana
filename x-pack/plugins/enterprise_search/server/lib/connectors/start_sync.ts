@@ -9,21 +9,17 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import {
   ConnectorConfiguration,
-  ConnectorDocument,
   SyncJobType,
   CONNECTORS_INDEX,
   startConnectorSync,
+  fetchConnectorById,
 } from '@kbn/search-connectors';
 
 import { isConfigEntry } from '../../../common/connectors/is_category_entry';
 
-import {
-  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
-  ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
-} from '../../../common/constants';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import { ErrorCode } from '../../../common/types/error_codes';
-import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';
 
 export const startSync = async (
   client: IScopedClusterClient,
@@ -31,11 +27,8 @@ export const startSync = async (
   jobType: SyncJobType,
   nextSyncConfig?: string // only processed for elastic-crawler service types
 ) => {
-  const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
-    id: connectorId,
-    index: CONNECTORS_INDEX,
-  });
-  const connector = connectorResult._source;
+  const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+
   if (connector) {
     const config = Object.entries(connector.configuration).reduce((acc, [key, configEntry]) => {
       if (isConfigEntry(configEntry)) {
@@ -49,7 +42,7 @@ export const startSync = async (
           nextSyncConfig: { label: 'nextSyncConfig', value: nextSyncConfig },
         }
       : config;
-    const { index_name } = connector;
+
     if (
       jobType === SyncJobType.ACCESS_CONTROL &&
       !configuration.use_document_level_security?.value
@@ -58,28 +51,20 @@ export const startSync = async (
     }
 
     if (connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
+      // Crawler-specific actions are not migrated to Connector API
       return await client.asCurrentUser.update({
         doc: {
           configuration,
           sync_now: true,
         },
         id: connectorId,
-        if_primary_term: connectorResult._primary_term,
-        if_seq_no: connectorResult._seq_no,
         index: CONNECTORS_INDEX,
       });
     }
 
-    const indexNameWithoutSearchPrefix = index_name ? stripSearchPrefix(index_name) : '';
-    const targetIndexName =
-      jobType === SyncJobType.ACCESS_CONTROL
-        ? `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexNameWithoutSearchPrefix}`
-        : index_name ?? undefined;
-
     return await startConnectorSync(client.asCurrentUser, {
       connectorId,
       jobType,
-      targetIndexName,
     });
   } else {
     throw new Error(ErrorCode.RESOURCE_NOT_FOUND);

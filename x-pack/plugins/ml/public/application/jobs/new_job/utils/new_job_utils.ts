@@ -9,31 +9,19 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep } from 'lodash';
 import rison from '@kbn/rison';
 import {
-  Query,
   fromKueryExpression,
   toElasticsearchQuery,
   buildEsQuery,
   buildQueryFromFilters,
-  DataViewBase,
 } from '@kbn/es-query';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { getDefaultDSLQuery, SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getQueryFromSavedSearchObject } from '../../../util/index_utils';
 
 // Provider for creating the items used for searching and job creation.
-
-const DEFAULT_DSL_QUERY: estypes.QueryDslQueryContainer = {
-  bool: {
-    must: [
-      {
-        match_all: {},
-      },
-    ],
-  },
-};
 
 export const DEFAULT_QUERY: Query = {
   query: '',
@@ -41,7 +29,7 @@ export const DEFAULT_QUERY: Query = {
 };
 
 export function getDefaultDatafeedQuery() {
-  return cloneDeep(DEFAULT_DSL_QUERY);
+  return getDefaultDSLQuery();
 }
 
 export function getDefaultQuery() {

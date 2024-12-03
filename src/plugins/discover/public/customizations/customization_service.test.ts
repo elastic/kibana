@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createCustomizationService, DiscoverCustomization } from './customization_service';
@@ -66,6 +67,31 @@ describe('createCustomizatonService', () => {
         defaultMenu: { newItem: { disabled: false } },
       };
       service.set(updatedCustomization);
+      expect(current).toBeUndefined();
+    });
+  });
+
+  describe('get', () => {
+    it('should return a customization', async () => {
+      const service = createCustomizationService();
+      const customization: DiscoverCustomization = { id: 'top_nav' };
+      service.set(customization);
+      const current = service.get('top_nav');
+      expect(current).toBe(customization);
+    });
+
+    it('should return undefined if customization is disabled', async () => {
+      const service = createCustomizationService();
+      const customization: DiscoverCustomization = { id: 'top_nav' };
+      service.set(customization);
+      service.disable('top_nav');
+      const current = service.get('top_nav');
+      expect(current).toBeUndefined();
+    });
+
+    it('should return undefined if customization does not exist', async () => {
+      const service = createCustomizationService();
+      const current = service.get('top_nav');
       expect(current).toBeUndefined();
     });
   });

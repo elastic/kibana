@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -15,6 +16,9 @@ import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BASE_SECURITY_CONVERSATIONS } from '../../../../assistant/content/conversations';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -23,38 +27,51 @@ const DATE = '2022-01-27T15:03:31.176Z';
 const MESSAGE = 'This rule is attempting to query data but...';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const mockGetInitialConversations = jest.fn(() => ({}));
 const mockGetComments = jest.fn(() => []);
 const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+const mockNavigationToApp = jest.fn();
 const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
+  hasUpdateAIAssistantAnonymization: true,
+  hasManageGlobalKnowledgeBase: true,
   isAssistantEnabled: true,
 };
-const ContextWrapper: React.FC = ({ children }) => (
-  <AssistantProvider
-    actionTypeRegistry={actionTypeRegistry}
-    assistantAvailability={mockAssistantAvailability}
-    augmentMessageCodeBlocks={jest.fn()}
-    baseAllow={[]}
-    baseAllowReplacement={[]}
-    basePath={'https://localhost:5601/kbn'}
-    defaultAllow={[]}
-    defaultAllowReplacement={[]}
-    docLinks={{
-      ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-      DOC_LINK_VERSION: 'current',
-    }}
-    getInitialConversations={mockGetInitialConversations}
-    getComments={mockGetComments}
-    http={mockHttp}
-    setConversations={jest.fn()}
-    setDefaultAllow={jest.fn()}
-    setDefaultAllowReplacement={jest.fn()}
-  >
-    {children}
-  </AssistantProvider>
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+  logger: {
+    log: jest.fn(),
+    warn: jest.fn(),
+    error: () => {},
+  },
+});
+
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+  <QueryClientProvider client={queryClient}>
+    <AssistantProvider
+      actionTypeRegistry={actionTypeRegistry}
+      assistantAvailability={mockAssistantAvailability}
+      augmentMessageCodeBlocks={jest.fn()}
+      basePath={'https://localhost:5601/kbn'}
+      docLinks={{
+        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        DOC_LINK_VERSION: 'current',
+      }}
+      getComments={mockGetComments}
+      http={mockHttp}
+      navigateToApp={mockNavigationToApp}
+      baseConversations={BASE_SECURITY_CONVERSATIONS}
+      currentAppId={'security'}
+      userProfileService={jest.fn() as unknown as UserProfileService}
+    >
+      {children}
+    </AssistantProvider>
+  </QueryClientProvider>
 );
 
 describe('RuleStatusFailedCallOut', () => {

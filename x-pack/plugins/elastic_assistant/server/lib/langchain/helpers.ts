@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { Message } from '@kbn/elastic-assistant';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import { KibanaRequest } from '@kbn/core-http-server';
+import type { DefendInsightsPostRequestBody, Message } from '@kbn/elastic-assistant-common';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import {
+  AttackDiscoveryPostRequestBody,
+  ExecuteConnectorRequestBody,
+} from '@kbn/elastic-assistant-common';
 
 export const getLangChainMessage = (
   assistantMessage: Pick<Message, 'content' | 'role'>
@@ -27,7 +32,20 @@ export const getLangChainMessages = (
   assistantMessages: Array<Pick<Message, 'content' | 'role'>>
 ): BaseMessage[] => assistantMessages.map(getLangChainMessage);
 
-export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content' | 'role'> => ({
-  content: prompt,
-  role: 'user',
-});
+export const requestHasRequiredAnonymizationParams = (
+  request: KibanaRequest<
+    unknown,
+    unknown,
+    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+  >
+): boolean => {
+  const { replacements } = request?.body ?? {};
+
+  const replacementsIsValid =
+    typeof replacements === 'object' &&
+    Object.keys(replacements).every(
+      (key) => typeof key === 'string' && typeof replacements[key] === 'string'
+    );
+
+  return replacementsIsValid;
+};

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { backOff } from 'exponential-backoff';
-
 import { generateKeyPairSync, createSign, randomBytes } from 'crypto';
+
+import { backOff } from 'exponential-backoff';
 
 import type { LoggerFactory, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -22,6 +22,7 @@ import { MessageSigningError } from '../../../common/errors';
 
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { appContextService } from '../app_context';
+import { SigningServiceNotFoundError } from '../../errors';
 
 interface MessageSigningKeys {
   private_key: string;
@@ -118,10 +119,10 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     signer.end();
 
     if (!serializedPrivateKey) {
-      throw new Error('unable to find private key');
+      throw new SigningServiceNotFoundError('Unable to find private key');
     }
     if (!passphrase) {
-      throw new Error('unable to find passphrase');
+      throw new SigningServiceNotFoundError('Unable to find passphrase');
     }
 
     const privateKey = Buffer.from(serializedPrivateKey, 'base64');
@@ -139,7 +140,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     const { publicKey } = await this.generateKeyPair();
 
     if (!publicKey) {
-      throw new Error('unable to find public key');
+      throw new SigningServiceNotFoundError('Unable to find public key');
     }
 
     return publicKey;
@@ -202,10 +203,10 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         soDoc = await this.getCurrentKeyPairObj();
       },
       {
-        maxDelay: 60 * 60 * 1000, // 1 hour in milliseconds
         startingDelay: 1000, // 1 second
+        maxDelay: 3000, // 3 seconds
         jitter: 'full',
-        numOfAttempts: Infinity,
+        numOfAttempts: 10,
         retry: (_err: Error, attempt: number) => {
           // not logging the error since we don't control what's in the error and it might contain sensitive data
           // ESO already logs specific caught errors before passing the error along
@@ -233,7 +234,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       soDoc = result.saved_objects[0];
       break;
     }
-    finder.close();
+    await finder.close();
 
     if (soDoc?.error) {
       throw soDoc.error;
@@ -250,7 +251,13 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       }
     | undefined
   > {
-    const currentKeyPair = await this.getCurrentKeyPairObjWithRetry();
+    let currentKeyPair;
+    try {
+      currentKeyPair = await this.getCurrentKeyPairObjWithRetry();
+    } catch (e) {
+      throw new MessageSigningError('Cannot read existing Message Signing Key pair');
+    }
+
     if (!currentKeyPair) {
       return;
     }

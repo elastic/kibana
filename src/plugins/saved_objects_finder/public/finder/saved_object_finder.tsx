@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { debounce } from 'lodash';
@@ -16,22 +17,28 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiSearchBarProps,
   EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
   IconType,
-  PropertySort,
   Query,
   SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import {
+  withEuiTablePersist,
+  type EuiTablePersistInjectedProps,
+} from '@kbn/shared-ux-table-persist/src';
+
 import { FinderAttributes, SavedObjectCommon, LISTING_LIMIT_SETTING } from '../../common';
+
+const PAGE_SIZE_OPTIONS = [5, 10, 15, 25];
 
 export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttributes> {
   type: string;
@@ -44,7 +51,7 @@ export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttribut
   includeFields?: string[];
 }
 
-interface SavedObjectFinderItem extends SavedObjectCommon {
+export interface SavedObjectFinderItem extends SavedObjectCommon {
   title: string | null;
   name: string | null;
   simple: SavedObjectCommon<FinderAttributes>;
@@ -54,7 +61,6 @@ interface SavedObjectFinderState {
   items: SavedObjectFinderItem[];
   query: Query;
   isFetchingItems: boolean;
-  sort?: PropertySort;
 }
 
 interface SavedObjectFinderServices {
@@ -64,6 +70,7 @@ interface SavedObjectFinderServices {
 }
 
 interface BaseSavedObjectFinder {
+  id: string;
   services: SavedObjectFinderServices;
   onChoose?: (
     id: SavedObjectCommon['id'],
@@ -77,6 +84,7 @@ interface BaseSavedObjectFinder {
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
   helpText?: string;
+  getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -91,8 +99,8 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
 
 export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
 
-export class SavedObjectFinderUi extends React.Component<
-  SavedObjectFinderProps,
+class SavedObjectFinderUiClass extends React.Component<
+  SavedObjectFinderProps & EuiTablePersistInjectedProps<SavedObjectFinderItem>,
   SavedObjectFinderState
 > {
   public static propTypes = {
@@ -138,7 +146,7 @@ export class SavedObjectFinderUi extends React.Component<
     const savedObjects = response.hits
       .map((savedObject) => {
         const {
-          attributes: { name, title },
+          attributes: { name, title, description },
         } = savedObject;
         const titleToUse = typeof title === 'string' ? title : '';
         const nameToUse = name ? name : titleToUse;
@@ -148,6 +156,7 @@ export class SavedObjectFinderUi extends React.Component<
           title: titleToUse,
           name: nameToUse,
           simple: savedObject,
+          description,
         };
       })
       .filter((savedObject) => {
@@ -172,7 +181,7 @@ export class SavedObjectFinderUi extends React.Component<
     }
   }, 300);
 
-  constructor(props: SavedObjectFinderProps) {
+  constructor(props: SavedObjectFinderProps & EuiTablePersistInjectedProps<SavedObjectFinderItem>) {
     super(props);
 
     this.state = {
@@ -209,7 +218,11 @@ export class SavedObjectFinderUi extends React.Component<
   };
 
   public render() {
-    const { onChoose, savedObjectMetaData } = this.props;
+    const {
+      onChoose,
+      savedObjectMetaData,
+      euiTablePersist: { pageSize, sorting, onTableChange },
+    } = this.props;
     const taggingApi = this.props.services.savedObjectsTagging;
     const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
     const tagColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined = originalTagColumn
@@ -229,7 +242,7 @@ export class SavedObjectFinderUi extends React.Component<
             name: i18n.translate('savedObjectsFinder.typeName', {
               defaultMessage: 'Type',
             }),
-            width: '50px',
+            width: '70px',
             align: 'center',
             description: i18n.translate('savedObjectsFinder.typeDescription', {
               defaultMessage: 'Type of the saved object',
@@ -254,14 +267,14 @@ export class SavedObjectFinderUi extends React.Component<
               ).getIconForSavedObject(item.simple);
 
               return (
-                <EuiToolTip position="top" content={currentSavedObjectMetaData.name}>
-                  <EuiIcon
-                    aria-label={currentSavedObjectMetaData.name}
-                    type={iconType}
-                    size="s"
-                    data-test-subj="objectType"
-                  />
-                </EuiToolTip>
+                <EuiIconTip
+                  position="top"
+                  content={currentSavedObjectMetaData.name}
+                  aria-label={currentSavedObjectMetaData.name}
+                  type={iconType}
+                  size="s"
+                  data-test-subj="objectType"
+                />
               );
             },
           }
@@ -288,7 +301,7 @@ export class SavedObjectFinderUi extends React.Component<
             ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
             : `${item.name} (${currentSavedObjectMetaData!.name})`;
 
-          return (
+          const link = (
             <EuiLink
               onClick={
                 onChoose
@@ -303,20 +316,35 @@ export class SavedObjectFinderUi extends React.Component<
               {item.name}
             </EuiLink>
           );
+
+          const tooltipText = this.props.getTooltipText?.(item);
+          const description = !!item.simple.attributes.description && (
+            <EuiText size="xs" color="subdued">
+              {item.simple.attributes.description}
+            </EuiText>
+          );
+          return tooltipText ? (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip position="left" content={tooltipText}>
+                {link}
+              </EuiToolTip>
+              {description}
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              {link}
+              {description}
+            </EuiFlexItem>
+          );
         },
       },
       ...(tagColumn ? [tagColumn] : []),
     ];
     const pagination = {
-      initialPageSize: this.props.initialPageSize || this.props.fixedPageSize || 10,
-      pageSizeOptions: [5, 10, 15, 25],
+      initialPageSize: !!this.props.fixedPageSize ? this.props.fixedPageSize : pageSize ?? 10,
+      pageSize: !!this.props.fixedPageSize ? undefined : pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
       showPerPageOptions: !this.props.fixedPageSize,
-    };
-    const sorting = {
-      sort: this.state.sort ?? {
-        field: this.state.query?.text ? '' : 'title',
-        direction: 'asc',
-      },
     };
     const typeFilter: SearchFilterConfig = {
       type: 'field_value_selection',
@@ -337,6 +365,9 @@ export class SavedObjectFinderUi extends React.Component<
       box: {
         incremental: true,
         'data-test-subj': 'savedObjectFinderSearchInput',
+        schema: {
+          recognizedFields: ['type', 'tag'],
+        },
       },
       filters: this.props.showFilter
         ? [
@@ -367,16 +398,24 @@ export class SavedObjectFinderUi extends React.Component<
             message={this.props.noItemsMessage}
             search={search}
             pagination={pagination}
-            sorting={sorting}
-            onTableChange={({ sort }) => {
-              this.setState({ sort });
-            }}
+            sorting={!!this.state.query?.text ? undefined : sorting}
+            onTableChange={onTableChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 }
+
+export const SavedObjectFinderUi = withEuiTablePersist(SavedObjectFinderUiClass, {
+  get: (props) => ({
+    tableId: `soFinder-${props.id}`,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+    initialPageSize: props.initialPageSize ?? props.fixedPageSize ?? 10,
+  }),
+});
+
+export const SavedObjectFinderWithoutPersist = SavedObjectFinderUiClass; // For testing
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export

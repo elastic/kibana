@@ -8,7 +8,7 @@
 import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,17 +35,24 @@ import { isEmpty, partition, some } from 'lodash';
 import {
   ActionVariable,
   RuleActionAlertsFilterProperty,
+  RuleActionFrequency,
   RuleActionParam,
-  RuleNotifyWhenType,
 } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
-import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
+import {
+  RuleActionsNotifyWhen,
+  RuleActionsAlertsFilter,
+  RuleActionsAlertsFilterTimeframe,
+} from '@kbn/response-ops-rule-form';
+import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
+import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
-import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
   RuleAction,
@@ -56,16 +63,11 @@ import {
   ActionConnectorMode,
   NotifyWhenSelectOptions,
 } from '../../../types';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
-import { transformActionVariables } from '../../lib/action_variables';
+import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
-import { ActionNotifyWhen } from './action_notify_when';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
-import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
-import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
 
@@ -93,7 +95,6 @@ export type ActionTypeFormProps = {
   hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
-  defaultNotifyWhenValue?: RuleNotifyWhenType;
   featureId: string;
   producerId: string;
   ruleTypeId?: string;
@@ -145,7 +146,6 @@ export const ActionTypeForm = ({
   hasAlertsMappings,
   minimumThrottleInterval,
   notifyWhenSelectOptions,
-  defaultNotifyWhenValue,
   producerId,
   featureId,
   ruleTypeId,
@@ -154,7 +154,11 @@ export const ActionTypeForm = ({
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
+    settings,
     http,
+    notifications,
+    unifiedSearch,
+    data,
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
@@ -367,44 +371,32 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
+  const onActionFrequencyChange = (frequency: RuleActionFrequency | undefined) => {
+    const { notifyWhen, throttle, summary } = frequency || {};
+
+    setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+
+    if (throttle) {
+      setActionThrottle(getDurationNumberInItsUnit(throttle));
+      setActionThrottleUnit(getDurationUnitValue(throttle));
+    }
+
+    setActionFrequencyProperty('throttle', throttle ? throttle : null, index);
+
+    setActionFrequencyProperty('summary', summary, index);
+  };
+
   const actionNotifyWhen = (
-    <ActionNotifyWhen
+    <RuleActionsNotifyWhen
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
       hasAlertsMappings={hasAlertsMappings}
-      onNotifyWhenChange={useCallback(
-        (notifyWhen) => {
-          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onThrottleChange={useCallback(
-        (throttle: number | null, throttleUnit: string) => {
-          if (throttle) {
-            setActionThrottle(throttle);
-            setActionThrottleUnit(throttleUnit);
-          }
-          setActionFrequencyProperty(
-            'throttle',
-            throttle ? `${throttle}${throttleUnit}` : null,
-            index
-          );
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onSummaryChange={useCallback(
-        (summary: boolean) => {
-          // use the default message when a user toggles between action frequencies
-          setUseDefaultMessage(true);
-          setActionFrequencyProperty('summary', summary, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
+      onChange={onActionFrequencyChange}
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
-      defaultNotifyWhenValue={defaultNotifyWhenValue}
+      onUseDefaultMessage={() => setUseDefaultMessage(true)}
     />
   );
 
@@ -428,7 +420,7 @@ export const ActionTypeForm = ({
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
 
-  const showActionAlertsFilter = hasFieldsForAAD;
+  const showActionAlertsFilter = hasFieldsForAAD || producerId === AlertConsumers.SIEM;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -513,17 +505,23 @@ export const ActionTypeForm = ({
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
             <EuiFormRow error={queryError} isInvalid={!!queryError} fullWidth>
-              <ActionAlertsFilterQuery
-                state={actionItem.alertsFilter?.query}
+              <RuleActionsAlertsFilter
+                action={actionItem}
                 onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
-                featureIds={[producerId as ValidFeatureId]}
                 appName={featureId!}
                 ruleTypeId={ruleTypeId}
+                plugins={{
+                  http,
+                  unifiedSearch,
+                  data,
+                  notifications,
+                }}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
-            <ActionAlertsFilterTimeframe
-              state={actionItem.alertsFilter?.timeframe}
+            <RuleActionsAlertsFilterTimeframe
+              action={actionItem}
+              settings={settings}
               onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
             />
           </>
@@ -549,6 +547,7 @@ export const ActionTypeForm = ({
                     actionParams={actionItem.params as any}
                     errors={actionParamsErrors.errors}
                     index={index}
+                    selectedActionGroupId={selectedActionGroup?.id}
                     editAction={(key: string, value: RuleActionParam, i: number) => {
                       setWarning(
                         validateParamsForWarnings(
@@ -570,6 +569,7 @@ export const ActionTypeForm = ({
                     actionConnector={actionConnector}
                     executionMode={ActionConnectorMode.ActionForm}
                     ruleTypeId={ruleTypeId}
+                    producerId={producerId}
                   />
                   {warning ? (
                     <>
@@ -701,8 +701,8 @@ export const ActionTypeForm = ({
                 <EuiFlexItem grow={false}>
                   <EuiBetaBadge
                     data-test-subj="action-type-form-beta-badge"
-                    label={betaBadgeProps.label}
-                    tooltipContent={betaBadgeProps.tooltipContent}
+                    label={TECH_PREVIEW_LABEL}
+                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
                   />
                 </EuiFlexItem>
               )}

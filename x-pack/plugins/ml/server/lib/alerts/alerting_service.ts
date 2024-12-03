@@ -9,13 +9,14 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { Duration } from 'moment/moment';
-import { memoize, pick } from 'lodash';
+import { capitalize, get, memoize, pick } from 'lodash';
 import {
   FIELD_FORMAT_IDS,
   type IFieldFormat,
   type SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import {
   getEntityFieldName,
   getEntityFieldValue,
@@ -25,6 +26,10 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { getAnomalyDescription } from '../../../common/util/anomaly_description';
+import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
 import type {
   MlAnomalyDetectionAlertParams,
@@ -48,7 +53,6 @@ import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
-import type { AwaitReturnType } from '../../../common/types/common';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
 
@@ -171,6 +175,15 @@ const resultTypeScoreMapping = {
   [ML_ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
 };
 
+export interface AnomalyDetectionAlertFieldFormatters {
+  numberFormatter: IFieldFormat['convert'];
+  fieldFormatters: Record<string, IFieldFormat['convert']>;
+}
+
+export interface AnomalyDetectionRuleState {
+  contextFieldFormatters?: AnomalyDetectionAlertFieldFormatters;
+}
+
 /**
  * Alerting related server-side methods
  * @param mlClient
@@ -182,7 +195,9 @@ export function alertingServiceProvider(
   getFieldsFormatRegistry: FieldFormatsRegistryProvider,
   getDataViewsService: GetDataViewsService
 ) {
-  type FieldFormatters = AwaitReturnType<ReturnType<typeof getFormatters>>;
+  let jobs: MlJob[] = [];
+
+  let contextFieldFormatters: AnomalyDetectionAlertFieldFormatters | undefined;
 
   /**
    * Provides formatters based on the data view of the datafeed index pattern
@@ -202,10 +217,13 @@ export function alertingServiceProvider(
         }, {} as Record<string, IFieldFormat['convert']>)
       : {};
 
-    return {
+    // store formatters to pass to the executor state update
+    contextFieldFormatters = {
       numberFormatter: numberFormatter.convert.bind(numberFormatter),
       fieldFormatters,
     };
+
+    return contextFieldFormatters;
   });
 
   /**
@@ -216,8 +234,8 @@ export function alertingServiceProvider(
       try {
         const dataViewsService = await getDataViewsService();
 
-        const dataViews = await dataViewsService.find(indexPattern);
-        const dataView = dataViews.find(({ title }) => title === indexPattern);
+        const dataViews = await dataViewsService.findLazy(indexPattern);
+        const dataView = dataViews.find((dView) => dView.getIndexPattern() === indexPattern);
 
         if (!dataView) return;
 
@@ -397,6 +415,72 @@ export function alertingServiceProvider(
     return alertInstanceKey;
   };
 
+  const getAlertMessage = (
+    resultType: MlAnomalyResultType,
+    source: Record<string, unknown>
+  ): string => {
+    let message = i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
+      defaultMessage:
+        'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
+    });
+
+    if (resultType === ML_ANOMALY_RESULT_TYPE.RECORD) {
+      const recordSource = source as MlAnomalyRecordDoc;
+
+      const detectorsByJob = jobs.reduce((acc, job) => {
+        acc[job.job_id] = job.analysis_config.detectors.reduce((innterAcc, detector) => {
+          innterAcc[detector.detector_index!] = detector.detector_description;
+          return innterAcc;
+        }, {} as Record<number, string | undefined>);
+        return acc;
+      }, {} as Record<string, Record<number, string | undefined>>);
+
+      const detectorDescription = get(detectorsByJob, [
+        recordSource.job_id,
+        recordSource.detector_index,
+      ]);
+
+      const record = {
+        source: recordSource,
+        detector: detectorDescription ?? recordSource.function_description,
+        severity: recordSource.record_score,
+      } as MlAnomaliesTableRecordExtended;
+      const entityName = getEntityFieldName(recordSource);
+      if (entityName !== undefined) {
+        record.entityName = entityName;
+        record.entityValue = getEntityFieldValue(recordSource);
+      }
+
+      const { anomalyDescription, mvDescription } = getAnomalyDescription(record);
+
+      const anomalyDescriptionSummary = `${anomalyDescription}${
+        mvDescription ? ` (${mvDescription})` : ''
+      }`;
+
+      let actual = recordSource.actual;
+      let typical = recordSource.typical;
+      if (
+        (!isDefined(actual) || !isDefined(typical)) &&
+        Array.isArray(recordSource.causes) &&
+        recordSource.causes.length === 1
+      ) {
+        actual = recordSource.causes[0].actual;
+        typical = recordSource.causes[0].typical;
+      }
+
+      let metricChangeDescription = '';
+      if (isDefined(actual) && isDefined(typical)) {
+        metricChangeDescription = capitalize(getMetricChangeDescription(actual, typical).message);
+      }
+
+      message = `${anomalyDescriptionSummary}. ${
+        metricChangeDescription ? `${metricChangeDescription}.` : ''
+      }`;
+    }
+
+    return message;
+  };
+
   /**
    * Returns a callback for formatting elasticsearch aggregation response
    * to the alert-as-data document.
@@ -419,18 +503,14 @@ export function alertingServiceProvider(
       const topAnomaly = requestedAnomalies[0];
       const timestamp = topAnomaly._source.timestamp;
 
+      const message = getAlertMessage(resultType, topAnomaly._source);
+
       return {
-        [ALERT_REASON]: i18n.translate(
-          'xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage',
-          {
-            defaultMessage:
-              'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
-          }
-        ),
+        [ALERT_REASON]: message,
         job_id: [...new Set(requestedAnomalies.map((h) => h._source.job_id))][0],
         is_interim: requestedAnomalies.some((h) => h._source.is_interim),
         anomaly_timestamp: timestamp,
-        anomaly_score: topAnomaly._source[getScoreFields(resultType, useInitialScore)],
+        anomaly_score: [topAnomaly._source[getScoreFields(resultType, useInitialScore)]],
         top_records: v.record_results.top_record_hits.hits.hits.map((h) => {
           const { actual, typical } = getTypicalAndActualValues(h._source);
           return pick<RecordAnomalyAlertDoc>(
@@ -482,7 +562,7 @@ export function alertingServiceProvider(
   const getResultsToContextFormatter = (
     resultType: MlAnomalyResultType,
     useInitialScore: boolean = false,
-    formatters: FieldFormatters
+    formatters: AnomalyDetectionAlertFieldFormatters
   ) => {
     const resultsLabel = getAggResultsLabel(resultType);
     return (v: AggResultsResponse): AlertExecutionResult | undefined => {
@@ -495,14 +575,12 @@ export function alertingServiceProvider(
       const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
       const timestamp = topAnomaly._source.timestamp;
       const bucketSpanInSeconds = topAnomaly._source.bucket_span;
+      const message = getAlertMessage(resultType, topAnomaly._source);
 
       return {
         count: aggTypeResults.doc_count,
         key: v.key,
-        message: i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
-          defaultMessage:
-            'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
-        }),
+        message,
         alertInstanceKey,
         jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
         isInterim: requestedAnomalies.some((h) => h._source.is_interim),
@@ -563,6 +641,8 @@ export function alertingServiceProvider(
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
+
+    jobs = jobsResponse;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
@@ -651,7 +731,8 @@ export function alertingServiceProvider(
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const fieldsFormatters = await getFormatters(datafeeds![0]!.indices[0]);
+    const fieldsFormatters =
+      contextFieldFormatters ?? (await getFormatters(datafeeds![0]!.indices[0]));
 
     const formatter = getResultsToContextFormatter(
       params.resultType,
@@ -698,6 +779,9 @@ export function alertingServiceProvider(
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
+
+    // Cache jobs response
+    jobs = jobsResponse;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
@@ -855,7 +939,7 @@ export function alertingServiceProvider(
     | { payload: AnomalyDetectionAlertPayload; context: AnomalyDetectionAlertContext; name: string }
     | undefined
   > => {
-    const formatters = await getFormatters(indexPattern);
+    const formatters = contextFieldFormatters ?? (await getFormatters(indexPattern));
 
     const context = getResultsToContextFormatter(resultType, false, formatters)(value);
     const payload = getResultsToPayloadFormatter(resultType, false)(value);
@@ -892,13 +976,15 @@ export function alertingServiceProvider(
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
-      spaceId: string
+      spaceId: string,
+      state?: AnomalyDetectionRuleState
     ): Promise<
       | {
           payload: AnomalyDetectionAlertPayload;
           context: AnomalyDetectionAlertContext;
           name: string;
           isHealthy: boolean;
+          stateUpdate: AnomalyDetectionRuleState;
         }
       | undefined
     > => {
@@ -910,9 +996,17 @@ export function alertingServiceProvider(
 
       const result = await fetchResult(queryParams);
 
+      if (state && isPopulatedObject(state?.contextFieldFormatters)) {
+        contextFieldFormatters = state.contextFieldFormatters;
+      }
+
       const formattedResult = result
         ? await getFormatted(queryParams.indexPattern, queryParams.resultType, spaceId, result)
         : undefined;
+
+      const stateUpdate: AnomalyDetectionRuleState = {
+        contextFieldFormatters,
+      };
 
       if (!formattedResult) {
         // If no anomalies found, report as recovered.
@@ -944,7 +1038,7 @@ export function alertingServiceProvider(
           'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredReason',
           {
             defaultMessage:
-              'No anomalies have been found in the concecutive bucket after the alert was triggered.',
+              'No anomalies have been found in the consecutive bucket after the alert was triggered.',
           }
         );
 
@@ -961,6 +1055,7 @@ export function alertingServiceProvider(
             jobIds: queryParams.jobIds,
             message: contextMessage,
           } as AnomalyDetectionAlertContext,
+          stateUpdate,
         };
       }
 
@@ -969,6 +1064,7 @@ export function alertingServiceProvider(
         payload: formattedResult.payload,
         name: formattedResult.name,
         isHealthy: false,
+        stateUpdate,
       };
     },
     /**

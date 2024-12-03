@@ -7,7 +7,10 @@
 
 import { useEffect, useMemo } from 'react';
 
+import { EuiSelectableOption } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
 import {
+  DocumentFieldsStatus,
   Field,
   Mappings,
   MappingsConfiguration,
@@ -21,20 +24,24 @@ import {
   stripUndefinedValues,
   normalizeRuntimeFields,
   deNormalizeRuntimeFields,
+  getAllFieldTypesFromState,
+  getFieldsFromState,
+  getTypeLabelFromField,
 } from './lib';
 import { useMappingsState, useDispatch } from './mappings_state_context';
 
 interface Args {
-  onChange: OnUpdateHandler;
+  onChange?: OnUpdateHandler;
   value?: {
     templates: MappingsTemplates;
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
     runtime: RuntimeFields;
   };
+  status?: DocumentFieldsStatus;
 }
 
-export const useMappingsStateListener = ({ onChange, value }: Args) => {
+export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
   const state = useMappingsState();
   const dispatch = useDispatch();
 
@@ -45,6 +52,20 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
     () => normalizeRuntimeFields(runtimeFields),
     [runtimeFields]
   );
+  const fieldTypesOptions: EuiSelectableOption[] = useMemo(() => {
+    const allFieldsTypes = getAllFieldTypesFromState(deNormalize(normalize(mappedFields)));
+    return allFieldsTypes.map((dataType) => ({
+      checked: undefined,
+      label: getTypeLabelFromField({ type: dataType }),
+      'data-test-subj': `indexDetailsMappingsSelectFilter-${dataType}`,
+    }));
+  }, [mappedFields]);
+
+  const calculateStatus = (fieldStatus: string | undefined, rootLevelFields: string | any[]) => {
+    if (fieldStatus) return fieldStatus;
+
+    return rootLevelFields.length === 0 ? 'creatingField' : 'idle';
+  };
 
   useEffect(() => {
     // If we are creating a new field, but haven't entered any name
@@ -58,79 +79,81 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
     const bypassFieldFormValidation =
       state.documentFields.status === 'creatingField' && emptyNameValue;
 
-    onChange({
-      // Output a mappings object from the user's input.
-      getData: () => {
-        // Pull the mappings properties from the current editor
-        const fields =
-          state.documentFields.editor === 'json'
-            ? state.fieldsJsonEditor.format()
-            : deNormalize(state.fields);
+    if (onChange) {
+      onChange({
+        // Output a mappings object from the user's input.
+        getData: () => {
+          // Pull the mappings properties from the current editor
+          const fields =
+            state.documentFields.editor === 'json'
+              ? state.fieldsJsonEditor.format()
+              : deNormalize(state.fields);
 
-        // Get the runtime fields
-        const runtime = deNormalizeRuntimeFields(state.runtimeFields);
+          // Get the runtime fields
+          const runtime = deNormalizeRuntimeFields(state.runtimeFields);
 
-        const configurationData = state.configuration.data.format();
-        const templatesData = state.templates.data.format();
+          const configurationData = state.configuration.data.format();
+          const templatesData = state.templates.data.format();
 
-        const output = {
-          ...stripUndefinedValues({
-            ...configurationData,
-            ...templatesData,
-          }),
-        };
+          const output = {
+            ...stripUndefinedValues({
+              ...configurationData,
+              ...templatesData,
+            }),
+          };
 
-        // Mapped fields
-        if (fields && Object.keys(fields).length > 0) {
-          output.properties = fields;
-        }
+          // Mapped fields
+          if (fields && Object.keys(fields).length > 0) {
+            output.properties = fields;
+          }
 
-        // Runtime fields
-        if (runtime && Object.keys(runtime).length > 0) {
-          output.runtime = runtime;
-        }
+          // Runtime fields
+          if (runtime && Object.keys(runtime).length > 0) {
+            output.runtime = runtime;
+          }
 
-        return Object.keys(output).length > 0 ? (output as Mappings) : undefined;
-      },
-      validate: async () => {
-        const configurationFormValidator =
-          state.configuration.submitForm !== undefined
-            ? new Promise(async (resolve, reject) => {
-                try {
-                  const { isValid } = await state.configuration.submitForm!();
-                  resolve(isValid);
-                } catch (error) {
-                  reject(error);
-                }
-              })
-            : Promise.resolve(true);
+          return Object.keys(output).length > 0 ? (output as Mappings) : undefined;
+        },
+        validate: async () => {
+          const configurationFormValidator =
+            state.configuration.submitForm !== undefined
+              ? new Promise(async (resolve, reject) => {
+                  try {
+                    const { isValid } = await state.configuration.submitForm!();
+                    resolve(isValid);
+                  } catch (error) {
+                    reject(error);
+                  }
+                })
+              : Promise.resolve(true);
 
-        const templatesFormValidator =
-          state.templates.submitForm !== undefined
-            ? new Promise(async (resolve, reject) => {
-                try {
-                  const { isValid } = await state.templates.submitForm!();
-                  resolve(isValid);
-                } catch (error) {
-                  reject(error);
-                }
-              })
-            : Promise.resolve(true);
+          const templatesFormValidator =
+            state.templates.submitForm !== undefined
+              ? new Promise(async (resolve, reject) => {
+                  try {
+                    const { isValid } = await state.templates.submitForm!();
+                    resolve(isValid);
+                  } catch (error) {
+                    reject(error);
+                  }
+                })
+              : Promise.resolve(true);
 
-        const promisesToValidate = [configurationFormValidator, templatesFormValidator];
+          const promisesToValidate = [configurationFormValidator, templatesFormValidator];
 
-        if (state.fieldForm !== undefined && !bypassFieldFormValidation) {
-          promisesToValidate.push(state.fieldForm.validate());
-        }
+          if (state.fieldForm !== undefined && !bypassFieldFormValidation) {
+            promisesToValidate.push(state.fieldForm.validate());
+          }
 
-        return Promise.all(promisesToValidate).then((validationArray) => {
-          const isValid = validationArray.every(Boolean) && state.fieldsJsonEditor.isValid;
-          dispatch({ type: 'validity:update', value: isValid });
-          return isValid;
-        });
-      },
-      isValid: state.isValid,
-    });
+          return Promise.all(promisesToValidate).then((validationArray) => {
+            const isValid = validationArray.every(Boolean) && state.fieldsJsonEditor.isValid;
+            dispatch({ type: 'validity:update', value: isValid });
+            return isValid;
+          });
+        },
+        isValid: state.isValid,
+      });
+    }
   }, [state, onChange, dispatch]);
 
   useEffect(() => {
@@ -149,11 +172,29 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
         templates: value.templates,
         fields: parsedFieldsDefaultValue,
         documentFields: {
-          status: parsedFieldsDefaultValue.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
+          status: calculateStatus(status, parsedFieldsDefaultValue.rootLevelFields),
           editor: 'default',
         },
         runtimeFields: parsedRuntimeFieldsDefaultValue,
+        filter: {
+          selectedOptions: fieldTypesOptions,
+          filteredFields: getFieldsFromState(parsedFieldsDefaultValue),
+          selectedDataTypes: [],
+        },
       },
     });
-  }, [value, parsedFieldsDefaultValue, dispatch, parsedRuntimeFieldsDefaultValue]);
+    dispatch({
+      type: 'editor.replaceViewMappings',
+      value: {
+        fields: cloneDeep(parsedFieldsDefaultValue),
+      },
+    });
+  }, [
+    value,
+    parsedFieldsDefaultValue,
+    dispatch,
+    status,
+    parsedRuntimeFieldsDefaultValue,
+    fieldTypesOptions,
+  ]);
 };

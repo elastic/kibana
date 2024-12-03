@@ -1,0 +1,66 @@
+- input: gcp-pubsub
+  template_path: gcp-pubsub.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: project_id
+      type: text
+      title: Project ID
+      multi: false
+      required: true
+      show_user: true
+    - name: topic
+      type: text
+      title: Topic
+      multi: false
+      required: true
+      show_user: true
+    - name: subscription_name
+      type: text
+      title: Subscription Name
+      multi: false
+      required: true
+      show_user: true
+    - name: credentials_file
+      type: text
+      title: Credentials File
+      multi: false
+      required: false
+      show_user: true
+      description: Path to a JSON file containing the credentials and key used to subscribe.
+    - name: credentials_json
+      type: text
+      title: Credentials JSON
+      multi: false
+      required: false
+      show_user: true
+      description: JSON blob containing the credentials and key used to subscribe.
+    - name: subscription_create
+      type: bool
+      title: Subscription Create
+      description: If true, the integration will create the subscription on start.
+      multi: false
+      required: false
+      show_user: true
+    - name: subscription_num_goroutines
+      type: text
+      title: Subscription Num Goroutines
+      description: Number of goroutines created to read from the subscription. This does not limit the number of messages that can be processed concurrently or the maximum number of goroutines the input will create.
+      multi: false
+      required: false
+      show_user: false
+    - name: subscription_max_outstanding_messages
+      type: text
+      title: Subscription Max Outstanding Messages
+      description: The maximum number of unprocessed messages (unacknowledged but not yet expired). If the value is negative, then there will be no limit on the number of unprocessed messages. Default is 1000.
+      multi: false
+      required: false
+      show_user: false
+    - name: alternative_host
+      type: text
+      title: Alternative host
+      multi: false
+      required: false
+      show_user: false

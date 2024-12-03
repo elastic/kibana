@@ -10,6 +10,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -21,6 +22,9 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -53,8 +57,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 setGlobalDate();
@@ -64,7 +72,7 @@ describe('runSoon()', () => {
 
   const existingRule = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       name: 'name',
       consumer: 'myApp',
@@ -154,7 +162,7 @@ describe('runSoon()', () => {
             action: 'rule_run_soon',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'name' } },
         })
       );
     });
@@ -172,7 +180,8 @@ describe('runSoon()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
+              name: 'name',
             },
           },
           error: {

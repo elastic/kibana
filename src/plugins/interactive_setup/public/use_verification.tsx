@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiModal, EuiModalHeader } from '@elastic/eui';
 import constate from 'constate';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -38,7 +39,7 @@ const [OuterVerificationProvider, useVerification] = constate(
   }
 );
 
-const InnerVerificationProvider: FunctionComponent = ({ children }) => {
+const InnerVerificationProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { http } = useKibana();
   const { status, setStatus, setCode } = useVerification();
 
@@ -72,7 +73,7 @@ const InnerVerificationProvider: FunctionComponent = ({ children }) => {
   );
 };
 
-export const VerificationProvider: FunctionComponent<VerificationProps> = ({
+export const VerificationProvider: FC<PropsWithChildren<VerificationProps>> = ({
   defaultCode,
   children,
 }) => {

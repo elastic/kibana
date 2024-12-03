@@ -10,7 +10,6 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
 import { search } from '@kbn/data-plugin/public';
@@ -30,10 +29,9 @@ export const AnnotationsPanel = (
 ) => {
   const { state, setState, layerId, accessor, frame } = props;
 
-  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
-    value: state,
-    onChange: setState,
-  });
+  // we don't listen to the state prop after the initial render, because we don't want to
+  // slow the annotation settings UI updates down on a full Redux state update
+  const [localState, setLocalState] = useState<XYState>(state);
 
   const index = localState.layers.findIndex((l) => l.layerId === layerId);
   const localLayer = localState.layers.find(
@@ -56,9 +54,13 @@ export const AnnotationsPanel = (
           'should never happen because annotation is created before config panel is opened'
         );
       }
-      setLocalState(updateLayer(localState, { ...localLayer, annotations: newConfigs }, index));
+
+      const newState = updateLayer(localState, { ...localLayer, annotations: newConfigs }, index);
+
+      setLocalState(newState); // keep track up updates for controls state
+      setState(newState); // notify the rest of the world, but don't wait
     },
-    [accessor, index, localState, localLayer, setLocalState]
+    [localLayer, localState, index, setState, accessor]
   );
 
   const [currentDataView, setCurrentDataView] = useState<DataView>();
@@ -109,12 +111,12 @@ export const AnnotationsPanel = (
 const getEndTimestamp = (
   datatableUtilities: DatatableUtilitiesService,
   startTime: string,
-  { activeData, dateRange }: FramePublicAPI,
+  { activeData, absDateRange }: FramePublicAPI,
   dataLayers: XYDataLayerConfig[]
 ) => {
   const startTimeNumber = moment(startTime).valueOf();
   const dateRangeFraction =
-    (moment(dateRange.toDate).valueOf() - moment(dateRange.fromDate).valueOf()) * 0.1;
+    (moment(absDateRange.toDate).valueOf() - moment(absDateRange.fromDate).valueOf()) * 0.1;
   const fallbackValue = moment(startTimeNumber + dateRangeFraction).toISOString();
   const dataLayersId = dataLayers.map(({ layerId }) => layerId);
   if (

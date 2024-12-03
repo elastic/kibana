@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import {
   EuiTextColor,
   EuiTextColorProps,
@@ -24,7 +25,7 @@ export interface TextWithIconProps {
   iconTooltip?: React.ReactNode;
 }
 
-export const TextWithIcon: React.FC<TextWithIconProps> = ({
+export const TextWithIcon: FC<PropsWithChildren<TextWithIconProps>> = ({
   color,
   tooltip,
   icon,
@@ -46,7 +47,7 @@ export const TextWithIcon: React.FC<TextWithIconProps> = ({
         </EuiFlexItem>
       )}
       {!!children && (
-        <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
+        <EuiFlexItem grow={false} css={{ flexWrap: 'wrap' }}>
           {tooltip ? (
             <EuiToolTip content={tooltip}>
               <EuiTextColor color={color}>{children}</EuiTextColor>

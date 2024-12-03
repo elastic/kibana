@@ -59,7 +59,7 @@ export const getSharedActions = ({
   isTextBasedLanguage?: boolean;
   hasLayerSettings: boolean;
   openLayerSettings: () => void;
-  core: Pick<CoreStart, 'overlays' | 'theme'>;
+  core: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>;
   customRemoveModalText?: { title?: string; description?: string };
 }) => [
   getOpenLayerSettingsAction({
@@ -110,7 +110,7 @@ const InContextMenuActions = (props: LayerActionsProps) => {
             display="empty"
             color="text"
             size="s"
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
               defaultMessage: `Layer actions`,
             })}
@@ -189,6 +189,7 @@ export const LayerActions = (props: LayerActionsProps) => {
       alignItems="center"
       direction="row"
       justifyContent="flexEnd"
+      data-test-subj="lnsLayerActions"
     >
       {outsideListAction && (
         <EuiFlexItem grow={false}>

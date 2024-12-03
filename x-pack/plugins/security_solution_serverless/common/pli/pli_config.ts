@@ -5,40 +5,49 @@
  * 2.0.
  */
 
-import type { AppFeatureKeys } from '@kbn/security-solution-features';
-import { AppFeatureKey } from '@kbn/security-solution-features/keys';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { SecurityProductLine, SecurityProductTier } from '../config';
 
-type PliAppFeatures = Readonly<
-  Record<SecurityProductLine, Readonly<Record<SecurityProductTier, Readonly<AppFeatureKeys>>>>
+type PliProductFeatures = Readonly<
+  Record<SecurityProductLine, Readonly<Record<SecurityProductTier, Readonly<ProductFeatureKeys>>>>
 >;
 
-export const PLI_APP_FEATURES: PliAppFeatures = {
+export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   security: {
-    essentials: [AppFeatureKey.endpointHostManagement, AppFeatureKey.endpointPolicyManagement],
+    essentials: [
+      ProductFeatureKey.endpointHostManagement,
+      ProductFeatureKey.endpointPolicyManagement,
+    ],
     complete: [
-      AppFeatureKey.advancedInsights,
-      AppFeatureKey.assistant,
-      AppFeatureKey.investigationGuide,
-      AppFeatureKey.threatIntelligence,
-      AppFeatureKey.casesConnectors,
-      AppFeatureKey.externalRuleActions,
+      ProductFeatureKey.advancedInsights,
+      ProductFeatureKey.assistant,
+      ProductFeatureKey.attackDiscovery,
+      ProductFeatureKey.investigationGuide,
+      ProductFeatureKey.investigationGuideInteractions,
+      ProductFeatureKey.threatIntelligence,
+      ProductFeatureKey.casesConnectors,
+      ProductFeatureKey.externalRuleActions,
+      ProductFeatureKey.integrationAssistant,
     ],
   },
   endpoint: {
     essentials: [
-      AppFeatureKey.endpointPolicyProtections,
-      AppFeatureKey.endpointArtifactManagement,
-      AppFeatureKey.endpointExceptions,
+      ProductFeatureKey.endpointPolicyProtections,
+      ProductFeatureKey.endpointArtifactManagement,
+      ProductFeatureKey.endpointExceptions,
     ],
     complete: [
-      AppFeatureKey.endpointResponseActions,
-      AppFeatureKey.osqueryAutomatedResponseActions,
-      AppFeatureKey.endpointExceptions,
+      ProductFeatureKey.endpointHostIsolationExceptions,
+      ProductFeatureKey.endpointResponseActions,
+      ProductFeatureKey.osqueryAutomatedResponseActions,
+      ProductFeatureKey.endpointAgentTamperProtection,
+      ProductFeatureKey.endpointCustomNotification,
+      ProductFeatureKey.endpointProtectionUpdates,
     ],
   },
   cloud: {
-    essentials: [],
+    essentials: [ProductFeatureKey.cloudSecurityPosture],
     complete: [],
   },
 } as const;

@@ -6,8 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { SavedObject } from '@kbn/core/server';
+import { RuleNotifyWhen, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
@@ -23,11 +28,12 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('bulkEdit', () => {
+    const es = getService('es');
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
 
-    for (const scenario of UserAtSpaceScenarios) {
+    for (const scenario of [...UserAtSpaceScenarios, systemActionScenario]) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle bulk edit of rules appropriately', async () => {
@@ -109,6 +115,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].actions).to.eql([
                 {
                   id: createdAction.id,
@@ -116,7 +123,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                   params: {},
                   connector_type_id: 'test.noop',
                   uuid: response.body.rules[0].actions[0].uuid,
-                  use_alert_data_for_template: false,
                 },
               ]);
               expect(response.statusCode).to.eql(200);
@@ -124,7 +130,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdRule.id,
               });
               break;
@@ -187,6 +193,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               response.body.rules.forEach((rule: SanitizedRule) =>
                 expect(rule.tags).to.eql([`multiple-rules-edit-${scenario.id}`, 'tag-A'])
               );
@@ -260,6 +267,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
               expect(response.statusCode).to.eql(200);
               break;
@@ -323,6 +331,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
               expect(response.statusCode).to.eql(200);
 
@@ -379,17 +388,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'bulkEdit',
-                  'test.restricted-noop',
-                  'alertsRestrictedFixture'
-                ),
+                message: getUnauthorizedErrorMessage('bulkEdit', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
               expect(response.statusCode).to.eql(200);
 
@@ -424,6 +430,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -462,6 +469,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -500,6 +508,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -539,6 +548,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 error: 'Bad Request',
                 message:
@@ -578,6 +588,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'superuser at space1':
             case 'global_read at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({ rules: [], skipped: [], errors: [], total: 0 });
               expect(response.statusCode).to.eql(200);
               break;
@@ -597,12 +608,94 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should handle bulk edit rules with system actions', async () => {
+          const connectorId = 'system-connector-test.system-action-kibana-privileges';
+          const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
+
+          const { body: createdRule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestRuleData())
+            .expect(200);
+
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              ids: [createdRule.id],
+              operations: [
+                {
+                  operation: 'add',
+                  field: 'actions',
+                  value: [
+                    {
+                      id: connectorId,
+                      params: { index: ES_TEST_INDEX_NAME, reference },
+                    },
+                  ],
+                },
+              ],
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to find rules for any rule types',
+                statusCode: 403,
+              });
+
+              break;
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('bulkEdit', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
+              });
+
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([
+                {
+                  message: 'Unauthorized to execute actions',
+                  rule: { id: createdRule.id, name: createdRule.name },
+                },
+              ]);
+
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([
+                {
+                  message: 'Unauthorized to get actions',
+                  rule: { id: createdRule.id, name: createdRule.name },
+                },
+              ]);
+
+              break;
+            case 'superuser at space1':
+            case 'system_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([]);
+
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
 
     describe('do NOT delete reference for rule type like', () => {
-      const es = getService('es');
-
       it('.esquery', async () => {
         const space1 = UserAtSpaceScenarios[1].space.id;
         const { body: createdRule } = await supertest
@@ -675,6 +768,280 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(alertHitsV1[0]?._source?.references ?? true).to.eql(
           alertHitsV2[0]?._source?.references ?? false
         );
+      });
+    });
+
+    describe('Actions', () => {
+      const { space } = SuperuserAtSpace1;
+
+      it('should add the actions correctly', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ids: [createdRule.id],
+            operations: [
+              {
+                operation: 'add',
+                field: 'actions',
+                value: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                  {
+                    id: 'system-connector-test.system-action',
+                    params: {},
+                  },
+                ],
+              },
+            ],
+          });
+
+        expect(response.status).to.eql(200);
+
+        const action = response.body.rules[0].actions[0];
+        const systemAction = response.body.rules[0].actions[1];
+        const { uuid, ...restAction } = action;
+        const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+        expect([restAction, restSystemAction]).to.eql([
+          {
+            id: createdAction.id,
+            connector_type_id: 'test.noop',
+            group: 'default',
+            params: {},
+          },
+          {
+            id: 'system-connector-test.system-action',
+            connector_type_id: 'test.system-action',
+            params: {},
+          },
+          ,
+        ]);
+
+        const esResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${response.body.rules[0].id}`,
+          },
+          { meta: true }
+        );
+
+        expect(esResponse.statusCode).to.eql(200);
+        expect((esResponse.body._source as any)?.alert.systemActions).to.be(undefined);
+        const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+
+        const rawAction = rawActions[0];
+        const rawSystemAction = rawActions[1];
+
+        const { uuid: rawActionUuid, ...rawActionRest } = rawAction;
+        const { uuid: rawSystemActionUuid, ...rawSystemActionRest } = rawSystemAction;
+
+        expect(rawActionRest).to.eql({
+          actionRef: 'action_0',
+          actionTypeId: 'test.noop',
+          params: {},
+          group: 'default',
+        });
+
+        expect(rawSystemActionRest).to.eql({
+          actionRef: 'system_action:system-connector-test.system-action',
+          actionTypeId: 'test.system-action',
+          params: {},
+        });
+
+        expect(rawActionUuid).to.not.be(undefined);
+        expect(rawSystemActionUuid).to.not.be(undefined);
+      });
+
+      it('should not allow creating a default action without group', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ids: [createdRule.id],
+            operations: [
+              {
+                operation: 'add',
+                field: 'actions',
+                value: [
+                  {
+                    id: 'test-id',
+                    params: {},
+                  },
+                ],
+              },
+            ],
+          });
+
+        expect(response.status).to.eql(400);
+
+        expect(response.body).to.eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Group is not defined in action test-id',
+        });
+      });
+
+      it('should throw 400 if the system action is missing required params', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ids: [createdRule.id],
+            operations: [
+              {
+                operation: 'add',
+                field: 'actions',
+                value: [
+                  {
+                    id: 'system-connector-test.system-action-connector-adapter',
+                    params: {},
+                  },
+                ],
+              },
+            ],
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.errors.length).to.eql(1);
+
+        expect(response.body.errors[0].message).to.eql(
+          'Invalid system action params. System action type: test.system-action-connector-adapter - [myParam]: expected value of type [string] but got [undefined]'
+        );
+      });
+
+      it('strips out properties from system actions that are part of the default actions', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        for (const propertyToAdd of [
+          { group: 'default' },
+          {
+            frequency: {
+              summary: false,
+              throttle: '1s',
+              notifyWhen: RuleNotifyWhen.THROTTLE,
+            },
+          },
+        ]) {
+          const systemActionWithProperty = {
+            id: 'system-connector-test.system-action',
+            params: {},
+            ...propertyToAdd,
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              ids: [createdRule.id],
+              operations: [
+                {
+                  operation: 'add',
+                  field: 'actions',
+                  value: [systemActionWithProperty],
+                },
+              ],
+            });
+
+          expect(response.status).to.eql(200);
+          expect(response.body.rules[0].actions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
+
+          const esResponse = await es.get<SavedObject<RawRule>>(
+            {
+              index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+              id: `alert:${response.body.rules[0].id}`,
+            },
+            { meta: true }
+          );
+
+          expect(esResponse.statusCode).to.eql(200);
+          expect((esResponse.body._source as any)?.alert.systemActions).to.be(undefined);
+
+          const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+          expect(rawActions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
+        }
+      });
+
+      it('should throw 400 when using the same system action twice', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ids: [createdRule.id],
+            operations: [
+              {
+                operation: 'add',
+                field: 'actions',
+                value: [
+                  {
+                    id: 'system-connector-test.system-action',
+                    params: {},
+                  },
+                  {
+                    id: 'system-connector-test.system-action',
+                    params: {},
+                  },
+                ],
+              },
+            ],
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.errors.length).to.eql(1);
+
+        expect(response.body.errors[0].message).to.eql('Cannot use the same system action twice');
       });
     });
   });

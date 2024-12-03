@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { i18n as kbnI18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -22,11 +21,8 @@ import {
   AppMountParameters,
   AppUpdater,
   AppStatus,
-  AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -47,12 +43,6 @@ interface ManagementStartDependencies {
   serverless?: ServerlessPluginStart;
 }
 
-const LazyKibanaSettingsApplication = React.lazy(async () => ({
-  default: (await import('@kbn/management-settings-application')).KibanaSettingsApplication,
-}));
-
-const KibanaSettingsApplication = withSuspense(LazyKibanaSettingsApplication);
-
 export class ManagementPlugin
   implements
     Plugin<
@@ -65,21 +55,15 @@ export class ManagementPlugin
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const config = this.initializerContext.config.get();
-    const navLinkStatus =
-      AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus];
-
     const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
       (section: ManagementSection) => ({
         id: section.id,
         title: section.title,
-        navLinkStatus,
         deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
           id: mgmtApp.id,
           title: mgmtApp.title,
           path: mgmtApp.basePath,
           keywords: mgmtApp.keywords,
-          navLinkStatus,
         })),
       })
     );
@@ -135,6 +119,7 @@ export class ManagementPlugin
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, deps] = await core.getStartServices();
+        const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
@@ -146,13 +131,22 @@ export class ManagementPlugin
               const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
-              coreStart.chrome.setBreadcrumbs(newBreadcrumbs);
+              coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
+                project: { value: newBreadcrumbs, absolute: true },
+              });
             }
           },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
+          chromeStyle$,
         });
       },
+    });
+
+    core.getStartServices().then(([coreStart]) => {
+      coreStart.chrome
+        .getChromeStyle$()
+        .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
     });
 
     return {
@@ -171,41 +165,12 @@ export class ManagementPlugin
       this.appUpdater.next(() => {
         return {
           status: AppStatus.inaccessible,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         };
       });
     }
 
-    // Register the Settings app only if in serverless, until we integrate the SettingsApplication into the Advanced settings plugin
-    // Otherwise, it will be double registered from the Advanced settings plugin
-    if (plugins.serverless) {
-      const title = kbnI18n.translate('management.settings.settingsLabel', {
-        defaultMessage: 'Advanced Settings',
-      });
-
-      this.managementSections.definedSections.kibana.registerApp({
-        id: 'settings',
-        title,
-        order: 3,
-        async mount({ element, setBreadcrumbs, history }) {
-          setBreadcrumbs([{ text: title }]);
-
-          ReactDOM.render(
-            <KibanaRenderContextProvider {...core}>
-              <KibanaSettingsApplication {...{ ...core, history }} />
-            </KibanaRenderContextProvider>,
-            element
-          );
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-      });
-    }
-
     return {
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
     };

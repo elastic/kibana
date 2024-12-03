@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.CategorizedFields",
+        "id": "def-public.CategorizedFields",
         "type": "Interface",
         "tags": [],
         "label": "CategorizedFields",
@@ -33,7 +17,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.CategorizedFields.Unnamed",
+            "id": "def-public.CategorizedFields.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[category: string]: { count: number; fields: FieldDefinition<UiSettingsType, string | number | boolean | (string | number)[] | null | undefined>[]; }",
@@ -42,9 +26,9 @@
               "[category: string]:  { count: number; fields: ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.FieldDefinition",
+                "section": "def-public.FieldDefinition",
                 "text": "FieldDefinition"
               },
               "<",
@@ -66,7 +50,35 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.FieldDefinition",
+        "id": "def-public.CategoryCounts",
+        "type": "Interface",
+        "tags": [],
+        "label": "CategoryCounts",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/category.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.CategoryCounts.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[category: string]: number",
+            "description": [],
+            "signature": [
+              "[category: string]:  number"
+            ],
+            "path": "packages/kbn-management/settings/types/category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.FieldDefinition",
         "type": "Interface",
         "tags": [],
         "label": "FieldDefinition",
@@ -76,9 +88,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<T, V>"
@@ -89,7 +101,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.ariaAttributes",
+            "id": "def-public.FieldDefinition.ariaAttributes",
             "type": "Object",
             "tags": [],
             "label": "ariaAttributes",
@@ -105,7 +117,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.categories",
+            "id": "def-public.FieldDefinition.categories",
             "type": "Array",
             "tags": [],
             "label": "categories",
@@ -121,7 +133,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.defaultValue",
+            "id": "def-public.FieldDefinition.defaultValue",
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultValue",
@@ -137,7 +149,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.defaultValueDisplay",
+            "id": "def-public.FieldDefinition.defaultValueDisplay",
             "type": "string",
             "tags": [],
             "label": "defaultValueDisplay",
@@ -150,7 +162,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.deprecation",
+            "id": "def-public.FieldDefinition.deprecation",
             "type": "Object",
             "tags": [
               "see"
@@ -175,7 +187,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.description",
+            "id": "def-public.FieldDefinition.description",
             "type": "CompoundType",
             "tags": [],
             "label": "description",
@@ -191,7 +203,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.displayName",
+            "id": "def-public.FieldDefinition.displayName",
             "type": "string",
             "tags": [],
             "label": "displayName",
@@ -204,7 +216,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.groupId",
+            "id": "def-public.FieldDefinition.groupId",
             "type": "string",
             "tags": [],
             "label": "groupId",
@@ -217,7 +229,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.id",
+            "id": "def-public.FieldDefinition.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -230,7 +242,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.isCustom",
+            "id": "def-public.FieldDefinition.isCustom",
             "type": "boolean",
             "tags": [],
             "label": "isCustom",
@@ -243,7 +255,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.isDefaultValue",
+            "id": "def-public.FieldDefinition.isDefaultValue",
             "type": "boolean",
             "tags": [],
             "label": "isDefaultValue",
@@ -256,7 +268,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.isOverridden",
+            "id": "def-public.FieldDefinition.isOverridden",
             "type": "boolean",
             "tags": [],
             "label": "isOverridden",
@@ -269,7 +281,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.isReadOnly",
+            "id": "def-public.FieldDefinition.isReadOnly",
             "type": "boolean",
             "tags": [],
             "label": "isReadOnly",
@@ -282,7 +294,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.metric",
+            "id": "def-public.FieldDefinition.metric",
             "type": "Object",
             "tags": [],
             "label": "metric",
@@ -298,7 +310,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.name",
+            "id": "def-public.FieldDefinition.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -311,7 +323,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.options",
+            "id": "def-public.FieldDefinition.options",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -327,7 +339,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.order",
+            "id": "def-public.FieldDefinition.order",
             "type": "number",
             "tags": [],
             "label": "order",
@@ -343,7 +355,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.requiresPageReload",
+            "id": "def-public.FieldDefinition.requiresPageReload",
             "type": "boolean",
             "tags": [],
             "label": "requiresPageReload",
@@ -356,7 +368,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.savedValue",
+            "id": "def-public.FieldDefinition.savedValue",
             "type": "Uncategorized",
             "tags": [],
             "label": "savedValue",
@@ -372,7 +384,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.type",
+            "id": "def-public.FieldDefinition.type",
             "type": "Uncategorized",
             "tags": [
               "see"
@@ -390,7 +402,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.FieldDefinition.unsavedFieldId",
+            "id": "def-public.FieldDefinition.unsavedFieldId",
             "type": "string",
             "tags": [],
             "label": "unsavedFieldId",
@@ -406,7 +418,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.SelectFieldDefinition",
+        "id": "def-public.SelectFieldDefinition",
         "type": "Interface",
         "tags": [],
         "label": "SelectFieldDefinition",
@@ -416,17 +428,17 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.SelectFieldDefinition",
+            "section": "def-public.SelectFieldDefinition",
             "text": "SelectFieldDefinition"
           },
           " extends ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"select\", string | null>"
@@ -437,7 +449,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.SelectFieldDefinition.options",
+            "id": "def-public.SelectFieldDefinition.options",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -456,7 +468,109 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.UiSettingMetadata",
+        "id": "def-public.SettingsCapabilities",
+        "type": "Interface",
+        "tags": [],
+        "label": "SettingsCapabilities",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.SettingsCapabilities.spaceSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "spaceSettings",
+            "description": [],
+            "signature": [
+              "SettingCapability"
+            ],
+            "path": "packages/kbn-management/settings/types/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.SettingsCapabilities.globalSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "globalSettings",
+            "description": [],
+            "signature": [
+              "SettingCapability"
+            ],
+            "path": "packages/kbn-management/settings/types/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.SettingsTabs",
+        "type": "Interface",
+        "tags": [],
+        "label": "SettingsTabs",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/tab.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.SettingsTabs.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[id: string]: { name: string; fields: FieldDefinition<UiSettingsType, string | number | boolean | (string | number)[] | null | undefined>[]; categoryCounts: CategoryCounts; callOutTitle: string; callOutText: string; sections: RegistryEntry[]; isSavingEnabled: boolean; }",
+            "description": [],
+            "signature": [
+              "[id: string]:  { name: string; fields: ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsType",
+                "text": "UiSettingsType"
+              },
+              ", string | number | boolean | (string | number)[] | null | undefined>[]; categoryCounts: ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.CategoryCounts",
+                "text": "CategoryCounts"
+              },
+              "; callOutTitle: string; callOutText: string; sections: ",
+              {
+                "pluginId": "@kbn/management-settings-section-registry",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
+                "section": "def-public.RegistryEntry",
+                "text": "RegistryEntry"
+              },
+              "[]; isSavingEnabled: boolean; }"
+            ],
+            "path": "packages/kbn-management/settings/types/tab.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.UiSettingMetadata",
         "type": "Interface",
         "tags": [],
         "label": "UiSettingMetadata",
@@ -466,17 +580,17 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<T, V> extends ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSetting",
+            "section": "def-public.UiSetting",
             "text": "UiSetting"
           },
           "<V>"
@@ -487,7 +601,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.UiSettingMetadata.type",
+            "id": "def-public.UiSettingMetadata.type",
             "type": "Uncategorized",
             "tags": [
               "see"
@@ -505,7 +619,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.UiSettingMetadata.value",
+            "id": "def-public.UiSettingMetadata.value",
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
@@ -521,7 +635,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.UiSettingMetadata.userValue",
+            "id": "def-public.UiSettingMetadata.userValue",
             "type": "Uncategorized",
             "tags": [],
             "label": "userValue",
@@ -540,7 +654,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.UnsavedFieldChange",
+        "id": "def-public.UnsavedFieldChange",
         "type": "Interface",
         "tags": [],
         "label": "UnsavedFieldChange",
@@ -550,9 +664,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<T>"
@@ -563,7 +677,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.UnsavedFieldChange.type",
+            "id": "def-public.UnsavedFieldChange.type",
             "type": "Uncategorized",
             "tags": [
               "see"
@@ -581,7 +695,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.UnsavedFieldChange.error",
+            "id": "def-public.UnsavedFieldChange.error",
             "type": "CompoundType",
             "tags": [],
             "label": "error",
@@ -597,7 +711,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.UnsavedFieldChange.isInvalid",
+            "id": "def-public.UnsavedFieldChange.isInvalid",
             "type": "CompoundType",
             "tags": [],
             "label": "isInvalid",
@@ -613,7 +727,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.UnsavedFieldChange.unsavedValue",
+            "id": "def-public.UnsavedFieldChange.unsavedValue",
             "type": "CompoundType",
             "tags": [],
             "label": "unsavedValue",
@@ -623,9 +737,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.KnownTypeToValue",
+                "section": "def-public.KnownTypeToValue",
                 "text": "KnownTypeToValue"
               },
               "<T> | null | undefined"
@@ -642,7 +756,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ArrayFieldDefinition",
+        "id": "def-public.ArrayFieldDefinition",
         "type": "Type",
         "tags": [],
         "label": "ArrayFieldDefinition",
@@ -652,9 +766,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"array\", (string | number)[] | null>"
@@ -666,7 +780,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ArraySettingType",
+        "id": "def-public.ArraySettingType",
         "type": "Type",
         "tags": [],
         "label": "ArraySettingType",
@@ -683,7 +797,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ArrayUiSettingMetadata",
+        "id": "def-public.ArrayUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "ArrayUiSettingMetadata",
@@ -693,9 +807,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"array\", (string | number)[] | null>"
@@ -707,7 +821,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ArrayUnsavedFieldChange",
+        "id": "def-public.ArrayUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "ArrayUnsavedFieldChange",
@@ -717,9 +831,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"array\">"
@@ -731,7 +845,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.BooleanFieldDefinition",
+        "id": "def-public.BooleanFieldDefinition",
         "type": "Type",
         "tags": [],
         "label": "BooleanFieldDefinition",
@@ -741,9 +855,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"boolean\", boolean | null>"
@@ -755,7 +869,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.BooleanSettingType",
+        "id": "def-public.BooleanSettingType",
         "type": "Type",
         "tags": [],
         "label": "BooleanSettingType",
@@ -772,7 +886,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.BooleanUiSettingMetadata",
+        "id": "def-public.BooleanUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "BooleanUiSettingMetadata",
@@ -782,9 +896,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"boolean\", boolean | null>"
@@ -796,7 +910,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.BooleanUnsavedFieldChange",
+        "id": "def-public.BooleanUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "BooleanUnsavedFieldChange",
@@ -806,9 +920,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"boolean\">"
@@ -820,7 +934,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ColorFieldDefinition",
+        "id": "def-public.ColorFieldDefinition",
         "type": "Type",
         "tags": [],
         "label": "ColorFieldDefinition",
@@ -830,9 +944,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"color\", string | null>"
@@ -844,7 +958,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ColorUiSettingMetadata",
+        "id": "def-public.ColorUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "ColorUiSettingMetadata",
@@ -854,9 +968,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"color\", string | null>"
@@ -868,7 +982,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ColorUnsavedFieldChange",
+        "id": "def-public.ColorUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "ColorUnsavedFieldChange",
@@ -878,9 +992,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"color\">"
@@ -892,7 +1006,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ImageFieldDefinition",
+        "id": "def-public.ImageFieldDefinition",
         "type": "Type",
         "tags": [],
         "label": "ImageFieldDefinition",
@@ -902,9 +1016,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"image\", string | null>"
@@ -916,7 +1030,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ImageUiSettingMetadata",
+        "id": "def-public.ImageUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "ImageUiSettingMetadata",
@@ -926,9 +1040,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"image\", string | null>"
@@ -940,7 +1054,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ImageUnsavedFieldChange",
+        "id": "def-public.ImageUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "ImageUnsavedFieldChange",
@@ -950,9 +1064,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"image\">"
@@ -964,7 +1078,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.JsonFieldDefinition",
+        "id": "def-public.JsonFieldDefinition",
         "type": "Type",
         "tags": [],
         "label": "JsonFieldDefinition",
@@ -974,9 +1088,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"json\", string | null>"
@@ -988,7 +1102,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.JsonUiSettingMetadata",
+        "id": "def-public.JsonUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "JsonUiSettingMetadata",
@@ -998,9 +1112,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"json\", string | null>"
@@ -1012,7 +1126,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.JsonUnsavedFieldChange",
+        "id": "def-public.JsonUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "JsonUnsavedFieldChange",
@@ -1022,9 +1136,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"json\">"
@@ -1036,7 +1150,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.KnownTypeToMetadata",
+        "id": "def-public.KnownTypeToMetadata",
         "type": "Type",
         "tags": [],
         "label": "KnownTypeToMetadata",
@@ -1047,81 +1161,81 @@
           "T extends \"array\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.ArrayUiSettingMetadata",
+            "section": "def-public.ArrayUiSettingMetadata",
             "text": "ArrayUiSettingMetadata"
           },
           " : T extends \"boolean\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.BooleanUiSettingMetadata",
+            "section": "def-public.BooleanUiSettingMetadata",
             "text": "BooleanUiSettingMetadata"
           },
           " : T extends \"color\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.ColorUiSettingMetadata",
+            "section": "def-public.ColorUiSettingMetadata",
             "text": "ColorUiSettingMetadata"
           },
           " : T extends \"image\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.ImageUiSettingMetadata",
+            "section": "def-public.ImageUiSettingMetadata",
             "text": "ImageUiSettingMetadata"
           },
           " : T extends \"json\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.JsonUiSettingMetadata",
+            "section": "def-public.JsonUiSettingMetadata",
             "text": "JsonUiSettingMetadata"
           },
           " : T extends \"markdown\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.MarkdownUiSettingMetadata",
+            "section": "def-public.MarkdownUiSettingMetadata",
             "text": "MarkdownUiSettingMetadata"
           },
           " : T extends \"number\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.NumberUiSettingMetadata",
+            "section": "def-public.NumberUiSettingMetadata",
             "text": "NumberUiSettingMetadata"
           },
           " : T extends \"select\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.SelectUiSettingMetadata",
+            "section": "def-public.SelectUiSettingMetadata",
             "text": "SelectUiSettingMetadata"
           },
           " : T extends \"string\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.StringUiSettingMetadata",
+            "section": "def-public.StringUiSettingMetadata",
             "text": "StringUiSettingMetadata"
           },
           " : T extends \"undefined\" ? ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UndefinedUiSettingMetadata",
+            "section": "def-public.UndefinedUiSettingMetadata",
             "text": "UndefinedUiSettingMetadata"
           },
           " : never"
@@ -1133,7 +1247,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.KnownTypeToValue",
+        "id": "def-public.KnownTypeToValue",
         "type": "Type",
         "tags": [],
         "label": "KnownTypeToValue",
@@ -1141,7 +1255,7 @@
           "\nThis is a narrowing type, which finds the correct primitive type based on a\ngiven {@link SettingType}."
         ],
         "signature": [
-          "T extends \"string\" | \"color\" | \"image\" | \"select\" | \"json\" | \"markdown\" ? string : T extends \"boolean\" ? boolean : T extends \"number\" | \"bigint\" ? number : T extends \"array\" ? (string | number)[] : T extends \"undefined\" ? undefined : never"
+          "T extends \"string\" | \"color\" | \"select\" | \"image\" | \"json\" | \"markdown\" ? string : T extends \"boolean\" ? boolean : T extends \"number\" | \"bigint\" ? number : T extends \"array\" ? (string | number)[] : T extends \"undefined\" ? undefined : never"
         ],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,
@@ -1150,7 +1264,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.MarkdownFieldDefinition",
+        "id": "def-public.MarkdownFieldDefinition",
         "type": "Type",
         "tags": [],
         "label": "MarkdownFieldDefinition",
@@ -1160,9 +1274,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"markdown\", string | null>"
@@ -1174,7 +1288,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.MarkdownUiSettingMetadata",
+        "id": "def-public.MarkdownUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "MarkdownUiSettingMetadata",
@@ -1184,9 +1298,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"markdown\", string | null>"
@@ -1198,7 +1312,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.MarkdownUnsavedFieldChange",
+        "id": "def-public.MarkdownUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "MarkdownUnsavedFieldChange",
@@ -1208,9 +1322,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"markdown\">"
@@ -1222,7 +1336,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.NumberFieldDefinition",
+        "id": "def-public.NumberFieldDefinition",
         "type": "Type",
         "tags": [],
         "label": "NumberFieldDefinition",
@@ -1232,9 +1346,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"number\", number | null>"
@@ -1246,7 +1360,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.NumberSettingType",
+        "id": "def-public.NumberSettingType",
         "type": "Type",
         "tags": [],
         "label": "NumberSettingType",
@@ -1263,7 +1377,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.NumberUiSettingMetadata",
+        "id": "def-public.NumberUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "NumberUiSettingMetadata",
@@ -1273,9 +1387,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"number\", number | null>"
@@ -1287,7 +1401,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.NumberUnsavedFieldChange",
+        "id": "def-public.NumberUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "NumberUnsavedFieldChange",
@@ -1297,9 +1411,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"number\">"
@@ -1311,7 +1425,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.OnFieldChangeFn",
+        "id": "def-public.OnFieldChangeFn",
         "type": "Type",
         "tags": [],
         "label": "OnFieldChangeFn",
@@ -1322,9 +1436,9 @@
           "(id: string, change?: ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<T> | undefined) => void"
@@ -1336,7 +1450,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.OnFieldChangeFn.$1",
+            "id": "def-public.OnFieldChangeFn.$1",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -1349,7 +1463,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.OnFieldChangeFn.$2",
+            "id": "def-public.OnFieldChangeFn.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -1359,9 +1473,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<T> | undefined"
@@ -1375,7 +1489,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.OnInputChangeFn",
+        "id": "def-public.OnInputChangeFn",
         "type": "Type",
         "tags": [],
         "label": "OnInputChangeFn",
@@ -1386,9 +1500,9 @@
           "(change?: ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<T> | undefined) => void"
@@ -1400,7 +1514,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.OnInputChangeFn.$1",
+            "id": "def-public.OnInputChangeFn.$1",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -1410,9 +1524,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<T> | undefined"
@@ -1426,7 +1540,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.ResetInputRef",
+        "id": "def-public.ResetInputRef",
         "type": "Type",
         "tags": [],
         "label": "ResetInputRef",
@@ -1443,7 +1557,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.SelectUiSettingMetadata",
+        "id": "def-public.SelectUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "SelectUiSettingMetadata",
@@ -1453,9 +1567,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"select\", string | null>"
@@ -1467,7 +1581,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.SelectUnsavedFieldChange",
+        "id": "def-public.SelectUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "SelectUnsavedFieldChange",
@@ -1477,9 +1591,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"select\">"
@@ -1491,7 +1605,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.SettingType",
+        "id": "def-public.SettingType",
         "type": "Type",
         "tags": [],
         "label": "SettingType",
@@ -1499,7 +1613,7 @@
           "\nThis is a local type equivalent to {@link UiSettingsType} for flexibility."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"select\" | \"json\" | \"markdown\" | \"array\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"select\" | \"image\" | \"array\" | \"json\" | \"markdown\""
         ],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,
@@ -1508,7 +1622,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.StringFieldDefinition",
+        "id": "def-public.StringFieldDefinition",
         "type": "Type",
         "tags": [],
         "label": "StringFieldDefinition",
@@ -1518,9 +1632,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"string\", string | null>"
@@ -1532,7 +1646,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.StringSettingType",
+        "id": "def-public.StringSettingType",
         "type": "Type",
         "tags": [],
         "label": "StringSettingType",
@@ -1540,7 +1654,7 @@
           "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `string` primitive type value."
         ],
         "signature": [
-          "\"string\" | \"color\" | \"image\" | \"select\" | \"json\" | \"markdown\""
+          "\"string\" | \"color\" | \"select\" | \"image\" | \"json\" | \"markdown\""
         ],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,
@@ -1549,7 +1663,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.StringUiSettingMetadata",
+        "id": "def-public.StringUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "StringUiSettingMetadata",
@@ -1559,9 +1673,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"string\", string | null>"
@@ -1573,7 +1687,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.StringUnsavedFieldChange",
+        "id": "def-public.StringUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "StringUnsavedFieldChange",
@@ -1583,9 +1697,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"string\">"
@@ -1597,7 +1711,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.UiSetting",
+        "id": "def-public.UiSetting",
         "type": "Type",
         "tags": [],
         "label": "UiSetting",
@@ -1607,9 +1721,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.PublicUiSettingsParams",
+            "section": "def-public.PublicUiSettingsParams",
             "text": "PublicUiSettingsParams"
           },
           " & ",
@@ -1629,7 +1743,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.UndefinedFieldDefinition",
+        "id": "def-public.UndefinedFieldDefinition",
         "type": "Type",
         "tags": [],
         "label": "UndefinedFieldDefinition",
@@ -1639,9 +1753,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<\"undefined\", null | undefined>"
@@ -1653,7 +1767,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.UndefinedSettingType",
+        "id": "def-public.UndefinedSettingType",
         "type": "Type",
         "tags": [],
         "label": "UndefinedSettingType",
@@ -1670,7 +1784,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.UndefinedUiSettingMetadata",
+        "id": "def-public.UndefinedUiSettingMetadata",
         "type": "Type",
         "tags": [],
         "label": "UndefinedUiSettingMetadata",
@@ -1680,9 +1794,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<\"undefined\", null | undefined>"
@@ -1694,7 +1808,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.UndefinedUnsavedFieldChange",
+        "id": "def-public.UndefinedUnsavedFieldChange",
         "type": "Type",
         "tags": [],
         "label": "UndefinedUnsavedFieldChange",
@@ -1704,9 +1818,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<\"undefined\">"
@@ -1718,7 +1832,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.UnsavedFieldChanges",
+        "id": "def-public.UnsavedFieldChanges",
         "type": "Type",
         "tags": [],
         "label": "UnsavedFieldChanges",
@@ -1727,9 +1841,9 @@
           "{ [x: string]: ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<",
@@ -1749,7 +1863,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.Value",
+        "id": "def-public.Value",
         "type": "Type",
         "tags": [],
         "label": "Value",
@@ -1765,6 +1879,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

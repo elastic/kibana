@@ -14,7 +14,7 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/m
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { EventReporter } from '../telemetry';
 import { SearchBar } from './search_bar';
 
@@ -45,6 +45,9 @@ const createResult = (result: Result): GlobalSearchResult => {
 const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
   results: results.map(createResult),
 });
+
+const searchCharLimit = 1000;
+
 jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('SearchBar', () => {
@@ -52,7 +55,6 @@ describe('SearchBar', () => {
   const core = coreMock.createStart();
 
   const basePathUrl = '/plugins/globalSearchBar/assets/';
-  const darkMode = false;
   const eventReporter = new EventReporter({ analytics: core.analytics, usageCollection });
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
@@ -90,6 +92,37 @@ describe('SearchBar', () => {
     expect(await screen.findAllByTestId('nav-search-option')).toHaveLength(list.length);
   };
 
+  describe('default behavior', () => {
+    it('displays an error message without making a network call when the search input exceeds the specified char limit', async () => {
+      const chromeStyle$ = of<ChromeStyle>('classic');
+
+      render(
+        <IntlProvider locale="en">
+          <SearchBar
+            globalSearch={{ ...searchService, searchCharLimit }}
+            navigateToUrl={applications.navigateToUrl}
+            basePathUrl={basePathUrl}
+            chromeStyle$={chromeStyle$}
+            reportEvent={eventReporter}
+          />
+        </IntlProvider>
+      );
+
+      expect(searchService.find).toHaveBeenCalledTimes(0);
+
+      await focusAndUpdate();
+
+      expect(searchService.find).toHaveBeenCalledTimes(1);
+
+      simulateTypeChar(Array.from(new Array(searchCharLimit + 1)).reduce((acc) => acc + 'a', ''));
+
+      // we use allBy because EUI renders a screen reader only version, along side the visual one
+      expect(await screen.findAllByTestId('searchCharLimitExceededMessageHeading')).toHaveLength(2);
+
+      expect(searchService.find).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('chromeStyle: classic', () => {
     const chromeStyle$ = of<ChromeStyle>('classic');
 
@@ -106,10 +139,9 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />
@@ -135,10 +167,9 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />
@@ -168,10 +199,9 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />
@@ -181,7 +211,7 @@ describe('SearchBar', () => {
       await focusAndUpdate();
 
       expect(searchService.find).toHaveBeenCalledTimes(1);
-      //
+
       simulateTypeChar('d');
       await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
 
@@ -200,10 +230,9 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />
@@ -224,10 +253,9 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />

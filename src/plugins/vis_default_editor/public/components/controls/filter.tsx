@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -12,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { Query } from '@kbn/es-query';
 import { IAggConfig } from '@kbn/data-plugin/public';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -45,14 +45,9 @@ function FilterRow({
   const { services } = useKibana<VisDefaultEditorKibanaServices>();
   const {
     data,
-    dataViews,
-    unifiedSearch,
-    usageCollection,
-    storage,
-    notifications,
-    http,
-    docLinks,
-    uiSettings,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
     appName,
   } = services;
 
@@ -117,17 +112,6 @@ function FilterRow({
           bubbleSubmitEvent={true}
           languageSwitcherPopoverAnchorPosition="leftDown"
           size="s"
-          deps={{
-            data,
-            dataViews,
-            unifiedSearch,
-            usageCollection,
-            storage,
-            notifications,
-            http,
-            docLinks,
-            uiSettings,
-          }}
           appName={appName}
         />
       </EuiFormRow>

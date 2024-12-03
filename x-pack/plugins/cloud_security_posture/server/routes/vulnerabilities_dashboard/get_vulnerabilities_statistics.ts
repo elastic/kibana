@@ -8,9 +8,9 @@
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_SEVERITY,
-} from '../../../common/constants';
+} from '@kbn/cloud-security-posture-common';
 
 export interface VulnerabilitiesStatisticsQueryResult {
   critical: {
@@ -25,7 +25,7 @@ export interface VulnerabilitiesStatisticsQueryResult {
   resources_scanned: {
     value: number;
   };
-  cloud_regions: {
+  cloud_accounts: {
     value: number;
   };
 }
@@ -35,7 +35,7 @@ export const getVulnerabilitiesStatisticsQuery = (): SearchRequest => ({
   query: {
     match_all: {},
   },
-  index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   aggs: {
     critical: {
       filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },
@@ -51,9 +51,9 @@ export const getVulnerabilitiesStatisticsQuery = (): SearchRequest => ({
         field: 'resource.id',
       },
     },
-    cloud_regions: {
+    cloud_accounts: {
       cardinality: {
-        field: 'cloud.region',
+        field: 'cloud.account.id',
       },
     },
   },
@@ -69,6 +69,6 @@ export const getVulnerabilitiesStatistics = async (esClient: ElasticsearchClient
     highCount: queryResult.aggregations?.high.doc_count,
     mediumCount: queryResult.aggregations?.medium.doc_count,
     resourcesScanned: queryResult.aggregations?.resources_scanned.value,
-    cloudRegions: queryResult.aggregations?.cloud_regions.value,
+    cloudAccounts: queryResult.aggregations?.cloud_accounts.value,
   };
 };

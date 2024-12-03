@@ -19,16 +19,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILicense } from '@kbn/licensing-plugin/public';
-import { durationToNumber } from '@kbn/reporting-common';
+import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
-import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
+import { checkLicense, Job } from '@kbn/reporting-public';
+import { ListingPropsInternal } from '.';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
-import { Job } from '../lib/job';
-import { checkLicense } from '../lib/license_check';
 import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from './components';
 import { guessAppIconTypeFromObjectType } from './utils';
-import { ListingPropsInternal } from '.';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -329,7 +327,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
         actions: [
           {
             isPrimary: true,
-            'data-test-subj': 'reportDownloadLink',
+            'data-test-subj': (job) => `reportDownloadLink-${job.id}`,
             type: 'icon',
             icon: 'download',
             name: i18n.translate('xpack.reporting.listing.table.downloadReportButtonLabel', {
@@ -397,12 +395,12 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
     return (
       <Fragment>
         {this.state.selectedJobs.length > 0 && (
-          <Fragment>
+          <div>
             <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
               <EuiFlexItem grow={false}>{this.renderDeleteButton()}</EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
-          </Fragment>
+          </div>
         )}
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
@@ -423,13 +421,13 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
           }
           pagination={pagination}
           selection={selection}
-          isSelectable={true}
           onChange={this.onTableChange}
           data-test-subj={REPORT_TABLE_ID}
           rowProps={() => ({ 'data-test-subj': REPORT_TABLE_ROW_ID })}
         />
         {!!this.state.selectedJob && (
           <ReportInfoFlyout
+            config={this.props.config}
             onClose={() => this.setState({ selectedJob: undefined })}
             job={this.state.selectedJob}
           />

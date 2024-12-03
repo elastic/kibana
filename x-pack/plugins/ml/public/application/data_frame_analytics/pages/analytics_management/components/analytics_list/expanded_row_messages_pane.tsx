@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import './expanded_row_messages_pane.scss';
-
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ml } from '../../../../../services/ml_api_service';
+import { css } from '@emotion/react';
+import { useMlApi } from '../../../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { JobMessages } from '../../../../../components/job_messages';
-import { JobMessage } from '../../../../../../../common/types/audit_message';
+import type { JobMessage } from '../../../../../../../common/types/audit_message';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 interface Props {
@@ -21,6 +22,22 @@ interface Props {
 }
 
 export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }) => {
+  const mlApi = useMlApi();
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
+
+  const cssOverride = useMemo(
+    () =>
+      css({
+        padding: `0 ${size.s} ${size.s} ${size.s}`,
+        '.euiTable': {
+          backgroundColor: 'transparent',
+        },
+      }),
+    [size.s]
+  );
+
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -29,7 +46,7 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }
   const getMessages = useCallback(async () => {
     try {
       setIsLoading(true);
-      const messagesResp = await ml.dataFrameAnalytics.getAnalyticsAuditMessages(analyticsId);
+      const messagesResp = await mlApi.dataFrameAnalytics.getAnalyticsAuditMessages(analyticsId);
       setIsLoading(false);
       setMessages(messagesResp);
     } catch (error) {
@@ -61,7 +78,7 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }
   useRefreshAnalyticsList({ onRefresh: getMessages });
 
   return (
-    <div className="mlExpandedRowJobMessages" data-test-subj={dataTestSubj}>
+    <div data-test-subj={dataTestSubj} css={cssOverride}>
       <JobMessages
         messages={messages}
         loading={isLoading}

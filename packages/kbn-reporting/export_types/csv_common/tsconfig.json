@@ -16,5 +16,6 @@
   "kbn_references": [
     "@kbn/data-plugin",
     "@kbn/reporting-common",
+    "@kbn/data-views-plugin",
   ]
 }

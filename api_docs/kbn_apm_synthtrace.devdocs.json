@@ -142,7 +142,7 @@
             "label": "getDefaultPipeline",
             "description": [],
             "signature": [
-              "(includeSerialization?: boolean) => (base: ",
+              "({ includeSerialization, versionOverride, }?: { includeSerialization?: boolean | undefined; versionOverride?: string | undefined; }) => (base: ",
               "Readable",
               ") => NodeJS.WritableStream"
             ],
@@ -153,17 +153,43 @@
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
                 "id": "def-server.ApmSynthtraceEsClient.getDefaultPipeline.$1",
-                "type": "boolean",
+                "type": "Object",
                 "tags": [],
-                "label": "includeSerialization",
+                "label": "{\n      includeSerialization,\n      versionOverride,\n    }",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.ApmSynthtraceEsClient.getDefaultPipeline.$1.includeSerialization",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "includeSerialization",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.ApmSynthtraceEsClient.getDefaultPipeline.$1.versionOverride",
+                    "type": "string",
+                    "tags": [],
+                    "label": "versionOverride",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -231,8 +257,54 @@
                     "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.ApmSynthtraceKibanaClient.Unnamed.$1.headers",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "headers",
+                    "description": [],
+                    "signature": [
+                      "Record<string, string> | undefined"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.ApmSynthtraceKibanaClient.getFleetApmPackagePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getFleetApmPackagePath",
+            "description": [],
+            "signature": [
+              "(packageVersion?: string | undefined) => string"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.ApmSynthtraceKibanaClient.getFleetApmPackagePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "packageVersion",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -261,7 +333,7 @@
             "label": "installApmPackage",
             "description": [],
             "signature": [
-              "(packageVersion: string) => Promise<void>"
+              "(packageVersion?: string | undefined) => Promise<{ version: string; }>"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
             "deprecated": false,
@@ -275,9 +347,131 @@
                 "label": "packageVersion",
                 "description": [],
                 "signature": [
-                  "string"
+                  "string | undefined"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.ApmSynthtraceKibanaClient.uninstallApmPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "uninstallApmPackage",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace",
+        "id": "def-server.EntitiesSynthtraceEsClient",
+        "type": "Class",
+        "tags": [],
+        "label": "EntitiesSynthtraceEsClient",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/apm-synthtrace",
+            "scope": "server",
+            "docId": "kibKbnApmSynthtracePluginApi",
+            "section": "def-server.EntitiesSynthtraceEsClient",
+            "text": "EntitiesSynthtraceEsClient"
+          },
+          " extends ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/apm-synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnApmSynthtraceClientPluginApi",
+            "section": "def-common.EntityFields",
+            "text": "EntityFields"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_es_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.EntitiesSynthtraceEsClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.EntitiesSynthtraceEsClient.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ client: ",
+                  "default",
+                  "; logger: ",
+                  "Logger",
+                  "; } & ",
+                  "EntitiesSynthtraceEsClientOptions"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.EntitiesSynthtraceEsClient.getDefaultPipeline",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultPipeline",
+            "description": [],
+            "signature": [
+              "({ includeSerialization }?: Pipeline) => (base: ",
+              "Readable",
+              ") => ",
+              "Transform"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.EntitiesSynthtraceEsClient.getDefaultPipeline.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ includeSerialization }",
+                "description": [],
+                "signature": [
+                  "Pipeline"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_es_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -290,38 +484,18 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.AssetsSynthtraceEsClient",
+        "id": "def-server.EntitiesSynthtraceKibanaClient",
         "type": "Class",
         "tags": [],
-        "label": "AssetsSynthtraceEsClient",
+        "label": "EntitiesSynthtraceKibanaClient",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/apm-synthtrace",
-            "scope": "server",
-            "docId": "kibKbnApmSynthtracePluginApi",
-            "section": "def-server.AssetsSynthtraceEsClient",
-            "text": "AssetsSynthtraceEsClient"
-          },
-          " extends ",
-          "SynthtraceEsClient",
-          "<",
-          {
-            "pluginId": "@kbn/apm-synthtrace-client",
-            "scope": "common",
-            "docId": "kibKbnApmSynthtraceClientPluginApi",
-            "section": "def-common.AssetDocument",
-            "text": "AssetDocument"
-          },
-          ">"
-        ],
-        "path": "packages/kbn-apm-synthtrace/src/lib/assets/assets_synthtrace_es_client.ts",
+        "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_kibana_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.AssetsSynthtraceEsClient.Unnamed",
+            "id": "def-server.EntitiesSynthtraceKibanaClient.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -329,31 +503,81 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-apm-synthtrace/src/lib/assets/assets_synthtrace_es_client.ts",
+            "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_kibana_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.AssetsSynthtraceEsClient.Unnamed.$1",
-                "type": "CompoundType",
+                "id": "def-server.EntitiesSynthtraceKibanaClient.Unnamed.$1",
+                "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "{ client: ",
-                  "default",
-                  "; logger: ",
-                  "Logger",
-                  "; } & ",
-                  "AssetsSynthtraceEsClientOptions"
-                ],
-                "path": "packages/kbn-apm-synthtrace/src/lib/assets/assets_synthtrace_es_client.ts",
+                "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_kibana_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.EntitiesSynthtraceKibanaClient.Unnamed.$1.logger",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "logger",
+                    "description": [],
+                    "signature": [
+                      "Logger"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_kibana_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.EntitiesSynthtraceKibanaClient.Unnamed.$1.target",
+                    "type": "string",
+                    "tags": [],
+                    "label": "target",
+                    "description": [],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_kibana_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.EntitiesSynthtraceKibanaClient.installEntityIndexPatterns",
+            "type": "Function",
+            "tags": [],
+            "label": "installEntityIndexPatterns",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_kibana_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.EntitiesSynthtraceKibanaClient.uninstallEntityIndexPatterns",
+            "type": "Function",
+            "tags": [],
+            "label": "uninstallEntityIndexPatterns",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/entities/entities_synthtrace_kibana_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -432,6 +656,177 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
+        "id": "def-server.InfraSynthtraceKibanaClient",
+        "type": "Class",
+        "tags": [],
+        "label": "InfraSynthtraceKibanaClient",
+        "description": [],
+        "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.InfraSynthtraceKibanaClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.InfraSynthtraceKibanaClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.InfraSynthtraceKibanaClient.Unnamed.$1.logger",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "logger",
+                    "description": [],
+                    "signature": [
+                      "Logger"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.InfraSynthtraceKibanaClient.Unnamed.$1.target",
+                    "type": "string",
+                    "tags": [],
+                    "label": "target",
+                    "description": [],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.InfraSynthtraceKibanaClient.Unnamed.$1.username",
+                    "type": "string",
+                    "tags": [],
+                    "label": "username",
+                    "description": [],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.InfraSynthtraceKibanaClient.Unnamed.$1.password",
+                    "type": "string",
+                    "tags": [],
+                    "label": "password",
+                    "description": [],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.InfraSynthtraceKibanaClient.fetchLatestSystemPackageVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchLatestSystemPackageVersion",
+            "description": [],
+            "signature": [
+              "() => Promise<string>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.InfraSynthtraceKibanaClient.installSystemPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "installSystemPackage",
+            "description": [],
+            "signature": [
+              "(packageVersion: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.InfraSynthtraceKibanaClient.installSystemPackage.$1",
+                "type": "string",
+                "tags": [],
+                "label": "packageVersion",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.InfraSynthtraceKibanaClient.uninstallSystemPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "uninstallSystemPackage",
+            "description": [],
+            "signature": [
+              "(packageVersion: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.InfraSynthtraceKibanaClient.uninstallSystemPackage.$1",
+                "type": "string",
+                "tags": [],
+                "label": "packageVersion",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace",
         "id": "def-server.LogsSynthtraceEsClient",
         "type": "Class",
         "tags": [],
@@ -489,6 +884,295 @@
                   "Logger",
                   "; } & ",
                   "LogsSynthtraceEsClientOptions"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.LogsSynthtraceEsClient.createIndexTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "createIndexTemplate",
+            "description": [],
+            "signature": [
+              "(name: ",
+              "IndexTemplateName",
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.createIndexTemplate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "IndexTemplateName"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.LogsSynthtraceEsClient.createComponentTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "createComponentTemplate",
+            "description": [],
+            "signature": [
+              "(name: string, mappings: ",
+              "MappingTypeMapping",
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.createComponentTemplate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.createComponentTemplate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "mappings",
+                "description": [],
+                "signature": [
+                  "MappingTypeMapping"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.LogsSynthtraceEsClient.deleteComponentTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteComponentTemplate",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.deleteComponentTemplate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.LogsSynthtraceEsClient.createIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "createIndex",
+            "description": [],
+            "signature": [
+              "(index: string, mappings?: ",
+              "MappingTypeMapping",
+              " | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.createIndex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.createIndex.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "mappings",
+                "description": [],
+                "signature": [
+                  "MappingTypeMapping",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.LogsSynthtraceEsClient.updateIndexTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "updateIndexTemplate",
+            "description": [],
+            "signature": [
+              "(indexName: string, modify: (template: ",
+              "IndicesIndexTemplate",
+              ") => ",
+              "IndicesPutIndexTemplateRequest",
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.updateIndexTemplate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.updateIndexTemplate.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "modify",
+                "description": [],
+                "signature": [
+                  "(template: ",
+                  "IndicesIndexTemplate",
+                  ") => ",
+                  "IndicesPutIndexTemplateRequest"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.LogsSynthtraceEsClient.createCustomPipeline",
+            "type": "Function",
+            "tags": [],
+            "label": "createCustomPipeline",
+            "description": [],
+            "signature": [
+              "(processors: ",
+              "IngestProcessorContainer",
+              "[]) => Promise<void>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.createCustomPipeline.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "processors",
+                "description": [],
+                "signature": [
+                  "IngestProcessorContainer",
+                  "[]"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.LogsSynthtraceEsClient.getDefaultPipeline",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultPipeline",
+            "description": [],
+            "signature": [
+              "({ includeSerialization }?: Pipeline) => (base: ",
+              "Readable",
+              ") => ",
+              "Transform"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.LogsSynthtraceEsClient.getDefaultPipeline.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ includeSerialization }",
+                "description": [],
+                "signature": [
+                  "Pipeline"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
                 "deprecated": false,
@@ -562,6 +1246,195 @@
                   "MonitoringSynthtraceEsClientOptions"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/monitoring/monitoring_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace",
+        "id": "def-server.OtelSynthtraceEsClient",
+        "type": "Class",
+        "tags": [],
+        "label": "OtelSynthtraceEsClient",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/apm-synthtrace",
+            "scope": "server",
+            "docId": "kibKbnApmSynthtracePluginApi",
+            "section": "def-server.OtelSynthtraceEsClient",
+            "text": "OtelSynthtraceEsClient"
+          },
+          " extends ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/apm-synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnApmSynthtraceClientPluginApi",
+            "section": "def-common.OtelDocument",
+            "text": "OtelDocument"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.OtelSynthtraceEsClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.OtelSynthtraceEsClient.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ client: ",
+                  "default",
+                  "; logger: ",
+                  "Logger",
+                  "; } & ",
+                  "OtelSynthtraceEsClientOptions"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.OtelSynthtraceEsClient.getDefaultPipeline",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultPipeline",
+            "description": [],
+            "signature": [
+              "({ includeSerialization, }?: { includeSerialization?: boolean | undefined; }) => (base: ",
+              "Readable",
+              ") => ",
+              "Transform"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.OtelSynthtraceEsClient.getDefaultPipeline.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n      includeSerialization,\n    }",
+                "description": [],
+                "path": "packages/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.OtelSynthtraceEsClient.getDefaultPipeline.$1.includeSerialization",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "includeSerialization",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace",
+        "id": "def-server.SyntheticsSynthtraceEsClient",
+        "type": "Class",
+        "tags": [],
+        "label": "SyntheticsSynthtraceEsClient",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/apm-synthtrace",
+            "scope": "server",
+            "docId": "kibKbnApmSynthtracePluginApi",
+            "section": "def-server.SyntheticsSynthtraceEsClient",
+            "text": "SyntheticsSynthtraceEsClient"
+          },
+          " extends ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/apm-synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnApmSynthtraceClientPluginApi",
+            "section": "def-common.SyntheticsMonitorDocument",
+            "text": "SyntheticsMonitorDocument"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-apm-synthtrace/src/lib/synthetics/synthetics_synthtrace_es_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.SyntheticsSynthtraceEsClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/synthetics/synthetics_synthtrace_es_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.SyntheticsSynthtraceEsClient.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ client: ",
+                  "default",
+                  "; logger: ",
+                  "Logger",
+                  "; } & ",
+                  "SyntheticsSynthtraceEsClientOptions"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/synthetics/synthetics_synthtrace_es_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

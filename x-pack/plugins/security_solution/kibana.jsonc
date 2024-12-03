@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/security-solution-plugin",
-  "owner": "@elastic/security-solution",
+  "owner": [
+    "@elastic/security-solution"
+  ],
+  "group": "security",
+  "visibility": "private",
   "plugin": {
     "id": "securitySolution",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "securitySolution"
@@ -21,7 +25,6 @@
       "dashboard",
       "data",
       "dataViews",
-      "discover",
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
@@ -51,12 +54,14 @@
       "stackConnectors",
       "discover",
       "notifications",
-      "savedObjects",
       "savedSearch",
       "unifiedDocViewer",
+      "charts",
+      "entityManager",
+      "inference",
+      "discoverShared"
     ],
     "optionalPlugins": [
-      "cloudExperiments",
       "encryptedSavedObjects",
       "fleet",
       "ml",
@@ -65,11 +70,14 @@
       "usageCollection",
       "lists",
       "home",
+      "management",
       "telemetry",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
-      "guidedOnboarding"
+      "guidedOnboarding",
+      "integrationAssistant",
+      "serverless"
     ],
     "requiredBundles": [
       "esUiShared",

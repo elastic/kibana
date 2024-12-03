@@ -156,10 +156,10 @@ export async function getExecutionsPerDayCount({
       },
     };
 
-    logger.debug(`query for getExecutionsPerDayCount - ${JSON.stringify(query)}`);
+    logger.debug(() => `query for getExecutionsPerDayCount - ${JSON.stringify(query)}`);
     const results = await esClient.search(query);
 
-    logger.debug(`results for getExecutionsPerDayCount query - ${JSON.stringify(results)}`);
+    logger.debug(() => `results for getExecutionsPerDayCount query - ${JSON.stringify(results)}`);
 
     const totalRuleExecutions =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
@@ -242,10 +242,12 @@ export async function getExecutionTimeoutsPerDayCount({
       },
     };
 
-    logger.debug(`query for getExecutionTimeoutsPerDayCount - ${JSON.stringify(query)}`);
+    logger.debug(() => `query for getExecutionTimeoutsPerDayCount - ${JSON.stringify(query)}`);
     const results = await esClient.search(query);
 
-    logger.debug(`results for getExecutionTimeoutsPerDayCount query - ${JSON.stringify(results)}`);
+    logger.debug(
+      () => `results for getExecutionTimeoutsPerDayCount query - ${JSON.stringify(results)}`
+    );
 
     const aggregations = results.aggregations as {
       by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;

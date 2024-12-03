@@ -19,7 +19,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { getDocLinks, getHttp, getUiSettings, getSettings, getTheme } from '../kibana_services';
 import { ImportResults } from '../importer';
 import { getPartialImportMessage } from './utils';
@@ -209,7 +210,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           <a
             data-test-subj="indexManagementNewIndexLink"
             target="_blank"
-            href={getHttp().basePath.prepend('/app/management/kibana/dataViews')}
+            href={getHttp().basePath.prepend('/app/management/data/index_management/indices')}
           >
             <FormattedMessage
               id="xpack.fileUpload.importComplete.indexMgmtLink"

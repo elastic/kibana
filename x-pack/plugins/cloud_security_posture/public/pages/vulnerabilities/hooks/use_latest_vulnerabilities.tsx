@@ -4,42 +4,100 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { number } from 'io-ts';
 import {
   SearchRequest,
   SearchResponse,
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
-  Sort,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CspVulnerabilityFinding } from '../../../../common/schemas';
-import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { EsHitRecord } from '@kbn/discover-utils/types';
+import {
+  MAX_FINDINGS_TO_LOAD,
+  CDR_VULNERABILITIES_INDEX_PATTERN,
+  CDR_3RD_PARTY_RETENTION_POLICY,
+} from '@kbn/cloud-security-posture-common';
+import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
+import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
+import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import {
+  CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS,
+  VULNERABILITY_FIELDS,
+} from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
-import { FindingsBaseEsQuery } from '../../../common/types';
+import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
-type LatestFindingsResponse = IKibanaSearchResponse<SearchResponse<any, FindingsAggs>>;
+type LatestFindingsResponse = IKibanaSearchResponse<
+  SearchResponse<CspVulnerabilityFinding, FindingsAggs>
+>;
 
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
-
 interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
-  sort: Sort;
+  sort: string[][];
   enabled: boolean;
-  pageIndex: number;
   pageSize: number;
 }
 
-export const getFindingsQuery = ({ query, sort, pageIndex, pageSize }: VulnerabilitiesQuery) => ({
-  index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  query,
-  from: pageIndex * pageSize,
-  size: pageSize,
-  sort,
+const getMultiFieldsSort = (sort: string[][]) => {
+  return sort.map(([id, direction]) => {
+    if (id === VULNERABILITY_FIELDS.PACKAGE_NAME) {
+      return getCaseInsensitiveSortScript(id, direction);
+    }
+
+    return {
+      [id]: direction,
+    };
+  });
+};
+
+const getRuntimeMappingsFromSort = (sort: string[][]) => {
+  return sort
+    .filter(([field]) => CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS.includes(field))
+    .reduce((acc, [field]) => {
+      const type: RuntimePrimitiveTypes = 'keyword';
+
+      return {
+        ...acc,
+        [field]: {
+          type,
+        },
+      };
+    }, {});
+};
+
+export const getVulnerabilitiesQuery = (
+  { query, sort }: VulnerabilitiesQuery,
+  pageParam: number
+) => ({
+  index: CDR_VULNERABILITIES_INDEX_PATTERN,
+  ignore_unavailable: true,
+  sort: getMultiFieldsSort(sort),
+  runtime_mappings: getRuntimeMappingsFromSort(sort),
+  size: MAX_FINDINGS_TO_LOAD,
+  query: {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter ?? []),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+              lte: 'now',
+            },
+          },
+        },
+      ],
+    },
+  },
+  ...(pageParam ? { from: pageParam } : {}),
 });
 
 export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
@@ -47,19 +105,25 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
     data,
     notifications: { toasts },
   } = useKibana().services;
-  return useQuery(
-    [LATEST_VULNERABILITIES_INDEX_PATTERN, options],
-    async () => {
+  /**
+   * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
+   * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array
+   * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
+   * the last loaded record to be used as a from parameter to fetch the next chunk of data.
+   */
+  return useInfiniteQuery(
+    [CDR_VULNERABILITIES_INDEX_PATTERN, options],
+    async ({ pageParam }) => {
       const {
         rawResponse: { hits },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getFindingsQuery(options),
+          params: getVulnerabilitiesQuery(options, pageParam),
         })
       );
 
       return {
-        page: hits.hits.map((hit) => hit._source!) as CspVulnerabilityFinding[],
+        page: hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord)),
         total: number.is(hits.total) ? hits.total : 0,
       };
     },
@@ -68,6 +132,12 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
       keepPreviousData: true,
       enabled: options.enabled,
       onError: (err: Error) => showErrorToast(toasts, err),
+      getNextPageParam: (lastPage, allPages) => {
+        if (lastPage.page.length < options.pageSize) {
+          return undefined;
+        }
+        return allPages.length * options.pageSize;
+      },
     }
   );
 };

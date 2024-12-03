@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CalloutMessage, VALIDATION_STATUS } from '../../../../common/constants/validation';
+import type { CalloutMessage } from '@kbn/ml-validators';
+import { VALIDATION_STATUS } from '@kbn/ml-validators';
 
 export const defaultIconType = 'questionInCircle';
 
@@ -53,7 +55,7 @@ const Message: FC<Pick<CalloutMessage, 'text' | 'url'>> = ({ text, url }) => (
 export const Callout: FC<CalloutMessage> = ({ heading, status, text, url }) => (
   <>
     <EuiCallOut
-      data-test-subj={'mlValidationCallout'}
+      data-test-subj={`mlValidationCallout ${status}`}
       // @ts-ignore
       color={statusToEuiColor(status)}
       size="s"

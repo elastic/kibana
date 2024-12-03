@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiText,
   EuiIcon,
   useEuiTheme,
   useEuiFontSize,
@@ -18,8 +19,11 @@ import {
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { useRightPanelContext } from '../context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import {
   FirstLastSeen,
@@ -27,14 +31,14 @@ import {
 } from '../../../../common/components/first_last_seen/first_last_seen';
 import { buildHostNamesFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import { RiskScoreLevel } from '../../../../explore/components/risk_score/severity/common';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { getField } from '../../shared/utils';
+import { CellActions } from '../../shared/components/cell_actions';
 import {
   FAMILY,
   LAST_SEEN,
@@ -48,12 +52,19 @@ import {
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
+import { PreviewLink } from '../../../shared/components/preview_link';
+import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
+import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
+import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 
 const HOST_ICON = 'storage';
-const CONTEXT_ID = `flyout-host-entity-overview`;
 
 export interface HostEntityOverviewProps {
   /**
@@ -62,12 +73,22 @@ export interface HostEntityOverviewProps {
   hostName: string;
 }
 
+export const HOST_PREVIEW_BANNER = {
+  title: i18n.translate('xpack.securitySolution.flyout.right.host.hostPreviewTitle', {
+    defaultMessage: 'Preview host details',
+  }),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
+
 /**
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
-  const { eventId, indexName, scopeId } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
+
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: DocumentDetailsLeftPanelKey,
@@ -79,7 +100,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
       },
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
-
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -114,21 +134,24 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     endDate: to,
   });
 
+  const hostOSFamilyValue = useMemo(
+    () => getField(getOr([], 'host.os.family', hostDetails)),
+    [hostDetails]
+  );
   const hostOSFamily: DescriptionList[] = useMemo(
     () => [
       {
         title: FAMILY,
-        description: (
-          <DefaultFieldRenderer
-            rowItems={getOr([], 'host.os.family', hostDetails)}
-            attrName={'host.os.family'}
-            idPrefix={CONTEXT_ID}
-            isDraggable={false}
-          />
+        description: hostOSFamilyValue ? (
+          <CellActions field={'host.os.family'} value={hostOSFamilyValue}>
+            {hostOSFamilyValue}
+          </CellActions>
+        ) : (
+          getEmptyTagValue()
         ),
       },
     ],
-    [hostDetails]
+    [hostOSFamilyValue]
   );
 
   const hostLastSeen: DescriptionList[] = useMemo(
@@ -138,7 +161,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         description: (
           <FirstLastSeen
             indexPatterns={selectedPatterns}
-            field={'host.name'}
+            field={HOST_NAME_FIELD_NAME}
             value={hostName}
             type={FirstLastSeenType.LAST_SEEN}
           />
@@ -159,7 +182,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{HOST_RISK_LEVEL}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
+              <RiskScoreDocTooltip />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -179,26 +202,44 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="s"
+      gutterSize="m"
       responsive={false}
       data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}
     >
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m" responsive={false}>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type={HOST_ICON} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
-              css={css`
-                font-size: ${xsFontSize};
-                font-weight: ${euiTheme.font.weight.bold};
-              `}
-              onClick={goToEntitiesTab}
-            >
-              {hostName}
-            </EuiLink>
+            {isPreviewEnabled ? (
+              <PreviewLink
+                field={HOST_NAME_FIELD_NAME}
+                value={hostName}
+                scopeId={scopeId}
+                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+              >
+                <EuiText
+                  css={css`
+                    font-size: ${xsFontSize};
+                    font-weight: ${euiTheme.font.weight.bold};
+                  `}
+                >
+                  {hostName}
+                </EuiText>
+              </PreviewLink>
+            ) : (
+              <EuiLink
+                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+                css={css`
+                  font-size: ${xsFontSize};
+                  font-weight: ${euiTheme.font.weight.bold};
+                `}
+                onClick={goToEntitiesTab}
+              >
+                {hostName}
+              </EuiLink>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -235,6 +276,22 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
+      <AlertCountInsight
+        fieldName={'host.name'}
+        name={hostName}
+        data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
+      />
+      <MisconfigurationsInsight
+        fieldName={'host.name'}
+        name={hostName}
+        data-test-subj={ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
+        telemetrySuffix={'host-entity-overview'}
+      />
+      <VulnerabilitiesInsight
+        hostName={hostName}
+        data-test-subj={ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID}
+        telemetrySuffix={'host-entity-overview'}
+      />
     </EuiFlexGroup>
   );
 };

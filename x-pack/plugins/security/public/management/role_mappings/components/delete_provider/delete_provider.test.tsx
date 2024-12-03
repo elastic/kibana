@@ -13,7 +13,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import { DeleteProvider } from './delete_provider';
-import type { RoleMapping } from '../../../../../common/model';
+import type { RoleMapping } from '../../../../../common';
 import { roleMappingsAPIClientMock } from '../../index.mock';
 
 describe('DeleteProvider', () => {

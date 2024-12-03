@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { ActionExecutor } from './action_executor';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
@@ -17,6 +17,8 @@ import {
   loggingSystemMock,
   httpServiceMock,
   savedObjectsRepositoryMock,
+  analyticsServiceMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { ActionTypeDisabledError } from './errors';
@@ -25,14 +27,14 @@ import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { pick } from 'lodash';
 import {
+  getErrorSource,
   isRetryableError,
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const executeParamsFields = [
   'actionId',
-  'isEphemeral',
   'params',
   'relatedSavedObjects',
   'executionId',
@@ -50,32 +52,6 @@ const inMemoryMetrics = inMemoryMetricsMock.create();
 let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
 let mockedTaskInstance: ConcreteTaskInstance;
-
-const mockAction = {
-  id: '1',
-  type: 'action',
-  attributes: {
-    name: '1',
-    actionTypeId: 'test',
-    config: {
-      bar: true,
-    },
-    secrets: {
-      baz: true,
-    },
-    isMissingSecrets: false,
-  },
-  references: [],
-};
-
-const mockActionInfo = {
-  actionTypeId: mockAction.attributes.actionTypeId,
-  name: mockAction.attributes.name,
-  config: mockAction.attributes.config,
-  secrets: mockAction.attributes.secrets,
-  actionId: mockAction.id,
-  rawAction: mockAction.attributes,
-};
 
 beforeAll(() => {
   fakeTimer = sinon.useFakeTimers();
@@ -107,14 +83,22 @@ const services = {
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 
+const unsecuredServices = {
+  log: jest.fn(),
+  savedObjectsClient: savedObjectsRepositoryMock.create(),
+};
+
 const actionExecutorInitializerParams = {
   logger: loggingSystemMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
+  getUnsecuredServices: jest.fn().mockReturnValue(unsecuredServices),
   actionTypeRegistry,
   getActionsAuthorizationWithRequest: jest.fn().mockReturnValue(actionsAuthorizationMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger,
   inMemoryConnectors: [],
+  analyticsService: analyticsServiceMock.createAnalyticsServiceStart(),
+  security: securityServiceMock.createStart(),
 };
 
 const taskRunnerFactoryInitializerParams = {
@@ -131,7 +115,6 @@ describe('Task Runner Factory', () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     actionExecutorInitializerParams.getServices.mockReturnValue(services);
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
   });
 
   test(`throws an error if factory isn't initialized`, () => {
@@ -189,7 +172,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       relatedSavedObjects: [],
       executionId: '123abc',
@@ -249,7 +231,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '9',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [],
@@ -305,7 +286,6 @@ describe('Task Runner Factory', () => {
     expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
       actionId: '2',
       consumer: 'test-consumer',
-      isEphemeral: false,
       params: { baz: true },
       relatedSavedObjects: [],
       executionId: '123abc',
@@ -362,7 +342,6 @@ describe('Task Runner Factory', () => {
     expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
       actionId: '2',
       consumer: 'test-consumer',
-      isEphemeral: false,
       params: { baz: true },
       relatedSavedObjects: [],
       executionId: '123abc',
@@ -423,7 +402,6 @@ describe('Task Runner Factory', () => {
     expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
       actionId: '2',
       consumer: 'test-consumer',
-      isEphemeral: false,
       params: { baz: true },
       relatedSavedObjects: [],
       executionId: '123abc',
@@ -544,12 +522,13 @@ describe('Task Runner Factory', () => {
       message: 'Error message',
       data: { foo: true },
       retry: false,
+      errorSource: TaskErrorSource.USER,
     });
 
     try {
       await taskRunner.run();
-      throw new Error('Should have thrown');
     } catch (e) {
+      expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
       expect(isRetryableError(e)).toEqual(false);
     }
   });
@@ -584,7 +563,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [],
@@ -642,7 +620,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [
@@ -695,7 +672,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [
@@ -754,7 +730,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       request: {
         headers: {
@@ -800,7 +775,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [],
@@ -853,6 +827,7 @@ describe('Task Runner Factory', () => {
       throw new Error('Should have thrown');
     } catch (e) {
       expect(isUnrecoverableError(e)).toEqual(true);
+      expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
     }
   });
 
@@ -887,6 +862,7 @@ describe('Task Runner Factory', () => {
       message: 'Error message',
       data: { foo: true },
       retry: false,
+      errorSource: TaskErrorSource.FRAMEWORK,
     });
 
     let err;
@@ -898,8 +874,118 @@ describe('Task Runner Factory', () => {
     expect(err).toBeDefined();
     expect(isRetryableError(err)).toEqual(false);
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-      `Action '2' failed: Error message`
+      `Action '2' failed: Error message`,
+      { tags: ['connector-run-failed', 'framework-error'] }
     );
+    expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
+  });
+
+  test(`will throw an error and log the error message with the serviceMessage`, async () => {
+    const taskRunner = taskRunnerFactory.create({
+      taskInstance: {
+        ...mockedTaskInstance,
+        attempts: 0,
+      },
+    });
+
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [
+        {
+          id: '2',
+          name: 'actionRef',
+          type: 'action',
+        },
+      ],
+    });
+    mockedActionExecutor.execute.mockResolvedValueOnce({
+      status: 'error',
+      actionId: '2',
+      message: 'Error message',
+      serviceMessage: 'Service message',
+      data: { foo: true },
+      retry: false,
+      errorSource: TaskErrorSource.FRAMEWORK,
+    });
+
+    let err;
+    try {
+      await taskRunner.run();
+    } catch (e) {
+      err = e;
+    }
+
+    expect(err).toBeDefined();
+    expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+      `Action '2' failed: Error message: Service message`,
+      { tags: ['connector-run-failed', 'framework-error'] }
+    );
+  });
+
+  test(`fallbacks to FRAMEWORK error if ActionExecutor does not return any type of source'`, async () => {
+    const taskRunner = taskRunnerFactory.create({
+      taskInstance: {
+        ...mockedTaskInstance,
+        attempts: 0,
+      },
+    });
+
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [
+        {
+          id: '2',
+          name: 'actionRef',
+          type: 'action',
+        },
+      ],
+    });
+    mockedActionExecutor.execute.mockResolvedValueOnce({
+      status: 'error',
+      actionId: '2',
+      message: 'Error message',
+      data: { foo: true },
+      retry: false,
+    });
+
+    try {
+      await taskRunner.run();
+    } catch (e) {
+      expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+    }
+  });
+
+  test(`Should return USER error for a "not found SO"`, async () => {
+    const taskRunner = taskRunnerFactory.create({
+      taskInstance: {
+        ...mockedTaskInstance,
+        attempts: 0,
+      },
+    });
+
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+
+    try {
+      await taskRunner.run();
+    } catch (e) {
+      expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+    }
   });
 
   test('will rethrow the error if the error is thrown instead of returned', async () => {
@@ -938,9 +1024,11 @@ describe('Task Runner Factory', () => {
     }
     expect(err).toBeDefined();
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-      `Action '2' failed: Fail`
+      `Action '2' failed: Fail`,
+      { tags: ['connector-run-failed', 'framework-error'] }
     );
     expect(thrownError).toEqual(err);
+    expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   test('increments monitoring metrics after execution', async () => {
@@ -1032,132 +1120,28 @@ describe('Task Runner Factory', () => {
     expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
   });
 
-  test('loadIndirectParams fetches taskParams and actionInfo and returns the rawAction', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-    });
-
-    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '3',
-      type: 'action_task_params',
-      attributes: {
-        actionId: '2',
-        params: { baz: true },
-        executionId: '123abc',
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      references: [
-        {
-          id: '9',
-          name: 'actionRef',
-          type: 'action',
-        },
-      ],
-    });
-
-    const result = await taskRunner.loadIndirectParams();
-
-    expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-    expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
-      'action_task_params',
-      '3',
-      { namespace: 'namespace-test' }
-    );
-    expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledWith(
-      '9',
-      expect.any(CoreKibanaRequest),
-      'test'
-    );
-
-    expect(result).toEqual({
-      data: {
-        indirectParams: mockActionInfo.rawAction,
-        actionInfo: mockActionInfo,
-        taskParams: {
-          attributes: {
-            actionId: '9',
-            apiKey: 'MTIzOmFiYw==',
-            executionId: '123abc',
-            params: {
-              baz: true,
-            },
-          },
-          id: '3',
-          references: [
-            {
-              id: '9',
-              name: 'actionRef',
-              type: 'action',
-            },
-          ],
-          type: 'action_task_params',
-        },
-      },
-    });
-  });
-
-  test("loadIndirectParams returns error when it can't fetch the actionInfo", async () => {
+  test('throws error if it cannot fetch task data', async () => {
     jest.resetAllMocks();
     const error = new Error('test');
-    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(error);
 
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
     });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '3',
-      type: 'action_task_params',
-      attributes: {
-        actionId: '2',
-        params: { baz: true },
-        executionId: '123abc',
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      references: [
-        {
-          id: '9',
-          name: 'actionRef',
-          type: 'action',
-        },
-      ],
-    });
 
-    const result = await taskRunner.loadIndirectParams();
+    try {
+      await taskRunner.run();
+      throw new Error('Should have thrown');
+    } catch (e) {
+      expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+      expect(e).toEqual(error);
 
-    expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-    expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ error });
-  });
-
-  test('throws error if it cannot fetch task or action data', async () => {
-    jest.resetAllMocks();
-    const error = new Error('test');
-    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
-
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-    });
-    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '3',
-      type: 'action_task_params',
-      attributes: {
-        actionId: '2',
-        params: { baz: true },
-        executionId: '123abc',
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      references: [
-        {
-          id: '9',
-          name: 'actionRef',
-          type: 'action',
-        },
-      ],
-    });
-
-    await expect(taskRunner.run()).rejects.toThrow('test');
+      expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
+        `Failed to load action task params ${mockedTaskInstance.params.actionTaskParamsId}: test`,
+        { tags: ['connector-run-failed', 'framework-error'] }
+      );
+    }
   });
 });

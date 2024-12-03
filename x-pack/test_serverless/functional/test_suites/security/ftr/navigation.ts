@@ -16,15 +16,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const headerPage = getPageObject('header');
+  const retry = getService('retry');
 
   describe('navigation', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
       await svlSecNavigation.navigateToLandingPage();
-    });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
     });
 
     it('has security serverless side nav', async () => {
@@ -49,6 +47,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.search.searchFor('security dashboards');
       await svlCommonNavigation.search.clickOnOption(0);
       await svlCommonNavigation.search.hideSearch();
+      await headerPage.waitUntilLoadingHasFinished();
 
       await expect(await browser.getCurrentUrl()).contain('app/security/dashboards');
     });
@@ -63,12 +62,17 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('navigates to cases app', async () => {
-      await svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId,
-      });
+      await retry.tryForTime(30 * 1000, async () => {
+        // start navigation to the cases app from the landing page
+        await svlSecNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({
+          deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId,
+        });
+        await headerPage.waitUntilLoadingHasFinished();
 
-      expect(await browser.getCurrentUrl()).contain('/app/security/cases');
-      await testSubjects.existOrFail('cases-all-title');
+        expect(await browser.getCurrentUrl()).contain('/app/security/cases');
+        await testSubjects.existOrFail('cases-all-title');
+      });
     });
   });
 }

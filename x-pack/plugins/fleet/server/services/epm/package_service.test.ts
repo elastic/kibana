@@ -34,13 +34,18 @@ import * as epmPackagesInstall from './packages/install';
 import * as epmRegistry from './registry';
 import * as epmTransformsInstall from './elasticsearch/transform/install';
 import * as epmArchiveParse from './archive/parse';
+import { getEsPackage } from './archive/storage';
+
+jest.mock('./archive/storage');
 
 const mockGetAuthzFromRequest = getAuthzFromRequest as jest.Mock;
 const testKeys = [
   'getInstallation',
   'ensureInstalledPackage',
   'fetchFindLatestPackage',
+  'getLatestPackageInfo',
   'getPackage',
+  'getPackageFieldsMetadata',
   'reinstallEsAssets',
   'readBundledPackage',
 ];
@@ -109,6 +114,23 @@ function getTest(
       break;
     case testKeys[3]:
       test = {
+        method: mocks.packageClient.getLatestPackageInfo.bind(mocks.packageClient),
+        args: ['package name'],
+        spy: jest.spyOn(epmPackagesGet, 'getPackageInfo'),
+        spyArgs: [
+          {
+            pkgName: 'package name',
+            pkgVersion: '',
+            savedObjectsClient: mocks.soClient,
+            prerelease: undefined,
+          },
+        ],
+        spyResponse: { name: 'getLatestPackageInfo test' },
+        expectedReturnValue: { name: 'getLatestPackageInfo test' },
+      };
+      break;
+    case testKeys[4]:
+      test = {
         method: mocks.packageClient.getPackage.bind(mocks.packageClient),
         args: ['package name', '8.0.0'],
         spy: jest.spyOn(epmRegistry, 'getPackage'),
@@ -123,7 +145,21 @@ function getTest(
         },
       };
       break;
-    case testKeys[4]:
+    case testKeys[5]:
+      test = {
+        method: mocks.packageClient.getPackageFieldsMetadata.bind(mocks.packageClient),
+        args: [{ packageName: 'package_name', datasetName: 'dataset_name' }],
+        spy: jest.spyOn(epmRegistry, 'getPackageFieldsMetadata'),
+        spyArgs: [{ packageName: 'package_name', datasetName: 'dataset_name' }, undefined],
+        spyResponse: {
+          dataset_name: { field_1: { flat_name: 'field_1', type: 'keyword' } },
+        },
+        expectedReturnValue: {
+          dataset_name: { field_1: { flat_name: 'field_1', type: 'keyword' } },
+        },
+      };
+      break;
+    case testKeys[6]:
       const pkg: InstallablePackage = {
         format_version: '1.0.0',
         name: 'package name',
@@ -141,8 +177,9 @@ function getTest(
         spy: jest.spyOn(epmTransformsInstall, 'installTransforms'),
         spyArgs: [
           {
-            installablePackage: pkg,
-            paths,
+            packageInstallContext: expect.objectContaining({
+              paths,
+            }),
             esClient: mocks.esClient,
             savedObjectsClient: mocks.soClient,
             logger: mocks.logger,
@@ -168,13 +205,17 @@ function getTest(
         ],
       };
       break;
-    case testKeys[5]:
-      const bundledPackage = { name: 'package name', version: '8.0.0', buffer: Buffer.from([]) };
+    case testKeys[7]:
+      const bundledPackage = {
+        name: 'package name',
+        version: '8.0.0',
+        getBuffer: () => Buffer.from([]),
+      };
       test = {
         method: mocks.packageClient.readBundledPackage.bind(mocks.packageClient),
         args: [bundledPackage],
         spy: jest.spyOn(epmArchiveParse, 'generatePackageInfoFromArchiveBuffer'),
-        spyArgs: [bundledPackage.buffer, 'application/zip'],
+        spyArgs: [bundledPackage.getBuffer(), 'application/zip'],
         spyResponse: {
           packageInfo: { name: 'readBundledPackage test' },
           paths: ['/some/test/path'],
@@ -253,6 +294,12 @@ describe('PackageService', () => {
           testKey
         );
         spy.mockResolvedValue(spyResponse);
+        if (testKey === 'reinstallEsAssets') {
+          jest
+            .mocked(epmPackagesGet.getInstallation)
+            .mockResolvedValue({ name: 'package name' } as any);
+          jest.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
+        }
 
         await expect(method(...args)).resolves.toEqual(expectedReturnValue);
         expect(spy).toHaveBeenCalledWith(...spyArgs);
@@ -273,6 +320,12 @@ describe('PackageService', () => {
         testKey
       );
       spy.mockResolvedValue(spyResponse);
+      if (testKey === 'reinstallEsAssets') {
+        jest
+          .mocked(epmPackagesGet.getInstallation)
+          .mockResolvedValue({ name: 'package name' } as any);
+        jest.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
+      }
 
       await expect(method(...args)).resolves.toEqual(expectedReturnValue);
       expect(spy).toHaveBeenCalledWith(...spyArgs);

@@ -1,14 +1,17 @@
 {
   "type": "plugin",
   "id": "@kbn/presentation-util-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).",
   "plugin": {
     "id": "presentationUtil",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
-      "savedObjects",
       "kibanaReact",
       "contentManagement",
       "embeddable",
@@ -16,6 +19,11 @@
       "dataViews",
       "uiActions"
     ],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": [
+      "savedObjects"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

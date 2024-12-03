@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
-import { useFindCspRuleTemplates } from './use_csp_rules';
+import { useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { useParams } from 'react-router-dom';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CspRuleTemplate } from '../../../common/schemas';
 
 const chance = new Chance();
 
-jest.mock('./use_csp_rules', () => ({
-  useFindCspRuleTemplates: jest.fn(),
-  useBulkUpdateCspRuleTemplates: jest.fn(),
+jest.mock('./use_csp_benchmark_rules', () => ({
+  useFindCspBenchmarkRule: jest.fn(),
+  useBulkUpdateCspBenchmarkRule: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -36,7 +36,9 @@ const queryClient = new QueryClient({
 });
 
 const getWrapper =
-  ({ canUpdate = true }: { canUpdate: boolean } = { canUpdate: true }): React.FC =>
+  (
+    { canUpdate = true }: { canUpdate: boolean } = { canUpdate: true }
+  ): FC<PropsWithChildren<unknown>> =>
   ({ children }) => {
     const coreStart = coreMock.createStart();
     const core = {
@@ -52,7 +54,7 @@ const getWrapper =
     return <TestProvider core={core}>{children}</TestProvider>;
   };
 
-const getRuleMock = (id = chance.guid()): CspRuleTemplate =>
+const getRuleMock = (id = chance.guid()): CspBenchmarkRule =>
   ({
     metadata: {
       audit: chance.sentence(),
@@ -60,6 +62,7 @@ const getRuleMock = (id = chance.guid()): CspRuleTemplate =>
         name: chance.word(),
         version: chance.sentence(),
         id: chance.word(),
+        rule_number: chance.word(),
       },
       default_value: chance.sentence(),
       description: chance.sentence(),
@@ -75,10 +78,20 @@ const getRuleMock = (id = chance.guid()): CspRuleTemplate =>
       tags: [chance.word(), chance.word()],
       version: chance.sentence(),
     },
-  } as CspRuleTemplate);
+  } as CspBenchmarkRule);
 
 const params = {
-  packagePolicyId: chance.guid(),
+  paginations: {
+    page: 1,
+    perPage: 10000,
+    ruleNumber: undefined,
+    search: '',
+    section: undefined,
+    sortField: 'metadata.benchmark.rule_number',
+    sortOrder: 'asc',
+  },
+  benchmarkId: 'cis_k8s',
+  benchmarkVersion: '1.0.1',
 };
 
 describe('<RulesContainer />', () => {
@@ -93,7 +106,7 @@ describe('<RulesContainer />', () => {
     const Wrapper = getWrapper();
     const rule1 = getRuleMock();
 
-    (useFindCspRuleTemplates as jest.Mock).mockReturnValue({
+    (useFindCspBenchmarkRule as jest.Mock).mockReturnValue({
       status: 'success',
       data: {
         total: 1,
@@ -109,5 +122,10 @@ describe('<RulesContainer />', () => {
 
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
     expect(await screen.findByText(rule1.metadata.name)).toBeInTheDocument();
+    expect(useFindCspBenchmarkRule).toHaveBeenCalledWith(
+      params.paginations,
+      params.benchmarkId,
+      params.benchmarkVersion
+    );
   });
 });

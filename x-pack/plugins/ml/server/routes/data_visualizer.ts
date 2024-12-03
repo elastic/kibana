@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { FieldsForHistograms } from '@kbn/ml-agg-utils';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { FieldsForHistograms } from '@kbn/ml-agg-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
 import {
+  dataVisualizerFieldHistogramsResponse,
   dataVisualizerFieldHistogramsSchema,
   indexPatternSchema,
 } from './schemas/data_visualizer_schema';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 
 function getHistogramsForFields(
   client: IScopedClusterClient,
@@ -33,25 +34,17 @@ function getHistogramsForFields(
  * Routes for the index data visualizer.
  */
 export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup DataVisualizer
-   *
-   * @api {post} /internal/ml/data_visualizer/get_field_histograms/:indexPattern Get histograms for fields
-   * @apiName GetHistogramsForFields
-   * @apiDescription Returns the histograms on a list fields in the specified index pattern.
-   *
-   * @apiSchema (params) indexPatternSchema
-   * @apiSchema (body) dataVisualizerFieldHistogramsSchema
-   *
-   * @apiSuccess {Object} fieldName histograms by field, keyed on the name of the field.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_visualizer/get_field_histograms/{indexPattern}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetFieldInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetFieldInfo'],
+        },
       },
+      summary: 'Gets histograms for fields',
+      description: 'Returns the histograms on a list fields in the specified index pattern.',
     })
     .addVersion(
       {
@@ -60,6 +53,12 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
           request: {
             params: indexPatternSchema,
             body: dataVisualizerFieldHistogramsSchema,
+          },
+          response: {
+            200: {
+              body: dataVisualizerFieldHistogramsResponse,
+              description: 'Histograms by field, keyed on the name of the field.',
+            },
           },
         },
       },

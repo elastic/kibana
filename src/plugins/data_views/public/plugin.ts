@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
@@ -41,8 +42,11 @@ export class DataViewsPublicPlugin
 {
   private readonly hasData = new HasData();
   private rollupsEnabled: boolean = false;
+  private readonly callResolveCluster: boolean;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.callResolveCluster = initializerContext.env.packageInfo.buildFlavor === 'traditional';
+  }
 
   public setup(
     core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
@@ -83,10 +87,13 @@ export class DataViewsPublicPlugin
     const config = this.initializerContext.config.get<ClientConfigType>();
 
     return new DataViewsServicePublic({
-      hasData: this.hasData.start(core),
+      hasData: this.hasData.start(core, this.callResolveCluster),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http),
+      apiClient: new DataViewsApiClient(http, async () => {
+        const currentUser = await core.security.authc.getCurrentUser();
+        return currentUser?.profile_uid;
+      }),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {

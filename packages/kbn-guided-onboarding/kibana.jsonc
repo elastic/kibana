@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/guided-onboarding",
-  "owner": "@elastic/platform-onboarding"
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

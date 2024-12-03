@@ -9,19 +9,20 @@ import React, { type FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { EuiErrorBoundary } from '@elastic/eui';
-
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { ScopedHistory } from '@kbn/core/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { ScopedHistory } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
+import type { ExperimentalFeatures } from '../../server/config';
 import { SECTION_SLUG } from './common/constants';
-import { AppDependencies } from './app_dependencies';
+import type { AppDependencies } from './app_dependencies';
 import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
 import {
   EnabledFeaturesContextProvider,
+  ExperimentalFeaturesContextProvider,
   type TransformEnabledFeatures,
 } from './serverless_context';
 
@@ -44,10 +45,9 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
 export const renderApp = (
   element: HTMLElement,
   appDependencies: AppDependencies,
-  enabledFeatures: TransformEnabledFeatures
+  enabledFeatures: TransformEnabledFeatures,
+  experimentalFeatures: ExperimentalFeatures
 ) => {
-  const I18nContext = appDependencies.i18n.Context;
-
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -58,19 +58,17 @@ export const renderApp = (
   });
 
   render(
-    <EuiErrorBoundary>
+    <KibanaRenderContextProvider {...appDependencies}>
       <QueryClientProvider client={queryClient}>
-        <KibanaThemeProvider theme$={appDependencies.theme.theme$}>
-          <KibanaContextProvider services={appDependencies}>
-            <I18nContext>
-              <EnabledFeaturesContextProvider enabledFeatures={enabledFeatures}>
-                <App history={appDependencies.history} />
-              </EnabledFeaturesContextProvider>
-            </I18nContext>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
+        <KibanaContextProvider services={appDependencies}>
+          <EnabledFeaturesContextProvider enabledFeatures={enabledFeatures}>
+            <ExperimentalFeaturesContextProvider experimentalFeatures={experimentalFeatures}>
+              <App history={appDependencies.history} />
+            </ExperimentalFeaturesContextProvider>
+          </EnabledFeaturesContextProvider>
+        </KibanaContextProvider>
       </QueryClientProvider>
-    </EuiErrorBoundary>,
+    </KibanaRenderContextProvider>,
     element
   );
 

@@ -19,6 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+
 import type { AgentPolicy } from '../../../../../types';
 import {
   useStartServices,
@@ -37,9 +39,10 @@ import {
 import { DevtoolsRequestFlyoutButton } from '../../../../../components';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import { generateUpdateAgentPolicyDevToolsRequest } from '../../../services';
+import { UNKNOWN_SPACE } from '../../../../../../../../common/constants';
 
-const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
-  pick(agentPolicy, [
+const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) => {
+  const partialPolicy = pick(agentPolicy, [
     'name',
     'description',
     'namespace',
@@ -52,10 +55,22 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'fleet_server_host_id',
     'agent_features',
     'is_protected',
+    'advanced_settings',
+    'global_data_tags',
+    'monitoring_pprof_enabled',
+    'monitoring_http',
+    'monitoring_diagnostics',
   ]);
+  return {
+    ...partialPolicy,
+    ...(!agentPolicy.space_ids?.includes(UNKNOWN_SPACE) && {
+      space_ids: agentPolicy.space_ids,
+    }),
+  };
+};
 
 const FormWrapper = styled.div`
-  max-width: 800px;
+  max-width: 1200px;
   margin-right: auto;
   margin-left: auto;
 `;
@@ -67,16 +82,22 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const {
       agents: { enabled: isFleetEnabled },
     } = useConfig();
-    const hasFleetAllPrivileges = useAuthz().fleet.all;
+    const hasAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
     });
+    const spaceSettings = useSpaceSettingsContext();
+
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasChanges, setHasChanges] = useState<boolean>(false);
     const [agentCount, setAgentCount] = useState<number>(0);
     const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-    const validation = agentPolicyFormValidation(agentPolicy);
+    const validation = agentPolicyFormValidation(agentPolicy, {
+      allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
+    });
+    const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
+    const [hasInvalidSpaceError, setInvalidSpaceError] = useState<boolean>(false);
 
     const updateAgentPolicy = (updatedFields: Partial<AgentPolicy>) => {
       setAgentPolicy({
@@ -96,7 +117,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         if (data) {
           notifications.toasts.addSuccess(
             i18n.translate('xpack.fleet.editAgentPolicy.successNotificationTitle', {
-              defaultMessage: "Successfully updated '{name}' settings",
+              defaultMessage: "Successfully updated ''{name}'' settings",
               values: { name: agentPolicy.name },
             })
           );
@@ -136,8 +157,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       if (isFleetEnabled) {
         setIsLoading(true);
         const { data } = await sendGetAgentStatus({ policyId: agentPolicy.id });
-        if (data?.results.total) {
-          setAgentCount(data.results.total);
+        if (data?.results.active) {
+          setAgentCount(data.results.active);
         } else {
           await submitUpdateAgentPolicy();
         }
@@ -151,7 +172,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         {agentCount ? (
           <ConfirmDeployAgentPolicyModal
             agentCount={agentCount}
-            agentPolicy={agentPolicy}
+            agentPolicies={[agentPolicy]}
             onConfirm={() => {
               setAgentCount(0);
               submitUpdateAgentPolicy();
@@ -169,6 +190,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
           validation={validation}
           isEditing={true}
+          updateAdvancedSettingsHasErrors={setHasAdvancedSettingsErrors}
+          setInvalidSpaceError={setInvalidSpaceError}
         />
 
         {hasChanges ? (
@@ -202,7 +225,12 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                     {showDevtoolsRequest ? (
                       <EuiFlexItem grow={false}>
                         <DevtoolsRequestFlyoutButton
-                          isDisabled={isLoading || Object.keys(validation).length > 0}
+                          isDisabled={
+                            isLoading ||
+                            Object.keys(validation).length > 0 ||
+                            hasAdvancedSettingsErrors ||
+                            hasInvalidSpaceError
+                          }
                           btnProps={{
                             color: 'text',
                           }}
@@ -221,8 +249,13 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         onClick={onSubmit}
                         isLoading={isLoading}
                         isDisabled={
-                          !hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0
+                          !hasAllAgentPoliciesPrivileges ||
+                          isLoading ||
+                          Object.keys(validation).length > 0 ||
+                          hasAdvancedSettingsErrors ||
+                          hasInvalidSpaceError
                         }
+                        data-test-subj="agentPolicyDetailsSaveButton"
                         iconType="save"
                         color="primary"
                         fill

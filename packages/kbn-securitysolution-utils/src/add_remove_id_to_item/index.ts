@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -19,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
  */
 type NotArray<T> = T extends unknown[] ? never : T;
 export const addIdToItem = <T>(item: NotArray<T>): T => {
-  const maybeId: typeof item & { id?: string } = item;
+  const maybeId = item as typeof item & { id?: string };
   if (maybeId.id != null) {
     return item;
   } else {
@@ -41,7 +42,7 @@ export const removeIdFromItem = <T>(
       },
       Exclude<keyof T, 'id'>
     > => {
-  const maybeId: typeof item & { id?: string } = item;
+  const maybeId = item as typeof item & { id?: string };
   if (maybeId.id != null) {
     const { id, ...noId } = maybeId;
     return noId;

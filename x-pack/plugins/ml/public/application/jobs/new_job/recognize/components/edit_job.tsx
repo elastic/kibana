@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,14 +22,16 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ModuleJobUI } from '../page';
+import { composeValidators, maxLengthValidator } from '@kbn/ml-validators';
+import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
+
+import type { ModuleJobUI } from '../page';
 import { usePartialState } from '../../../../components/custom_hooks';
-import { composeValidators, maxLengthValidator } from '../../../../../../common/util/validators';
 import { isJobIdValid } from '../../../../../../common/util/job_utils';
-import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
 import { JobGroupsInput } from '../../common/components';
-import { JobOverride } from '../../../../../../common/types/modules';
+import type { JobOverride } from '../../../../../../common/types/modules';
 
 interface EditJobProps {
   job: ModuleJobUI;

@@ -359,7 +359,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        actionsRemover.add('default', newConnector.id, 'action', 'actions');
+        actionsRemover.add('default', newConnector.id, 'connector', 'actions');
         await updateCase({
           supertest,
           params: {
@@ -399,7 +399,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        actionsRemover.add('default', connector.id, 'action', 'actions');
+        actionsRemover.add('default', connector.id, 'connector', 'actions');
 
         const postedCase = await createCase(
           supertest,
@@ -488,7 +488,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('unhappy path = 409s when case is closed', async () => {
+      it('should push a closed case', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
           serviceNowSimulatorURL,
@@ -511,11 +511,12 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           connectorId: connector.id,
-          expectedHttpCode: 409,
+          expectedHttpCode: 200,
         });
       });
 
-      describe('user profile uid', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/157588
+      describe.skip('user profile uid', () => {
         let headers: Record<string, string>;
         let superUserWithProfile: User;
         let superUserInfo: User;

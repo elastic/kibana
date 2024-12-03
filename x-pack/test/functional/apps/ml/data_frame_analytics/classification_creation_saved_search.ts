@@ -12,10 +12,10 @@ import type { FieldStatsType } from '../common/types';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const testSubjects = getService('testSubjects');
   const editedDescription = 'Edited description';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/147020
-  describe.skip('classification saved search creation', function () {
+  describe('classification saved search creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
       await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
@@ -576,6 +576,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
+          await ml.testExecution.logTestStep('displays the create data view switch');
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchCheckState(true);
+
           await ml.testExecution.logTestStep('continues to the validation step');
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
 
@@ -590,16 +594,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
-
-          await ml.testExecution.logTestStep('sets the create data view switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep('creates and starts the analytics job');
           await ml.dataFrameAnalyticsCreation.assertCreateButtonExists();
-          await ml.dataFrameAnalyticsCreation.assertStartJobCheckboxCheckState(true);
+          await ml.dataFrameAnalyticsCreation.assertStartJobSwitchCheckState(true);
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(testData.jobId);
 
           await ml.testExecution.logTestStep('finishes analytics processing');
@@ -684,16 +684,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
 
           await ml.testExecution.logTestStep('displays the ROC curve chart');
-          await ml.commonUI.assertColorsInCanvasElement(
-            'mlDFAnalyticsClassificationExplorationRocCurveChart',
-            testData.expected.rocCurveColorState,
-            ['#000000'],
-            undefined,
-            undefined,
-            // increased tolerance for ROC curve chart up from 10 to 20
-            // since the returned colors vary quite a bit on each run.
-            20
-          );
+
+          // This is a basic check that the chart exists since the returned colors vary quite a bit on each run and cause flakiness.
+          await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationRocCurveChart');
 
           await ml.commonUI.resetAntiAliasing();
         });

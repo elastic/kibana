@@ -5,57 +5,25 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiInputPopover, EuiFieldText } from '@elastic/eui';
+import type { EuiSelectableOption, EuiFieldTextProps } from '@elastic/eui';
+import { EuiInputPopover, EuiFieldText, htmlIdGenerator, keys } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import type { OpenTimelineResult } from '../../open_timeline/types';
+import type { SelectableTimelineProps } from '../selectable_timeline';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
-
-const StyledEuiInputPopover = styled(EuiInputPopover)`
-  .rightArrowIcon {
-    .euiFieldText {
-      padding-left: 12px;
-      padding-right: 40px;
-
-      &[readonly] {
-        cursor: pointer;
-        background-size: 0 100%;
-        background-repeat: no-repeat;
-
-        // To match EuiFieldText focus state
-        &:focus {
-          background-color: ${({ theme }) => theme.eui.euiFormBackgroundColor};
-          background-image: linear-gradient(
-            to top,
-            ${({ theme }) => theme.eui.euiFocusRingColor},
-            ${({ theme }) => theme.eui.euiFocusRingColor} 2px,
-            transparent 2px,
-            transparent 100%
-          );
-          background-size: 100% 100%;
-        }
-      }
-    }
-    .euiFormControlLayoutIcons {
-      left: unset;
-      right: 12px;
-    }
-  }
-`;
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 interface SearchTimelineSuperSelectProps {
   isDisabled: boolean;
   hideUntitled?: boolean;
   timelineId: string | null;
   timelineTitle: string | null;
-  timelineType?: TimelineTypeLiteral;
+  timelineType?: TimelineType;
   placeholder?: string;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
+  'aria-label'?: string;
 }
 
 const getBasicSelectableOptions = (timelineId: string) => [
@@ -74,9 +42,10 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   hideUntitled = false,
   timelineId,
   timelineTitle,
-  timelineType = TimelineType.template,
+  timelineType = TimelineTypeEnum.template,
   onTimelineChange,
   placeholder,
+  'aria-label': ariaLabel,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -84,25 +53,44 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen(false);
   }, []);
 
-  const handleOpenPopover = useCallback(() => {
-    setIsPopoverOpen(true);
+  const handlePopover = useCallback(() => {
+    setIsPopoverOpen((isOpen) => !isOpen);
   }, []);
+
+  const handleKeyboardOpen = useCallback<NonNullable<EuiFieldTextProps['onKeyDown']>>((event) => {
+    if (event.key === keys.ENTER) {
+      setIsPopoverOpen(true);
+    }
+  }, []);
+
+  const popoverId = useMemo(() => htmlIdGenerator('searchTimelinePopover')(), []);
 
   const superSelect = useMemo(
     () => (
       <EuiFieldText
-        readOnly
         disabled={isDisabled}
-        onFocus={handleOpenPopover}
-        onClick={handleOpenPopover}
+        onClick={handlePopover}
+        onKeyDown={handleKeyboardOpen}
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
-        icon="arrowDown"
+        icon={!isDisabled ? { type: 'arrowDown', side: 'right' } : undefined}
+        aria-label={ariaLabel}
+        aria-controls={popoverId}
+        aria-expanded={isPopoverOpen}
+        role="combobox"
       />
     ),
-    [handleOpenPopover, isDisabled, timelineTitle]
+    [
+      ariaLabel,
+      handleKeyboardOpen,
+      isDisabled,
+      isPopoverOpen,
+      popoverId,
+      timelineTitle,
+      handlePopover,
+    ]
   );
 
-  const handleGetSelectableOptions = useCallback(
+  const handleGetSelectableOptions = useCallback<SelectableTimelineProps['getSelectableOptions']>(
     ({ timelines, onlyFavorites, searchTimelineValue }) => [
       ...(!onlyFavorites && searchTimelineValue === ''
         ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)
@@ -115,7 +103,8 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               description: t.description,
               favorite: t.favorite,
               label: t.title,
-              id: timelineType === TimelineType.template ? t.templateTimelineId : t.savedObjectId,
+              id:
+                timelineType === TimelineTypeEnum.template ? t.templateTimelineId : t.savedObjectId,
               key: `${t.title}-${index}`,
               title: t.title,
               checked: [t.savedObjectId, t.templateTimelineId].includes(timelineId)
@@ -128,12 +117,12 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   );
 
   return (
-    <StyledEuiInputPopover
-      id="searchTimelinePopover"
+    <EuiInputPopover
+      id={popoverId}
       input={superSelect}
       isOpen={isPopoverOpen}
       closePopover={handleClosePopover}
-      anchorClassName="rightArrowIcon"
+      className="rightArrowIcon"
     >
       <SelectableTimeline
         hideUntitled={hideUntitled}
@@ -143,7 +132,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         timelineType={timelineType}
         placeholder={placeholder}
       />
-    </StyledEuiInputPopover>
+    </EuiInputPopover>
   );
 };
 

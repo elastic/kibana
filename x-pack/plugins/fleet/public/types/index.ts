@@ -80,6 +80,8 @@ export type {
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  PostStandaloneAgentAPIKeyRequest,
+  PostStandaloneAgentAPIKeyResponse,
   PostLogstashApiKeyResponse,
   GetOutputsResponse,
   GetCurrentUpgradesResponse,
@@ -99,6 +101,7 @@ export type {
   CategorySummaryItem,
   CategorySummaryList,
   PackageInfo,
+  PackageMetadata,
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
@@ -117,6 +120,7 @@ export type {
   GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
+  DeletePackageRequest,
   DeletePackageResponse,
   InstallationStatus,
   Installable,
@@ -138,12 +142,21 @@ export type {
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
   BulkGetAgentPoliciesResponse,
+  RegistryPolicyIntegrationTemplate,
+  EnrollmentSettingsFleetServerPolicy,
+  GetEnrollmentSettingsRequest,
+  GetEnrollmentSettingsResponse,
+  GetSpaceSettingsResponse,
+  GetAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsRequest,
+  GetListAgentPolicyOutputsResponse,
 } from '../../common/types';
 export {
   entries,
   ElasticsearchAssetType,
   KibanaAssetType,
   InstallStatus,
+  SetupTechnology,
 } from '../../common/types';
 
 export * from './intra_app_route_state';

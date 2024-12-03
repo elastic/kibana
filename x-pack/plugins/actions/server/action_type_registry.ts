@@ -7,9 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { RunContext, TaskManagerSetupContract, TaskCost } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { rawConnectorSchema } from './raw_connector_schema';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
@@ -20,6 +19,7 @@ import {
   ActionTypeSecrets,
   ActionTypeParams,
 } from './types';
+import { isBidirectionalConnectorType } from './lib/bidirectional_connectors';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -88,12 +88,22 @@ export class ActionTypeRegistry {
     actionTypeId: string,
     options: { notifyUsage: boolean } = { notifyUsage: false }
   ) {
+    const validLicense = this.licenseState.isLicenseValidForActionType(
+      this.get(actionTypeId),
+      options
+    ).isValid;
+    if (validLicense === false) return false;
+
     const actionTypeEnabled = this.isActionTypeEnabled(actionTypeId, options);
     const inMemoryConnector = this.inMemoryConnectors.find(
       (connector) => connector.id === actionId
     );
 
-    return actionTypeEnabled || (!actionTypeEnabled && inMemoryConnector?.isPreconfigured === true);
+    return (
+      actionTypeEnabled ||
+      (!actionTypeEnabled &&
+        (inMemoryConnector?.isPreconfigured === true || inMemoryConnector?.isSystemAction === true))
+    );
   }
 
   /**
@@ -184,8 +194,8 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         maxAttempts,
+        cost: TaskCost.Tiny,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
-        indirectParamsSchema: rawConnectorSchema,
       },
     });
     // No need to notify usage on basic action types
@@ -223,20 +233,26 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(featureId?: string): CommonActionType[] {
-    return Array.from(this.actionTypes)
-      .filter(([_, actionType]) =>
-        featureId ? actionType.supportedFeatureIds.includes(featureId) : true
-      )
-      .map(([actionTypeId, actionType]) => ({
-        id: actionTypeId,
-        name: actionType.name,
-        minimumLicenseRequired: actionType.minimumLicenseRequired,
-        enabled: this.isActionTypeEnabled(actionTypeId),
-        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-        supportedFeatureIds: actionType.supportedFeatureIds,
-        isSystemActionType: !!actionType.isSystemActionType,
-      }));
+    return (
+      Array.from(this.actionTypes)
+        .filter(([_, actionType]) =>
+          featureId ? actionType.supportedFeatureIds.includes(featureId) : true
+        )
+        // Temporarily don't return SentinelOne and Crowdstrike connector for Security Solution Rule Actions
+        .filter(([actionTypeId]) =>
+          featureId ? !isBidirectionalConnectorType(actionTypeId) : true
+        )
+        .map(([actionTypeId, actionType]) => ({
+          id: actionTypeId,
+          name: actionType.name,
+          minimumLicenseRequired: actionType.minimumLicenseRequired,
+          enabled: this.isActionTypeEnabled(actionTypeId),
+          enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+          enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
+          supportedFeatureIds: actionType.supportedFeatureIds,
+          isSystemActionType: !!actionType.isSystemActionType,
+        }))
+    );
   }
 
   /**

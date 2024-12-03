@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import type { AssetParts } from '../../../../common/types';
-import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
-
+import type {
+  ArchiveEntry,
+  ArchiveIterator,
+  AssetParts,
+  AssetsMap,
+} from '../../../../common/types';
 import {
-  getArchiveEntry,
-  setArchiveEntry,
-  deleteArchiveEntry,
-  getArchiveFilelist,
-  setArchiveFilelist,
-  deleteArchiveFilelist,
-  deletePackageInfo,
-  clearPackageFileCache,
-} from './cache';
+  PackageInvalidArchiveError,
+  PackageUnsupportedMediaTypeError,
+  PackageNotFoundError,
+} from '../../../errors';
+
+import { createArchiveIterator } from './archive_iterator';
+
+import { deletePackageInfo } from './cache';
 import type { SharedKey } from './cache';
 import { getBufferExtractor } from './extract';
 
@@ -25,62 +27,58 @@ export * from './cache';
 export { getBufferExtractor, untarBuffer, unzipBuffer } from './extract';
 export { generatePackageInfoFromArchiveBuffer } from './parse';
 
-export interface ArchiveEntry {
-  path: string;
-  buffer?: Buffer;
-}
-
-export async function unpackBufferToCache({
-  name,
-  version,
+export async function unpackBufferToAssetsMap({
   contentType,
   archiveBuffer,
+  useStreaming,
 }: {
-  name: string;
-  version: string;
   contentType: string;
   archiveBuffer: Buffer;
-}): Promise<string[]> {
-  // Make sure any buffers from previous installations from registry or upload are deleted first
-  clearPackageFileCache({ name, version });
+  useStreaming: boolean | undefined;
+}): Promise<{ paths: string[]; assetsMap: AssetsMap; archiveIterator: ArchiveIterator }> {
+  const archiveIterator = createArchiveIterator(archiveBuffer, contentType);
+  let paths: string[] = [];
+  let assetsMap: AssetsMap = new Map();
+  if (useStreaming) {
+    paths = await archiveIterator.getPaths();
+    // We keep the assetsMap empty as we don't want to load all the assets in memory
+    assetsMap = new Map();
+  } else {
+    const entries = await unpackArchiveEntriesIntoMemory(archiveBuffer, contentType);
 
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
-  const paths: string[] = [];
-  entries.forEach((entry) => {
-    const { path, buffer } = entry;
-    if (buffer) {
-      setArchiveEntry(path, buffer);
-      paths.push(path);
-    }
-  });
-  setArchiveFilelist({ name, version }, paths);
+    entries.forEach((entry) => {
+      const { path, buffer } = entry;
+      if (buffer) {
+        assetsMap.set(path, buffer);
+        paths.push(path);
+      }
+    });
+  }
 
-  return paths;
+  return { paths, assetsMap, archiveIterator };
 }
 
-export async function unpackBufferEntries(
+/**
+ * This function extracts all archive entries into memory.
+ *
+ * NOTE: This is potentially dangerous for large archives and can cause OOM
+ * errors. Use 'traverseArchiveEntries' instead to iterate over the entries
+ * without storing them all in memory at once.
+ *
+ * @param archiveBuffer
+ * @param contentType
+ * @returns All the entries in the archive buffer
+ */
+export async function unpackArchiveEntriesIntoMemory(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<ArchiveEntry[]> {
-  const bufferExtractor = getBufferExtractor({ contentType });
-  if (!bufferExtractor) {
-    throw new PackageUnsupportedMediaTypeError(
-      `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
-    );
-  }
   const entries: ArchiveEntry[] = [];
-  try {
-    const onlyFiles = ({ path }: ArchiveEntry): boolean => !path.endsWith('/');
-    const addToEntries = (entry: ArchiveEntry) => entries.push(entry);
-    await bufferExtractor(archiveBuffer, onlyFiles, addToEntries);
-  } catch (error) {
-    throw new PackageInvalidArchiveError(
-      `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
-    );
-  }
+  const addToEntries = async (entry: ArchiveEntry) => void entries.push(entry);
+  await traverseArchiveEntries(archiveBuffer, contentType, addToEntries);
 
-  // While unpacking a tar.gz file with unzipBuffer() will result in a thrown error in the try-catch above,
-  // unpacking a zip file with untarBuffer() just results in nothing.
+  // While unpacking a tar.gz file with unzipBuffer() will result in a thrown
+  // error, unpacking a zip file with untarBuffer() just results in nothing.
   if (entries.length === 0) {
     throw new PackageInvalidArchiveError(
       `Archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
@@ -89,17 +87,28 @@ export async function unpackBufferEntries(
   return entries;
 }
 
+export async function traverseArchiveEntries(
+  archiveBuffer: Buffer,
+  contentType: string,
+  onEntry: (entry: ArchiveEntry) => Promise<void>
+) {
+  const bufferExtractor = getBufferExtractor({ contentType });
+  if (!bufferExtractor) {
+    throw new PackageUnsupportedMediaTypeError(
+      `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
+    );
+  }
+  try {
+    const onlyFiles = ({ path }: ArchiveEntry): boolean => !path.endsWith('/');
+    await bufferExtractor(archiveBuffer, onlyFiles, onEntry);
+  } catch (error) {
+    throw new PackageInvalidArchiveError(
+      `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
+    );
+  }
+}
+
 export const deletePackageCache = ({ name, version }: SharedKey) => {
-  // get cached archive filelist
-  const paths = getArchiveFilelist({ name, version });
-
-  // delete cached archive filelist
-  deleteArchiveFilelist({ name, version });
-
-  // delete cached archive files
-  // this has been populated in unpackBufferToCache()
-  paths?.forEach(deleteArchiveEntry);
-
   deletePackageInfo({ name, version });
 };
 
@@ -147,9 +156,9 @@ export function getPathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-export function getAsset(key: string) {
-  const buffer = getArchiveEntry(key);
-  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
+export function getAssetFromAssetsMap(assetsMap: AssetsMap, key: string) {
+  const buffer = assetsMap.get(key);
+  if (buffer === undefined) throw new PackageNotFoundError(`Cannot find asset ${key}`);
 
   return buffer;
 }

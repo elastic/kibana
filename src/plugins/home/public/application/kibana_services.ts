@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -15,24 +16,27 @@ import {
   SavedObjectsClientContract,
   IUiSettingsClient,
   ApplicationStart,
+  ThemeServiceStart,
+  I18nStart,
 } from '@kbn/core/public';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { TutorialService } from '../services/tutorials';
 import { AddDataService } from '../services/add_data';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';
-import { ConfigSchema } from '../../config';
+import type { ConfigSchema } from '../../server/config';
 import type { WelcomeService } from '../services/welcome';
 
 export interface HomeKibanaServices {
   dataViewsService: DataViewsContract;
   kibanaVersion: string;
   share: SharePluginSetup;
+  shareStart: SharePluginStart;
   chrome: ChromeStart;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
@@ -52,7 +56,11 @@ export interface HomeKibanaServices {
   addDataService: AddDataService;
   welcomeService: WelcomeService;
   guidedOnboardingService?: GuidedOnboardingApi;
-  cloud?: CloudSetup;
+  cloud: CloudSetup;
+  cloudStart: CloudStart;
+  overlays: OverlayStart;
+  theme: ThemeServiceStart;
+  i18nStart: I18nStart;
 }
 
 let services: HomeKibanaServices | null = null;

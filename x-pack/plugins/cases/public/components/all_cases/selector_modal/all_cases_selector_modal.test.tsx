@@ -11,10 +11,14 @@ import { AllCasesSelectorModal } from '.';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import userEvent from '@testing-library/user-event';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import { useGetTags } from '../../../containers/use_get_tags';
+import { useGetCategories } from '../../../containers/use_get_categories';
 
 jest.mock('../../../containers/api');
 jest.mock('../../../containers/user_profiles/api');
+jest.mock('../../../containers/use_get_tags');
+jest.mock('../../../containers/use_get_categories');
 
 const onRowClick = jest.fn();
 const defaultProps = {
@@ -27,6 +31,11 @@ describe('AllCasesSelectorModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
+    (useGetCategories as jest.Mock).mockReturnValue({
+      data: ['beverages', 'snacks'],
+      refetch: jest.fn(),
+    });
   });
 
   it('renders', () => {
@@ -35,22 +44,18 @@ describe('AllCasesSelectorModal', () => {
     expect(res.getByTestId('all-cases-modal')).toBeInTheDocument();
   });
 
-  it('Closing modal when pressing the x icon', () => {
+  it('Closing modal when pressing the x icon', async () => {
     const res = appMockRenderer.render(<AllCasesSelectorModal {...defaultProps} />);
 
-    act(() => {
-      userEvent.click(res.getByLabelText('Closes this modal window'));
-    });
+    await userEvent.click(res.getByLabelText('Closes this modal window'));
 
     expect(res.queryByTestId('all-cases-modal')).toBeFalsy();
   });
 
-  it('Closing modal when pressing the cancel button', () => {
+  it('Closing modal when pressing the cancel button', async () => {
     const res = appMockRenderer.render(<AllCasesSelectorModal {...defaultProps} />);
 
-    act(() => {
-      userEvent.click(res.getByTestId('all-cases-modal-cancel-button'));
-    });
+    await userEvent.click(res.getByTestId('all-cases-modal-cancel-button'));
 
     expect(res.queryByTestId('all-cases-modal')).toBeFalsy();
   });

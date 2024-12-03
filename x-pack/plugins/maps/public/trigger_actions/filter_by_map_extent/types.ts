@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type { HasDisableTriggers, HasParentApi, HasType } from '@kbn/presentation-publishing';
+import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
-export interface FilterByMapExtentInput extends EmbeddableInput {
-  filterByMapExtent: boolean;
-}
-
-export interface FilterByMapExtentActionContext {
-  embeddable: Embeddable<FilterByMapExtentInput>;
-}
+export type FilterByMapExtentActionApi = HasType<'visualization' | 'map'> &
+  Partial<HasDisableTriggers & HasParentApi<HasType> & HasVisualizeConfig>;

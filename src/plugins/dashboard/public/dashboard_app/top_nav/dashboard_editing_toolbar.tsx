@@ -1,47 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
+
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import React, { useCallback, useMemo } from 'react';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { isExplicitInputWithAttributes } from '@kbn/embeddable-plugin/public';
 
-import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
-import { EditorMenu } from './editor_menu';
-import { useDashboardAPI } from '../dashboard_app';
-import { pluginServices } from '../../services/plugin_services';
-import { ControlsToolbarButton } from './controls_toolbar_button';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
-import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
+import {
+  dataService,
+  embeddableService,
+  usageCollectionService,
+  visualizationsService,
+} from '../../services/kibana_services';
+import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
+import { ControlsToolbarButton } from './controls_toolbar_button';
+import { EditorMenu } from './editor_menu';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
-  const {
-    usageCollection,
-    data: { search },
-    notifications: { toasts },
-    embeddable: { getStateTransfer },
-    visualizations: { getAliases: getVisTypeAliases },
-  } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
 
-  const dashboard = useDashboardAPI();
+  const dashboardApi = useDashboardApi();
 
-  const stateTransferService = getStateTransfer();
-
-  const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
-
-  const trackUiMetric = usageCollection.reportUiCounter?.bind(
-    usageCollection,
-    DASHBOARD_UI_METRIC_ID
+  const lensAlias = useMemo(
+    () => visualizationsService.getAliases().find(({ name }) => name === 'lens'),
+    []
   );
 
   const createNewVisType = useCallback(
@@ -50,6 +44,10 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       let appId = '';
 
       if (visType) {
+        const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
+          usageCollectionService,
+          DASHBOARD_UI_METRIC_ID
+        );
         if (trackUiMetric) {
           trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
@@ -68,75 +66,36 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
         path = '#/create?';
       }
 
+      const stateTransferService = embeddableService.getStateTransfer();
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
-          originatingApp: dashboard.getAppContext()?.currentAppId,
-          originatingPath: dashboard.getAppContext()?.getCurrentPath?.(),
-          searchSessionId: search.session.getSessionId(),
+          originatingApp: dashboardApi.getAppContext()?.currentAppId,
+          originatingPath: dashboardApi.getAppContext()?.getCurrentPath?.(),
+          searchSessionId: dataService.search.session.getSessionId(),
         },
       });
     },
-    [stateTransferService, dashboard, search.session, trackUiMetric]
+    [dashboardApi]
   );
 
-  const createNewEmbeddable = useCallback(
-    async (embeddableFactory: EmbeddableFactory) => {
-      if (trackUiMetric) {
-        trackUiMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
-      }
+  /**
+   * embeddableFactory: Required, you can get the factory from embeddableStart.getEmbeddableFactory(<embeddable type, i.e. lens>)
+   * initialInput: Optional, use it in case you want to pass your own input to the factory
+   * dismissNotification: Optional, if not passed a toast will appear in the dashboard
+   */
 
-      let explicitInput: Partial<EmbeddableInput>;
-      let attributes: unknown;
-      try {
-        const explicitInputReturn = await embeddableFactory.getExplicitInput(undefined, dashboard);
-        if (isExplicitInputWithAttributes(explicitInputReturn)) {
-          explicitInput = explicitInputReturn.newInput;
-          attributes = explicitInputReturn.attributes;
-        } else {
-          explicitInput = explicitInputReturn;
-        }
-      } catch (e) {
-        // error likely means user canceled embeddable creation
-        return;
-      }
-
-      const newEmbeddable = await dashboard.addNewEmbeddable(
-        embeddableFactory.type,
-        explicitInput,
-        attributes
-      );
-
-      if (newEmbeddable) {
-        dashboard.setScrollToPanelId(newEmbeddable.id);
-        dashboard.setHighlightPanelId(newEmbeddable.id);
-        toasts.addSuccess({
-          title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
-          'data-test-subj': 'addEmbeddableToDashboardSuccess',
-        });
-      }
-    },
-    [trackUiMetric, dashboard, toasts]
-  );
-
+  const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const extraButtons = [
-    <EditorMenu
-      createNewVisType={createNewVisType}
-      createNewEmbeddable={createNewEmbeddable}
-      isDisabled={isDisabled}
-    />,
+    <EditorMenu createNewVisType={createNewVisType} isDisabled={isDisabled} />,
     <AddFromLibraryButton
-      onClick={() => dashboard.addFromLibrary()}
+      onClick={() => dashboardApi.addFromLibrary()}
       size="s"
       data-test-subj="dashboardAddFromLibraryButton"
       isDisabled={isDisabled}
     />,
+    <ControlsToolbarButton isDisabled={isDisabled} controlGroupApi={controlGroupApi} />,
   ];
-  if (dashboard.controlGroup) {
-    extraButtons.push(
-      <ControlsToolbarButton isDisabled={isDisabled} controlGroup={dashboard.controlGroup} />
-    );
-  }
 
   return (
     <div

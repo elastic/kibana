@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Agent } from '@kbn/fleet-plugin/common';
+
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 import type { AllowlistFields } from './filterlists/types';
 
@@ -43,6 +45,7 @@ export interface ESLicense {
   start_date_in_millis?: number;
 }
 
+// Telemetry
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   '@timestamp'?: string;
@@ -79,6 +82,31 @@ export interface TelemetryEvent {
   };
 }
 
+/**
+ * List of supported telemetry channels.
+ */
+export enum TelemetryChannel {
+  LISTS = 'security-lists-v2',
+  ENDPOINT_META = 'endpoint-metadata',
+  ENDPOINT_ALERTS = 'alerts-endpoint',
+  DETECTION_ALERTS = 'alerts-detections',
+  TIMELINE = 'alerts-timeline',
+  INSIGHTS = 'security-insights-v1',
+  TASK_METRICS = 'task-metrics',
+}
+
+export enum TelemetryCounter {
+  DOCS_SENT = 'docs_sent',
+  DOCS_LOST = 'docs_lost',
+  DOCS_DROPPED = 'docs_dropped',
+  HTTP_STATUS = 'http_status',
+  RUNTIME_ERROR = 'runtime_error',
+  FATAL_ERROR = 'fatal_error',
+  TELEMETRY_OPTED_OUT = 'telemetry_opted_out',
+  TELEMETRY_NOT_REACHABLE = 'telemetry_not_reachable',
+  NUM_ENDPOINT = 'num_endpoint',
+}
+
 // EP Policy Response
 
 export interface EndpointPolicyResponseAggregation {
@@ -99,7 +127,7 @@ export interface EndpointPolicyResponseAggregation {
 interface EndpointPolicyResponseHits {
   hits: {
     total: { value: number };
-    hits: EndpointPolicyResponseDocument[];
+    hits: Array<{ _source: EndpointPolicyResponseDocument }>;
   };
 }
 
@@ -108,33 +136,30 @@ interface NonPolicyConfiguration {
 }
 
 export interface EndpointPolicyResponseDocument {
-  _source: {
-    '@timestamp': string;
-    agent: {
-      id: string;
-    };
-    event: {
-      agent_id_status: string;
-    };
-    Endpoint: {
-      policy: {
-        applied: {
-          actions: Array<{
-            name: string;
-            message: string;
-            status: string;
-          }>;
-          artifacts: {
-            global: {
-              version: string;
-            };
-          };
+  agent: {
+    id: string;
+  };
+  event: {
+    agent_id_status: string;
+  };
+  Endpoint: {
+    policy: {
+      applied: {
+        actions: Array<{
+          name: string;
+          message: string;
           status: string;
+        }>;
+        artifacts: {
+          global: {
+            version: string;
+          };
         };
+        status: string;
       };
-      configuration: NonPolicyConfiguration;
-      state: NonPolicyConfiguration;
     };
+    configuration: NonPolicyConfiguration;
+    state: NonPolicyConfiguration;
   };
 }
 
@@ -155,32 +180,35 @@ export interface EndpointMetricsAggregation {
 interface EndpointMetricHits {
   hits: {
     total: { value: number };
-    hits: EndpointMetricDocument[];
+    hits: Array<{ _id: string; _source: EndpointMetricDocument }>;
   };
 }
 
-interface EndpointMetricDocument {
-  _source: {
-    '@timestamp': string;
+export interface EndpointMetricDocument {
+  '@timestamp': string;
+  agent: {
+    id: string;
+    version: string;
+  };
+  Endpoint: {
+    metrics: EndpointMetrics;
+  };
+  elastic: {
     agent: {
       id: string;
-      version: string;
-    };
-    Endpoint: {
-      metrics: EndpointMetrics;
-    };
-    elastic: {
-      agent: {
-        id: string;
-      };
-    };
-    host: {
-      os: EndpointMetricOS;
-    };
-    event: {
-      agent_id_status: string;
     };
   };
+  host: {
+    os: EndpointMetricOS;
+  };
+  event: {
+    agent_id_status: string;
+  };
+}
+
+export interface EndpointMetricsAbstract {
+  endpointMetricIds: string[];
+  totalEndpoints: number;
 }
 
 interface DocumentsVolumeMetrics {
@@ -283,24 +311,22 @@ export interface EndpointMetadataAggregation {
 interface EndpointMetadataHits {
   hits: {
     total: { value: number };
-    hits: EndpointMetadataDocument[];
+    hits: Array<{ _source: EndpointMetadataDocument }>;
   };
 }
 
 export interface EndpointMetadataDocument {
-  _source: {
-    '@timestamp': string;
+  '@timestamp': string;
+  agent: {
+    id: string;
+    version: string;
+  };
+  Endpoint: {
+    capabilities: string[];
+  };
+  elastic: {
     agent: {
       id: string;
-      version: string;
-    };
-    Endpoint: {
-      capabilities: string[];
-    };
-    elastic: {
-      agent: {
-        id: string;
-      };
     };
   };
 }
@@ -428,21 +454,28 @@ export interface ValueListIndicatorMatchResponseAggregation {
   };
 }
 
-export interface TaskMetric {
-  name: string;
-  passed: boolean;
-  time_executed_in_ms: number;
-  start_time: number;
-  end_time: number;
-  error_message?: string;
-}
-
 export interface TelemetryConfiguration {
   telemetry_max_buffer_size: number;
   max_security_list_telemetry_batch: number;
   max_endpoint_telemetry_batch: number;
   max_detection_rule_telemetry_batch: number;
   max_detection_alerts_batch: number;
+  use_async_sender: boolean;
+  sender_channels?: {
+    [key: string]: TelemetrySenderChannelConfiguration;
+  };
+  pagination_config?: PaginationConfiguration;
+}
+
+export interface PaginationConfiguration {
+  max_page_size_bytes: number;
+  num_docs_to_sample: number;
+}
+
+export interface TelemetrySenderChannelConfiguration {
+  buffer_time_span_millis: number;
+  inflight_events_threshold: number;
+  max_payload_size_bytes: number;
 }
 
 export interface TelemetryFilterListArtifact {
@@ -456,4 +489,29 @@ export interface ValueListResponse {
   itemMetricsResponse: ValueListItemsResponseAggregation;
   exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
   indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
+}
+
+export type Nullable<T> = T | null | undefined;
+
+export interface ExtraInfo {
+  clusterInfo: ESClusterInfo;
+  licenseInfo: Nullable<ESLicense>;
+}
+
+export interface TimeFrame {
+  startOfDay: string;
+  endOfDay: string;
+}
+
+export interface TimelineResult {
+  nodes: number;
+  events: number;
+  timeline: TimelineTelemetryTemplate | undefined;
+}
+
+export interface FleetAgentResponse {
+  agents: Agent[];
+  total: number;
+  page: number;
+  perPage: number;
 }

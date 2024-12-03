@@ -12,10 +12,17 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { useGetDashboard } from './use_get_dashboard';
+import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('./use_get_dashboard');
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
+jest.mock('../lib/gen_ai/use_get_dashboard');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const mockDashboard = useGetDashboard as jest.Mock;
@@ -38,6 +45,17 @@ const azureConnector = {
   config: {
     apiUrl: 'https://azureaiurl.com',
     apiProvider: OpenAiProviderType.AzureAi,
+  },
+  secrets: {
+    apiKey: 'thats-a-nice-looking-key',
+  },
+};
+const otherOpenAiConnector = {
+  ...openAiConnector,
+  config: {
+    apiUrl: 'https://localhost/oss-llm',
+    apiProvider: OpenAiProviderType.Other,
+    defaultModel: 'local-model',
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',
@@ -86,6 +104,24 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
+  test('other open ai connector fields are rendered', async () => {
+    const { getAllByTestId } = render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
+      otherOpenAiConnector.config.apiUrl
+    );
+    expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
+      otherOpenAiConnector.config.apiProvider
+    );
+    expect(getAllByTestId('other-ai-api-doc')[0]).toBeInTheDocument();
+    expect(getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
+  });
+
   describe('Dashboard link', () => {
     it('Does not render if isEdit is false and dashboardUrl is defined', async () => {
       const { queryByTestId } = render(
@@ -101,7 +137,7 @@ describe('ConnectorFields renders', () => {
       }));
       const { queryByTestId } = render(
         <ConnectorFormTestProvider connector={openAiConnector}>
-          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+          <ConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
       expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
@@ -139,7 +175,7 @@ describe('ConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       await waitFor(async () => {
@@ -168,7 +204,7 @@ describe('ConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
@@ -196,15 +232,14 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(res.getByTestId(field));
+      if (value !== '') {
+        await userEvent.type(res.getByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
       });

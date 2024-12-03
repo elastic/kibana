@@ -7,18 +7,18 @@
 
 import React, { type FC, useCallback, useMemo } from 'react';
 import { omit, pick } from 'lodash';
+import type { EuiDescriptionListProps, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBadge,
   EuiCodeBlock,
   EuiDescriptionList,
-  EuiDescriptionListProps,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiTitle,
   useEuiPaddingSize,
 } from '@elastic/eui';
@@ -27,7 +27,8 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
-import { JobMap } from '../data_frame_analytics/pages/job_map';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { InferenceApi } from './inference_api_tab';
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
@@ -38,6 +39,10 @@ import { useEnabledFeatures } from '../contexts/ml';
 interface ExpandedRowProps {
   item: ModelItemFull;
 }
+
+const JobMap = dynamic(async () => ({
+  default: (await import('../data_frame_analytics/pages/job_map')).JobMap,
+}));
 
 const useBadgeFormatter = () => {
   const xs = useEuiPaddingSize('xs');
@@ -164,19 +169,47 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
   ]);
 
-  const deploymentStatItems: AllocatedModel[] = useMemo<AllocatedModel[]>(() => {
+  const deploymentStatItems = useMemo<AllocatedModel[]>(() => {
     const deploymentStats = stats.deployment_stats;
     const modelSizeStats = stats.model_size_stats;
 
     if (!deploymentStats || !modelSizeStats) return [];
 
-    const items: AllocatedModel[] = deploymentStats.flatMap((perDeploymentStat) => {
+    return deploymentStats.flatMap((perDeploymentStat) => {
+      // A deployment can be in a starting state and not allocated to any node yet.
+      if (perDeploymentStat.nodes.length < 1) {
+        return [
+          {
+            key: `${perDeploymentStat.deployment_id}_no_node`,
+            ...perDeploymentStat,
+            ...modelSizeStats,
+            node: {
+              name: '-',
+              average_inference_time_ms: 0,
+              inference_count: 0,
+              routing_state: {
+                routing_state: perDeploymentStat.state,
+                reason: perDeploymentStat.reason,
+              },
+              last_access: 0,
+              number_of_pending_requests: 0,
+              start_time: 0,
+              throughput_last_minute: 0,
+              number_of_allocations: 0,
+              threads_per_allocation: 0,
+              error_count: 0,
+            },
+          },
+        ];
+      }
+
       return perDeploymentStat.nodes.map((n) => {
         const nodeName = Object.values(n.node)[0].name;
         return {
           key: `${perDeploymentStat.deployment_id}_${nodeName}`,
           ...perDeploymentStat,
           ...modelSizeStats,
+          // @ts-expect-error `throughput_last_minute` is not declared in ES Types
           node: {
             ...pick(n, [
               'average_inference_time_ms',
@@ -195,8 +228,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         };
       });
     });
-
-    return items;
   }, [stats]);
 
   const hideColumns = useMemo(() => {
@@ -408,20 +439,51 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               id: 'pipelines',
               'data-test-subj': 'mlTrainedModelPipelines',
               name: (
-                <>
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
-                    defaultMessage="Pipelines"
-                  />
+                <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
+                      defaultMessage="Pipelines"
+                    />
+                  </EuiFlexItem>
                   {isPopulatedObject(pipelines) ? (
-                    <EuiNotificationBadge>{Object.keys(pipelines).length}</EuiNotificationBadge>
+                    <EuiFlexItem grow={false}>
+                      <EuiNotificationBadge>{Object.keys(pipelines).length}</EuiNotificationBadge>
+                    </EuiFlexItem>
                   ) : null}
-                </>
+                </EuiFlexGroup>
               ),
               content: (
                 <div data-test-subj={'mlTrainedModelPipelinesContent'}>
                   <EuiSpacer size={'s'} />
                   <ModelPipelines pipelines={pipelines!} ingestStats={stats.ingest} />
+                </div>
+              ),
+            },
+          ]
+        : []),
+      ...(Array.isArray(item.inference_apis) && item.inference_apis.length > 0
+        ? [
+            {
+              id: 'inferenceApi',
+              'data-test-subj': 'inferenceAPIs',
+              name: (
+                <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceAPIsTabLabel"
+                      defaultMessage="Inference services"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge>{item.inference_apis.length}</EuiNotificationBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              content: (
+                <div data-test-subj={'mlTrainedModelInferenceAPIContent'}>
+                  <EuiSpacer size={'s'} />
+                  <InferenceApi inferenceApis={item.inference_apis} />
                 </div>
               ),
             },
@@ -462,6 +524,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     restMetaData,
     stats,
     item.model_id,
+    item.inference_apis,
     hideColumns,
   ]);
 

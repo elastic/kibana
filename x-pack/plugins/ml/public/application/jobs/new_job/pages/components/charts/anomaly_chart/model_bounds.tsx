@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
+import type { AreaSeriesStyle, RecursivePartial } from '@elastic/charts';
 import { ScaleType, AreaSeries, CurveType } from '@elastic/charts';
-import { ModelItem } from '../../../../common/results_loader';
-import { seriesStyle, useChartColors } from '../common/settings';
+import type { ModelItem } from '../../../../common/results_loader';
+import { areaSeriesStyle, useChartColors } from '../common/settings';
 
 interface Props {
   modelData?: ModelItem[];
@@ -16,14 +18,14 @@ interface Props {
 
 const SPEC_ID = 'model';
 
-const areaSeriesStyle = {
-  ...seriesStyle,
+const style: RecursivePartial<AreaSeriesStyle> = {
+  ...areaSeriesStyle,
   area: {
-    ...seriesStyle.area,
+    ...areaSeriesStyle.area,
     visible: true,
   },
   line: {
-    ...seriesStyle.line,
+    ...areaSeriesStyle.line,
     strokeWidth: 1,
     opacity: 0.4,
   },
@@ -42,7 +44,7 @@ export const ModelBounds: FC<Props> = ({ modelData }) => {
       y0Accessors={['modelLower']}
       data={model}
       curve={CurveType.CURVE_MONOTONE_X}
-      areaSeriesStyle={areaSeriesStyle}
+      areaSeriesStyle={style}
       color={MODEL_COLOR}
     />
   );

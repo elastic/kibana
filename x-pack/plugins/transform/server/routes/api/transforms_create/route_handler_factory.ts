@@ -7,14 +7,15 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import type { DataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
+import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
+import type { TransformIdParamSchema } from '../../api_schemas/common';
 import type {
   PutTransformsRequestSchema,
-  PutTransformsQuerySchema,
   PutTransformsResponseSchema,
-} from '../../../../common/api_schemas/transforms';
+} from '../../api_schemas/transforms';
 import { isLatestTransform } from '../../../../common/types/transform';
 
 import type { RouteDependencies } from '../../../types';
@@ -26,11 +27,13 @@ export const routeHandlerFactory: (
   routeDependencies: RouteDependencies
 ) => RequestHandler<
   TransformIdParamSchema,
-  PutTransformsQuerySchema,
+  DataViewCreateQuerySchema,
   PutTransformsRequestSchema,
   TransformRequestHandlerContext
 > = (routeDependencies) => async (ctx, req, res) => {
-  const { coreStart, dataViews } = routeDependencies;
+  const { getCoreStart, getDataViewsStart } = routeDependencies;
+  const coreStart = await getCoreStart();
+  const dataViews = await getDataViewsStart();
   const { transformId } = req.params;
   const { createDataView, timeFieldName } = req.query;
 
@@ -73,35 +76,23 @@ export const routeHandlerFactory: (
       req
     );
 
-    const dataViewName = req.body.dest.index;
     const runtimeMappings = req.body.source.runtime_mappings as Record<string, RuntimeField>;
 
-    try {
-      const dataViewsResp = await dataViewsService.createAndSave(
-        {
-          title: dataViewName,
-          timeFieldName,
-          // Adding runtime mappings for transforms of type latest only here
-          // since only they will want to replicate the source index mapping.
-          // Pivot type transforms have index mappings that cannot be
-          // inferred from the source index.
-          ...(isPopulatedObject(runtimeMappings) && isLatestTransform(req.body)
-            ? { runtimeFieldMap: runtimeMappings }
-            : {}),
-          allowNoIndex: true,
-        },
-        false,
-        true
-      );
+    const { dataViewsCreated, dataViewsErrors } = await createDataViewFn({
+      dataViewsService,
+      dataViewName: req.body.dest.index,
+      // Adding runtime mappings for transforms of type latest only here
+      // since only they will want to replicate the source index mapping.
+      // Pivot type transforms have index mappings that cannot be
+      // inferred from the source index.
+      runtimeMappings:
+        isPopulatedObject(runtimeMappings) && isLatestTransform(req.body) ? runtimeMappings : {},
+      timeFieldName,
+      errorFallbackId: transformId,
+    });
 
-      if (dataViewsResp.id) {
-        response.dataViewsCreated = [{ id: dataViewsResp.id }];
-      }
-    } catch (error) {
-      // For the error id we use the transform id
-      // because in case of an error we don't get a data view id.
-      response.dataViewsErrors = [{ id: transformId, error }];
-    }
+    response.dataViewsCreated = dataViewsCreated;
+    response.dataViewsErrors = dataViewsErrors;
   }
 
   return res.ok({ body: response });

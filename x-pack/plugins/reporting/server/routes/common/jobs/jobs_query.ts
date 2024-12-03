@@ -8,8 +8,9 @@
 import { TransportResult, errors, estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
-import { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
+import { JOB_STATUS } from '@kbn/reporting-common';
+import type { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
+import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { ReportingCore } from '../../..';
 import { Report } from '../../../lib/store';
 import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fields';
@@ -39,24 +40,22 @@ export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> 
 
 export interface JobsQueryFactory {
   list(
-    jobTypes: string[],
     user: ReportingUser,
     page: number,
     size: number,
     jobIds: string[] | null
   ): Promise<ReportApiJSON[]>;
-  count(jobTypes: string[], user: ReportingUser): Promise<number>;
+  count(user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getError(id: string): Promise<string>;
   getDocumentPayload(doc: ReportApiJSON): Promise<Payload>;
   delete(deleteIndex: string, id: string): Promise<TransportResult<estypes.DeleteResponse>>;
 }
 
-export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
-  function getIndex() {
-    return `${REPORTING_SYSTEM_INDEX}-*`;
-  }
-
+export function jobsQueryFactory(
+  reportingCore: ReportingCore,
+  { isInternal }: { isInternal: boolean }
+): JobsQueryFactory {
   async function execQuery<
     T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
   >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
@@ -74,7 +73,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
   }
 
   return {
-    async list(jobTypes, user, page = 0, size = defaultSize, jobIds) {
+    async list(user, page = 0, size = defaultSize, jobIds) {
       const username = getUsername(user);
       const body = getSearchBody({
         size,
@@ -84,7 +83,6 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
             filter: {
               bool: {
                 must: [
-                  { terms: { jobtype: jobTypes } },
                   { term: { created_by: username } },
                   ...(jobIds ? [{ ids: { values: jobIds } }] : []),
                 ],
@@ -95,7 +93,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       });
 
       const response = (await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search({ body, index: getIndex() })
+        elasticsearchClient.search({ body, index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY })
       )) as estypes.SearchResponse<ReportSource>;
 
       return (
@@ -111,14 +109,14 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       );
     },
 
-    async count(jobTypes, user) {
+    async count(user) {
       const username = getUsername(user);
       const body = {
         query: {
           constant_score: {
             filter: {
               bool: {
-                must: [{ terms: { jobtype: jobTypes } }, { term: { created_by: username } }],
+                must: [{ term: { created_by: username } }],
               },
             },
           },
@@ -126,7 +124,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       };
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.count({ body, index: getIndex() })
+        elasticsearchClient.count({ body, index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY })
       );
 
       return response?.count ?? 0;
@@ -155,7 +153,10 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       });
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
+        elasticsearchClient.search<ReportSource>({
+          body,
+          index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+        })
       );
 
       const result = response?.hits?.hits?.[0];
@@ -186,7 +187,10 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       };
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
+        elasticsearchClient.search<ReportSource>({
+          body,
+          index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+        })
       );
       const hits = response?.hits?.hits?.[0];
       const status = hits?._source?.status;
@@ -199,18 +203,14 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     },
 
     async getDocumentPayload(doc: ReportApiJSON) {
-      const getDocumentPayload = getDocumentPayloadFactory(reportingCore);
+      const getDocumentPayload = getDocumentPayloadFactory(reportingCore, { isInternal });
       return await getDocumentPayload(doc);
     },
 
     async delete(deleteIndex, id) {
       try {
         const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
-
-        // Using `wait_for` helps avoid users seeing recently-deleted reports temporarily flashing back in the
-        // job listing.
-        const query = { id, index: deleteIndex, refresh: 'wait_for' as const };
-
+        const query = { id, index: deleteIndex };
         return await elasticsearchClient.delete(query, { meta: true });
       } catch (error) {
         throw new Error(

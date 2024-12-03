@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { getSecurityGetStartedComponent } from './get_started';
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
   SecuritySolutionServerlessPluginSetup,
@@ -18,12 +17,13 @@ import type {
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
-import { setupNavigation, startNavigation } from './navigation';
-import { setRoutes } from './pages/routes';
+import { startNavigation } from './navigation';
 import {
   parseExperimentalConfigValue,
   type ExperimentalFeatures,
 } from '../common/experimental_features';
+import { setOnboardingSettings } from './onboarding';
+import { getEnablementModalCallout } from './components/enablement_modal_callout';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -53,7 +53,8 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    setupNavigation(core, setupDeps);
+    setupDeps.discover.showInlineTopNav();
+
     return {};
   }
 
@@ -63,18 +64,17 @@ export class SecuritySolutionServerlessPlugin
   ): SecuritySolutionServerlessPluginStart {
     const { securitySolution } = startDeps;
     const { productTypes } = this.config;
-
     const services = createServices(core, startDeps, this.experimentalFeatures);
 
-    registerUpsellings(securitySolution.getUpselling(), productTypes, services);
+    registerUpsellings(productTypes, services);
 
     securitySolution.setComponents({
-      GetStarted: getSecurityGetStartedComponent(services, productTypes),
       DashboardsLandingCallout: getDashboardsLandingCallout(services),
+      EnablementModalCallout: getEnablementModalCallout(services),
     });
 
+    setOnboardingSettings(services);
     startNavigation(services);
-    setRoutes(services);
 
     return {};
   }

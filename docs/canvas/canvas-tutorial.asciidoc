@@ -9,15 +9,11 @@ To familiarize yourself with *Canvas*, add the Sample eCommerce orders data, the
 
 To create a workpad of the eCommerce store data, add the data set, then create the workpad.
 
-. On the home page, click *Try sample data*.
+. <<gs-get-data-into-kibana,Install the eCommerce sample data>>.
 
-. Click *Other sample data sets*. 
+. Go to **Canvas** using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
-. On the *Sample eCommerce orders* card, click *Add data*.
-
-. Open the main menu, then click *Canvas*.
-
-. On the *Canvas workpads* page, click *Create workpad*.
+. Select *Create workpad*.
 
 [float]
 === Customize your workpad with images
@@ -121,7 +117,7 @@ To focus your data on a specific time range, add the time filter.
 . To use the date time field from the sample data, enter `order_date` in the *Column* field, then click *Set*.
 
 [role="screenshot"]
-image::images/canvas_tutorialCustomTimeFilter_7.17.0.png[Custom time filter added to the workpad]
+image::../setup/images/canvas_tutorialCustomTimeFilter_7.17.0.png[Custom time filter added to the workpad]
 
 To see how the data changes, set the time filter to *Last 7 days*. As you change the time filter options, the elements automatically update.
 

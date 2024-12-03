@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC, useEffect } from 'react';
@@ -40,7 +41,7 @@ describe('toMountPoint', () => {
   };
 
   it('exposes the euiTheme when `theme$` is provided', async () => {
-    const theme = { theme$: of<CoreTheme>({ darkMode: true }) };
+    const theme = { theme$: of<CoreTheme>({ darkMode: true, name: 'amsterdam' }) };
     const mount = toMountPoint(<InnerComponent />, { theme, i18n, analytics });
 
     const targetEl = document.createElement('div');
@@ -52,7 +53,7 @@ describe('toMountPoint', () => {
   });
 
   it('propagates changes of the theme$ observable', async () => {
-    const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
+    const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: true, name: 'amsterdam' });
 
     const mount = toMountPoint(<InnerComponent />, { theme: { theme$ }, i18n, analytics });
 
@@ -64,7 +65,7 @@ describe('toMountPoint', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      theme$.next({ darkMode: false });
+      theme$.next({ darkMode: false, name: 'amsterdam' });
     });
     await flushPromises();
 

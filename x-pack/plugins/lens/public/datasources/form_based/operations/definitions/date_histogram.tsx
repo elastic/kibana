@@ -29,12 +29,13 @@ import {
 } from '@kbn/data-plugin/public';
 import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { TooltipWrapper } from '@kbn/visualization-ui-components';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import { updateColumnParam } from '../layer_helpers';
-import { OperationDefinition, ParamEditorProps } from '.';
+import { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { FormBasedLayer } from '../../types';
+import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -50,26 +51,34 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   };
 }
 
-function getMultipleDateHistogramsErrorMessage(layer: FormBasedLayer, columnId: string) {
+function getMultipleDateHistogramsErrorMessage(
+  layer: FormBasedLayer,
+  columnId: string
+): FieldBasedOperationErrorMessage[] {
   const usesTimeShift = Object.values(layer.columns).some(
     (col) => col.timeShift && col.timeShift !== ''
   );
   if (!usesTimeShift) {
-    return undefined;
+    return [];
   }
   const dateHistograms = layer.columnOrder.filter(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   );
   if (dateHistograms.length < 2) {
-    return undefined;
+    return [];
   }
-  return i18n.translate('xpack.lens.indexPattern.multipleDateHistogramsError', {
-    defaultMessage:
-      '"{dimensionLabel}" is not the only date histogram. When using time shifts, make sure to only use one date histogram.',
-    values: {
-      dimensionLabel: layer.columns[columnId].label,
+  return [
+    {
+      uniqueId: TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS,
+      message: i18n.translate('xpack.lens.indexPattern.multipleDateHistogramsError', {
+        defaultMessage:
+          '"{dimensionLabel}" is not the only date histogram. When using time shifts, make sure to only use one date histogram.',
+        values: {
+          dimensionLabel: layer.columns[columnId].label,
+        },
+      }),
     },
-  });
+  ];
 }
 
 export const dateHistogramOperation: OperationDefinition<
@@ -84,11 +93,10 @@ export const dateHistogramOperation: OperationDefinition<
   input: 'field',
   priority: 5, // Highest priority level used
   operationParams: [{ name: 'interval', type: 'string', required: false }],
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    [
-      ...(getInvalidFieldMessage(layer, columnId, indexPattern) || []),
-      getMultipleDateHistogramsErrorMessage(layer, columnId) || '',
-    ].filter(Boolean),
+  getErrorMessage: (layer, columnId, indexPattern) => [
+    ...getInvalidFieldMessage(layer, columnId, indexPattern),
+    ...getMultipleDateHistogramsErrorMessage(layer, columnId),
+  ],
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       (type === 'date' || type === 'date_range') &&

@@ -4,17 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { type DataView } from '@kbn/data-views-plugin/common';
-import numeral from '@elastic/numeral';
-import { FieldsSelectorModal } from './fields_selector';
-import { FindingsGroupBySelector } from '../../pages/configurations/layout/findings_group_by_selector';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { FieldsSelectorModal, useFieldsModal } from './fields_selector';
 import { useStyles } from './use_styles';
+import { CSP_FIELDS_SELECTOR_OPEN_BUTTON } from '../test_subjects';
 
-const formatNumber = (value: number) => {
-  return value < 1000 ? value : numeral(value).format('0.0a');
+const GroupSelectorWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  const styles = useStyles();
+
+  return (
+    <EuiFlexItem grow={false} className={styles.groupBySelector}>
+      {children}
+    </EuiFlexItem>
+  );
 };
 
 export const AdditionalControls = ({
@@ -24,6 +30,8 @@ export const AdditionalControls = ({
   columns,
   onAddColumn,
   onRemoveColumn,
+  groupSelectorComponent,
+  onResetColumns,
 }: {
   total: number;
   title: string;
@@ -31,13 +39,11 @@ export const AdditionalControls = ({
   columns: string[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
+  groupSelectorComponent?: JSX.Element;
+  onResetColumns: () => void;
 }) => {
-  const styles = useStyles();
-
-  const [isFieldSelectorModalVisible, setIsFieldSelectorModalVisible] = useState(false);
-
-  const closeModal = () => setIsFieldSelectorModalVisible(false);
-  const showModal = () => setIsFieldSelectorModalVisible(true);
+  const { isFieldSelectorModalVisible, closeFieldsSelectorModal, openFieldsSelectorModal } =
+    useFieldsModal();
 
   return (
     <>
@@ -45,30 +51,30 @@ export const AdditionalControls = ({
         <FieldsSelectorModal
           columns={columns}
           dataView={dataView}
-          closeModal={closeModal}
+          closeModal={closeFieldsSelectorModal}
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
+          onResetColumns={onResetColumns}
         />
       )}
       <EuiFlexItem grow={0}>
-        <span className="cspDataTableTotal">{`${formatNumber(total)} ${title}`}</span>
+        <span className="cspDataTableTotal">{`${getAbbreviatedNumber(total)} ${title}`}</span>
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
         <EuiButtonEmpty
           className="cspDataTableFields"
           iconType="tableOfContents"
-          onClick={showModal}
+          onClick={openFieldsSelectorModal}
           size="xs"
           color="text"
+          data-test-subj={CSP_FIELDS_SELECTOR_OPEN_BUTTON}
         >
-          {i18n.translate('xpack.csp.dataTable.fields', {
-            defaultMessage: 'Fields',
-          })}
+          <FormattedMessage id="xpack.csp.dataTable.fieldsButton" defaultMessage="Fields" />
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} className={styles.groupBySelector}>
-        <FindingsGroupBySelector type="default" />
-      </EuiFlexItem>
+      {groupSelectorComponent && (
+        <GroupSelectorWrapper>{groupSelectorComponent}</GroupSelectorWrapper>
+      )}
     </>
   );
 };

@@ -6,14 +6,96 @@
  */
 
 import type { ExistsFilter, Filter } from '@kbn/es-query';
+import { tableDefaults } from '@kbn/securitysolution-data-table';
+import { createLicenseServiceMock } from '../../../../common/license/mocks';
 import {
+  buildAlertAssigneesFilter,
   buildAlertsFilter,
   buildAlertStatusesFilter,
   buildAlertStatusFilter,
   buildThreatMatchFilter,
+  getAlertsDefaultModel,
+  getAlertsPreviewDefaultModel,
+  buildAlertsFilterByRuleIds,
 } from './default_config';
 
 jest.mock('./actions');
+
+const basicBaseColumns = [
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: 'Severity',
+    id: 'kibana.alert.severity',
+    initialWidth: 105,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: 'Risk Score',
+    id: 'kibana.alert.risk_score',
+    initialWidth: 100,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: 'Reason',
+    id: 'kibana.alert.reason',
+    initialWidth: 450,
+  },
+  { columnHeaderType: 'not-filtered', id: 'host.name' },
+  { columnHeaderType: 'not-filtered', id: 'user.name' },
+  { columnHeaderType: 'not-filtered', id: 'process.name' },
+  { columnHeaderType: 'not-filtered', id: 'file.name' },
+  { columnHeaderType: 'not-filtered', id: 'source.ip' },
+  { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+];
+
+const platinumBaseColumns = [
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: 'Severity',
+    id: 'kibana.alert.severity',
+    initialWidth: 105,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: 'Risk Score',
+    id: 'kibana.alert.risk_score',
+    initialWidth: 100,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: 'Reason',
+    id: 'kibana.alert.reason',
+    initialWidth: 450,
+  },
+  { columnHeaderType: 'not-filtered', id: 'host.name' },
+  { columnHeaderType: 'not-filtered', id: 'user.name' },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'host.risk.calculated_level',
+    displayAsText: 'Host Risk Level',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.risk.calculated_level',
+    displayAsText: 'User Risk Level',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'host.asset.criticality',
+    displayAsText: 'Host Criticality',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.asset.criticality',
+    displayAsText: 'User Criticality',
+  },
+  { columnHeaderType: 'not-filtered', id: 'process.name' },
+  { columnHeaderType: 'not-filtered', id: 'file.name' },
+  { columnHeaderType: 'not-filtered', id: 'source.ip' },
+  { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+];
+
+const dataViewId = 'security-solution-default';
 
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
@@ -23,6 +105,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           negate: false,
+          index: dataViewId,
           disabled: false,
           type: 'phrase',
           key: 'kibana.alert.rule.rule_id',
@@ -47,6 +130,7 @@ describe('alerts default_config', () => {
           meta: {
             alias: null,
             disabled: false,
+            index: dataViewId,
             negate: false,
             key: 'kibana.alert.rule.type',
             type: 'term',
@@ -155,6 +239,233 @@ describe('alerts default_config', () => {
       };
       expect(filters).toHaveLength(1);
       expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('buildAlertAssigneesFilter', () => {
+    test('given an empty list of assignees ids will return an empty filter', () => {
+      const filters: Filter[] = buildAlertAssigneesFilter([]);
+      expect(filters).toHaveLength(0);
+    });
+
+    test('builds filter containing all assignees ids passed into function', () => {
+      const filters = buildAlertAssigneesFilter(['user-id-1', 'user-id-2', 'user-id-3']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          index: dataViewId,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.workflow_assignee_ids': 'user-id-1',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.workflow_assignee_ids': 'user-id-2',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.workflow_assignee_ids': 'user-id-3',
+                },
+              },
+            ],
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('buildAlertsFilterByRuleIds', () => {
+    it('given an empty list of rule ids will return an empty filter', () => {
+      const filters = buildAlertsFilterByRuleIds([]);
+      expect(filters).toHaveLength(0);
+    });
+
+    it('builds filter containing 1 rule id passed into function', () => {
+      const filters = buildAlertsFilterByRuleIds(['rule-id-1']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-1',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      };
+
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+
+    it('builds filter containing 3 rule ids passed into function', () => {
+      const filters = buildAlertsFilterByRuleIds(['rule-id-1', 'rule-id-2', 'rule-id-3']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-1',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-2',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-3',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      };
+
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('getAlertsDefaultModel', () => {
+    test('returns correct model for Basic license', () => {
+      const licenseServiceMock = createLicenseServiceMock();
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+      const model = getAlertsDefaultModel(licenseServiceMock);
+
+      const expected = {
+        ...tableDefaults,
+        showCheckboxes: true,
+        columns: [
+          { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Assignees',
+            id: 'kibana.alert.workflow_assignee_ids',
+            initialWidth: 190,
+          },
+          ...basicBaseColumns,
+        ],
+      };
+      expect(model).toEqual(expected);
+    });
+
+    test('returns correct model for Platinum license', () => {
+      const licenseServiceMock = createLicenseServiceMock();
+      const model = getAlertsDefaultModel(licenseServiceMock);
+
+      const expected = {
+        ...tableDefaults,
+        showCheckboxes: true,
+        columns: [
+          { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Assignees',
+            id: 'kibana.alert.workflow_assignee_ids',
+            initialWidth: 190,
+          },
+          ...platinumBaseColumns,
+        ],
+      };
+      expect(model).toEqual(expected);
+    });
+  });
+
+  describe('getAlertsPreviewDefaultModel', () => {
+    test('returns correct model for Basic license', () => {
+      const licenseServiceMock = createLicenseServiceMock();
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+      const model = getAlertsPreviewDefaultModel(licenseServiceMock);
+
+      const expected = {
+        ...tableDefaults,
+        showCheckboxes: false,
+        defaultColumns: [
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.original_time', initialWidth: 200 },
+          ...basicBaseColumns,
+        ],
+        columns: [
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.original_time', initialWidth: 200 },
+          ...basicBaseColumns,
+        ],
+        sort: [
+          {
+            columnId: 'kibana.alert.original_time',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+      };
+      expect(model).toEqual(expected);
+    });
+
+    test('returns correct model for Platinum license', () => {
+      const licenseServiceMock = createLicenseServiceMock();
+      const model = getAlertsPreviewDefaultModel(licenseServiceMock);
+
+      const expected = {
+        ...tableDefaults,
+        showCheckboxes: false,
+        defaultColumns: [
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.original_time', initialWidth: 200 },
+          ...platinumBaseColumns,
+        ],
+        columns: [
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.original_time', initialWidth: 200 },
+          ...platinumBaseColumns,
+        ],
+        sort: [
+          {
+            columnId: 'kibana.alert.original_time',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+      };
+      expect(model).toEqual(expected);
     });
   });
 

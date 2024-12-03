@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['canvas', 'header', 'maps']);
+  const { canvas, maps } = getPageObjects(['canvas', 'maps']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
@@ -18,45 +18,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('maps in canvas', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      // canvas application is only available when installation contains canvas workpads
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       // open canvas home
-      await PageObjects.canvas.goToListingPage();
+      await canvas.goToListingPage();
       // create new workpad
-      await PageObjects.canvas.createNewWorkpad();
-      await PageObjects.canvas.setWorkpadName('maps tests');
+      await canvas.createNewWorkpad();
+      await canvas.setWorkpadName('maps tests');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('by-value', () => {
       it('creates new map embeddable', async () => {
-        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await PageObjects.canvas.createNewVis('maps');
-        await PageObjects.maps.clickSaveAndReturnButton();
-        const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        const originalEmbeddableCount = await canvas.getEmbeddableCount();
+        await canvas.createNewVis('maps');
+        await maps.clickSaveAndReturnButton();
+        const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount + 1);
       });
 
       it('edits map by-value embeddable', async () => {
-        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await dashboardPanelActions.openContextMenu();
+        const originalEmbeddableCount = await canvas.getEmbeddableCount();
         await dashboardPanelActions.clickEdit();
-        await PageObjects.maps.saveMap('canvas test map');
-        const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        await maps.saveMap('canvas test map');
+        const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
     });
 
     describe('by-reference', () => {
       it('adds existing map embeddable from the visualize library', async () => {
-        await PageObjects.canvas.deleteSelectedElement();
-        await PageObjects.canvas.clickAddFromLibrary();
+        await canvas.deleteSelectedElement();
+        await canvas.clickAddFromLibrary();
         await dashboardAddPanel.addEmbeddable('canvas test map', 'map');
         await testSubjects.existOrFail('embeddablePanelHeading-canvastestmap');
       });
 
       it('edits map by-reference embeddable', async () => {
         await dashboardPanelActions.editPanelByTitle('canvas test map');
-        await PageObjects.maps.saveMap('canvas test map v2', true, false);
+        await maps.saveMap('canvas test map v2', true, false);
         await testSubjects.existOrFail('embeddablePanelHeading-canvastestmapv2');
-        await PageObjects.canvas.deleteSelectedElement();
+        await canvas.deleteSelectedElement();
       });
     });
   });

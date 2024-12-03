@@ -8,7 +8,6 @@
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import '../../mock/match_media';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 
@@ -16,13 +15,12 @@ import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer, type EventsViewerProps } from '.';
 import { eventsDefaultModel } from './default_model';
 import { EntityType } from '@kbn/timelines-plugin/common';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from './use_timelines_events';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { mount } from 'enzyme';
 
@@ -37,13 +35,6 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-
-const originalKibanaLib = jest.requireActual('../../lib/kibana');
-
-// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
-// The returned permissions object will indicate that the user does not have permissions by default
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
-mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock('./use_timelines_events');
 

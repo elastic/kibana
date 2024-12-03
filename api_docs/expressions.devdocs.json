@@ -127,15 +127,7 @@
                 "section": "def-common.ExecutionContext",
                 "text": "ExecutionContext"
               },
-              "<InspectorAdapters, ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">"
+              "<InspectorAdapters>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -278,6 +270,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1279,6 +1288,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Executor.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -2200,6 +2226,19 @@
             "label": "type",
             "description": [
               "\nReturn type of function. This SHOULD be supplied. We use it for UI\nand autocomplete hinting. We may also use it for optimizations in\nthe future."
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunction.allowCache",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -3975,9 +4014,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -4026,9 +4065,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -4052,9 +4091,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>) => ",
@@ -4080,9 +4119,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -4106,9 +4145,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ") => ",
@@ -4134,9 +4173,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -4777,7 +4816,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -6087,12 +6126,52 @@
             "section": "def-common.TablesAdapter",
             "text": "TablesAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/expressions/common/util/tables_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "#tables",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.allowCsvExport",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCsvExport",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.initialSelectedTable",
+            "type": "string",
+            "tags": [],
+            "label": "initialSelectedTable",
+            "description": [
+              "Key of table to set as initial selection"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "expressions",
             "id": "def-public.TablesAdapter.logDatatable",
@@ -6101,7 +6180,7 @@
             "label": "logDatatable",
             "description": [],
             "signature": [
-              "(name: string, datatable: ",
+              "(key: string, datatable: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -6120,7 +6199,7 @@
                 "id": "def-public.TablesAdapter.logDatatable.$1",
                 "type": "string",
                 "tags": [],
-                "label": "name",
+                "label": "key",
                 "description": [],
                 "signature": [
                   "string"
@@ -6836,7 +6915,7 @@
         "label": "useExpressionRenderer",
         "description": [],
         "signature": [
-          "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }: ",
+          "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    abortController,\n    ...loaderParams\n  }: ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -6870,7 +6949,7 @@
             "id": "def-public.useExpressionRenderer.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }",
+            "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    abortController,\n    ...loaderParams\n  }",
             "description": [],
             "signature": [
               {
@@ -7047,6 +7126,20 @@
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7068,7 +7161,7 @@
             "section": "def-common.ExecutionContext",
             "text": "ExecutionContext"
           },
-          "<InspectorAdapters, ExecutionContextSearch>"
+          "<InspectorAdapters>"
         ],
         "path": "src/plugins/expressions/common/execution/types.ts",
         "deprecated": false,
@@ -7084,7 +7177,14 @@
               "\nGet search context of the expression."
             ],
             "signature": [
-              "() => ExecutionContextSearch"
+              "() => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ExecutionContextSearch",
+                "text": "ExecutionContextSearch"
+              }
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
@@ -7127,6 +7227,22 @@
                 "text": "ExpressionType"
               },
               "; }"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExecutionContext.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nAllow caching in the current execution."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
@@ -7195,9 +7311,9 @@
               "(() => ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) | undefined"
@@ -7513,7 +7629,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"not-started\" | \"result\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -8371,6 +8487,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunctionDefinition.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionFunctionDefinition.inputTypes",
             "type": "Array",
             "tags": [],
@@ -8541,11 +8673,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -8608,14 +8740,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8669,14 +8793,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8713,14 +8829,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -8759,14 +8867,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8803,14 +8903,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -8873,14 +8965,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8941,14 +9025,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -9011,14 +9087,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -9080,13 +9148,66 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
+              ">>"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunctionDefinitions.math_column",
+            "type": "Object",
+            "tags": [],
+            "label": "math_column",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"mathColumn\", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
               ", ",
               {
-                "pluginId": "@kbn/utility-types",
+                "pluginId": "expressions",
                 "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.MathColumnArguments",
+                "text": "MathColumnArguments"
+              },
+              ", Promise<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ">, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
               },
               ">>"
             ],
@@ -9424,7 +9545,7 @@
             "label": "onData$",
             "description": [],
             "signature": [
-              "(<TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
+              "(<TData, TInspectorAdapters extends unknown>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,
@@ -9568,6 +9689,20 @@
             "signature": [
               "Observable",
               "<unknown> | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,
@@ -10022,7 +10157,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -10655,11 +10790,11 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/utility-types",
+                "pluginId": "@kbn/es-query",
                 "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ExecutionContextSearch",
+                "text": "ExecutionContextSearch"
               },
               " | undefined"
             ],
@@ -10701,20 +10836,6 @@
             "type": "CompoundType",
             "tags": [],
             "label": "debug",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/expressions/public/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.IExpressionLoaderParams.disableCaching",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disableCaching",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -10951,6 +11072,20 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.partial",
             "type": "CompoundType",
             "tags": [],
@@ -10976,6 +11111,20 @@
             ],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
             "deprecated": false,
@@ -11700,7 +11849,7 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false,
@@ -11861,14 +12010,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -11925,7 +12066,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -12180,14 +12321,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-public.ExpressionRendererComponent.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12201,7 +12342,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -13486,7 +13627,7 @@
               "section": "def-public.ReactExpressionRendererProps",
               "text": "ReactExpressionRendererProps"
             },
-            ") => JSX.Element"
+            ") => React.JSX.Element"
           ],
           "path": "src/plugins/expressions/public/plugin.ts",
           "deprecated": false,
@@ -13647,15 +13788,7 @@
                 "section": "def-common.ExecutionContext",
                 "text": "ExecutionContext"
               },
-              "<InspectorAdapters, ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">"
+              "<InspectorAdapters>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -13798,6 +13931,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -14580,6 +14730,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Executor.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -15501,6 +15668,19 @@
             "label": "type",
             "description": [
               "\nReturn type of function. This SHOULD be supplied. We use it for UI\nand autocomplete hinting. We may also use it for optimizations in\nthe future."
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunction.allowCache",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -16651,9 +16831,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-server.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -16722,9 +16902,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
@@ -16748,9 +16928,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>) => ",
@@ -16776,9 +16956,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -16802,9 +16982,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
               ") => ",
@@ -16830,9 +17010,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-server.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -18454,6 +18634,20 @@
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -18475,7 +18669,7 @@
             "section": "def-common.ExecutionContext",
             "text": "ExecutionContext"
           },
-          "<InspectorAdapters, ExecutionContextSearch>"
+          "<InspectorAdapters>"
         ],
         "path": "src/plugins/expressions/common/execution/types.ts",
         "deprecated": false,
@@ -18491,7 +18685,14 @@
               "\nGet search context of the expression."
             ],
             "signature": [
-              "() => ExecutionContextSearch"
+              "() => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ExecutionContextSearch",
+                "text": "ExecutionContextSearch"
+              }
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
@@ -18534,6 +18735,22 @@
                 "text": "ExpressionType"
               },
               "; }"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExecutionContext.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nAllow caching in the current execution."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
@@ -18602,9 +18819,9 @@
               "(() => ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) | undefined"
@@ -18920,7 +19137,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"not-started\" | \"result\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -19747,6 +19964,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunctionDefinition.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExpressionFunctionDefinition.inputTypes",
             "type": "Array",
             "tags": [],
@@ -19917,11 +20150,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -19984,14 +20217,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -20045,14 +20270,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -20089,14 +20306,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -20135,14 +20344,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -20179,14 +20380,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -20249,14 +20442,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -20317,14 +20502,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -20387,14 +20564,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -20456,13 +20625,66 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
+              ">>"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunctionDefinitions.math_column",
+            "type": "Object",
+            "tags": [],
+            "label": "math_column",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"mathColumn\", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
               ", ",
               {
-                "pluginId": "@kbn/utility-types",
+                "pluginId": "expressions",
                 "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.MathColumnArguments",
+                "text": "MathColumnArguments"
+              },
+              ", Promise<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ">, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
               },
               ">>"
             ],
@@ -21769,14 +21991,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -21833,7 +22047,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -22814,15 +23028,7 @@
                 "section": "def-common.ExecutionContext",
                 "text": "ExecutionContext"
               },
-              "<InspectorAdapters, ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">"
+              "<InspectorAdapters>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -22965,6 +23171,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -23966,6 +24189,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Executor.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -24887,6 +25127,19 @@
             "label": "type",
             "description": [
               "\nReturn type of function. This SHOULD be supplied. We use it for UI\nand autocomplete hinting. We may also use it for optimizations in\nthe future."
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunction.allowCache",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -26034,7 +26287,8 @@
             "section": "def-common.ExpressionsInspectorAdapter",
             "text": "ExpressionsInspectorAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
         "deprecated": false,
@@ -26727,7 +26981,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -28037,12 +28291,52 @@
             "section": "def-common.TablesAdapter",
             "text": "TablesAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/expressions/common/util/tables_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "#tables",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.allowCsvExport",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCsvExport",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.initialSelectedTable",
+            "type": "string",
+            "tags": [],
+            "label": "initialSelectedTable",
+            "description": [
+              "Key of table to set as initial selection"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "expressions",
             "id": "def-common.TablesAdapter.logDatatable",
@@ -28051,7 +28345,7 @@
             "label": "logDatatable",
             "description": [],
             "signature": [
-              "(name: string, datatable: ",
+              "(key: string, datatable: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -28070,7 +28364,7 @@
                 "id": "def-common.TablesAdapter.logDatatable.$1",
                 "type": "string",
                 "tags": [],
-                "label": "name",
+                "label": "key",
                 "description": [],
                 "signature": [
                   "string"
@@ -28967,14 +29261,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">"
         ],
         "path": "src/plugins/expressions/common/util/test_utils.ts",
@@ -29261,13 +29547,13 @@
       },
       {
         "parentPluginId": "expressions",
-        "id": "def-common.getUiSettingFn",
+        "id": "def-common.getUiSettingFnBrowser",
         "type": "Function",
         "tags": [],
-        "label": "getUiSettingFn",
+        "label": "getUiSettingFnBrowser",
         "description": [],
         "signature": [
-          "({\n  getStartDependencies,\n}: UiSettingFnArguments) => ",
+          "({\n  getStartDependencies,\n}: UiSettingFnArgumentsBrowser) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -29282,13 +29568,53 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-common.getUiSettingFn.$1",
+            "id": "def-common.getUiSettingFnBrowser.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  getStartDependencies,\n}",
             "description": [],
             "signature": [
-              "UiSettingFnArguments"
+              "UiSettingFnArgumentsBrowser"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.getUiSettingFnServer",
+        "type": "Function",
+        "tags": [],
+        "label": "getUiSettingFnServer",
+        "description": [],
+        "signature": [
+          "({\n  getStartDependencies,\n}: UiSettingFnArgumentsServer) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionUiSetting",
+            "text": "ExpressionFunctionUiSetting"
+          }
+        ],
+        "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.getUiSettingFnServer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  getStartDependencies,\n}",
+            "description": [],
+            "signature": [
+              "UiSettingFnArgumentsServer"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
             "deprecated": false,
@@ -30233,6 +30559,20 @@
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -30256,9 +30596,27 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe Kibana normalized type of the column"
+            ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumnMeta.esType",
+            "type": "string",
+            "tags": [],
+            "label": "esType",
+            "description": [
+              "\nThe original type of the column from ES"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -30542,7 +30900,7 @@
             "section": "def-common.ExecutionContext",
             "text": "ExecutionContext"
           },
-          "<InspectorAdapters, ExecutionContextSearch>"
+          "<InspectorAdapters>"
         ],
         "path": "src/plugins/expressions/common/execution/types.ts",
         "deprecated": false,
@@ -30558,7 +30916,14 @@
               "\nGet search context of the expression."
             ],
             "signature": [
-              "() => ExecutionContextSearch"
+              "() => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ExecutionContextSearch",
+                "text": "ExecutionContextSearch"
+              }
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
@@ -30601,6 +30966,22 @@
                 "text": "ExpressionType"
               },
               "; }"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExecutionContext.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nAllow caching in the current execution."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
@@ -30669,9 +31050,9 @@
               "(() => ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) | undefined"
@@ -31231,7 +31612,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"not-started\" | \"result\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -32269,11 +32650,11 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/utility-types",
+                "pluginId": "@kbn/es-query",
                 "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ExecutionContextSearch",
+                "text": "ExecutionContextSearch"
               },
               " | undefined"
             ],
@@ -32323,9 +32704,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any> | undefined"
@@ -32481,6 +32862,20 @@
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -32628,6 +33023,22 @@
                 "text": "UnmappedTypeStrings"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunctionDefinition.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": false,
@@ -32805,11 +33216,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -32872,14 +33283,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -32933,14 +33336,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -32977,14 +33372,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -33023,14 +33410,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -33067,14 +33446,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -33137,14 +33508,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -33205,14 +33568,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -33275,14 +33630,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -33344,13 +33691,66 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
+              ">>"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunctionDefinitions.math_column",
+            "type": "Object",
+            "tags": [],
+            "label": "math_column",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"mathColumn\", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
               ", ",
               {
-                "pluginId": "@kbn/utility-types",
+                "pluginId": "expressions",
                 "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.MathColumnArguments",
+                "text": "MathColumnArguments"
+              },
+              ", Promise<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ">, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
               },
               ">>"
             ],
@@ -34504,7 +34904,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -36454,14 +36854,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -36540,7 +36932,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -36853,14 +37245,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/clog.ts",
@@ -36922,14 +37306,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
           },
           ">>"
         ],
@@ -36993,14 +37369,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
@@ -37054,14 +37422,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
           },
           ">>"
         ],
@@ -37125,14 +37485,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
@@ -37195,14 +37547,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
@@ -37240,14 +37584,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
           },
           ">>"
         ],
@@ -37303,14 +37639,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
@@ -37349,14 +37677,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -37394,14 +37714,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
           },
           ">>"
         ],
@@ -37672,7 +37984,23 @@
             "section": "def-common.ExpressionFunctionDefinition",
             "text": "ExpressionFunctionDefinition"
           },
-          "<infer Name, infer Input, infer Arguments, infer Output, infer Context> ? { name: Name; input: Input; arguments: Arguments; output: Output; context: Context; } : never"
+          "<infer Name extends string, infer Input, infer Arguments extends Record<never, unknown>, infer Output, infer Context extends ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ">> ? { name: Name; input: Input; arguments: Arguments; output: Output; context: Context; } : never"
         ],
         "path": "src/plugins/expressions/common/ast/build_function.ts",
         "deprecated": false,
@@ -37921,11 +38249,11 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
@@ -37937,19 +38265,19 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
           }
         ],
         "initialIsOpen": false
@@ -37964,7 +38292,7 @@
           "\nMode of the expression render environment.\nThis value can be set from a consumer embedding an expression renderer and is accessible\nfrom within the active render function as part of the handlers.\nThe following modes are supported:\n* view (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)\n* preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline\n* edit: The chart is rendered within an editor and configuration elements within the chart should be displayed"
         ],
         "signature": [
-          "\"edit\" | \"preview\" | \"view\""
+          "\"edit\" | \"view\" | \"preview\""
         ],
         "path": "src/plugins/expressions/common/expression_renderers/types.ts",
         "deprecated": false,
@@ -39454,9 +39782,7 @@
                 "section": "def-common.SerializedDatatable",
                 "text": "SerializedDatatable"
               },
-              ") => { rows: ",
-              "Dictionary",
-              "<string>[]; type: \"datatable\"; columns: ",
+              ") => { rows: _.Dictionary<string>[]; type: \"datatable\"; columns: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -42551,14 +42877,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">) => Promise<",
               {
                 "pluginId": "expressions",
@@ -42637,14 +42955,6 @@
                     "docId": "kibInspectorPluginApi",
                     "section": "def-common.Adapters",
                     "text": "Adapters"
-                  },
-                  ", ",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "common",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-common.SerializableRecord",
-                    "text": "SerializableRecord"
                   },
                   ">"
                 ],
@@ -45399,15 +45709,7 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">) => any"
+              ">) => string | number | boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
             "deprecated": false,
@@ -45465,14 +45767,6 @@
                     "docId": "kibInspectorPluginApi",
                     "section": "def-common.Adapters",
                     "text": "Adapters"
-                  },
-                  ", ",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "common",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-common.SerializableRecord",
-                    "text": "SerializableRecord"
                   },
                   ">"
                 ],
@@ -45912,14 +46206,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">) => unknown"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -45978,14 +46264,6 @@
                     "docId": "kibInspectorPluginApi",
                     "section": "def-common.Adapters",
                     "text": "Adapters"
-                  },
-                  ", ",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "common",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-common.SerializableRecord",
-                    "text": "SerializableRecord"
                   },
                   ">"
                 ],
@@ -46205,14 +46483,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">) => unknown"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
@@ -46271,14 +46541,6 @@
                     "docId": "kibInspectorPluginApi",
                     "section": "def-common.Adapters",
                     "text": "Adapters"
-                  },
-                  ", ",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "common",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-common.SerializableRecord",
-                    "text": "SerializableRecord"
                   },
                   ">"
                 ],

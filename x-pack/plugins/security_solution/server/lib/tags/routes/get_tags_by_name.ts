@@ -10,24 +10,21 @@ import { i18n } from '@kbn/i18n';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getTagsByNameRequest } from '../../../../common/api/tags';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
-import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
 import { findTagsByName } from '../saved_objects';
 
-export const getTagsByNameRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  security: SetupPlugins['security']
-) => {
+export const getTagsByNameRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .get({
       path: INTERNAL_TAGS_URL,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -36,7 +33,7 @@ export const getTagsByNameRoute = (
         validate: { request: { query: buildRouteValidationWithExcess(getTagsByNameRequest) } },
       },
       async (context, request, response) => {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const frameworkRequest = await buildFrameworkRequest(context, request);
         const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
 
         const { name: tagName } = request.query;

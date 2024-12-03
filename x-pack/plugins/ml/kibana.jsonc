@@ -1,13 +1,20 @@
 {
   "type": "plugin",
   "id": "@kbn/ml-plugin",
-  "owner": "@elastic/ml-ui",
+  "owner": [
+    "@elastic/ml-ui"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "This plugin provides access to the machine learning features provided by Elastic.",
   "plugin": {
     "id": "ml",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "ml"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "ml"
+    ],
     "requiredPlugins": [
       "aiops",
       "charts",
@@ -41,6 +48,7 @@
       "maps",
       "security",
       "spaces",
+      "observabilityAIAssistant",
       "usageCollection",
       "cases"
     ],
@@ -56,8 +64,10 @@
       "maps",
       "savedObjectsFinder",
       "usageCollection",
-      "unifiedSearch"
+      "alerting"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

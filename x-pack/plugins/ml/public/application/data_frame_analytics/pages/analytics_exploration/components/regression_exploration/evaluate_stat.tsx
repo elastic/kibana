@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiStat, EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiStat, EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
 import { REGRESSION_STATS } from '../../../../common/analytics';
 
 interface Props {
@@ -82,24 +83,25 @@ const tooltipContent = {
   ),
 };
 
-export const EvaluateStat: FC<Props> = ({ isLoading, statType, title, dataTestSubj }) => (
-  <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
-    <EuiFlexItem grow={false}>
-      <EuiStat
-        reverse
-        isLoading={isLoading}
-        title={title}
-        description={statDescriptions[statType]}
-        titleSize="xxs"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      {statType !== REGRESSION_STATS.HUBER && (
-        <EuiIconTip
-          anchorClassName="mlDataFrameAnalyticsRegression__evaluateStat"
-          content={tooltipContent[statType]}
+export const EvaluateStat: FC<Props> = ({ isLoading, statType, title, dataTestSubj }) => {
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
+
+  return (
+    <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj} alignItems="flexEnd">
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          reverse
+          isLoading={isLoading}
+          title={title}
+          description={statDescriptions[statType]}
+          titleSize="xxs"
         />
-      )}
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={{ paddingBottom: `${size.xxs}` }}>
+        {statType !== REGRESSION_STATS.HUBER && <EuiIconTip content={tooltipContent[statType]} />}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

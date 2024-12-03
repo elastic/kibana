@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import type {
+  GetTimelinesResponse,
+  PatchTimelineResponse,
+} from '@kbn/security-solution-plugin/common/api/timeline';
 import type { CompleteTimeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 import { rootRequest } from './common';
 
-export const createTimeline = (timeline: CompleteTimeline) =>
-  rootRequest<TimelineResponse>({
+const mockTimeline = getTimeline();
+
+/**
+ * Creates a timeline saved object
+ * @param {CompleteTimeline} [timeline] - configuration needed for creating a timeline. Defaults to getTimeline in security_solution_cypress/cypress/objects/timeline.ts
+ * @returns undefined
+ */
+export const createTimeline = (timeline: CompleteTimeline = mockTimeline) =>
+  rootRequest<PatchTimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
     body: {
@@ -58,8 +69,13 @@ export const createTimeline = (timeline: CompleteTimeline) =>
     },
   });
 
-export const createTimelineTemplate = (timeline: CompleteTimeline) =>
-  rootRequest<TimelineResponse>({
+/**
+ * Creates a timeline template saved object
+ * @param {CompleteTimeline} [timeline] - configuration needed for creating a timeline template. Defaults to `getTimeline` in security_solution_cypress/cypress/objects/timeline.ts
+ * @returns undefined
+ */
+export const createTimelineTemplate = (timeline: CompleteTimeline = mockTimeline) =>
+  rootRequest<PatchTimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
     body: {
@@ -101,12 +117,23 @@ export const createTimelineTemplate = (timeline: CompleteTimeline) =>
         savedQueryId: null,
       },
     },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '2023-10-31',
+    },
   });
 
 export const loadPrepackagedTimelineTemplates = () =>
   rootRequest({
     method: 'POST',
     url: 'api/timeline/_prepackaged',
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+
+      'elastic-api-version': '2023-10-31',
+    },
   });
 
 export const favoriteTimeline = ({
@@ -130,3 +157,22 @@ export const favoriteTimeline = ({
       templateTimelineVersion: templateTimelineVersion || null,
     },
   });
+
+export const getAllTimelines = () =>
+  rootRequest<GetTimelinesResponse>({
+    method: 'GET',
+    url: 'api/timelines?page_size=100&page_index=1&sort_field=updated&sort_order=desc&timeline_type=default',
+  });
+
+export const deleteTimelines = () => {
+  getAllTimelines().then(($timelines) => {
+    const savedObjectIds = $timelines.body.timeline.map((timeline) => timeline.savedObjectId);
+    rootRequest({
+      method: 'DELETE',
+      url: 'api/timeline',
+      body: {
+        savedObjectIds,
+      },
+    });
+  });
+};

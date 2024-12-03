@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { DocLinksStart } from '@kbn/core/public';
 import {
   getPrecisionErrorWarningMessages,
   cloneLayer,
@@ -15,13 +18,10 @@ import {
 } from './utils';
 import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
-import type { DocLinksStart } from '@kbn/core/public';
-import { EuiLink } from '@elastic/eui';
 import { TermsIndexPatternColumn } from './operations';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { FormBasedLayer } from './types';
 import { createMockedIndexPatternWithAdditionalFields } from './mocks';
+import { getLongMessage } from '../../user_messages_utils';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
@@ -107,9 +107,6 @@ describe('indexpattern_datasource utils', () => {
     });
 
     describe('precision error warning with accuracy mode', () => {
-      const enableAccuracyButtonSelector =
-        'button[data-test-subj="lnsPrecisionWarningEnableAccuracy"]';
-
       test('should show accuracy mode prompt if currently disabled', async () => {
         framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
         (state.layers.id.columns.col1 as TermsIndexPatternColumn).params.accuracyMode = false;
@@ -125,16 +122,14 @@ describe('indexpattern_datasource utils', () => {
         );
 
         expect(warningMessages).toHaveLength(1);
+        const { longMessage, ...rest } = warningMessages[0];
 
-        expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
+        expect({ ...rest, longMessage: '' }).toMatchSnapshot();
 
-        const instance = mountWithIntl(<div>{warningMessages[0].longMessage}</div>);
+        render(<I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>);
 
-        const enableAccuracyButton = instance.find(enableAccuracyButtonSelector);
-
-        expect(enableAccuracyButton.exists()).toBeTruthy();
-
-        enableAccuracyButton.simulate('click');
+        expect(screen.getByTestId('lnsPrecisionWarningEnableAccuracy')).toBeInTheDocument();
+        await userEvent.click(screen.getByTestId('lnsPrecisionWarningEnableAccuracy'));
 
         expect(setStateMock).toHaveBeenCalledTimes(1);
       });
@@ -152,20 +147,21 @@ describe('indexpattern_datasource utils', () => {
         );
 
         expect(warningMessages).toHaveLength(1);
+        const { longMessage, ...rest } = warningMessages[0];
 
-        expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
+        expect({ ...rest, longMessage: '' }).toMatchSnapshot();
 
-        const instance = shallow(<div>{warningMessages[0].longMessage}</div>);
-
-        expect(instance.exists(enableAccuracyButtonSelector)).toBeFalsy();
-
-        expect(instance.find(FormattedMessage).props().id).toBe(
-          'xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled'
+        const { container } = render(
+          <I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>
         );
+        expect(container).toHaveTextContent(
+          'might be an approximation. For more precise results, try increasing the number of Top Values or using Filters instead.'
+        );
+        expect(screen.queryByTestId('lnsPrecisionWarningEnableAccuracy')).not.toBeInTheDocument();
       });
     });
 
-    test('if has precision error and sorting is by count ascending, show fix action and switch to rare terms', () => {
+    test('if has precision error and sorting is by count ascending, show fix action and switch to rare terms', async () => {
       framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
       state.layers.id.columnOrder = ['col1', 'col2'];
       state.layers.id.columns = {
@@ -185,7 +181,7 @@ describe('indexpattern_datasource utils', () => {
         } as unknown as GenericIndexPatternColumn,
       };
       const setState = jest.fn();
-      const warnings = getPrecisionErrorWarningMessages(
+      const warningMessages = getPrecisionErrorWarningMessages(
         datatableUtilitites,
         state,
         framePublicAPI,
@@ -193,11 +189,13 @@ describe('indexpattern_datasource utils', () => {
         setState
       );
 
-      expect(warnings).toHaveLength(1);
-      expect({ ...warnings[0], longMessage: '' }).toMatchSnapshot();
-      const DummyComponent = () => <>{warnings[0].longMessage}</>;
-      const warningUi = shallow(<DummyComponent />);
-      warningUi.find(EuiLink).simulate('click');
+      expect(warningMessages).toHaveLength(1);
+      const { longMessage, ...rest } = warningMessages[0];
+
+      expect({ ...rest, longMessage: '' }).toMatchSnapshot();
+
+      render(<I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>);
+      await userEvent.click(screen.getByText('Rank by rarity'));
       const stateSetter = setState.mock.calls[0][0];
       const newState = stateSetter(state);
       expect(newState.layers.id.columns.col1.label).toEqual('Rare values of category');
@@ -310,7 +308,11 @@ describe('indexpattern_datasource utils', () => {
         ]),
         [
           `${rootId}X${formulaParts.length}`,
-          { operationType: 'math', references: formulaParts.map((_, i) => `${rootId}X${i}`) },
+          {
+            operationType: 'math',
+            references: formulaParts.map((_, i) => `${rootId}X${i}`),
+            label: 'Part of formula',
+          },
         ],
       ]);
     }
@@ -434,6 +436,69 @@ describe('indexpattern_datasource utils', () => {
         docLinks
       );
       expect(warnings).toHaveLength(2);
+    });
+
+    // formula columns should never have a source field
+    // but it has been observed in the wild (https://github.com/elastic/kibana/issues/168561)
+    it('should ignore formula column with source field', () => {
+      const state = {
+        layers: {
+          '08ae29be-2717-4320-a908-a50ca73ee558': {
+            indexPatternId: '0',
+            columnOrder: [
+              '62f73507-09c4-4bf9-9e6f-a9692e348d94',
+              '1a027207-98b3-4a57-a97f-4c67e95eebc1',
+            ],
+            columns: {
+              '1a027207-98b3-4a57-a97f-4c67e95eebc1': {
+                customLabel: true,
+                dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query: 'my:field',
+                },
+                isBucketed: false,
+                label: 'Failures',
+                operationType: 'count',
+                params: {
+                  emptyAsNull: true,
+                },
+                scale: 'ratio',
+                sourceField: '___records___',
+              },
+              '62f73507-09c4-4bf9-9e6f-a9692e348d94': {
+                customLabel: true,
+                dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query: 'my:field',
+                },
+                isBucketed: false,
+                label: 'Success',
+                operationType: 'formula',
+                params: {
+                  emptyAsNull: true,
+                  formula: 'count(kql=\'message:"some message" AND message:"SUCCESS"\')',
+                  isFormulaBroken: false,
+                },
+                references: ['62f73507-09c4-4bf9-9e6f-a9692e348d94X0'],
+                scale: 'ratio',
+                // here's the issue - this should not be here
+                sourceField: '___records___',
+              },
+            },
+            incompleteColumns: {},
+          },
+        },
+      } as unknown as FormBasedPrivateState;
+
+      expect(() => {
+        getUnsupportedOperationsWarningMessage(
+          state,
+          createFramePublic(createMockedIndexPatternWithAdditionalFields([])),
+          docLinks
+        );
+      }).not.toThrow();
     });
   });
 });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useContext, useState } from 'react';
@@ -19,7 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,112 @@ interface ConnectorConfigurationFieldProps {
   setConfigValue: (value: number | string | boolean | null) => void;
 }
 
+interface ConfigInputFieldProps {
+  configEntry: ConfigEntryView;
+  isLoading: boolean;
+  validateAndSetConfigValue: (value: string) => void;
+}
+export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
+  configEntry,
+  isLoading,
+  validateAndSetConfigValue,
+}) => {
+  const { isValid, required, placeholder, value, label } = configEntry;
+  const [innerValue, setInnerValue] = useState(value);
+  return (
+    <EuiFieldText
+      disabled={isLoading}
+      required={required}
+      value={ensureStringType(innerValue)}
+      isInvalid={!isValid}
+      onChange={(event) => {
+        setInnerValue(event.target.value);
+        validateAndSetConfigValue(event.target.value);
+      }}
+      placeholder={placeholder}
+      aria-label={label}
+    />
+  );
+};
+
+export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
+  isLoading,
+  configEntry,
+  validateAndSetConfigValue,
+}) => {
+  const { isValid, required, placeholder, value, label } = configEntry;
+  const [innerValue, setInnerValue] = useState(value);
+  return (
+    <EuiTextArea
+      disabled={isLoading}
+      required={required}
+      // ensures placeholder shows up when value is empty string
+      value={ensureStringType(innerValue) || undefined}
+      isInvalid={!isValid}
+      onChange={(event) => {
+        setInnerValue(event.target.value);
+        validateAndSetConfigValue(event.target.value);
+      }}
+      placeholder={placeholder}
+      aria-label={label}
+    />
+  );
+};
+
+export const ConfigSensitiveTextArea: React.FC<ConfigInputFieldProps> = ({
+  isLoading,
+  configEntry,
+  validateAndSetConfigValue,
+}) => {
+  const { key, label, tooltip } = configEntry;
+  return (
+    <EuiAccordion
+      id={key + '-accordion'}
+      buttonContent={
+        tooltip ? (
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem>
+              <p>{label}</p>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={tooltip} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <p>{label}</p>
+        )
+      }
+    >
+      <ConfigInputTextArea
+        isLoading={isLoading}
+        configEntry={configEntry}
+        validateAndSetConfigValue={validateAndSetConfigValue}
+      />
+    </EuiAccordion>
+  );
+};
+export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
+  isLoading,
+  configEntry,
+  validateAndSetConfigValue,
+}) => {
+  const { required, value, label } = configEntry;
+  const [innerValue, setInnerValue] = useState(value);
+  return (
+    <EuiFieldPassword
+      disabled={isLoading}
+      required={required}
+      type="dual"
+      value={ensureStringType(innerValue)}
+      onChange={(event) => {
+        setInnerValue(event.target.value);
+        validateAndSetConfigValue(event.target.value);
+      }}
+      aria-label={label}
+    />
+  );
+};
+
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
   configEntry,
   isLoading,
@@ -53,18 +160,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     setConfigValue(ensureCorrectTyping(configEntry.type, value));
   };
 
-  const {
-    key,
-    display,
-    isValid,
-    label,
-    options,
-    required,
-    placeholder,
-    sensitive,
-    tooltip,
-    value,
-  } = configEntry;
+  const { key, display, label, options, required, sensitive, tooltip, value } = configEntry;
 
   switch (display) {
     case DisplayType.DROPDOWN:
@@ -77,66 +173,47 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           onChange={(event) => {
             validateAndSetConfigValue(event.target.value);
           }}
+          aria-label={label}
         />
       ) : (
         <EuiRadioGroup
           disabled={isLoading}
           idSelected={ensureStringType(value)}
-          name="radio group"
+          name={key}
           options={options.map((option) => ({ id: option.value, label: option.label }))}
           onChange={(id) => {
             validateAndSetConfigValue(id);
           }}
+          aria-label={label}
         />
       );
 
     case DisplayType.NUMERIC:
       return (
-        <EuiFieldText
-          disabled={isLoading}
-          required={required}
-          value={ensureStringType(value)}
-          isInvalid={!isValid}
-          onChange={(event) => {
-            validateAndSetConfigValue(event.target.value);
-          }}
-          placeholder={placeholder}
+        <ConfigInputField
+          key={key}
+          isLoading={isLoading}
+          configEntry={configEntry}
+          validateAndSetConfigValue={validateAndSetConfigValue}
         />
       );
 
     case DisplayType.TEXTAREA:
       const textarea = (
-        <EuiTextArea
-          disabled={isLoading}
-          placeholder={placeholder}
-          required={required}
-          value={ensureStringType(value) || undefined} // ensures placeholder shows up when value is empty string
-          onChange={(event) => {
-            validateAndSetConfigValue(event.target.value);
-          }}
+        <ConfigInputTextArea
+          key={sensitive ? key + '-sensitive-text-area' : key + 'text-area'}
+          isLoading={isLoading}
+          configEntry={configEntry}
+          validateAndSetConfigValue={validateAndSetConfigValue}
         />
       );
 
       return sensitive ? (
-        <EuiAccordion
-          id={key + '-accordion'}
-          buttonContent={
-            tooltip ? (
-              <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem>
-                  <p>{label}</p>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="questionInCircle" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <p>{label}</p>
-            )
-          }
-        >
-          {textarea}
-        </EuiAccordion>
+        <ConfigSensitiveTextArea
+          isLoading={isLoading}
+          configEntry={configEntry}
+          validateAndSetConfigValue={validateAndSetConfigValue}
+        />
       ) : (
         textarea
       );
@@ -151,10 +228,11 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                   <EuiSwitch
                     checked={ensureBooleanType(value)}
                     disabled={isLoading || !hasPlatinumLicense}
-                    label={<p>{label}</p>}
+                    label={label}
                     onChange={(event) => {
                       validateAndSetConfigValue(event.target.checked);
                     }}
+                    aria-label={label}
                   />
                 </EuiFlexItem>
                 {!hasPlatinumLicense && (
@@ -185,49 +263,36 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         );
       }
       return (
-        <EuiSwitch
-          checked={ensureBooleanType(value)}
-          disabled={isLoading}
-          label={
-            tooltip ? (
-              <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem>
-                  <p>{label}</p>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="questionInCircle" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <p>{label}</p>
-            )
-          }
-          onChange={(event) => {
-            validateAndSetConfigValue(event.target.checked);
-          }}
-        />
+        <EuiFlexGroup direction="row" gutterSize="xs">
+          <EuiSwitch
+            checked={ensureBooleanType(value)}
+            disabled={isLoading}
+            label={label}
+            onChange={(event) => {
+              validateAndSetConfigValue(event.target.checked);
+            }}
+          />
+          {tooltip && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={tooltip} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       );
 
     default:
       return sensitive ? (
-        <EuiFieldPassword
-          disabled={isLoading}
-          required={required}
-          type="dual"
-          value={ensureStringType(value)}
-          onChange={(event) => {
-            validateAndSetConfigValue(event.target.value);
-          }}
+        <ConfigInputPassword
+          isLoading={isLoading}
+          configEntry={configEntry}
+          validateAndSetConfigValue={validateAndSetConfigValue}
         />
       ) : (
-        <EuiFieldText
-          disabled={isLoading}
-          placeholder={placeholder}
-          required={required}
-          value={ensureStringType(value)}
-          onChange={(event) => {
-            validateAndSetConfigValue(event.target.value);
-          }}
+        <ConfigInputField
+          key={key}
+          isLoading={isLoading}
+          configEntry={configEntry}
+          validateAndSetConfigValue={validateAndSetConfigValue}
         />
       );
   }

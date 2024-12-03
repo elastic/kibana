@@ -8,8 +8,14 @@
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { IKibanaResponse, Logger, RequestHandler } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type {
+  BulkDeleteRulesPostResponse,
+  BulkDeleteRulesResponse,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkCrudRulesResponse,
+  BulkDeleteRulesPostRequestBody,
   BulkDeleteRulesRequestBody,
   validateQueryRuleByIds,
 } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -18,35 +24,36 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import {
   buildSiemResponse,
   createBulkErrorObject,
   transformBulkError,
 } from '../../../../routes/utils';
-import { deleteRules } from '../../../logic/crud/delete_rules';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 type Handler = RequestHandler<
   unknown,
   unknown,
-  BulkDeleteRulesRequestBody,
+  BulkDeleteRulesRequestBody | BulkDeleteRulesPostRequestBody,
   SecuritySolutionRequestHandlerContext,
   'delete' | 'post'
 >;
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ *
+ * TODO: https://github.com/elastic/kibana/issues/193184 Delete this route and clean up the code
  */
 export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   const handler: Handler = async (
     context,
     request,
     response
-  ): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
+  ): Promise<IKibanaResponse<BulkDeleteRulesResponse | BulkDeleteRulesPostResponse>> => {
     logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
 
     const siemResponse = buildSiemResponse(response);
@@ -54,7 +61,8 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
     try {
       const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
-      const rulesClient = ctx.alerting.getRulesClient();
+      const rulesClient = await ctx.alerting.getRulesClient();
+      const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
@@ -75,9 +83,8 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
               return getIdBulkError({ id, ruleId });
             }
 
-            await deleteRules({
+            await detectionRulesClient.deleteRule({
               ruleId: rule.id,
-              rulesClient,
             });
 
             return transformValidateBulkError(idOrRuleIdOrUnknown, rule);
@@ -106,16 +113,31 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
     path: DETECTION_ENGINE_RULES_BULK_DELETE,
     options: {
       tags: ['access:securitySolution'],
-    },
-  };
-  const versionConfig = {
-    version: '2023-10-31',
-    validate: {
-      request: {
-        body: buildRouteValidationWithZod(BulkDeleteRulesRequestBody),
+      timeout: {
+        idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
       },
     },
   };
-  router.versioned.delete(routeConfig).addVersion(versionConfig, handler);
-  router.versioned.post(routeConfig).addVersion(versionConfig, handler);
+  router.versioned.delete(routeConfig).addVersion(
+    {
+      version: '2023-10-31',
+      validate: {
+        request: {
+          body: buildRouteValidationWithZod(BulkDeleteRulesRequestBody),
+        },
+      },
+    },
+    handler
+  );
+  router.versioned.post(routeConfig).addVersion(
+    {
+      version: '2023-10-31',
+      validate: {
+        request: {
+          body: buildRouteValidationWithZod(BulkDeleteRulesPostRequestBody),
+        },
+      },
+    },
+    handler
+  );
 };

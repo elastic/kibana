@@ -75,7 +75,7 @@ const status = (rendered, row = 0) => {
   rendered.update();
   return findTestSubject(rendered, 'indexTableCell-status')
     .at(row)
-    .find('.euiTableCellContent')
+    .find('div.euiTableCellContent')
     .text();
 };
 
@@ -167,6 +167,11 @@ describe('index table', () => {
         enableLegacyTemplates: true,
         enableIndexActions: true,
         enableIndexStats: true,
+      },
+      privs: {
+        monitor: true,
+        manageEnrich: true,
+        monitorEnrich: true,
       },
     };
 
@@ -277,7 +282,7 @@ describe('index table', () => {
     snapshot(indicesInTable);
 
     // Enable "Show hidden indices"
-    const switchControl = findTestSubject(rendered, 'indexTableIncludeHiddenIndicesToggle');
+    const switchControl = findTestSubject(rendered, 'checkboxToggles-includeHiddenIndices');
     switchControl.simulate('click');
 
     // We do expect now the `.admin1` and `.admin3` indices to be in the list
@@ -298,7 +303,7 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
 
-    const searchInput = rendered.find('.euiFieldSearch').first();
+    const searchInput = rendered.find('input.euiFieldSearch').first();
     searchInput.instance().value = 'testy0';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();

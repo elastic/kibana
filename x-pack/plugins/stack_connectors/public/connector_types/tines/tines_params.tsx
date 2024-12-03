@@ -81,6 +81,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
   const [selectedWebhookOption, setSelectedWebhookOption] = useState<
     WebhookOption | null | undefined
   >();
+  const [bodyOption, setBodyOption] = useState<string>('');
 
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
@@ -88,8 +89,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     if (!subAction) {
       editAction('subAction', isTest ? SUB_ACTION.TEST : SUB_ACTION.RUN, index);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTest, subAction]);
+  }, [editAction, index, isTest, subAction]);
 
   if (connectorId !== actionConnector?.id) {
     // Story (and webhook) reset needed before requesting with a different connectorId
@@ -137,7 +137,10 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     }
   }, [toasts, storiesError, webhooksError]);
 
-  const showFallbackFrom = useMemo<'Story' | 'Webhook' | 'any' | null>(() => {
+  const showFallbackFrom = useMemo<'Story' | 'Webhook' | 'any' | 'error' | null>(() => {
+    if (storiesError || webhooksError) {
+      return 'error';
+    }
     if (incompleteStories && !selectedStoryOption) {
       return 'Story';
     }
@@ -150,7 +153,9 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     return null;
   }, [
     webhookUrl,
+    storiesError,
     incompleteStories,
+    webhooksError,
     incompleteWebhooks,
     selectedStoryOption,
     selectedWebhookOption,
@@ -198,6 +203,12 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     }
   }, [selectedWebhookOption, webhook, webhooks, toasts, editSubActionParams]);
 
+  useEffect(() => {
+    if (body !== bodyOption) {
+      editSubActionParams({ body: bodyOption });
+    }
+  }, [body, bodyOption, editSubActionParams]);
+
   const selectedStoryOptions = useMemo(
     () => (selectedStoryOption ? [selectedStoryOption] : []),
     [selectedStoryOption]
@@ -219,7 +230,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       <EuiFlexItem>
         <EuiFormRow
           fullWidth
-          error={errors.story}
+          error={errors.story as string[]}
           isInvalid={!!errors.story?.length && selectedStoryOption !== undefined}
           label={i18n.STORY_LABEL}
           helpText={i18n.STORY_HELP}
@@ -242,7 +253,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
         </EuiFormRow>
         <EuiFormRow
           fullWidth
-          error={errors.webhook}
+          error={errors.webhook as string[]}
           isInvalid={!!errors.webhook?.length && selectedWebhookOption !== undefined}
           label={i18n.WEBHOOK_LABEL}
           helpText={i18n.WEBHOOK_HELP}
@@ -270,7 +281,19 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
 
       {showFallbackFrom != null && (
         <EuiFlexItem>
-          {showFallbackFrom !== 'any' && (
+          {showFallbackFrom === 'error' && (
+            <>
+              <EuiCallOut
+                title={i18n.WEBHOOK_URL_ERROR_FALLBACK_TITLE}
+                color="primary"
+                data-test-subj="tines-fallbackCallout"
+              >
+                {i18n.WEBHOOK_URL_ERROR_FALLBACK}
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {(showFallbackFrom === 'Story' || showFallbackFrom === 'Webhook') && (
             <>
               <EuiCallOut
                 title={i18n.WEBHOOK_URL_FALLBACK_TITLE}
@@ -284,7 +307,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           )}
           <EuiFormRow
             fullWidth
-            error={errors.webhookUrl}
+            error={errors.webhookUrl as string[]}
             isInvalid={!!errors.webhookUrl?.length}
             label={i18n.WEBHOOK_URL_LABEL}
             helpText={i18n.WEBHOOK_URL_HELP}
@@ -307,17 +330,10 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             paramsProperty={'body'}
             inputTargetValue={body}
             label={i18n.BODY_LABEL}
-            aria-label={i18n.BODY_ARIA_LABEL}
+            ariaLabel={i18n.BODY_ARIA_LABEL}
             errors={errors.body as string[]}
-            onDocumentsChange={(json: string) => {
-              editSubActionParams({ body: json });
-            }}
-            onBlur={() => {
-              if (!body) {
-                editSubActionParams({ body: '' });
-              }
-            }}
-            data-test-subj="tines-bodyJsonEditor"
+            onDocumentsChange={setBodyOption}
+            dataTestSubj="tines-bodyJsonEditor"
           />
         </EuiFlexItem>
       )}

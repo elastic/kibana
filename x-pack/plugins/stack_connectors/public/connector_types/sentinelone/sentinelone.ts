@@ -35,6 +35,7 @@ export function getConnectorType(): ConnectorTypeModel<
     id: SENTINELONE_CONNECTOR_ID,
     actionTypeTitle: SENTINELONE_TITLE,
     iconClass: lazy(() => import('./logo')),
+    isExperimental: true,
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.sentinelone.config.selectMessageText',
       {
@@ -53,12 +54,12 @@ export function getConnectorType(): ConnectorTypeModel<
       // The internal "subAction" param should always be valid, ensure it is only if "subActionParams" are valid
       if (!subAction) {
         errors.subAction.push(translations.ACTION_REQUIRED);
-      } else if (!(subAction in SUB_ACTION)) {
+      } else if (!Object.values(SUB_ACTION).includes(subAction)) {
         errors.subAction.push(translations.INVALID_ACTION);
       }
       return { errors };
     },
     actionConnectorFields: lazy(() => import('./sentinelone_connector')),
-    actionParamsFields: lazy(() => import('./sentinelone_params')),
+    actionParamsFields: lazy(() => import('./sentinelone_params_empty')),
   };
 }

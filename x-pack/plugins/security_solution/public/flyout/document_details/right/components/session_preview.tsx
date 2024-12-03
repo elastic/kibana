@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { EuiCode, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiCode, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import type { ReactElement } from 'react';
-import React, { useMemo, type FC } from 'react';
+import React, { useMemo, type FC, type PropsWithChildren } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SESSION_PREVIEW_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
-import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
+import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID, SESSION_PREVIEW_TEST_ID } from './test_ids';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { useProcessData } from '../hooks/use_process_data';
-import { RenderRuleName } from '../../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
 
 /**
  * One-off helper to make sure that inline values are rendered consistently
  */
-const ValueContainer: FC<{ text?: ReactElement }> = ({ text, children }) => (
+const ValueContainer: FC<PropsWithChildren<{ text?: ReactElement }>> = ({ text, children }) => (
   <>
     {text && (
       <>
@@ -37,7 +36,7 @@ const ValueContainer: FC<{ text?: ReactElement }> = ({ text, children }) => (
  * Renders session preview under Visualizations section in the flyout right EuiPanel
  */
 export const SessionPreview: FC = () => {
-  const { eventId, scopeId } = useRightPanelContext();
+  const { isPreview } = useDocumentDetailsContext();
 
   const { processName, userName, startAt, ruleName, ruleId, workdir, command } = useProcessData();
   const { euiTheme } = useEuiTheme();
@@ -75,11 +74,15 @@ export const SessionPreview: FC = () => {
             />
           }
         >
-          <PreferenceFormattedDate value={new Date(startAt)} />
+          <span>
+            <PreferenceFormattedDate value={new Date(startAt)} />
+          </span>
         </ValueContainer>
       )
     );
   }, [startAt]);
+
+  const href = useRuleDetailsLink({ ruleId: !isPreview ? ruleId : null });
 
   const ruleFragment = useMemo(() => {
     return (
@@ -93,20 +96,21 @@ export const SessionPreview: FC = () => {
             />
           }
         >
-          <RenderRuleName
-            contextId={scopeId}
-            eventId={eventId}
-            fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
-            fieldType={'string'}
-            isAggregatable={false}
-            isDraggable={false}
-            linkValue={ruleId}
-            value={ruleName}
-          />
+          {href ? (
+            <EuiLink
+              href={href}
+              target="_blank"
+              data-test-subj={SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID}
+            >
+              {ruleName}
+            </EuiLink>
+          ) : (
+            <ValueContainer>{ruleName}</ValueContainer>
+          )}
         </ValueContainer>
       )
     );
-  }, [ruleName, ruleId, scopeId, eventId]);
+  }, [ruleName, ruleId, href]);
 
   const commandFragment = useMemo(() => {
     return (

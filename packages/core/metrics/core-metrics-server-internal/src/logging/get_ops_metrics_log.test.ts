@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { OpsMetrics } from '@kbn/core-metrics-server';
@@ -45,9 +46,15 @@ function createMockOpsMetrics(testMetrics: Partial<OpsMetrics>): OpsMetrics {
     ...testMetrics,
   };
 }
+
 const testMetrics = {
   process: {
-    memory: { heap: { used_in_bytes: 100 } },
+    memory: {
+      heap: { used_in_bytes: 100, total_in_bytes: 200, size_limit: 300 },
+      resident_set_size_in_bytes: 400,
+      external_in_bytes: 500,
+      array_buffers_in_bytes: 600,
+    },
     uptime_in_millis: 1500,
     event_loop_delay: 50,
     event_loop_delay_histogram: { percentiles: { '50': 50, '75': 75, '95': 95, '99': 99 } },
@@ -127,9 +134,14 @@ describe('getEcsOpsMetricsLog', () => {
             "utilization": 0.6365329598160299,
           },
           "memory": Object {
+            "arrayBuffersInBytes": 600,
+            "externalInBytes": 500,
             "heap": Object {
+              "sizeLimit": 300,
+              "totalInBytes": 200,
               "usedInBytes": 100,
             },
+            "residentSetSizeInBytes": 400,
           },
           "uptime": 1,
         },

@@ -8,14 +8,10 @@
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderOptions, RenderResult, RenderHookResult } from '@testing-library/react';
+import { render as reactRender, act, waitFor, renderHook } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-import { themeServiceMock } from '@kbn/core/public/mocks';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
@@ -54,13 +50,25 @@ export interface TestRenderer {
   AppWrapper: React.FC<any>;
   HookWrapper: React.FC<any>;
   render: UiRender;
-  renderHook: <TProps, TResult>(
-    callback: (props: TProps) => TResult
-  ) => RenderHookResult<TProps, TResult>;
+  renderHook: <TResult, TProps>(
+    callback: (props: TProps) => TResult,
+    wrapper?: React.FC<React.PropsWithChildren>
+  ) => RenderHookResult<TResult, TProps>;
   setHeaderActionMenu: Function;
+  waitFor: typeof waitFor;
 }
 
-const queryClient = new QueryClient();
+// disable retries to avoid test flakiness
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});
 
 export const createFleetTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
@@ -71,7 +79,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
 
   ExperimentalFeaturesService.init(allowedExperimentalValues);
 
-  const HookWrapper = memo(({ children }) => {
+  const HookWrapper = memo(({ children }: { children?: React.ReactNode }) => {
     return (
       <startServices.i18n.Context>
         <Router history={mountHistory}>
@@ -93,7 +101,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
     setHeaderActionMenu: jest.fn(),
-    AppWrapper: memo(({ children }) => {
+    AppWrapper: memo(({ children }: { children?: React.ReactNode }) => {
       return (
         <FleetAppContext
           startServices={testRendererMocks.startServices}
@@ -102,7 +110,6 @@ export const createFleetTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
-          theme$={themeServiceMock.createTheme$()}
           fleetStatus={{
             enabled: true,
             isLoading: false,
@@ -114,11 +121,23 @@ export const createFleetTestRendererMock = (): TestRenderer => {
       );
     }),
     HookWrapper,
-    renderHook: (callback) => {
+    renderHook: (
+      callback,
+      ExtraWrapper: React.FC<React.PropsWithChildren<unknown>> = memo(({ children }) => (
+        <>{children}</>
+      ))
+    ) => {
+      const wrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
+        <testRendererMocks.HookWrapper>
+          <ExtraWrapper>{children}</ExtraWrapper>
+        </testRendererMocks.HookWrapper>
+      );
+
       return renderHook(callback, {
-        wrapper: testRendererMocks.HookWrapper,
+        wrapper,
       });
     },
+    waitFor,
     render: (ui, options) => {
       let renderResponse: RenderResult;
       act(() => {
@@ -137,8 +156,9 @@ export const createFleetTestRendererMock = (): TestRenderer => {
 export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
+  ExperimentalFeaturesService.init(allowedExperimentalValues);
   const startServices = createStartServices(basePath);
-  const HookWrapper = memo(({ children }) => {
+  const HookWrapper = memo(({ children }: { children?: React.ReactNode }) => {
     return (
       <startServices.i18n.Context>
         <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
@@ -156,7 +176,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
     setHeaderActionMenu: jest.fn(),
-    AppWrapper: memo(({ children }) => {
+    AppWrapper: memo(({ children }: { children?: React.ReactNode }) => {
       return (
         <IntegrationsAppContext
           basepath={basePath}
@@ -166,7 +186,6 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
-          theme$={themeServiceMock.createTheme$()}
           setHeaderActionMenu={() => {}}
           fleetStatus={{
             enabled: true,
@@ -189,11 +208,22 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
       });
       return renderResponse!;
     },
-    renderHook: (callback) => {
+    renderHook: (
+      callback,
+      ExtraWrapper: React.FC<React.PropsWithChildren<unknown>> = memo(({ children }) => (
+        <>{children}</>
+      ))
+    ) => {
+      const wrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
+        <testRendererMocks.HookWrapper>
+          <ExtraWrapper>{children}</ExtraWrapper>
+        </testRendererMocks.HookWrapper>
+      );
       return renderHook(callback, {
-        wrapper: testRendererMocks.HookWrapper,
+        wrapper,
       });
     },
+    waitFor,
   };
 
   return testRendererMocks;

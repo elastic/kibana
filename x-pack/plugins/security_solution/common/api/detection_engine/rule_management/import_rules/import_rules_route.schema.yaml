@@ -1,15 +1,18 @@
 openapi: 3.0.0
 info:
   title: Import Rules API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/rules/_import:
-    summary: Imports rules from an `.ndjson` file
     post:
-      operationId: ImportRules
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      summary: Import rules
-      description: Imports rules from an `.ndjson` file, including actions and exception lists.
+      operationId: ImportRules
+      summary: Import detection rules
+      description: |
+        Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
+        - The `Content-Type: multipart/form-data` HTTP header.
+        - A link to the `.ndjson` file containing the rules.
       tags:
         - Import/Export API
       requestBody:

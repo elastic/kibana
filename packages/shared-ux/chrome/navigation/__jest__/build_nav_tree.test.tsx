@@ -1,627 +1,343 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import './setup_jest_mocks';
-import React from 'react';
-import { type RenderResult } from '@testing-library/react';
-import { type Observable, of } from 'rxjs';
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import { of } from 'rxjs';
+import type {
+  NavigationTreeDefinitionUI,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 
-import { navLinksMock } from '../mocks/src/navlinks';
-import { Navigation } from '../src/ui/components/navigation';
-import type { RootNavigationItemDefinition } from '../src/ui/types';
-
-import {
-  getMockFn,
-  renderNavigation,
-  errorHandler,
-  type TestType,
-  type ProjectNavigationChangeListener,
-} from './utils';
-import { getServicesMock } from '../mocks/src/jest';
-
-const { cloudLinks: mockCloudLinks } = getServicesMock();
+import { EventTracker } from '../src/analytics';
+import { renderNavigation } from './utils';
 
 describe('builds navigation tree', () => {
   test('render reference UI and build the navigation tree', async () => {
-    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
+    const { findByTestId } = renderNavigation({
+      navTreeDef: of({
+        id: 'es',
+        body: [
+          {
+            id: 'group1',
+            title: 'Group 1',
+            defaultIsCollapsed: false,
+            path: 'group1',
+            children: [
+              {
+                id: 'item1',
+                title: 'Item 1',
+                href: 'https://foo',
+                path: 'group1.item1',
+              },
+              {
+                id: 'item2',
+                title: 'Item 2',
+                href: 'https://foo',
+                path: 'group1.item2',
+              },
+              {
+                id: 'group1A',
+                title: 'Group1A',
+                defaultIsCollapsed: false,
+                path: 'group1.group1A',
+                children: [
+                  {
+                    id: 'item1',
+                    title: 'Group 1A Item 1',
+                    href: 'https://foo',
+                    path: 'group1.group1A.item1',
+                  },
+                  {
+                    id: 'group1A_1',
+                    title: 'Group1A_1',
+                    path: 'group1.group1A.group1A_1',
+                    children: [
+                      {
+                        id: 'item1',
+                        title: 'Group 1A_1 Item 1',
+                        href: 'https://foo',
+                        path: 'group1.group1A.group1A_1.item1',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    });
 
-    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
-      try {
-        expect(await findByTestId(/nav-item-group1.item1\s/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.item2\s/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.group1A.item1\s/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.item1\s/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.item2\s/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.group1A.item1\s/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).toBeVisible();
 
-        // Click the last group to expand and show the last depth
-        (await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).click();
+    // Click the last group to expand and show the last depth
+    (await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).click();
 
-        expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
+  });
 
-        expect(onProjectNavigationChange).toHaveBeenCalled();
-        const lastCall =
-          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-        const [{ navigationTree }] = lastCall;
-        return navigationTree;
-      } catch (e) {
-        errorHandler(type)(e);
-      }
+  test('should handle links on accordion toggle button', async () => {
+    const navigateToUrl = jest.fn();
+
+    const accordionNode: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      renderAs: 'accordion',
+      href: '/app/foo', // Accordion has an href
+      children: [
+        {
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
+        },
+      ],
     };
 
-    // -- Default navigation
     {
-      const renderResult = renderNavigation({
-        navTreeDef: {
+      const { findByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          id: 'es',
+          body: [accordionNode],
+        }),
+        services: { navigateToUrl },
+      });
+
+      const accordionToggleButton = await findByTestId(/nav-item-group1\s/);
+      accordionToggleButton.click();
+      expect(navigateToUrl).not.toHaveBeenCalled(); // Should not navigate to the href
+      unmount();
+    }
+
+    {
+      const { findByTestId } = renderNavigation({
+        navTreeDef: of({
+          id: 'es',
           body: [
             {
-              type: 'navGroup',
-              id: 'group1',
-              defaultIsCollapsed: false,
-              children: [
-                {
-                  id: 'item1',
-                  title: 'Item 1',
-                  href: 'https://foo',
-                },
-                {
-                  id: 'item2',
-                  title: 'Item 2',
-                  href: 'https://foo',
-                },
-                {
-                  id: 'group1A',
-                  title: 'Group1A',
-                  defaultIsCollapsed: false,
-                  children: [
-                    {
-                      id: 'item1',
-                      title: 'Group 1A Item 1',
-                      href: 'https://foo',
-                    },
-                    {
-                      id: 'group1A_1',
-                      title: 'Group1A_1',
-                      children: [
-                        {
-                          id: 'item1',
-                          title: 'Group 1A_1 Item 1',
-                          href: 'https://foo',
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
+              ...accordionNode,
+              isCollapsible: false, // Non-collapsible accordion
             },
           ],
-        },
-        onProjectNavigationChange,
+        }),
+        services: { navigateToUrl },
       });
 
-      const navigationTree = await runTests('treeDef', renderResult);
+      const accordionToggleButton = await findByTestId(/nav-item-group1\s/);
+      accordionToggleButton.click();
 
-      expect(navigationTree).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "children": Array [
-              Object {
-                "children": undefined,
-                "deepLink": undefined,
-                "href": "https://foo",
-                "id": "item1",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item1",
-                ],
-                "sideNavStatus": "visible",
-                "title": "Item 1",
-              },
-              Object {
-                "children": undefined,
-                "deepLink": undefined,
-                "href": "https://foo",
-                "id": "item2",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item2",
-                ],
-                "sideNavStatus": "visible",
-                "title": "Item 2",
-              },
-              Object {
-                "children": Array [
-                  Object {
-                    "children": undefined,
-                    "deepLink": undefined,
-                    "href": "https://foo",
-                    "id": "item1",
-                    "isActive": false,
-                    "isGroup": false,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "item1",
-                    ],
-                    "sideNavStatus": "visible",
-                    "title": "Group 1A Item 1",
-                  },
-                  Object {
-                    "children": Array [
-                      Object {
-                        "children": undefined,
-                        "deepLink": undefined,
-                        "href": "https://foo",
-                        "id": "item1",
-                        "isActive": false,
-                        "isGroup": false,
-                        "path": Array [
-                          "group1",
-                          "group1A",
-                          "group1A_1",
-                          "item1",
-                        ],
-                        "sideNavStatus": "visible",
-                        "title": "Group 1A_1 Item 1",
-                      },
-                    ],
-                    "deepLink": undefined,
-                    "href": undefined,
-                    "id": "group1A_1",
-                    "isActive": false,
-                    "isGroup": true,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "group1A_1",
-                    ],
-                    "sideNavStatus": "visible",
-                    "title": "Group1A_1",
-                  },
-                ],
-                "deepLink": undefined,
-                "href": undefined,
-                "id": "group1A",
-                "isActive": true,
-                "isGroup": true,
-                "path": Array [
-                  "group1",
-                  "group1A",
-                ],
-                "sideNavStatus": "visible",
-                "title": "Group1A",
-              },
-            ],
-            "deepLink": undefined,
-            "href": undefined,
-            "id": "group1",
-            "isActive": true,
-            "isGroup": true,
-            "path": Array [
-              "group1",
-            ],
-            "sideNavStatus": "visible",
-            "title": "",
-            "type": "navGroup",
-          },
-        ]
-      `);
-
-      onProjectNavigationChange.mockReset();
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="group1" defaultIsCollapsed={false}>
-              <Navigation.Item id="item1" title="Item 1" href="https://foo" />
-              <Navigation.Item id="item2" title="Item 2" href="https://foo" />
-              <Navigation.Group id="group1A" title="Group1A">
-                <Navigation.Item id="item1" title="Group 1A Item 1" href="https://foo" />
-                <Navigation.Group id="group1A_1" title="Group1A_1">
-                  <Navigation.Item id="item1" title="Group 1A_1 Item 1" href="https://foo" />
-                </Navigation.Group>
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        onProjectNavigationChange,
-      });
-
-      const navigationTree = await runTests('uiComponents', renderResult);
-
-      expect(navigationTree).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "children": Array [
-              Object {
-                "children": undefined,
-                "deepLink": undefined,
-                "href": "https://foo",
-                "id": "item1",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item1",
-                ],
-                "sideNavStatus": "visible",
-                "title": "Item 1",
-              },
-              Object {
-                "children": undefined,
-                "deepLink": undefined,
-                "href": "https://foo",
-                "id": "item2",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item2",
-                ],
-                "sideNavStatus": "visible",
-                "title": "Item 2",
-              },
-              Object {
-                "children": Array [
-                  Object {
-                    "children": undefined,
-                    "deepLink": undefined,
-                    "href": "https://foo",
-                    "id": "item1",
-                    "isActive": false,
-                    "isGroup": false,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "item1",
-                    ],
-                    "sideNavStatus": "visible",
-                    "title": "Group 1A Item 1",
-                  },
-                  Object {
-                    "children": Array [
-                      Object {
-                        "children": undefined,
-                        "deepLink": undefined,
-                        "href": "https://foo",
-                        "id": "item1",
-                        "isActive": false,
-                        "isGroup": false,
-                        "path": Array [
-                          "group1",
-                          "group1A",
-                          "group1A_1",
-                          "item1",
-                        ],
-                        "sideNavStatus": "visible",
-                        "title": "Group 1A_1 Item 1",
-                      },
-                    ],
-                    "deepLink": undefined,
-                    "href": undefined,
-                    "id": "group1A_1",
-                    "isActive": false,
-                    "isGroup": true,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "group1A_1",
-                    ],
-                    "sideNavStatus": "visible",
-                    "title": "Group1A_1",
-                  },
-                ],
-                "deepLink": undefined,
-                "href": undefined,
-                "id": "group1A",
-                "isActive": false,
-                "isGroup": true,
-                "path": Array [
-                  "group1",
-                  "group1A",
-                ],
-                "sideNavStatus": "visible",
-                "title": "Group1A",
-              },
-            ],
-            "deepLink": undefined,
-            "href": undefined,
-            "id": "group1",
-            "isActive": true,
-            "isGroup": true,
-            "path": Array [
-              "group1",
-            ],
-            "sideNavStatus": "visible",
-            "title": "",
-          },
-        ]
-      `);
+      expect(navigateToUrl).toHaveBeenCalledWith('/app/foo'); // Should navigate to the href
     }
   });
 
-  test('should read the title from deeplink, prop or React children', async () => {
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      ...navLinksMock,
-      {
-        id: 'item1',
-        title: 'Title from deeplink',
-        baseUrl: '',
-        url: '',
-        href: '',
-      },
-    ]);
-
-    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const runTests = (type: TestType) => {
-      expect(onProjectNavigationChange).toHaveBeenCalled();
-      const lastCall =
-        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-      const [{ navigationTree }] = lastCall;
-
-      const groupChildren = navigationTree[0].children?.[0].children;
-
-      if (!groupChildren) {
-        throw new Error('Expected group children to be defined');
-      }
-
-      try {
-        expect(groupChildren[0].title).toBe('Title from deeplink');
-        expect(groupChildren[1].title).toBe('Overwrite deeplink title');
-        expect(groupChildren[2].title).toBe('Title in props'); // Unknown deeplink, has not been rendered
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-
-      return groupChildren;
+  test('should render panel opener groups as accordion when the sideNav is collapsed', async () => {
+    const panelOpenerNode: ChromeProjectNavigationNode = {
+      id: 'nestedGroup1',
+      title: 'Nested Group 1',
+      path: 'group1.nestedGroup1',
+      renderAs: 'panelOpener', // Should be converted to accordion when sideNav is collapsed
+      children: [
+        {
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
+        },
+      ],
     };
 
-    // -- Default navigation
+    const nodes: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      children: [panelOpenerNode],
+    };
+
     {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          children: [
+      // Side nav is collapsed
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          id: 'es',
+          body: [nodes],
+        }),
+        services: { isSideNavCollapsed: true },
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+      expect(accordionButtonLabel).toEqual(['Group 1', 'Nested Group 1']); // 2 accordion buttons
+
+      unmount();
+    }
+
+    {
+      // Side nav is not collapsed
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          id: 'es',
+          body: [nodes],
+        }),
+        services: { isSideNavCollapsed: false }, // No conversion to accordion
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+
+      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
+      unmount();
+    }
+
+    {
+      // Panel opener with a link
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          id: 'es',
+          body: [
             {
-              id: 'group1',
+              ...nodes,
               children: [
                 {
-                  id: 'item1',
-                  link: 'item1', // Title from deeplink
-                },
-                {
-                  id: 'item2',
-                  link: 'item1', // Overwrite title from deeplink
-                  title: 'Overwrite deeplink title',
-                },
-                {
-                  id: 'item3',
-                  title: 'Title in props',
-                },
-                {
-                  id: 'item4',
-                  link: 'unknown', // Unknown deeplink
-                  title: 'Should not be rendered',
+                  ...panelOpenerNode,
+                  href: '/foo/bar', // Panel opener with a link should not be converted to accordion
                 },
               ],
             },
           ],
-        },
-      ];
-
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        services: { navLinks$ },
-        onProjectNavigationChange,
+        }),
+        services: { isSideNavCollapsed: true }, // SideNav is collapsed
       });
 
-      const groupChildren = runTests('treeDef');
-      expect(groupChildren.length).toBe(3);
-      expect(groupChildren[3]).toBeUndefined(); // Unknown deeplink, has not been rendered
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
 
-      onProjectNavigationChange.mockReset();
-      renderResult.unmount();
-    }
-
-    // -- With UI components
-    {
-      renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                {/* Title from deeplink */}
-                <Navigation.Item<any> id="item1" link="item1" />
-                <Navigation.Item<any> id="item2" link="item1" title="Overwrite deeplink title" />
-                <Navigation.Item id="item3" title="Title in props" />
-                <Navigation.Item<any> id="item4" link="unknown" title="Should not be rendered" />
-                <Navigation.Item id="item5">Title in children</Navigation.Item>
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        services: { navLinks$ },
-        onProjectNavigationChange,
-      });
-
-      const groupChildren = runTests('uiComponents');
-      expect(groupChildren.length).toBe(4);
-      // "item4" has been skipped as it is an unknown deeplink and we have the next item in the list
-      expect(groupChildren[3].title).toBe('Title in children');
+      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
+      unmount();
     }
   });
 
-  test('should not render the group if it does not have children AND no href or deeplink', async () => {
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      {
-        id: 'item1',
-        title: 'Title from deeplink',
-        baseUrl: '',
-        url: '',
-        href: '',
-      },
-    ]);
-    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
+  test('should track click event', async () => {
+    const navigateToUrl = jest.fn();
+    const reportEvent = jest.fn();
 
-    const runTests = (type: TestType, { queryByTestId }: RenderResult) => {
-      expect(onProjectNavigationChange).toHaveBeenCalled();
-
-      try {
-        // Check the DOM
-        expect(queryByTestId(/nav-group-root.group1/)).toBeNull();
-        expect(queryByTestId(/nav-item-root.group2.item1/)).toBeVisible();
-
-        // Check the navigation tree
-        const lastCall =
-          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-        const [navTree] = lastCall;
-        const [rootNode] = navTree.navigationTree;
-        expect(rootNode.id).toBe('root');
-        expect(rootNode.children?.length).toBe(2);
-        expect(rootNode.children?.[0]?.id).toBe('group1');
-        expect(rootNode.children?.[0]?.children).toBeUndefined(); // No children mounted and registered itself
-        expect(rootNode.children?.[1]?.id).toBe('group2');
-        return navTree;
-      } catch (e) {
-        errorHandler(type)(e);
-      }
+    const node: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      defaultIsCollapsed: false,
+      children: [
+        {
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
+        },
+      ],
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+    const { findByTestId } = renderNavigation({
+      navTreeDef: of({
+        id: 'es',
+        body: [node],
+      }),
+      services: { navigateToUrl, eventTracker: new EventTracker({ reportEvent }) },
+    });
+
+    const navItem = await findByTestId(/nav-item-group1.item1\s/);
+    navItem.click();
+
+    expect(navigateToUrl).toHaveBeenCalled();
+    expect(reportEvent).toHaveBeenCalledWith('solutionNav_click_navlink', {
+      href: undefined,
+      href_prev: undefined,
+      id: 'item1',
+    });
+  });
+
+  test('should allow custom onClick handler for links', async () => {
+    const navigateToUrl = jest.fn();
+    const onClick = jest.fn();
+
+    const node: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      defaultIsCollapsed: false,
+      children: [
         {
-          type: 'navGroup',
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
+          onClick,
+        },
+      ],
+    };
+
+    const { findByTestId } = renderNavigation({
+      navTreeDef: of({
+        id: 'es',
+        body: [node],
+      }),
+      services: { navigateToUrl },
+    });
+
+    const navItem = await findByTestId(/nav-item-group1.item1\s/);
+    navItem.click();
+
+    expect(navigateToUrl).not.toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ type: 'click' }));
+  });
+
+  test('should not render the group if it does not have children', async () => {
+    const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
+      body: [
+        {
           id: 'root',
+          title: 'Root',
+          path: 'root',
           isCollapsible: false,
           children: [
             {
               id: 'group1',
-              children: [{ link: 'notRegistered' }],
+              title: 'Group 1',
+              path: 'root.group1',
+              children: [], // Group with no children should not be rendered
             },
             {
               id: 'group2',
-              children: [{ link: 'item1' }],
+              title: 'Group 2',
+              path: 'group2',
+              isCollapsible: false,
+              children: [
+                {
+                  id: 'item1',
+                  title: 'Item 1',
+                  href: '/app/item1',
+                  path: 'root.group2.item1',
+                },
+              ],
             },
           ],
         },
-      ];
-
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        services: { navLinks$ },
-        onProjectNavigationChange,
-      });
-
-      await runTests('treeDef', renderResult);
-
-      onProjectNavigationChange.mockReset();
-      renderResult.unmount();
-    }
-
-    // -- With UI components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="root" isCollapsible={false}>
-              <Navigation.Group id="group1" title="Hello">
-                <Navigation.Item<any> link="notRegistered" />
-              </Navigation.Group>
-              <Navigation.Group id="group2">
-                <Navigation.Item<any> link="item1" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        services: { navLinks$ },
-        onProjectNavigationChange,
-      });
-
-      await runTests('uiComponents', renderResult);
-    }
-  });
-
-  test('should render group preset (analytics, ml...)', async () => {
-    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const runTests = async (type: TestType) => {
-      try {
-        expect(onProjectNavigationChange).toHaveBeenCalled();
-        const lastCall =
-          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-        const [navTreeGenerated] = lastCall;
-
-        expect(navTreeGenerated).toEqual({
-          navigationTree: expect.any(Array),
-        });
-      } catch (e) {
-        errorHandler(type)(e);
-      }
+      ],
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'preset',
-          preset: 'analytics',
-        },
-        {
-          type: 'preset',
-          preset: 'ml',
-        },
-        {
-          type: 'preset',
-          preset: 'devtools',
-        },
-        {
-          type: 'preset',
-          preset: 'management',
-        },
-      ];
+    const { queryByTestId } = renderNavigation({
+      navTreeDef: of(navTree),
+    });
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        onProjectNavigationChange,
-      });
-
-      await runTests('treeDef');
-
-      renderResult.unmount();
-      onProjectNavigationChange.mockReset();
-    }
-
-    // -- With UI Components
-    {
-      renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group preset="analytics" />
-            <Navigation.Group preset="ml" />
-            <Navigation.Group preset="devtools" />
-            <Navigation.Group preset="management" />
-          </Navigation>
-        ),
-        onProjectNavigationChange,
-      });
-
-      await runTests('uiComponents');
-    }
+    // Check the DOM
+    expect(queryByTestId(/nav-group-root.group1/)).toBeNull();
+    expect(queryByTestId(/nav-item-root.group2.item1/)).toBeVisible();
   });
 
   test('should render recently accessed items', async () => {
@@ -630,134 +346,46 @@ describe('builds navigation tree', () => {
       { label: 'Another example', link: '/app/example/5235', id: '5235' },
     ]);
 
-    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
-      try {
-        expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
-        expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
-          'RecentThis is an exampleAnother example'
-        );
-      } catch (e) {
-        errorHandler(type)(e);
-      }
+    const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
+      body: [{ type: 'recentlyAccessed' }],
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'recentlyAccessed',
-        },
-      ];
+    const { findByTestId } = renderNavigation({
+      navTreeDef: of(navTree),
+      services: { recentlyAccessed$ },
+    });
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        services: { recentlyAccessed$ },
-      });
-
-      await runTests('treeDef', renderResult);
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                <Navigation.RecentlyAccessed />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        services: { recentlyAccessed$ },
-      });
-
-      await runTests('uiComponents', renderResult);
-    }
+    expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
+    expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
+      'RecentThis is an exampleAnother example'
+    );
   });
 
-  test('should render the cloud links', async () => {
-    const stripLastChar = (str: string = '') => str.substring(0, str.length - 1);
+  test('should limit the number of recently accessed items to 5', async () => {
+    const recentlyAccessed$ = of([
+      { label: 'Item1', link: '/app/foo/1', id: '1' },
+      { label: 'Item2', link: '/app/foo/2', id: '2' },
+      { label: 'Item3', link: '/app/foo/3', id: '3' },
+      { label: 'Item4', link: '/app/foo/4', id: '4' },
+      { label: 'Item5', link: '/app/foo/5', id: '5' },
+      { label: 'Item6', link: '/app/foo/6', id: '6' },
+      { label: 'Item7', link: '/app/foo/7', id: '7' },
+    ]);
 
-    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
-      try {
-        expect(await findByTestId(/nav-item-group1.cloudLink1/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.cloudLink2/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.cloudLink3/)).toBeVisible();
-
-        {
-          const userAndRolesLink = await findByTestId(/nav-item-group1.cloudLink1/);
-          expect(userAndRolesLink.textContent).toBe('Mock Users & RolesExternal link');
-          const href = userAndRolesLink.getAttribute('href');
-          expect(href).toBe(stripLastChar(mockCloudLinks.userAndRoles?.href));
-        }
-
-        {
-          const performanceLink = await findByTestId(/nav-item-group1.cloudLink2/);
-          expect(performanceLink.textContent).toBe('Mock PerformanceExternal link');
-          const href = performanceLink.getAttribute('href');
-          expect(href).toBe(stripLastChar(mockCloudLinks.performance?.href));
-        }
-
-        {
-          const billingLink = await findByTestId(/nav-item-group1.cloudLink3/);
-          expect(billingLink.textContent).toBe('Mock Billing & SubscriptionsExternal link');
-          const href = billingLink.getAttribute('href');
-          expect(href).toBe(stripLastChar(mockCloudLinks.billingAndSub?.href));
-        }
-
-        {
-          const deploymentLink = await findByTestId(/nav-item-group1.cloudLink4/);
-          expect(deploymentLink.textContent).toBe('Mock DeploymentExternal link');
-          const href = deploymentLink.getAttribute('href');
-          expect(href).toBe(stripLastChar(mockCloudLinks.deployment?.href));
-        }
-      } catch (e) {
-        errorHandler(type)(e);
-      }
+    const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
+      body: [{ type: 'recentlyAccessed' }],
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'group1',
-          defaultIsCollapsed: false,
-          children: [
-            { id: 'cloudLink1', cloudLink: 'userAndRoles' },
-            { id: 'cloudLink2', cloudLink: 'performance' },
-            { id: 'cloudLink3', cloudLink: 'billingAndSub' },
-            { id: 'cloudLink4', cloudLink: 'deployment' },
-          ],
-        },
-      ];
+    const { queryAllByTestId } = renderNavigation({
+      navTreeDef: of(navTree),
+      services: { recentlyAccessed$ },
+    });
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-      });
-
-      await runTests('treeDef', renderResult);
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="group1" defaultIsCollapsed={false}>
-              <Navigation.Item id="cloudLink1" cloudLink="userAndRoles" />
-              <Navigation.Item id="cloudLink2" cloudLink="performance" />
-              <Navigation.Item id="cloudLink3" cloudLink="billingAndSub" />
-              <Navigation.Item id="cloudLink4" cloudLink="deployment" />
-            </Navigation.Group>
-          </Navigation>
-        ),
-      });
-
-      await runTests('uiComponents', renderResult);
-    }
+    const items = await queryAllByTestId(/nav-recentlyAccessed-item/);
+    expect(items).toHaveLength(5);
+    const itemsText = items.map((item) => item.textContent);
+    expect(itemsText).toEqual(['Item1', 'Item2', 'Item3', 'Item4', 'Item5']);
   });
 });

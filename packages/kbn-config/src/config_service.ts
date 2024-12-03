@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
-import { cloneDeep, isEqual, merge } from 'lodash';
+import { cloneDeep, isEqual, merge, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
-import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, shareReplay, tap } from 'rxjs';
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
@@ -47,6 +48,7 @@ export class ConfigService {
   private readonly deprecationLog: Logger;
   private readonly docLinks: DocLinks;
 
+  private stripUnknownKeys = false;
   private validated = false;
   private readonly config$: Observable<Config>;
   private lastConfig?: Config;
@@ -63,7 +65,10 @@ export class ConfigService {
   private readonly schemas = new Map<string, Type<unknown>>();
   private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
   private readonly dynamicPaths = new Map<string, string[]>();
-  private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
+  private readonly overrides$ = new BehaviorSubject<{
+    additions: Record<string, unknown>;
+    removals: string[];
+  }>({ additions: {}, removals: [] });
   private readonly handledDeprecatedConfigs = new Map<string, DeprecatedConfigDetails[]>();
 
   constructor(
@@ -73,7 +78,10 @@ export class ConfigService {
   ) {
     this.log = logger.get('config');
     this.deprecationLog = logger.get('config', 'deprecation');
-    this.docLinks = getDocLinks({ kibanaBranch: env.packageInfo.branch });
+    this.docLinks = getDocLinks({
+      kibanaBranch: env.packageInfo.branch,
+      buildFlavor: env.packageInfo.buildFlavor,
+    });
 
     this.config$ = combineLatest([
       this.rawConfigProvider.getConfig$(),
@@ -81,7 +89,8 @@ export class ConfigService {
       this.overrides$,
     ]).pipe(
       map(([rawConfig, deprecations, overrides]) => {
-        const overridden = merge(rawConfig, overrides);
+        const overridden = merge(rawConfig, overrides.additions);
+        overrides.removals.forEach((key) => unset(overridden, key));
         const migrated = applyDeprecations(overridden, deprecations);
         this.deprecatedConfigPaths.next(migrated.changedPaths);
         return new ObjectToConfigAdapter(migrated.config);
@@ -91,6 +100,14 @@ export class ConfigService {
       }),
       shareReplay(1)
     );
+  }
+
+  /**
+   * Set the global setting for stripUnknownKeys. Useful for running in Serverless-compatible way.
+   * @param stripUnknownKeys Set to `true` if unknown keys (not explicitly forbidden) should be dropped without failing validation
+   */
+  public setGlobalStripUnknownKeys(stripUnknownKeys: boolean) {
+    this.stripUnknownKeys = stripUnknownKeys;
   }
 
   /**
@@ -136,7 +153,7 @@ export class ConfigService {
   public async validate(params: ConfigValidateParameters = { logDeprecations: true }) {
     const namespaces = [...this.schemas.keys()];
     for (let i = 0; i < namespaces.length; i++) {
-      await this.getValidatedConfigAtPath$(namespaces[i]).pipe(first()).toPromise();
+      await firstValueFrom(this.getValidatedConfigAtPath$(namespaces[i]));
     }
 
     if (params.logDeprecations) {
@@ -192,9 +209,30 @@ export class ConfigService {
       throw new Error(`No validation schema has been defined for [${namespace}]`);
     }
 
-    const validatedConfig = hasSchema
-      ? await this.atPath<{ enabled?: boolean }>(path).pipe(first()).toPromise()
+    let validatedConfig = hasSchema
+      ? await firstValueFrom(
+          this.getValidatedConfigAtPath$(
+            path,
+            // At this point we don't care about how valid the config is: we just want to read `enabled`
+            { stripUnknownKeys: true }
+          ) as Observable<{ enabled?: boolean }>,
+          { defaultValue: undefined }
+        )
       : undefined;
+
+    // Special use case: when the provided config includes `enabled` and the validated config doesn't,
+    // it's quite likely that's not an allowed config and it should fail.
+    // Applying "normal" validation (not stripping unknowns) in that case.
+    if (
+      hasSchema &&
+      typeof config.get(path)?.enabled !== 'undefined' &&
+      typeof validatedConfig?.enabled === 'undefined'
+    ) {
+      validatedConfig = await firstValueFrom(
+        this.getValidatedConfigAtPath$(path) as Observable<{ enabled?: boolean }>,
+        { defaultValue: undefined }
+      );
+    }
 
     const isDisabled = validatedConfig?.enabled === false;
     if (isDisabled) {
@@ -242,15 +280,23 @@ export class ConfigService {
    * @param newOverrides
    */
   public setDynamicConfigOverrides(newOverrides: Record<string, unknown>) {
-    const globalOverrides = cloneDeep(this.overrides$.value);
+    const globalOverrides = cloneDeep(this.overrides$.value.additions);
 
     const flattenedOverrides = getFlattenedObject(newOverrides);
 
     const validateWithNamespace = new Set<string>();
 
+    const flattenedKeysToRemove: string[] = []; // We don't want to remove keys until all the validations have been applied.
+
     keyLoop: for (const key in flattenedOverrides) {
       // this if is enforced by an eslint rule :shrug:
       if (key in flattenedOverrides) {
+        // If set to `null`, delete the config from the overrides.
+        if (flattenedOverrides[key] === null) {
+          flattenedKeysToRemove.push(key);
+          continue;
+        }
+
         for (const [configPath, dynamicConfigKeys] of this.dynamicPaths.entries()) {
           if (
             key.startsWith(`${configPath}.`) &&
@@ -270,13 +316,17 @@ export class ConfigService {
       }
     }
 
-    const globalOverridesAsConfig = new ObjectToConfigAdapter(
-      merge({}, this.lastConfig, globalOverrides)
-    );
+    const rawConfig = merge({}, this.lastConfig, globalOverrides);
+    flattenedKeysToRemove.forEach((key) => {
+      unset(globalOverrides, key);
+      unset(rawConfig, key);
+    });
+    const globalOverridesAsConfig = new ObjectToConfigAdapter(rawConfig);
 
     validateWithNamespace.forEach((ns) => this.validateAtPath(ns, globalOverridesAsConfig.get(ns)));
 
-    this.overrides$.next(globalOverrides);
+    this.overrides$.next({ additions: globalOverrides, removals: flattenedKeysToRemove });
+    return globalOverrides;
   }
 
   private async logDeprecation() {
@@ -296,7 +346,13 @@ export class ConfigService {
     });
   }
 
-  private validateAtPath(path: ConfigPath, config: Record<string, unknown>) {
+  private validateAtPath(
+    path: ConfigPath,
+    config: Record<string, unknown>,
+    validateOptions?: { stripUnknownKeys?: boolean }
+  ) {
+    const stripUnknownKeys = validateOptions?.stripUnknownKeys || this.stripUnknownKeys;
+
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {
@@ -307,21 +363,25 @@ export class ConfigService {
       {
         dev: this.env.mode.dev,
         prod: this.env.mode.prod,
-        serverless: this.env.cliArgs.serverless === true,
+        serverless: this.env.packageInfo.buildFlavor === 'serverless',
         ...this.env.packageInfo,
       },
-      `config validation of [${namespace}]`
+      `config validation of [${namespace}]`,
+      stripUnknownKeys ? { stripUnknownKeys } : {}
     );
   }
 
   private getValidatedConfigAtPath$(
     path: ConfigPath,
-    { ignoreUnchanged = true }: { ignoreUnchanged?: boolean } = {}
+    {
+      ignoreUnchanged = true,
+      stripUnknownKeys,
+    }: { ignoreUnchanged?: boolean; stripUnknownKeys?: boolean } = {}
   ) {
     return this.config$.pipe(
       map((config) => config.get(path)),
       ignoreUnchanged ? distinctUntilChanged(isEqual) : identity,
-      map((config) => this.validateAtPath(path, config))
+      map((config) => this.validateAtPath(path, config, { stripUnknownKeys }))
     );
   }
 

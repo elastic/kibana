@@ -25,19 +25,19 @@ viewer:
   cluster: []
   indices:
     - names:
-        - '.siem-signals*'
-        - '.lists-*'
-        - '.items-*'
+        - ".siem-signals*"
+        - ".lists-*"
+        - ".items-*"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
+        - "read"
+        - "view_index_metadata"
       allow_restricted_indices: false
     - names:
-        - '.alerts*'
-        - '.preview.alerts*'
+        - ".alerts*"
+        - ".preview.alerts*"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
+        - "read"
+        - "view_index_metadata"
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -49,19 +49,24 @@ viewer:
         - packetbeat-*
         - winlogbeat-*
         - metrics-endpoint.metadata_current_*
-        - '.fleet-agents*'
-        - '.fleet-actions*'
-        - 'risk-score.risk-score-*'
+        - ".fleet-agents*"
+        - ".fleet-actions*"
+        - "risk-score.risk-score-*"
+        - ".asset-criticality.asset-criticality-*"
+        - ".entities.v1.latest.security_*"
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
         - feature_securitySolutionCases.read
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -71,7 +76,7 @@ viewer:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
   run_as: []
 
 # modeled after t3_analyst
@@ -79,14 +84,14 @@ editor:
   cluster: []
   indices:
     - names:
-        - '.siem-signals*'
-        - '.lists-*'
-        - '.items-*'
+        - ".siem-signals*"
+        - ".lists-*"
+        - ".items-*"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
-        - 'write'
-        - 'maintenance'
+        - "read"
+        - "view_index_metadata"
+        - "write"
+        - "maintenance"
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -101,19 +106,29 @@ editor:
         - read
         - write
     - names:
-        - '.internal.alerts*'
-        - '.alerts*'
-        - '.internal.preview.alerts*'
-        - '.preview.alerts*'
-        - 'risk-score.risk-score-*'
+        - ".internal.alerts*"
+        - ".alerts*"
+        - ".internal.preview.alerts*"
+        - ".preview.alerts*"
+        - "risk-score.risk-score-*"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
-        - 'write'
-        - 'maintenance'
+        - "read"
+        - "view_index_metadata"
+        - "write"
+        - "maintenance"
+    - names:
+        - ".asset-criticality.asset-criticality-*"
+        - .entities.v1.latest.security_*
+      privileges:
+        - "read"
+        - "write"
       allow_restricted_indices: false
+    - names:
+        - ".ml-anomalies-*"
+      privileges:
+        - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -130,6 +145,8 @@ editor:
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -139,15 +156,15 @@ editor:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
   run_as: []
 
 t1_analyst:
   cluster:
   indices:
     - names:
-        - '.alerts-security*'
-        - '.siem-signals-*'
+        - ".alerts-security*"
+        - ".siem-signals-*"
       privileges:
         - read
         - write
@@ -162,13 +179,16 @@ t1_analyst:
         - packetbeat-*
         - winlogbeat-*
         - metrics-endpoint.metadata_current_*
-        - '.fleet-agents*'
-        - '.fleet-actions*'
+        - ".fleet-agents*"
+        - ".fleet-actions*"
         - risk-score.risk-score-*
+        - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.read
@@ -176,6 +196,7 @@ t1_analyst:
         - feature_siem.endpoint_list_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -186,7 +207,7 @@ t1_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
 
 t2_analyst:
   cluster:
@@ -213,10 +234,17 @@ t2_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
+        - ".ml-anomalies-*"
       privileges:
         - read
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.read
@@ -224,6 +252,7 @@ t2_analyst:
         - feature_siem.endpoint_list_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -234,7 +263,7 @@ t2_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
 
 t3_analyst:
   cluster:
@@ -248,6 +277,7 @@ t3_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
@@ -257,6 +287,7 @@ t3_analyst:
       privileges:
         - read
         - write
+        - maintenance
     - names:
         - .lists*
         - .items*
@@ -268,10 +299,12 @@ t3_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -287,8 +320,10 @@ t3_analyst:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
+        - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -298,7 +333,7 @@ t3_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
 
 threat_intelligence_analyst:
   cluster:
@@ -310,12 +345,17 @@ threat_intelligence_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .lists*
-        - .items*
         - packetbeat-*
         - winlogbeat-*
       privileges:
         - read
+    - names:
+        - .lists*
+        - .items*
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -328,18 +368,20 @@ threat_intelligence_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
-        - feature_siem.read
-        - feature_siem.read_alerts
+        - feature_siem.all
         - feature_siem.endpoint_list_read
         - feature_siem.blocklist_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.all
@@ -349,7 +391,7 @@ threat_intelligence_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
 
 rule_author:
   cluster:
@@ -363,6 +405,7 @@ rule_author:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
@@ -387,10 +430,12 @@ rule_author:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -405,6 +450,7 @@ rule_author:
         - feature_siem.actions_log_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -414,7 +460,7 @@ rule_author:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
 
 soc_manager:
   cluster:
@@ -428,6 +474,8 @@ soc_manager:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
       privileges:
         - read
         - write
@@ -451,10 +499,12 @@ soc_manager:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .asset-criticality.asset-criticality-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -471,8 +521,10 @@ soc_manager:
         - feature_siem.actions_log_management_all
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
+        - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -483,10 +535,10 @@ soc_manager:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
 
 detections_admin:
-  cluster: ['manage_index_templates', 'manage_transform']
+  cluster: ["manage_index_templates", "manage_transform"]
   indices:
     - names:
         - apm-*-transaction*
@@ -511,14 +563,21 @@ detections_admin:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
         - risk-score.risk-score-*
       privileges:
         - all
+    - names:
+        - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
+      privileges:
+        - read
+        - write
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.all
         - feature_siem.all
@@ -526,6 +585,7 @@ detections_admin:
         - feature_siem.crud_alerts
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
@@ -535,7 +595,7 @@ detections_admin:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
 
 platform_engineer:
   cluster:
@@ -559,8 +619,18 @@ platform_engineer:
         - risk-score.risk-score-*
       privileges:
         - all
+    - names:
+        - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
+      privileges:
+        - read
+        - write
+    - names:
+        - ".ml-anomalies-*"
+      privileges:
+        - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.all
         - feature_siem.all
@@ -575,6 +645,7 @@ platform_engineer:
         - feature_siem.actions_log_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_fleet.all
@@ -587,7 +658,7 @@ platform_engineer:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
 
 endpoint_operations_analyst:
   cluster:
@@ -610,6 +681,8 @@ endpoint_operations_analyst:
         - .lists*
         - .items*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
@@ -620,8 +693,14 @@ endpoint_operations_analyst:
       privileges:
         - read
         - write
+        - maintenance
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -637,8 +716,10 @@ endpoint_operations_analyst:
         - feature_siem.actions_log_management_all # Response History
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all # Execute
+        - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -650,7 +731,7 @@ endpoint_operations_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"
 
 endpoint_policy_manager:
   cluster:
@@ -670,11 +751,18 @@ endpoint_policy_manager:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
-        - .lists*
-        - .items*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
+        - ".ml-anomalies-*"
       privileges:
         - read
+    - names:
+        - .lists*
+        - .items*
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -685,7 +773,7 @@ endpoint_policy_manager:
         - write
         - manage
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.all
         - feature_siem.all
@@ -699,6 +787,7 @@ endpoint_policy_manager:
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -710,4 +799,4 @@ endpoint_policy_manager:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: '*'
+      resources: "*"

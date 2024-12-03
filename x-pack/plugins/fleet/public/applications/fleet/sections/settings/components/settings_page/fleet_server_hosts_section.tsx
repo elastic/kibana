@@ -11,7 +11,7 @@ import { EuiTitle, EuiLink, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetServerHost } from '../../../../types';
-import { useLink, useStartServices, useConfig } from '../../../../hooks';
+import { useAuthz, useLink, useStartServices } from '../../../../hooks';
 import { FleetServerHostsTable } from '../fleet_server_hosts_table';
 
 export interface FleetServerHostsSectionProps {
@@ -23,9 +23,9 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
   fleetServerHosts,
   deleteFleetServerHost,
 }) => {
+  const authz = useAuthz();
   const { docLinks } = useStartServices();
   const { getHref } = useLink();
-  const showAddButton = useConfig().internal?.fleetServerStandalone !== true;
 
   return (
     <>
@@ -59,7 +59,7 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
         fleetServerHosts={fleetServerHosts}
         deleteFleetServerHost={deleteFleetServerHost}
       />
-      {showAddButton && (
+      {authz.fleet.addFleetServers ? (
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
@@ -73,7 +73,7 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
             />
           </EuiButtonEmpty>
         </>
-      )}
+      ) : null}
       <EuiSpacer size="m" />
     </>
   );

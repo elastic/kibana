@@ -9,6 +9,8 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
+import { getScopedQueryErrorMessage } from '../../../../../common';
+import { getEsQueryConfig } from '../../../../lib/get_es_query_config';
 import type { MaintenanceWindow } from '../../types';
 import {
   generateMaintenanceWindowEvents,
@@ -44,9 +46,10 @@ async function updateWithOCC(
   context: MaintenanceWindowClientContext,
   params: UpdateMaintenanceWindowParams
 ): Promise<MaintenanceWindow> {
-  const { savedObjectsClient, getModificationMetadata, logger } = context;
+  const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
   const { id, data } = params;
   const { title, enabled, duration, rRule, categoryIds, scopedQuery } = data;
+  const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
     updateMaintenanceWindowParamsSchema.validate(params);
@@ -61,7 +64,8 @@ async function updateWithOCC(
         buildEsQuery(
           undefined,
           [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[]
+          scopedQuery.filters as Filter[],
+          esQueryConfig
         )
       );
       scopedQueryWithGeneratedValue = {
@@ -70,7 +74,11 @@ async function updateWithOCC(
       };
     }
   } catch (error) {
-    throw Boom.badRequest(`Error validating update maintenance scoped query - ${error.message}`);
+    throw Boom.badRequest(
+      `Error validating update maintenance window data - ${getScopedQueryErrorMessage(
+        error.message
+      )}`
+    );
   }
 
   try {
@@ -118,6 +126,14 @@ async function updateWithOCC(
         updatedBy: modificationMetadata.updatedBy,
         updatedAt: modificationMetadata.updatedAt,
       });
+
+    if (updateMaintenanceWindowAttributes.scopedQuery) {
+      if (updateMaintenanceWindowAttributes.categoryIds?.length !== 1) {
+        throw Boom.badRequest(
+          `Error validating update maintenance window data - scoped query must be accompanied by 1 category ID`
+        );
+      }
+    }
 
     // We are deleting and then creating rather than updating because SO.update
     // performs a partial update on the rRule, we would need to null out all of the fields

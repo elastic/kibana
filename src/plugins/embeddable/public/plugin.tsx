@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
@@ -25,6 +25,7 @@ import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plug
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,
@@ -40,7 +41,9 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   SavedObjectEmbeddableInput,
-  PANEL_BADGE_TRIGGER,
+  registerReactEmbeddableSavedObject,
+  ReactEmbeddableSavedObject,
+  getReactEmbeddableSavedObjects,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
@@ -55,7 +58,11 @@ import {
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setKibanaServices } from './kibana_services';
-import { CustomTimeRangeBadge, EditPanelAction } from './embeddable_panel/panel_actions';
+import {
+  reactEmbeddableRegistryHasKey,
+  registerReactEmbeddableFactory,
+} from './react_embeddable_system';
+import { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -71,6 +78,40 @@ export interface EmbeddableStartDependencies {
 }
 
 export interface EmbeddableSetup {
+  /**
+   * Register an embeddable API saved object with the Add from library flyout.
+   *
+   * @example
+   *  registerReactEmbeddableSavedObject({
+   *    onAdd: (container, savedObject) => {
+   *      container.addNewPanel({
+   *        panelType: CONTENT_ID,
+   *        initialState: savedObject.attributes,
+   *      });
+   *    },
+   *    embeddableType: CONTENT_ID,
+   *    savedObjectType: MAP_SAVED_OBJECT_TYPE,
+   *    savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
+   *      defaultMessage: 'Map',
+   *    }),
+   *    getIconForSavedObject: () => APP_ICON,
+   *  });
+   */
+  registerReactEmbeddableSavedObject: typeof registerReactEmbeddableSavedObject;
+
+  /**
+   * @deprecated React embeddables should register their saved objects with {@link registerReactEmbeddableSavedObject}.
+   */
+  registerSavedObjectToPanelMethod: typeof registerSavedObjectToPanelMethod;
+
+  /**
+   * Registers an async {@link ReactEmbeddableFactory} getter.
+   */
+  registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
+
+  /**
+   * @deprecated use {@link registerReactEmbeddableFactory} instead.
+   */
   registerEmbeddableFactory: <
     I extends EmbeddableInput,
     O extends EmbeddableOutput,
@@ -79,11 +120,33 @@ export interface EmbeddableSetup {
     id: string,
     factory: EmbeddableFactoryDefinition<I, O, E>
   ) => () => EmbeddableFactory<I, O, E>;
+  /**
+   * @deprecated
+   */
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  /**
+   * @deprecated
+   */
   setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
 
 export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
+  /**
+   * Checks if a {@link ReactEmbeddableFactory} has been registered using {@link registerReactEmbeddableFactory}
+   */
+  reactEmbeddableRegistryHasKey: (type: string) => boolean;
+
+  /**
+   *
+   * @returns An iterator over all {@link ReactEmbeddableSavedObject}s that have been registered using {@link registerReactEmbeddableSavedObject}.
+   */
+  getReactEmbeddableSavedObjects: <
+    TSavedObjectAttributes extends FinderAttributes
+  >() => IterableIterator<[string, ReactEmbeddableSavedObject<TSavedObjectAttributes>]>;
+
+  /**
+   * @deprecated use {@link registerReactEmbeddableFactory} instead.
+   */
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
@@ -91,11 +154,17 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
   >(
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
+
+  /**
+   * @deprecated
+   */
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getAttributeService: <
     A extends { title: string },
-    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+    V extends EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
@@ -122,6 +191,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     bootstrap(uiActions);
 
     return {
+      registerReactEmbeddableFactory,
+      registerSavedObjectToPanelMethod,
+      registerReactEmbeddableSavedObject,
+
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerEnhancement: this.registerEnhancement,
       setCustomEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => {
@@ -145,12 +218,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
-    const { uiActions } = deps;
-    const { overlays, theme, uiSettings } = core;
-
-    const dateFormat = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
-    const commonlyUsedRanges = uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
-
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
     });
@@ -161,22 +228,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       this.appList
     );
     this.isRegistryReady = true;
-
-    const editPanel = new EditPanelAction(
-      this.getEmbeddableFactory,
-      core.application,
-      this.stateTransferService
-    );
-
-    const timeRangeBadge = new CustomTimeRangeBadge(
-      overlays,
-      theme,
-      editPanel,
-      commonlyUsedRanges,
-      dateFormat
-    );
-
-    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     const commonContract: CommonEmbeddableStartContract = {
       getEmbeddableFactory: this
@@ -192,6 +243,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
 
     const embeddableStart: EmbeddableStart = {
+      reactEmbeddableRegistryHasKey,
+      getReactEmbeddableSavedObjects,
+
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
       getAttributeService: (type: string, options) =>

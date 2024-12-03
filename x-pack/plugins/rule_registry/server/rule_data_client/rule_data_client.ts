@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { errors, TransportResult } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
@@ -14,6 +14,7 @@ import { Logger } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { sanitizeBulkErrorResponse } from '@kbn/alerting-plugin/server';
 import {
   RuleDataWriteDisabledError,
   RuleDataWriterInitializationError,
@@ -231,13 +232,20 @@ export class RuleDataClient implements IRuleDataClient {
               meta: true,
             });
 
+            if (!response.body.errors) {
+              return response;
+            }
+
             // TODO: #160572 - add support for version conflict errors, in case alert was updated
             // some other way between the time it was fetched and the time it was updated.
-            if (response.body.errors) {
-              const error = new errors.ResponseError(response);
-              this.options.logger.error(error);
-            }
-            return response;
+            // Redact part of reason message that echoes back value
+            const sanitizedResponse = sanitizeBulkErrorResponse(response) as TransportResult<
+              estypes.BulkResponse,
+              unknown
+            >;
+            const error = new errors.ResponseError(sanitizedResponse);
+            this.options.logger.error(error);
+            return sanitizedResponse;
           } else {
             this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
           }

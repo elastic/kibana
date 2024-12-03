@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+
 import type { RuleParams } from '../../../rule_schema';
 import { duplicateRule } from './duplicate_rule';
 
@@ -35,13 +36,25 @@ describe('duplicateRule', () => {
       meta: undefined,
       maxSignals: 100,
       responseActions: [],
-      relatedIntegrations: [],
-      requiredFields: [],
+      relatedIntegrations: [
+        {
+          package: 'aws',
+          version: '~1.2.3',
+          integration: 'route53',
+        },
+      ],
+      requiredFields: [
+        {
+          name: 'event.action',
+          type: 'keyword',
+          ecs: true,
+        },
+      ],
       riskScore: 42,
       riskScoreMapping: [],
       severity: 'low',
       severityMapping: [],
-      setup: 'Some setup guide.',
+      setup: `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`,
       threat: [],
       to: 'now',
       references: [],
@@ -93,78 +106,63 @@ describe('duplicateRule', () => {
     jest.clearAllMocks();
   });
 
-  it('returns an object with fields copied from a given rule', async () => {
-    const rule = createTestRule();
-    const result = await duplicateRule({
-      rule,
+  describe('when duplicating any kind of rule', () => {
+    it('appends [Duplicate] to the name', async () => {
+      const rule = createTestRule();
+      rule.name = 'PowerShell Keylogging Script';
+      const result = await duplicateRule({
+        rule,
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          name: 'PowerShell Keylogging Script [Duplicate]',
+        })
+      );
     });
 
-    expect(result).toEqual({
-      name: expect.anything(), // covered in a separate test
-      params: {
-        ...rule.params,
-        ruleId: expect.anything(), // covered in a separate test
-      },
-      tags: rule.tags,
-      alertTypeId: rule.alertTypeId,
-      consumer: rule.consumer,
-      schedule: rule.schedule,
-      actions: rule.actions,
-      enabled: false, // covered in a separate test
+    it('generates a new ruleId', async () => {
+      const rule = createTestRule();
+      const result = await duplicateRule({
+        rule,
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            ruleId: 'new ruleId',
+          }),
+        })
+      );
+    });
+
+    it('makes sure the duplicated rule is disabled', async () => {
+      const rule = createTestRule();
+      rule.enabled = true;
+      const result = await duplicateRule({
+        rule,
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          enabled: false,
+        })
+      );
     });
   });
 
-  it('appends [Duplicate] to the name', async () => {
-    const rule = createTestRule();
-    rule.name = 'PowerShell Keylogging Script';
-    const result = await duplicateRule({
-      rule,
-    });
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        name: 'PowerShell Keylogging Script [Duplicate]',
-      })
-    );
-  });
-
-  it('generates a new ruleId', async () => {
-    const rule = createTestRule();
-    const result = await duplicateRule({
-      rule,
-    });
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        params: expect.objectContaining({
-          ruleId: 'new ruleId',
-        }),
-      })
-    );
-  });
-
-  it('makes sure the duplicated rule is disabled', async () => {
-    const rule = createTestRule();
-    rule.enabled = true;
-    const result = await duplicateRule({
-      rule,
-    });
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        enabled: false,
-      })
-    );
-  });
-
-  describe('when duplicating a prebuilt (immutable) rule', () => {
+  describe('when duplicating a prebuilt rule', () => {
     const createPrebuiltRule = () => {
       const rule = createTestRule();
       rule.params.immutable = true;
+      rule.params.ruleSource = {
+        type: 'external',
+        isCustomized: false,
+      };
       return rule;
     };
 
-    it('transforms it to a custom (mutable) rule', async () => {
+    it('transforms it to a custom rule', async () => {
       const rule = createPrebuiltRule();
       const result = await duplicateRule({
         rule,
@@ -174,78 +172,46 @@ describe('duplicateRule', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             immutable: false,
+            ruleSource: {
+              type: 'internal',
+            },
           }),
         })
       );
     });
 
-    it('resets related integrations to an empty array', async () => {
+    it('copies fields from the original rule', async () => {
       const rule = createPrebuiltRule();
-      rule.params.relatedIntegrations = [
-        {
-          package: 'aws',
-          version: '~1.2.3',
-          integration: 'route53',
+      const result = await duplicateRule({
+        rule,
+      });
+
+      expect(result).toEqual({
+        name: expect.anything(), // covered in a separate test
+        params: {
+          ...rule.params,
+          ruleId: expect.anything(), // covered in a separate test
+          immutable: expect.anything(), // covered in a separate test
+          ruleSource: expect.anything(), // covered in a separate test
         },
-      ];
-
-      const result = await duplicateRule({
-        rule,
+        tags: rule.tags,
+        alertTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        schedule: rule.schedule,
+        actions: rule.actions,
+        systemActions: rule.actions,
+        enabled: false, // covered in a separate test
       });
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            relatedIntegrations: [],
-          }),
-        })
-      );
-    });
-
-    it('resets required fields to an empty array', async () => {
-      const rule = createPrebuiltRule();
-      rule.params.requiredFields = [
-        {
-          name: 'event.action',
-          type: 'keyword',
-          ecs: true,
-        },
-      ];
-
-      const result = await duplicateRule({
-        rule,
-      });
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            requiredFields: [],
-          }),
-        })
-      );
-    });
-
-    it('resets setup guide to an empty string', async () => {
-      const rule = createPrebuiltRule();
-      rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
-      const result = await duplicateRule({
-        rule,
-      });
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            setup: '',
-          }),
-        })
-      );
     });
   });
 
-  describe('when duplicating a custom (mutable) rule', () => {
+  describe('when duplicating a custom rule', () => {
     const createCustomRule = () => {
       const rule = createTestRule();
       rule.params.immutable = false;
+      rule.params.ruleSource = {
+        type: 'internal',
+      };
       return rule;
     };
 
@@ -259,71 +225,34 @@ describe('duplicateRule', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             immutable: false,
+            ruleSource: {
+              type: 'internal',
+            },
           }),
         })
       );
     });
 
-    it('copies related integrations as is', async () => {
+    it('copies fields from the original rule', async () => {
       const rule = createCustomRule();
-      rule.params.relatedIntegrations = [
-        {
-          package: 'aws',
-          version: '~1.2.3',
-          integration: 'route53',
+      const result = await duplicateRule({
+        rule,
+      });
+
+      expect(result).toEqual({
+        name: expect.anything(), // covered in a separate test
+        params: {
+          ...rule.params,
+          ruleId: expect.anything(), // covered in a separate test
         },
-      ];
-
-      const result = await duplicateRule({
-        rule,
+        tags: rule.tags,
+        alertTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        schedule: rule.schedule,
+        actions: rule.actions,
+        systemActions: rule.actions,
+        enabled: false, // covered in a separate test
       });
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            relatedIntegrations: rule.params.relatedIntegrations,
-          }),
-        })
-      );
-    });
-
-    it('copies required fields as is', async () => {
-      const rule = createCustomRule();
-      rule.params.requiredFields = [
-        {
-          name: 'event.action',
-          type: 'keyword',
-          ecs: true,
-        },
-      ];
-
-      const result = await duplicateRule({
-        rule,
-      });
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            requiredFields: rule.params.requiredFields,
-          }),
-        })
-      );
-    });
-
-    it('copies setup guide as is', async () => {
-      const rule = createCustomRule();
-      rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
-      const result = await duplicateRule({
-        rule,
-      });
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            setup: rule.params.setup,
-          }),
-        })
-      );
     });
   });
 });

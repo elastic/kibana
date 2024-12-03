@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
+import React, { type PropsWithChildren } from 'react';
 import { makeAction, makeActionContext } from '../mocks/helpers';
 import { CellActionsProvider, useCellActionsContext } from './cell_actions_context';
 
 const action = makeAction('action-1', 'icon', 1);
 const mockGetTriggerCompatibleActions = jest.fn(async () => [action]);
-const ContextWrapper: React.FC = ({ children }) => (
+const ContextWrapper: React.FC<PropsWithChildren<unknown>> = ({ children }) => (
   <CellActionsProvider getTriggerCompatibleActions={mockGetTriggerCompatibleActions}>
     {children}
   </CellActionsProvider>

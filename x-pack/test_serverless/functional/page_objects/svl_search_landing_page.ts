@@ -10,6 +10,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
+  const monacoEditor = getService('monacoEditor');
 
   return {
     async assertSvlSearchSideNavExists() {
@@ -31,48 +33,60 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
     apiKeys: {
       async openCreateFlyout() {
         await testSubjects.click('new-api-key-button');
-        await testSubjects.existOrFail('create-api-key-submit');
+        await testSubjects.existOrFail('formFlyoutSubmitButton');
       },
       async setApiKeyName(value: string) {
-        await testSubjects.existOrFail('create-api-key-name');
-        await testSubjects.setValue('create-api-key-name', value);
+        await testSubjects.existOrFail('apiKeyNameInput');
+        await testSubjects.setValue('apiKeyNameInput', value);
       },
       async selectNeverExpires() {
-        await (
-          await (
-            await testSubjects.find('create-api-key-expires-never-radio')
-          ).findByTagName('label')
-        ).click();
-        await testSubjects.missingOrFail('create-api-key-expires-days-number-field');
+        await (await await testSubjects.find('apiKeyCustomExpirationSwitch')).click();
+        await testSubjects.missingOrFail('apiKeyCustomExpirationInput');
       },
       async createApiKeySubmitAndSuccess() {
-        await testSubjects.click('create-api-key-submit');
+        await testSubjects.click('formFlyoutSubmitButton');
         await testSubjects.existOrFail('api-key-create-success-panel');
       },
       async createApiKeySubmitAndError() {
-        await testSubjects.click('create-api-key-submit');
-        await testSubjects.existOrFail('create-api-key-error-callout');
+        await testSubjects.click('formFlyoutSubmitButton');
+        await testSubjects.existOrFail('apiKeyFlyoutResponseError');
       },
       async createApiKeyCancel() {
-        await testSubjects.click('create-api-key-cancel');
+        await testSubjects.click('formFlyoutCancelButton');
       },
       async createApiKeyToggleMetadataSwitch() {
-        await testSubjects.click('create-api-metadata-switch');
+        await testSubjects.click('apiKeysMetadataSwitch');
       },
       async expectMetadataEditorToExist() {
-        await testSubjects.existOrFail('create-api-metadata-code-editor-container');
+        await monacoEditor.getCodeEditorValue(1);
       },
       async createApiKeyToggleRoleDescriptorsSwitch() {
-        await testSubjects.click('create-api-role-descriptors-switch');
+        await testSubjects.click('apiKeysRoleDescriptorsSwitch');
       },
       async expectRoleDescriptorsEditorToExist() {
-        await testSubjects.existOrFail('create-api-role-descriptors-code-editor-container');
+        await monacoEditor.getCodeEditorValue(0);
+        await testSubjects.existOrFail('apiKeysReadOnlyDescriptors');
+        await testSubjects.existOrFail('apiKeysWriteOnlyDescriptors');
       },
       async setRoleDescriptorsValue(value: string) {
-        await testSubjects.existOrFail('create-api-role-descriptors-code-editor-container');
-        await testSubjects.setValue('kibanaCodeEditor', value, {
-          clearWithKeyboard: true,
-        });
+        await monacoEditor.getCodeEditorValue(0);
+        await monacoEditor.setCodeEditorValue(value, 0);
+      },
+    },
+    pipeline: {
+      async createPipeline() {
+        await testSubjects.clickWhenNotDisabled('create-a-pipeline-button');
+      },
+      async expectNavigateToCreatePipelinePage() {
+        expect(await browser.getCurrentUrl()).contain(
+          '/app/management/ingest/ingest_pipelines/create'
+        );
+      },
+      async managePipeline() {
+        await testSubjects.clickWhenNotDisabled('manage-pipeline-button');
+      },
+      async expectNavigateToManagePipelinePage() {
+        expect(await browser.getCurrentUrl()).contain('/app/management/ingest/ingest_pipelines');
       },
     },
   };

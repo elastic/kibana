@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
-import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
+import { type DarkModeValue, parseDarkModeValue } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
@@ -56,8 +57,8 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   };
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
-    let darkMode = false;
-    const themeVersion: ThemeVersion = 'v8';
+    let darkMode: DarkModeValue = false;
+    let themeName: string = 'amsterdam';
 
     try {
       const authenticated = isAuthenticated(request);
@@ -68,19 +69,25 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
         if (userSettingDarkMode !== undefined) {
           darkMode = userSettingDarkMode;
         } else {
-          darkMode = await uiSettingsClient.get('theme:darkMode');
+          darkMode = parseDarkModeValue(await uiSettingsClient.get('theme:darkMode'));
         }
+
+        themeName = await uiSettingsClient.get('theme:name');
       }
     } catch (e) {
       // just use the default values in case of connectivity issues with ES
     }
 
+    // keeping legacy themeTag support - note that the browser is now overriding it during setup.
+    if (darkMode === 'system') {
+      darkMode = false;
+    }
+
     const themeTag = getThemeTag({
-      themeVersion,
+      name: !themeName || themeName === 'amsterdam' ? 'v8' : themeName,
       darkMode,
     });
-    const buildHash = packageInfo.buildNum;
-    const bundlesHref = getBundlesHref(baseHref, String(buildHash));
+    const bundlesHref = getBundlesHref(baseHref);
 
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,
@@ -108,7 +115,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       publicPathMap,
     });
 
-    const hash = createHash('sha1');
+    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
     hash.update(body);
     const etag = hash.digest('hex');
 

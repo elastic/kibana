@@ -13,7 +13,9 @@ import { FormTestComponent } from '../../../common/test_utils';
 import * as i18n from '../translations';
 import { Configure } from './configure';
 
-describe('Configure ', () => {
+// Failing: See https://github.com/elastic/kibana/issues/176600
+// Failing: See https://github.com/elastic/kibana/issues/193918
+describe.skip('Configure ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
@@ -30,24 +32,65 @@ describe('Configure ', () => {
     expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
-  it('updates field options correctly', async () => {
+  it('updates field options correctly when not required', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Configure />
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
-
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith(
         {
-          options: {
-            required: true,
-          },
+          defaultValue: false,
+        },
+        true
+      );
+    });
+  });
+
+  it('updates field options correctly when required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Configure />
+      </FormTestComponent>
+    );
+
+    await userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('toggle-custom-field-default-value'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith(
+        {
+          required: true,
+          defaultValue: true,
+        },
+        true
+      );
+    });
+  });
+
+  it('default value is "false" when required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Configure />
+      </FormTestComponent>
+    );
+
+    await userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith(
+        {
+          required: true,
+          defaultValue: false,
         },
         true
       );

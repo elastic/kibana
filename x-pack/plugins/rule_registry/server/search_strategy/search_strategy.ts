@@ -4,38 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { map, mergeMap, catchError } from 'rxjs/operators';
+
+import Boom from '@hapi/boom';
+import { map, mergeMap, catchError, of } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
-import { from, of } from 'rxjs';
-import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
+import { from } from 'rxjs';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import {
   ReadOperations,
-  PluginStartContract as AlertingStart,
+  AlertingServerStart,
   AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
-import {
-  RuleRegistrySearchRequest,
-  RuleRegistrySearchResponse,
-} from '../../common/search_strategy';
+import { partition } from 'lodash';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
+import { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
+import type { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from '../../common';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
+import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
+import { getConsumersFilter } from '../lib/get_consumers_filter';
 
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
-  rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
+  rawResponse: {
+    hits: { total: 0, hits: [] },
+  } as unknown as RuleRegistrySearchResponse['rawResponse'],
 };
 
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
 
+// these are deprecated types should never show up in any alert table
+const EXCLUDED_RULE_TYPE_IDS = ['siem.notifications'];
+
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
-  alerting: AlertingStart,
+  alerting: AlertingServerStart,
   logger: Logger,
   security?: SecurityPluginSetup,
   spaces?: SpacesPluginStart
@@ -44,55 +52,69 @@ export const ruleRegistrySearchStrategyProvider = (
   const requestUserEs = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
   return {
     search: (request, options, deps) => {
+      let params = {};
+
       // SIEM uses RBAC fields in their alerts but also utilizes ES DLS which
       // is different than every other solution so we need to special case
       // those requests.
-      let siemRequest = false;
-      let params = {};
-      if (request.featureIds.length === 1 && request.featureIds[0] === AlertConsumers.SIEM) {
-        siemRequest = true;
-      } else if (request.featureIds.includes(AlertConsumers.SIEM)) {
-        throw new Error(
-          `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
+      const isAnyRuleTypeESAuthorized = request.ruleTypeIds.some(isSiemRuleType);
+      const isEachRuleTypeESAuthorized =
+        // every returns true for empty arrays
+        request.ruleTypeIds.length > 0 && request.ruleTypeIds.every(isSiemRuleType);
+
+      const registeredRuleTypes = alerting.listTypes();
+
+      const [validRuleTypeIds, invalidRuleTypeIds] = partition(request.ruleTypeIds, (ruleTypeId) =>
+        registeredRuleTypes.has(ruleTypeId)
+      );
+
+      if (isAnyRuleTypeESAuthorized && !isEachRuleTypeESAuthorized) {
+        throw new KbnSearchError(
+          `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing multiple rule types with mixed authorization.`,
+          400
         );
       }
-      request.featureIds.forEach((featureId) => {
-        if (!isValidFeatureId(featureId)) {
-          logger.warn(
-            `Found invalid feature '${featureId}' while using ${RULE_SEARCH_STRATEGY_NAME} search strategy. No alert data from this feature will be searched.`
-          );
-        }
+
+      invalidRuleTypeIds.forEach((ruleTypeId) => {
+        logger.warn(
+          `Found invalid rule type '${ruleTypeId}' while using ${RULE_SEARCH_STRATEGY_NAME} search strategy. No alert data from this rule type will be searched.`
+        );
       });
 
       const securityAuditLogger = security?.audit.asScoped(deps.request);
       const getActiveSpace = async () => spaces?.spacesService.getActiveSpace(deps.request);
-      const getAsync = async (featureIds: string[]) => {
+
+      const getAsync = async (ruleTypeIds: string[]) => {
         const [space, authorization] = await Promise.all([
           getActiveSpace(),
           alerting.getAlertingAuthorizationWithRequest(deps.request),
         ]);
+
         let authzFilter;
-        const fIds = new Set(featureIds);
-        if (!siemRequest && featureIds.length > 0) {
+
+        if (!isAnyRuleTypeESAuthorized && ruleTypeIds.length > 0) {
           authzFilter = (await getAuthzFilter(
             authorization,
-            ReadOperations.Find,
-            fIds
+            ReadOperations.Find
           )) as estypes.QueryDslQueryContainer;
         }
 
-        const authorizedRuleTypes =
-          featureIds.length > 0
-            ? await authorization.getAuthorizedRuleTypes(AlertingAuthorizationEntity.Alert, fIds)
-            : [];
+        const authorizedRuleTypes = await authorization.getAllAuthorizedRuleTypesFindOperation({
+          authorizationEntity: AlertingAuthorizationEntity.Alert,
+          ruleTypeIds,
+        });
+
         return { space, authzFilter, authorizedRuleTypes };
       };
-      return from(getAsync(request.featureIds)).pipe(
+      return from(getAsync(validRuleTypeIds)).pipe(
         mergeMap(({ space, authzFilter, authorizedRuleTypes }) => {
-          const indices = alerting.getAlertIndicesAlias(
-            authorizedRuleTypes.map((art: { id: any }) => art.id),
-            space?.id
+          const authorizedRuleTypesIds = Array.from(authorizedRuleTypes.keys());
+          const ruleTypes = (authorizedRuleTypesIds ?? []).filter(
+            (ruleTypeId: string) => !EXCLUDED_RULE_TYPE_IDS.includes(ruleTypeId)
           );
+
+          const indices = alerting.getAlertIndicesAlias(ruleTypes, space?.id);
+
           if (indices.length === 0) {
             return of(EMPTY_RESPONSE);
           }
@@ -102,11 +124,24 @@ export const ruleRegistrySearchStrategyProvider = (
               ? request.query?.bool?.filter
               : [request.query?.bool?.filter]
             : [];
+
           if (authzFilter) {
             filter.push(authzFilter);
           }
+
           if (space?.id) {
             filter.push(getSpacesFilter(space.id) as estypes.QueryDslQueryContainer);
+          }
+
+          const ruleTypeFilter = getRuleTypeIdsFilter(request.ruleTypeIds);
+          const consumersFilter = getConsumersFilter(request.consumers);
+
+          if (consumersFilter) {
+            filter.push(consumersFilter);
+          }
+
+          if (ruleTypeFilter) {
+            filter.push(ruleTypeFilter);
           }
 
           const sort = request.sort ?? [];
@@ -116,14 +151,16 @@ export const ruleRegistrySearchStrategyProvider = (
               ? { ids: request.query?.ids }
               : {
                   bool: {
+                    ...request.query?.bool,
                     filter,
                   },
                 }),
           };
+
           let fields = request?.fields ?? [];
           fields.push({ field: 'kibana.alert.*', include_unmapped: false });
 
-          if (siemRequest) {
+          if (isAnyRuleTypeESAuthorized) {
             fields.push({ field: 'signal.*', include_unmapped: false });
             fields = fields.concat(buildAlertFieldsRequest([], false));
           } else {
@@ -146,7 +183,7 @@ export const ruleRegistrySearchStrategyProvider = (
               ...(request.runtimeMappings ? { runtime_mappings: request.runtimeMappings } : {}),
             },
           };
-          return (siemRequest ? requestUserEs : internalUserEs).search(
+          return (isAnyRuleTypeESAuthorized ? requestUserEs : internalUserEs).search(
             { id: request.id, params },
             options,
             deps
@@ -177,7 +214,6 @@ export const ruleRegistrySearchStrategyProvider = (
           return response;
         }),
         catchError((err) => {
-          // check if auth error, if yes, write to ecs logger
           if (securityAuditLogger != null && err?.output?.statusCode === 403) {
             securityAuditLogger.log(
               alertAuditEvent({
@@ -188,13 +224,21 @@ export const ruleRegistrySearchStrategyProvider = (
             );
           }
 
-          throw err;
+          if (Boom.isBoom(err)) {
+            throw new KbnSearchError(err.output.payload.message, err.output.statusCode);
+          }
+
+          if (err instanceof KbnSearchError) {
+            throw err;
+          }
+
+          throw new KbnSearchError(err.message, 500);
         })
       );
     },
     cancel: async (id, options, deps) => {
-      if (internalUserEs.cancel) internalUserEs.cancel(id, options, deps);
-      if (requestUserEs.cancel) requestUserEs.cancel(id, options, deps);
+      if (internalUserEs.cancel) internalUserEs.cancel(id, options, deps).catch(() => {});
+      if (requestUserEs.cancel) requestUserEs.cancel(id, options, deps).catch(() => {});
     },
   };
 };

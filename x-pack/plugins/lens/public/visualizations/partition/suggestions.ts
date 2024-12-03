@@ -39,20 +39,18 @@ function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisua
 }
 
 function getNewShape(
-  groups: TableSuggestionColumn[],
-  subVisualizationId?: PieVisualizationState['shape']
+  subVisualizationId?: PieVisualizationState['shape'],
+  currentShape?: PieVisualizationState['shape']
 ) {
   if (subVisualizationId) {
     return subVisualizationId;
   }
 
-  let newShape: PieVisualizationState['shape'] | undefined;
-
-  if (groups.length !== 1 && !subVisualizationId) {
-    newShape = PieChartTypes.PIE;
+  if (currentShape) {
+    return currentShape;
   }
 
-  return newShape ?? PieChartTypes.DONUT;
+  return PieChartTypes.PIE;
 }
 
 function hasCustomSuggestionsExists(shape: PieChartType | string | undefined) {
@@ -122,7 +120,10 @@ export function suggestions({
     groups.length <= PartitionChartsMeta.pie.maxBuckets &&
     !hasCustomSuggestionsExists(subVisualizationId)
   ) {
-    const newShape = getNewShape(groups, subVisualizationId as PieVisualizationState['shape']);
+    const newShape = getNewShape(
+      subVisualizationId as PieVisualizationState['shape'],
+      state?.shape
+    );
     const baseSuggestion: VisualizationSuggestion<PieVisualizationState> = {
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: '{chartName}',
@@ -239,12 +240,7 @@ export function suggestions({
         ],
       },
       previewIcon: PartitionChartsMeta.treemap.icon,
-      // hide treemap suggestions from bottom bar, but keep them for chart switcher
-      hide:
-        table.changeType === 'reduced' ||
-        !state ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === PieChartTypes.TREEMAP),
+      hide: table.changeType === 'reduced' || hasIntervalScale(groups),
     });
   }
 
@@ -292,11 +288,7 @@ export function suggestions({
         ],
       },
       previewIcon: PartitionChartsMeta.mosaic.icon,
-      hide:
-        groups.length !== 2 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'mosaic'),
+      hide: groups.length !== 2 || table.changeType === 'reduced' || hasIntervalScale(groups),
     });
   }
 
@@ -341,11 +333,7 @@ export function suggestions({
         ],
       },
       previewIcon: PartitionChartsMeta.waffle.icon,
-      hide:
-        groups.length !== 1 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'waffle'),
+      hide: groups.length !== 1 || table.changeType === 'reduced' || hasIntervalScale(groups),
     });
   }
 
@@ -359,7 +347,12 @@ export function suggestions({
     .sort((a, b) => b.score - a.score)
     .map((suggestion) => ({
       ...suggestion,
-      hide: shouldHideSuggestion || incompleteConfiguration || suggestion.hide,
+      hide:
+        // avoid to suggest the same shape if already used
+        (state && state.shape === suggestion.state.shape) ||
+        shouldHideSuggestion ||
+        incompleteConfiguration ||
+        suggestion.hide,
       incomplete: incompleteConfiguration,
     }));
 }

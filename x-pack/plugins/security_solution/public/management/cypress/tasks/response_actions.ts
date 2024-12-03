@@ -16,6 +16,7 @@ import {
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
@@ -25,17 +26,31 @@ import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
-  cy.get('[data-test-subj^="command-type"]').should(
-    'have.length',
-    ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.length
-  );
-  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.forEach((command) => {
+  // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions
+  const config = Cypress.config();
+  const automatedActionsPAttern = /automatedProcessActionsEnabled/;
+  const automatedProcessActionsEnabled =
+    config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
+
+  const enabledActions = [
+    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+    ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+  ];
+
+  cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);
+  enabledActions.forEach((command) => {
     cy.getByTestSubj(`command-type-${command}`);
   });
 };
+export const selectIsolateAndSaveWithoutEnabling = (ruleName: string) => {
+  cy.getByTestSubj(`command-type-isolate`).click();
+  cy.getByTestSubj('create-enabled-false').click();
+  cy.contains(`${ruleName} was created`);
+};
+
 export const addEndpointResponseAction = () => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').click();
+    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click();
   });
 };
 export const focusAndOpenCommandDropdown = (number = 0) => {
@@ -49,6 +64,26 @@ export const fillUpNewRule = (name = 'Test', description = 'Test') => {
   cy.getByTestSubj('create-new-rule').click();
   cy.getByTestSubj('stepDefineRule').within(() => {
     cy.getByTestSubj('queryInput').first().type('_id:*{enter}');
+  });
+  cy.getByTestSubj('define-continue').click();
+  cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {
+    cy.getByTestSubj('input').type(name);
+  });
+  cy.getByTestSubj('detectionEngineStepAboutRuleDescription').within(() => {
+    cy.getByTestSubj('input').type(description);
+  });
+  cy.getByTestSubj('about-continue').click();
+  cy.getByTestSubj('schedule-continue').click();
+};
+export const fillUpNewEsqlRule = (name = 'Test', description = 'Test', query: string) => {
+  loadPage('app/security/rules/management');
+  cy.getByTestSubj('create-new-rule').click();
+  cy.getByTestSubj('stepDefineRule').within(() => {
+    cy.getByTestSubj('esqlRuleType').click();
+    cy.getByTestSubj('ruleEsqlQueryBar').within(() => {
+      cy.getByTestSubj('globalQueryBar').click();
+      cy.getByTestSubj('kibanaCodeEditor').type(query);
+    });
   });
   cy.getByTestSubj('define-continue').click();
   cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {
@@ -76,27 +111,24 @@ export const getRunningProcesses = (command: string): Cypress.Chainable<number> 
   // find pid of process
   // traverse back from last column to the second column that has pid
   return cy
-    .getByTestSubj('getProcessListTable', { timeout: 120000 })
-    .findByTestSubj('process_list_command')
+    .getByTestSubj('processesOutput-processListTable', { timeout: 120000 })
+    .findByTestSubj('processesOutput-command')
     .contains(command)
-    .parents('td')
-    .siblings('td')
-    .eq(1)
-    .find('span')
-    .then((span) => {
+    .parents('tr')
+    .findByTestSubj('processesOutput-pid')
+    .find('.euiTableCellContent')
+    .then((cellContent) => {
       // get pid
-      return Number(span.text());
+      return Number(cellContent.text());
     });
 };
 
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
-      'be.disabled'
-    );
+    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should('be.disabled');
   });
   // Try adding new action, should not add list item.
-  cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').click({
+  cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click({
     force: true,
   });
   cy.getByTestSubj(`response-actions-list-item-${itemNumber}`).should('not.exist');
@@ -235,6 +267,11 @@ export const ensureResponseActionAuthzAccess = (
 
         apiPayload = formData;
       }
+      break;
+
+    case 'scan':
+      url = SCAN_ROUTE;
+      Object.assign(apiPayload, { parameters: { path: 'scan/two' } });
       break;
 
     default:

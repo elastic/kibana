@@ -1,20 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import {
-  KibanaTimerangeOutput,
-  ExecutionContextSearch,
-  KibanaContext,
-  KibanaFilter,
-  KibanaQueryOutput,
-} from '../..';
+import { KibanaTimerangeOutput, KibanaContext, KibanaFilter, KibanaQueryOutput } from '../..';
 
 interface Arguments {
   q?: KibanaQueryOutput[] | null;
@@ -28,5 +23,5 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   KibanaContext | null,
   Arguments,
   Promise<KibanaContext>,
-  ExecutionContext<Adapters, ExecutionContextSearch>
+  ExecutionContext<Adapters>
 >;

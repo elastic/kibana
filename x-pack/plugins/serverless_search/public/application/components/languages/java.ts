@@ -44,7 +44,7 @@ ElasticsearchClient esClient = new ElasticsearchClient(transport);`,
   testConnection: `InfoResponse info = esClient.info();
 
 logger.info(info.toString());`,
-  ingestData: `List<Book> books = new ArrayList<>();
+  ingestData: ({ ingestPipeline }) => `List<Book> books = new ArrayList<>();
 books.add(new Book("9780553351927", "Snow Crash", "Neal Stephenson", "1992-06-01", 470));
 books.add(new Book("9780441017225", "Revelation Space", "Alastair Reynolds", "2000-03-15", 585));
 books.add(new Book("9780451524935", "1984", "George Orwell", "1985-06-01", 328));
@@ -57,7 +57,59 @@ BulkRequest.Builder br = new BulkRequest.Builder();
 for (Book book : books) {
     br.operations(op -> op
         .index(idx -> idx
-            .index("books")
+            .index("books")${ingestPipeline ? `\n            .pipeline("${ingestPipeline}")` : ''}
+            .id(product.getId())
+            .document(book)
+        )
+    );
+}
+
+BulkResponse result = esClient.bulk(br.build());
+
+// Log errors, if any
+if (result.errors()) {
+    logger.error("Bulk had errors");
+    for (BulkResponseItem item: result.items()) {
+        if (item.error() != null) {
+            logger.error(item.error().reason());
+        }
+    }
+}`,
+  ingestDataIndex: ({ apiKey, indexName, url, ingestPipeline }) => `// URL and API key
+String serverUrl = "${url}";
+String apiKey = "${apiKey}";
+
+// Create the low-level client
+RestClient restClient = RestClient
+  .builder(HttpHost.create(serverUrl))
+  .setDefaultHeaders(new Header[]{
+      new BasicHeader("Authorization", "ApiKey " + apiKey)
+  })
+  .build();
+
+// Create the transport with a Jackson mapper
+ElasticsearchTransport transport = new RestClientTransport(
+  restClient, new JacksonJsonpMapper());
+
+// And create the API client
+ElasticsearchClient esClient = new ElasticsearchClient(transport);
+
+List<Book> books = new ArrayList<>();
+books.add(new Book("9780553351927", "Snow Crash", "Neal Stephenson", "1992-06-01", 470));
+books.add(new Book("9780441017225", "Revelation Space", "Alastair Reynolds", "2000-03-15", 585));
+books.add(new Book("9780451524935", "1984", "George Orwell", "1985-06-01", 328));
+books.add(new Book("9781451673319", "Fahrenheit 451", "Ray Bradbury", "1953-10-15", 227));
+books.add(new Book("9780060850524", "Brave New World", "Aldous Huxley", "1932-06-01", 268));
+books.add(new Book("9780385490818", "The Handmaid's Tale", "Margaret Atwood", "1985-06-01", 311));
+
+BulkRequest.Builder br = new BulkRequest.Builder();
+
+for (Book book : books) {
+    br.operations(op -> op
+        .index(idx -> idx
+            .index("${indexName}")${
+    ingestPipeline ? `\n            .pipeline("${ingestPipeline}")` : ''
+  }
             .id(product.getId())
             .document(book)
         )

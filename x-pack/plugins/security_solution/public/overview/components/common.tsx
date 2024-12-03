@@ -8,14 +8,14 @@
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import * as i18n from './translations';
-import { RiskScoreDocLink } from '../../explore/components/risk_score/risk_score_onboarding/risk_score_doc_link';
-import type { RiskScoreEntity } from '../../../common/risk_engine';
+import { EntityAnalyticsLearnMoreLink } from '../../entity_analytics/components/risk_score_onboarding/entity_analytics_doc_link';
 
 export const RiskScoreInfoTooltip: React.FC<{
   toolTipContent: React.ReactNode;
   toolTipTitle?: React.ReactNode;
   width?: number;
-}> = ({ toolTipContent, toolTipTitle, width = 270 }) => {
+  anchorPosition?: EuiPopover['props']['anchorPosition'];
+}> = ({ toolTipContent, toolTipTitle, width = 270, anchorPosition = 'leftCenter' }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onClick = useCallback(() => {
@@ -30,7 +30,7 @@ export const RiskScoreInfoTooltip: React.FC<{
     <EuiPopover
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      anchorPosition="leftCenter"
+      anchorPosition={anchorPosition}
       button={
         <EuiButtonIcon
           color="text"
@@ -50,9 +50,13 @@ export const RiskScoreInfoTooltip: React.FC<{
   );
 };
 
-export const RiskScoreDocTooltip = ({ riskScoreEntity }: { riskScoreEntity: RiskScoreEntity }) => (
+export const RiskScoreDocTooltip = ({
+  anchorPosition,
+}: {
+  anchorPosition?: React.ComponentProps<typeof RiskScoreInfoTooltip>['anchorPosition'];
+}) => (
   <RiskScoreInfoTooltip
-    toolTipContent={<RiskScoreDocLink riskScoreEntity={riskScoreEntity} />}
-    width={200} // Magic number to match the width of the doc link
+    anchorPosition={anchorPosition}
+    toolTipContent={<EntityAnalyticsLearnMoreLink />}
   />
 );

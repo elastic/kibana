@@ -8,10 +8,16 @@
 import { isEmpty } from 'lodash/fp';
 
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
-import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
+import {
+  ecsFieldMap,
+  EcsFieldMap,
+} from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import {
+  technicalRuleFieldMap,
+  TechnicalRuleFieldMap,
+} from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
+import { legacyExperimentalFieldMap, ExperimentalRuleFieldMap } from '@kbn/alerts-as-data-utils';
+import { Fields, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 import { ENRICHMENT_DESTINATION_PATH } from '../constants';
 
@@ -51,117 +57,141 @@ export const isRuleParametersFieldOrSubfield = (field: string, prependField?: st
 export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) =>
   prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH;
 
+// Helper functions
+const createFieldItem = (
+  fieldCategory: string,
+  field: string,
+  values: string[],
+  isObjectArray: boolean
+): TimelineEventsDetailsItem => ({
+  category: fieldCategory,
+  field,
+  values,
+  originalValue: values,
+  isObjectArray,
+});
+
+const processGeoField = (
+  field: string,
+  item: unknown[],
+  fieldCategory: string
+): TimelineEventsDetailsItem => {
+  const formattedLocation = formatGeoLocation(item);
+  return createFieldItem(fieldCategory, field, formattedLocation, true);
+};
+
+const processSimpleField = (
+  dotField: string,
+  strArr: string[],
+  isObjectArray: boolean,
+  fieldCategory: string
+): TimelineEventsDetailsItem => createFieldItem(fieldCategory, dotField, strArr, isObjectArray);
+
+const processNestedFields = (
+  item: unknown,
+  dotField: string,
+  fieldCategory: string,
+  prependDotField: boolean
+): TimelineEventsDetailsItem[] => {
+  if (Array.isArray(item)) {
+    return item.flatMap((curr) =>
+      getDataFromFieldsHits(curr as Fields, prependDotField ? dotField : undefined, fieldCategory)
+    );
+  }
+
+  return getDataFromFieldsHits(
+    item as Fields,
+    prependDotField ? dotField : undefined,
+    fieldCategory
+  );
+};
+
+type DisjointFieldNames = 'ecs.version' | 'event.action' | 'event.kind' | 'event.original';
+
+// Memoized field maps
+const fieldMaps: EcsFieldMap &
+  Omit<TechnicalRuleFieldMap, DisjointFieldNames> &
+  ExperimentalRuleFieldMap = {
+  ...technicalRuleFieldMap,
+  ...ecsFieldMap,
+  ...legacyExperimentalFieldMap,
+};
+
 export const getDataFromFieldsHits = (
-  fields: EventHit['fields'],
+  fields: Fields,
   prependField?: string,
   prependFieldCategory?: string
-): TimelineEventsDetailsItem[] =>
-  Object.keys(fields).reduce<TimelineEventsDetailsItem[]>((accumulator, field) => {
+): TimelineEventsDetailsItem[] => {
+  const resultMap = new Map<string, TimelineEventsDetailsItem>();
+  const fieldNames = Object.keys(fields);
+  for (let i = 0; i < fieldNames.length; i++) {
+    const field = fieldNames[i];
     const item: unknown[] = fields[field];
-    const fieldCategory =
-      prependFieldCategory != null ? prependFieldCategory : getFieldCategory(field);
+    const fieldCategory = prependFieldCategory ?? getFieldCategory(field);
+    const dotField = prependField ? `${prependField}.${field}` : field;
+
+    // Handle geo fields
     if (isGeoField(field)) {
-      return [
-        ...accumulator,
-        {
-          category: fieldCategory,
-          field,
-          values: formatGeoLocation(item),
-          originalValue: formatGeoLocation(item),
-          isObjectArray: true, // important for UI
-        },
-      ];
+      const geoItem = processGeoField(field, item, fieldCategory);
+      resultMap.set(field, geoItem);
+      // eslint-disable-next-line no-continue
+      continue;
     }
+
     const objArrStr = toObjectArrayOfStrings(item);
     const strArr = objArrStr.map(({ str }) => str);
     const isObjectArray = objArrStr.some((o) => o.isObjectArray);
-    const dotField = prependField ? `${prependField}.${field}` : field;
 
-    // return simple field value (non-ecs object, non-array)
-    if (
-      !isObjectArray ||
-      (Object.keys({
-        ...ecsFieldMap,
-        ...technicalRuleFieldMap,
-        ...legacyExperimentalFieldMap,
-      }).find((ecsField) => ecsField === field) === undefined &&
-        !isRuleParametersFieldOrSubfield(field, prependField))
-    ) {
-      return [
-        ...accumulator,
-        {
-          category: fieldCategory,
-          field: dotField,
-          values: strArr,
-          originalValue: strArr,
-          isObjectArray,
-        },
-      ];
+    const isEcsField = fieldMaps[field as keyof typeof fieldMaps] !== undefined;
+    const isRuleParameters = isRuleParametersFieldOrSubfield(field, prependField);
+
+    // Handle simple fields
+    if (!isObjectArray || (!isEcsField && !isRuleParameters)) {
+      const simpleItem = processSimpleField(dotField, strArr, isObjectArray, fieldCategory);
+      resultMap.set(dotField, simpleItem);
+      // eslint-disable-next-line no-continue
+      continue;
     }
 
-    const threatEnrichmentObject = isThreatEnrichmentFieldOrSubfield(field, prependField)
-      ? [
-          {
-            category: fieldCategory,
-            field: dotField,
-            values: strArr,
-            originalValue: strArr,
-            isObjectArray,
-          },
-        ]
-      : [];
-
-    // format nested fields
-    let nestedFields;
-    if (isRuleParametersFieldOrSubfield(field, prependField)) {
-      nestedFields = Array.isArray(item)
-        ? item
-            .reduce((acc, i) => {
-              acc.push(getDataFromFieldsHits(i, dotField, fieldCategory));
-              return acc;
-            }, [])
-            .flat()
-        : getDataFromFieldsHits(item, dotField, fieldCategory);
-    } else {
-      nestedFields = Array.isArray(item)
-        ? item
-            .reduce((acc, i) => {
-              acc.push(getDataFromFieldsHits(i, dotField, fieldCategory));
-              return acc;
-            }, [])
-            .flat()
-        : getDataFromFieldsHits(item, prependField, fieldCategory);
+    // Handle threat enrichment
+    if (isThreatEnrichmentFieldOrSubfield(field, prependField)) {
+      const enrichmentItem = createFieldItem(fieldCategory, dotField, strArr, isObjectArray);
+      resultMap.set(dotField, enrichmentItem);
     }
 
-    // combine duplicate fields
-    const flat: Record<string, TimelineEventsDetailsItem> = [
-      ...accumulator,
-      ...nestedFields,
-      ...threatEnrichmentObject,
-    ].reduce(
-      (acc, f) => ({
-        ...acc,
-        // acc/flat is hashmap to determine if we already have the field or not without an array iteration
-        // its converted back to array in return with Object.values
-        ...(acc[f.field] != null
-          ? {
-              [f.field]: {
-                ...f,
-                originalValue: acc[f.field].originalValue.includes(f.originalValue[0])
-                  ? acc[f.field].originalValue
-                  : [...acc[f.field].originalValue, ...f.originalValue],
-                values: acc[f.field].values.includes(f.values[0])
-                  ? acc[f.field].values
-                  : [...acc[f.field].values, ...f.values],
-              },
-            }
-          : { [f.field]: f }),
-      }),
-      {}
+    // Process nested fields
+    const nestedFields = processNestedFields(
+      item,
+      dotField,
+      fieldCategory,
+      isRuleParameters || isThreatEnrichmentFieldOrSubfield(field, prependField)
     );
+    // Merge results
+    for (const nestedItem of nestedFields) {
+      const existing = resultMap.get(nestedItem.field);
 
-    return Object.values(flat);
-  }, []);
+      if (!existing) {
+        resultMap.set(nestedItem.field, nestedItem);
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
-export const getDataSafety = <A, T>(fn: (args: A) => T, args: A): Promise<T> =>
-  new Promise((resolve) => setTimeout(() => resolve(fn(args))));
+      // Merge values and originalValue arrays
+      const mergedValues = existing.values?.includes(nestedItem.values?.[0] || '')
+        ? existing.values
+        : [...(existing.values || []), ...(nestedItem.values || [])];
+
+      const mergedOriginal = existing.originalValue.includes(nestedItem.originalValue[0])
+        ? existing.originalValue
+        : [...existing.originalValue, ...nestedItem.originalValue];
+
+      resultMap.set(nestedItem.field, {
+        ...nestedItem,
+        values: mergedValues,
+        originalValue: mergedOriginal,
+      });
+    }
+  }
+
+  return Array.from(resultMap.values());
+};

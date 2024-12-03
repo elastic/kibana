@@ -13,12 +13,10 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
-import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
-import { epmRouteService } from '@kbn/fleet-plugin/common';
-import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   UpgradeSpecificRulesRequest,
+  PickVersionValues,
   PerformRuleUpgradeResponseBody,
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
@@ -30,6 +28,7 @@ import type {
   BulkDuplicateRules,
   BulkActionEditPayload,
   BulkActionType,
+  BulkManualRuleRun,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
 } from '../../../../common/api/detection_engine/rule_management';
@@ -47,6 +46,7 @@ import {
 } from '../../../../common/constants';
 
 import {
+  BOOTSTRAP_PREBUILT_RULES_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
   PERFORM_RULE_UPGRADE_URL,
@@ -58,7 +58,7 @@ import {
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
 
-import type { PreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
+import type { RulePreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
@@ -80,6 +80,7 @@ import type {
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
+import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 
 /**
  * Create provided Rule
@@ -148,12 +149,17 @@ export const patchRule = async ({
  *
  * @throws An error if response is not OK
  */
-export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
-  KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
+export const previewRule = async ({
+  rule,
+  enableLoggedRequests,
+  signal,
+}: PreviewRulesProps): Promise<RulePreviewResponse> =>
+  KibanaServices.get().http.fetch<RulePreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
     method: 'POST',
     version: '2023-10-31',
     body: JSON.stringify(rule),
     signal,
+    query: enableLoggedRequests ? { enable_logged_requests: enableLoggedRequests } : undefined,
   });
 
 /**
@@ -236,18 +242,19 @@ export const fetchRulesSnoozeSettings = async ({
   const response = await KibanaServices.get().http.fetch<RulesSnoozeSettingsBatchResponse>(
     INTERNAL_ALERTING_API_FIND_RULES_PATH,
     {
-      method: 'GET',
-      query: {
+      method: 'POST',
+      body: JSON.stringify({
         filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
         fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
         per_page: ids.length,
-      },
+      }),
       signal,
     }
   );
 
   return response.data?.reduce((result, { id, ...snoozeSettings }) => {
     result[id] = {
+      name: snoozeSettings.name ?? '',
       muteAll: snoozeSettings.mute_all ?? false,
       activeSnoozes: snoozeSettings.active_snoozes ?? [],
       isSnoozedUntil: snoozeSettings.is_snoozed_until
@@ -330,7 +337,10 @@ export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefine
 type PlainBulkAction = {
   type: Exclude<
     BulkActionType,
-    BulkActionTypeEnum['edit'] | BulkActionTypeEnum['export'] | BulkActionTypeEnum['duplicate']
+    | BulkActionTypeEnum['edit']
+    | BulkActionTypeEnum['export']
+    | BulkActionTypeEnum['duplicate']
+    | BulkActionTypeEnum['run']
   >;
 } & QueryOrIds;
 
@@ -344,9 +354,18 @@ type DuplicateBulkAction = {
   duplicatePayload?: BulkDuplicateRules['duplicate'];
 } & QueryOrIds;
 
-export type BulkAction = PlainBulkAction | EditBulkAction | DuplicateBulkAction;
+export type ManualRuleRunBulkAction = {
+  type: BulkActionTypeEnum['run'];
+  runPayload: BulkManualRuleRun['run'];
+} & QueryOrIds;
 
-export interface PerformBulkActionProps {
+export type BulkAction =
+  | PlainBulkAction
+  | EditBulkAction
+  | DuplicateBulkAction
+  | ManualRuleRunBulkAction;
+
+export interface PerformRulesBulkActionProps {
   bulkAction: BulkAction;
   dryRun?: boolean;
 }
@@ -362,7 +381,7 @@ export interface PerformBulkActionProps {
 export async function performBulkAction({
   bulkAction,
   dryRun = false,
-}: PerformBulkActionProps): Promise<BulkActionResponse> {
+}: PerformRulesBulkActionProps): Promise<BulkActionResponse> {
   const params = {
     action: bulkAction.type,
     query: bulkAction.query,
@@ -370,6 +389,7 @@ export async function performBulkAction({
     edit: bulkAction.type === BulkActionTypeEnum.edit ? bulkAction.editPayload : undefined,
     duplicate:
       bulkAction.type === BulkActionTypeEnum.duplicate ? bulkAction.duplicatePayload : undefined,
+    run: bulkAction.type === BulkActionTypeEnum.run ? bulkAction.runPayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
@@ -576,66 +596,6 @@ export const addRuleExceptions = async ({
     }
   );
 
-export interface InstallFleetPackageProps {
-  packageName: string;
-  packageVersion: string;
-  prerelease?: boolean;
-  force?: boolean;
-}
-
-/**
- * Install a Fleet package from the registry
- *
- * @param packageName Name of the package to install
- * @param packageVersion Version of the package to install
- * @param prerelease Whether to install a prerelease version of the package
- * @param force Whether to force install the package. If false, the package will only be installed if it is not already installed
- *
- * @returns The response from the Fleet API
- */
-export const installFleetPackage = ({
-  packageName,
-  packageVersion,
-  prerelease = false,
-  force = true,
-}: InstallFleetPackageProps): Promise<InstallPackageResponse> => {
-  return KibanaServices.get().http.post<InstallPackageResponse>(
-    epmRouteService.getInstallPath(packageName, packageVersion),
-    {
-      query: { prerelease },
-      version: '2023-10-31',
-      body: JSON.stringify({ force }),
-    }
-  );
-};
-
-export interface BulkInstallFleetPackagesProps {
-  packages: string[];
-  prerelease?: boolean;
-}
-
-/**
- * Install multiple Fleet packages from the registry
- *
- * @param packages Array of package names to install
- * @param prerelease Whether to install prerelease versions of the packages
- *
- * @returns The response from the Fleet API
- */
-export const bulkInstallFleetPackages = ({
-  packages,
-  prerelease = false,
-}: BulkInstallFleetPackagesProps): Promise<BulkInstallPackagesResponse> => {
-  return KibanaServices.get().http.post<BulkInstallPackagesResponse>(
-    epmRouteService.getBulkInstallPath(),
-    {
-      query: { prerelease },
-      version: '2023-10-31',
-      body: JSON.stringify({ packages }),
-    }
-  );
-};
-
 /**
  * NEW PREBUILT RULES ROUTES START HERE! 👋
  * USE THESE ONES! THEY'RE THE NICE ONES, PROMISE!
@@ -719,25 +679,27 @@ export const performInstallSpecificRules = async (
     }),
   });
 
-export const performUpgradeAllRules = async (): Promise<PerformRuleUpgradeResponseBody> =>
-  KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
-    method: 'POST',
-    version: '1',
-    body: JSON.stringify({
-      mode: 'ALL_RULES',
-      pick_version: 'TARGET',
-    }),
-  });
+export interface PerformUpgradeRequest {
+  rules: UpgradeSpecificRulesRequest['rules'];
+  pickVersion: PickVersionValues;
+}
 
-export const performUpgradeSpecificRules = async (
-  rules: UpgradeSpecificRulesRequest['rules']
-): Promise<PerformRuleUpgradeResponseBody> =>
+export const performUpgradeSpecificRules = async ({
+  rules,
+  pickVersion,
+}: PerformUpgradeRequest): Promise<PerformRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
     method: 'POST',
     version: '1',
     body: JSON.stringify({
       mode: 'SPECIFIC_RULES',
       rules,
-      pick_version: 'TARGET', // Setting fixed 'TARGET' temporarily for Milestone 2
+      pick_version: pickVersion,
     }),
+  });
+
+export const bootstrapPrebuiltRules = async (): Promise<BootstrapPrebuiltRulesResponse> =>
+  KibanaServices.get().http.fetch(BOOTSTRAP_PREBUILT_RULES_URL, {
+    method: 'POST',
+    version: '1',
   });

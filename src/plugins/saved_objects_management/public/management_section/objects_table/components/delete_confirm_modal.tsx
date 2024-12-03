@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC, useMemo } from 'react';
@@ -28,6 +29,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import type { SavedObjectWithMetadata, SavedObjectManagementTypeInfo } from '../../../../common';
 import { getSavedObjectLabel } from '../../../lib';
 
@@ -48,7 +50,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   allowedTypes,
   showPlainSpinner,
 }) => {
-  const undeletableObjects = useMemo(() => {
+  const hiddenObjects = useMemo(() => {
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
   }, [selectedObjects]);
   const deletableObjects = useMemo(() => {
@@ -84,26 +86,32 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {undeletableObjects.length > 0 && (
+        {hiddenObjects.length > 0 && (
           <>
             <EuiCallOut
               data-test-subj="cannotDeleteObjectsConfirmWarning"
               title={
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.title"
-                  defaultMessage="Some objects cannot be deleted"
+                  defaultMessage="Some objects have been excluded"
                 />
               }
               iconType="warning"
               color="warning"
             >
-              <p>
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.content"
-                  defaultMessage="{objectCount, plural, one {# object is} other {# objects are}} hidden and cannot be deleted. {objectCount, plural, one {It was} other {They were}} excluded from the table summary."
-                  values={{ objectCount: undeletableObjects.length }}
-                />
-              </p>
+              {hiddenObjects.length > 0 && (
+                <p
+                  css={css`
+                    margin-block-end: 0 !important;
+                  `}
+                >
+                  <FormattedMessage
+                    id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.content"
+                    defaultMessage="{objectCount, plural, one {# object is} other {# objects are}} hidden and cannot be deleted."
+                    values={{ objectCount: hiddenObjects.length }}
+                  />
+                </p>
+              )}
             </EuiCallOut>
             <EuiSpacer size="s" />
           </>
@@ -159,7 +167,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               field: 'id',
               name: i18n.translate(
                 'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
-                { defaultMessage: 'Id' }
+                { defaultMessage: 'ID' }
               ),
             },
             {

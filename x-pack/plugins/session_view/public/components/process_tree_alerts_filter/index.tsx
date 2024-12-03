@@ -51,7 +51,7 @@ export const ProcessTreeAlertsFilter = ({
   };
 
   const onSelectedProcessEventAlertCategory = useCallback(
-    (event) => {
+    (event: any) => {
       const [_, selectedAlertEvent] = event.target.textContent.split(' ');
       setSelectedProcessEventAlertCategory(selectedAlertEvent);
       onAlertEventCategorySelected(selectedAlertEvent);
@@ -124,9 +124,10 @@ export const ProcessTreeAlertsFilter = ({
             {totalAlertsCount === filteredAlertsCount && (
               <FormattedMessage
                 id="xpack.sessionView.alertTotalCountStatusLabel"
-                defaultMessage="Showing {count} alerts"
+                defaultMessage="{count, plural, one {Showing <bold>#</bold> alert} other {Showing <bold>#</bold> alerts}}"
                 values={{
-                  count: <strong>{totalAlertsCount}</strong>,
+                  count: totalAlertsCount,
+                  bold: (str) => <strong>{str}</strong>,
                 }}
               />
             )}

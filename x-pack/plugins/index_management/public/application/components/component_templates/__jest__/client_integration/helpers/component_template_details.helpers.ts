@@ -86,6 +86,8 @@ export type ComponentTemplateDetailsTestSubjects =
   | 'noMappingsCallout'
   | 'settingsTabContent'
   | 'noSettingsCallout'
+  | 'deprecatedComponentTemplateBadge'
   | 'manageComponentTemplateButton'
   | 'manageComponentTemplateContextMenu'
+  | 'missingCustomComponentTemplate'
   | 'manageComponentTemplateContextMenu.action';

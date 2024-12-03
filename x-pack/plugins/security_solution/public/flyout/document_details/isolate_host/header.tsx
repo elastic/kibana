@@ -5,32 +5,38 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { AgentTypeIntegration } from '../../../common/components/endpoint/agents/agent_type_integration';
+import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint';
 
 /**
  * Document details expandable right section header for the isolate host panel
  */
 export const PanelHeader: FC = () => {
-  const { isolateAction } = useIsolateHostPanelContext();
+  const { isolateAction, dataFormattedForFieldBrowser: data } = useIsolateHostPanelContext();
+  const {
+    details: { agentType },
+  } = useAlertResponseActionsSupport(data);
 
-  const title =
-    isolateAction === 'isolateHost' ? (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.isolateHost.isolateTitle"
-        defaultMessage="Isolate host"
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.isolateHost.releaseTitle"
-        defaultMessage="Release host"
-      />
-    );
+  const title = (
+    <EuiFlexGroup responsive gutterSize="s">
+      <EuiFlexItem grow={false} data-test-subj="flyoutHostIsolationHeaderTitle">
+        {isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}
+        <EuiSpacer size="s" />
+        <AgentTypeIntegration
+          agentType={agentType}
+          layout="horizontal"
+          data-test-subj="flyoutHostIsolationHeaderIntegration"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
     <FlyoutHeader>

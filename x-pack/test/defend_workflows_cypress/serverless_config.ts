@@ -14,9 +14,7 @@ import { DefendWorkflowsCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const defendWorkflowsCypressConfig = await readConfigFile(
-    require.resolve(
-      '../../test_serverless/functional/test_suites/security/cypress/security_config.base.ts'
-    )
+    require.resolve('./serverless_config.base.ts')
   );
   const config = defendWorkflowsCypressConfig.getAll();
   const hostIp = getLocalhostRealIp();
@@ -28,8 +26,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     esTestCluster: {
       ...config.esTestCluster,
-      serverArgs: [...config.esTestCluster.serverArgs, 'http.host=0.0.0.0'],
+      serverArgs: [
+        ...config.esTestCluster.serverArgs,
+        'http.host=0.0.0.0',
+        // Enable custom roles
+        'xpack.security.authc.native_roles.enabled=true',
+      ],
     },
+
     esServerlessOptions: {
       ...(config.esServerlessOptions ?? {}),
       resources: Object.values(ES_RESOURCES),
@@ -51,6 +55,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${defendWorkflowsCypressConfig.get(
           'servers.elasticsearch.port'
         )}`,
+
+        // Enable spaces UI capabilities
+        '--xpack.spaces.maxSpaces=100',
+
+        // Enable UI to create custom roles in kibana
+        `--xpack.security.roleManagementEnabled=true`,
+
+        // Enable Fleet server standalone so that no checks are done to see if fleet-server has
+        // registered with Kibana and we are able to access the Agents page of Fleet
+        '--xpack.fleet.internal.fleetServerStandalone=true',
+
         // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
         '--xpack.securitySolution.packagerTaskInterval=5s',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(enabledFeatureFlags)}`,

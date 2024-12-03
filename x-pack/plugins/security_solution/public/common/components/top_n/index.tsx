@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Filter, Query } from '@kbn/es-query';
+import { type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { isActiveTimeline } from '../../../helpers';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
@@ -19,9 +19,9 @@ import { useKibana } from '../../lib/kibana';
 import { combineQueries } from '../../lib/kuery';
 import type { inputsModel, State } from '../../store';
 import { inputsSelectors } from '../../store';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { timelineSelectors } from '../../../timelines/store/timeline';
-import type { TimelineModel } from '../../../timelines/store/timeline/model';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { timelineSelectors } from '../../../timelines/store';
+import type { TimelineModel } from '../../../timelines/store/model';
 
 import { getOptions, isDetectionsAlertsTable } from './helpers';
 import { TopN } from './top_n';
@@ -77,7 +77,7 @@ const connector = connect(makeMapStateToProps);
 export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
-  indexPattern: DataViewBase;
+  dataViewSpec?: DataViewSpec;
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -97,7 +97,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   browserFields,
   dataProviders,
   field,
-  indexPattern,
+  dataViewSpec: indexPattern,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
@@ -111,6 +111,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
 
   const options = getOptions(isActiveTimeline(scopeId ?? '') ? activeTimelineEventType : undefined);
+  const applyGlobalQueriesAndFilters = !isActiveTimeline(scopeId ?? '');
 
   const combinedQueries = useMemo(
     () =>
@@ -126,7 +127,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
               language: 'kuery',
               query: activeTimelineKqlQueryExpression ?? '',
             },
-          })?.filterQuery
+          })
         : undefined,
     [
       scopeId,
@@ -147,7 +148,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
 
   return (
     <TopN
-      combinedQueries={combinedQueries}
+      filterQuery={combinedQueries?.filterQuery}
       data-test-subj="top-n"
       defaultView={defaultView}
       deleteQuery={isActiveTimeline(scopeId ?? '') ? undefined : deleteQuery}
@@ -158,7 +159,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
       options={options}
       paddingSize={paddingSize}
       query={isActiveTimeline(scopeId ?? '') ? EMPTY_QUERY : globalQuery}
-      showLegend={showLegend}
       setAbsoluteRangeDatePickerTarget={
         isActiveTimeline(scopeId ?? '') ? InputsModelId.timeline : InputsModelId.global
       }
@@ -167,6 +167,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       to={isActiveTimeline(scopeId ?? '') ? activeTimelineTo : to}
       toggleTopN={toggleTopN}
       onFilterAdded={onFilterAdded}
+      applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
     />
   );
 };

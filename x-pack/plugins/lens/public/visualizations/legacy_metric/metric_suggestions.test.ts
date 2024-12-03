@@ -135,7 +135,7 @@ describe('metric_suggestions', () => {
     expect(suggestion).toHaveLength(0);
   });
 
-  test('does not suggest for text based languages', () => {
+  test('suggests for text based languages', () => {
     const col = {
       columnId: 'id',
       operation: {
@@ -155,7 +155,7 @@ describe('metric_suggestions', () => {
       datasourceId: 'textBased',
     });
 
-    expect(suggestion).toHaveLength(0);
+    expect(suggestion).toHaveLength(1);
   });
   test('suggests a basic metric chart', () => {
     const [suggestion, ...rest] = getSuggestions({
@@ -171,6 +171,7 @@ describe('metric_suggestions', () => {
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
+        "hide": true,
         "previewIcon": [Function],
         "score": 0.1,
         "state": Object {
@@ -206,6 +207,7 @@ describe('metric_suggestions', () => {
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
+        "hide": true,
         "previewIcon": [Function],
         "score": 0.1,
         "state": Object {

@@ -12,9 +12,17 @@ import { i18n } from '@kbn/i18n';
 import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-server';
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
-  exposeToBrowser: { poll: true, roles: true, export_types: true, statefulSettings: true },
+  exposeToBrowser: {
+    csv: { scroll: true },
+    poll: true,
+    roles: true,
+    export_types: true,
+    statefulSettings: true,
+  },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
+    unused('csv.enablePanelActionDownload', { level: 'warning' }), // unused since 9.0
+    unused('queue.indexInterval', { level: 'warning' }), // unused since 8.15
     unused('capture.browser.chromium.maxScreenshotDimension', { level: 'warning' }), // unused since 7.8
     unused('capture.browser.type', { level: 'warning' }),
     unused('poll.jobCompletionNotifier.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
@@ -62,7 +70,10 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   ],
   exposeToUsage: {
     capture: { maxAttempts: true },
-    csv: { maxSizeBytes: true, scroll: { size: true, duration: true } },
+    csv: {
+      maxSizeBytes: true,
+      scroll: { size: true, duration: true },
+    },
     kibanaServer: false, // show as [redacted]
     queue: { indexInterval: true, pollEnabled: true, timeout: true },
     roles: { enabled: true },

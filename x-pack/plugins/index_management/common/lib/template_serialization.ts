@@ -11,8 +11,15 @@ import {
   TemplateSerialized,
   TemplateListItem,
   TemplateType,
+  IndexMode,
 } from '../types';
-import { deserializeESLifecycle } from './data_stream_serialization';
+import { deserializeESLifecycle } from './data_stream_utils';
+import {
+  allowAutoCreateRadioValues,
+  allowAutoCreateRadioIds,
+  STANDARD_INDEX_MODE,
+  LOGSDB_INDEX_MODE,
+} from '../constants';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -23,20 +30,34 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     indexPatterns,
     template,
     composedOf,
+    ignoreMissingComponentTemplates,
     dataStream,
+    indexMode,
     _meta,
     allowAutoCreate,
+    deprecated,
   } = templateDeserialized;
 
   return {
     version,
     priority,
-    template,
+    template: {
+      ...template,
+      settings: {
+        ...template?.settings,
+        index: {
+          ...template?.settings?.index,
+          mode: indexMode,
+        },
+      },
+    },
     index_patterns: indexPatterns,
     data_stream: dataStream,
     composed_of: composedOf,
-    allow_auto_create: allowAutoCreate,
+    ignore_missing_component_templates: ignoreMissingComponentTemplates,
+    allow_auto_create: allowAutoCreateRadioValues?.[allowAutoCreate],
     _meta,
+    deprecated,
   };
 }
 
@@ -52,7 +73,9 @@ export function deserializeTemplate(
     priority,
     _meta,
     composed_of: composedOf,
+    ignore_missing_component_templates: ignoreMissingComponentTemplates,
     data_stream: dataStream,
+    deprecated,
     allow_auto_create: allowAutoCreate,
   } = templateEs;
   const { settings } = template;
@@ -66,6 +89,13 @@ export function deserializeTemplate(
     type = 'managed';
   }
 
+  const ilmPolicyName = settings?.index?.lifecycle?.name;
+
+  const indexMode = (settings?.index?.mode ??
+    (indexPatterns.some((pattern) => pattern === 'logs-*-*')
+      ? LOGSDB_INDEX_MODE
+      : STANDARD_INDEX_MODE)) as IndexMode;
+
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
@@ -73,11 +103,19 @@ export function deserializeTemplate(
     ...(template.lifecycle ? { lifecycle: deserializeESLifecycle(template.lifecycle) } : {}),
     indexPatterns: indexPatterns.sort(),
     template,
-    ilmPolicy: settings?.index?.lifecycle,
-    composedOf,
+    indexMode,
+    ilmPolicy: ilmPolicyName ? { name: ilmPolicyName } : undefined,
+    composedOf: composedOf ?? [],
+    ignoreMissingComponentTemplates: ignoreMissingComponentTemplates ?? [],
     dataStream,
-    allowAutoCreate,
+    allowAutoCreate:
+      allowAutoCreate === true
+        ? allowAutoCreateRadioIds.TRUE_RADIO_OPTION
+        : allowAutoCreate === false
+        ? allowAutoCreateRadioIds.FALSE_RADIO_OPTION
+        : allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
     _meta,
+    deprecated,
     _kbnMeta: {
       type,
       hasDatastream: Boolean(dataStream),

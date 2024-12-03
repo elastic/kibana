@@ -19,23 +19,30 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
-import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { ensureLatestRulesPackageInstalled } from '../../logic/ensure_latest_rules_package_installed';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
-import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
+import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
 
 export const performRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       access: 'internal',
       path: PERFORM_RULE_INSTALLATION_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
+        timeout: {
+          idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
+        },
       },
     })
     .addVersion(
@@ -54,7 +61,8 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
           const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
           const config = ctx.securitySolution.getConfig();
           const soClient = ctx.core.savedObjects.client;
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
           const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
@@ -76,7 +84,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
             ruleObjectsClient,
             versionSpecifiers: mode === 'ALL_RULES' ? undefined : request.body.rules,
           });
-          const { currentRules, installableRules } = getVersionBuckets(ruleVersionsMap);
+          const { currentRules, installableRules } = getRuleGroups(ruleVersionsMap);
 
           // Perform all the checks we can before we start the upgrade process
           if (mode === 'SPECIFIC_RULES') {
@@ -105,7 +113,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
           }
 
           const { results: installedRules, errors: installationErrors } = await createPrebuiltRules(
-            rulesClient,
+            detectionRulesClient,
             installableRules
           );
           const ruleErrors = [...fetchErrors, ...installationErrors];
@@ -130,7 +138,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
               failed: ruleErrors.length,
             },
             results: {
-              created: installedRules.map(({ result }) => internalRuleToAPIResponse(result)),
+              created: installedRules.map(({ result }) => result),
               skipped: skippedRules,
             },
             errors: allErrors,

@@ -13,8 +13,8 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { css } from '@emotion/react';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import {
@@ -26,7 +26,7 @@ import {
 import { AttachmentType } from '../../../common/types/domain';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseUI } from '../../containers/types';
-import type { EuiMarkdownEditorRef } from '../markdown_editor';
+import type { MarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { removeItemFromSessionStorage } from '../utils';
@@ -38,12 +38,6 @@ import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
-const MySpinner = styled(EuiLoadingSpinner)`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-`;
-
 const initialCommentValue: AddCommentFormSchema = {
   comment: '',
 };
@@ -51,7 +45,7 @@ const initialCommentValue: AddCommentFormSchema = {
 export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
   setComment: (newComment: string) => void;
-  editor: EuiMarkdownEditorRef | null;
+  editor: MarkdownEditorRef | null;
 }
 
 /* eslint-disable react/no-unused-prop-types */
@@ -71,11 +65,15 @@ export const AddComment = React.memo(
       { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
       ref
     ) => {
-      const editorRef = useRef<EuiMarkdownEditorRef>(null);
+      const editorRef = useRef<MarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { permissions, owner, appId } = useCasesContext();
+      const { permissions, owner } = useCasesContext();
       const { isLoading, mutate: createAttachments } = useCreateAttachments();
-      const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
+      const draftStorageKey = getMarkdownEditorStorageKey({
+        appId: owner[0],
+        caseId,
+        commentId: id,
+      });
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -87,7 +85,7 @@ export const AddComment = React.memo(
       const { setFieldValue, reset, submit } = form;
       const [{ comment }] = useFormData<{ comment: string }>({ form, watch: [fieldName] });
 
-      const addQuote = useCallback(
+      const addQuote = useCallback<AddCommentRefObject['addQuote']>(
         (quote) => {
           const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '\n> ');
           const val = `> ${addCarrots} \n\n`;
@@ -97,7 +95,7 @@ export const AddComment = React.memo(
         [comment, setFieldValue]
       );
 
-      const setComment = useCallback(
+      const setComment = useCallback<AddCommentRefObject['setComment']>(
         (newComment) => {
           setFieldValue(fieldName, newComment);
         },
@@ -182,9 +180,19 @@ export const AddComment = React.memo(
 
       return (
         <span id="add-comment-permLink">
-          {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
-          {permissions.create && (
-            <Form form={form}>
+          {isLoading && showLoading && (
+            <EuiLoadingSpinner
+              css={css`
+                position: absolute;
+                top: 50%;
+                left: 50%;
+              `}
+              data-test-subj="loading-spinner"
+              size="xl"
+            />
+          )}
+          {permissions.createComment && (
+            <Form form={form} data-test-subj="add-comment-form-wrapper">
               <UseField
                 path={fieldName}
                 component={MarkdownEditorForm}

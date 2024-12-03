@@ -17,11 +17,15 @@ export const BEDROCK_CONNECTOR_ID = '.bedrock';
 export enum SUB_ACTION {
   RUN = 'run',
   INVOKE_AI = 'invokeAI',
+  INVOKE_AI_RAW = 'invokeAIRaw',
   INVOKE_STREAM = 'invokeStream',
+  DASHBOARD = 'getDashboard',
   TEST = 'test',
+  BEDROCK_CLIENT_SEND = 'bedrockClientSend',
 }
 
+export const DEFAULT_TIMEOUT_MS = 120000;
 export const DEFAULT_TOKEN_LIMIT = 8191;
-export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-v2';
+export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
 
-export const DEFAULT_BEDROCK_URL = `https://bedrock.us-east-1.amazonaws.com` as const;
+export const DEFAULT_BEDROCK_URL = `https://bedrock-runtime.us-east-1.amazonaws.com` as const;

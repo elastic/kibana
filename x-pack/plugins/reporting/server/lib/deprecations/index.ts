@@ -9,7 +9,6 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { DeprecationsDetails, DocLinksServiceSetup } from '@kbn/core/server';
-import { checkIlmMigrationStatus } from './check_ilm_migration_status';
 
 function deprecationError(
   title: string,
@@ -20,7 +19,7 @@ function deprecationError(
     return [
       {
         title,
-        level: 'fetch_error', // NOTE: is fetch_error not shown in the Upgrade Assistant UI?
+        level: 'fetch_error',
         deprecationType: 'feature',
         message: i18n.translate(
           'xpack.reporting.deprecations.reportingRole.forbiddenErrorMessage',
@@ -45,7 +44,7 @@ function deprecationError(
   return [
     {
       title,
-      level: 'fetch_error', // NOTE: is fetch_error not shown in the Upgrade Assistant UI?
+      level: 'fetch_error',
       deprecationType: 'feature',
       message: i18n.translate('xpack.reporting.deprecations.reportingRole.unknownErrorMessage', {
         defaultMessage: 'Failed to perform deprecation check. Check Kibana logs for more details.',
@@ -83,7 +82,6 @@ function getDetailedErrorMessage(error: any): string {
 }
 
 export const deprecations = {
-  checkIlmMigrationStatus,
   deprecationError,
   getDetailedErrorMessage,
   getErrorStatusCode,

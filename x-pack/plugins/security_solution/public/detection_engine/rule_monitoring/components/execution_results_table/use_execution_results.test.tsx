@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { cleanup, waitFor, renderHook } from '@testing-library/react';
 
 import { useExecutionResults } from './use_execution_results';
 import { useToasts } from '../../../../common/lib/kibana';
 import { api } from '../../api';
+import { createReactQueryWrapper } from '../../../../common/mock';
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../api');
@@ -26,21 +29,6 @@ describe('useExecutionResults', () => {
   afterEach(async () => {
     cleanup();
   });
-
-  const createReactQueryWrapper = () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          // Turn retries off, otherwise we won't be able to test errors
-          retry: false,
-        },
-      },
-    });
-    const wrapper: React.FC = ({ children }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-    return wrapper;
-  };
 
   const render = () =>
     renderHook(
@@ -60,18 +48,17 @@ describe('useExecutionResults', () => {
   it('calls the API via fetchRuleExecutionResults', async () => {
     const fetchRuleExecutionResults = jest.spyOn(api, 'fetchRuleExecutionResults');
 
-    const { waitForNextUpdate } = render();
+    render();
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(fetchRuleExecutionResults).toHaveBeenCalledTimes(1));
 
-    expect(fetchRuleExecutionResults).toHaveBeenCalledTimes(1);
     expect(fetchRuleExecutionResults).toHaveBeenLastCalledWith(
       expect.objectContaining({ ruleId: SOME_RULE_ID })
     );
   });
 
   it('fetches data from the API', async () => {
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -79,10 +66,9 @@ describe('useExecutionResults', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents returns
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     // It switches to a success state
-    expect(result.current.isLoading).toEqual(false);
     expect(result.current.isSuccess).toEqual(true);
     expect(result.current.isError).toEqual(false);
     expect(result.current.data).toEqual({
@@ -119,7 +105,7 @@ describe('useExecutionResults', () => {
     const exception = new Error('Boom!');
     jest.spyOn(api, 'fetchRuleExecutionResults').mockRejectedValue(exception);
 
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -127,10 +113,9 @@ describe('useExecutionResults', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     // It switches to an error state
-    expect(result.current.isLoading).toEqual(false);
     expect(result.current.isSuccess).toEqual(false);
     expect(result.current.isError).toEqual(true);
     expect(result.current.error).toEqual(exception);

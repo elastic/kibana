@@ -7,14 +7,16 @@
 
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
+import { fireEvent, screen, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import '../../../../common/mock/formatted_relative';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
+import { createReactQueryWrapper, TestProviders } from '../../../../common/mock';
 import type { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
+import { useDeleteNote } from './hooks/use_delete_note';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
@@ -27,12 +29,15 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('./hooks/use_delete_note');
+
+const deleteMutateMock = jest.fn();
+
 describe('NotePreviews', () => {
   let mockResults: OpenTimelineResult[];
   let note1updated: number;
   let note2updated: number;
   let note3updated: number;
-  let queryClient: QueryClient;
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
@@ -40,23 +45,20 @@ describe('NotePreviews', () => {
     note2updated = moment(note1updated).add(1, 'minute').valueOf();
     note3updated = moment(note2updated).add(1, 'minute').valueOf();
     (useDeepEqualSelector as jest.Mock).mockReset();
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
-        },
-      },
+    (useDeleteNote as jest.Mock).mockReturnValue({
+      mutate: deleteMutateMock,
+      onSuccess: jest.fn(),
+      onError: jest.fn(),
+      isLoading: false,
     });
   });
 
   test('it renders a note preview for each note when isModal is false', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <NotePreviews notes={hasNotes[0].notes} />
-      </QueryClientProvider>
-    );
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={hasNotes[0].notes} />, {
+      wrappingComponent: createReactQueryWrapper(),
+    });
 
     hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
@@ -66,11 +68,9 @@ describe('NotePreviews', () => {
   test('it renders a note preview for each note when isModal is true', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <NotePreviews notes={hasNotes[0].notes} />
-      </QueryClientProvider>
-    );
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={hasNotes[0].notes} />, {
+      wrappingComponent: createReactQueryWrapper(),
+    });
 
     hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
@@ -99,11 +99,9 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <NotePreviews notes={nonUniqueNotes} />
-      </QueryClientProvider>
-    );
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={nonUniqueNotes} />, {
+      wrappingComponent: createReactQueryWrapper(),
+    });
 
     expect(wrapper.find('div.euiCommentEvent__headerUsername').at(1).text()).toEqual('bob');
   });
@@ -130,11 +128,9 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <NotePreviews notes={nonUniqueNotes} />
-      </QueryClientProvider>
-    );
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={nonUniqueNotes} />, {
+      wrappingComponent: createReactQueryWrapper(),
+    });
 
     expect(wrapper.find('div.euiCommentEvent__headerUsername').at(2).text()).toEqual('bob');
   });
@@ -160,11 +156,9 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <NotePreviews notes={nonUniqueNotes} />{' '}
-      </QueryClientProvider>
-    );
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={nonUniqueNotes} />, {
+      wrappingComponent: createReactQueryWrapper(),
+    });
 
     expect(wrapper.find('div.euiCommentEvent__headerUsername').at(2).text()).toEqual('bob');
   });
@@ -173,10 +167,11 @@ describe('NotePreviews', () => {
     const timeline = mockTimelineResults[0];
     (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <NotePreviews notes={[]} showTimelineDescription timelineId="test-timeline-id" />
-      </QueryClientProvider>
+    const wrapper = mountWithI18nProvider(
+      <NotePreviews notes={[]} showTimelineDescription timelineId="test-timeline-id" />,
+      {
+        wrappingComponent: createReactQueryWrapper(),
+      }
     );
 
     expect(wrapper.find('[data-test-subj="note-preview-description"]').first().text()).toContain(
@@ -188,11 +183,9 @@ describe('NotePreviews', () => {
     const timeline = mockTimelineResults[0];
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ ...timeline, description: undefined });
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <NotePreviews notes={[]} />
-      </QueryClientProvider>
-    );
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={[]} />, {
+      wrappingComponent: createReactQueryWrapper(),
+    });
 
     expect(wrapper.find('[data-test-subj="note-preview-description"]').exists()).toBe(false);
   });
@@ -201,20 +194,21 @@ describe('NotePreviews', () => {
     const timeline = mockTimelineResults[0];
     (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <NotePreviews
-          notes={[
-            {
-              note: 'disabled delete',
-              updated: note2updated,
-              updatedBy: 'alice',
-            },
-          ]}
-          showTimelineDescription
-          timelineId="test-timeline-id"
-        />
-      </QueryClientProvider>
+    const wrapper = mountWithI18nProvider(
+      <NotePreviews
+        notes={[
+          {
+            note: 'disabled delete',
+            updated: note2updated,
+            updatedBy: 'alice',
+          },
+        ]}
+        showTimelineDescription
+        timelineId="test-timeline-id"
+      />,
+      {
+        wrappingComponent: createReactQueryWrapper(),
+      }
     );
 
     expect(wrapper.find('[data-test-subj="delete-note"] button').prop('disabled')).toBeTruthy();
@@ -224,11 +218,37 @@ describe('NotePreviews', () => {
     const timeline = mockTimelineResults[0];
     (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
+    const wrapper = mountWithI18nProvider(
+      <NotePreviews
+        notes={[
+          {
+            note: 'enabled delete',
+            savedObjectId: 'test-id',
+            updated: note2updated,
+            updatedBy: 'alice',
+          },
+        ]}
+        showTimelineDescription
+        timelineId="test-timeline-id"
+      />,
+      {
+        wrappingComponent: createReactQueryWrapper(),
+      }
+    );
+
+    expect(wrapper.find('[data-test-subj="delete-note"] button').prop('disabled')).toBeFalsy();
+  });
+
+  test('should render toggle event details action by default', () => {
+    const timeline = mockTimelineResults[0];
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+    const wrapper = mountWithI18nProvider(
+      <TestProviders>
         <NotePreviews
           notes={[
             {
+              noteId: 'noteId1',
               note: 'enabled delete',
               savedObjectId: 'test-id',
               updated: note2updated,
@@ -238,9 +258,87 @@ describe('NotePreviews', () => {
           showTimelineDescription
           timelineId="test-timeline-id"
         />
-      </QueryClientProvider>
+      </TestProviders>,
+      {
+        wrappingComponent: createReactQueryWrapper(),
+      }
     );
 
-    expect(wrapper.find('[data-test-subj="delete-note"] button').prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="notes-toggle-event-details"]`).exists()).toBeTruthy();
+  });
+
+  test('should not render toggle event details action when showToggleEventDetailsAction is false ', () => {
+    const timeline = mockTimelineResults[0];
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+    const wrapper = mountWithI18nProvider(
+      <TestProviders>
+        <NotePreviews
+          notes={[
+            {
+              noteId: 'noteId1',
+              note: 'enabled delete',
+              savedObjectId: 'test-id',
+              updated: note2updated,
+              updatedBy: 'alice',
+            },
+          ]}
+          showTimelineDescription
+          timelineId="test-timeline-id"
+          showToggleEventDetailsAction={false}
+        />
+      </TestProviders>,
+      {
+        wrappingComponent: createReactQueryWrapper(),
+      }
+    );
+
+    expect(wrapper.find(`[data-test-subj="notes-toggle-event-details"]`).exists()).toBeFalsy();
+  });
+
+  describe('Delete Notes', () => {
+    it('should delete note correctly', async () => {
+      const timeline = {
+        ...mockTimelineResults[0],
+        confirmingNoteId: 'noteId1',
+      };
+      (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+      render(
+        <TestProviders>
+          <NotePreviews
+            notes={[
+              {
+                note: 'first note',
+                noteId: 'noteId1',
+                savedObjectId: 'test-id-1',
+                updated: note2updated,
+                updatedBy: 'alice',
+              },
+
+              {
+                note: 'second note',
+                noteId: 'noteId2',
+                savedObjectId: 'test-id-2',
+                updated: note2updated,
+                updatedBy: 'alice',
+              },
+            ]}
+            showTimelineDescription
+            timelineId="test-timeline-id"
+          />
+        </TestProviders>,
+        {
+          wrapper: createReactQueryWrapper(),
+        }
+      );
+
+      fireEvent.click(screen.queryAllByTestId('delete-note')[0]);
+      await waitFor(() => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+      expect(deleteMutateMock.mock.calls).toHaveLength(1);
+      expect(deleteMutateMock.mock.calls[0][0]).toBe('test-id-1');
+    });
   });
 });

@@ -22,6 +22,8 @@ import { listFleetServerHostsForProxyId } from '../fleet_server_host';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
 
+import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
+
 export function getPreconfiguredFleetProxiesFromConfig(config?: FleetConfigType) {
   const { proxies: fleetProxiesFromConfig } = config;
 
@@ -101,26 +103,24 @@ async function createOrUpdatePreconfiguredFleetProxies(
           fleetServerHosts.some((host) => host.is_default) ||
           outputs.some((output) => output.is_default || output.is_default_monitoring)
         ) {
-          await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+          await agentPolicyService.bumpAllAgentPolicies(esClient);
         } else {
           await pMap(
             outputs,
-            (output) =>
-              agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id),
+            (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id),
             {
-              concurrency: 20,
+              concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
             }
           );
           await pMap(
             fleetServerHosts,
             (fleetServerHost) =>
               agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
-                soClient,
                 esClient,
                 fleetServerHost.id
               ),
             {
-              concurrency: 20,
+              concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
             }
           );
         }

@@ -16,6 +16,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const observability = getService('observability');
     const esArchiver = getService('esArchiver');
     const testSubjects = getService('testSubjects');
+    const dataGrid = getService('dataGrid');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -29,39 +30,24 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     it('remembers column changes', async () => {
       await observability.alerts.common.navigateToTimeWithData();
-      const durationColumnButton = await testSubjects.find(
-        'dataGridHeaderCellActionButton-kibana.alert.duration.us'
-      );
-      await durationColumnButton.click();
-      const columnMenu = await testSubjects.find(
-        'dataGridHeaderCellActionGroup-kibana.alert.duration.us'
-      );
-      const removeButton = await columnMenu.findByCssSelector('[title="Hide column"]');
-      await removeButton.click();
+      await dataGrid.clickHideColumn('kibana.alert.duration.us');
 
       await observability.alerts.common.navigateToTimeWithData();
 
       const durationColumnExists = await testSubjects.exists(
-        'dataGridHeaderCellActionButton-kibana.alert.duration.us'
+        'dataGridHeaderCell-kibana.alert.duration.us'
       );
-
       expect(durationColumnExists).to.be(false);
     });
 
     it('remembers sorting changes', async () => {
       await observability.alerts.common.navigateToTimeWithData();
-      const timestampColumnButton = await testSubjects.find(
-        'dataGridHeaderCellActionButton-@timestamp'
-      );
-      await timestampColumnButton.click();
-      const columnMenu = await testSubjects.find('dataGridHeaderCellActionGroup-@timestamp');
-      const sortButton = await columnMenu.findByCssSelector('[title="Sort Old-New"]');
-      await sortButton.click();
+      await dataGrid.clickDocSortAsc('kibana.alert.start');
 
       await observability.alerts.common.navigateToTimeWithData();
 
-      const timestampColumnHeading = await testSubjects.find('dataGridHeaderCell-@timestamp');
-      expect(await timestampColumnHeading.getAttribute('aria-sort')).to.be('ascending');
+      const triggeredColumnHeading = await dataGrid.getHeaderElement('kibana.alert.start');
+      expect(await triggeredColumnHeading.getAttribute('aria-sort')).to.be('ascending');
     });
   });
 };

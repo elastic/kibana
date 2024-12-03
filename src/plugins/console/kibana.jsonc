@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/console-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "console",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "console"
     ],
@@ -15,11 +19,11 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "home"
+      "home",
+      "cloud"
     ],
     "requiredBundles": [
       "esUiShared",
-      "kibanaReact",
       "kibanaUtils"
     ]
   }

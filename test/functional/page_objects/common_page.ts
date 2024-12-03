@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
@@ -39,6 +40,23 @@ export class CommonPageObject extends FtrService {
     return url.toString();
   }
 
+  private async disableTours() {
+    const NEW_FEATURES_TOUR_STORAGE_KEYS = {
+      RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
+      TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
+      FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
+    };
+
+    const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
+    const tourConfig = {
+      isTourActive: false,
+    };
+
+    for (const key of tourStorageKeys) {
+      await this.browser.setLocalStorageItem(key, JSON.stringify(tourConfig));
+    }
+  }
+
   /**
    * Logins to Kibana as default user and navigates to provided app
    * @param appUrl Kibana URL
@@ -54,6 +72,8 @@ export class CommonPageObject extends FtrService {
     if (disableWelcomePrompt) {
       await this.browser.setLocalStorageItem('home:welcome:show', 'false');
     }
+
+    await this.disableTours();
 
     let currentUrl = await this.browser.getCurrentUrl();
     this.log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
@@ -314,14 +334,16 @@ export class CommonPageObject extends FtrService {
         }
 
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+        const decodedAppUrl = decodeURIComponent(appUrl);
+        const decodedCurrentUrl = decodeURIComponent(currentUrl);
 
-        const navSuccessful = currentUrl
+        const navSuccessful = decodedCurrentUrl
           .replace(':80/', '/')
           .replace(':443/', '/')
-          .startsWith(appUrl.replace(':80/', '/').replace(':443/', '/'));
+          .startsWith(decodedAppUrl.replace(':80/', '/').replace(':443/', '/'));
 
         if (!navSuccessful) {
-          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
+          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${decodedAppUrl} currentUrl=${decodedCurrentUrl}`;
           this.log.debug(msg);
           throw new Error(msg);
         }
@@ -458,39 +480,6 @@ export class CommonPageObject extends FtrService {
         throw new Error('Local nav not visible yet');
       }
     });
-  }
-
-  async closeToast() {
-    const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
-    await toast.moveMouseTo();
-    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
-
-    await this.testSubjects.click('toastCloseButton');
-    return title;
-  }
-
-  async closeToastIfExists() {
-    const toastShown = await this.find.existsByCssSelector('.euiToast');
-    if (toastShown) {
-      try {
-        await this.testSubjects.click('toastCloseButton');
-      } catch (err) {
-        // ignore errors, toast clear themselves after timeout
-      }
-    }
-  }
-
-  async clearAllToasts() {
-    const toasts = await this.find.allByCssSelector('.euiToast');
-    for (const toastElement of toasts) {
-      try {
-        await toastElement.moveMouseTo();
-        const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
-        await closeBtn.click();
-      } catch (err) {
-        // ignore errors, toast clear themselves after timeout
-      }
-    }
   }
 
   async getJsonBodyText() {

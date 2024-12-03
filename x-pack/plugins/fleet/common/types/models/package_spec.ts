@@ -9,24 +9,25 @@ import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry }
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
-  format_version: string;
+  format_version?: string;
   name: string;
   title: string;
-  description: string;
+  description?: string;
   version: string;
   license?: 'basic';
   source?: {
     license: string;
   };
-  type?: 'integration' | 'input';
+  type?: PackageSpecPackageType;
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
   conditions?: PackageSpecConditions;
   icons?: PackageSpecIcon[];
   screenshots?: PackageSpecScreenshot[];
+  policy_templates_behavior?: 'all' | 'combined_policy' | 'individual_policies';
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
-  owner: { github: string; type?: 'elastic' | 'partner' | 'community' };
+  owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,
     'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
@@ -35,6 +36,11 @@ export interface PackageSpecManifest {
     privileges?: { root?: boolean };
   };
   asset_tags?: PackageSpecTags[];
+  discovery?: {
+    fields?: Array<{
+      name: string;
+    }>;
+  };
 }
 export interface PackageSpecTags {
   text: string;
@@ -42,7 +48,7 @@ export interface PackageSpecTags {
   asset_ids?: string[];
 }
 
-export type PackageSpecPackageType = 'integration' | 'input';
+export type PackageSpecPackageType = 'integration' | 'input' | 'content';
 
 export type PackageSpecCategory =
   | 'advanced_analytics_ueba'
@@ -69,6 +75,7 @@ export type PackageSpecCategory =
   | 'datastore'
   | 'dns_security'
   | 'edr_xdr'
+  | 'cloudsecurity_cdr'
   | 'elasticsearch_sdk'
   | 'elastic_stack'
   | 'email_security'
@@ -112,11 +119,12 @@ export type PackageSpecCategory =
   | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
-  kibana: {
-    version: string;
+  kibana?: {
+    version?: string;
   };
   elastic?: {
-    subscription: string;
+    subscription?: string;
+    capabilities?: string[];
   };
 }
 
@@ -125,6 +133,7 @@ export interface PackageSpecIcon {
   title?: string;
   size?: string;
   type?: string;
+  dark_mode?: boolean;
 }
 
 export interface PackageSpecScreenshot {

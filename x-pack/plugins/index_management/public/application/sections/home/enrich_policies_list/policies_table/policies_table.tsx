@@ -16,8 +16,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
+import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
 import { useAppContext } from '../../../../app_context';
-import type { SerializedEnrichPolicy } from '../../../../../../common/types';
 
 export interface Props {
   policies: SerializedEnrichPolicy[];
@@ -26,52 +27,88 @@ export interface Props {
   onExecutePolicyClick: (policyName: string) => void;
 }
 
-const pagination = {
-  initialPageSize: 50,
-  pageSizeOptions: [25, 50, 100],
-};
-
 export const PoliciesTable: FunctionComponent<Props> = ({
   policies,
   onReloadClick,
   onDeletePolicyClick,
   onExecutePolicyClick,
 }) => {
-  const { history } = useAppContext();
+  const { history, privs } = useAppContext();
 
-  const renderToolsRight = () => {
-    return [
-      <EuiButton
-        key="reloadPolicies"
-        data-test-subj="reloadPoliciesButton"
-        iconType="refresh"
-        color="success"
-        onClick={onReloadClick}
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicies.table.reloadButton"
-          defaultMessage="Reload"
-        />
-      </EuiButton>,
-      <EuiButton
-        key="createPolicy"
-        fill
-        iconType="plusInCircle"
-        {...reactRouterNavigate(history, '/enrich_policies/create')}
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicies.table.createPolicyButton"
-          defaultMessage="Create enrich policy"
-        />
-      </EuiButton>,
-    ];
-  };
+  const createBtn = (
+    <EuiButton
+      key="createPolicy"
+      fill
+      iconType="plusInCircle"
+      data-test-subj="createPolicyButton"
+      {...reactRouterNavigate(history, '/enrich_policies/create')}
+    >
+      <FormattedMessage
+        id="xpack.idxMgmt.enrichPolicies.table.createPolicyButton"
+        defaultMessage="Create enrich policy"
+      />
+    </EuiButton>
+  );
+
+  const toolsRight = [
+    <EuiButton
+      key="reloadPolicies"
+      data-test-subj="reloadPoliciesButton"
+      iconType="refresh"
+      color="success"
+      onClick={onReloadClick}
+    >
+      <FormattedMessage
+        id="xpack.idxMgmt.enrichPolicies.table.reloadButton"
+        defaultMessage="Reload"
+      />
+    </EuiButton>,
+  ];
+
+  if (privs.manageEnrich) {
+    toolsRight.push(createBtn);
+  }
 
   const search: EuiSearchBarProps = {
-    toolsRight: renderToolsRight(),
+    toolsRight,
     box: {
       incremental: true,
     },
+  };
+
+  const actions: EuiBasicTableColumn<SerializedEnrichPolicy> = {
+    name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.actionsField', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      {
+        isPrimary: true,
+        name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeAction', {
+          defaultMessage: 'Execute',
+        }),
+        description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeDescription', {
+          defaultMessage: 'Execute this enrich policy',
+        }),
+        type: 'icon',
+        icon: 'play',
+        'data-test-subj': 'executePolicyButton',
+        onClick: ({ name }) => onExecutePolicyClick(name),
+      },
+      {
+        isPrimary: true,
+        name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteAction', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteDescription', {
+          defaultMessage: 'Delete this enrich policy',
+        }),
+        type: 'icon',
+        icon: 'trash',
+        color: 'danger',
+        'data-test-subj': 'deletePolicyButton',
+        onClick: ({ name }) => onDeletePolicyClick(name),
+      },
+    ],
   };
 
   const columns: Array<EuiBasicTableColumn<SerializedEnrichPolicy>> = [
@@ -124,41 +161,25 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       truncateText: true,
       render: (fields: string[]) => <span className="eui-textTruncate">{fields.join(', ')}</span>,
     },
-    {
-      name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.actionsField', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        {
-          isPrimary: true,
-          name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeAction', {
-            defaultMessage: 'Execute',
-          }),
-          description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeDescription', {
-            defaultMessage: 'Execute this enrich policy',
-          }),
-          type: 'icon',
-          icon: 'play',
-          'data-test-subj': 'executePolicyButton',
-          onClick: ({ name }) => onExecutePolicyClick(name),
-        },
-        {
-          isPrimary: true,
-          name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteAction', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteDescription', {
-            defaultMessage: 'Delete this enrich policy',
-          }),
-          type: 'icon',
-          icon: 'trash',
-          color: 'danger',
-          'data-test-subj': 'deletePolicyButton',
-          onClick: ({ name }) => onDeletePolicyClick(name),
-        },
-      ],
-    },
   ];
+
+  if (privs.manageEnrich) {
+    columns.push(actions);
+  }
+
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<SerializedEnrichPolicy>({
+    tableId: 'enrichPolicies',
+    initialPageSize: 50,
+    initialSort: {
+      field: 'name',
+      direction: 'asc',
+    },
+  });
+
+  const pagination = {
+    pageSize,
+    pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+  };
 
   return (
     <EuiInMemoryTable
@@ -168,8 +189,8 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       columns={columns}
       search={search}
       pagination={pagination}
-      sorting={true}
-      isSelectable={false}
+      sorting={sorting}
+      onTableChange={onTableChange}
     />
   );
 };

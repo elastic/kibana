@@ -29,7 +29,7 @@ interface Metadata {
 interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
-  alertData?: ParsedTechnicalFields;
+  alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
 }
 
@@ -46,15 +46,20 @@ export const createActionHandler = async (
 
   const { soClient, metadata, alertData, error } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
-
+  const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { agent_all, agent_ids, agent_platforms, agent_policy_ids } = params;
-  const selectedAgents = await parseAgentSelection(internalSavedObjectsClient, osqueryContext, {
-    agents: agent_ids,
-    allAgentsSelected: !!agent_all,
-    platformsSelected: agent_platforms,
-    policiesSelected: agent_policy_ids,
-  });
+  const selectedAgents = await parseAgentSelection(
+    internalSavedObjectsClient,
+    elasticsearchClient,
+    osqueryContext,
+    {
+      agents: agent_ids,
+      allAgentsSelected: !!agent_all,
+      platformsSelected: agent_platforms,
+      policiesSelected: agent_policy_ids,
+    }
+  );
 
   if (!selectedAgents.length) {
     throw new CustomHttpRequestError('No agents found for selection', 400);

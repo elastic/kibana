@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
@@ -16,7 +17,7 @@ import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
 import { UrlPanelContent } from './url_panel_content';
-import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
+import { ShareMenuItemLegacy, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
 
@@ -31,7 +32,7 @@ export interface ShareContextMenuProps {
     locator: LocatorPublic<any>;
     params: any;
   };
-  shareMenuItems: ShareMenuItem[];
+  shareMenuItems: ShareMenuItemLegacy[];
   sharingData: any;
   onClose: () => void;
   embedUrlParamExtensions?: UrlParamExtension[];
@@ -42,7 +43,7 @@ export interface ShareContextMenuProps {
   objectTypeTitle?: string;
   disabledShareUrl?: boolean;
 }
-
+// Needed for Canvas
 export class ShareContextMenu extends Component<ShareContextMenuProps> {
   public render() {
     const { panels, initialPanelId } = this.getPanels();
@@ -128,14 +129,14 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       });
     }
 
-    this.props.shareMenuItems.forEach(({ shareMenuItem, panel }) => {
+    this.props.shareMenuItems.forEach(({ shareMenuItem }) => {
       const panelId = panels.length + 1;
       panels.push({
-        ...panel,
         id: panelId,
       });
       menuItems.push({
         ...shareMenuItem,
+        name: shareMenuItem!.name,
         panel: panelId,
       });
     });

@@ -12,9 +12,8 @@ import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { splitSizeAndUnits, DataStream } from '../../../common';
 import { timeUnits, extraTimeUnits } from '../constants/time_units';
 
-export const isFleetManaged = (dataStream: DataStream): boolean => {
-  // TODO check if the wording will change to 'fleet'
-  return Boolean(dataStream._meta?.managed && dataStream._meta?.managed_by === 'ingest-manager');
+export const isManaged = (dataStream: DataStream): boolean => {
+  return Boolean(dataStream._meta?.managed);
 };
 
 export const filterDataStreams = (
@@ -23,13 +22,13 @@ export const filterDataStreams = (
 ): DataStream[] => {
   return dataStreams.filter((dataStream: DataStream) => {
     // include all data streams that are neither hidden nor managed
-    if (!dataStream.hidden && !isFleetManaged(dataStream)) {
+    if (!dataStream.hidden && !isManaged(dataStream)) {
       return true;
     }
     if (dataStream.hidden && visibleTypes.includes('hidden')) {
       return true;
     }
-    return isFleetManaged(dataStream) && visibleTypes.includes('managed');
+    return isManaged(dataStream) && visibleTypes.includes('managed');
   });
 };
 
@@ -52,7 +51,7 @@ export const getLifecycleValue = (
     return i18n.translate('xpack.idxMgmt.dataStreamList.dataRetentionDisabled', {
       defaultMessage: 'Disabled',
     });
-  } else if (!lifecycle?.data_retention) {
+  } else if (!lifecycle?.effective_retention && !lifecycle?.data_retention) {
     const infiniteDataRetention = i18n.translate(
       'xpack.idxMgmt.dataStreamList.dataRetentionInfinite',
       {
@@ -76,7 +75,8 @@ export const getLifecycleValue = (
   }
 
   // Extract size and unit, in order to correctly map the unit to the correct text
-  const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
+  const activeRetention = lifecycle?.effective_retention || lifecycle?.data_retention;
+  const { size, unit } = splitSizeAndUnits(activeRetention as string);
   const availableTimeUnits = [...timeUnits, ...extraTimeUnits];
   const match = availableTimeUnits.find((timeUnit) => timeUnit.value === unit);
 
@@ -120,4 +120,20 @@ export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {
   }
 
   return;
+};
+
+export const deserializeGlobalMaxRetention = (globalMaxRetention?: string) => {
+  if (!globalMaxRetention) {
+    return {};
+  }
+
+  const { size, unit } = splitSizeAndUnits(globalMaxRetention);
+  const availableTimeUnits = [...timeUnits, ...extraTimeUnits];
+  const match = availableTimeUnits.find((timeUnit) => timeUnit.value === unit);
+
+  return {
+    size,
+    unit,
+    unitText: match?.text ?? unit,
+  };
 };

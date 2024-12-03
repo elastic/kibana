@@ -7,8 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import type {
-  ResponseActionUploadParameters,
   ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../../../../../common/endpoint/types';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import type { UploadActionUIRequestBody } from '../../../../../common/api/endpoint';
@@ -29,7 +29,7 @@ export const UploadActionResult = memo<
   const actionCreator = useSendUploadEndpointRequest();
 
   const actionRequestBody = useMemo<undefined | UploadActionUIRequestBody>(() => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
     const { comment, overwrite, file } = command.args.args;
 
     if (!endpointId) {
@@ -37,6 +37,7 @@ export const UploadActionResult = memo<
     }
 
     const reqBody: UploadActionUIRequestBody = {
+      agent_type: agentType,
       endpoint_ids: [endpointId],
       ...(comment?.[0] ? { comment: comment?.[0] } : {}),
       parameters:
@@ -49,7 +50,7 @@ export const UploadActionResult = memo<
     };
 
     return reqBody;
-  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
+  }, [command.args.args, command.commandDefinition?.meta]);
 
   const { result, actionDetails } = useConsoleActionSubmitter<
     UploadActionUIRequestBody,

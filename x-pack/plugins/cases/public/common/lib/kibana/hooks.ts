@@ -10,12 +10,12 @@ import moment from 'moment-timezone';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { convertToCamelCase } from '../../../api/utils';
 import {
-  FEATURE_ID,
+  FEATURE_ID_V2,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
@@ -29,8 +29,6 @@ export const useTimeZone = (): string => {
   const timeZone = useUiSetting<string>(DEFAULT_DATE_FORMAT_TZ);
   return timeZone === 'Browser' ? moment.tz.guess() : timeZone;
 };
-
-export const useBasePath = (): string => useKibana().services.http.basePath.get();
 
 export const useToasts = (): StartServices['notifications']['toasts'] =>
   useKibana().services.notifications.toasts;
@@ -116,12 +114,12 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
  * Returns a full URL to the provided page path by using
  * kibana's `getUrlForApp()`
  */
-export const useAppUrl = (appId: string) => {
+export const useAppUrl = (appId?: string) => {
   const { getUrlForApp } = useKibana().services.application;
 
   const getAppUrl = useCallback(
     (options?: { deepLinkId?: string; path?: string; absolute?: boolean }) =>
-      getUrlForApp(appId, options),
+      getUrlForApp(appId ?? '', options),
     [appId, getUrlForApp]
   );
   return { getAppUrl };
@@ -131,7 +129,7 @@ export const useAppUrl = (appId: string) => {
  * Navigate to any app using kibana's `navigateToApp()`
  * or by url using `navigateToUrl()`
  */
-export const useNavigateTo = (appId: string) => {
+export const useNavigateTo = (appId?: string) => {
   const { navigateToApp, navigateToUrl } = useKibana().services.application;
 
   const navigateTo = useCallback(
@@ -144,7 +142,7 @@ export const useNavigateTo = (appId: string) => {
       if (url) {
         navigateToUrl(url);
       } else {
-        navigateToApp(appId, options);
+        navigateToApp(appId ?? '', options);
       }
     },
     [appId, navigateToApp, navigateToUrl]
@@ -156,7 +154,7 @@ export const useNavigateTo = (appId: string) => {
  * Returns navigateTo and getAppUrl navigation hooks
  *
  */
-export const useNavigation = (appId: string) => {
+export const useNavigation = (appId?: string) => {
   const { navigateTo } = useNavigateTo(appId);
   const { getAppUrl } = useAppUrl(appId);
   return { navigateTo, getAppUrl };
@@ -168,7 +166,7 @@ interface Capabilities {
 }
 interface UseApplicationCapabilities {
   actions: Capabilities;
-  generalCases: CasesPermissions;
+  generalCasesV2: CasesPermissions;
   visualize: Capabilities;
   dashboard: Capabilities;
 }
@@ -180,13 +178,13 @@ interface UseApplicationCapabilities {
 
 export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   const capabilities = useKibana().services?.application?.capabilities;
-  const casesCapabilities = capabilities[FEATURE_ID];
+  const casesCapabilities = capabilities[FEATURE_ID_V2];
   const permissions = getUICapabilities(casesCapabilities);
 
   return useMemo(
     () => ({
       actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
-      generalCases: {
+      generalCasesV2: {
         all: permissions.all,
         create: permissions.create,
         read: permissions.read,
@@ -194,6 +192,9 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
         delete: permissions.delete,
         push: permissions.push,
         connectors: permissions.connectors,
+        settings: permissions.settings,
+        reopenCase: permissions.reopenCase,
+        createComment: permissions.createComment,
       },
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
@@ -215,6 +216,9 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       permissions.delete,
       permissions.push,
       permissions.connectors,
+      permissions.settings,
+      permissions.reopenCase,
+      permissions.createComment,
     ]
   );
 };

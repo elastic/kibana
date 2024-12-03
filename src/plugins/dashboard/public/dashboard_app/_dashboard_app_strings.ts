@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export const getDashboardPageTitle = () =>
   i18n.translate('dashboard.dashboardPageTitle', {
@@ -26,13 +27,13 @@ export const dashboardReadonlyBadge = {
 };
 
 export const dashboardManagedBadge = {
-  getText: () =>
-    i18n.translate('dashboard.badge.managed.text', {
-      defaultMessage: 'Managed',
+  getDuplicateButtonAriaLabel: () =>
+    i18n.translate('dashboard.managedContentPopoverFooterText', {
+      defaultMessage: 'Click here to duplicate this dashboard',
     }),
-  getTooltip: () =>
-    i18n.translate('dashboard.badge.managed.tooltip', {
-      defaultMessage: 'This dashboard is system managed. Clone this dashboard to make changes.',
+  getBadgeAriaLabel: () =>
+    i18n.translate('dashboard.managedContentBadge.ariaLabel', {
+      defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
     }),
 };
 
@@ -41,9 +42,13 @@ export const dashboardManagedBadge = {
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-export function getDashboardTitle(title: string, viewMode: ViewMode, isNew: boolean): string {
-  const isEditMode = viewMode === ViewMode.EDIT;
-  const dashboardTitle = isNew ? getNewDashboardTitle() : title;
+export function getDashboardTitle(
+  title: string | undefined,
+  viewMode: ViewMode,
+  isNew: boolean
+): string {
+  const isEditMode = viewMode === 'edit';
+  const dashboardTitle = isNew || !Boolean(title) ? getNewDashboardTitle() : (title as string);
   return isEditMode
     ? i18n.translate('dashboard.strings.dashboardEditTitle', {
         defaultMessage: 'Editing {title}',
@@ -73,21 +78,6 @@ export const unsavedChangesBadgeStrings = {
     }),
 };
 
-export const leaveConfirmStrings = {
-  getLeaveTitle: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
-      defaultMessage: 'Unsaved changes',
-    }),
-  getLeaveSubtitle: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
-      defaultMessage: 'Leave Dashboard with unsaved work?',
-    }),
-  getLeaveCancelButtonText: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Cancel',
-    }),
-};
-
 export const getCreateVisualizationButtonTitle = () =>
   i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
     defaultMessage: 'Create visualization',
@@ -103,13 +93,17 @@ export const getNewDashboardTitle = () =>
     defaultMessage: 'New Dashboard',
   });
 
-export const getPanelAddedSuccessString = (savedObjectName: string) =>
-  i18n.translate('dashboard.addPanel.newEmbeddableAddedSuccessMessageTitle', {
-    defaultMessage: '{savedObjectName} was added',
-    values: {
-      savedObjectName,
-    },
-  });
+export const getPanelAddedSuccessString = (savedObjectName?: string) =>
+  savedObjectName
+    ? i18n.translate('dashboard.addPanel.newEmbeddableAddedSuccessMessageTitle', {
+        defaultMessage: '{savedObjectName} was added',
+        values: {
+          savedObjectName,
+        },
+      })
+    : i18n.translate('dashboard.addPanel.newEmbeddableWithNoTitleAddedSuccessMessageTitle', {
+        defaultMessage: 'A panel was added',
+      });
 
 export const getPanelTooOldErrorString = () =>
   i18n.translate('dashboard.loadURLError.PanelTooOld', {
@@ -189,11 +183,11 @@ export const topNavStrings = {
       defaultMessage: 'Quick save your dashboard without any prompts',
     }),
   },
-  saveAs: {
-    label: i18n.translate('dashboard.topNave.saveAsButtonAriaLabel', {
+  editModeInteractiveSave: {
+    label: i18n.translate('dashboard.topNave.editModeInteractiveSaveButtonAriaLabel', {
       defaultMessage: 'save as',
     }),
-    description: i18n.translate('dashboard.topNave.saveAsConfigDescription', {
+    description: i18n.translate('dashboard.topNave.editModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Save as a new dashboard',
     }),
   },
@@ -229,11 +223,11 @@ export const topNavStrings = {
       defaultMessage: 'Open dashboard settings',
     }),
   },
-  clone: {
-    label: i18n.translate('dashboard.topNave.cloneButtonAriaLabel', {
-      defaultMessage: 'clone',
+  viewModeInteractiveSave: {
+    label: i18n.translate('dashboard.topNave.viewModeInteractiveSaveButtonAriaLabel', {
+      defaultMessage: 'duplicate',
     }),
-    description: i18n.translate('dashboard.topNave.cloneConfigDescription', {
+    description: i18n.translate('dashboard.topNave.viewModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },

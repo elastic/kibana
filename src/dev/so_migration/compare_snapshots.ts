@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -22,6 +23,22 @@ interface CompareSnapshotsParameters {
   to: string;
   log: ToolingLog;
   outputPath?: string;
+  emitJson?: boolean;
+}
+
+interface SnapshotComparisonResult {
+  hasChanges: boolean;
+  from: string;
+  to: string;
+  changed: string[];
+  unchanged: string[];
+  changes: {
+    [pluginName: string]: {
+      from: MigrationInfoRecord;
+      to: MigrationInfoRecord;
+      versionChange: { from: number; to: number; emoji: string };
+    };
+  };
 }
 
 async function compareSnapshots({
@@ -29,7 +46,8 @@ async function compareSnapshots({
   log,
   from,
   to,
-}: CompareSnapshotsParameters): Promise<any> {
+  emitJson = false,
+}: CompareSnapshotsParameters): Promise<SnapshotComparisonResult> {
   validateInput({
     from,
     to,
@@ -43,20 +61,25 @@ async function compareSnapshots({
 
   const result = compareSnapshotFiles(fromSnapshot, toSnapshot);
 
-  log.info(
-    `Snapshots compared: ${from} <=> ${to}. ` +
-      `${result.hasChanges ? 'No changes' : 'Changed: ' + result.changed.join(', ')}`
-  );
+  if (result.hasChanges) {
+    log.info(`Snapshots compared: ${from} <=> ${to}. Changed: ${result.changed.join(', ')}`);
+    result.changed.forEach((pluginName) => {
+      const { versionChange } = result.changes[pluginName];
+      log.info(
+        `${versionChange.emoji} ${pluginName}: ${versionChange.from} => ${versionChange.to}`
+      );
+    });
+  } else {
+    log.info(`Snapshots compared: ${from} <=> ${to}. No changes`);
+  }
 
   if (outputPath) {
     writeSnapshot(outputPath, result);
     log.info(`Output written to: ${outputPath}`);
-  } else {
-    log.info(
-      `Emitting result to STDOUT... (Enable '--silent' or '--quiet' to disable non-parseable output)`
-    );
+  } else if (emitJson) {
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(result, null, 2));
+    log.info(`Emitted result as JSON to stdout... (Use '--quiet' to disable non-parseable output)`);
   }
 
   return result;
@@ -132,7 +155,10 @@ function expandGitRev(gitRev: string) {
  * @param fromSnapshot
  * @param toSnapshot
  */
-function compareSnapshotFiles(fromSnapshot: MigrationSnapshot, toSnapshot: MigrationSnapshot) {
+function compareSnapshotFiles(
+  fromSnapshot: MigrationSnapshot,
+  toSnapshot: MigrationSnapshot
+): SnapshotComparisonResult {
   const pluginNames = Object.keys(fromSnapshot.typeDefinitions);
   const pluginNamesWithChangedHash = pluginNames.filter((pluginName) => {
     const fromHash = fromSnapshot.typeDefinitions[pluginName].hash;
@@ -145,17 +171,24 @@ function compareSnapshotFiles(fromSnapshot: MigrationSnapshot, toSnapshot: Migra
   const changes = pluginNamesWithChangedHash.reduce((changesObj, pluginName) => {
     const fromMigrationInfo = fromSnapshot.typeDefinitions[pluginName];
     const toMigrationInfo = toSnapshot.typeDefinitions[pluginName];
+    const fromVersion = Number(fromMigrationInfo.modelVersions.at(-1)?.version || '0');
+    const toVersion = Number(toMigrationInfo.modelVersions.at(-1)?.version || '0');
     changesObj[pluginName] = {
       from: fromMigrationInfo,
       to: toMigrationInfo,
+      versionChange: {
+        from: fromVersion,
+        to: toVersion,
+        emoji: Math.abs(fromVersion - toVersion) >= 2 ? '🚨' : '✅',
+      },
     };
     return changesObj;
-  }, {} as Record<string, { from: MigrationInfoRecord; to: MigrationInfoRecord }>);
+  }, {} as SnapshotComparisonResult['changes']);
 
   return {
     hasChanges: pluginNamesWithChangedHash.length > 0,
-    from: fromSnapshot.meta.kibanaCommitHash,
-    to: toSnapshot.meta.kibanaCommitHash,
+    from: fromSnapshot.meta.kibanaCommitHash!,
+    to: toSnapshot.meta.kibanaCommitHash!,
     changed: pluginNamesWithChangedHash,
     unchanged: restOfPluginNames,
     changes,

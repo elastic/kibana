@@ -18,7 +18,7 @@ import { updateVisualizationState, LensAppState } from '../../../state_managemen
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { LensInspector } from '../../../lens_inspector_service';
 import { screen } from '@testing-library/react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { SettingsMenu } from '../../../app_plugin/settings_menu';
 
 describe('workspace_panel_wrapper', () => {
@@ -34,7 +34,6 @@ describe('workspace_panel_wrapper', () => {
       <>
         <WorkspacePanelWrapper
           framePublicAPI={mockFrameAPI}
-          visualizationState={{ internalState: 123 }}
           visualizationId="myVis"
           visualizationMap={{
             myVis: { ...mockVisualization, ToolbarComponent: ToolbarComponentMock },
@@ -45,6 +44,7 @@ describe('workspace_panel_wrapper', () => {
           lensInspector={{} as unknown as LensInspector}
           getUserMessages={() => []}
           children={<span />}
+          displayOptions={undefined}
           {...propsOverrides}
         />
         <SettingsMenu
@@ -98,7 +98,7 @@ describe('workspace_panel_wrapper', () => {
   });
 
   it('should render its children', async () => {
-    const customElementText = faker.random.word();
+    const customElementText = faker.word.words();
     renderWorkspacePanelWrapper({ children: <span>{customElementText}</span> });
     expect(screen.getByText(customElementText)).toBeInTheDocument();
   });

@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/graph-plugin",
-  "owner": "@elastic/kibana-visualizations",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "graph",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "graph"
@@ -14,7 +18,6 @@
       "licensing",
       "data",
       "navigation",
-      "savedObjects",
       "unifiedSearch",
       "inspector",
       "savedObjectsManagement",
@@ -27,9 +30,9 @@
       "spaces"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "kibanaUtils",
-      "kibanaReact"
+      "kibanaReact",
+      "savedObjects"
     ]
   }
 }

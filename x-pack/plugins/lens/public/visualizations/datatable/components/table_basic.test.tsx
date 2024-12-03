@@ -6,22 +6,31 @@
  */
 
 import React from 'react';
-import { ReactWrapper, shallow, mount } from 'enzyme';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
+import { faker } from '@faker-js/faker';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiDataGrid } from '@elastic/eui';
-import { IAggType } from '@kbn/data-plugin/public';
-import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { VisualizationContainer } from '../../../visualization_container';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { IconChartDatatable } from '@kbn/chart-icons';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
-import { DataContext, DatatableComponent } from './table_basic';
-import type { DatatableProps } from '../../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
-
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { DatatableComponent } from './table_basic';
+import type { DatatableProps } from '../../../../common/expressions';
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
+import { DatatableRenderProps } from './types';
+import { PaletteOutput } from '@kbn/coloring';
+import { getTransposeId } from '@kbn/transpose-utils';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+
+jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
+  const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');
+  return {
+    ...mod,
+    getCellColorFn: jest.fn(mod.getCellColorFn),
+  };
+});
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
 
@@ -63,6 +72,17 @@ function sampleArgs() {
           sourceParams: { indexPatternId, type: 'count' },
         },
       },
+      {
+        id: 'd',
+        name: 'd',
+        meta: {
+          type: 'number',
+          source: 'esaggs',
+          field: 'd',
+          params: { id: 'range' },
+          sourceParams: { indexPatternId, type: 'range' },
+        },
+      },
     ],
     rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
   };
@@ -86,132 +106,96 @@ function copyData<T>(data: T): T {
   return JSON.parse(JSON.stringify(data));
 }
 
-async function waitForWrapperUpdate(wrapper: ReactWrapper) {
-  await act(async () => {
-    await new Promise((r) => setTimeout(r, 0));
-  });
-  wrapper.update();
-}
-
 describe('DatatableComponent', () => {
   let onDispatchEvent: jest.Mock;
   let renderComplete: jest.Mock;
 
+  let { data, args } = sampleArgs();
   beforeEach(() => {
     onDispatchEvent = jest.fn();
     renderComplete = jest.fn();
+    const sample = sampleArgs();
+    data = sample.data;
+    args = sample.args;
   });
 
-  test('it renders the title and value', () => {
-    const { data, args } = sampleArgs();
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    expect(
-      shallow(
-        <DatatableComponent
-          data={data}
-          args={args}
-          formatFactory={(x) => x as unknown as IFieldFormat}
-          dispatchEvent={onDispatchEvent}
-          getType={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          theme={setUpMockTheme}
-          renderMode="edit"
-          interactive
-          renderComplete={renderComplete}
-        />
-      )
-    ).toMatchSnapshot();
+  const renderDatatableComponent = (propsOverrides: Partial<DatatableRenderProps> = {}) => {
+    const props: DatatableRenderProps = {
+      data,
+      args,
+      formatFactory: () => ({ convert: (x) => x } as IFieldFormat),
+      dispatchEvent: onDispatchEvent,
+      getType: jest.fn().mockReturnValue({
+        type: 'buckets',
+      }),
+      paletteService: chartPluginMock.createPaletteRegistry(),
+      theme: setUpMockTheme,
+      renderMode: 'edit' as const,
+      interactive: true,
+      syncColors: false,
+      renderComplete,
+      ...propsOverrides,
+    };
+    const rtlRender = render(<DatatableComponent {...props} />, { wrapper: I18nProvider });
+    return {
+      ...rtlRender,
+      rerender: (newProps: Partial<DatatableRenderProps>) =>
+        rtlRender.rerender(<DatatableComponent {...props} {...newProps} />),
+    };
+  };
+
+  test('it renders the title and value', () => {
+    renderDatatableComponent();
+    expect(screen.getByLabelText('My fanci metric chart')).toBeInTheDocument();
+    expect(screen.getByRole('row')).toBeInTheDocument();
+    expect(screen.queryAllByRole('gridcell').map((cell) => cell.textContent)).toEqual([
+      'shoes',
+      '1588024800000',
+      '3',
+    ]);
   });
 
   test('it renders actions column when there are row actions', () => {
-    const { data, args } = sampleArgs();
-
-    expect(
-      shallow(
-        <DatatableComponent
-          data={data}
-          args={args}
-          formatFactory={(x) => x as unknown as IFieldFormat}
-          dispatchEvent={onDispatchEvent}
-          getType={jest.fn()}
-          rowHasRowClickTriggerActions={[true, true, true]}
-          renderMode="edit"
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          theme={setUpMockTheme}
-          interactive
-          renderComplete={renderComplete}
-        />
-      )
-    ).toMatchSnapshot();
+    const rowHasRowClickTriggerActions = [true, true, true];
+    renderDatatableComponent({ rowHasRowClickTriggerActions });
+    expect(screen.getByRole('button', { name: 'Show actions' })).toBeInTheDocument();
+  });
+  test('it does not render actions column when there are row actions', () => {
+    const rowHasRowClickTriggerActions = [false, false, false];
+    renderDatatableComponent({ rowHasRowClickTriggerActions });
+    expect(screen.queryByRole('button', { name: 'Show actions' })).not.toBeInTheDocument();
   });
 
   test('it renders custom row height if set to another value than 1', () => {
-    const { data, args } = sampleArgs();
-
-    expect(
-      shallow(
-        <DatatableComponent
-          data={data}
-          args={{ ...args, rowHeightLines: 5 }}
-          formatFactory={(x) => x as unknown as IFieldFormat}
-          dispatchEvent={onDispatchEvent}
-          getType={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          theme={setUpMockTheme}
-          renderMode="edit"
-          interactive
-          renderComplete={renderComplete}
-        />
-      )
-    ).toMatchSnapshot();
+    renderDatatableComponent({
+      args: {
+        ...args,
+        rowHeightLines: 5,
+      },
+    });
+    screen.getAllByRole('gridcell').forEach((cell) => {
+      expect(cell.firstChild).toHaveClass('euiDataGridRowCell__content--lineCountHeight');
+    });
   });
 
-  test('it should render hide, reset, and sort actions on header even when it is in read only mode', () => {
-    const { data, args } = sampleArgs();
-
-    expect(
-      shallow(
-        <DatatableComponent
-          data={data}
-          args={args}
-          formatFactory={(x) => x as unknown as IFieldFormat}
-          dispatchEvent={onDispatchEvent}
-          getType={jest.fn()}
-          rowHasRowClickTriggerActions={[false, false, false]}
-          renderMode="view"
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          theme={setUpMockTheme}
-          interactive
-          renderComplete={renderComplete}
-        />
-      )
-    ).toMatchSnapshot();
+  test('it should render hide, reset, and sort actions on header even when it is in read only mode', async () => {
+    renderDatatableComponent({ renderMode: 'view' });
+    await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-a'));
+    const actionPopover = screen.getByRole('dialog');
+    const actions = within(actionPopover)
+      .getAllByRole('button')
+      .map((button) => button.textContent);
+    expect(actions).toEqual(['Sort ascending', 'Sort descending', 'Reset width', 'Hide']);
   });
 
   test('it invokes executeTriggerActions with correct context on click on top value', async () => {
-    const { args, data } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
-        renderMode="edit"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-        columnFilterable={[true, true, true]}
-      />
-    );
-
-    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
-
-    await waitForWrapperUpdate(wrapper);
-
-    wrapper.find('[data-test-subj="lensDatatableFilterOut"]').first().simulate('click');
+    renderDatatableComponent({ columnFilterable: [true, true, true] });
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
+    await userEvent.click(screen.getByTestId('lensDatatableFilterOut'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -230,29 +214,9 @@ describe('DatatableComponent', () => {
   });
 
   test('it invokes executeTriggerActions with correct context on click on timefield', async () => {
-    const { args, data } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
-        renderMode="edit"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-        columnFilterable={[true, true, true]}
-      />
-    );
-
-    wrapper.find('[data-test-subj="dataGridRowCell"]').at(1).simulate('focus');
-
-    await waitForWrapperUpdate(wrapper);
-
-    wrapper.find('[data-test-subj="lensDatatableFilterFor"]').first().simulate('click');
+    renderDatatableComponent({ columnFilterable: [true, true, true] });
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[1]);
+    await userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -271,7 +235,7 @@ describe('DatatableComponent', () => {
   });
 
   test('it invokes executeTriggerActions with correct context on click on timefield from range', async () => {
-    const data: Datatable = {
+    const dataWithTimestamp: Datatable = {
       type: 'datatable',
       columns: [
         {
@@ -297,38 +261,23 @@ describe('DatatableComponent', () => {
       rows: [{ a: 1588024800000, b: 3 }],
     };
 
-    const args: DatatableProps['args'] = {
-      title: '',
-      columns: [
-        { columnId: 'a', type: 'lens_datatable_column' },
-        { columnId: 'b', type: 'lens_datatable_column' },
-      ],
-      sortingColumnId: '',
-      sortingDirection: 'none',
-      rowHeightLines: 1,
-    };
+    renderDatatableComponent({
+      data: dataWithTimestamp,
+      columnFilterable: [true, true, true],
+      args: {
+        title: '',
+        columns: [
+          { columnId: 'a', type: 'lens_datatable_column' },
+          { columnId: 'b', type: 'lens_datatable_column' },
+        ],
+        sortingColumnId: '',
+        sortingDirection: 'none',
+        rowHeightLines: 1,
+      },
+    });
 
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
-        renderMode="edit"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-        columnFilterable={[true, true, true]}
-      />
-    );
-
-    wrapper.find('[data-test-subj="dataGridRowCell"]').at(0).simulate('focus');
-
-    await waitForWrapperUpdate(wrapper);
-
-    wrapper.find('[data-test-subj="lensDatatableFilterFor"]').first().simulate('click');
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
+    await userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -337,7 +286,7 @@ describe('DatatableComponent', () => {
           {
             column: 0,
             row: 0,
-            table: data,
+            table: dataWithTimestamp,
             value: 1588024800000,
           },
         ],
@@ -347,552 +296,276 @@ describe('DatatableComponent', () => {
   });
 
   test('it should not invoke executeTriggerActions if interactivity is set to false', async () => {
-    const { args, data } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
-        renderMode="edit"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive={false}
-        renderComplete={renderComplete}
-        columnFilterable={[true, true, true]}
-      />
-    );
-
-    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
-
-    await waitForWrapperUpdate(wrapper);
-
-    expect(wrapper.find('[data-test-subj="lensDatatableFilterOut"]').exists()).toBe(false);
+    renderDatatableComponent({ columnFilterable: [true, true, true], interactive: false });
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
+    expect(screen.queryByTestId('lensDatatableFilterOut')).not.toBeInTheDocument();
   });
 
   test('it shows emptyPlaceholder for undefined bucketed data', () => {
-    const { args, data } = sampleArgs();
-    const emptyData: Datatable = {
-      ...data,
-      rows: [{ a: undefined, b: undefined, c: 0 }],
-    };
-
-    const component = shallow(
-      <DatatableComponent
-        data={emptyData}
-        args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn((type) =>
-          type === 'count' ? ({ type: 'metrics' } as IAggType) : ({ type: 'buckets' } as IAggType)
-        )}
-        renderMode="edit"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-    expect(component.find(VisualizationContainer)).toHaveLength(1);
-    expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(IconChartDatatable);
-  });
-
-  test('it renders the table with the given sorting', () => {
-    const { data, args } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={{
-          ...args,
-          sortingColumnId: 'b',
-          sortingDirection: 'desc',
-        }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="edit"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-
-    expect(wrapper.find(EuiDataGrid).prop('sorting')!.columns).toEqual([
-      { id: 'b', direction: 'desc' },
-    ]);
-
-    wrapper.find(EuiDataGrid).prop('sorting')!.onSort([]);
-
-    expect(onDispatchEvent).toHaveBeenCalledWith({
-      name: 'edit',
+    renderDatatableComponent({
       data: {
-        action: 'sort',
-        columnId: undefined,
-        direction: 'none',
+        ...data,
+        rows: [{ a: undefined, b: undefined, c: undefined }],
       },
     });
+    expect(screen.getByTestId('lnsVisualizationContainer')).toHaveTextContent('No results found');
+  });
 
-    wrapper
-      .find(EuiDataGrid)
-      .prop('sorting')!
-      .onSort([{ id: 'a', direction: 'asc' }]);
+  test('it renders the table with the given sorting', async () => {
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'b',
+        sortingDirection: 'desc',
+      },
+    });
+    expect(screen.getByTestId('dataGridHeaderCellSortingIcon-b')).toHaveAttribute(
+      'data-euiicon-type',
+      'sortDown'
+    );
+    await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-b'));
+    fireEvent.click(screen.getByRole('button', { name: 'Sort ascending' }));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'edit',
       data: {
         action: 'sort',
-        columnId: 'a',
+        columnId: 'b',
         direction: 'asc',
       },
     });
   });
 
   test('it renders the table with the given sorting in readOnly mode', () => {
-    const { data, args } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={{
-          ...args,
-          sortingColumnId: 'b',
-          sortingDirection: 'desc',
-        }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="view"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'b',
+        sortingDirection: 'desc',
+      },
+    });
+    expect(screen.getByTestId('dataGridHeaderCellSortingIcon-b')).toHaveAttribute(
+      'data-euiicon-type',
+      'sortDown'
     );
-
-    expect(wrapper.find(EuiDataGrid).prop('sorting')!.columns).toEqual([
-      { id: 'b', direction: 'desc' },
-    ]);
   });
 
   test('it does not render a hidden column', () => {
-    const { data, args } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={{
-          ...args,
-          columns: [
-            { columnId: 'a', hidden: true, type: 'lens_datatable_column' },
-            { columnId: 'b', type: 'lens_datatable_column' },
-            { columnId: 'c', type: 'lens_datatable_column' },
-          ],
-          sortingColumnId: 'b',
-          sortingDirection: 'desc',
-        }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="view"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-
-    expect(wrapper.find(EuiDataGrid).prop('columns')!.length).toEqual(2);
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          { columnId: 'a', hidden: true, type: 'lens_datatable_column' },
+          { columnId: 'b', type: 'lens_datatable_column' },
+          { columnId: 'c', type: 'lens_datatable_column' },
+        ],
+        sortingColumnId: 'b',
+        sortingDirection: 'desc',
+      },
+    });
+    expect(screen.queryAllByRole('gridcell').map((cell) => cell.textContent)).toEqual([
+      '1588024800000',
+      '3',
+    ]);
   });
 
-  test('it adds alignment data to context', () => {
-    const { data, args } = sampleArgs();
-
-    const wrapper = shallow(
-      <DatatableComponent
-        data={data}
-        args={{
-          ...args,
-          columns: [
-            { columnId: 'a', alignment: 'center', type: 'lens_datatable_column' },
-            { columnId: 'b', type: 'lens_datatable_column' },
-            { columnId: 'c', type: 'lens_datatable_column' },
-          ],
-          sortingColumnId: 'b',
-          sortingDirection: 'desc',
-        }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="view"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-
-    expect(wrapper.find(DataContext.Provider).prop('value').alignments).toEqual({
-      // set via args
-      a: 'center',
-      // default for date
-      b: 'left',
-      // default for number
-      c: 'right',
+  test('it adds explicit alignment to context', () => {
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          { columnId: 'a', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'b', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'c', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'd', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+        ],
+      },
     });
+    const alignmentsClassNames = screen
+      .getAllByTestId('lnsTableCellContent')
+      .map((cell) => cell.className);
+
+    expect(alignmentsClassNames).toEqual([
+      'lnsTableCell--center', // set via args
+      'lnsTableCell--center', // set via args
+      'lnsTableCell--center', // set via args
+      'lnsTableCell--center', // set via args
+    ]);
+  });
+
+  test('it adds default alignment data to context', () => {
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          { columnId: 'a', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'b', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'c', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'd', type: 'lens_datatable_column', colorMode: 'none' },
+        ],
+        sortingColumnId: 'b',
+        sortingDirection: 'desc',
+      },
+    });
+    const alignmentsClassNames = screen
+      .getAllByTestId('lnsTableCellContent')
+      .map((cell) => cell.className);
+
+    expect(alignmentsClassNames).toEqual([
+      'lnsTableCell--left', // default for string
+      'lnsTableCell--left', // default for date
+      'lnsTableCell--right', // default for number
+      'lnsTableCell--left', // default for range
+    ]);
   });
 
   test('it should refresh the table header when the datatable data changes', () => {
-    const { data, args } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="edit"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-    // mnake a copy of the data, changing only the name of the first column
+    const { rerender } = renderDatatableComponent();
     const newData = copyData(data);
     newData.columns[0].name = 'new a';
-    wrapper.setProps({ data: newData });
-    wrapper.update();
-
-    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
-    // which can't be seen, but shows in the text content
-    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toContain(
-      'new a'
-    );
-  });
-
-  test('it does compute minMax for each numeric column', () => {
-    const { data, args } = sampleArgs();
-
-    const wrapper = shallow(
-      <DatatableComponent
-        data={data}
-        args={{
-          ...args,
-          columns: [
-            { columnId: 'a', hidden: true, type: 'lens_datatable_column' },
-            { columnId: 'b', type: 'lens_datatable_column' },
-            { columnId: 'c', type: 'lens_datatable_column' },
-          ],
-          sortingColumnId: 'b',
-          sortingDirection: 'desc',
-        }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="view"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-
-    expect(wrapper.find(DataContext.Provider).prop('value').minMaxByColumnId).toEqual({
-      c: { min: 3, max: 3 },
-    });
+    rerender({ data: newData });
+    expect(screen.getAllByTestId('dataGridHeader')[0]).toHaveTextContent('new a');
   });
 
   test('it does render a summary footer if at least one column has it configured', () => {
-    const { data, args } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={{
-          ...args,
-          columns: [
-            ...args.columns.slice(0, 2),
-            {
-              columnId: 'c',
-              type: 'lens_datatable_column',
-              summaryRow: 'sum',
-              summaryLabel: 'Sum',
-              summaryRowValue: 3,
-            },
-          ],
-          sortingColumnId: 'b',
-          sortingDirection: 'desc',
-        }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="view"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="lnsDataTable-footer-a"]').exists()).toEqual(false);
-    expect(wrapper.find('[data-test-subj="lnsDataTable-footer-c"]').first().text()).toEqual(
-      'Sum: 3'
-    );
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          ...args.columns.slice(0, 2),
+          {
+            columnId: 'c',
+            type: 'lens_datatable_column',
+            summaryRow: 'sum',
+            summaryLabel: 'Sum',
+            summaryRowValue: 3,
+          },
+        ],
+        sortingColumnId: 'b',
+        sortingDirection: 'desc',
+      },
+    });
+    expect(screen.queryByTestId('lnsDataTable-footer-a')).not.toBeInTheDocument();
+    expect(screen.getByTestId('lnsDataTable-footer-c')).toHaveTextContent('Sum: 3');
   });
 
   test('it does render a summary footer with just the raw value for empty label', () => {
-    const { data, args } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={{
-          ...args,
-          columns: [
-            ...args.columns.slice(0, 2),
-            {
-              columnId: 'c',
-              type: 'lens_datatable_column',
-              summaryRow: 'sum',
-              summaryLabel: '',
-              summaryRowValue: 3,
-            },
-          ],
-          sortingColumnId: 'b',
-          sortingDirection: 'desc',
-        }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="view"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="lnsDataTable-footer-c"]').first().text()).toEqual('3');
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          ...args.columns.slice(0, 2),
+          {
+            columnId: 'c',
+            type: 'lens_datatable_column',
+            summaryRow: 'sum',
+            summaryLabel: '',
+            summaryRowValue: 3,
+          },
+        ],
+        sortingColumnId: 'b',
+        sortingDirection: 'desc',
+      },
+    });
+    expect(screen.getByTestId('lnsDataTable-footer-c')).toHaveTextContent('3');
   });
 
   test('it does not render the summary row if the only column with summary is hidden', () => {
-    const { data, args } = sampleArgs();
-
-    const wrapper = mountWithIntl(
-      <DatatableComponent
-        data={data}
-        args={{
-          ...args,
-          columns: [
-            ...args.columns.slice(0, 2),
-            {
-              columnId: 'c',
-              type: 'lens_datatable_column',
-              summaryRow: 'sum',
-              summaryLabel: '',
-              summaryRowValue: 3,
-              hidden: true,
-            },
-          ],
-          sortingColumnId: 'b',
-          sortingDirection: 'desc',
-        }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="view"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="lnsDataTable-footer-c"]').exists()).toBe(false);
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          ...args.columns.slice(0, 2),
+          {
+            columnId: 'c',
+            type: 'lens_datatable_column',
+            summaryRow: 'sum',
+            summaryLabel: '',
+            summaryRowValue: 3,
+            hidden: true,
+          },
+        ],
+        sortingColumnId: 'b',
+        sortingDirection: 'desc',
+      },
+    });
+    expect(screen.queryByTestId('lnsDataTable-footer-c')).not.toBeInTheDocument();
   });
 
   describe('pagination', () => {
-    it('enables pagination', async () => {
-      const { data, args } = sampleArgs();
-
-      data.rows = new Array(10).fill({ a: 'shoes', b: 1588024800000, c: 3 });
-
-      args.pageSize = 2;
-
-      const wrapper = mount(
-        <DatatableComponent
-          data={data}
-          args={args}
-          formatFactory={(x) => x as unknown as IFieldFormat}
-          dispatchEvent={onDispatchEvent}
-          getType={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          theme={setUpMockTheme}
-          renderMode="edit"
-          interactive
-          renderComplete={renderComplete}
-        />
-      );
-
-      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
-      expect(paginationConfig).toBeTruthy();
-      expect(paginationConfig?.pageIndex).toBe(0); // should start at 0
-      expect(paginationConfig?.pageSize).toBe(args.pageSize);
-
-      // trigger new page
-      const newIndex = 3;
-      act(() => paginationConfig?.onChangePage(newIndex));
-      wrapper.update();
-
-      const updatedConfig = wrapper.find(EuiDataGrid).prop('pagination');
-      expect(updatedConfig).toBeTruthy();
-      expect(updatedConfig?.pageIndex).toBe(newIndex);
-      expect(updatedConfig?.pageSize).toBe(args.pageSize);
-    });
-
-    it('resets page position if rows change so page will be empty', async () => {
-      const { data, args } = sampleArgs();
-
-      data.rows = new Array(10).fill({ a: 'shoes', b: 1588024800000, c: 3 });
-
-      args.pageSize = 2;
-
-      const wrapper = mount(
-        <DatatableComponent
-          data={data}
-          args={args}
-          formatFactory={(x) => x as unknown as IFieldFormat}
-          dispatchEvent={onDispatchEvent}
-          getType={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          theme={setUpMockTheme}
-          renderMode="edit"
-          interactive
-          renderComplete={renderComplete}
-        />
-      );
-      const newIndex = 3;
-      act(() => wrapper.find(EuiDataGrid).prop('pagination')?.onChangePage(newIndex));
-      wrapper.update();
-
-      expect(wrapper.find(EuiDataGrid).prop('pagination')?.pageIndex).toBe(newIndex);
-
-      wrapper.setProps({
-        data: {
-          ...data,
-          rows: new Array(20).fill({ a: 'shoes', b: 1588024800000, c: 3 }),
-        },
-      });
-
-      await waitForWrapperUpdate(wrapper);
-
-      // keeps existing page if more data is added
-      expect(wrapper.find(EuiDataGrid).prop('pagination')?.pageIndex).toBe(newIndex);
-
-      wrapper.setProps({
-        data: {
-          ...data,
-          rows: new Array(3).fill({ a: 'shoes', b: 1588024800000, c: 3 }),
-        },
-      });
-
-      await waitForWrapperUpdate(wrapper);
-      // resets to the last page if the current page becomes out of bounds
-      expect(wrapper.find(EuiDataGrid).prop('pagination')?.pageIndex).toBe(1);
-    });
-
     it('disables pagination by default', async () => {
-      const { data, args } = sampleArgs();
-
-      delete args.pageSize;
-
-      const wrapper = mount(
-        <DatatableComponent
-          data={data}
-          args={args}
-          formatFactory={(x) => x as unknown as IFieldFormat}
-          dispatchEvent={onDispatchEvent}
-          getType={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          theme={setUpMockTheme}
-          renderMode="edit"
-          interactive
-          renderComplete={renderComplete}
-        />
-      );
-
-      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
-      expect(paginationConfig).not.toBeTruthy();
+      renderDatatableComponent();
+      expect(screen.queryByTestId('tablePaginationPopoverButton')).not.toBeInTheDocument();
     });
 
+    it('enables pagination', async () => {
+      const rowNumbers = 13;
+      const pageSize = 4;
+      data.rows = new Array(rowNumbers).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+
+      args.pageSize = pageSize;
+
+      const numberOfPages = Math.ceil(rowNumbers / pageSize);
+
+      renderDatatableComponent({
+        args,
+        data,
+      });
+      expect(screen.queryByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: `Page 1 of ${numberOfPages}` })).toHaveAttribute(
+        'aria-current',
+        'true'
+      );
+      const newIndex = 3;
+      await userEvent.click(
+        screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` })
+      );
+      expect(
+        screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
+      ).toHaveAttribute('aria-current', 'true');
+    });
     it('dynamically toggles pagination', async () => {
-      const { data, args } = sampleArgs();
-
-      const argsWithPagination = copyData(args);
-      argsWithPagination.pageSize = 20;
-
       const argsWithoutPagination = copyData(args);
       delete argsWithoutPagination.pageSize;
 
-      const defaultProps = {
+      const rowNumbers = 13;
+      const pageSize = 4;
+      data.rows = new Array(rowNumbers).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+
+      args.pageSize = pageSize;
+
+      const { rerender } = renderDatatableComponent({
+        args,
         data,
-        formatFactory: (x?: SerializedFieldFormat) => x as unknown as IFieldFormat,
-        dispatchEvent: onDispatchEvent,
-        getType: jest.fn(),
-        paletteService: chartPluginMock.createPaletteRegistry(),
-        theme: setUpMockTheme,
-        renderMode: 'edit' as RenderMode,
-        interactive: true,
-        renderComplete,
-      };
-
-      const wrapper = mount(
-        <DatatableComponent {...{ ...defaultProps, args: argsWithoutPagination }} />
-      );
-      wrapper.update();
-
-      expect(wrapper.find(EuiDataGrid).prop('pagination')).not.toBeTruthy();
-
-      wrapper.setProps({ args: argsWithPagination });
-      wrapper.update();
-
-      expect(wrapper.find(EuiDataGrid).prop('pagination')).toBeTruthy();
-
-      wrapper.setProps({ args: argsWithoutPagination });
-      wrapper.update();
-
-      expect(wrapper.find(EuiDataGrid).prop('pagination')).not.toBeTruthy();
+      });
+      expect(screen.queryByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
+      await act(async () => {
+        rerender({ args: argsWithoutPagination });
+      });
+      expect(screen.queryByTestId('tablePaginationPopoverButton')).not.toBeInTheDocument();
     });
 
     it('dispatches event when page size changed', async () => {
-      const { data, args } = sampleArgs();
-
-      args.pageSize = 10;
-
-      const wrapper = mount(
-        <DatatableComponent
-          data={data}
-          args={args}
-          formatFactory={(x) => x as unknown as IFieldFormat}
-          dispatchEvent={onDispatchEvent}
-          getType={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          theme={setUpMockTheme}
-          renderMode="edit"
-          interactive
-          renderComplete={renderComplete}
-        />
-      );
-
-      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
-      expect(paginationConfig).toBeTruthy();
-
+      args.pageSize = 2;
+      data.rows = new Array(20).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+      renderDatatableComponent({
+        args,
+      });
+      await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
       const sizeToChangeTo = 100;
-      paginationConfig?.onChangeItemsPerPage(sizeToChangeTo);
+      fireEvent.click(screen.getByRole('button', { name: `${sizeToChangeTo} rows` }));
 
       expect(onDispatchEvent).toHaveBeenCalledTimes(1);
       expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -901,6 +574,191 @@ describe('DatatableComponent', () => {
           action: LENS_EDIT_PAGESIZE_ACTION,
           size: sizeToChangeTo,
         },
+      });
+    });
+
+    it('doesnt change page position when changing the data to a bigger set', async () => {
+      const rowNumbers = 10;
+      const pageSize = 2;
+      const numberOfPages = Math.ceil(rowNumbers / pageSize);
+      data.rows = new Array(rowNumbers).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+
+      args.pageSize = pageSize;
+
+      const { rerender } = renderDatatableComponent({
+        args,
+        data,
+      });
+      const newIndex = 3;
+      await userEvent.click(
+        screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` })
+      );
+      expect(
+        screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
+      ).toHaveAttribute('aria-current', 'true');
+
+      await act(async () => {
+        rerender({
+          data: {
+            ...data,
+            rows: new Array(20).fill({ a: 'shoes', b: 1588024800000, c: 3 }),
+          },
+        });
+      });
+      const newNumberOfPages = Math.ceil(20 / pageSize);
+
+      // keeps existing page if more data is added
+      expect(
+        screen.getByRole('button', { name: `Page ${newIndex} of ${newNumberOfPages}` })
+      ).toHaveAttribute('aria-current', 'true');
+    });
+
+    it('resets page position if rows change so page will be empty', async () => {
+      const rowNumbers = 10;
+      const pageSize = 2;
+      const numberOfPages = Math.ceil(rowNumbers / pageSize);
+      data.rows = new Array(rowNumbers).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+
+      args.pageSize = pageSize;
+
+      const { rerender } = renderDatatableComponent({
+        args,
+        data,
+      });
+      const newIndex = 3;
+      await userEvent.click(
+        screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` })
+      );
+      expect(
+        screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
+      ).toHaveAttribute('aria-current', 'true');
+
+      await act(async () => {
+        rerender({
+          args: {
+            ...args,
+            pageSize: 2,
+          },
+          data: {
+            ...data,
+            rows: new Array(4).fill({ a: 'shoes', b: 1588024800000, c: 3 }),
+          },
+        });
+      });
+      // resets to the last page if the current page becomes out of bounds
+      expect(screen.getByTestId('euiDataGridBody')).toHaveAttribute(
+        'aria-label',
+        'My fanci metric chart; Page 2 of 2.'
+      );
+    });
+  });
+
+  describe('renderCellValue', () => {
+    describe('getCellColor', () => {
+      const palette: PaletteOutput<CustomPaletteState> = {
+        type: 'palette',
+        name: 'default',
+        params: {
+          colors: [],
+          gradient: false,
+          stops: [],
+          range: 'number',
+          rangeMin: 0,
+          rangeMax: 100,
+        },
+      };
+
+      describe('caching', () => {
+        test('caches getCellColorFn by columnId', () => {
+          args.columns[0].palette = palette;
+          args.columns[0].colorMode = 'cell';
+          data.rows.push(
+            ...[
+              { a: 'pants', b: 1588024800000, c: 4 },
+              { a: 'hat', b: 1588024800000, c: 5 },
+              { a: 'bag', b: 1588024800000, c: 6 },
+            ]
+          );
+
+          renderDatatableComponent();
+
+          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+        });
+
+        test('caches getCellColorFn by columnId with transpose columns', () => {
+          const columnId1 = getTransposeId('a', 'test');
+          const columnId2 = getTransposeId('b', 'test');
+
+          renderDatatableComponent({
+            data: {
+              ...data,
+              rows: [{ [columnId1]: 'shoe', [columnId2]: 'hat' }],
+              columns: [columnId1, columnId2].map((id) => ({
+                ...data.columns[0],
+                id,
+              })),
+            },
+            args: {
+              ...args,
+              columns: [columnId1, columnId2].map((columnId) => ({
+                ...args.columns[0],
+                palette,
+                colorMode: 'cell',
+                columnId,
+              })),
+            },
+          });
+
+          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+        });
+      });
+
+      const color = 'red';
+
+      test('should correctly color numerical values', () => {
+        args.columns[0].palette = palette;
+        args.columns[0].colorMode = 'cell';
+
+        (getCellColorFn as jest.Mock).mockReturnValue(() => color);
+
+        renderDatatableComponent();
+
+        const cellColors = screen
+          .queryAllByRole('gridcell')
+          .map((cell) => [cell.textContent, cell.style.backgroundColor]);
+
+        expect(cellColors).toEqual([
+          ['shoes', 'red'],
+          ['1588024800000', ''],
+          ['3', ''],
+        ]);
+      });
+
+      test('should correctly color string values', () => {
+        args.columns[2].palette = palette;
+        args.columns[2].colorMode = 'cell';
+
+        (getCellColorFn as jest.Mock).mockReturnValue(() => color);
+
+        renderDatatableComponent();
+
+        const cellColors = screen
+          .queryAllByRole('gridcell')
+          .map((cell) => [cell.textContent, cell.style.backgroundColor]);
+
+        expect(cellColors).toEqual([
+          ['shoes', ''],
+          ['1588024800000', ''],
+          ['3', 'red'],
+        ]);
       });
     });
   });

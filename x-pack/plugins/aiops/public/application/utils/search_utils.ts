@@ -9,28 +9,18 @@
 // `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts`
 
 import { cloneDeep } from 'lodash';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { FilterManager, isQuery, mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  buildQueryFromFilters,
-  buildEsQuery,
-  Query,
-  Filter,
-  AggregateQuery,
-} from '@kbn/es-query';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { Query, Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SimpleSavedObject } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import {
-  getDefaultDSLQuery,
-  type SearchQueryLanguage,
-  SEARCH_QUERY_LANGUAGE,
-} from '@kbn/ml-query-utils';
+import { getDefaultDSLQuery, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
 
@@ -66,51 +56,6 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObjec
     });
   }
   return parsed;
-}
-
-/**
- * Create an Elasticsearch query that combines both lucene/kql query string and filters
- * Should also form a valid query if only the query or filters is provided
- */
-export function createMergedEsQuery(
-  query?: Query | AggregateQuery,
-  filters?: Filter[],
-  dataView?: DataView,
-  uiSettings?: IUiSettingsClient
-) {
-  let combinedQuery: QueryDslQueryContainer = getDefaultDSLQuery();
-
-  // FIXME: Add support for AggregateQuery type #150091
-  if (isQuery(query) && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-    const ast = fromKueryExpression(query.query);
-    if (query.query !== '') {
-      combinedQuery = toElasticsearchQuery(ast, dataView);
-    }
-    if (combinedQuery.bool !== undefined) {
-      const filterQuery = buildQueryFromFilters(filters, dataView);
-
-      if (!Array.isArray(combinedQuery.bool.filter)) {
-        combinedQuery.bool.filter =
-          combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
-      }
-
-      if (!Array.isArray(combinedQuery.bool.must_not)) {
-        combinedQuery.bool.must_not =
-          combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
-      }
-
-      combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
-      combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
-    }
-  } else {
-    combinedQuery = buildEsQuery(
-      dataView,
-      query ? [query] : [],
-      filters ? filters : [],
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    );
-  }
-  return combinedQuery;
 }
 
 function getSavedSearchSource(savedSearch: SavedSearch) {
@@ -161,7 +106,7 @@ export function getEsQueryFromSavedSearch({
     if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
       savedQuery.bool.filter = savedQuery.bool.filter.filter(
         (c: QueryDslQueryContainer) =>
-          !(c.hasOwnProperty('range') && c.range?.hasOwnProperty(timeField))
+          !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
       );
     }
     return {
@@ -175,11 +120,11 @@ export function getEsQueryFromSavedSearch({
   if (!savedSearch && userQuery) {
     if (filterManager && userFilters) filterManager.addFilters(userFilters);
 
-    const combinedQuery = createMergedEsQuery(
+    const combinedQuery = buildEsQuery(
+      dataView,
       userQuery,
       Array.isArray(userFilters) ? userFilters : [],
-      dataView,
-      uiSettings
+      uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
 
     return {
@@ -200,11 +145,11 @@ export function getEsQueryFromSavedSearch({
     if (filterManager) filterManager.setFilters(currentFilters);
     if (globalFilters) filterManager?.addFilters(globalFilters);
 
-    const combinedQuery = createMergedEsQuery(
+    const combinedQuery = buildEsQuery(
+      dataView,
       currentQuery,
       filterManager ? filterManager?.getFilters() : currentFilters,
-      dataView,
-      uiSettings
+      uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
 
     return {

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useCallback, useState, useMemo } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -45,6 +47,7 @@ export interface Props {
   item: Item;
   entityName: string;
   isReadonly?: boolean;
+  readonlyReason?: string;
   services: Pick<Services, 'TagSelector' | 'TagList' | 'notifyError'>;
   onSave?: (args: {
     id: string;
@@ -54,6 +57,7 @@ export interface Props {
   }) => Promise<void>;
   customValidators?: CustomValidators;
   onCancel: () => void;
+  appendRows?: React.ReactNode;
 }
 
 const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
@@ -62,16 +66,34 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
   entityName,
   isReadonly = true,
+  readonlyReason,
   services: { TagSelector, TagList, notifyError },
   onSave,
   onCancel,
   customValidators,
+  appendRows,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
   const form = useMetadataForm({ item, customValidators });
+
+  const hasNoChanges = () => {
+    const itemTags = item.tags.map((obj) => obj.id).sort();
+    const formTags = form.tags.value.slice().sort();
+
+    const compareTags = (arr1: string[], arr2: string[]) => {
+      if (arr1.length !== arr2.length) return false;
+      return arr1.every((tag: string, index) => tag === arr2[index]);
+    };
+
+    return (
+      item.title === form.title.value &&
+      item.description === form.description.value &&
+      compareTags(itemTags, formTags)
+    );
+  };
 
   const onClickSave = useCallback(async () => {
     if (form.isValid && onSave && !form.getIsChangingValue()) {
@@ -136,10 +158,18 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
         <MetadataForm
           form={{ ...form, isSubmitted }}
           isReadonly={isReadonly}
+          readonlyReason={
+            readonlyReason ||
+            i18n.translate('contentManagement.contentEditor.metadataForm.readOnlyToolTip', {
+              defaultMessage: 'To edit these details, contact your administrator for access.',
+            })
+          }
           tagsReferences={item.tags}
           TagList={TagList}
           TagSelector={TagSelector}
-        />
+        >
+          {appendRows}
+        </MetadataForm>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -163,7 +193,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
                   onClick={onClickSave}
                   data-test-subj="saveButton"
                   fill
-                  disabled={isSubmitted && !form.isValid}
+                  disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
                   isLoading={isSubmitting}
                 >
                   {i18nTexts.saveButtonLabel}

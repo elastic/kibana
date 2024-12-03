@@ -1,16 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
+import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client/src/types';
+import { Readable } from 'stream';
 import { BaseStepCtx } from './journey';
+import { SynthtraceClientType } from '../services/synthtrace';
+
+interface JourneySynthtrace<T extends { '@timestamp'?: number | undefined }, O = any> {
+  type: SynthtraceClientType;
+  generator: (options: O) => Readable | SynthtraceGenerator<T>;
+  options: O;
+}
 
 export interface RampConcurrentUsersAction {
   action: 'rampConcurrentUsers';
@@ -69,7 +79,7 @@ export interface ScalabilitySetup {
   test: ScalabilityAction[];
 }
 
-export interface JourneyConfigOptions<CtxExt> {
+export interface JourneyConfigOptions<CtxExt extends { '@timestamp'?: number | undefined }> {
   /**
    * Relative path to FTR config file. Use to override the default ones:
    * 'x-pack/test/functional/config.base.js', 'test/functional/config.base.js'
@@ -116,9 +126,28 @@ export interface JourneyConfigOptions<CtxExt> {
   extendContext?: (ctx: BaseStepCtx) => CtxExt;
   /**
    * Use this to define actions that will be executed after Kibana & ES were started,
-   * but before archives are loaded. APM traces are not collected for this hook.
+   * but before archives are loaded or synthtrace is run. APM traces are not collected for this hook.
    */
   beforeSteps?: (ctx: BaseStepCtx & CtxExt) => Promise<void>;
+  /**
+   * Use to setup ES data ingestion with APM Synthtrace
+   *
+   * synthtrace: {
+   *   type: 'infra',
+   *   generator: generateHostsData,
+   *   options: {
+   *      from: new Date(Date.now() - 1000 * 60 * 10),
+   *      to: new Date(),
+   *      count: 1000,
+   *   },
+   * },
+   */
+  synthtrace?: JourneySynthtrace<CtxExt>;
+
+  /**
+   * Take browser page screenshot on every step complete
+   */
+  takeScreenshotOnSuccess?: boolean;
 }
 
 export class JourneyConfig<CtxExt extends object> {
@@ -191,5 +220,13 @@ export class JourneyConfig<CtxExt extends object> {
     } else {
       new Promise<void>((resolve) => resolve());
     }
+  }
+
+  getSynthtraceConfig() {
+    return this.#opts.synthtrace;
+  }
+
+  takeScreenshotOnSuccess() {
+    return !!this.#opts.takeScreenshotOnSuccess;
   }
 }

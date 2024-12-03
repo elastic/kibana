@@ -20,23 +20,24 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { context } from '@kbn/kibana-react-plugin/public';
 import { ResultsLinks } from '../../../common/components/results_links';
 import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
 import { ImportErrors } from '../import_errors';
 import { ImportSummary } from '../import_summary';
 import { ImportSettings } from '../import_settings';
+import { DocCountChart } from '../doc_count_chart';
 import {
   addCombinedFieldsToPipeline,
   addCombinedFieldsToMappings,
   getDefaultCombinedFields,
 } from '../../../common/components/combined_fields';
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
+import { importData } from './import';
+import { FILE_FORMATS } from '../../../../../common/constants';
 
-const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = {};
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
 
@@ -58,7 +59,7 @@ const DEFAULT_STATE = {
   createDataView: true,
   dataView: '',
   dataViewId: '',
-  ingestPipelineId: '',
+  pipelineId: null,
   errors: [],
   importFailures: [],
   docCount: 0,
@@ -74,14 +75,19 @@ const DEFAULT_STATE = {
   isFilebeatFlyoutVisible: false,
   checkingValidIndex: false,
   combinedFields: [],
+  importer: undefined,
+  createPipeline: true,
+  initializeDeployment: false,
+  initializeDeploymentStatus: IMPORT_STATUS.INCOMPLETE,
 };
 
 export class ImportView extends Component {
+  static contextType = context;
+
   constructor(props) {
     super(props);
 
     this.state = getDefaultState(DEFAULT_STATE, this.props.results, this.props.capabilities);
-    this.dataViewsContract = props.dataViewsContract;
   }
 
   componentDidMount() {
@@ -96,233 +102,43 @@ export class ImportView extends Component {
   };
 
   clickImport = () => {
-    this.import();
+    const { data, results } = this.props;
+    const {
+      data: { dataViews: dataViewsContract },
+      fileUpload,
+      http,
+    } = this.context.services;
+    const {
+      index,
+      dataView,
+      createDataView,
+      indexSettingsString,
+      mappingsString,
+      pipelineString,
+      pipelineId,
+    } = this.state;
+
+    const createPipeline = pipelineString !== '';
+
+    this.setState({
+      createPipeline,
+    });
+
+    importData(
+      { data, results, dataViewsContract, fileUpload, http },
+      {
+        index,
+        dataView,
+        createDataView,
+        indexSettingsString,
+        mappingsString,
+        pipelineString,
+        pipelineId,
+        createPipeline,
+      },
+      (state) => this.setState(state)
+    );
   };
-
-  // TODO - sort this function out. it's a mess
-  async import() {
-    const { data, results, dataViewsContract, fileUpload } = this.props;
-
-    const { format } = results;
-    let { timeFieldName } = this.state;
-    const { index, dataView, createDataView, indexSettingsString, mappingsString, pipelineString } =
-      this.state;
-
-    const errors = [];
-
-    if (index !== '') {
-      this.setState(
-        {
-          importing: true,
-          errors,
-        },
-        async () => {
-          // check to see if the user has permission to create and ingest data into the specified index
-          if (
-            (await fileUpload.hasImportPermission({
-              checkCreateDataView: createDataView,
-              checkHasManagePipeline: true,
-              indexName: index,
-            })) === false
-          ) {
-            errors.push(
-              i18n.translate('xpack.dataVisualizer.file.importView.importPermissionError', {
-                defaultMessage:
-                  'You do not have permission to create or import data into index {index}.',
-                values: {
-                  index,
-                },
-              })
-            );
-            this.setState({
-              permissionCheckStatus: IMPORT_STATUS.FAILED,
-              importing: false,
-              imported: false,
-              errors,
-            });
-            return;
-          }
-
-          this.setState(
-            {
-              importing: true,
-              imported: false,
-              reading: true,
-              initialized: true,
-              permissionCheckStatus: IMPORT_STATUS.COMPLETE,
-            },
-            () => {
-              setTimeout(async () => {
-                let success = true;
-                const createPipeline = pipelineString !== '';
-
-                let settings = {};
-                let mappings = {};
-                let pipeline = {};
-
-                try {
-                  settings = JSON.parse(indexSettingsString);
-                } catch (error) {
-                  success = false;
-                  const parseError = i18n.translate(
-                    'xpack.dataVisualizer.file.importView.parseSettingsError',
-                    {
-                      defaultMessage: 'Error parsing settings:',
-                    }
-                  );
-                  errors.push(`${parseError} ${error.message}`);
-                }
-
-                try {
-                  mappings = JSON.parse(mappingsString);
-                } catch (error) {
-                  success = false;
-                  const parseError = i18n.translate(
-                    'xpack.dataVisualizer.file.importView.parseMappingsError',
-                    {
-                      defaultMessage: 'Error parsing mappings:',
-                    }
-                  );
-                  errors.push(`${parseError} ${error.message}`);
-                }
-
-                try {
-                  if (createPipeline) {
-                    pipeline = JSON.parse(pipelineString);
-                  }
-                } catch (error) {
-                  success = false;
-                  const parseError = i18n.translate(
-                    'xpack.dataVisualizer.file.importView.parsePipelineError',
-                    {
-                      defaultMessage: 'Error parsing ingest pipeline:',
-                    }
-                  );
-                  errors.push(`${parseError} ${error.message}`);
-                }
-
-                this.setState({
-                  parseJSONStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                });
-
-                // if an @timestamp field has been added to the
-                // mappings, use this field as the time field.
-                // This relies on the field being populated by
-                // the ingest pipeline on ingest
-                if (isPopulatedObject(mappings.properties, [DEFAULT_TIME_FIELD])) {
-                  timeFieldName = DEFAULT_TIME_FIELD;
-                  this.setState({ timeFieldName });
-                }
-
-                if (success) {
-                  const importer = await fileUpload.importerFactory(format, {
-                    excludeLinesPattern: results.exclude_lines_pattern,
-                    multilineStartPattern: results.multiline_start_pattern,
-                  });
-                  if (importer !== undefined) {
-                    const readResp = importer.read(data, this.setReadProgress);
-                    success = readResp.success;
-                    this.setState({
-                      readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                      reading: false,
-                    });
-
-                    if (readResp.success === false) {
-                      console.error(readResp.error);
-                      errors.push(readResp.error);
-                    }
-
-                    if (success) {
-                      const initializeImportResp = await importer.initializeImport(
-                        index,
-                        settings,
-                        mappings,
-                        pipeline
-                      );
-
-                      const indexCreated = initializeImportResp.index !== undefined;
-                      this.setState({
-                        indexCreatedStatus: indexCreated
-                          ? IMPORT_STATUS.COMPLETE
-                          : IMPORT_STATUS.FAILED,
-                      });
-
-                      if (createPipeline) {
-                        const pipelineCreated = initializeImportResp.pipelineId !== undefined;
-                        if (indexCreated) {
-                          this.setState({
-                            ingestPipelineCreatedStatus: pipelineCreated
-                              ? IMPORT_STATUS.COMPLETE
-                              : IMPORT_STATUS.FAILED,
-                            ingestPipelineId: pipelineCreated
-                              ? initializeImportResp.pipelineId
-                              : '',
-                          });
-                        }
-                        success = indexCreated && pipelineCreated;
-                      } else {
-                        success = indexCreated;
-                      }
-
-                      if (success) {
-                        const importId = initializeImportResp.id;
-                        const pipelineId = initializeImportResp.pipelineId;
-                        const importResp = await importer.import(
-                          importId,
-                          index,
-                          pipelineId,
-                          this.setImportProgress
-                        );
-                        success = importResp.success;
-                        this.setState({
-                          uploadStatus: importResp.success
-                            ? IMPORT_STATUS.COMPLETE
-                            : IMPORT_STATUS.FAILED,
-                          importFailures: importResp.failures,
-                          docCount: importResp.docCount,
-                        });
-
-                        if (success) {
-                          if (createDataView) {
-                            const dataViewName = dataView === '' ? index : dataView;
-                            const dataViewResp = await createKibanaDataView(
-                              dataViewName,
-                              dataViewsContract,
-                              timeFieldName
-                            );
-                            success = dataViewResp.success;
-                            this.setState({
-                              dataViewCreatedStatus: dataViewResp.success
-                                ? IMPORT_STATUS.COMPLETE
-                                : IMPORT_STATUS.FAILED,
-                              dataViewId: dataViewResp.id,
-                            });
-                            if (dataViewResp.success === false) {
-                              errors.push(dataViewResp.error);
-                            }
-                          }
-                        } else {
-                          errors.push(importResp.error);
-                        }
-                      } else {
-                        errors.push(initializeImportResp.error);
-                      }
-                    }
-                  }
-                }
-
-                this.setState({
-                  importing: false,
-                  imported: success,
-                  errors,
-                });
-              }, 500);
-            }
-          );
-        }
-      );
-    }
-  }
 
   onConfigModeChange = (configMode) => {
     this.setState({
@@ -330,8 +146,7 @@ export class ImportView extends Component {
     });
   };
 
-  onIndexChange = (e) => {
-    const index = e.target.value;
+  onIndexChange = (index) => {
     this.setState({
       index,
       checkingValidIndex: true,
@@ -345,7 +160,7 @@ export class ImportView extends Component {
       return;
     }
 
-    const exists = await this.props.fileUpload.checkIndexExists(index);
+    const exists = await this.context.services.fileUpload.checkIndexExists(index);
     const indexNameError = exists ? (
       <FormattedMessage
         id="xpack.dataVisualizer.file.importView.indexNameAlreadyExistsErrorMessage"
@@ -390,14 +205,20 @@ export class ImportView extends Component {
     });
   };
 
-  onCombinedFieldsChange = (combinedFields) => {
-    this.setState({ combinedFields });
+  onPipelineIdChange = (text) => {
+    this.setState({
+      pipelineId: text,
+    });
   };
 
-  setImportProgress = (progress) => {
+  onCreatePipelineChange = (b) => {
     this.setState({
-      uploadProgress: progress,
+      createPipeline: b,
     });
+  };
+
+  onCombinedFieldsChange = (combinedFields) => {
+    this.setState({ combinedFields });
   };
 
   setReadProgress = (progress) => {
@@ -414,9 +235,13 @@ export class ImportView extends Component {
     this.setState({ isFilebeatFlyoutVisible: false });
   };
 
+  closeFilebeatFlyout = () => {
+    this.setState({ isFilebeatFlyoutVisible: false });
+  };
+
   async loadDataViewNames() {
     try {
-      const dataViewNames = await this.dataViewsContract.getTitles();
+      const dataViewNames = await this.context.services.data.dataViews.getTitles();
       this.setState({ dataViewNames });
     } catch (error) {
       console.error('failed to load data views', error);
@@ -428,7 +253,7 @@ export class ImportView extends Component {
       index,
       dataView,
       dataViewId,
-      ingestPipelineId,
+      pipelineId,
       importing,
       imported,
       reading,
@@ -454,9 +279,11 @@ export class ImportView extends Component {
       isFilebeatFlyoutVisible,
       checkingValidIndex,
       combinedFields,
+      importer,
+      createPipeline,
+      initializeDeployment,
+      initializeDeploymentStatus,
     } = this.state;
-
-    const createPipeline = pipelineString !== '';
 
     const statuses = {
       reading,
@@ -470,6 +297,8 @@ export class ImportView extends Component {
       uploadStatus,
       createDataView,
       createPipeline,
+      initializeDeployment,
+      initializeDeploymentStatus,
     };
 
     const disableImport =
@@ -487,40 +316,44 @@ export class ImportView extends Component {
           </EuiTitle>
         </EuiPageHeader>
         <EuiSpacer size="m" />
-        <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.dataVisualizer.file.importView.importDataTitle"
-                defaultMessage="Import data"
-              />
-            </h2>
-          </EuiTitle>
+        {initialized === false ? (
+          <EuiPanel
+            data-test-subj="dataVisualizerFileImportSettingsPanel"
+            hasShadow={false}
+            hasBorder
+          >
+            <EuiTitle size="s">
+              <h2>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.importView.importDataTitle"
+                  defaultMessage="Import data"
+                />
+              </h2>
+            </EuiTitle>
 
-          <ImportSettings
-            index={index}
-            dataView={dataView}
-            initialized={initialized}
-            onIndexChange={this.onIndexChange}
-            createDataView={createDataView}
-            onCreateDataViewChange={this.onCreateDataViewChange}
-            onDataViewChange={this.onDataViewChange}
-            indexSettingsString={indexSettingsString}
-            mappingsString={mappingsString}
-            pipelineString={pipelineString}
-            onIndexSettingsStringChange={this.onIndexSettingsStringChange}
-            onMappingsStringChange={this.onMappingsStringChange}
-            onPipelineStringChange={this.onPipelineStringChange}
-            indexNameError={indexNameError}
-            dataViewNameError={dataViewNameError}
-            combinedFields={combinedFields}
-            onCombinedFieldsChange={this.onCombinedFieldsChange}
-            results={this.props.results}
-          />
+            <ImportSettings
+              index={index}
+              dataView={dataView}
+              initialized={initialized}
+              onIndexChange={this.onIndexChange}
+              createDataView={createDataView}
+              onCreateDataViewChange={this.onCreateDataViewChange}
+              onDataViewChange={this.onDataViewChange}
+              indexSettingsString={indexSettingsString}
+              mappingsString={mappingsString}
+              pipelineString={pipelineString}
+              onIndexSettingsStringChange={this.onIndexSettingsStringChange}
+              onMappingsStringChange={this.onMappingsStringChange}
+              onPipelineStringChange={this.onPipelineStringChange}
+              indexNameError={indexNameError}
+              dataViewNameError={dataViewNameError}
+              combinedFields={combinedFields}
+              onCombinedFieldsChange={this.onCombinedFieldsChange}
+              results={this.props.results}
+            />
 
-          <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-          {(initialized === false || importing === true) && (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -557,47 +390,25 @@ export class ImportView extends Component {
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
-          )}
-
-          {initialized === true && importing === false && (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.clickReset}>
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.importView.resetButtonLabel"
-                    defaultMessage="Reset"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={() => this.props.onChangeMode(DATAVISUALIZER_MODE.READ)}
-                  isDisabled={importing}
-                >
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.importView.backButtonLabel"
-                    defaultMessage="Back"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.importView.importNewButtonLabel"
-                    defaultMessage="Import a new file"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiPanel>
+          </EuiPanel>
+        ) : null}
 
         {initialized === true && (
           <React.Fragment>
             <EuiSpacer size="m" />
 
-            <EuiPanel>
+            <EuiPanel hasShadow={false} hasBorder>
               <ImportProgress statuses={statuses} />
+
+              {importer !== undefined &&
+                importer.initialized() &&
+                this.props.results.format !== FILE_FORMATS.TIKA && (
+                  <DocCountChart
+                    statuses={statuses}
+                    dataStart={this.context.services.data}
+                    importer={importer}
+                  />
+                )}
 
               {imported === true && (
                 <React.Fragment>
@@ -606,7 +417,7 @@ export class ImportView extends Component {
                   <ImportSummary
                     index={index}
                     dataView={dataView === '' ? index : dataView}
-                    ingestPipelineId={ingestPipelineId}
+                    pipelineId={pipelineId}
                     docCount={docCount}
                     importFailures={importFailures}
                     createDataView={createDataView}
@@ -615,21 +426,44 @@ export class ImportView extends Component {
 
                   <EuiSpacer size="l" />
 
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton onClick={this.clickReset}>
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.importView.resetButtonLabel"
+                          defaultMessage="Reset"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.importView.importNewButtonLabel"
+                          defaultMessage="Import a new file"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="l" />
+
                   <ResultsLinks
-                    fieldStats={this.props.results?.field_stats}
+                    results={this.props.results}
                     index={index}
                     dataViewId={dataViewId}
                     timeFieldName={timeFieldName}
                     createDataView={createDataView}
                     showFilebeatFlyout={this.showFilebeatFlyout}
                     getAdditionalLinks={this.props.getAdditionalLinks ?? []}
+                    resultLinks={this.props.resultLinks}
+                    combinedFields={combinedFields}
                   />
 
                   {isFilebeatFlyoutVisible && (
                     <FilebeatConfigFlyout
                       index={index}
                       results={this.props.results}
-                      ingestPipelineId={ingestPipelineId}
+                      pipelineId={pipelineId}
                       closeFlyout={this.closeFilebeatFlyout}
                     />
                   )}
@@ -647,25 +481,6 @@ export class ImportView extends Component {
         )}
       </EuiPageBody>
     );
-  }
-}
-
-async function createKibanaDataView(dataViewName, dataViewsContract, timeFieldName) {
-  try {
-    const emptyPattern = await dataViewsContract.createAndSave({
-      title: dataViewName,
-      timeFieldName,
-    });
-
-    return {
-      success: true,
-      id: emptyPattern.id,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error,
-    };
   }
 }
 

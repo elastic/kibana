@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
@@ -30,7 +30,7 @@ describe('useGetSeverity', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getSeverity');
-    const { waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useGetSeverity({
           http,
@@ -39,7 +39,7 @@ describe('useGetSeverity', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => result.current.isSuccess);
 
     expect(spy).toHaveBeenCalledWith({
       http,
@@ -70,7 +70,7 @@ describe('useGetSeverity', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () =>
         useGetSeverity({
           http,
@@ -79,8 +79,9 @@ describe('useGetSeverity', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls addError when the getSeverity api returns successfully but contains an error', async () => {
@@ -94,7 +95,7 @@ describe('useGetSeverity', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () =>
         useGetSeverity({
           http,
@@ -103,7 +104,8 @@ describe('useGetSeverity', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

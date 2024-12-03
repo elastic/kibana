@@ -7,11 +7,21 @@
 
 import { LensPlugin } from './plugin';
 
+export { isLensApi } from './react_embeddable/type_guards';
+export { type EmbeddableComponent } from './react_embeddable/renderer/lens_custom_renderer_component';
 export type {
-  EmbeddableComponentProps,
-  EmbeddableComponent,
+  LensApi,
+  LensSerializedState,
+  LensRuntimeState,
+  LensByValueInput,
+  LensByReferenceInput,
   TypedLensByValueInput,
-} from './embeddable/embeddable_component';
+  LensEmbeddableInput,
+  LensEmbeddableOutput,
+  LensSavedObjectAttributes,
+  LensRendererProps as EmbeddableComponentProps,
+} from './react_embeddable/types';
+
 export type {
   XYState,
   XYReferenceLineLayerConfig,
@@ -32,6 +42,7 @@ export type {
   Visualization,
   VisualizationSuggestion,
   Suggestion,
+  UserMessage,
 } from './types';
 export type {
   LegacyMetricState as MetricState,
@@ -46,6 +57,7 @@ export type { DatatableVisualizationState } from './visualizations/datatable/vis
 export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type { MetricVisualizationState } from './visualizations/metric/types';
+export type { TagcloudState } from './visualizations/tagcloud/types';
 export type {
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
@@ -105,12 +117,7 @@ export type {
   ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
 
-export type {
-  LensEmbeddableInput,
-  LensSavedObjectAttributes,
-  Embeddable,
-  LensEmbeddableOutput,
-} from './embeddable';
+export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_lens_config/in_app_embeddable_edit/types';
 
 export type { ChartInfo } from './chart_info_api';
 

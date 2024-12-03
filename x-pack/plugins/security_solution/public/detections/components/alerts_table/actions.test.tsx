@@ -25,20 +25,18 @@ import {
   getThresholdDetectionAlertAADMock,
   mockEcsDataWithAlert,
   mockTimelineDetails,
-  mockTimelineResult,
   mockAADEcsDataWithAlert,
   mockGetOneTimelineResult,
   mockTimelineData,
 } from '../../../common/mock';
-import type { CreateTimeline, UpdateTimelineLoading } from './types';
+import type { CreateTimeline } from './types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
-import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { KibanaServices } from '../../../common/lib/kibana';
 import {
   DEFAULT_FROM_MOMENT,
@@ -57,7 +55,8 @@ import {
   USER,
 } from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { defaultUdtHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -100,6 +99,7 @@ const getExpectedcreateTimelineParam = (
   notes: null,
   timeline: {
     ...timelineDefaults,
+    excludedRowRendererIds: [],
     dataProviders,
     id: TimelineId.active,
     indexNames: [],
@@ -126,7 +126,6 @@ describe('alert actions', () => {
   const anchor = '2020-03-01T17:59:46.349Z';
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
-  let updateTimelineIsLoading: UpdateTimelineLoading;
   let searchStrategyClient: jest.Mocked<ISearchStart>;
   let clock: sinon.SinonFakeTimers;
   let mockKibanaServices: jest.Mock;
@@ -269,7 +268,6 @@ describe('alert actions', () => {
     mockGetExceptionFilter = jest.fn().mockResolvedValue(undefined);
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
-    updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
     mockKibanaServices = KibanaServices.get as jest.Mock;
 
     fetchMock = jest.fn();
@@ -284,7 +282,7 @@ describe('alert actions', () => {
       search: jest.fn().mockImplementation(() => of({ data: mockTimelineDetails })),
     };
 
-    (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineResult);
+    (getTimelineTemplate as jest.Mock).mockResolvedValue(mockGetOneTimelineResult);
 
     clock = sinon.useFakeTimers(unix);
   });
@@ -295,28 +293,10 @@ describe('alert actions', () => {
 
   describe('sendAlertToTimelineAction', () => {
     describe('timeline id is NOT empty string and apollo client exists', () => {
-      test('it invokes updateTimelineIsLoading to set to true', async () => {
-        await sendAlertToTimelineAction({
-          createTimeline,
-          ecsData: mockEcsDataWithAlert,
-          updateTimelineIsLoading,
-          searchStrategyClient,
-          getExceptionFilter: mockGetExceptionFilter,
-        });
-
-        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
-        expect(updateTimelineIsLoading).toHaveBeenCalledTimes(1);
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-      });
-
       test('it invokes createTimeline with designated timeline template if "timelineTemplate" exists', async () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -332,40 +312,35 @@ describe('alert actions', () => {
                 id: '@timestamp',
                 type: 'date',
                 esTypes: ['date'],
-                initialWidth: 190,
+                initialWidth: 215,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'message',
-                initialWidth: 180,
+                initialWidth: 360,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'event.category',
-                initialWidth: 180,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'host.name',
-                initialWidth: 180,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'source.ip',
-                initialWidth: 180,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'destination.ip',
-                initialWidth: 180,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'user.name',
-                initialWidth: 180,
               },
             ],
-            defaultColumns: defaultHeaders,
+            defaultColumns: defaultUdtHeaders,
             dataProviders: [],
             dataViewId: null,
             dateRange: {
@@ -379,13 +354,11 @@ describe('alert actions', () => {
               eventCategoryField: 'event.category',
               query: '',
               size: 100,
-              tiebreakerField: '',
               timestampField: '@timestamp',
             },
             eventIdToNoteIds: {},
             eventType: 'all',
             excludedRowRendererIds: [],
-            expandedDetail: {},
             filters: [
               {
                 $state: {
@@ -412,7 +385,6 @@ describe('alert actions', () => {
             indexNames: [],
             isFavorite: false,
             isLive: false,
-            isLoading: false,
             isSaving: false,
             isSelectAllChecked: false,
             itemsPerPage: 25,
@@ -445,17 +417,19 @@ describe('alert actions', () => {
                 sortDirection: 'desc',
               },
             ],
-            status: TimelineStatus.draft,
+            status: TimelineStatusEnum.draft,
             title: '',
-            timelineType: TimelineType.default,
+            timelineType: TimelineTypeEnum.default,
             templateTimelineId: null,
             templateTimelineVersion: null,
             version: null,
             savedSearchId: null,
-            isDiscoverSavedSearchLoaded: false,
+            savedSearch: null,
+            isDataProviderVisible: false,
+            rowHeight: 3,
+            sampleSize: 500,
           },
           to: '2018-11-05T19:03:25.937Z',
-          resolveTimelineConfig: undefined,
           ruleNote: '# this is some markdown documentation',
           ruleAuthor: ['elastic'],
         };
@@ -466,11 +440,13 @@ describe('alert actions', () => {
 
       test('it invokes createTimeline with kqlQuery.filterQuery.kuery.kind as "kuery" if not specified in returned timeline template', async () => {
         const mockTimelineResultModified = {
-          ...mockTimelineResult,
-          kqlQuery: {
-            filterQuery: {
-              kuery: {
-                expression: [''],
+          body: {
+            ...mockGetOneTimelineResult,
+            kqlQuery: {
+              filterQuery: {
+                kuery: {
+                  expression: [''],
+                },
               },
             },
           },
@@ -480,12 +456,10 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
         const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
-
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
@@ -499,7 +473,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -508,14 +481,6 @@ describe('alert actions', () => {
         delete defaultTimelinePropsWithoutNote.ruleNote;
         delete defaultTimelinePropsWithoutNote.ruleAuthor;
 
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
-        });
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
@@ -547,15 +512,16 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
+        const expectedTimelineProps = structuredClone(defaultTimelineProps);
+        expectedTimelineProps.timeline.excludedRowRendererIds = [];
+
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+        expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
       });
     });
 
@@ -574,15 +540,16 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
+        const expectedTimelineProps = structuredClone(defaultTimelineProps);
+        expectedTimelineProps.timeline.excludedRowRendererIds = [];
+
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+        expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
       });
     });
 
@@ -605,18 +572,17 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            excludedRowRendererIds: [],
             resolveTimelineConfig: undefined,
             dataProviders: [
               {
@@ -645,18 +611,19 @@ describe('alert actions', () => {
           },
         };
 
+        const expectedTimelineProps = structuredClone(defaultTimelineProps);
+        expectedTimelineProps.timeline.excludedRowRendererIds = [];
+
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+        expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
       });
     });
 
@@ -725,7 +692,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimeline,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -733,13 +699,13 @@ describe('alert actions', () => {
         const expectedFrom = '2021-01-10T21:11:45.839Z';
         const expectedTo = '2021-01-10T21:12:45.839Z';
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            excludedRowRendererIds: [],
             dataProviders: [
               {
                 and: [],
@@ -853,7 +819,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimelineAndNoFilters,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -878,7 +843,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithTemplateTimeline,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -886,14 +850,15 @@ describe('alert actions', () => {
         const expectedFrom = '2021-01-10T21:11:45.839Z';
         const expectedTo = '2021-01-10T21:12:45.839Z';
 
-        expect(updateTimelineIsLoading).toHaveBeenCalled();
         expect(mockGetExceptionFilter).toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            excludedRowRendererIds: [],
             columns: mockGetOneTimelineResult.columns,
+            defaultColumns: defaultUdtHeaders,
             dataProviders: [],
             dateRange: {
               start: expectedFrom,
@@ -1036,7 +1001,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimeline,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -1045,6 +1009,7 @@ describe('alert actions', () => {
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            excludedRowRendererIds: [],
             filters: [
               {
                 meta: {
@@ -1108,6 +1073,8 @@ describe('alert actions', () => {
           timeline: {
             ...defaultTimelineProps.timeline,
             dataProviders: [],
+            columns: defaultUdtHeaders,
+            defaultColumns: defaultUdtHeaders,
             dateRange: {
               start: expectedFrom,
               end: expectedTo,
@@ -1128,7 +1095,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimeline,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });

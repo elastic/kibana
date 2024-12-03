@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, renderHook } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/react';
 
-import { MaintenanceWindow } from '../pages/maintenance_windows/types';
+import { waitFor, renderHook, act } from '@testing-library/react';
+
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 import { useUpdateMaintenanceWindow } from './use_update_maintenance_window';
 
@@ -35,7 +34,7 @@ jest.mock('../services/maintenance_windows_api/update', () => ({
 
 const { updateMaintenanceWindow } = jest.requireMock('../services/maintenance_windows_api/update');
 
-const maintenanceWindow: MaintenanceWindow = {
+const updateParams = {
   title: 'updated',
   duration: 1,
   rRule: {
@@ -51,7 +50,7 @@ describe('useUpdateMaintenanceWindow', () => {
     jest.clearAllMocks();
 
     appMockRenderer = createAppMockRenderer();
-    updateMaintenanceWindow.mockResolvedValue(maintenanceWindow);
+    updateMaintenanceWindow.mockResolvedValue(updateParams);
   });
 
   it('should call onSuccess if api succeeds', async () => {
@@ -60,7 +59,7 @@ describe('useUpdateMaintenanceWindow', () => {
     });
 
     await act(async () => {
-      await result.current.mutate({ maintenanceWindowId: '123', maintenanceWindow });
+      await result.current.mutate({ maintenanceWindowId: '123', updateParams });
     });
     await waitFor(() =>
       expect(mockAddSuccess).toBeCalledWith("Updated maintenance window 'updated'")
@@ -75,7 +74,7 @@ describe('useUpdateMaintenanceWindow', () => {
     });
 
     await act(async () => {
-      await result.current.mutate({ maintenanceWindowId: '123', maintenanceWindow });
+      await result.current.mutate({ maintenanceWindowId: '123', updateParams });
     });
 
     await waitFor(() =>

@@ -135,6 +135,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '22.04.2 LTS (Jammy Jellyfish)',
             },
+            elastic: { agent: { unprivileged: false } }, // Root agent
           },
           components: [
             {
@@ -146,6 +147,13 @@ describe('fleet usage telemetry', () => {
               status: 'HEALTHY',
             },
           ],
+          upgrade_details: {
+            target_version: '8.12.0',
+            state: 'UPG_FAILED',
+            metadata: {
+              error_msg: 'Download failed',
+            },
+          },
         },
         {
           create: {
@@ -165,6 +173,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '20.04.5 LTS (Focal Fossa)',
             },
+            elastic: { agent: { unprivileged: true } }, // Non root agent
           },
           components: [
             {
@@ -176,6 +185,13 @@ describe('fleet usage telemetry', () => {
               status: 'HEALTHY',
             },
           ],
+          upgrade_details: {
+            target_version: '8.12.0',
+            state: 'UPG_FAILED',
+            metadata: {
+              error_msg: 'Agent crash detected',
+            },
+          },
         },
         {
           create: {
@@ -220,6 +236,25 @@ describe('fleet usage telemetry', () => {
           last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
           active: true,
           policy_id: 'policy2',
+          upgrade_details: {
+            target_version: '8.11.0',
+            state: 'UPG_ROLLBACK',
+            metadata: {},
+          },
+        },
+        {
+          create: {
+            _id: 'agent4',
+          },
+        },
+        {
+          agent: {
+            version: '8.6.0',
+          },
+          last_checkin_status: 'online',
+          last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
+          active: true,
+          policy_id: 'policy3',
         },
       ],
       refresh: 'wait_for',
@@ -317,6 +352,7 @@ describe('fleet usage telemetry', () => {
       },
       enabled: true,
       policy_id: 'fleet-server-policy',
+      policy_ids: ['fleet-server-policy'],
       inputs: [
         {
           compiled_input: {
@@ -331,6 +367,20 @@ describe('fleet usage telemetry', () => {
           },
         },
       ],
+    });
+
+    await soClient.create('ingest-package-policies', {
+      name: 'nginx-1',
+      namespace: 'default',
+      package: {
+        name: 'nginx',
+        title: 'Nginx',
+        version: '1.0.0',
+      },
+      enabled: true,
+      policy_id: 'policy2',
+      policy_ids: ['policy2', 'policy3'],
+      inputs: [],
     });
 
     await soClient.create(
@@ -361,6 +411,21 @@ describe('fleet usage telemetry', () => {
       },
       { id: 'output3' }
     );
+    await soClient.create(
+      'ingest-outputs',
+      {
+        name: 'output4',
+        type: 'elasticsearch',
+        hosts: ['http://localhost:9200'],
+        is_default: false,
+        is_default_monitoring: false,
+        config_yaml: '',
+        ca_trusted_fingerprint: '',
+        proxy_id: null,
+        preset: 'balanced',
+      },
+      { id: 'output4' }
+    );
 
     await soClient.create(
       'ingest-agent-policies',
@@ -377,8 +442,34 @@ describe('fleet usage telemetry', () => {
         schema_version: '1.0.0',
         data_output_id: 'output2',
         monitoring_output_id: 'output3',
+        global_data_tags: [
+          { name: 'test', value: 'test1' },
+          { name: 'test2', value: 'test2' },
+        ],
       },
       { id: 'policy2' }
+    );
+    await soClient.create(
+      'ingest-agent-policies',
+      {
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        name: 'Yet another policy',
+        description: 'Policy 3',
+        inactivity_timeout: 1209600,
+        status: 'active',
+        is_managed: false,
+        revision: 2,
+        updated_by: 'system',
+        schema_version: '1.0.0',
+        data_output_id: 'output4',
+        monitoring_output_id: 'output4',
+        global_data_tags: [
+          { name: 'test', value: 'test1' },
+          { name: 'test2', value: 'test2' },
+        ],
+      },
+      { id: 'policy3' }
     );
   });
 
@@ -397,13 +488,13 @@ describe('fleet usage telemetry', () => {
       expect.objectContaining({
         agents_enabled: true,
         agents: {
-          total_enrolled: 3,
+          total_enrolled: 4,
           healthy: 0,
           unhealthy: 0,
           inactive: 0,
           unenrolled: 1,
-          offline: 3,
-          total_all_statuses: 4,
+          offline: 4,
+          total_all_statuses: 5,
           updating: 0,
         },
         fleet_server: {
@@ -413,16 +504,22 @@ describe('fleet usage telemetry', () => {
           unhealthy: 0,
           offline: 0,
           updating: 0,
+          inactive: 0,
+          unenrolled: 0,
           num_host_urls: 0,
         },
         packages: [],
+        agents_per_privileges: {
+          root: 3,
+          unprivileged: 1,
+        },
         agents_per_version: [
           {
             version: '8.6.0',
-            count: 2,
+            count: 3,
             healthy: 0,
             inactive: 0,
-            offline: 2,
+            offline: 3,
             unenrolled: 0,
             unhealthy: 0,
             updating: 0,
@@ -439,7 +536,7 @@ describe('fleet usage telemetry', () => {
           },
         ],
         agent_checkin_status: { error: 1, degraded: 1 },
-        agents_per_policy: [2, 1],
+        agents_per_policy: [2, 1, 1],
         agents_per_os: [
           {
             name: 'Ubuntu',
@@ -463,6 +560,18 @@ describe('fleet usage telemetry', () => {
             count_as_monitoring: 1,
             output_type: 'logstash',
           },
+          {
+            count_as_data: 1,
+            count_as_monitoring: 1,
+            output_type: 'elasticsearch',
+            preset_counts: {
+              balanced: 2,
+              custom: 0,
+              latency: 0,
+              scale: 0,
+              throughput: 0,
+            },
+          },
         ],
         fleet_server_config: {
           policies: [
@@ -477,8 +586,10 @@ describe('fleet usage telemetry', () => {
           ],
         },
         agent_policies: {
-          count: 2,
+          count: 3,
           output_types: expect.arrayContaining(['elasticsearch', 'logstash', 'third_type']),
+          count_with_global_data_tags: 2,
+          avg_number_global_data_tags_per_policy: 2,
         },
         agent_logs_panics_last_hour: [
           {
@@ -496,7 +607,39 @@ describe('fleet usage telemetry', () => {
           'this should not be included in metrics',
         ],
         fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        integrations_details: [
+          {
+            total_integration_policies: 2,
+            shared_integration_policies: 1,
+            shared_integrations: {
+              agents: undefined,
+              name: 'nginx-1',
+              pkg_name: 'nginx',
+              pkg_version: '1.0.0',
+              shared_by_agent_policies: 2,
+            },
+          },
+        ],
       })
     );
+    expect(usage?.upgrade_details.length).toBe(3);
+    expect(usage?.upgrade_details).toContainEqual({
+      target_version: '8.12.0',
+      state: 'UPG_FAILED',
+      error_msg: 'Download failed',
+      agent_count: 1,
+    });
+    expect(usage?.upgrade_details).toContainEqual({
+      target_version: '8.12.0',
+      state: 'UPG_FAILED',
+      error_msg: 'Agent crash detected',
+      agent_count: 1,
+    });
+    expect(usage?.upgrade_details).toContainEqual({
+      target_version: '8.11.0',
+      state: 'UPG_ROLLBACK',
+      error_msg: '',
+      agent_count: 1,
+    });
   });
 });

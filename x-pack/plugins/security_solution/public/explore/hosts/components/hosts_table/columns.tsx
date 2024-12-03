@@ -7,6 +7,8 @@
 
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
+import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -19,9 +21,9 @@ import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
-import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
-import { ENTITY_RISK_LEVEL } from '../../../components/risk_score/translations';
+import { VIEW_HOSTS_BY_SEVERITY } from '../../../../entity_analytics/components/host_risk_score_table/translations';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
+import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
@@ -162,6 +164,23 @@ export const getHostsColumns = (
       },
     });
   }
+
+  columns.push({
+    field: 'node.criticality',
+    name: i18n.ASSET_CRITICALITY,
+    truncateText: false,
+    mobileOptions: { show: true },
+    sortable: false,
+    render: (assetCriticality: CriticalityLevelWithUnassigned) => {
+      if (!assetCriticality) return getEmptyTagValue();
+      return (
+        <AssetCriticalityBadge
+          criticalityLevel={assetCriticality}
+          css={{ verticalAlign: 'middle' }}
+        />
+      );
+    },
+  });
 
   return columns;
 };

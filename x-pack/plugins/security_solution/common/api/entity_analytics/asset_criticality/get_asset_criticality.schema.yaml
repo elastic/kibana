@@ -1,0 +1,38 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Asset Criticality Get Record Schema
+paths:
+  /api/asset_criticality:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetAssetCriticalityRecord
+      summary: Get an asset criticality record
+      description: Get the asset criticality record for a specific entity.
+      parameters:
+        - name: id_value
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The ID value of the asset.
+        - name: id_field
+          in: query
+          required: true
+          schema:
+            $ref: './common.schema.yaml#/components/schemas/IdField'
+          example: 'host.name'
+          description: The field representing the ID.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
+        '400':
+          description: Invalid request
+        '404':
+          description: Criticality record not found

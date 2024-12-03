@@ -1,15 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, Subscription, combineLatest, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { pick } from '@kbn/std';
+import { Observable, Subscription, combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
+import { map } from 'rxjs';
+import { schema, TypeOf } from '@kbn/config-schema';
 
+import { pick, Semaphore } from '@kbn/std';
+import {
+  generateOpenApiDocument,
+  type GenerateOpenApiDocumentOptionsFilters,
+} from '@kbn/router-to-openapispec';
 import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -25,9 +31,10 @@ import type {
   InternalContextSetup,
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
-import { Router } from '@kbn/core-http-router-server-internal';
+import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
 
 import { CspConfigType, cspConfig } from './csp';
+import { PermissionsPolicyConfigType, permissionsPolicyConfig } from './permissions_policy';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
@@ -52,6 +59,7 @@ export interface SetupDeps {
 export class HttpService
   implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart>
 {
+  private static readonly generateOasSemaphore = new Semaphore(1);
   private readonly prebootServer: HttpServer;
   private isPrebootServerStopped = false;
   private readonly httpServer: HttpServer;
@@ -74,10 +82,16 @@ export class HttpService
       configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
-    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
+      configService.atPath<PermissionsPolicyConfigType>(permissionsPolicyConfig.path),
+    ]).pipe(
+      map(
+        ([http, csp, externalUrl, permissionsPolicy]) =>
+          new HttpConfig(http, csp, externalUrl, permissionsPolicy)
+      )
+    );
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
-    this.prebootServer = new HttpServer(logger, 'Preboot', shutdownTimeout$);
-    this.httpServer = new HttpServer(logger, 'Kibana', shutdownTimeout$);
+    this.prebootServer = new HttpServer(coreContext, 'Preboot', shutdownTimeout$);
+    this.httpServer = new HttpServer(coreContext, 'Kibana', shutdownTimeout$);
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
@@ -132,7 +146,10 @@ export class HttpService
           path,
           this.log,
           prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId),
-          { isDev: this.env.mode.dev, versionedRouteResolution: config.versioned.versionResolution }
+          {
+            isDev: this.env.mode.dev,
+            versionedRouterOptions: getVersionedRouterOptions(config),
+          }
         );
 
         registerCallback(router);
@@ -145,7 +162,7 @@ export class HttpService
     return this.internalPreboot;
   }
 
-  public async setup(deps: SetupDeps) {
+  public async setup(deps: SetupDeps): Promise<InternalHttpServiceSetup> {
     this.requestHandlerContext = deps.context.createContextContainer();
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
@@ -168,9 +185,11 @@ export class HttpService
 
     this.internalSetup = {
       ...serverContract,
-
+      registerOnPostValidation: (cb) => {
+        Router.on('onPostValidate', cb);
+      },
+      getRegisteredDeprecatedApis: () => serverContract.getDeprecatedRoutes(),
       externalUrl: new ExternalUrlConfig(config.externalUrl),
-
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
         pluginId: PluginOpaqueId = this.coreContext.coreId
@@ -178,7 +197,8 @@ export class HttpService
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
         const router = new Router<Context>(path, this.log, enhanceHandler, {
           isDev: this.env.mode.dev,
-          versionedRouteResolution: config.versioned.versionResolution,
+          versionedRouterOptions: getVersionedRouterOptions(config),
+          pluginId,
         });
         registerRouter(router);
         return router;
@@ -219,10 +239,94 @@ export class HttpService
         await this.httpsRedirectServer.start(config);
       }
 
+      if (config.oas.enabled) {
+        this.log.info('Registering experimental OAS API');
+        this.registerOasApi(config);
+      }
+
       await this.httpServer.start();
     }
 
     return this.getStartContract();
+  }
+
+  private registerOasApi(config: HttpConfig) {
+    const basePath = this.internalSetup?.basePath;
+    const server = this.internalSetup?.server;
+    if (!basePath || !server) {
+      throw new Error('Cannot register OAS API before server setup is complete');
+    }
+
+    const baseUrl =
+      basePath.publicBaseUrl ?? `http://localhost:${config.port}${basePath.serverBasePath}`;
+
+    const stringOrStringArraySchema = schema.oneOf([
+      schema.string(),
+      schema.arrayOf(schema.string()),
+    ]);
+    const querySchema = schema.object({
+      access: schema.maybe(schema.oneOf([schema.literal('public'), schema.literal('internal')])),
+      excludePathsMatching: schema.maybe(stringOrStringArraySchema),
+      pathStartsWith: schema.maybe(stringOrStringArraySchema),
+      pluginId: schema.maybe(schema.string()),
+      version: schema.maybe(schema.string()),
+    });
+
+    server.route({
+      path: '/api/oas',
+      method: 'GET',
+      handler: async (req, h) => {
+        let filters: GenerateOpenApiDocumentOptionsFilters;
+        let query: TypeOf<typeof querySchema>;
+        try {
+          query = querySchema.validate(req.query);
+          filters = {
+            ...query,
+            excludePathsMatching:
+              typeof query.excludePathsMatching === 'string'
+                ? [query.excludePathsMatching]
+                : query.excludePathsMatching,
+            pathStartsWith:
+              typeof query.pathStartsWith === 'string'
+                ? [query.pathStartsWith]
+                : query.pathStartsWith,
+          };
+        } catch (e) {
+          return h.response({ message: e.message }).code(400);
+        }
+        return await firstValueFrom(
+          of(1).pipe(
+            HttpService.generateOasSemaphore.acquire(),
+            mergeMap(async () => {
+              try {
+                // Potentially quite expensive
+                const result = generateOpenApiDocument(
+                  this.httpServer.getRouters({ pluginId: query.pluginId }),
+                  {
+                    baseUrl,
+                    title: 'Kibana HTTP APIs',
+                    version: '0.0.0', // TODO get a better version here
+                    filters,
+                  }
+                );
+                return h.response(result);
+              } catch (e) {
+                this.log.error(e);
+                return h.response({ message: e.message }).code(500);
+              }
+            })
+          )
+        );
+      },
+      options: {
+        app: { access: 'public' },
+        auth: false,
+        cache: {
+          privacy: 'public',
+          otherwise: 'must-revalidate',
+        },
+      },
+    });
   }
 
   /**
@@ -247,4 +351,12 @@ export class HttpService
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
   }
+}
+
+function getVersionedRouterOptions(config: HttpConfig): RouterOptions['versionedRouterOptions'] {
+  return {
+    defaultHandlerResolutionStrategy: config.versioned.versionResolution,
+    useVersionResolutionStrategyForInternalPaths:
+      config.versioned.useVersionResolutionStrategyForInternalPaths,
+  };
 }

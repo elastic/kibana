@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import 'jest-canvas-mock';
@@ -113,14 +114,12 @@ describe('lens_attributes_builder', () => {
         formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
+
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer: {
@@ -156,13 +155,10 @@ describe('lens_attributes_builder', () => {
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer: {
@@ -215,13 +211,10 @@ describe('lens_attributes_builder', () => {
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer_0: {
@@ -272,13 +265,10 @@ describe('lens_attributes_builder', () => {
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer_0: {
@@ -340,13 +330,10 @@ describe('lens_attributes_builder', () => {
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer_0: {

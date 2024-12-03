@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 
 import { EuiForm } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { CalloutMessage, ValidateAnalyticsJobResponse } from '@kbn/ml-validators';
+import { VALIDATION_STATUS } from '@kbn/ml-validators';
 
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { ValidationStep } from './validation_step';
 import { ValidationStepDetails } from './validation_step_details';
 import { ANALYTICS_STEPS } from '../../page';
-import { useMlApiContext } from '../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../contexts/kibana';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import {
-  CalloutMessage,
-  ValidateAnalyticsJobResponse,
-  VALIDATION_STATUS,
-} from '../../../../../../../common/constants/validation';
 
 export interface ValidationSummary {
   warning: number;
@@ -52,7 +50,7 @@ export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
   const showDetails = step !== ANALYTICS_STEPS.VALIDATION && stepActivated === true;
   const {
     dataFrameAnalytics: { validateDataFrameAnalytics },
-  } = useMlApiContext();
+  } = useMlApi();
 
   const dataTestSubj = `mlAnalyticsCreateJobWizardValidationStepWrapper${
     showValidationStep ? ' active' : ''

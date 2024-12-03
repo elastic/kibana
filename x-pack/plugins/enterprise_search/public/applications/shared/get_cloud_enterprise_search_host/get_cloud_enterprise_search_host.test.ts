@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+
 import { getCloudEnterpriseSearchHost } from './get_cloud_enterprise_search_host';
 
 const defaultPortCloud = {
@@ -15,11 +17,13 @@ const defaultPortCloud = {
   cloudHost: 'us-central1.gcp.cloud.es.io',
   cloudDefaultPort: '443',
   registerCloudService: jest.fn(),
+  onboarding: {},
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
   },
-};
+  fetchElasticsearchConfig: jest.fn(),
+} as CloudSetup;
 // 9243
 const customPortCloud = {
   cloudId:
@@ -29,30 +33,36 @@ const customPortCloud = {
   cloudHost: 'us-central1.gcp.cloud.es.io',
   cloudDefaultPort: '9243',
   registerCloudService: jest.fn(),
+  onboarding: {},
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
   },
-};
+  fetchElasticsearchConfig: jest.fn(),
+} as CloudSetup;
 const missingDeploymentIdCloud = {
   cloudId:
     'dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvOjkyNDMkYWMzMWViYjkwMjQxNzczMTU3MDQzYzM0ZmQyNmZkNDYkYTRjMDYyMzBlNDhjOGZjZTdiZTg4YTA3NGEzYmIzZTA=',
   isCloudEnabled: true,
   registerCloudService: jest.fn(),
+  onboarding: {},
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
   },
-};
+  fetchElasticsearchConfig: jest.fn(),
+} as CloudSetup;
 const noCloud = {
   cloudId: undefined,
   isCloudEnabled: false,
   registerCloudService: jest.fn(),
+  onboarding: {},
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
   },
-};
+  fetchElasticsearchConfig: jest.fn(),
+} as CloudSetup;
 
 describe('getCloudEnterpriseSearchHost', () => {
   it('uses the default port', () => {

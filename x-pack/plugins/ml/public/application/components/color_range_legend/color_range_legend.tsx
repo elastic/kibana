@@ -5,12 +5,37 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { css } from '@emotion/react';
 import d3 from 'd3';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
+import { euiThemeVars } from '@kbn/ui-theme';
+
 const COLOR_RANGE_RESOLUTION = 10;
+
+// Overrides for d3/svg default styles
+const cssOverride = css({
+  // Override default font size and color for axis
+  text: {
+    fontSize: `calc(${euiThemeVars.euiFontSizeXS} - 2px)`,
+    fill: euiThemeVars.euiColorDarkShade,
+  },
+  // Override default styles for axis lines
+  '.axis': {
+    path: {
+      fill: 'none',
+      stroke: 'none',
+    },
+    line: {
+      fill: 'none',
+      stroke: euiThemeVars.euiColorMediumShade,
+      shapeRendering: 'crispEdges',
+    },
+  },
+});
 
 interface ColorRangeLegendProps {
   colorRange: (d: number) => string;
@@ -64,7 +89,6 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
 
     const wrapper = d3
       .select(d3Container.current)
-      .classed('mlColorRangeLegend', true)
       .attr('width', wrapperWidth)
       .attr('height', wrapperHeight)
       .append('g')
@@ -143,7 +167,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <svg ref={d3Container} />
+        <svg ref={d3Container} css={cssOverride} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

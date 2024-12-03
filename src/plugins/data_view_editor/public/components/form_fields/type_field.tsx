@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { UseField } from '../../shared_imports';
 
 import { IndexPatternConfig } from '../../types';
@@ -30,7 +32,7 @@ interface TypeFieldProps {
 }
 
 const standardSelectItem = (
-  <EuiDescriptionList style={{ whiteSpace: 'nowrap' }} data-test-subj="standardType">
+  <EuiDescriptionList css={{ whiteSpace: 'nowrap' }} data-test-subj="standardType">
     <EuiDescriptionListTitle>
       <FormattedMessage
         id="indexPatternEditor.typeSelect.standardTitle"
@@ -47,7 +49,7 @@ const standardSelectItem = (
 );
 
 const rollupSelectItem = (
-  <EuiDescriptionList style={{ whiteSpace: 'nowrap' }} data-test-subj="rollupType">
+  <EuiDescriptionList css={{ whiteSpace: 'nowrap' }} data-test-subj="rollupType">
     <EuiDescriptionListTitle>
       <FormattedMessage
         id="indexPatternEditor.typeSelect.rollupTitle"
@@ -57,6 +59,15 @@ const rollupSelectItem = (
       <EuiBadge color={euiLightVars.euiColorAccent}>
         <FormattedMessage id="indexPatternEditor.typeSelect.betaLabel" defaultMessage="Beta" />
       </EuiBadge>
+      &nbsp;
+      <RollupDeprecationTooltip>
+        <EuiBadge color="warning">
+          <FormattedMessage
+            id="indexPatternEditor.typeSelect.deprecatedBadge"
+            defaultMessage="Deprecated"
+          />
+        </EuiBadge>
+      </RollupDeprecationTooltip>
     </EuiDescriptionListTitle>
     <EuiDescriptionListDescription>
       <FormattedMessage
@@ -90,7 +101,7 @@ export const TypeField = ({ onChange }: TypeFieldProps) => {
                   {
                     value: INDEX_PATTERN_TYPE.ROLLUP,
                     inputDisplay: i18n.translate('indexPatternEditor.typeSelect.rollup', {
-                      defaultMessage: 'Rollup',
+                      defaultMessage: 'Rollup (deprecated)',
                     }),
                     dropdownDisplay: rollupSelectItem,
                   },

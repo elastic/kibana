@@ -1,0 +1,505 @@
+{
+  "id": "@kbn/visualization-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.getDatasourceId",
+        "type": "Function",
+        "tags": [],
+        "label": "getDatasourceId",
+        "description": [],
+        "signature": [
+          "(datasourceStates: Record<string, unknown>) => \"formBased\" | \"textBased\" | undefined"
+        ],
+        "path": "packages/kbn-visualization-utils/src/get_datasource_id.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.getDatasourceId.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "datasourceStates",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "packages/kbn-visualization-utils/src/get_datasource_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.getLensAttributesFromSuggestion",
+        "type": "Function",
+        "tags": [],
+        "label": "getLensAttributesFromSuggestion",
+        "description": [],
+        "signature": [
+          "({ filters, query, suggestion, dataView, }: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; suggestion: ",
+          "Suggestion",
+          "<unknown, unknown> | undefined; dataView?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined; }) => { references: { name: string; id: string; type: string; }[]; visualizationType: string; state: { visualization: {}; datasourceStates: Record<string, unknown>; query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; }; title: string; }"
+        ],
+        "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.getLensAttributesFromSuggestion.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  filters,\n  query,\n  suggestion,\n  dataView,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.getLensAttributesFromSuggestion.$1.filters",
+                "type": "Array",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.getLensAttributesFromSuggestion.$1.query",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.AggregateQuery",
+                    "text": "AggregateQuery"
+                  }
+                ],
+                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.getLensAttributesFromSuggestion.$1.suggestion",
+                "type": "Object",
+                "tags": [],
+                "label": "suggestion",
+                "description": [],
+                "signature": [
+                  "Suggestion",
+                  "<unknown, unknown> | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.getLensAttributesFromSuggestion.$1.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.getTimeZone",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeZone",
+        "description": [
+          "\nGet timeZone from uiSettings"
+        ],
+        "signature": [
+          "(uiSettings: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-public.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-visualization-utils/src/get_timezone.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.getTimeZone.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-public.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/kbn-visualization-utils/src/get_timezone.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.mapVisToChartType",
+        "type": "Function",
+        "tags": [],
+        "label": "mapVisToChartType",
+        "description": [],
+        "signature": [
+          "(visualizationType: string) => ",
+          {
+            "pluginId": "@kbn/visualization-utils",
+            "scope": "common",
+            "docId": "kibKbnVisualizationUtilsPluginApi",
+            "section": "def-common.ChartType",
+            "text": "ChartType"
+          },
+          " | undefined"
+        ],
+        "path": "packages/kbn-visualization-utils/src/map_vis_to_chart_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.mapVisToChartType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "visualizationType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-visualization-utils/src/map_vis_to_chart_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.TooltipWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "TooltipWrapper",
+        "description": [],
+        "signature": [
+          "({ children, condition, tooltipContent, ...tooltipProps }: TooltipWrapperProps) => React.JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-utils/src/tooltip_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.TooltipWrapper.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  condition,\n  tooltipContent,\n  ...tooltipProps\n}",
+            "description": [],
+            "signature": [
+              "TooltipWrapperProps"
+            ],
+            "path": "packages/kbn-visualization-utils/src/tooltip_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.useDebouncedValue",
+        "type": "Function",
+        "tags": [],
+        "label": "useDebouncedValue",
+        "description": [
+          "\nDebounces value changes and updates inputValue on root state changes if no debounced changes\nare in flight because the user is currently modifying the value.\n\n* allowFalsyValue: update upstream with all falsy values but null or undefined\n* wait: debounce timeout"
+        ],
+        "signature": [
+          "<T>({ onChange, value, defaultValue, }: { onChange: (val: T) => void; value: T; defaultValue?: T | undefined; }, { allowFalsyValue, wait }?: { allowFalsyValue?: boolean | undefined; wait?: number | undefined; }) => { inputValue: T; handleInputChange: (val: T) => void; initialValue: T; }"
+        ],
+        "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.useDebouncedValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    onChange,\n    value,\n    defaultValue,\n  }",
+            "description": [],
+            "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(val: T) => void"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-utils",
+                    "id": "def-common.useDebouncedValue.$1.onChange.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "val",
+                    "description": [],
+                    "signature": [
+                      "T"
+                    ],
+                    "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$1.value",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$1.defaultValue",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "defaultValue",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.useDebouncedValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ allowFalsyValue, wait = DEFAULT_TIMEOUT }",
+            "description": [],
+            "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$2.allowFalsyValue",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "allowFalsyValue",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$2.wait",
+                "type": "number",
+                "tags": [],
+                "label": "wait",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.ChartType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ChartType",
+        "description": [],
+        "path": "packages/kbn-visualization-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

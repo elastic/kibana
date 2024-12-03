@@ -6,7 +6,6 @@
  */
 
 export const KIBANA_HOME = '/app/home#/';
-export const KIBANA_SAVED_OBJECTS = '/app/management/kibana/objects';
 export const LOGOUT_URL = '/logout';
 
 // Common
@@ -18,18 +17,19 @@ export const ASSETS_URL = '/app/security/assets';
 export const ENDPOINTS_URL = '/app/security/administration/endpoints';
 export const CLOUD_DEFEND_URL = '/app/security/cloud_defend';
 export const POLICIES_URL = '/app/security/administration/policy';
-export const USERS_URL = '/app/security/users/allUsers';
 export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';
 export const CSP_BENCHMARKS_URL = '/app/security/cloud_security_posture/benchmarks';
 export const CSP_DASHBOARD_URL = '/app/security/cloud_security_posture/dashboard';
-export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/vulnerabilities';
+export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/configurations';
 
 export const RULES_LANDING_URL = '/app/security/rules/landing';
 export const RULES_COVERAGE_URL = '/app/security/rules_coverage_overview';
 
-export const NETWORK_URL = '/app/security/network/flows';
+export const HOSTS_URL = '/app/security/hosts/events';
+export const USERS_URL = '/app/security/users/events';
+export const NETWORK_URL = '/app/security/network/events';
 export const OVERVIEW_URL = '/app/security/overview';
 
 export const ENTITY_ANALYTICS_URL = '/app/security/entity_analytics';
@@ -47,6 +47,11 @@ export const CASES_URL = '/app/security/cases';
 
 export const hostsUrl = (tab: 'allHosts' | 'anomalies' | 'events' | 'uncommonProcesses'): string =>
   `/app/security/hosts/${tab}`;
+export const networkUrl = (
+  tab: 'flows' | 'anomalies' | 'events' | 'dns' | 'http' | 'tls'
+): string => `/app/security/network/${tab}`;
+export const usersUrl = (tab: 'allUsers' | 'anomalies' | 'events' | 'authentications'): string =>
+  `/app/security/users/${tab}`;
 
 export const DISCOVER_WITH_FILTER_URL =
   "/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now%2Fd,to:now%2Fd))&_a=(columns:!(),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:security-solution-default,key:host.name,negate:!f,params:(query:test-host),type:phrase),query:(match_phrase:(host.name:test-host)))),index:security-solution-default,interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))";
@@ -64,6 +69,8 @@ export const ALERTS_URL = '/app/security/alerts';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
 export const CREATE_RULE_URL = '/app/security/rules/create';
 export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_management';
+export const ENTITY_ANALYTICS_ASSET_CRITICALITY_URL =
+  '/app/security/entity_analytics_asset_criticality';
 
 export const exceptionsListDetailsUrl = (listId: string) =>
   `/app/security/exceptions/details/${listId}`;
@@ -72,3 +79,6 @@ export const exceptionsListDetailsUrl = (listId: string) =>
 export const DISCOVER_URL = '/app/discover';
 export const OSQUERY_URL = '/app/osquery';
 export const FLEET_URL = '/app/fleet';
+
+// Entity Analytics
+export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';

@@ -18,6 +18,7 @@ import { useStyles } from './styles';
 
 interface DetailPanelProcessTabDeps {
   selectedProcess: Process | null;
+  index: string;
 }
 
 type ListItems = Array<{
@@ -70,10 +71,13 @@ const LEADER_FIELD_PREFIX = [
 /**
  * Detail panel in the session view.
  */
-export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTabDeps) => {
+export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelProcessTabDeps) => {
   const styles = useStyles();
 
-  const processDetail = useMemo(() => getDetailPanelProcess(selectedProcess), [selectedProcess]);
+  const processDetail = useMemo(
+    () => getDetailPanelProcess(selectedProcess, index),
+    [selectedProcess, index]
+  );
   const renderExecs = useCallback(
     (executable: string[][]) =>
       executable.map((execTuple, idx) => {

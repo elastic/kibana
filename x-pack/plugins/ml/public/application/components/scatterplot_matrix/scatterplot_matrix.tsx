@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -24,8 +26,8 @@ import {
 
 import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
-import { Query } from '@kbn/data-plugin/common/query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { Query } from '@kbn/data-plugin/common/query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
@@ -34,8 +36,9 @@ import {
   type RuntimeMappings,
 } from '@kbn/ml-runtime-field-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
+import { euiThemeVars } from '@kbn/ui-theme';
 
-import { useCurrentThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
+import { useCurrentThemeVars, useMlApi, useMlKibana } from '../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../vega_chart';
@@ -47,7 +50,17 @@ import {
   OUTLIER_SCORE_FIELD,
 } from './scatterplot_matrix_vega_lite_spec';
 
-import './scatterplot_matrix.scss';
+const cssOverrides = css({
+  // Prevent the chart from overflowing the container
+  overflowX: 'auto',
+  // Overrides for the outlier threshold slider
+  '.vega-bind': {
+    span: {
+      fontSize: euiThemeVars.euiFontSizeXS,
+      padding: `0 ${euiThemeVars.euiSizeXS}`,
+    },
+  },
+});
 
 const SCATTERPLOT_MATRIX_DEFAULT_FIELDS = 4;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_SIZE = 1000;
@@ -116,7 +129,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   dataView,
   query,
 }) => {
-  const { esSearch } = useMlApiContext();
+  const { esSearch } = useMlApi();
   const kibana = useMlKibana();
   const {
     services: { application, data },
@@ -412,7 +425,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       ) : (
         <div
           data-test-subj={`mlScatterplotMatrix ${isLoading ? 'loading' : 'loaded'}`}
-          className="mlScatterplotMatrix"
+          css={cssOverrides}
         >
           <EuiFlexGroup>
             <EuiFlexItem>

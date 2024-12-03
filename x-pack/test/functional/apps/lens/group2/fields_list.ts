@@ -9,54 +9,60 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const { visualize, lens, timePicker, header } = getPageObjects([
+    'visualize',
+    'lens',
+    'timePicker',
+    'header',
+  ]);
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
+  const es = getService('es');
+  const queryBar = getService('queryBar');
+  const dataViews = getService('dataViews');
 
   describe('lens fields list tests', () => {
     for (const datasourceType of ['form-based', 'ad-hoc', 'ad-hoc-no-timefield']) {
       describe(`${datasourceType} datasource`, () => {
         before(async () => {
-          await PageObjects.visualize.navigateToNewVisualization();
-          await PageObjects.visualize.clickVisType('lens');
+          await visualize.navigateToNewVisualization();
+          await visualize.clickVisType('lens');
 
           if (datasourceType !== 'form-based') {
-            await PageObjects.lens.createAdHocDataView(
-              '*stash*',
-              datasourceType !== 'ad-hoc-no-timefield'
-            );
-            retry.try(async () => {
-              const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-              expect(selectedPattern).to.eql('*stash*');
+            await dataViews.createFromSearchBar({
+              name: '*stash*',
+              adHoc: true,
+              hasTimeField: datasourceType !== 'ad-hoc-no-timefield',
             });
+            await dataViews.waitForSwitcherToBe('*stash*');
           }
 
           if (datasourceType !== 'ad-hoc-no-timefield') {
-            await PageObjects.lens.goToTimeRange();
+            await lens.goToTimeRange();
           }
 
           await retry.try(async () => {
-            await PageObjects.lens.clickAddField();
+            await dataViews.clickAddFieldFromSearchBar();
             await fieldEditor.setName('runtime_string');
             await fieldEditor.enableValue();
             await fieldEditor.typeScript("emit('abc')");
             await fieldEditor.save();
-            await PageObjects.header.waitUntilLoadingHasFinished();
+            await header.waitUntilLoadingHasFinished();
+            await testSubjects.missingOrFail('fieldEditor');
           });
         });
-
         it('should show all fields as available', async () => {
           expect(
             await (await testSubjects.find('lnsIndexPatternAvailableFields-count')).getVisibleText()
-          ).to.eql(53);
+          ).to.eql(50);
         });
 
         it('should show a histogram and top values popover for numeric field', async () => {
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('number');
+          const [fieldId] = await lens.findFieldIdsByType('number');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
@@ -78,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show a top values popover for a keyword field', async () => {
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('keyword');
+          const [fieldId] = await lens.findFieldIdsByType('keyword');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
@@ -98,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show a date histogram popover for a date field', async () => {
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('date');
+          const [fieldId] = await lens.findFieldIdsByType('date');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
@@ -114,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show examples for geo points field', async () => {
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('geo_point');
+          const [fieldId] = await lens.findFieldIdsByType('geo_point');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for top values chart
@@ -124,9 +130,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show stats for a numeric runtime field', async () => {
-          await PageObjects.lens.searchField('runtime');
-          await PageObjects.lens.waitForField('runtime_number');
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('number');
+          await lens.searchField('runtime');
+          await lens.waitForMissingField('Records');
+          await lens.waitForField('runtime_number');
+          const [fieldId] = await lens.findFieldIdsByType('number');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
@@ -149,9 +156,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show stats for a keyword runtime field', async () => {
-          await PageObjects.lens.searchField('runtime');
-          await PageObjects.lens.waitForField('runtime_string');
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('keyword');
+          await lens.searchField('runtime');
+          await lens.waitForField('runtime_string');
+          const [fieldId] = await lens.findFieldIdsByType('keyword');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
@@ -164,12 +171,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               '[data-test-subj="lnsFieldListPanelFieldContent"] .echChart'
             )
           ).to.eql(false);
-          await PageObjects.lens.searchField('');
+          await lens.searchField('');
         });
 
         it('should change popover content if user defines a filter that affects field values', async () => {
           // check the current records count for stats
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('keyword');
+          const [fieldId] = await lens.findFieldIdsByType('keyword');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           const valuesCount = parseInt(
@@ -198,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await filterBar.removeAllFilters();
           await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '-1' });
           // check via popup fields have no data
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('keyword');
+          const [fieldId] = await lens.findFieldIdsByType('keyword');
           await log.debug(`Opening field stats for ${fieldId}`);
           await retry.try(async () => {
             await testSubjects.click(fieldId);
@@ -213,10 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // remove the filter
             await filterBar.removeAllFilters();
             // tweak the time range to 17 Sept 2015 to 18 Sept 2015
-            await PageObjects.lens.goToTimeRange(
-              'Sep 17, 2015 @ 06:31:44.000',
-              'Sep 18, 2015 @ 06:31:44.000'
-            );
+            await lens.goToTimeRange('Sep 17, 2015 @ 06:31:44.000', 'Sep 18, 2015 @ 06:31:44.000');
             // check all fields are empty now
             expect(
               await (await testSubjects.find('lnsIndexPatternEmptyFields-count')).getVisibleText()
@@ -231,5 +235,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       });
     }
+
+    describe(`update field list test`, () => {
+      before(async () => {
+        await es.transport.request({
+          path: '/field-update-test/_doc',
+          method: 'POST',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            oldField: 10,
+          },
+        });
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
+        await timePicker.setCommonlyUsedTime('This_week');
+
+        await dataViews.createFromSearchBar({
+          name: 'field-update-test',
+          adHoc: true,
+          hasTimeField: true,
+        });
+        await dataViews.waitForSwitcherToBe('field-update-test*');
+      });
+      after(async () => {
+        await es.transport.request({
+          path: '/field-update-test',
+          method: 'DELETE',
+        });
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      });
+
+      it('should show new fields Available fields', async () => {
+        await es.transport.request({
+          path: '/field-update-test/_doc?refresh=true',
+          method: 'POST',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            oldField: 20,
+            newField: 20,
+          },
+        });
+
+        await lens.waitForField('oldField');
+        await queryBar.setQuery('oldField: 20');
+        await queryBar.submitQuery();
+        await header.waitUntilLoadingHasFinished();
+        await lens.waitForField('newField');
+      });
+    });
   });
 }

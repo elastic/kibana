@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import { useEffect, useMemo, useState } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
@@ -28,15 +28,15 @@ import {
   INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 
-import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
+import type { PreviewMappingsProperties } from '../../../server/routes/api_schemas/transforms';
 
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { getPreviewTransformRequestBody, type TransformConfigQuery } from '../common';
 
-import { SearchItems } from './use_search_items';
+import type { SearchItems } from './use_search_items';
 import { useGetTransformsPreview } from './use_get_transforms_preview';
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import {
   isLatestPartialRequest,
   isPivotPartialRequest,
@@ -270,7 +270,7 @@ export const useTransformConfigData = (
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-      const cellValue = pageData.hasOwnProperty(adjustedRowIndex)
+      const cellValue = Object.hasOwn(pageData, adjustedRowIndex)
         ? pageData[adjustedRowIndex][columnId] ?? null
         : null;
 

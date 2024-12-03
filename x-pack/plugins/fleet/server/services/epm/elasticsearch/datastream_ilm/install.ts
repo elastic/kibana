@@ -6,18 +6,20 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import pMap from 'p-map';
 
-import { ElasticsearchAssetType } from '../../../../../common/types/models';
-import type {
-  EsAssetReference,
-  InstallablePackage,
-  RegistryDataStream,
+import {
+  ElasticsearchAssetType,
+  type PackageInstallContext,
 } from '../../../../../common/types/models';
-import { updateEsAssetReferences } from '../../packages/install';
-import { getAsset } from '../transform/common';
+import type { EsAssetReference, RegistryDataStream } from '../../../../../common/types/models';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
+import { getAssetFromAssetsMap } from '../../archive';
 
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+
+import { MAX_CONCURRENT_DATASTREAMS_ILM_OPERATIONS } from '../../../../constants';
 
 import { deleteIlms } from './remove';
 
@@ -32,13 +34,13 @@ interface IlmPathDataset {
 }
 
 export const installIlmForDataStream = async (
-  registryPackage: InstallablePackage,
-  paths: string[],
+  packageInstallContext: PackageInstallContext,
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
   esReferences: EsAssetReference[]
 ) => {
+  const { packageInfo: registryPackage, paths, assetsMap } = packageInstallContext;
   const previousInstalledIlmEsAssets = esReferences.filter(
     ({ type }) => type === ElasticsearchAssetType.dataStreamIlmPolicy
   );
@@ -100,7 +102,9 @@ export const installIlmForDataStream = async (
 
     const ilmInstallations: IlmInstallation[] = ilmPathDatasets.map(
       (ilmPathDataset: IlmPathDataset) => {
-        const content = JSON.parse(getAsset(ilmPathDataset.path).toString('utf-8'));
+        const content = JSON.parse(
+          getAssetFromAssetsMap(assetsMap, ilmPathDataset.path).toString('utf-8')
+        );
         content.policy._meta = getESAssetMetadata({ packageName: registryPackage.name });
 
         return {
@@ -110,11 +114,15 @@ export const installIlmForDataStream = async (
       }
     );
 
-    const installationPromises = ilmInstallations.map(async (ilmInstallation) => {
-      return handleIlmInstall({ esClient, ilmInstallation, logger });
-    });
-
-    installedIlms = await Promise.all(installationPromises).then((results) => results.flat());
+    installedIlms = await pMap(
+      ilmInstallations,
+      async (ilmInstallation) => {
+        return handleIlmInstall({ esClient, ilmInstallation, logger });
+      },
+      {
+        concurrency: MAX_CONCURRENT_DATASTREAMS_ILM_OPERATIONS,
+      }
+    ).then((results) => results.flat());
   }
 
   return { installedIlms, esReferences };

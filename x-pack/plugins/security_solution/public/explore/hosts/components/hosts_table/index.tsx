@@ -9,11 +9,13 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
 import type {
   Columns,
   Criteria,
   ItemsPerRow,
+  SiemTables,
   SortingBasicTable,
 } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
@@ -53,7 +55,8 @@ export type HostsTableColumns = [
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,
-  Columns<RiskSeverity>?
+  Columns<RiskSeverity>?,
+  Columns<CriticalityLevelWithUnassigned>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -90,7 +93,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     getHostsSelector(state, type)
   );
 
-  const updateLimitPagination = useCallback(
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) =>
       dispatch(
         hostsActions.updateTableLimit({
@@ -102,7 +105,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
     (newPage) =>
       dispatch(
         hostsActions.updateTableActivePage({
@@ -161,7 +164,6 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       ),
     [dispatchSeverityUpdate, isPlatinumOrTrialLicense, hasEntityAnalyticsCapability]
   );
-
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 
   return (

@@ -1,26 +1,10 @@
 {
   "id": "@kbn/shared-ux-card-no-data-mocks",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-        "id": "def-common.StorybookMock",
+        "id": "def-public.StorybookMock",
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
@@ -30,9 +14,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-            "section": "def-common.StorybookMock",
+            "section": "def-public.StorybookMock",
             "text": "StorybookMock"
           },
           " extends ",
@@ -55,7 +39,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "id": "def-common.StorybookMock.propArguments",
+            "id": "def-public.StorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
@@ -66,7 +50,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "id": "def-common.StorybookMock.propArguments.category",
+                "id": "def-public.StorybookMock.propArguments.category",
                 "type": "Object",
                 "tags": [],
                 "label": "category",
@@ -77,7 +61,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.propArguments.category.control",
+                    "id": "def-public.StorybookMock.propArguments.category.control",
                     "type": "Object",
                     "tags": [],
                     "label": "control",
@@ -88,7 +72,7 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-common.StorybookMock.propArguments.category.control.type",
+                        "id": "def-public.StorybookMock.propArguments.category.control.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -101,7 +85,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.propArguments.category.defaultValue",
+                    "id": "def-public.StorybookMock.propArguments.category.defaultValue",
                     "type": "string",
                     "tags": [],
                     "label": "defaultValue",
@@ -114,7 +98,7 @@
               },
               {
                 "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "id": "def-common.StorybookMock.propArguments.title",
+                "id": "def-public.StorybookMock.propArguments.title",
                 "type": "Object",
                 "tags": [],
                 "label": "title",
@@ -125,7 +109,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.propArguments.title.control",
+                    "id": "def-public.StorybookMock.propArguments.title.control",
                     "type": "Object",
                     "tags": [],
                     "label": "control",
@@ -136,7 +120,7 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-common.StorybookMock.propArguments.title.control.type",
+                        "id": "def-public.StorybookMock.propArguments.title.control.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -149,7 +133,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.propArguments.title.defaultValue",
+                    "id": "def-public.StorybookMock.propArguments.title.defaultValue",
                     "type": "string",
                     "tags": [],
                     "label": "defaultValue",
@@ -162,7 +146,7 @@
               },
               {
                 "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "id": "def-common.StorybookMock.propArguments.description",
+                "id": "def-public.StorybookMock.propArguments.description",
                 "type": "Object",
                 "tags": [],
                 "label": "description",
@@ -173,7 +157,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.propArguments.description.control",
+                    "id": "def-public.StorybookMock.propArguments.description.control",
                     "type": "Object",
                     "tags": [],
                     "label": "control",
@@ -184,7 +168,7 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-common.StorybookMock.propArguments.description.control.type",
+                        "id": "def-public.StorybookMock.propArguments.description.control.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -197,7 +181,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.propArguments.description.defaultValue",
+                    "id": "def-public.StorybookMock.propArguments.description.defaultValue",
                     "type": "string",
                     "tags": [],
                     "label": "defaultValue",
@@ -210,7 +194,7 @@
               },
               {
                 "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "id": "def-common.StorybookMock.propArguments.button",
+                "id": "def-public.StorybookMock.propArguments.button",
                 "type": "Object",
                 "tags": [],
                 "label": "button",
@@ -221,7 +205,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.propArguments.button.control",
+                    "id": "def-public.StorybookMock.propArguments.button.control",
                     "type": "Object",
                     "tags": [],
                     "label": "control",
@@ -232,7 +216,7 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-common.StorybookMock.propArguments.button.control.type",
+                        "id": "def-public.StorybookMock.propArguments.button.control.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -245,7 +229,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.propArguments.button.defaultValue",
+                    "id": "def-public.StorybookMock.propArguments.button.defaultValue",
                     "type": "string",
                     "tags": [],
                     "label": "defaultValue",
@@ -260,7 +244,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "id": "def-common.StorybookMock.serviceArguments",
+            "id": "def-public.StorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
@@ -271,7 +255,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "id": "def-common.StorybookMock.serviceArguments.canAccessFleet",
+                "id": "def-public.StorybookMock.serviceArguments.canAccessFleet",
                 "type": "Object",
                 "tags": [],
                 "label": "canAccessFleet",
@@ -282,7 +266,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.serviceArguments.canAccessFleet.control",
+                    "id": "def-public.StorybookMock.serviceArguments.canAccessFleet.control",
                     "type": "string",
                     "tags": [],
                     "label": "control",
@@ -293,7 +277,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "id": "def-common.StorybookMock.serviceArguments.canAccessFleet.defaultValue",
+                    "id": "def-public.StorybookMock.serviceArguments.canAccessFleet.defaultValue",
                     "type": "boolean",
                     "tags": [],
                     "label": "defaultValue",
@@ -308,7 +292,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "id": "def-common.StorybookMock.dependencies",
+            "id": "def-public.StorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -329,7 +313,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "id": "def-common.StorybookMock.getProps",
+            "id": "def-public.StorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -338,9 +322,9 @@
               "(params?: ",
               {
                 "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               " | undefined) => ",
@@ -352,7 +336,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "id": "def-common.StorybookMock.getProps.$1",
+                "id": "def-public.StorybookMock.getProps.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -360,9 +344,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   },
                   " | undefined"
@@ -377,7 +361,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "id": "def-common.StorybookMock.getServices",
+            "id": "def-public.StorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -386,9 +370,9 @@
               "(params: ",
               {
                 "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               ") => ",
@@ -400,7 +384,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "id": "def-common.StorybookMock.getServices.$1",
+                "id": "def-public.StorybookMock.getServices.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -408,9 +392,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   }
                 ],
@@ -429,7 +413,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-        "id": "def-common.getKibanaDependenciesMock",
+        "id": "def-public.getKibanaDependenciesMock",
         "type": "Function",
         "tags": [],
         "label": "getKibanaDependenciesMock",
@@ -448,7 +432,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "id": "def-common.getKibanaDependenciesMock.$1",
+            "id": "def-public.getKibanaDependenciesMock.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -469,7 +453,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-        "id": "def-common.getServicesMock",
+        "id": "def-public.getServicesMock",
         "type": "Function",
         "tags": [],
         "label": "getServicesMock",
@@ -488,7 +472,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "id": "def-common.getServicesMock.$1",
+            "id": "def-public.getServicesMock.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -513,7 +497,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-        "id": "def-common.Params",
+        "id": "def-public.Params",
         "type": "Type",
         "tags": [],
         "label": "Params",
@@ -521,7 +505,7 @@
           "\nStorybook parameters provided from the controls addon."
         ],
         "signature": [
-          "{ description: any; category: any; title: any; button: any; canAccessFleet: any; }"
+          "{ title: any; description: any; category: any; button: any; canAccessFleet: any; }"
         ],
         "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
         "deprecated": false,
@@ -529,6 +513,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

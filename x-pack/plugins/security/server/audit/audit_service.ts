@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map } from 'rxjs/operators';
+import { distinctUntilKeyChanged, map } from 'rxjs';
 
 import type {
   HttpServiceSetup,
@@ -14,79 +14,18 @@ import type {
   LoggerContextConfigInput,
   LoggingServiceSetup,
 } from '@kbn/core/server';
+import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
-import type { AuditEvent } from './audit_events';
 import { httpRequestEvent } from './audit_events';
-import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
 
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 
-export interface AuditLogger {
-  /**
-   * Logs an {@link AuditEvent} and automatically adds meta data about the
-   * current user, space and correlation id.
-   *
-   * Guidelines around what events should be logged and how they should be
-   * structured can be found in: `/x-pack/plugins/security/README.md`
-   *
-   * @example
-   * ```typescript
-   * const auditLogger = securitySetup.audit.asScoped(request);
-   * auditLogger.log({
-   *   message: 'User is updating dashboard [id=123]',
-   *   event: {
-   *     action: 'saved_object_update',
-   *     outcome: 'unknown'
-   *   },
-   *   kibana: {
-   *     saved_object: { type: 'dashboard', id: '123' }
-   *   },
-   * });
-   * ```
-   */
-  log: (event: AuditEvent | undefined) => void;
-
-  /**
-   * Indicates whether audit logging is enabled or not.
-   *
-   * Useful for skipping resource-intense operations that don't need to be performed when audit
-   * logging is disabled.
-   */
-  readonly enabled: boolean;
-}
-
-export interface AuditServiceSetup {
-  /**
-   * Creates an {@link AuditLogger} scoped to the current request.
-   *
-   * This audit logger logs events with all required user and session info and should be used for
-   * all user-initiated actions.
-   *
-   * @example
-   * ```typescript
-   * const auditLogger = securitySetup.audit.asScoped(request);
-   * auditLogger.log(event);
-   * ```
-   */
-  asScoped: (request: KibanaRequest) => AuditLogger;
-
-  /**
-   * {@link AuditLogger} for background tasks only.
-   *
-   * This audit logger logs events without any user or session info and should never be used to log
-   * user-initiated actions.
-   *
-   * @example
-   * ```typescript
-   * securitySetup.audit.withoutRequest.log(event);
-   * ```
-   */
-  withoutRequest: AuditLogger;
-}
+const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
 
 interface AuditServiceSetupParams {
   license: SecurityLicense;
@@ -257,10 +196,13 @@ export function filterEvent(
     return !ignoreFilters.some(
       (rule) =>
         (!rule.actions || rule.actions.includes(event.event?.action!)) &&
-        (!rule.categories || event.event?.category?.every((c) => rule.categories?.includes(c))) &&
-        (!rule.types || event.event?.type?.every((t) => rule.types?.includes(t))) &&
+        (!rule.categories ||
+          normalize(event.event?.category)?.every((c) => rule.categories?.includes(c || ''))) &&
+        (!rule.types ||
+          normalize(event.event?.type)?.every((t) => rule.types?.includes(t || ''))) &&
         (!rule.outcomes || rule.outcomes.includes(event.event?.outcome!)) &&
-        (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!))
+        (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!)) &&
+        (!rule.users || !event.user?.name || rule.users.includes(event.user.name))
     );
   }
   return true;

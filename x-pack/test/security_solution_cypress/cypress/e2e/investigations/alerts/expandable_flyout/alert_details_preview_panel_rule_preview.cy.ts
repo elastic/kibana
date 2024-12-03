@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import {
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE,
   DOCUMENT_DETAILS_FLYOUT_CREATED_BY,
@@ -25,6 +25,7 @@ import {
   toggleRulePreviewScheduleSection,
 } from '../../../../tasks/expandable_flyout/alert_details_preview_panel_rule_preview';
 import { clickRuleSummaryButton } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -39,11 +40,12 @@ describe(
     const rule = getNewRule();
 
     beforeEach(() => {
+      deleteAlertsAndRules();
       login();
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
       clickRuleSummaryButton();
     });
 
@@ -118,7 +120,7 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).should('be.visible');
         cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER_LINK).should(
           'contain.text',
-          'Show rule details'
+          'Show full rule details'
         );
       });
     });

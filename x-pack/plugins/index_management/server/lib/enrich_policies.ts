@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import type { EnrichSummary } from '@elastic/elasticsearch/lib/api/types';
-import type { SerializedEnrichPolicy } from '../../common/types';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { getPolicyType } from '../../common/lib';
 
 export const serializeEnrichmentPolicies = (

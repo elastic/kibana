@@ -1,0 +1,46 @@
+- name: system
+  title: System
+  type: group
+  level: custom
+  description: "System-related information"
+  fields:
+    - name: cpu.cores
+      type: integer
+      level: custom
+      description: "Number of CPU cores"
+    - name: cpu.total.norm.pct
+      level: custom
+      type: float
+      description: "Percentage of CPU usage"
+    - name: cpu.user.pct
+      level: custom
+      type: float
+      description: "Percentage of CPU usage by user processes"
+    - name: cpu.system.pct
+      level: custom
+      type: float
+      description: "Percentage of CPU usage by system processes"
+    - name: load.1
+      level: custom
+      type: float
+      description: "Load 1m by system processes"
+    - name: memory.actual.used.pct
+      level: custom
+      type: float
+      description: "Percentage of actual memory by system processes"
+    - name: filesystem.used.pct
+      level: custom
+      type: float
+      description: "Percentage of filesytem used by system processes"
+    - name: network.name
+      type: keyword
+      level: custom
+      description: "Name of the network interface"
+    - name: network.in.bytes
+      level: custom
+      type: long
+      description: "Number of incoming bytes"
+    - name: network.out.bytes
+      level: custom
+      type: long
+      description: "Number of outgoing bytes"

@@ -10,13 +10,26 @@ import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import {
+  AVG_ID,
+  AVG_NAME,
+  MAX_ID,
+  MAX_NAME,
+  MEDIAN_ID,
+  MEDIAN_NAME,
+  MIN_ID,
+  MIN_NAME,
+  STD_DEVIATION_ID,
+  STD_DEVIATION_NAME,
+  SUM_ID,
+  SUM_NAME,
+} from '@kbn/lens-formula-docs';
 import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
-  combineErrorMessages,
   isColumnOfType,
 } from './helpers';
 import {
@@ -62,7 +75,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   supportsDate,
   hideZeroOption,
   aggConfigParams,
-  documentationDescription,
   quickFunctionDocumentation,
   unsupportedSettings,
 }: {
@@ -221,35 +233,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       );
     },
 
-    getErrorMessage: (layer, columnId, indexPattern) =>
-      combineErrorMessages([
-        getInvalidFieldMessage(layer, columnId, indexPattern),
-        getColumnReducedTimeRangeError(layer, columnId, indexPattern),
-      ]),
+    getErrorMessage: (layer, columnId, indexPattern) => [
+      ...getInvalidFieldMessage(layer, columnId, indexPattern),
+      ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
+    ],
     filterable: true,
     canReduceTimeRange: true,
-    documentation: {
-      section: 'elasticsearch',
-      signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {
-        defaultMessage: 'field: string',
-      }),
-      description:
-        documentationDescription ||
-        i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
-          defaultMessage: `
-Returns the {metric} of a field. This function only works for number fields.
-
-Example: Get the {metric} of price:
-\`{metric}(price)\`
-
-Example: Get the {metric} of price for orders from the UK:
-\`{metric}(price, kql='location:UK')\`
-      `,
-          values: {
-            metric: type,
-          },
-        }),
-    },
     quickFunctionDocumentation,
     shiftable: true,
   } as OperationDefinition<T, 'field', {}, true>;
@@ -263,10 +252,8 @@ export type MaxIndexPatternColumn = MetricColumn<'max'>;
 export type MedianIndexPatternColumn = MetricColumn<'median'>;
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
-  type: 'min',
-  displayName: i18n.translate('xpack.lens.indexPattern.min', {
-    defaultMessage: 'Minimum',
-  }),
+  type: MIN_ID,
+  displayName: MIN_NAME,
   ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.minOf', {
       defaultMessage: 'Minimum of {name}',
@@ -287,10 +274,8 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
 });
 
 export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
-  type: 'max',
-  displayName: i18n.translate('xpack.lens.indexPattern.max', {
-    defaultMessage: 'Maximum',
-  }),
+  type: MAX_ID,
+  displayName: MAX_NAME,
   ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.maxOf', {
       defaultMessage: 'Maximum of {name}',
@@ -311,11 +296,9 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
 });
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
-  type: 'average',
+  type: AVG_ID,
   priority: 2,
-  displayName: i18n.translate('xpack.lens.indexPattern.avg', {
-    defaultMessage: 'Average',
-  }),
+  displayName: AVG_NAME,
   ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.avgOf', {
       defaultMessage: 'Average of {name}',
@@ -335,10 +318,8 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
 
 export const standardDeviationOperation = buildMetricOperation<StandardDeviationIndexPatternColumn>(
   {
-    type: 'standard_deviation',
-    displayName: i18n.translate('xpack.lens.indexPattern.standardDeviation', {
-      defaultMessage: 'Standard deviation',
-    }),
+    type: STD_DEVIATION_ID,
+    displayName: STD_DEVIATION_NAME,
     ofName: (name) =>
       i18n.translate('xpack.lens.indexPattern.standardDeviationOf', {
         defaultMessage: 'Standard deviation of {name}',
@@ -351,20 +332,6 @@ export const standardDeviationOperation = buildMetricOperation<StandardDeviation
     aggConfigParams: {
       showBounds: false,
     },
-    documentationDescription: i18n.translate(
-      'xpack.lens.indexPattern.standardDeviation.documentation.markdown',
-      {
-        defaultMessage: `
-Returns the amount of variation or dispersion of the field. The function works only for number fields.
-
-#### Examples
-
-To get the standard deviation of price, use \`standard_deviation(price)\`.
-
-To get the variance of price for orders from the UK, use \`square(standard_deviation(price, kql='location:UK'))\`.
-      `,
-      }
-    ),
     quickFunctionDocumentation: i18n.translate(
       'xpack.lens.indexPattern.standardDeviation.quickFunctionDescription',
       {
@@ -376,11 +343,9 @@ To get the variance of price for orders from the UK, use \`square(standard_devia
 );
 
 export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
-  type: 'sum',
+  type: SUM_ID,
   priority: 1,
-  displayName: i18n.translate('xpack.lens.indexPattern.sum', {
-    defaultMessage: 'Sum',
-  }),
+  displayName: SUM_NAME,
   ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.sumOf', {
       defaultMessage: 'Sum of {name}',
@@ -401,11 +366,9 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
-  type: 'median',
+  type: MEDIAN_ID,
   priority: 3,
-  displayName: i18n.translate('xpack.lens.indexPattern.median', {
-    defaultMessage: 'Median',
-  }),
+  displayName: MEDIAN_NAME,
   ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.medianOf', {
       defaultMessage: 'Median of {name}',

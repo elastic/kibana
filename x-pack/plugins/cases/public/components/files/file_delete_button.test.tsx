@@ -39,8 +39,6 @@ describe('FileDeleteButton', () => {
       );
 
       expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
-
-      expect(useDeleteFileAttachmentMock).toBeCalledTimes(1);
     });
 
     it('clicking delete button opens the confirmation modal', async () => {
@@ -52,7 +50,7 @@ describe('FileDeleteButton', () => {
 
       expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+      await userEvent.click(deleteButton);
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
@@ -66,11 +64,11 @@ describe('FileDeleteButton', () => {
 
       expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+      await userEvent.click(deleteButton);
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+      await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
         expect(mutate).toHaveBeenCalledTimes(1);
@@ -115,7 +113,7 @@ describe('FileDeleteButton', () => {
 
       expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+      await userEvent.click(deleteButton);
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
@@ -127,11 +125,11 @@ describe('FileDeleteButton', () => {
 
       expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+      await userEvent.click(deleteButton);
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+      await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
         expect(mutate).toHaveBeenCalledTimes(1);

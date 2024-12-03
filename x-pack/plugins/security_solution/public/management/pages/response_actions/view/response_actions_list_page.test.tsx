@@ -8,7 +8,7 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   type AppContextTestRender,
@@ -19,8 +19,6 @@ import type { ActionListApiResponse } from '../../../../../common/endpoint/types
 import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../../../components/endpoint_response_actions_list/mocks';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
-
-jest.mock('../../../../common/experimental_features_service');
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -119,6 +117,7 @@ const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 describe('Response actions history page', () => {
   const testPrefix = 'response-actions-list';
 
+  let user: UserEvent;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
@@ -132,7 +131,20 @@ describe('Response actions history page', () => {
     refetch: refetchFunction,
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(async () => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<ResponseActionsListPage />));
@@ -163,6 +175,7 @@ describe('Response actions history page', () => {
       ...baseMockedActionList,
     };
     jest.clearAllMocks();
+    jest.runOnlyPendingTimers();
   });
 
   describe('Hide/Show header', () => {
@@ -204,7 +217,7 @@ describe('Response actions history page', () => {
       expect(getByTestId('pagination-button-2').getAttribute('aria-current')).toStrictEqual('true');
     });
 
-    it('should read and set command filter values from URL params', () => {
+    it('should read and set command filter values from URL params', async () => {
       const filterPrefix = 'actions-filter';
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?commands=release,processes`);
@@ -212,7 +225,7 @@ describe('Response actions history page', () => {
 
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
@@ -230,7 +243,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?commands=release,processes');
     });
 
-    it('should read and set hosts filter values from URL params', () => {
+    it('should read and set hosts filter values from URL params', async () => {
       mockUseGetEndpointsList.mockReturnValue({
         data: Array.from({ length: 10 }).map((_, i) => {
           return {
@@ -254,7 +267,7 @@ describe('Response actions history page', () => {
       render();
       const { getAllByTestId, getByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
@@ -274,7 +287,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5');
     });
 
-    it('should read and set status filter values from URL params', () => {
+    it('should read and set status filter values from URL params', async () => {
       const filterPrefix = 'statuses-filter';
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?statuses=pending,failed`);
@@ -282,7 +295,7 @@ describe('Response actions history page', () => {
 
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
@@ -387,85 +400,136 @@ describe('Response actions history page', () => {
       // verify 5 rows that are expanded are the ones from before
       expect(expandedButtons).toEqual([0, 2, 3, 4, 5]);
     });
+
+    it('should read and set action type filter values using `types` URL params', async () => {
+      const filterPrefix = 'types-filter';
+
+      reactTestingLibrary.act(() => {
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?types=automated,manual`);
+      });
+
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
+        if (option.getAttribute('aria-checked') === 'true') {
+          acc.push(option.textContent?.split('-')[0].trim() as string);
+        }
+        return acc;
+      }, []);
+
+      expect(selectedFilterOptions.length).toEqual(2);
+      expect(selectedFilterOptions).toEqual([
+        'Triggered by rule. Checked option.',
+        'Triggered manually. Checked option.',
+      ]);
+      expect(history.location.search).toEqual('?types=automated,manual');
+    });
+
+    it('should read and set agent type filter values using `agentTypes` URL params', async () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+      });
+      const filterPrefix = 'types-filter';
+      reactTestingLibrary.act(() => {
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?agentTypes=endpoint`);
+      });
+
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
+        if (option.getAttribute('aria-checked') === 'true') {
+          acc.push(option.textContent?.split('-')[0].trim() as string);
+        }
+        return acc;
+      }, []);
+
+      expect(selectedFilterOptions.length).toEqual(1);
+      expect(selectedFilterOptions).toEqual(['Elastic Defend. Checked option.']);
+      expect(history.location.search).toEqual('?agentTypes=endpoint');
+    });
   });
 
-  describe('Set selected/set values to URL params', () => {
-    it('should set selected page number to URL params', () => {
+  // TODO: These tests need revisiting, they likely time out because of slow click events after
+  // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
+  describe.skip('Set selected/set values to URL params', () => {
+    it('should set selected page number to URL params', async () => {
       render();
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId('pagination-button-1'));
+      await user.click(getByTestId('pagination-button-1'));
       expect(history.location.search).toEqual('?page=2&pageSize=10');
     });
 
-    it('should set selected pageSize value to URL params', () => {
+    it('should set selected pageSize value to URL params', async () => {
       render();
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId('tablePaginationPopoverButton'));
+      await user.click(getByTestId('tablePaginationPopoverButton'));
       const pageSizeOption = getByTestId('tablePagination-20-rows');
-      pageSizeOption.style.pointerEvents = 'all';
-      userEvent.click(pageSizeOption);
+      await user.click(pageSizeOption);
 
       expect(history.location.search).toEqual('?page=1&pageSize=20');
     });
 
-    it('should set selected command filter options to URL params ', () => {
+    it('should set selected command filter options to URL params', async () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
-        option.style.pointerEvents = 'all';
-        userEvent.click(option);
-      });
+      for (const option of allFilterOptions) {
+        await user.click(option);
+      }
 
       expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
       );
     });
 
-    it('should set selected hosts filter options to URL params ', () => {
+    it('should set selected hosts filter options to URL params ', async () => {
       const filterPrefix = 'hosts-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option, i) => {
+      for (const [i, option] of allFilterOptions.entries()) {
         if ([0, 1, 2].includes(i)) {
-          option.style.pointerEvents = 'all';
-          userEvent.click(option);
+          await user.click(option);
         }
-      });
+      }
 
       expect(history.location.search).toEqual('?hosts=agent-id-0%2Cagent-id-1%2Cagent-id-2');
     });
 
-    it('should set selected status filter options to URL params ', () => {
+    it('should set selected status filter options to URL params ', async () => {
       const filterPrefix = 'statuses-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
-        option.style.pointerEvents = 'all';
-        userEvent.click(option);
-      });
+      for (const option of allFilterOptions) {
+        await user.click(option);
+      }
 
       expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
     });
 
-    it('should set selected users search input strings to URL params ', () => {
+    it('should set selected users search input strings to URL params ', async () => {
       const filterPrefix = 'users-filter';
       render();
       const { getByTestId } = renderResult;
       const usersInput = getByTestId(`${testPrefix}-${filterPrefix}-search`);
-      userEvent.type(usersInput, '   , userX , userY, ,');
-      userEvent.type(usersInput, '{enter}');
+      await user.type(usersInput, '   , userX , userY, ,');
+      await user.type(usersInput, '{enter}');
 
       expect(history.location.search).toEqual('?users=userX%2CuserY');
     });
@@ -479,15 +543,15 @@ describe('Response actions history page', () => {
       expect(startDatePopoverButton).toHaveTextContent('Last 24 hours');
 
       // pick another relative date
-      userEvent.click(quickMenuButton);
+      await user.click(quickMenuButton);
       await waitForEuiPopoverOpen();
-      userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
+      await user.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
       expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
 
       expect(history.location.search).toEqual('?endDate=now&startDate=now-15m');
     });
 
-    it('should set actionIds using `withOutputs` to URL params ', async () => {
+    it('should set actionIds to URL params using `withOutputs`', async () => {
       const allActionIds = mockUseGetEndpointActionList.data?.data.map((action) => action.id) ?? [];
       const actionIdsWithDetails = allActionIds
         .reduce<string[]>((acc, e, i) => {
@@ -505,14 +569,136 @@ describe('Response actions history page', () => {
 
       const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
       // expand some rows
-      expandButtons.forEach((button, i) => {
+      for (const [i, button] of expandButtons.entries()) {
         if ([0, 1].includes(i)) {
-          userEvent.click(button);
+          await user.click(button);
         }
-      });
+      }
 
       // verify 2 rows are expanded and are the ones from before
       expect(history.location.search).toEqual(`?withOutputs=${actionIdsWithDetails}`);
+    });
+
+    it('should set selected action type to URL params using `types`', async () => {
+      const filterPrefix = 'types-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      for (const option of allFilterOptions) {
+        if (option.title.includes('Triggered')) {
+          await user.click(option);
+        }
+      }
+
+      expect(history.location.search).toEqual('?types=automated%2Cmanual');
+    });
+
+    it('should set selected agent type filter options to URL params using `agentTypes`', async () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+      });
+      const filterPrefix = 'types-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      for (const option of allFilterOptions) {
+        if (!option.title.includes('Triggered')) {
+          await user.click(option);
+        }
+      }
+
+      expect(history.location.search).toEqual('?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike');
+    });
+  });
+
+  // TODO: These tests need revisiting, they likely time out because of slow click events after
+  // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
+  describe.skip('Clear all selected options on a filter', () => {
+    it('should clear all selected options on `actions` filter', async () => {
+      const filterPrefix = 'actions-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      for (const option of allFilterOptions) {
+        await user.click(option);
+      }
+
+      expect(history.location.search).toEqual(
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
+      );
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      await user.click(clearAllButton);
+      expect(history.location.search).toEqual('');
+    });
+
+    it('should clear all selected options on `hosts` filter', async () => {
+      const filterPrefix = 'hosts-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      for (const option of allFilterOptions) {
+        await user.click(option);
+      }
+
+      expect(history.location.search).toEqual(
+        '?hosts=agent-id-0%2Cagent-id-1%2Cagent-id-2%2Cagent-id-3%2Cagent-id-4%2Cagent-id-5%2Cagent-id-6%2Cagent-id-7%2Cagent-id-8'
+      );
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      await user.click(clearAllButton);
+      expect(history.location.search).toEqual('');
+    });
+
+    it('should clear all selected options on `statuses` filter', async () => {
+      const filterPrefix = 'statuses-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      for (const option of allFilterOptions) {
+        await user.click(option);
+      }
+
+      expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      await user.click(clearAllButton);
+      expect(history.location.search).toEqual('');
+    });
+
+    it('should clear `agentTypes` and `actionTypes` selected options on `types` filter', async () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+      });
+      const filterPrefix = 'types-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      await user.click(allFilterOptions[0]);
+
+      for (const option of allFilterOptions) {
+        await user.click(option);
+      }
+
+      expect(history.location.search).toEqual(
+        '?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike&types=automated%2Cmanual'
+      );
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      await user.click(clearAllButton);
+      expect(history.location.search).toEqual('');
     });
   });
 });

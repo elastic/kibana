@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { convertToBuildEsQuery } from '.';
-import { mockIndexPattern } from '../../mock';
+import type { DataProvider } from '../../../../common/types/timeline';
+import { convertToBuildEsQuery, buildGlobalQuery } from '.';
+import { mockDataViewSpec } from '../../mock';
 
 describe('convertToBuildEsQuery', () => {
   /**
@@ -60,7 +61,7 @@ describe('convertToBuildEsQuery', () => {
     const [converted, _] = convertToBuildEsQuery({
       config,
       queries: queryWithNestedFields,
-      indexPattern: mockIndexPattern,
+      dataViewSpec: mockDataViewSpec,
       filters,
     });
 
@@ -175,7 +176,7 @@ describe('convertToBuildEsQuery', () => {
     const [converted, _] = convertToBuildEsQuery({
       config: configWithOverride,
       queries: queryWithNestedFields,
-      indexPattern: mockIndexPattern,
+      dataViewSpec: mockDataViewSpec,
       filters,
     });
 
@@ -275,5 +276,31 @@ describe('convertToBuildEsQuery', () => {
         must_not: [],
       },
     });
+  });
+});
+
+describe('buildGlobalQuery', () => {
+  it('should generate correct kql query when provided value is an array', () => {
+    const providers = [
+      {
+        and: [],
+        enabled: true,
+        id: 'event-details-value-default-draggable-plain-column-renderer-formatted-field-value-timeline-1-Imhtx44Bu3sCtYk3xxsO-host_name-p1',
+        name: 'p1',
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: 'host.name',
+          value: ['p1', 'p2'],
+          operator: 'includes',
+          displayField: 'host.name',
+          displayValue: '( p1 OR p2 )',
+        },
+      } as DataProvider,
+    ];
+
+    const query = buildGlobalQuery(providers, {});
+
+    expect(query).to.equal('host.name : (p1 OR p2)');
   });
 });

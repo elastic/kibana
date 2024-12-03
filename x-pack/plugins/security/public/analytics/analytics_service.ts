@@ -6,17 +6,16 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { filter, switchMap } from 'rxjs';
-import { throttleTime } from 'rxjs/operators';
+import { filter, switchMap, throttleTime } from 'rxjs';
 
 import type {
   AnalyticsServiceSetup as CoreAnalyticsServiceSetup,
   HttpSetup,
   HttpStart,
 } from '@kbn/core/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import { registerUserContext } from './register_user_context';
-import type { AuthenticationServiceSetup } from '..';
 import type { SecurityLicense } from '../../common';
 
 interface AnalyticsServiceSetupParams {

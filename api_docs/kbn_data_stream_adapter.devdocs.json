@@ -1,0 +1,990 @@
+{
+  "id": "@kbn/data-stream-adapter",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.DataStreamAdapter",
+        "type": "Class",
+        "tags": [],
+        "label": "DataStreamAdapter",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/data-stream-adapter",
+            "scope": "server",
+            "docId": "kibKbnDataStreamAdapterPluginApi",
+            "section": "def-server.DataStreamAdapter",
+            "text": "DataStreamAdapter"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.IndexAdapter",
+            "text": "IndexAdapter"
+          }
+        ],
+        "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.DataStreamAdapter.setIndexTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "setIndexTemplate",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.SetIndexTemplateParams",
+                "text": "SetIndexTemplateParams"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-stream-adapter",
+                "id": "def-server.DataStreamAdapter.setIndexTemplate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.SetIndexTemplateParams",
+                    "text": "SetIndexTemplateParams"
+                  }
+                ],
+                "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.DataStreamAdapter.install",
+            "type": "Function",
+            "tags": [],
+            "label": "install",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.InstallParams",
+                "text": "InstallParams"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-stream-adapter",
+                "id": "def-server.DataStreamAdapter.install.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.InstallParams",
+                    "text": "InstallParams"
+                  }
+                ],
+                "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.DataStreamSpacesAdapter",
+        "type": "Class",
+        "tags": [],
+        "label": "DataStreamSpacesAdapter",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/data-stream-adapter",
+            "scope": "server",
+            "docId": "kibKbnDataStreamAdapterPluginApi",
+            "section": "def-server.DataStreamSpacesAdapter",
+            "text": "DataStreamSpacesAdapter"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.IndexPatternAdapter",
+            "text": "IndexPatternAdapter"
+          }
+        ],
+        "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.DataStreamSpacesAdapter.setIndexTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "setIndexTemplate",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.SetIndexTemplateParams",
+                "text": "SetIndexTemplateParams"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-stream-adapter",
+                "id": "def-server.DataStreamSpacesAdapter.setIndexTemplate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.SetIndexTemplateParams",
+                    "text": "SetIndexTemplateParams"
+                  }
+                ],
+                "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.DataStreamSpacesAdapter._install",
+            "type": "Function",
+            "tags": [],
+            "label": "_install",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.InstallParams",
+                "text": "InstallParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.InstallIndex",
+                "text": "InstallIndex"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-stream-adapter",
+                "id": "def-server.DataStreamSpacesAdapter._install.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.InstallParams",
+                    "text": "InstallParams"
+                  }
+                ],
+                "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.DataStreamSpacesAdapter.installSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "installSpace",
+            "description": [
+              "\nMethod to create the data stream for a given space ID.\nIt resolves with the full data stream name."
+            ],
+            "signature": [
+              "(spaceId: string) => Promise<string>"
+            ],
+            "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-stream-adapter",
+                "id": "def-server.DataStreamSpacesAdapter.installSpace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.DataStreamSpacesAdapter.getInstalledSpaceName",
+            "type": "Function",
+            "tags": [],
+            "label": "getInstalledSpaceName",
+            "description": [],
+            "signature": [
+              "(spaceId: string) => Promise<string | undefined>"
+            ],
+            "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-stream-adapter",
+                "id": "def-server.DataStreamSpacesAdapter.getInstalledSpaceName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.retryTransientEsErrors",
+        "type": "Function",
+        "tags": [],
+        "label": "retryTransientEsErrors",
+        "description": [],
+        "signature": [
+          "<T>(esCall: () => Promise<T>, { logger, attempt }: { logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          "; attempt?: number | undefined; }) => Promise<T>"
+        ],
+        "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.retryTransientEsErrors.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "esCall",
+            "description": [],
+            "signature": [
+              "() => Promise<T>"
+            ],
+            "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.retryTransientEsErrors.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ logger, attempt = 0 }",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-stream-adapter",
+                "id": "def-server.retryTransientEsErrors.$2.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/data-stream-adapter",
+                "id": "def-server.retryTransientEsErrors.$2.attempt",
+                "type": "number",
+                "tags": [],
+                "label": "attempt",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.AllowedValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "AllowedValue",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.AllowedValue.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.AllowedValue.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.EcsMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "EcsMetadata",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.allowed_values",
+            "type": "Array",
+            "tags": [],
+            "label": "allowed_values",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.AllowedValue",
+                "text": "AllowedValue"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.dashed_name",
+            "type": "string",
+            "tags": [],
+            "label": "dashed_name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.doc_values",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "doc_values",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.example",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "example",
+            "description": [],
+            "signature": [
+              "string | number | boolean | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.flat_name",
+            "type": "string",
+            "tags": [],
+            "label": "flat_name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.ignore_above",
+            "type": "number",
+            "tags": [],
+            "label": "ignore_above",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.index",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.level",
+            "type": "string",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.multi_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "multi_fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.MultiField",
+                "text": "MultiField"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.normalize",
+            "type": "Array",
+            "tags": [],
+            "label": "normalize",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.required",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "required",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.scaling_factor",
+            "type": "number",
+            "tags": [],
+            "label": "scaling_factor",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.short",
+            "type": "string",
+            "tags": [],
+            "label": "short",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.EcsMetadata.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [],
+            "signature": [
+              "Record<string, { type: string; }> | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.InstallParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "InstallParams",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.InstallParams.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.InstallParams.esClient",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
+              " | Promise<",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.InstallParams.pluginStop$",
+            "type": "Object",
+            "tags": [],
+            "label": "pluginStop$",
+            "description": [],
+            "signature": [
+              "Subject",
+              "<void>"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.InstallParams.tasksTimeoutMs",
+            "type": "number",
+            "tags": [],
+            "label": "tasksTimeoutMs",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.MultiField",
+        "type": "Interface",
+        "tags": [],
+        "label": "MultiField",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.MultiField.flat_name",
+            "type": "string",
+            "tags": [],
+            "label": "flat_name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.MultiField.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-server.MultiField.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.EcsFieldMap",
+        "type": "Type",
+        "tags": [],
+        "label": "EcsFieldMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.MultiField",
+            "text": "MultiField"
+          },
+          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+        ],
+        "path": "packages/kbn-index-adapter/src/field_maps/ecs_field_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.FieldMap",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldMap",
+        "description": [],
+        "signature": [
+          "{ [P in T]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.MultiField",
+            "text": "MultiField"
+          },
+          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+        ],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.SchemaFieldMapKeys",
+        "type": "Type",
+        "tags": [],
+        "label": "SchemaFieldMapKeys",
+        "description": [],
+        "signature": [
+          "Key extends string ? NonNullable<T[Key]> extends Record<string, unknown> ? `${Key}` | `${Key}.${",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.SchemaFieldMapKeys",
+            "text": "SchemaFieldMapKeys"
+          },
+          "<NonNullable<T[Key]>, keyof NonNullable<T[Key]>>}` : `${Key}` : never"
+        ],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.SetComponentTemplateParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SetComponentTemplateParams",
+        "description": [],
+        "signature": [
+          "GetComponentTemplateOpts"
+        ],
+        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.SetIndexTemplateParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SetIndexTemplateParams",
+        "description": [],
+        "signature": [
+          "{ namespace?: string | undefined; name: string; hidden?: boolean | undefined; template?: ",
+          "IndicesPutIndexTemplateIndexTemplateMapping",
+          " | undefined; componentTemplateRefs?: string[] | undefined; isDataStream?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-server.ecsFieldMap",
+        "type": "Object",
+        "tags": [],
+        "label": "ecsFieldMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.MultiField",
+            "text": "MultiField"
+          },
+          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+        ],
+        "path": "packages/kbn-index-adapter/src/field_maps/ecs_field_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

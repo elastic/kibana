@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { execSync } from 'child_process';
+import { getKibanaDir } from '#pipeline-utils';
 
 const deploymentsListJson = execSync('ecctl deployment list --output json').toString();
 const { deployments } = JSON.parse(deploymentsListJson);
@@ -23,12 +25,11 @@ const DAY_IN_SECONDS = 60 * 60 * 24;
 for (const deployment of prDeployments) {
   try {
     const prNumber = deployment.name.match(/^kibana-pr-([0-9]+)$/)[1];
-    const prJson = execSync(`gh pr view '${prNumber}' --json state,labels,commits`).toString();
+    const prJson = execSync(`gh pr view '${prNumber}' --json state,labels,updatedAt`).toString();
     const pullRequest = JSON.parse(prJson);
     const prOpen = pullRequest.state === 'OPEN';
 
-    const lastCommit = pullRequest.commits.slice(-1)[0];
-    const lastCommitTimestamp = new Date(lastCommit.committedDate).getTime() / 1000;
+    const lastCommitTimestamp = new Date(pullRequest.updatedAt).getTime() / 1000;
 
     const persistDeployment = Boolean(
       pullRequest.labels.filter((label: any) => label.name === 'ci:cloud-persist-deployment').length
@@ -68,7 +69,9 @@ for (const deployment of deploymentsToPurge) {
   console.log(`Scheduling deployment for deletion: ${deployment.name} / ${deployment.id}`);
   try {
     execSync(`ecctl deployment shutdown --force '${deployment.id}'`, { stdio: 'inherit' });
-    execSync(`vault delete secret/kibana-issues/dev/cloud-deploy/${deployment.name}`, {
+
+    execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${deployment.name}`, {
+      cwd: getKibanaDir(),
       stdio: 'inherit',
     });
   } catch (ex) {

@@ -17,6 +17,7 @@ import type { SideEffectSimulator, ResolverProps } from '../../types';
 import { ResolverWithoutProviders } from '../../view/resolver_without_providers';
 import { SideEffectContext } from '../../view/side_effect_context';
 import type { State } from '../../../common/store/types';
+import { TestProviders } from '../../../common/mock';
 
 enableMapSet();
 
@@ -93,23 +94,27 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
   }, [props.rasterWidth, props.rasterHeight, props.sideEffectSimulator.controls, resolverElement]);
 
   return (
-    <I18nProvider>
-      <Router history={props.history}>
-        <KibanaContextProvider services={props.coreStart}>
-          <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
-            <Provider store={props.store}>
-              <ResolverWithoutProviders
-                ref={resolverRef}
-                databaseDocumentID={props.databaseDocumentID}
-                resolverComponentInstanceID={props.resolverComponentInstanceID}
-                indices={props.indices}
-                shouldUpdate={props.shouldUpdate}
-                filters={props.filters}
-              />
-            </Provider>
-          </SideEffectContext.Provider>
-        </KibanaContextProvider>
-      </Router>
-    </I18nProvider>
+    <TestProviders>
+      <I18nProvider>
+        <Router history={props.history}>
+          <KibanaContextProvider services={props.coreStart}>
+            <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
+              <Provider store={props.store}>
+                <ResolverWithoutProviders
+                  ref={resolverRef}
+                  databaseDocumentID={props.databaseDocumentID}
+                  resolverComponentInstanceID={props.resolverComponentInstanceID}
+                  indices={props.indices}
+                  shouldUpdate={props.shouldUpdate}
+                  filters={props.filters}
+                  isSplitPanel={props.isSplitPanel}
+                  showPanelOnClick={props.showPanelOnClick}
+                />
+              </Provider>
+            </SideEffectContext.Provider>
+          </KibanaContextProvider>
+        </Router>
+      </I18nProvider>
+    </TestProviders>
   );
 });

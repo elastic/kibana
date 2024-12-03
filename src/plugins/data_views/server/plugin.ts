@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
@@ -16,6 +17,7 @@ import { registerIndexPatternsUsageCollector } from './register_index_pattern_us
 import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
 import type { ClientConfigType } from '../common/types';
+import { dataTiersUiSettingsConfig } from './ui_settings';
 import {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
@@ -23,6 +25,7 @@ import {
   DataViewsServerPluginStartDependencies,
 } from './types';
 import { DataViewsStorage } from './content_management';
+import { cacheMaxAge } from './ui_settings';
 
 export class DataViewsServerPlugin
   implements
@@ -46,14 +49,26 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
+    if (config.dataTiersExcludedForFields) {
+      core.uiSettings.register(dataTiersUiSettingsConfig);
+    }
+    if (config.fieldListCachingEnabled) {
+      core.uiSettings.register(cacheMaxAge);
+    }
+
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
-    registerRoutes(
-      core.http,
-      core.getStartServices,
-      () => this.rollupsEnabled,
-      dataViewRestCounter
-    );
+    registerRoutes({
+      http: core.http,
+      logger: this.logger,
+      getStartServices: core.getStartServices,
+      isRollupsEnabled: () => this.rollupsEnabled,
+      dataViewRestCounter,
+      hasEsDataTimeout: config.hasEsDataTimeout,
+    });
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useContext, useMemo } from 'react';
-import { EuiComboBoxOptionOption, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldStatsInfoButton, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 import { AggListForm } from './list_form';
 import { DropDown } from '../aggregation_dropdown';
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 import { PivotConfigurationContext } from '../pivot_configuration/pivot_configuration';
 import { MAX_NESTING_SUB_AGGS } from '../../../../common/pivot_aggs';
+import type { DropDownOptionWithField } from '../step_define/common/get_pivot_dropdown_options';
+import type { DropDownOption } from '../../../../common/dropdown';
 
 /**
  * Component for managing sub-aggregation of the provided
@@ -52,11 +57,47 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
     }
     return nestingLevel <= MAX_NESTING_SUB_AGGS;
   }, [item]);
+  const { handleFieldStatsButtonClick, populatedFields } = useFieldStatsTrigger();
 
+  const options = useMemo(() => {
+    const opts: EuiComboBoxOptionOption[] = [];
+    state.aggOptions.forEach(({ label, field, options: aggOptions }: DropDownOptionWithField) => {
+      const isEmpty = populatedFields && field.id ? !populatedFields.has(field.id) : false;
+
+      const aggOption: DropDownOption = {
+        isGroupLabel: true,
+        key: field.id,
+        searchableLabel: label,
+        // @ts-ignore Purposefully passing label as element instead of string
+        // for more robust rendering
+        label: (
+          <FieldStatsInfoButton
+            isEmpty={populatedFields && !populatedFields.has(field.id)}
+            field={field}
+            label={label}
+            onButtonClick={handleFieldStatsButtonClick}
+          />
+        ),
+      };
+
+      if (aggOptions.length) {
+        opts.push(aggOption);
+        opts.push(
+          ...aggOptions.map((o) => ({
+            ...o,
+            isEmpty,
+            isGroupLabel: false,
+            searchableLabel: o.label,
+          }))
+        );
+      }
+    });
+    return opts;
+  }, [handleFieldStatsButtonClick, populatedFields, state.aggOptions]);
   const dropdown = (
     <DropDown
       changeHandler={addSubAggHandler}
-      options={state.aggOptions}
+      options={options}
       placeholder={i18n.translate('xpack.transform.stepDefineForm.addSubAggregationPlaceholder', {
         defaultMessage: 'Add a sub-aggregation ...',
       })}

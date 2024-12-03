@@ -14,7 +14,7 @@ import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../logic/rule_act
 // eslint-disable-next-line no-restricted-imports
 import { legacyReadNotifications } from '../../logic/notifications/legacy_read_notifications';
 // eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleNotificationAlertTypeParams } from '../../logic/notifications/legacy_types';
+import type { LegacyRuleNotificationRuleTypeParams } from '../../logic/notifications/legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateNotifications } from '../../logic/notifications/legacy_create_notifications';
 import { UPDATE_OR_CREATE_LEGACY_ACTIONS } from '../../../../../../common/constants';
@@ -34,8 +34,10 @@ export const legacyCreateLegacyNotificationRoute = (
     .post({
       path: UPDATE_OR_CREATE_LEGACY_ACTIONS,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -62,7 +64,7 @@ export const legacyCreateLegacyNotificationRoute = (
         },
       },
       async (context, request, response) => {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const rulesClient = await (await context.alerting).getRulesClient();
         const savedObjectsClient = (await context.core).savedObjects.client;
         const { alert_id: ruleAlertId } = request.query;
         const { actions, interval, name } = request.body;
@@ -75,7 +77,7 @@ export const legacyCreateLegacyNotificationRoute = (
             ruleAlertId,
           });
           if (notification != null) {
-            await rulesClient.update<LegacyRuleNotificationAlertTypeParams>({
+            await rulesClient.update<LegacyRuleNotificationRuleTypeParams>({
               id: notification.id,
               data: {
                 tags: [],

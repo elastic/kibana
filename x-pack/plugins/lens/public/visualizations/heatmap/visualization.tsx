@@ -38,10 +38,7 @@ import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import { FormBasedPersistedState } from '../..';
-
-const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
-  defaultMessage: 'Magnitude',
-});
+import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
 
 interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -107,6 +104,9 @@ export const getHeatmapVisualization = ({
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
   id: LENS_HEATMAP_ID,
 
+  getVisualizationTypeId(state) {
+    return state.shape;
+  },
   visualizationTypes: [
     {
       id: 'heatmap',
@@ -114,15 +114,12 @@ export const getHeatmapVisualization = ({
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heat map',
       }),
-      groupLabel: groupLabelForHeatmap,
-      showExperimentalBadge: false,
-      sortPriority: 1,
+      sortPriority: 8,
+      description: i18n.translate('xpack.lens.heatmap.visualizationDescription', {
+        defaultMessage: 'Show density or distribution across two dimensions.',
+      }),
     },
   ],
-
-  getVisualizationTypeId(state) {
-    return state.shape;
-  },
 
   getLayerIds(state) {
     return [state.layerId];
@@ -318,6 +315,8 @@ export const getHeatmapVisualization = ({
         isVisible: state.legend.isVisible,
         position: state.legend.position,
         legendSize: state.legend.legendSize,
+        shouldTruncate: state.legend.shouldTruncate,
+        maxLines: state.legend.maxLines,
       }
     );
 
@@ -428,6 +427,7 @@ export const getHeatmapVisualization = ({
 
     if (!state.xAccessor) {
       errors.push({
+        uniqueId: HEATMAP_X_MISSING_AXIS,
         severity: 'error',
         fixableInEditor: true,
         displayLocations: [{ id: 'visualization' }],
@@ -456,6 +456,7 @@ export const getHeatmapVisualization = ({
         warnings = hasArrayValues
           ? [
               {
+                uniqueId: HEATMAP_RENDER_ARRAY_VALUES,
                 severity: 'warning',
                 fixableInEditor: true,
                 displayLocations: [{ id: 'toolbar' }],

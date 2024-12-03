@@ -1,0 +1,61 @@
+{
+  "id": "@kbn/code-editor-mock",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/code-editor-mock",
+        "id": "def-common.MockedCodeEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "MockedCodeEditor",
+        "description": [],
+        "signature": [
+          "(props: Omit<any, \"className\"> & { className?: string | undefined; \"data-test-subj\"?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "packages/shared-ux/code_editor/mocks/code_editor_mock.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/code-editor-mock",
+            "id": "def-common.MockedCodeEditor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<any, \"className\"> & { className?: string | undefined; \"data-test-subj\"?: string | undefined; }"
+            ],
+            "path": "packages/shared-ux/code_editor/mocks/code_editor_mock.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

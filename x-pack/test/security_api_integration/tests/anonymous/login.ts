@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { adminTestUser } from '@kbn/test';
 import { resolve } from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+
+import expect from '@kbn/expect';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -245,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(2);

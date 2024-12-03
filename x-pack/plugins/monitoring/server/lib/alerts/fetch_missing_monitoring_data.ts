@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface ClusterBucketESResponse {
@@ -163,7 +163,7 @@ export async function fetchMissingMonitoringData(
         nodeName,
         clusterUuid,
         gapDuration: differenceInMs,
-        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
       };
     }
   }

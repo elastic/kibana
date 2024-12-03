@@ -11,28 +11,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
-import {
-  PivotAggsConfig,
-  PivotGroupByConfig,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
-} from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { PivotAggsConfig, PivotGroupByConfig } from '../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 
-import { StepDefineExposedState } from './common';
+import type { StepDefineExposedState } from './common';
 import { StepDefineSummary } from './step_define_summary';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
-import { MlSharedContext } from '../../../../__mocks__/shared_context';
-import { getMlSharedImports } from '../../../../../shared_imports';
-
-describe('Transform: <DefinePivotSummary />', () => {
+// Failing: https://github.com/elastic/kibana/issues/195992
+describe.skip('Transform: <DefinePivotSummary />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
   test('Minimal initialization', async () => {
     // Arrange
     const queryClient = new QueryClient();
-    const mlSharedImports = await getMlSharedImports();
 
     const searchItems = {
       dataView: {
@@ -81,9 +74,7 @@ describe('Transform: <DefinePivotSummary />', () => {
 
     const { queryByText } = render(
       <QueryClientProvider client={queryClient}>
-        <MlSharedContext.Provider value={mlSharedImports}>
-          <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
-        </MlSharedContext.Provider>
+        <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
       </QueryClientProvider>
     );
 

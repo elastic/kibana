@@ -111,7 +111,7 @@ export const createOrUpdateIndexTemplate = async ({
   esClient,
   template,
 }: CreateOrUpdateIndexTemplateOpts) => {
-  logger.info(`Installing index template ${template.name}`);
+  logger.debug(`Installing index template ${template.name}`);
 
   let mappings: MappingTypeMapping = {};
   try {

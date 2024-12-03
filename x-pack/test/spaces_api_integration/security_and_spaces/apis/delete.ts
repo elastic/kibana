@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { deleteTestSuiteFactory } from '../../common/suites/delete';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function deleteSpaceTestSuite({ getService }: FtrProviderContext) {
@@ -22,7 +24,7 @@ export default function deleteSpaceTestSuite({ getService }: FtrProviderContext)
     expectEmptyResult,
     expectNotFound,
     expectReservedSpaceResult,
-  } = deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
+  } = deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('delete', () => {
     [

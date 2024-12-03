@@ -10,6 +10,7 @@ import { DocLinksStart } from '@kbn/core/public';
 class DocLinks {
   public aiSearchDoc: string;
   public aiSearchHelp: string;
+  public apiKeyMetadata: string;
   public apiKeys: string;
   public appSearchAdaptiveRelevance: string;
   public appSearchApiClients: string;
@@ -64,6 +65,8 @@ class DocLinks {
   public clientsRustOverview: string;
   public cloudIndexManagement: string;
   public connectors: string;
+  public connectorsClientDeploy: string;
+  public connectorsMappings: string;
   public connectorsAzureBlobStorage: string;
   public connectorsBox: string;
   public connectorsClients: string;
@@ -80,10 +83,12 @@ class DocLinks {
   public connectorsMySQL: string;
   public connectorsNative: string;
   public connectorsNetworkDrive: string;
+  public connectorsNotion: string;
   public connectorsOneDrive: string;
   public connectorsOracle: string;
   public connectorsOutlook: string;
   public connectorsPostgreSQL: string;
+  public connectorsRedis: string;
   public connectorsS3: string;
   public connectorsSalesforce: string;
   public connectorsServiceNow: string;
@@ -98,6 +103,7 @@ class DocLinks {
   public crawlerOverview: string;
   public deployTrainedModels: string;
   public documentLevelSecurity: string;
+  public e5Model: string;
   public elasticsearchCreateIndex: string;
   public elasticsearchGettingStarted: string;
   public elasticsearchMapping: string;
@@ -109,6 +115,7 @@ class DocLinks {
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
   public indexApi: string;
+  public inferenceApiCreate: string;
   public ingestionApis: string;
   public ingestPipelines: string;
   public kibanaSecurity: string;
@@ -119,11 +126,11 @@ class DocLinks {
   public licenseManagement: string;
   public machineLearningStart: string;
   public mlDocumentEnrichment: string;
-  public mlDocumentEnrichmentUpdateMappings: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
   public restApis: string;
   public rrf: string;
+  public roleDescriptors: string;
   public searchApplications: string;
   public searchApplicationsSearch: string;
   public searchApplicationsTemplates: string;
@@ -133,9 +140,11 @@ class DocLinks {
   public searchTemplates: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
+  public semanticTextField: string;
   public start: string;
   public supportedNlpModels: string;
   public syncRules: string;
+  public syncRulesAdvanced: string;
   public trainedModels: string;
   public textEmbedding: string;
   public workplaceSearchApiKeys: string;
@@ -181,6 +190,7 @@ class DocLinks {
   constructor() {
     this.aiSearchDoc = '';
     this.aiSearchHelp = '';
+    this.apiKeyMetadata = '';
     this.apiKeys = '';
     this.appSearchAdaptiveRelevance = '';
     this.appSearchApis = '';
@@ -235,6 +245,8 @@ class DocLinks {
     this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
     this.connectors = '';
+    this.connectorsClientDeploy = '';
+    this.connectorsMappings = '';
     this.connectorsAzureBlobStorage = '';
     this.connectorsBox = '';
     this.connectorsConfluence = '';
@@ -251,10 +263,12 @@ class DocLinks {
     this.connectorsMySQL = '';
     this.connectorsNative = '';
     this.connectorsNetworkDrive = '';
+    this.connectorsNotion = '';
     this.connectorsOneDrive = '';
     this.connectorsOracle = '';
     this.connectorsOutlook = '';
     this.connectorsPostgreSQL = '';
+    this.connectorsRedis = '';
     this.connectorsS3 = '';
     this.connectorsSalesforce = '';
     this.connectorsServiceNow = '';
@@ -269,6 +283,7 @@ class DocLinks {
     this.crawlerOverview = '';
     this.deployTrainedModels = '';
     this.documentLevelSecurity = '';
+    this.e5Model = '';
     this.elasticsearchCreateIndex = '';
     this.elasticsearchGettingStarted = '';
     this.elasticsearchMapping = '';
@@ -280,6 +295,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
     this.indexApi = '';
+    this.inferenceApiCreate = '';
     this.ingestionApis = '';
     this.ingestPipelines = '';
     this.kibanaSecurity = '';
@@ -290,11 +306,11 @@ class DocLinks {
     this.licenseManagement = '';
     this.machineLearningStart = '';
     this.mlDocumentEnrichment = '';
-    this.mlDocumentEnrichmentUpdateMappings = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
     this.restApis = '';
     this.rrf = '';
+    this.roleDescriptors = '';
     this.searchUIAppSearch = '';
     this.searchUIElasticsearch = '';
     this.searchApplicationsTemplates = '';
@@ -304,9 +320,11 @@ class DocLinks {
     this.searchLabs = '';
     this.searchLabsRepo = '';
     this.searchTemplates = '';
+    this.semanticTextField = '';
     this.start = '';
     this.supportedNlpModels = '';
     this.syncRules = '';
+    this.syncRulesAdvanced = '';
     this.trainedModels = '';
     this.textEmbedding = '';
     this.workplaceSearchApiKeys = '';
@@ -354,6 +372,7 @@ class DocLinks {
     this.aiSearchDoc = docLinks.links.enterpriseSearch.aiSearchDoc;
     this.aiSearchHelp = docLinks.links.enterpriseSearch.aiSearchHelp;
     this.apiKeys = docLinks.links.enterpriseSearch.apiKeys;
+    this.apiKeyMetadata = docLinks.links.security.mappingRoles;
     this.appSearchAdaptiveRelevance = docLinks.links.appSearch.adaptiveRelevance;
     this.appSearchApis = docLinks.links.appSearch.apiRef;
     this.appSearchApiClients = docLinks.links.appSearch.apiClients;
@@ -407,7 +426,9 @@ class DocLinks {
     this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.connectors = docLinks.links.enterpriseSearch.connectors;
+    this.connectorsMappings = docLinks.links.enterpriseSearch.connectorsMappings;
     this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
+    this.connectorsClientDeploy = docLinks.links.enterpriseSearch.connectorsClientDeploy;
     this.connectorsBox = docLinks.links.enterpriseSearch.connectorsBox;
     this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
     this.connectorsContentExtraction = docLinks.links.enterpriseSearch.connectorsContentExtraction;
@@ -424,10 +445,12 @@ class DocLinks {
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsNative = docLinks.links.enterpriseSearch.connectorsNative;
     this.connectorsNetworkDrive = docLinks.links.enterpriseSearch.connectorsNetworkDrive;
+    this.connectorsNotion = docLinks.links.enterpriseSearch.connectorsNotion;
     this.connectorsOneDrive = docLinks.links.enterpriseSearch.connectorsOneDrive;
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsOutlook = docLinks.links.enterpriseSearch.connectorsOutlook;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
+    this.connectorsRedis = docLinks.links.enterpriseSearch.connectorsRedis;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
     this.connectorsSalesforce = docLinks.links.enterpriseSearch.connectorsSalesforce;
     this.connectorsServiceNow = docLinks.links.enterpriseSearch.connectorsServiceNow;
@@ -442,6 +465,7 @@ class DocLinks {
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.deployTrainedModels = docLinks.links.enterpriseSearch.deployTrainedModels;
     this.documentLevelSecurity = docLinks.links.enterpriseSearch.documentLevelSecurity;
+    this.e5Model = docLinks.links.enterpriseSearch.e5Model;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
@@ -453,6 +477,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.indexApi = docLinks.links.enterpriseSearch.indexApi;
+    this.inferenceApiCreate = docLinks.links.enterpriseSearch.inferenceApiCreate;
     this.ingestionApis = docLinks.links.enterpriseSearch.ingestionApis;
     this.ingestPipelines = docLinks.links.enterpriseSearch.ingestPipelines;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
@@ -463,11 +488,10 @@ class DocLinks {
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.mlDocumentEnrichment = docLinks.links.enterpriseSearch.mlDocumentEnrichment;
-    this.mlDocumentEnrichmentUpdateMappings =
-      docLinks.links.enterpriseSearch.mlDocumentEnrichmentUpdateMappings;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.restApis = docLinks.links.apis.restApis;
+    this.roleDescriptors = docLinks.links.security.definingRoles;
     this.rrf = docLinks.links.elasticsearch.rrf;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
@@ -478,9 +502,11 @@ class DocLinks {
     this.searchLabs = docLinks.links.enterpriseSearch.searchLabs;
     this.searchLabsRepo = docLinks.links.enterpriseSearch.searchLabsRepo;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
+    this.semanticTextField = docLinks.links.enterpriseSearch.semanticTextField;
     this.start = docLinks.links.enterpriseSearch.start;
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;
     this.syncRules = docLinks.links.enterpriseSearch.syncRules;
+    this.syncRulesAdvanced = docLinks.links.enterpriseSearch.syncRulesAdvanced;
     this.trainedModels = docLinks.links.enterpriseSearch.trainedModels;
     this.textEmbedding = docLinks.links.enterpriseSearch.textEmbedding;
     this.workplaceSearchGatedFormBlog = docLinks.links.workplaceSearch.gatedFormBlog;

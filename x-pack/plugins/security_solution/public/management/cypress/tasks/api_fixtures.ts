@@ -55,7 +55,7 @@ export const loadRule = (body = {}, includeResponseActions = true) =>
       tags: [],
       license: '',
       interval: '1m',
-      from: 'now-120s',
+      from: 'now-360s',
       to: 'now',
       meta: { from: '1m', kibana_siem_app_url: 'http://localhost:5620/app/security' },
       actions: [],
@@ -67,6 +67,28 @@ export const loadRule = (body = {}, includeResponseActions = true) =>
             response_actions: [
               {
                 params: { command: 'isolate', comment: 'Isolate host' },
+                action_type_id: '.endpoint',
+              },
+              {
+                params: {
+                  command: 'suspend-process',
+                  comment: 'Suspend host',
+                  config: {
+                    field: 'entity_id',
+                    overwrite: false,
+                  },
+                },
+                action_type_id: '.endpoint',
+              },
+              {
+                params: {
+                  command: 'kill-process',
+                  comment: 'Kill host',
+                  config: {
+                    field: '',
+                    overwrite: true,
+                  },
+                },
                 action_type_id: '.endpoint',
               },
             ],

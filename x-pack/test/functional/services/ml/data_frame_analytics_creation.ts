@@ -73,16 +73,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async openAdvancedEditor() {
-      this.assertAdvancedEditorSwitchExists();
+      await this.assertAdvancedEditorSwitchExists();
       await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
-      this.assertAdvancedEditorSwitchCheckState(true);
-      this.assertAdvancedEditorCodeEditorExists();
+      await this.assertAdvancedEditorSwitchCheckState(true);
+      await this.assertAdvancedEditorCodeEditorExists();
     },
 
     async closeAdvancedEditor() {
-      this.assertAdvancedEditorSwitchExists();
+      await this.assertAdvancedEditorSwitchExists();
       await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
-      this.assertAdvancedEditorSwitchCheckState(false);
+      await this.assertAdvancedEditorSwitchCheckState(false);
       await testSubjects.missingOrFail('mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor');
     },
 
@@ -259,13 +259,13 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async assertDestIndexInputExists() {
       await retry.tryForTime(4000, async () => {
-        await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+        await testSubjects.existOrFail('mlCreationWizardUtilsDestinationIndexInput');
       });
     },
 
     async assertDestIndexValue(expectedValue: string) {
       const actualDestIndex = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobFlyoutDestinationIndexInput',
+        'mlCreationWizardUtilsDestinationIndexInput',
         'value'
       );
       expect(actualDestIndex).to.eql(
@@ -275,13 +275,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setDestIndex(destIndex: string) {
-      await mlCommonUI.setValueWithChecks(
-        'mlAnalyticsCreateJobFlyoutDestinationIndexInput',
-        destIndex,
-        {
-          clearWithKeyboard: true,
-        }
-      );
+      await mlCommonUI.setValueWithChecks('mlCreationWizardUtilsDestinationIndexInput', destIndex, {
+        clearWithKeyboard: true,
+      });
       await this.assertDestIndexValue(destIndex);
     },
 
@@ -401,7 +397,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async selectDependentVariable(dependentVariable: string) {
       await this.waitForDependentVariableInputLoaded();
-      await comboBox.set(
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
         '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
         dependentVariable
       );
@@ -557,12 +553,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async assertValidationCalloutsExists() {
       await retry.tryForTime(4000, async () => {
-        await testSubjects.existOrFail('mlValidationCallout');
+        await testSubjects.existOrFail('~mlValidationCallout');
       });
     },
 
     async assertAllValidationCalloutsPresent(expectedNumCallouts: number) {
-      const validationCallouts = await testSubjects.findAll('mlValidationCallout');
+      const validationCallouts = await testSubjects.findAll('~mlValidationCallout');
       expect(validationCallouts.length).to.eql(expectedNumCallouts);
     },
 
@@ -624,30 +620,39 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertCreateDataViewSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateDataViewCheckbox`, {
-        allowHidden: true,
-      });
-    },
-
-    async getCreateDataViewSwitchCheckState(): Promise<boolean> {
-      const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardCreateDataViewCheckbox',
-        'checked'
-      );
-      return state === 'true';
+      await testSubjects.existOrFail(`mlCreateDataViewSwitch`, { allowHidden: true });
     },
 
     async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState = await this.getCreateDataViewSwitchCheckState();
+      const actualCheckState =
+        (await testSubjects.getAttribute('mlCreateDataViewSwitch', 'aria-checked')) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
+    async assertDataViewTimeFieldInputExists() {
+      await testSubjects.existOrFail(`mlDataViewTimeFieldSelect`);
+    },
+
+    async assertDataViewTimeFieldValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(`mlDataViewTimeFieldSelect`, 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Data view time field should be ${expectedValue}, got ${actualValue}`
+      );
+    },
+
+    async setDataViewTimeField(fieldName: string) {
+      const selectControl = await testSubjects.find('mlDataViewTimeFieldSelect');
+      await selectControl.type(fieldName);
+      await this.assertDataViewTimeFieldValue(fieldName);
+    },
+
     async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
       const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch',
+        'mlCreationWizardUtilsJobIdAsDestIndexNameSwitch',
         'aria-checked'
       );
       return state === 'true';
@@ -662,35 +667,32 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertDestIndexSameAsIdSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch`, {
+      await testSubjects.existOrFail(`mlCreationWizardUtilsJobIdAsDestIndexNameSwitch`, {
         allowHidden: true,
       });
     },
 
     async setDestIndexSameAsIdCheckState(checkState: boolean) {
       if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch');
+        await testSubjects.click('mlCreationWizardUtilsJobIdAsDestIndexNameSwitch');
       }
       await this.assertDestIndexSameAsIdCheckState(checkState);
     },
 
-    async setCreateDataViewSwitchState(checkState: boolean) {
-      if ((await this.getCreateDataViewSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobWizardCreateDataViewCheckbox');
-      }
-      await this.assertCreateDataViewSwitchCheckState(checkState);
+    async assertStartJobSwitchExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardStartJobSwitch');
     },
 
-    async assertStartJobCheckboxExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardStartJobCheckbox');
+    async getStartJobSwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardStartJobSwitch',
+        'aria-checked'
+      );
+      return state === 'true';
     },
 
-    async assertStartJobCheckboxCheckState(expectedCheckState: boolean) {
-      const actualCheckState =
-        (await testSubjects.getAttribute(
-          'mlAnalyticsCreateJobWizardStartJobCheckbox',
-          'checked'
-        )) === 'true';
+    async assertStartJobSwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getStartJobSwitchCheckState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Start job check state should be ${expectedCheckState} (got ${actualCheckState})`

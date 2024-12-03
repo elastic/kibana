@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import React, { FC, PropsWithChildren } from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { ContentClientProvider } from './content_client_context';
 import { ContentClient } from './content_client';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
@@ -28,7 +29,7 @@ const setup = () => {
   });
   const contentClient = new ContentClient(() => crudClient, contentTypeRegistry);
 
-  const Wrapper: React.FC = ({ children }) => (
+  const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     <ContentClientProvider contentClient={contentClient}>{children}</ContentClientProvider>
   );
 
@@ -45,12 +46,10 @@ describe('useCreateContentMutation', () => {
     const input: CreateIn = { contentTypeId: 'testType', data: { foo: 'bar' }, version: 2 };
     const output = { test: 'test' };
     crudClient.create.mockResolvedValueOnce(output);
-    const { result, waitFor } = renderHook(() => useCreateContentMutation(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useCreateContentMutation(), { wrapper: Wrapper });
     result.current.mutate(input);
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(result.current.data).toEqual(output);
+    await waitFor(() => expect(result.current.data).toEqual(output));
   });
 });
 
@@ -65,12 +64,10 @@ describe('useUpdateContentMutation', () => {
     };
     const output = { test: 'test' };
     crudClient.update.mockResolvedValueOnce(output);
-    const { result, waitFor } = renderHook(() => useUpdateContentMutation(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useUpdateContentMutation(), { wrapper: Wrapper });
     result.current.mutate(input);
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(result.current.data).toEqual(output);
+    await waitFor(() => expect(result.current.data).toEqual(output));
   });
 });
 
@@ -80,11 +77,9 @@ describe('useDeleteContentMutation', () => {
     const input: DeleteIn = { contentTypeId: 'testType', id: 'test', version: 2 };
     const output = { test: 'test' };
     crudClient.delete.mockResolvedValueOnce(output);
-    const { result, waitFor } = renderHook(() => useDeleteContentMutation(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useDeleteContentMutation(), { wrapper: Wrapper });
     result.current.mutate(input);
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(result.current.data).toEqual(output);
+    await waitFor(() => expect(result.current.data).toEqual(output));
   });
 });

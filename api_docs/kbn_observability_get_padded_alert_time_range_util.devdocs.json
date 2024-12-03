@@ -1,0 +1,115 @@
+{
+  "id": "@kbn/observability-get-padded-alert-time-range-util",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/observability-get-padded-alert-time-range-util",
+        "id": "def-common.getPaddedAlertTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "getPaddedAlertTimeRange",
+        "description": [],
+        "signature": [
+          "(alertStart: string, alertEnd?: string | undefined, lookBackWindow?: { size: number; unit: \"m\" | \"s\" | \"d\" | \"h\"; } | undefined) => ",
+          "TimeRange"
+        ],
+        "path": "x-pack/packages/observability/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-get-padded-alert-time-range-util",
+            "id": "def-common.getPaddedAlertTimeRange.$1",
+            "type": "string",
+            "tags": [],
+            "label": "alertStart",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/observability/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/observability-get-padded-alert-time-range-util",
+            "id": "def-common.getPaddedAlertTimeRange.$2",
+            "type": "string",
+            "tags": [],
+            "label": "alertEnd",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/observability/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/observability-get-padded-alert-time-range-util",
+            "id": "def-common.getPaddedAlertTimeRange.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "lookBackWindow",
+            "description": [],
+            "path": "x-pack/packages/observability/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-get-padded-alert-time-range-util",
+                "id": "def-common.getPaddedAlertTimeRange.$3.size",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [],
+                "path": "x-pack/packages/observability/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-get-padded-alert-time-range-util",
+                "id": "def-common.getPaddedAlertTimeRange.$3.unit",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "unit",
+                "description": [],
+                "signature": [
+                  "\"m\" | \"s\" | \"d\" | \"h\""
+                ],
+                "path": "x-pack/packages/observability/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

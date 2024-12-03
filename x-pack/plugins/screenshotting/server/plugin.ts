@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { from } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -16,11 +15,15 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './browsers';
-import { ConfigType, createConfig } from './config';
+import {
+  ChromiumArchivePaths,
+  ConfigType,
+  createConfig,
+  getChromiumPackage,
+} from '@kbn/screenshotting-server';
+import { from, switchMap } from 'rxjs';
+import { HeadlessChromiumDriverFactory, install } from './browsers';
 import { Screenshots } from './screenshots';
-import { getChromiumPackage } from './utils';
 
 interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;

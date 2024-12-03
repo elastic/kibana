@@ -6,10 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { ToolingLog } from '@kbn/tooling-log';
 import { chunk } from 'lodash';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
@@ -153,15 +155,26 @@ export function ObservabilityAlertsCommonProvider({
     return await (await getQueryBar()).type(query);
   });
 
+  const clickOnQueryBar = retryOnStale.wrap(async () => {
+    return await (await getQueryBar()).click();
+  });
+
   const submitQuery = async (query: string) => {
     await typeInQueryBar(query);
     await testSubjects.click('querySubmitButton');
   };
 
   // Flyout
-  const openAlertsFlyout = retryOnStale.wrap(async () => {
-    await openActionsMenuForRow(0);
-    await testSubjects.click('viewAlertDetailsFlyout');
+  const getReasonMessageLinkByIndex = async (index: number) => {
+    const reasonMessageLinks = await find.allByCssSelector(
+      '[data-test-subj="o11yGetRenderCellValueLink"]'
+    );
+    return reasonMessageLinks[index] || null;
+  };
+
+  const openAlertsFlyout = retryOnStale.wrap(async (index: number = 0) => {
+    const reasonMessageLink = await getReasonMessageLinkByIndex(index);
+    await reasonMessageLink.click();
     await retry.waitFor(
       'flyout open',
       async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
@@ -241,8 +254,8 @@ export function ObservabilityAlertsCommonProvider({
     }
 
     // wait for a confirmation toast (the css index is 1-based)
-    await toasts.getToastElement(1);
-    await toasts.dismissAllToasts();
+    await toasts.getElementByIndex(1);
+    await toasts.dismissAll();
   };
 
   const setWorkflowStatusFilter = retryOnStale.wrap(async (workflowStatus: WorkflowStatus) => {
@@ -307,9 +320,73 @@ export function ObservabilityAlertsCommonProvider({
     return value;
   });
 
+  // Data view
+  const createDataView = async ({
+    supertest,
+    id,
+    name,
+    title,
+    logger,
+  }: {
+    supertest: SuperTestAgent;
+    id: string;
+    name: string;
+    title: string;
+    logger: ToolingLog;
+  }) => {
+    const { body } = await supertest
+      .post(`/api/content_management/rpc/create`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        contentTypeId: 'index-pattern',
+        data: {
+          fieldAttrs: '{}',
+          title,
+          timeFieldName: '@timestamp',
+          sourceFilters: '[]',
+          fields: '[]',
+          fieldFormatMap: '{}',
+          typeMeta: '{}',
+          runtimeFieldMap: '{}',
+          name,
+        },
+        options: { id },
+        version: 1,
+      })
+      .expect(200);
+
+    logger.debug(`Created data view: ${JSON.stringify(body)}`);
+    return body;
+  };
+
+  const deleteDataView = async ({
+    supertest,
+    id,
+    logger,
+  }: {
+    supertest: SuperTestAgent;
+    id: string;
+    logger: ToolingLog;
+  }) => {
+    const { body } = await supertest
+      .post(`/api/content_management/rpc/delete`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        contentTypeId: 'index-pattern',
+        id,
+        options: { force: true },
+        version: 1,
+      })
+      .expect(200);
+
+    logger.debug(`Deleted data view id: ${id}`);
+    return body;
+  };
+
   return {
     getQueryBar,
     clearQueryBar,
+    clickOnQueryBar,
     closeAlertsFlyout,
     filterForValueButtonExists,
     getAlertsFlyout,
@@ -350,5 +427,7 @@ export function ObservabilityAlertsCommonProvider({
     navigateToRulesLogsPage,
     navigateToRuleDetailsByRuleId,
     navigateToAlertDetails,
+    createDataView,
+    deleteDataView,
   };
 }

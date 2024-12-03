@@ -1,0 +1,29 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "server/**/*", "public/**/*", "jest.config.js"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/calculate-auto",
+    "@kbn/es-types",
+    "@kbn/core-http-server",
+    "@kbn/management-settings-ids",
+    "@kbn/config-schema",
+    "@kbn/core-ui-settings-common",
+    "@kbn/i18n",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/logging",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/es-query",
+    "@kbn/use-tracked-promise",
+    "@kbn/core-application-browser",
+    "@kbn/i18n-react"
+  ]
+}

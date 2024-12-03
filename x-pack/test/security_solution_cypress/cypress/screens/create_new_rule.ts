@@ -19,11 +19,37 @@ export const ADD_FALSE_POSITIVE_BTN =
 export const ADD_REFERENCE_URL_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] .euiButtonEmpty__text';
 
-export const ALERT_SUPPRESSION_FIELDS =
+export const ALERT_SUPPRESSION_FIELDS = '[data-test-subj="alertSuppressionInput"]';
+
+export const ALERT_SUPPRESSION_FIELDS_COMBO_BOX =
   '[data-test-subj="alertSuppressionInput"] [data-test-subj="comboBoxInput"]';
 
+export const ALERT_SUPPRESSION_FIELDS_INPUT = `${ALERT_SUPPRESSION_FIELDS_COMBO_BOX} input`;
+
+export const ALERT_SUPPRESSION_WARNING = '[data-test-subj="alertSuppressionWarning"]';
+
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
-  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationOptions"]';
+
+export const ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL = `${ALERT_SUPPRESSION_DURATION_OPTIONS} #per-time-period`;
+
+export const ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION = `${ALERT_SUPPRESSION_DURATION_OPTIONS} #per-rule-execution`;
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_OPTIONS =
+  '[data-test-subj="suppressionMissingFieldsOptions"]';
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS = `${ALERT_SUPPRESSION_MISSING_FIELDS_OPTIONS} #suppress`;
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS = `${ALERT_SUPPRESSION_MISSING_FIELDS_OPTIONS} #doNotSuppress`;
+
+export const ALERT_SUPPRESSION_DURATION_VALUE_INPUT =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="interval"]';
+
+export const ALERT_SUPPRESSION_DURATION_UNIT_INPUT =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="timeType"]';
+
+export const THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX =
+  '[data-test-subj="thresholdAlertSuppressionEnabled"] input';
 
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
@@ -35,9 +61,16 @@ export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
 export const CREATE_WITHOUT_ENABLING_BTN = '[data-test-subj="create-enabled-false"]';
 
+export const SAVE_WITH_ERRORS_MODAL = '[data-test-subj="save-with-errors-confirmation-modal"]';
+
+export const SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
 export const CUSTOM_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
+
+export const QUERY_BAR_ADD_FILTER =
+  '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="addFilter"]';
 
 export const THREAT_MAPPING_COMBO_BOX_INPUT =
   '[data-test-subj="threatMatchInput"] [data-test-subj="fieldAutocompleteComboBox"]';
@@ -48,7 +81,7 @@ export const THREAT_MATCH_CUSTOM_QUERY_INPUT =
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
 
-export const THREAT_MATCH_INDICATOR_INDEX =
+export const CUSTOM_INDEX_PATTERN_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const THREAT_MATCH_INDICATOR_INDICATOR_INDEX =
@@ -91,17 +124,37 @@ export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
 
+export const EQL_QUERY_VALIDATION_LABEL = '.euiFormLabel-isInvalid';
+
 export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
+
+export const EQL_QUERY_VALIDATION_ERROR_CONTENT =
+  '[data-test-subj="eql-validation-errors-popover-content"]';
+
+export const EQL_OPTIONS_POPOVER_TRIGGER = '[data-test-subj="eql-settings-trigger"]';
+
+export const EQL_OPTIONS_TIMESTAMP_INPUT =
+  '[data-test-subj="eql-timestamp-field"] [data-test-subj="comboBoxInput"]';
 
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
+
+export const RELATED_INTEGRATION_COMBO_BOX_INPUT =
+  '[data-test-subj="relatedIntegrationComboBox"] [data-test-subj="comboBoxSearchInput"]';
+
+export const REQUIRED_FIELD_COMBO_BOX_INPUT =
+  '[data-test-subj^="requiredFieldNameSelect"] [data-test-subj="comboBoxSearchInput"]';
 
 export const INDICATOR_MATCH_TYPE = '[data-test-subj="threatMatchRuleType"]';
 
 export const INPUT = '[data-test-subj="input"]';
 
+export const MAX_SIGNALS_INPUT = '[data-test-subj="detectionEngineStepAboutRuleMaxSignals"]';
+
 export const INVESTIGATION_NOTES_TEXTAREA =
   '[data-test-subj="detectionEngineStepAboutRuleNote"] textarea';
+
+export const SETUP_GUIDE_TEXTAREA = '[data-test-subj="detectionEngineStepAboutRuleSetup"] textarea';
 
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';
@@ -215,13 +268,9 @@ export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
 
 export const ESQL_TYPE = '[data-test-subj="esqlRuleType"]';
 
-export const ESQL_QUERY_BAR_INPUT_AREA =
-  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] textarea';
+export const ESQL_QUERY_BAR_INPUT_AREA = '[data-test-subj="ruleEsqlQueryBar"] textarea';
 
-export const ESQL_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"]';
-
-export const ESQL_QUERY_BAR_EXPAND_BTN =
-  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] [data-test-subj="TextBasedLangEditor-expand"]';
+export const ESQL_QUERY_BAR = '[data-test-subj="ruleEsqlQueryBar"]';
 
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 
@@ -251,3 +300,19 @@ export const RULE_INDICES =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';
+
+export const PREVIEW_SUBMIT_BUTTON = '[data-test-subj="previewSubmitButton"]';
+
+export const PREVIEW_LOGGED_REQUESTS_CHECKBOX = '[data-test-subj="show-elasticsearch-requests"]';
+
+export const PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-accordion"] button';
+
+export const PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-item-accordion"] button';
+
+export const PREVIEW_LOGGED_REQUEST_DESCRIPTION =
+  '[data-test-subj="preview-logged-request-description"]';
+
+export const PREVIEW_LOGGED_REQUEST_CODE_BLOCK =
+  '[data-test-subj="preview-logged-request-code-block"]';

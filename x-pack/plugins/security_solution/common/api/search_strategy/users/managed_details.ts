@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { UsersQueries } from '../model/factory_query_type';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
 export const managedUserDetailsSchema = requestBasicOptionsSchema.extend({
   userName: z.string(),
+  userEmail: z.array(z.string()).optional(),
   factoryQueryType: z.literal(UsersQueries.managedDetails),
 });
 

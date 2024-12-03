@@ -1,15 +1,20 @@
 openapi: 3.0.0
 info:
   title: Export Rules API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/rules/_export:
-    summary: Exports rules to an `.ndjson` file
     post:
-      operationId: ExportRules
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      summary: Export rules
-      description: Exports rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file - Actions, Exception lists. Prebuilt rules cannot be exported.
+      operationId: ExportRules
+      summary: Export detection rules
+      description: |
+        Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
+        - Actions
+        - Exception lists
+        > info
+        > You cannot export prebuilt rules.
       tags:
         - Import/Export API
       parameters:

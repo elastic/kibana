@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export function EndpointPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

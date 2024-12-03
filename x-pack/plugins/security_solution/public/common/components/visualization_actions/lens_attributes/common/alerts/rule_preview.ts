@@ -22,8 +22,9 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
       visualization: {
         title: 'Empty XY chart',
         legend: {
-          isVisible: false,
+          isVisible: extraOptions?.showLegend,
           position: 'right',
+          legendStats: ['currentAndLastValue'],
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',
@@ -39,7 +40,6 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
             splitAccessor: 'e92c8920-0449-4564-81f4-8945517817a4',
           },
         ],
-        valuesInLegend: true,
         yTitle: '',
         axisTitlesVisibilitySettings: {
           x: false,

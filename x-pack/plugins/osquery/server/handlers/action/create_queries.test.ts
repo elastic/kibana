@@ -60,7 +60,7 @@ describe('create queries', () => {
           process: {
             pid,
           },
-        } as unknown as ParsedTechnicalFields,
+        } as unknown as ParsedTechnicalFields & { _index: string },
         osqueryContext: {} as OsqueryAppContext,
       });
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
@@ -77,7 +77,7 @@ describe('create queries', () => {
         agents: [TEST_AGENT],
         alertData: {
           process: { pid },
-        } as unknown as ParsedTechnicalFields,
+        } as unknown as ParsedTechnicalFields & { _index: string },
         osqueryContext: {} as OsqueryAppContext,
       });
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
@@ -89,7 +89,7 @@ describe('create queries', () => {
         agents: [TEST_AGENT],
         alertData: {
           process: {},
-        } as unknown as ParsedTechnicalFields,
+        } as unknown as ParsedTechnicalFields & { _index: string },
         osqueryContext: {} as OsqueryAppContext,
       });
       expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');

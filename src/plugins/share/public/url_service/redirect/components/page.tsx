@@ -1,43 +1,54 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+
 import { EuiPageTemplate } from '@elastic/eui';
-import { ThemeServiceSetup } from '@kbn/core/public';
+import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
+import type { ChromeDocTitle, ThemeServiceSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { Error } from './error';
-import { RedirectManager } from '../redirect_manager';
+
+import type { RedirectManager } from '../redirect_manager';
+import { RedirectEmptyPrompt } from './empty_prompt';
 import { Spinner } from './spinner';
 
 export interface PageProps {
+  homeHref: string;
+  docTitle: ChromeDocTitle;
+  customBranding: CustomBrandingSetup;
   manager: Pick<RedirectManager, 'error$'>;
   theme: ThemeServiceSetup;
-  customBranding: CustomBrandingStart;
 }
 
-export const Page: React.FC<PageProps> = ({ manager, theme, customBranding }) => {
+export const Page: React.FC<PageProps> = ({
+  manager,
+  homeHref,
+  customBranding,
+  docTitle,
+  theme,
+}) => {
   const error = useObservable(manager.error$);
   const hasCustomBranding = useObservable(customBranding.hasCustomBranding$);
 
   if (error) {
     return (
-      <KibanaThemeProvider theme={{ theme$: theme.theme$ }}>
+      <KibanaThemeProvider theme={theme}>
         <EuiPageTemplate>
-          <Error error={error} />
+          <RedirectEmptyPrompt docTitle={docTitle} error={error} homeHref={homeHref} />
         </EuiPageTemplate>
       </KibanaThemeProvider>
     );
   }
 
   return (
-    <KibanaThemeProvider theme={{ theme$: theme.theme$ }}>
+    <KibanaThemeProvider theme={theme}>
       <EuiPageTemplate>
         <Spinner showPlainSpinner={Boolean(hasCustomBranding)} />
       </EuiPageTemplate>

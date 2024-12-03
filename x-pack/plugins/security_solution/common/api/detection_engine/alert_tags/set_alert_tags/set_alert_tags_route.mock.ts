@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SetAlertTagsRequestBody } from './set_alert_tags_route';
+import type { SetAlertTagsRequestBody } from './set_alert_tags.gen';
 
 export const getSetAlertTagsRequestMock = (
   tagsToAdd: string[] = [],

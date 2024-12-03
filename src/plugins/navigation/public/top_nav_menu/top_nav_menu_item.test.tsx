@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { EuiButtonIcon } from '@elastic/eui';
 
 describe('TopNavMenu', () => {
   const ensureMenuItemDisabled = (data: TopNavMenuData) => {
@@ -73,6 +75,23 @@ describe('TopNavMenu', () => {
     component.simulate('click', event);
     expect(data.run).toHaveBeenCalledTimes(1);
     expect(component).toMatchSnapshot();
+  });
+
+  it('Should render an icon-only item', () => {
+    const data: TopNavMenuData = {
+      id: 'test',
+      label: 'test',
+      iconType: 'share',
+      iconOnly: true,
+      run: jest.fn(),
+    };
+
+    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
+    expect(component).toMatchSnapshot();
+
+    const event = { currentTarget: { value: 'a' } };
+    component.find(EuiButtonIcon).simulate('click', event);
+    expect(data.run).toHaveBeenCalledTimes(1);
   });
 
   it('Should render disabled item and it shouldnt be clickable', () => {

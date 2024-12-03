@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { monaco } from '@kbn/monaco';
-import { getHeight } from './get_height';
+import { getHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 
 describe('getHeight', () => {
   Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 500 });
@@ -31,28 +32,17 @@ describe('getHeight', () => {
   test('when using document explorer, returning the available height in the flyout', () => {
     const monacoMock = getMonacoMock(500, 0);
 
-    const height = getHeight(monacoMock, true);
-    expect(height).toBe(475);
+    const height = getHeight(monacoMock, DEFAULT_MARGIN_BOTTOM);
+    expect(height).toBe(484);
+
+    const heightCustom = getHeight(monacoMock, 80);
+    expect(heightCustom).toBe(420);
   });
 
   test('when using document explorer, returning the available height in the flyout has a minimun guarenteed height', () => {
     const monacoMock = getMonacoMock(500);
 
-    const height = getHeight(monacoMock, true);
+    const height = getHeight(monacoMock, DEFAULT_MARGIN_BOTTOM);
     expect(height).toBe(400);
-  });
-
-  test('when using classic table, its displayed inline without scrolling', () => {
-    const monacoMock = getMonacoMock(100);
-
-    const height = getHeight(monacoMock, false);
-    expect(height).toBe(1020);
-  });
-
-  test('when using classic table, limited height > 500 lines to allow scrolling', () => {
-    const monacoMock = getMonacoMock(1000);
-
-    const height = getHeight(monacoMock, false);
-    expect(height).toBe(5020);
   });
 });

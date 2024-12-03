@@ -82,8 +82,13 @@ describe('Input package create and edit package policy', () => {
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
-    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click().get(`#${agentPolicyId}`).click();
-    cy.wait(500); // wait for policy id to be set
+    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click();
+    cy.getBySel('agentPolicyMultiItem').each(($el) => {
+      if ($el.text() === agentPolicyName) {
+        $el.trigger('click');
+      }
+    });
+    cy.wait(1000); // wait for policy id to be set
     cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
 
     cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();
@@ -98,9 +103,9 @@ describe('Input package create and edit package policy', () => {
   });
   it('should show mappings editor with link to create custom template', () => {
     editPackagePolicyandShowAdvanced(INPUT_TEST_PACKAGE, packagePolicyName);
-    cy.getBySel(POLICY_EDITOR.EDIT_MAPPINGS_BTN).click();
+    cy.getBySel(POLICY_EDITOR.CREATE_MAPPINGS_BTN).click();
     cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-    cy.get('body').should('contain', `logs-${datasetName}@custom`);
+    cy.get('body').should('contain', `Create component template`);
   });
 });
 
@@ -150,8 +155,13 @@ describe('Integration package with custom dataset create and edit package policy
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
-    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click().get(`#${agentPolicyId}`).click();
-    cy.wait(500); // wait for policy id to be set
+    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click();
+    cy.getBySel('agentPolicyMultiItem').each(($el) => {
+      if ($el.text() === agentPolicyName) {
+        $el.trigger('click');
+      }
+    });
+    cy.wait(1000); // wait for policy id to be set
     cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
 
     cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();
@@ -210,8 +220,13 @@ describe('Integration package with fixed dataset create and edit package policy'
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
-    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click().get(`#${agentPolicyId}`).click();
-    cy.wait(500); // wait for policy id to be set
+    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click();
+    cy.getBySel('agentPolicyMultiItem').each(($el) => {
+      if ($el.text() === agentPolicyName) {
+        $el.trigger('click');
+      }
+    });
+    cy.wait(1000); // wait for policy id to be set
     cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
 
     cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();
@@ -231,7 +246,7 @@ describe('Integration package with fixed dataset create and edit package policy'
     cy.getBySel(INTEGRATION_NAME_LINK).contains(packagePolicyName).click();
     cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
 
-    cy.getBySel(POLICY_EDITOR.EDIT_MAPPINGS_BTN).click();
-    cy.get('body').should('contain', `logs-logs_int_no_dataset.log@custom`);
+    cy.getBySel(POLICY_EDITOR.CREATE_MAPPINGS_BTN).click();
+    cy.get('body').should('contain', `Create component template`);
   });
 });

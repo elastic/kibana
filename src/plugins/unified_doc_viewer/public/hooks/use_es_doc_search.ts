@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -14,7 +15,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SEARCH_FIELDS_FROM_SOURCE, buildDataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { useUnifiedDocViewerServices } from './use_doc_viewer_services';
+import { getUnifiedDocViewerServices } from '../plugin';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 
@@ -26,7 +27,7 @@ export interface EsDocSearchProps {
   /**
    * Index in ES to query
    */
-  index: string;
+  index: string | undefined;
   /**
    * DataView entity
    */
@@ -39,6 +40,15 @@ export interface EsDocSearchProps {
    * Records fetched from text based query
    */
   textBasedHits?: DataTableRecord[];
+  /**
+   * An optional callback that will be called before fetching the doc
+   */
+  onBeforeFetch?: () => Promise<void>;
+  /**
+   * An optional callback that will be called after fetching the doc
+   * @param record
+   */
+  onProcessRecord?: (record: DataTableRecord) => DataTableRecord;
 }
 
 /**
@@ -50,15 +60,24 @@ export function useEsDocSearch({
   dataView,
   requestSource,
   textBasedHits,
+  onBeforeFetch,
+  onProcessRecord,
 }: EsDocSearchProps): [ElasticRequestState, DataTableRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<DataTableRecord | null>(null);
-  const { data, uiSettings, analytics } = useUnifiedDocViewerServices();
+  const { data, uiSettings, analytics } = getUnifiedDocViewerServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const requestData = useCallback(async () => {
+    if (!index) {
+      return;
+    }
+
     const singleDocFetchingStartTime = window.performance.now();
     try {
+      if (onBeforeFetch) {
+        await onBeforeFetch();
+      }
       const result = await lastValueFrom(
         data.search.search({
           params: {
@@ -73,7 +92,8 @@ export function useEsDocSearch({
 
       if (hits?.hits?.[0]) {
         setStatus(ElasticRequestState.Found);
-        setHit(buildDataTableRecord(hits.hits[0], dataView));
+        const record = buildDataTableRecord(hits?.hits?.[0], dataView);
+        setHit(onProcessRecord ? onProcessRecord(record) : record);
       } else {
         setStatus(ElasticRequestState.NotFound);
       }
@@ -94,7 +114,17 @@ export function useEsDocSearch({
         duration: singleDocFetchingDuration,
       });
     }
-  }, [analytics, data.search, dataView, id, index, useNewFieldsApi, requestSource]);
+  }, [
+    analytics,
+    data.search,
+    dataView,
+    id,
+    index,
+    useNewFieldsApi,
+    requestSource,
+    onBeforeFetch,
+    onProcessRecord,
+  ]);
 
   useEffect(() => {
     if (textBasedHits) {
@@ -131,7 +161,7 @@ export function buildSearchBody(
           filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
         },
       },
-      stored_fields: computedFields.storedFields,
+      stored_fields: ['*'],
       script_fields: computedFields.scriptFields,
       version: true,
     },
@@ -140,8 +170,7 @@ export function buildSearchBody(
     return undefined;
   }
   if (useNewFieldsApi) {
-    // @ts-expect-error
-    request.body.fields = [{ field: '*', include_unmapped: 'true' }];
+    request.body.fields = [{ field: '*', include_unmapped: true }];
     request.body.runtime_mappings = runtimeFields ? runtimeFields : {};
     if (requestAllFields) {
       request.body._source = true;

@@ -34,7 +34,15 @@ const networkLinks: LinkItem = {
       defaultMessage: 'Network',
     }),
   ],
+  capabilities: [`${SERVER_APP_ID}.show`],
   links: [
+    {
+      id: SecurityPageName.networkFlows,
+      title: i18n.translate('xpack.securitySolution.appLinks.network.flows', {
+        defaultMessage: 'Flows',
+      }),
+      path: `${NETWORK_PATH}/flows`,
+    },
     {
       id: SecurityPageName.networkDns,
       title: i18n.translate('xpack.securitySolution.appLinks.network.dns', {
@@ -61,6 +69,7 @@ const networkLinks: LinkItem = {
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.anomalies', {
         defaultMessage: 'Anomalies',
       }),
+      capabilities: ['ml.canGetJobs'],
       path: `${NETWORK_PATH}/anomalies`,
       licenseType: 'gold',
     },
@@ -88,7 +97,15 @@ const usersLinks: LinkItem = {
       defaultMessage: 'Users',
     }),
   ],
+  capabilities: [`${SERVER_APP_ID}.show`],
   links: [
+    {
+      id: SecurityPageName.usersAll,
+      title: i18n.translate('xpack.securitySolution.appLinks.users.allUsers', {
+        defaultMessage: 'All users',
+      }),
+      path: `${USERS_PATH}/allUsers`,
+    },
     {
       id: SecurityPageName.usersAuthentications,
       title: i18n.translate('xpack.securitySolution.appLinks.users.authentications', {
@@ -101,6 +118,7 @@ const usersLinks: LinkItem = {
       title: i18n.translate('xpack.securitySolution.appLinks.users.anomalies', {
         defaultMessage: 'Anomalies',
       }),
+      capabilities: ['ml.canGetJobs'],
       path: `${USERS_PATH}/anomalies`,
       licenseType: 'gold',
     },
@@ -134,9 +152,18 @@ const hostsLinks: LinkItem = {
       defaultMessage: 'Hosts',
     }),
   ],
+  capabilities: [`${SERVER_APP_ID}.show`],
   links: [
     {
-      id: SecurityPageName.uncommonProcesses,
+      id: SecurityPageName.hostsAll,
+      title: i18n.translate('xpack.securitySolution.appLinks.hosts.allHosts', {
+        defaultMessage: 'All hosts',
+      }),
+      path: `${HOSTS_PATH}/allHosts`,
+      isBeta: false,
+    },
+    {
+      id: SecurityPageName.hostsUncommonProcesses,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.uncommonProcesses', {
         defaultMessage: 'Uncommon Processes',
       }),
@@ -147,6 +174,7 @@ const hostsLinks: LinkItem = {
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.anomalies', {
         defaultMessage: 'Anomalies',
       }),
+      capabilities: ['ml.canGetJobs'],
       path: `${HOSTS_PATH}/anomalies`,
       licenseType: 'gold',
     },
@@ -165,7 +193,7 @@ const hostsLinks: LinkItem = {
       path: `${HOSTS_PATH}/hostRisk`,
     },
     {
-      id: SecurityPageName.sessions,
+      id: SecurityPageName.hostsSessions,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.sessions', {
         defaultMessage: 'Sessions',
       }),
@@ -180,7 +208,7 @@ export const exploreLinks: LinkItem = {
   id: SecurityPageName.exploreLanding,
   title: EXPLORE,
   path: EXPLORE_PATH,
-  globalNavPosition: 8,
+  globalNavPosition: 9,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.explore', {

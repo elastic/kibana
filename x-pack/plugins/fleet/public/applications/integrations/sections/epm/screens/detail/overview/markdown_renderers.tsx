@@ -56,9 +56,7 @@ export const markdownRenderers = (
   refs: MutableRefObject<Map<string, HTMLDivElement | null>>
 ): TransformOptions['components'] => {
   return {
-    table: ({ children }) => (
-      <EuiTable className="euiEuiTable euiTable--responsive">{children}</EuiTable>
-    ),
+    table: ({ children }) => <EuiTable>{children}</EuiTable>,
     tr: ({ children }) => <EuiTableRow>{children}</EuiTableRow>,
     th: ({ children }) => <EuiTableHeaderCell>{children}</EuiTableHeaderCell>,
     td: ({ children }) => <EuiTableRowCell>{children}</EuiTableRowCell>,
@@ -81,7 +79,7 @@ export const markdownRenderers = (
     },
     h5: ({ children }) => <h6>{children}</h6>,
     h6: ({ children }) => <h6>{children}</h6>,
-    link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
+    a: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
       <EuiLink
         href={href}
         target="_blank"
@@ -110,6 +108,11 @@ export const markdownRenderers = (
           {children}
         </EuiCodeBlock>
       );
+    },
+    img: (
+      props: React.ClassAttributes<HTMLImageElement> & React.ImgHTMLAttributes<HTMLImageElement>
+    ) => {
+      return <img style={{ maxWidth: '100%' }} {...props} alt={props.alt} />;
     },
   };
 };

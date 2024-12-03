@@ -40,12 +40,12 @@ const ruleTypes = [
 ];
 
 describe('createConfigRoute', () => {
-  it('registers the route and returns config if user is authorized', async () => {
+  it('registers the route and returns exposed config values if user is authorized', async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
     const mockRulesClient = rulesClientMock.create();
 
-    mockRulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    mockRulesClient.listRuleTypes.mockResolvedValueOnce(ruleTypes);
     createConfigRoute({
       logger,
       router,
@@ -54,8 +54,9 @@ describe('createConfigRoute', () => {
         isUsingSecurity: true,
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
+        run: { alerts: { max: 1000 }, actions: { max: 100000 } },
       }),
-      getRulesClientWithRequest: () => mockRulesClient,
+      getRulesClientWithRequest: async () => mockRulesClient,
     });
 
     const [config, handler] = router.get.mock.calls[0];
@@ -79,7 +80,7 @@ describe('createConfigRoute', () => {
     const logger = loggingSystemMock.create().get();
     const mockRulesClient = rulesClientMock.create();
 
-    mockRulesClient.listRuleTypes.mockResolvedValueOnce(new Set());
+    mockRulesClient.listRuleTypes.mockResolvedValueOnce([]);
     createConfigRoute({
       logger,
       router,
@@ -88,8 +89,9 @@ describe('createConfigRoute', () => {
         isUsingSecurity: true,
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
+        run: { alerts: { max: 1000 }, actions: { max: 100000 } },
       }),
-      getRulesClientWithRequest: () => mockRulesClient,
+      getRulesClientWithRequest: async () => mockRulesClient,
     });
 
     const [config, handler] = router.get.mock.calls[0];

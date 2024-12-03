@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isUndefined } from 'lodash';
@@ -106,11 +107,6 @@ export function toElasticsearchQuery(
     });
   }
 
-  // Special case for wildcards where there are no fields or all fields share the same prefix
-  if (isExistsQuery && (!fields?.length || fields?.length === indexPattern?.fields.length)) {
-    return { match_all: {} };
-  }
-
   const queries = fields!.reduce((accumulator: any, field: DataViewFieldBase) => {
     const isKeywordField = field.esTypes?.length === 1 && field.esTypes.includes('keyword');
     const wrapWithNestedQuery = (query: any) => {
@@ -159,7 +155,7 @@ export function toElasticsearchQuery(
         ? {
             wildcard: {
               [field.name]: {
-                value,
+                value: wildcard.toQueryStringQuery(valueArg),
                 ...(typeof config.caseInsensitive === 'boolean' && {
                   case_insensitive: config.caseInsensitive,
                 }),

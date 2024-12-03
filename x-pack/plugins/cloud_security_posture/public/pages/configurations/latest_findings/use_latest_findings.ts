@@ -7,27 +7,29 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import type { Pagination } from '@elastic/eui';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { showErrorToast } from '@kbn/cloud-security-posture';
+import { MAX_FINDINGS_TO_LOAD, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
+import {
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  CDR_3RD_PARTY_RETENTION_POLICY,
+} from '@kbn/cloud-security-posture-common';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
+import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
+import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import { CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import type { FindingsBaseEsQuery } from '../../../common/types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
   enabled: boolean;
-}
-
-export interface FindingsGroupByNoneQuery {
-  pageIndex: Pagination['pageIndex'];
-  sort: any;
+  pageSize: number;
 }
 
 type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
@@ -39,15 +41,56 @@ interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-export const getFindingsQuery = ({ query, sort }: UseFindingsOptions, pageParam: any) => ({
-  index: CSP_LATEST_FINDINGS_DATA_VIEW,
-  query,
-  sort: getMultiFieldsSort(sort),
-  size: MAX_FINDINGS_TO_LOAD,
-  aggs: getFindingsCountAggQuery(),
-  ignore_unavailable: false,
-  ...(pageParam ? { search_after: pageParam } : {}),
-});
+const getRuntimeMappingsFromSort = (sort: string[][]) => {
+  return sort
+    .filter(([field]) => CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS.includes(field))
+    .reduce((acc, [field]) => {
+      const type: RuntimePrimitiveTypes = 'keyword';
+
+      return {
+        ...acc,
+        [field]: {
+          type,
+        },
+      };
+    }, {});
+};
+
+export const getFindingsQuery = (
+  { query, sort }: UseFindingsOptions,
+  rulesStates: CspBenchmarkRulesStates,
+  pageParam: any
+) => {
+  const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
+
+  return {
+    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+    sort: getMultiFieldsSort(sort),
+    runtime_mappings: getRuntimeMappingsFromSort(sort),
+    size: MAX_FINDINGS_TO_LOAD,
+    aggs: getFindingsCountAggQuery(),
+    ignore_unavailable: true,
+    query: {
+      ...query,
+      bool: {
+        ...query?.bool,
+        filter: [
+          ...(query?.bool?.filter ?? []),
+          {
+            range: {
+              '@timestamp': {
+                gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+                lte: 'now',
+              },
+            },
+          },
+        ],
+        must_not: [...(query?.bool?.must_not ?? []), ...mutedRulesFilterQuery],
+      },
+    },
+    ...(pageParam ? { from: pageParam } : {}),
+  };
+};
 
 const getMultiFieldsSort = (sort: string[][]) => {
   return sort.map(([id, direction]) => {
@@ -92,14 +135,22 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
     data,
     notifications: { toasts },
   } = useKibana().services;
+  const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
+
+  /**
+   * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
+   * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array
+   * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
+   * the last loaded record to be used as a from parameter to fetch the next chunk of data.
+   */
   return useInfiniteQuery(
-    ['csp_findings', { params: options }],
+    ['csp_findings', { params: options }, rulesStates],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getFindingsQuery(options, pageParam),
+          params: getFindingsQuery(options, rulesStates!, pageParam), // ruleStates always exists since it under the `enabled` dependency.
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be an defined');
@@ -113,12 +164,14 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       };
     },
     {
-      enabled: options.enabled,
+      enabled: options.enabled && !!rulesStates,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
-      getNextPageParam: (lastPage) => {
-        if (lastPage.page.length === 0) return undefined;
-        return lastPage.page[lastPage.page.length - 1].raw.sort;
+      getNextPageParam: (lastPage, allPages) => {
+        if (lastPage.page.length < options.pageSize) {
+          return undefined;
+        }
+        return allPages.length * options.pageSize;
       },
     }
   );

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
@@ -25,7 +27,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
 
       const instances = [...Array(numServices).keys()].map((index) =>
         apm
-          .service({ name: `synth-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
+          .service({ name: `synth-node-${index}`, environment: ENVIRONMENT, agentName: 'nodejs' })
           .instance('instance')
       );
       const instanceSpans = (instance: Instance) => {
@@ -33,6 +35,9 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
+            .defaults({
+              'url.domain': 'foo.bar',
+            })
             .duration(1000)
             .success()
             .children(
@@ -62,7 +67,10 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             .failure()
             .errors(
               instance
-                .error({ message: '[ResponseError] index_not_found_exception' })
+                .error({
+                  message: '[ResponseError] index_not_found_exception',
+                  type: 'ResponseError',
+                })
                 .timestamp(timestamp + 50)
             )
         );

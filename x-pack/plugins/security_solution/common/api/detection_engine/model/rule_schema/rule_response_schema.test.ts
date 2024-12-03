@@ -41,7 +41,7 @@ describe('Rule response schema', () => {
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", type: Invalid literal value, expected \\"query\\", type: Invalid literal value, expected \\"saved_query\\", saved_id: Required, and 15 more"`
+      `"type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
     );
   });
 
@@ -70,9 +70,7 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", type: Invalid literal value, expected \\"query\\", saved_id: Required, type: Invalid literal value, expected \\"threshold\\", and 14 more"`
-    );
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"saved_id: Required"`);
   });
 
   test('it should validate a type of "timeline_id" if there is a "timeline_title" dependent', () => {
@@ -103,7 +101,7 @@ describe('Rule response schema', () => {
       const result = RuleResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"exceptions_list: Expected array, received string, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", exceptions_list: Expected array, received string, exceptions_list: Expected array, received string, and 22 more"`
+        `"exceptions_list: Expected array, received string"`
       );
     });
   });
@@ -239,7 +237,42 @@ describe('investigation_fields', () => {
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"investigation_fields: Expected object, received string, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", investigation_fields: Expected object, received string, investigation_fields: Expected object, received string, and 22 more"`
+      `"investigation_fields: Expected object, received string"`
     );
+  });
+});
+
+describe('rule_source', () => {
+  test('it should validate a rule with "rule_source" set to internal', () => {
+    const payload = getRulesSchemaMock();
+    payload.rule_source = {
+      type: 'internal',
+    };
+
+    const result = RuleResponse.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
+  });
+
+  test('it should validate a rule with "rule_source" set to external', () => {
+    const payload = getRulesSchemaMock();
+    payload.rule_source = {
+      type: 'external',
+      is_customized: true,
+    };
+
+    const result = RuleResponse.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
+  });
+
+  test('it should not validate a rule with "rule_source" set to undefined', () => {
+    const payload = getRulesSchemaMock();
+    // @ts-expect-error
+    delete payload.rule_source;
+
+    const result = RuleResponse.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"rule_source: Required"`);
   });
 });

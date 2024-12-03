@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 const fields = [
   {
@@ -77,10 +79,12 @@ export const buildDataViewMock = ({
   name,
   fields: definedFields,
   timeFieldName,
+  type = 'default',
 }: {
   name: string;
   fields: DataView['fields'];
   timeFieldName?: string;
+  type?: string;
 }): DataView => {
   const dataViewFields = [...definedFields] as DataView['fields'];
 
@@ -98,9 +102,9 @@ export const buildDataViewMock = ({
     name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
-    type: 'default',
+    type,
     getName: () => name,
-    getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
+    getComputedFields: () => ({ docvalueFields: [], scriptFields: {} }),
     getSourceFiltering: () => ({}),
     getIndexPattern: () => `${name}-title`,
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
@@ -121,3 +125,15 @@ export const buildDataViewMock = ({
 };
 
 export const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields });
+export const dataViewMockWithTimefield = buildDataViewMock({
+  timeFieldName: '@timestamp',
+  name: 'the-data-view-with-timefield',
+  fields,
+});
+export const dataViewMockEsql = buildDataViewMock({
+  name: 'the-data-view-esql',
+  fields,
+  type: ESQL_TYPE,
+});
+
+export const dataViewMockList = [dataViewMock, dataViewMockWithTimefield];

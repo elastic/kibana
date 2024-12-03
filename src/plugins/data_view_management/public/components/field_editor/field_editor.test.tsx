@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -16,6 +17,7 @@ import { mockManagementPlugin } from '../../mocks';
 import { createComponentWithContext } from '../test_utils';
 
 jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
   EuiBasicTable: 'eui-basic-table',
   EuiButton: 'eui-button',
   EuiButtonEmpty: 'eui-button-empty',
@@ -39,8 +41,8 @@ jest.mock('@elastic/eui', () => ({
   euiPaletteColorBlind: () => ['red'],
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
 
   return {
     ...original,

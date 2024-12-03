@@ -9,17 +9,29 @@ import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
-  const svlCommonApi = getService('svlCommonApi');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('telemetry API', () => {
     before(async () => {
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+          withCustomHeaders: {
+            [ELASTIC_HTTP_VERSION_HEADER]: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+            'content-type': 'application/json',
+          },
+        }
+      );
       // TODO: Clean `kql-telemetry` before running the tests
       await kibanaServer.savedObjects.clean({ types: ['kql-telemetry'] });
       await kibanaServer.importExport.load(
@@ -33,12 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should increment the opt *in* counter in the .kibana_analytics/kql-telemetry document', async () => {
-      await supertest
+      await supertestAdminWithCookieCredentials
         .post('/internal/kql_opt_in_stats')
-        .set('content-type', 'application/json')
-        .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
         .send({ opt_in: true })
         .expect(200);
 
@@ -48,18 +56,14 @@ export default function ({ getService }: FtrProviderContext) {
           q: 'type:kql-telemetry',
         })
         .then((response) => {
-          const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-          expect(kqlTelemetryDoc.optInCount).to.be(1);
+          const optInCount = get(response, 'hits.hits[0]._source.kql-telemetry.optInCount');
+          expect(optInCount).to.be(1);
         });
     });
 
     it('should increment the opt *out* counter in the .kibana_analytics/kql-telemetry document', async () => {
-      await supertest
+      await supertestAdminWithCookieCredentials
         .post('/internal/kql_opt_in_stats')
-        .set('content-type', 'application/json')
-        .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
         .send({ opt_in: false })
         .expect(200);
 
@@ -69,87 +73,48 @@ export default function ({ getService }: FtrProviderContext) {
           q: 'type:kql-telemetry',
         })
         .then((response) => {
-          const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-          expect(kqlTelemetryDoc.optOutCount).to.be(1);
+          const optOutCount = get(response, 'hits.hits[0]._source.kql-telemetry.optOutCount');
+          expect(optOutCount).to.be(1);
         });
     });
 
-    it('should report success when opt *in* is incremented successfully', () => {
-      return (
-        supertest
-          .post('/internal/kql_opt_in_stats')
-          .set('content-type', 'application/json')
-          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
-          .send({ opt_in: true })
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.success).to.be(true);
-          })
-      );
+    it('should report success when opt *in* is incremented successfully', async () => {
+      const { body } = await supertestAdminWithCookieCredentials
+        .post('/internal/kql_opt_in_stats')
+        .send({ opt_in: true })
+        .expect('Content-Type', /json/)
+        .expect(200);
+      expect(body.success).to.be(true);
     });
 
-    it('should report success when opt *out* is incremented successfully', () => {
-      return (
-        supertest
-          .post('/internal/kql_opt_in_stats')
-          .set('content-type', 'application/json')
-          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
-          .send({ opt_in: false })
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.success).to.be(true);
-          })
-      );
+    it('should report success when opt *out* is incremented successfully', async () => {
+      const { body } = await supertestAdminWithCookieCredentials
+        .post('/internal/kql_opt_in_stats')
+        .send({ opt_in: false })
+        .expect('Content-Type', /json/)
+        .expect(200);
+      expect(body.success).to.be(true);
     });
 
     it('should only accept literal boolean values for the opt_in POST body param', function () {
       return Promise.all([
-        supertest
+        supertestAdminWithCookieCredentials
           .post('/internal/kql_opt_in_stats')
-          .set('content-type', 'application/json')
-          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
           .send({ opt_in: 'notabool' })
           .expect(400),
-        supertest
+        supertestAdminWithCookieCredentials
           .post('/internal/kql_opt_in_stats')
-          .set('content-type', 'application/json')
-          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
           .send({ opt_in: 0 })
           .expect(400),
-        supertest
+        supertestAdminWithCookieCredentials
           .post('/internal/kql_opt_in_stats')
-          .set('content-type', 'application/json')
-          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
           .send({ opt_in: null })
           .expect(400),
-        supertest
+        supertestAdminWithCookieCredentials
           .post('/internal/kql_opt_in_stats')
-          .set('content-type', 'application/json')
-          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
           .send({ opt_in: undefined })
           .expect(400),
-        supertest
-          .post('/internal/kql_opt_in_stats')
-          .set('content-type', 'application/json')
-          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
-          .send({})
-          .expect(400),
+        supertestAdminWithCookieCredentials.post('/internal/kql_opt_in_stats').send({}).expect(400),
       ]);
     });
   });

@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { Observable, from } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
-import { TagWithRelations } from '../../../common';
-import { ITagsCache } from '../../services/tags';
+import { Observable, from, takeUntil } from 'rxjs';
+import { TagWithRelations } from '../../../common/types';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';
 import { ITagAssignmentService } from '../../services/assignments';
+import { ITagsCache } from '../../services/tags';
+import { StartServices } from '../../types';
 import { TagAction } from './types';
 
-interface GetAssignActionOptions {
-  overlays: OverlayStart;
-  notifications: NotificationsStart;
-  theme: ThemeServiceStart;
+interface GetAssignActionOptions extends StartServices {
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
   assignableTypes: string[];
@@ -27,19 +23,15 @@ interface GetAssignActionOptions {
 }
 
 export const getAssignAction = ({
-  notifications,
-  overlays,
-  theme,
   assignableTypes,
   assignmentService,
   tagCache,
   fetchTags,
   canceled$,
+  ...startServices
 }: GetAssignActionOptions): TagAction => {
   const openFlyout = getAssignFlyoutOpener({
-    overlays,
-    notifications,
-    theme,
+    ...startServices,
     tagCache,
     assignmentService,
     assignableTypes,
@@ -60,6 +52,7 @@ export const getAssignAction = ({
     ),
     type: 'icon',
     icon: 'tag',
+    available: (tag) => !tag.managed,
     onClick: async (tag: TagWithRelations) => {
       const flyout = await openFlyout({
         tagIds: [tag.id],

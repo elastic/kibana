@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -16,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('overview page - Analytics apps', function describeIndexTests() {
+  // Fails in chrome 128+: See https://github.com/elastic/kibana/issues/192509
+  describe.skip('overview page - Analytics apps', function describeIndexTests() {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load(
@@ -35,19 +37,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const apps = ['dashboards', 'discover', 'canvas', 'maps', 'ml'];
 
-    it('should display Analytics apps cards', async () => {
-      const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
-      expect(kbnOverviewAppsCards.length).to.be(apps.length);
+    describe('Analytics apps cards', function () {
+      this.tags('skipFIPS');
+      it('should display ', async () => {
+        const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
+        expect(kbnOverviewAppsCards.length).to.be(apps.length);
 
-      const verifyImageUrl = async (el: WebElementWrapper, imgName: string) => {
-        const image = await el.findByCssSelector('img');
-        const imageUrl = await image.getAttribute('src');
-        expect(imageUrl.includes(imgName)).to.be(true);
-      };
+        const verifyImageUrl = async (el: WebElementWrapper, imgName: string) => {
+          const image = await el.findByCssSelector('img');
+          const imageUrl = (await image.getAttribute('src')) ?? '';
+          expect(imageUrl.includes(imgName)).to.be(true);
+        };
 
-      for (let i = 0; i < apps.length; i++) {
-        await verifyImageUrl(kbnOverviewAppsCards[i], `kibana_${apps[i]}_light.svg`);
-      }
+        for (let i = 0; i < apps.length; i++) {
+          await verifyImageUrl(kbnOverviewAppsCards[i], `kibana_${apps[i]}_light.svg`);
+        }
+      });
     });
 
     it('click on a card should lead to the appropriate app', async () => {

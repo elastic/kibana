@@ -1,5 +1,9 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/shared-ux-page-kibana-template",
-  "owner": "@elastic/appex-sharedux"
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

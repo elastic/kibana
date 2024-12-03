@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
+import type { IRouter } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
-import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { DataViewsServerPluginSetup } from '@kbn/data-views-plugin/server';
-import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { License } from './services';
-import { IndexPatternsFetcher } from './shared_imports';
-import { handleEsError } from './shared_imports';
-import { formatEsError } from './lib/format_es_error';
+import type { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { DataViewsServerPluginSetup } from '@kbn/data-views-plugin/server';
+import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { License } from './services';
+import type { IndexPatternsFetcher } from './shared_imports';
+import type { handleEsError } from './shared_imports';
+import type { formatEsError } from './lib/format_es_error';
 
 export interface Dependencies {
   indexManagement?: IndexManagementPluginSetup;
-  visTypeTimeseries?: VisTypeTimeseriesSetup;
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;

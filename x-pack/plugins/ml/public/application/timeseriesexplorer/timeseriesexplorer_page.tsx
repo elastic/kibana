@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,6 +19,7 @@ import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
+import { getAnnotationStyles, getTimeseriesExplorerStyles } from './styles';
 
 interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
@@ -25,20 +27,26 @@ interface TimeSeriesExplorerPageProps {
   noSingleMetricJobsFound?: boolean;
 }
 
-export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
+const timeseriesExplorerStyles = getTimeseriesExplorerStyles();
+const annotationStyles = getAnnotationStyles();
+
+export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPageProps>> = ({
   children,
   dateFormatTz,
   resizeRef,
   noSingleMetricJobsFound,
 }) => {
   const {
-    services: { docLinks },
+    services: { cases, docLinks },
   } = useMlKibana();
+  const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = cases?.helpers.canUseCases();
   const helpLink = docLinks.links.ml.anomalyDetection;
+
   return (
     <>
       <div
-        className="ml-time-series-explorer"
+        css={[timeseriesExplorerStyles, annotationStyles]}
         ref={resizeRef}
         data-test-subj="mlPageSingleMetricViewer"
       >
@@ -60,8 +68,9 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
         {noSingleMetricJobsFound ? null : (
           <JobSelector dateFormatTz={dateFormatTz!} singleSelection={true} timeseriesOnly={true} />
         )}
-
-        {children}
+        <CasesContext owner={[]} permissions={casesPermissions!}>
+          {children}
+        </CasesContext>
         <HelpMenu docLink={helpLink} />
       </div>
     </>

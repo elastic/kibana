@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DeepPartial, ValuesType } from 'utility-types';
@@ -22,7 +23,9 @@ type DedotKey<
 export type DedotObject<TObject extends Record<string, any>> = UnionToIntersection<
   Exclude<
     ValuesType<{
-      [TKey in keyof TObject]: {} extends Pick<TObject, TKey>
+      [TKey in keyof TObject as string]: string extends TKey
+        ? Record<TKey, TObject[TKey]>
+        : {} extends Pick<TObject, TKey>
         ? DeepPartial<DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>>>
         : DedotKey<TObject, TKey, TObject[TKey]>;
     }>,
@@ -41,7 +44,9 @@ type DotKey<
   TKey extends keyof TObject & string,
   TPrefix extends string
 > = TObject[TKey] extends Array<infer TValueType>
-  ? ToArray<DotObject<TValueType, `${TPrefix}${TKey}.`>>
+  ? TValueType extends Record<string, any>
+    ? ToArray<DotObject<TValueType, `${TPrefix}${TKey}.`>>
+    : never
   : TObject[TKey] extends Record<string, any>
   ? DotObject<TObject[TKey], `${TPrefix}${TKey}.`>
   : { [key in `${TPrefix}${TKey}`]: TObject[TKey] };

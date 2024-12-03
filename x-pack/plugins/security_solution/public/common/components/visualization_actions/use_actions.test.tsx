@@ -7,11 +7,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { useKibana } from '../../lib/kibana/kibana_react';
 import { mockAttributes } from './mocks';
-import { useActions } from './use_actions';
-import { coreMock } from '@kbn/core/public/mocks';
+import { DEFAULT_ACTIONS, useActions } from './use_actions';
 import { TestProviders } from '../../mock';
 
 jest.mock('./use_add_to_existing_case', () => {
@@ -30,25 +27,20 @@ jest.mock('./use_add_to_new_case', () => {
     }),
   };
 });
+
+jest.mock('./use_redirect_to_dashboard_from_lens', () => ({
+  useRedirectToDashboardFromLens: jest.fn().mockReturnValue({
+    redirectTo: jest.fn(),
+    getEditOrCreateDashboardPath: jest.fn().mockReturnValue('mockDashboardPath'),
+  }),
+}));
+
 jest.mock('../../lib/kibana/kibana_react', () => {
   return {
-    useKibana: jest.fn(),
-  };
-});
-
-const coreStart = coreMock.createStart();
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <TestProviders>
-    <NavigationProvider core={coreStart}>{children}</NavigationProvider>
-  </TestProviders>
-);
-describe(`useActions`, () => {
-  const mockNavigateToPrefilledEditor = jest.fn();
-  beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    useKibana: jest.fn().mockReturnValue({
       services: {
         lens: {
-          navigateToPrefilledEditor: mockNavigateToPrefilledEditor,
+          navigateToPrefilledEditor: jest.fn(),
           canUseEditor: jest.fn().mockReturnValue(true),
           SaveModalComponent: jest
             .fn()
@@ -59,33 +51,34 @@ describe(`useActions`, () => {
             addWarning: jest.fn(),
           },
         },
+        application: { capabilities: { visualize: { save: true } } },
       },
-    });
-  });
+    }),
+  };
+});
 
+const props = {
+  withActions: DEFAULT_ACTIONS,
+  attributes: mockAttributes,
+  timeRange: {
+    from: '2022-10-26T23:00:00.000Z',
+    to: '2022-11-03T15:16:50.053Z',
+  },
+  inspectActionProps: {
+    handleInspectClick: jest.fn(),
+    isInspectButtonDisabled: false,
+  },
+};
+
+describe(`useActions`, () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render actions', () => {
-    const { result } = renderHook(
-      () =>
-        useActions({
-          withActions: true,
-          attributes: mockAttributes,
-          timeRange: {
-            from: '2022-10-26T23:00:00.000Z',
-            to: '2022-11-03T15:16:50.053Z',
-          },
-          inspectActionProps: {
-            onInspectActionClicked: jest.fn(),
-            isDisabled: false,
-          },
-        }),
-      {
-        wrapper,
-      }
-    );
+    const { result } = renderHook(() => useActions(props), {
+      wrapper: TestProviders,
+    });
     expect(result.current[0].id).toEqual('inspect');
     expect(result.current[0].order).toEqual(4);
     expect(result.current[1].id).toEqual('addToNewCase');
@@ -119,20 +112,11 @@ describe(`useActions`, () => {
     const { result } = renderHook(
       () =>
         useActions({
-          withActions: true,
-          attributes: mockAttributes,
-          timeRange: {
-            from: '2022-10-26T23:00:00.000Z',
-            to: '2022-11-03T15:16:50.053Z',
-          },
-          inspectActionProps: {
-            onInspectActionClicked: jest.fn(),
-            isDisabled: false,
-          },
+          ...props,
           extraActions: mockExtraAction,
         }),
       {
-        wrapper,
+        wrapper: TestProviders,
       }
     );
 

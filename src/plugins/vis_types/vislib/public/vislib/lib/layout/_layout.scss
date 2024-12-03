@@ -134,12 +134,11 @@
   }
 
   .chart {
-    @include euiScrollBar;
     flex: 1 1 100%;
     min-height: 0;
     min-width: 0;
     overflow: visible;
-
+    @include euiScrollBar;
     > svg {
       display: block;
     }
@@ -203,7 +202,7 @@
   }
 
   .slice {
-    stroke-width: $euiSizeXS / 2;
+    stroke-width: calc($euiSizeXS / 2);
     stroke: $euiColorEmptyShade;
 
     &:hover {

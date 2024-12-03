@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // ---------------------------------- WARNING ----------------------------------
 // this file was generated, and should not be edited by hand
@@ -69,8 +70,9 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const MlAnomalyDetectionAlertRequired = rt.type({
   'kibana.alert.job_id': schemaString,
 });
+// prettier-ignore
 const MlAnomalyDetectionAlertOptional = rt.partial({
-  'kibana.alert.anomaly_score': schemaNumber,
+  'kibana.alert.anomaly_score': schemaNumberArray,
   'kibana.alert.anomaly_timestamp': schemaDate,
   'kibana.alert.is_interim': schemaBoolean,
   'kibana.alert.top_influencers': rt.array(

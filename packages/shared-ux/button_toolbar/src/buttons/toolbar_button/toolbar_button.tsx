@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -23,7 +24,7 @@ type ButtonRenderStyle = 'standard' | 'iconButton';
 interface ToolbarButtonCommonProps
   extends Pick<
     EuiButtonPropsForButton,
-    'onClick' | 'iconType' | 'size' | 'data-test-subj' | 'isDisabled'
+    'onClick' | 'onBlur' | 'iconType' | 'size' | 'data-test-subj' | 'isDisabled' | 'aria-label'
   > {
   /**
    * Render style of the toolbar button
@@ -88,7 +89,7 @@ const computeToolbarButtonCommonCSSProps = (
       : {};
 
   const defaultStyles = {
-    ...toolButtonStyles.default,
+    ...(type === 'primary' ? {} : toolButtonStyles.default),
     ...groupPositionStyles,
   };
 
@@ -96,7 +97,7 @@ const computeToolbarButtonCommonCSSProps = (
     ? defaultStyles
     : {
         ...defaultStyles,
-        ...(type === 'primary' ? {} : toolButtonStyles.emptyButton),
+        ...(type === 'empty' ? toolButtonStyles.emptyButton : {}),
       };
 };
 
@@ -162,7 +163,7 @@ const ToolbarIconButton = ({
     <EuiButtonIcon
       {...rest}
       disabled={isDisabled}
-      aria-label={label}
+      aria-label={label ?? rest['aria-label']}
       size={size}
       iconSize={size}
       css={cssProps}

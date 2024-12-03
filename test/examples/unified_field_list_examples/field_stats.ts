@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -54,7 +55,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('field distribution', () => {
       before(async () => {
-        await PageObjects.unifiedFieldList.toggleSidebarSection('empty'); // it will allow to render more fields in Available fields section
+        await PageObjects.unifiedFieldList.toggleSidebarSection('meta'); // it will allow to render more fields in Available fields section
       });
 
       it('should return an auto histogram for numbers and top values', async () => {

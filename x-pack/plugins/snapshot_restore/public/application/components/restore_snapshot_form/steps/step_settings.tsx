@@ -21,7 +21,7 @@ import {
   EuiLink,
   EuiCallOut,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { RestoreSettings } from '../../../../../common/types';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { useCore, useServices } from '../../../app_context';
@@ -143,7 +143,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace fullWidth>
+        <EuiFormRow fullWidth>
           <Fragment>
             <EuiSwitch
               data-test-subj="modifyIndexSettingsSwitch"
@@ -244,7 +244,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace fullWidth>
+        <EuiFormRow fullWidth>
           <Fragment>
             <EuiSwitch
               label={

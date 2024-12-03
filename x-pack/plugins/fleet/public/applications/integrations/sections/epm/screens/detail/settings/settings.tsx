@@ -23,15 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type { Observable } from 'rxjs';
-import type { CoreTheme } from '@kbn/core/public';
-
-import {
-  getNumTransformAssets,
-  TransformInstallWithCurrentUserPermissionCallout,
-} from '../../../../../../../components/transform_install_as_current_user_callout';
-
-import type { PackageInfo } from '../../../../../types';
+import type { FleetStartServices } from '../../../../../../../plugin';
+import type { PackageInfo, PackageMetadata } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
   useGetPackagePoliciesQuery,
@@ -47,6 +40,7 @@ import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
 
@@ -83,20 +77,21 @@ const UpdatesAvailableMsg = ({
       defaultMessage: 'New version available',
     })}
   >
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <FormattedMessage
-          id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
-          defaultMessage="Upgrade to version {latestVersion} to get the latest features."
-          values={{ latestVersion }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <p>
-          <EuiLink onClick={toggleChangelogModal}>{'View changelog.'}</EuiLink>
-        </p>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <FormattedMessage
+      id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
+      defaultMessage="Upgrade to version {latestVersion} to get the latest features. {changelogLink}"
+      values={{
+        latestVersion,
+        changelogLink: (
+          <EuiLink onClick={toggleChangelogModal}>
+            <FormattedMessage
+              id="xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink"
+              defaultMessage="View changelog."
+            />
+          </EuiLink>
+        ),
+      }}
+    />
   </EuiCallOut>
 );
 
@@ -117,240 +112,340 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
 
 interface Props {
   packageInfo: PackageInfo;
-  theme$: Observable<CoreTheme>;
+  packageMetadata?: PackageMetadata;
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
 }
 
-export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
-  const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
-  const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
-  const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+export const SettingsPage: React.FC<Props> = memo(
+  ({ packageInfo, packageMetadata, startServices }: Props) => {
+    const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
+    const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
+    const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
 
-  const toggleChangelogModal = useCallback(() => {
-    setIsChangelogModalOpen(!isChangelogModalOpen);
-  }, [isChangelogModalOpen]);
-  const getPackageInstallStatus = useGetPackageInstallStatus();
+    const toggleChangelogModal = useCallback(() => {
+      setIsChangelogModalOpen(!isChangelogModalOpen);
+    }, [isChangelogModalOpen]);
+    const getPackageInstallStatus = useGetPackageInstallStatus();
 
-  const { data: packagePoliciesData } = useGetPackagePoliciesQuery({
-    perPage: SO_SEARCH_LIMIT,
-    page: 1,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
-  });
+    const { data: packagePoliciesData } = useGetPackagePoliciesQuery({
+      perPage: SO_SEARCH_LIMIT,
+      page: 1,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
+    });
 
-  const packagePolicyIds = useMemo(
-    () => packagePoliciesData?.items.map(({ id }) => id),
-    [packagePoliciesData]
-  );
+    const packagePolicyIds = useMemo(
+      () => packagePoliciesData?.items.map(({ id }) => id),
+      [packagePoliciesData]
+    );
 
-  const agentPolicyIds = useMemo(
-    () => packagePoliciesData?.items.map(({ policy_id: agentPolicyId }) => agentPolicyId) ?? [],
-    [packagePoliciesData]
-  );
+    const agentPolicyIds = useMemo(
+      () => packagePoliciesData?.items.flatMap((packagePolicy) => packagePolicy.policy_ids) ?? [],
+      [packagePoliciesData]
+    );
 
-  const { data: dryRunData } = useUpgradePackagePolicyDryRunQuery(
-    packagePolicyIds ?? [],
-    latestVersion,
-    {
-      enabled: packagePolicyIds && packagePolicyIds.length > 0,
-    }
-  );
-
-  const updatePackageMutation = useUpdatePackageMutation();
-
-  const { notifications } = useStartServices();
-
-  const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
-    return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
-  }, [name]);
-
-  const isShowKeepPoliciesUpToDateSwitchDisabled = useMemo(() => {
-    return AUTO_UPGRADE_POLICIES_PACKAGES.some((pkg) => pkg.name === name);
-  }, [name]);
-
-  const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
-    keepPoliciesUpToDate ?? false
-  );
-
-  const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
-    setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
-
-    updatePackageMutation.mutate(
+    const { data: dryRunData } = useUpgradePackagePolicyDryRunQuery(
+      packagePolicyIds ?? [],
+      latestVersion,
       {
-        pkgName: packageInfo.name,
-        pkgVersion: packageInfo.version,
-        body: {
-          keepPoliciesUpToDate: !keepPoliciesUpToDateSwitchValue,
-        },
-      },
-      {
-        onSuccess: () => {
-          notifications.toasts.addSuccess({
-            title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
-              defaultMessage: 'Integration settings saved',
-            }),
-            text: !keepPoliciesUpToDateSwitchValue
-              ? i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateEnabledSuccess', {
-                  defaultMessage:
-                    'Fleet will automatically keep integration policies up to date for {title}',
-                  values: { title },
-                })
-              : i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateDisabledSuccess', {
-                  defaultMessage:
-                    'Fleet will not automatically keep integration policies up to date for {title}',
-                  values: { title },
-                }),
-          });
-        },
-        onError: (error) => {
-          notifications.toasts.addError(error, {
-            title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
-              defaultMessage: 'Error saving integration settings',
-            }),
-            toastMessage: i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateError', {
-              defaultMessage: 'Error saving integration settings for {title}',
-              values: { title },
-            }),
-          });
-        },
+        enabled: packagePolicyIds && packagePolicyIds.length > 0,
       }
     );
-  }, [
-    keepPoliciesUpToDateSwitchValue,
-    notifications.toasts,
-    packageInfo.name,
-    packageInfo.version,
-    title,
-    updatePackageMutation,
-  ]);
 
-  const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
-  const packageHasUsages = !!packagePoliciesData?.total;
+    const updatePackageMutation = useUpdatePackageMutation();
 
-  const updateAvailable =
-    installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
+    const { notifications } = useStartServices();
 
-  const isViewingOldPackage = version < latestVersion;
-  // hide install/remove options if the user has version of the package is installed
-  // and this package is out of date or if they do have a version installed but it's not this one
-  const hideInstallOptions =
-    (installationStatus === InstallStatus.notInstalled && isViewingOldPackage) ||
-    (installationStatus === InstallStatus.installed && installedVersion !== version);
+    const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
+      return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
+    }, [name]);
 
-  const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
+    const isShowKeepPoliciesUpToDateSwitchDisabled = useMemo(() => {
+      return AUTO_UPGRADE_POLICIES_PACKAGES.some((pkg) => pkg.name === name);
+    }, [name]);
 
-  const { numOfAssets, numTransformAssets } = useMemo(
-    () => ({
-      numTransformAssets: getNumTransformAssets(packageInfo.assets),
-      numOfAssets: Object.entries(packageInfo.assets).reduce(
-        (acc, [serviceName, serviceNameValue]) =>
-          acc +
-          Object.entries(serviceNameValue).reduce(
-            (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
-            0
-          ),
-        0
-      ),
-    }),
-    [packageInfo.assets]
-  );
+    const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
+      keepPoliciesUpToDate ?? false
+    );
 
-  return (
-    <>
-      <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={1} />
-        <EuiFlexItem grow={6}>
-          <EuiText>
-            <EuiTitle>
-              <h3>
-                <FormattedMessage
-                  id="xpack.fleet.integrations.settings.packageSettingsTitle"
-                  defaultMessage="Settings"
-                />
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            {installedVersion !== null && (
-              <div>
-                <EuiTitle>
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.fleet.integrations.settings.packageVersionTitle"
-                      defaultMessage="{title} version"
-                      values={{
-                        title,
-                      }}
-                    />
-                  </h4>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <table>
-                  <tbody>
-                    <tr>
-                      <SettingsTitleCell>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.versionInfo.installedVersion"
-                          defaultMessage="Installed version"
-                        />
-                      </SettingsTitleCell>
-                      <td>
-                        <EuiTitle size="xs" data-test-subj="epmSettings.installedVersionTitle">
-                          <span>{installedVersion}</span>
-                        </EuiTitle>
-                      </td>
-                    </tr>
-                    <tr>
-                      <SettingsTitleCell>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.versionInfo.latestVersion"
-                          defaultMessage="Latest version"
-                        />
-                      </SettingsTitleCell>
-                      <td>
-                        <EuiTitle size="xs" data-test-subj="epmSettings.latestVersionTitle">
-                          <span>{latestVersion}</span>
-                        </EuiTitle>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                {shouldShowKeepPoliciesUpToDateSwitch && (
-                  <>
-                    <KeepPoliciesUpToDateSwitch
-                      checked={keepPoliciesUpToDateSwitchValue}
-                      onChange={handleKeepPoliciesUpToDateSwitchChange}
-                      disabled={isShowKeepPoliciesUpToDateSwitchDisabled}
-                    />
-                    <EuiSpacer size="l" />
-                  </>
-                )}
+    const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
+      setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
 
-                {(updateAvailable || isUpgradingPackagePolicies) && (
-                  <>
-                    <UpdatesAvailableMsg
-                      latestVersion={latestVersion}
-                      toggleChangelogModal={toggleChangelogModal}
-                    />
-                    <EuiSpacer size="l" />
-                    <p>
-                      <UpdateButton
-                        {...packageInfo}
-                        version={latestVersion}
-                        agentPolicyIds={agentPolicyIds}
-                        packagePolicyIds={packagePolicyIds}
-                        dryRunData={dryRunData}
-                        isUpgradingPackagePolicies={isUpgradingPackagePolicies}
-                        setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
-                        theme$={theme$}
+      updatePackageMutation.mutate(
+        {
+          pkgName: packageInfo.name,
+          pkgVersion: packageInfo.version,
+          body: {
+            keepPoliciesUpToDate: !keepPoliciesUpToDateSwitchValue,
+          },
+        },
+        {
+          onSuccess: () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
+                defaultMessage: 'Integration settings saved',
+              }),
+              text: !keepPoliciesUpToDateSwitchValue
+                ? i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateEnabledSuccess', {
+                    defaultMessage:
+                      'Fleet will automatically keep integration policies up to date for {title}',
+                    values: { title },
+                  })
+                : i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateDisabledSuccess', {
+                    defaultMessage:
+                      'Fleet will not automatically keep integration policies up to date for {title}',
+                    values: { title },
+                  }),
+            });
+          },
+          onError: (error) => {
+            notifications.toasts.addError(error, {
+              title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
+                defaultMessage: 'Error saving integration settings',
+              }),
+              toastMessage: i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateError', {
+                defaultMessage: 'Error saving integration settings for {title}',
+                values: { title },
+              }),
+            });
+          },
+        }
+      );
+    }, [
+      keepPoliciesUpToDateSwitchValue,
+      notifications.toasts,
+      packageInfo.name,
+      packageInfo.version,
+      title,
+      updatePackageMutation,
+    ]);
+
+    const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
+
+    const updateAvailable =
+      installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
+
+    const isViewingOldPackage = version < latestVersion;
+    // hide install/remove options if the user has version of the package is installed
+    // and this package is out of date or if they do have a version installed but it's not this one
+    const hideInstallOptions =
+      (installationStatus === InstallStatus.notInstalled && isViewingOldPackage) ||
+      (installationStatus === InstallStatus.installed && installedVersion !== version);
+
+    const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
+
+    return (
+      <>
+        <EuiFlexGroup alignItems="flexStart">
+          <SideBarColumn grow={1} />
+          <EuiFlexItem grow={7}>
+            <EuiText>
+              <EuiTitle>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.fleet.integrations.settings.packageSettingsTitle"
+                    defaultMessage="Settings"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {installedVersion !== null && (
+                <div>
+                  <EuiTitle>
+                    <h4>
+                      <FormattedMessage
+                        id="xpack.fleet.integrations.settings.packageVersionTitle"
+                        defaultMessage="{title} version"
+                        values={{
+                          title,
+                        }}
                       />
-                    </p>
-                  </>
-                )}
-              </div>
-            )}
-            {!hideInstallOptions && !isUpdating && (
-              <div>
-                <EuiSpacer size="s" />
-                {installationStatus === InstallStatus.notInstalled ||
-                installationStatus === InstallStatus.installing ? (
+                    </h4>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <table>
+                    <tbody>
+                      <tr>
+                        <SettingsTitleCell>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.versionInfo.installedVersion"
+                            defaultMessage="Installed version"
+                          />
+                        </SettingsTitleCell>
+                        <td>
+                          <EuiTitle size="xs" data-test-subj="epmSettings.installedVersionTitle">
+                            <span>{installedVersion}</span>
+                          </EuiTitle>
+                        </td>
+                      </tr>
+                      <tr>
+                        <SettingsTitleCell>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.versionInfo.latestVersion"
+                            defaultMessage="Latest version"
+                          />
+                        </SettingsTitleCell>
+                        <td>
+                          <EuiTitle size="xs" data-test-subj="epmSettings.latestVersionTitle">
+                            <span>{latestVersion}</span>
+                          </EuiTitle>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  {shouldShowKeepPoliciesUpToDateSwitch && (
+                    <>
+                      <KeepPoliciesUpToDateSwitch
+                        checked={keepPoliciesUpToDateSwitchValue}
+                        onChange={handleKeepPoliciesUpToDateSwitchChange}
+                        disabled={isShowKeepPoliciesUpToDateSwitchDisabled}
+                      />
+                      <EuiSpacer size="l" />
+                    </>
+                  )}
+
+                  {(updateAvailable || isUpgradingPackagePolicies) && (
+                    <>
+                      <UpdatesAvailableMsg
+                        latestVersion={latestVersion}
+                        toggleChangelogModal={toggleChangelogModal}
+                      />
+                      <EuiSpacer size="l" />
+                      <p>
+                        <UpdateButton
+                          {...packageInfo}
+                          version={latestVersion}
+                          agentPolicyIds={agentPolicyIds}
+                          packagePolicyIds={packagePolicyIds}
+                          dryRunData={dryRunData}
+                          isUpgradingPackagePolicies={isUpgradingPackagePolicies}
+                          setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
+                          startServices={startServices}
+                        />
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+              {!hideInstallOptions && !isUpdating && (
+                <div>
+                  <EuiSpacer size="s" />
+                  {installationStatus === InstallStatus.notInstalled ||
+                  installationStatus === InstallStatus.installing ? (
+                    <div>
+                      <EuiTitle>
+                        <h4>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageInstallTitle"
+                            defaultMessage="Install {title}"
+                            values={{
+                              title,
+                            }}
+                          />
+                        </h4>
+                      </EuiTitle>
+                      <EuiSpacer size="s" />
+                      <p>
+                        <FormattedMessage
+                          id="xpack.fleet.integrations.settings.packageInstallDescription"
+                          defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for {title} data."
+                          values={{
+                            title,
+                          }}
+                        />
+                      </p>
+                      <EuiFlexGroup>
+                        <EuiFlexItem grow={false}>
+                          <p>
+                            <InstallButton
+                              {...packageInfo}
+                              disabled={packageMetadata?.has_policies}
+                            />
+                          </p>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </div>
+                  ) : (
+                    <>
+                      <EuiFlexGroup direction="column" gutterSize="m">
+                        <EuiFlexItem>
+                          <EuiTitle>
+                            <h4>
+                              <FormattedMessage
+                                id="xpack.fleet.integrations.settings.packageUninstallTitle"
+                                defaultMessage="Uninstall"
+                              />
+                            </h4>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageUninstallDescription"
+                            defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <div>
+                            <UninstallButton
+                              {...packageInfo}
+                              latestVersion={latestVersion}
+                              disabled={packageMetadata?.has_policies}
+                            />
+                          </div>
+                        </EuiFlexItem>
+                        {packageMetadata?.has_policies && (
+                          <EuiFlexItem>
+                            <EuiText color="subdued" size="s">
+                              <FormattedMessage
+                                id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
+                                defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
+                                values={{
+                                  title,
+                                  strongNote: <NoteLabel />,
+                                }}
+                              />
+                            </EuiText>
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                      <EuiSpacer size="l" />
+                      <EuiFlexGroup direction="column" gutterSize="m">
+                        <EuiFlexItem>
+                          <EuiTitle>
+                            <h4>
+                              <FormattedMessage
+                                id="xpack.fleet.integrations.settings.packageReinstallTitle"
+                                defaultMessage="Reinstall"
+                              />
+                            </h4>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageReinstallDescription"
+                            defaultMessage="Reinstall Kibana and Elasticsearch assets for this integration."
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <div>
+                            <ReinstallButton
+                              {...packageInfo}
+                              installSource={
+                                'installationInfo' in packageInfo &&
+                                packageInfo.installationInfo?.install_source
+                                  ? packageInfo.installationInfo.install_source
+                                  : ''
+                              }
+                            />
+                          </div>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </>
+                  )}
+                </div>
+              )}
+              {hideInstallOptions && isViewingOldPackage && !isUpdating && (
+                <div>
+                  <EuiSpacer size="s" />
                   <div>
                     <EuiTitle>
                       <h4>
@@ -364,160 +459,37 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                       </h4>
                     </EuiTitle>
                     <EuiSpacer size="s" />
-
-                    {numTransformAssets > 0 ? (
-                      <>
-                        <TransformInstallWithCurrentUserPermissionCallout
-                          count={numTransformAssets}
-                        />
-                        <EuiSpacer size="s" />
-                      </>
-                    ) : null}
                     <p>
-                      <FormattedMessage
-                        id="xpack.fleet.integrations.settings.packageInstallDescription"
-                        defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for {title} data."
-                        values={{
-                          title,
-                        }}
-                      />
+                      <EuiText color="subdued">
+                        <FormattedMessage
+                          id="xpack.fleet.integrations.settings.packageSettingsOldVersionMessage"
+                          defaultMessage="Version {version} is out of date. The {latestVersion} of this integration is available to be installed."
+                          values={{
+                            version,
+                            latestVersion: (
+                              <LatestVersionLink name={name} version={latestVersion} />
+                            ),
+                          }}
+                        />
+                      </EuiText>
                     </p>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <p>
-                          <InstallButton
-                            {...packageInfo}
-                            numOfAssets={numOfAssets}
-                            disabled={!packagePoliciesData || packageHasUsages}
-                          />
-                        </p>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
                   </div>
-                ) : (
-                  <>
-                    <EuiFlexGroup direction="column" gutterSize="m">
-                      <EuiFlexItem>
-                        <EuiTitle>
-                          <h4>
-                            <FormattedMessage
-                              id="xpack.fleet.integrations.settings.packageUninstallTitle"
-                              defaultMessage="Uninstall"
-                            />
-                          </h4>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageUninstallDescription"
-                          defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div>
-                          <UninstallButton
-                            {...packageInfo}
-                            numOfAssets={numOfAssets}
-                            latestVersion={latestVersion}
-                            disabled={!packagePoliciesData || packageHasUsages}
-                          />
-                        </div>
-                      </EuiFlexItem>
-                      {packageHasUsages && (
-                        <EuiFlexItem>
-                          <EuiText color="subdued" size="s">
-                            <FormattedMessage
-                              id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
-                              defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
-                              values={{
-                                title,
-                                strongNote: <NoteLabel />,
-                              }}
-                            />
-                          </EuiText>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                    <EuiSpacer size="l" />
-                    <EuiFlexGroup direction="column" gutterSize="m">
-                      <EuiFlexItem>
-                        <EuiTitle>
-                          <h4>
-                            <FormattedMessage
-                              id="xpack.fleet.integrations.settings.packageReinstallTitle"
-                              defaultMessage="Reinstall"
-                            />
-                          </h4>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageReinstallDescription"
-                          defaultMessage="Reinstall Kibana and Elasticsearch assets for this integration."
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <div>
-                          <ReinstallButton
-                            {...packageInfo}
-                            installSource={
-                              'installationInfo' in packageInfo &&
-                              packageInfo.installationInfo?.install_source
-                                ? packageInfo.installationInfo.install_source
-                                : ''
-                            }
-                          />
-                        </div>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                )}
-              </div>
-            )}
-            {hideInstallOptions && isViewingOldPackage && !isUpdating && (
-              <div>
-                <EuiSpacer size="s" />
-                <div>
-                  <EuiTitle>
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.fleet.integrations.settings.packageInstallTitle"
-                        defaultMessage="Install {title}"
-                        values={{
-                          title,
-                        }}
-                      />
-                    </h4>
-                  </EuiTitle>
-                  <EuiSpacer size="s" />
-                  <p>
-                    <EuiText color="subdued">
-                      <FormattedMessage
-                        id="xpack.fleet.integrations.settings.packageSettingsOldVersionMessage"
-                        defaultMessage="Version {version} is out of date. The {latestVersion} of this integration is available to be installed."
-                        values={{
-                          version,
-                          latestVersion: <LatestVersionLink name={name} version={latestVersion} />,
-                        }}
-                      />
-                    </EuiText>
-                  </p>
                 </div>
-              </div>
-            )}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiPortal>
-        {isChangelogModalOpen && (
-          <ChangelogModal
-            currentVersion={version}
-            latestVersion={latestVersion}
-            packageName={name}
-            onClose={toggleChangelogModal}
-          />
-        )}
-      </EuiPortal>
-    </>
-  );
-});
+              )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiPortal>
+          {isChangelogModalOpen && (
+            <ChangelogModal
+              currentVersion={version}
+              latestVersion={latestVersion}
+              packageName={name}
+              onClose={toggleChangelogModal}
+            />
+          )}
+        </EuiPortal>
+      </>
+    );
+  }
+);

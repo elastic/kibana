@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createHash } from 'crypto';
@@ -64,16 +65,39 @@ export class Instance extends Entity<ApmFields> {
     });
   }
 
-  error({ message, type }: { message: string; type?: string }) {
+  crash({ message, type }: { message: string; type?: string }) {
     return new ApmError({
       ...this.fields,
+      'error.type': 'crash',
       'error.exception': [{ message, ...(type ? { type } : {}) }],
-      'error.grouping_name': getErrorGroupingKey(message),
+    });
+  }
+  error({
+    message,
+    type,
+    culprit,
+    groupingKey,
+  }: {
+    message: string;
+    type?: string;
+    culprit?: string;
+    groupingKey?: string;
+  }) {
+    return new ApmError({
+      ...this.fields,
+      ...(groupingKey ? { 'error.grouping_key': groupingKey } : {}),
+      'error.exception': [{ message, ...(type ? { type } : {}) }],
+      'error.culprit': culprit,
     });
   }
 
   containerId(containerId: string) {
     this.fields['container.id'] = containerId;
+    return this;
+  }
+
+  hostName(hostName: string) {
+    this.fields['host.name'] = hostName;
     return this;
   }
 

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook, act } from '@testing-library/react';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { TableVisUiState } from '../../types';
 import { useUiState } from './use_ui_state';
@@ -38,7 +39,7 @@ describe('useUiState', () => {
   });
 
   it('should subscribe on uiState changes and update local state', async () => {
-    const { result, unmount, waitForNextUpdate } = renderHook(() => useUiState(uiState));
+    const { result, unmount } = renderHook(() => useUiState(uiState));
 
     expect(uiState.on).toHaveBeenCalledWith('change', expect.any(Function));
     // @ts-expect-error
@@ -60,18 +61,18 @@ describe('useUiState', () => {
       updateOnChange();
     });
 
-    await waitForNextUpdate();
-
     // should update local state with new values
-    expect(result.current).toEqual({
-      columnsWidth: [],
-      sort: {
-        columnIndex: 1,
-        direction: 'asc',
-      },
-      setColumnsWidth: expect.any(Function),
-      setSort: expect.any(Function),
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        columnsWidth: [],
+        sort: {
+          columnIndex: 1,
+          direction: 'asc',
+        },
+        setColumnsWidth: expect.any(Function),
+        setSort: expect.any(Function),
+      })
+    );
 
     act(() => {
       updateOnChange();

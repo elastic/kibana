@@ -35,6 +35,14 @@ import type {
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import { riskEngineDataClientMock } from '../../../entity_analytics/risk_engine/risk_engine_data_client.mock';
+import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/risk_score_data_client.mock';
+import { entityStoreDataClientMock } from '../../../entity_analytics/entity_store/entity_store_data_client.mock';
+import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { detectionRulesClientMock } from '../../rule_management/logic/detection_rules_client/__mocks__/detection_rules_client';
+import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
+import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
+import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -54,6 +62,7 @@ export const createMockClients = () => {
       exceptionListClient: listMock.getExceptionListClient(core.savedObjects.client),
     },
     rulesClient: rulesClientMock.create(),
+    detectionRulesClient: detectionRulesClientMock.create(),
     actionsClient: actionsClientMock.create(),
     ruleDataService: ruleRegistryMocks.createRuleDataService(),
 
@@ -63,6 +72,15 @@ export const createMockClients = () => {
     detectionEngineHealthClient: detectionEngineHealthClientMock.create(),
     ruleExecutionLog: ruleExecutionLogMock.forRoutes.create(),
     riskEngineDataClient: riskEngineDataClientMock.create(),
+    riskScoreDataClient: riskScoreDataClientMock.create(),
+    assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+    entityStoreDataClient: entityStoreDataClientMock.create(),
+
+    internalFleetServices: {
+      packages: packageServiceMock.createClient(),
+    },
+    siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
+    getInferenceClient: jest.fn(),
   };
 };
 
@@ -85,13 +103,14 @@ const createRequestContextMock = (
       getActionsClient: jest.fn(() => clients.actionsClient),
     } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>,
     alerting: {
-      getRulesClient: jest.fn(() => clients.rulesClient),
+      getRulesClient: jest.fn().mockResolvedValue(clients.rulesClient),
     } as unknown as jest.Mocked<AlertingApiRequestHandlerContext>,
     licensing: clients.licensing,
     lists: {
       getListClient: jest.fn(() => clients.lists.listClient),
       getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
       getExtensionPointClient: jest.fn(),
+      getInternalListClient: jest.fn(),
     },
   };
 };
@@ -110,6 +129,7 @@ const createSecuritySolutionRequestContextMock = (
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
+  const mockAuditLogger = auditLoggerMock.create();
 
   return {
     core,
@@ -134,14 +154,21 @@ const createSecuritySolutionRequestContextMock = (
     }),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
+    getDetectionRulesClient: jest.fn(() => clients.detectionRulesClient),
     getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
-    getInternalFleetServices: jest.fn(() => {
-      // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
-      throw new Error('Not implemented');
-    }),
+    getInternalFleetServices: jest.fn(
+      () => clients.internalFleetServices as unknown as EndpointInternalFleetServicesInterface
+    ),
     getRiskEngineDataClient: jest.fn(() => clients.riskEngineDataClient),
+    getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
+    getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
+    getAuditLogger: jest.fn(() => mockAuditLogger),
+    getDataViewsService: jest.fn(),
+    getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
+    getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
+    getInferenceClient: jest.fn(() => clients.getInferenceClient()),
   };
 };
 

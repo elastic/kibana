@@ -20,20 +20,23 @@ import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { AGENTS_INDEX, AGENT_ACTIONS_INDEX, API_VERSIONS } from '../../../../../../common';
+
 import { sendRequest } from '../../../hooks';
+
+import { debugRoutesService } from '../../../../../../common/services';
+
+import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
 
 import { CodeBlock } from './code_block';
 
 const fetchIndex = async (index?: string) => {
-  if (!index) return;
-  const path = `/${index}/_search`;
+  if (!index) return null;
   const response = await sendRequest({
     method: 'post',
-    path: `/api/console/proxy`,
-    query: {
-      path,
-      method: 'GET',
-    },
+    path: debugRoutesService.getIndexPath(),
+    body: { index },
+    version: API_VERSIONS.internal.v1,
   });
 
   return response;
@@ -41,10 +44,9 @@ const fetchIndex = async (index?: string) => {
 
 export const FleetIndexDebugger = () => {
   const indices = [
-    { label: '.fleet-agents', value: '.fleet-agents' },
-    { label: '.fleet-actions', value: '.fleet-actions' },
-    { label: '.fleet-servers', value: '.fleet-servers' },
-    { label: '.fleet-enrollment-api-keys', value: '.fleet-enrollment-api-keys' },
+    { label: AGENTS_INDEX, value: AGENTS_INDEX },
+    { label: AGENT_ACTIONS_INDEX, value: AGENT_ACTIONS_INDEX },
+    { label: ENROLLMENT_API_KEYS_INDEX, value: ENROLLMENT_API_KEYS_INDEX },
   ];
   const [index, setIndex] = useState<string | undefined>();
 

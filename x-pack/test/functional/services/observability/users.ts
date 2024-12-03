@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Role } from '@kbn/security-plugin/common/model';
+import { Role } from '@kbn/security-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type CreateRolePayload = Pick<Role, 'metadata' | 'elasticsearch' | 'kibana'>;
@@ -58,7 +58,7 @@ export function ObservabilityUsersProvider({ getPageObject, getService }: FtrPro
  */
 const defineBasicObservabilityRole = (
   features: Partial<{
-    observabilityCases: string[];
+    observabilityCasesV2: string[];
     apm: string[];
     logs: string[];
     infrastructure: string[];

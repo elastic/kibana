@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanelProps,
   EuiSpacer,
   EuiText,
@@ -20,25 +20,33 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { TryInConsoleButton } from '@kbn/try-in-console';
 import { OverviewPanel } from './overview_panel';
 import './select_client.scss';
 
 export interface SelectClientPanelProps {
   docLinks: { elasticsearchClients: string; kibanaRunApiInConsole: string };
-  http: HttpStart;
   isPanelLeft?: boolean;
   overviewPanelProps?: Partial<EuiPanelProps>;
   callout?: React.ReactNode;
+  application?: ApplicationStart;
+  consolePlugin?: ConsolePluginStart;
+  sharePlugin: SharePluginStart;
+  children: React.ReactNode;
 }
 
-export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
+export const SelectClientPanel: FC<PropsWithChildren<SelectClientPanelProps>> = ({
   docLinks,
   children,
-  http,
   isPanelLeft = true,
   overviewPanelProps,
   callout,
+  application,
+  consolePlugin,
+  sharePlugin,
 }) => {
   const panelContent = (
     <>
@@ -73,11 +81,14 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
             })}
 
             <span>
-              <EuiLink target="_blank" href={http.basePath.prepend(`/app/dev_tools#/console`)}>
-                {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.link', {
+              <TryInConsoleButton
+                application={application}
+                consolePlugin={consolePlugin}
+                sharePlugin={sharePlugin}
+                content={i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.link', {
                   defaultMessage: 'Try Console now',
                 })}
-              </EuiLink>
+              />
             </span>
           </p>
         </EuiCallOut>
@@ -87,22 +98,23 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
   return (
     <OverviewPanel
       description={
-        <FormattedMessage
-          id="searchApiPanels.welcomeBanner.selectClient.description"
-          defaultMessage="Elastic builds and maintains clients in several popular languages and our community has contributed many more. Select your favorite language client or dive into the {console} to get started."
-          values={{
-            console: (
-              <EuiLink href={http.basePath.prepend(`/app/dev_tools#/console`)}>
-                {i18n.translate(
-                  'searchApiPanels.welcomeBanner.selectClient.description.console.link',
-                  {
-                    defaultMessage: 'Console',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
+        <EuiFlexGroup direction="column" alignItems="flexStart" justifyContent="flexStart">
+          <EuiFlexItem>
+            <FormattedMessage
+              id="searchApiPanels.welcomeBanner.selectClient.description"
+              defaultMessage="Elastic builds and maintains clients in several popular languages and our community has contributed many more. Select your favorite language client or dive into the console to get started."
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TryInConsoleButton
+              application={application}
+              consolePlugin={consolePlugin}
+              sharePlugin={sharePlugin}
+              type="button"
+              showIcon={false}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       leftPanelContent={isPanelLeft ? panelContent : undefined}
       rightPanelContent={!isPanelLeft ? panelContent : undefined}

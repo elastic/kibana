@@ -1,0 +1,40 @@
+steps:
+  - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
+    label: 'Serverless AI Assistant - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
+    label: 'AI Assistant - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1

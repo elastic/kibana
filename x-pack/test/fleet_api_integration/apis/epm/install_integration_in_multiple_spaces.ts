@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 const testSpaceId = 'fleet_test_space';
 
@@ -15,9 +17,10 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
   const esArchiver = getService('esArchiver');
-  const server = dockerServers.get('registry');
+  const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
+
   const pkgName = 'system';
   const pkgVersion = '1.27.0';
 
@@ -36,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const installPackageInSpace = async (pkg: string, version: string, spaceId: string) => {
-    await supertest
+    return supertest
       .post(`/s/${spaceId}/api/fleet/epm/packages/${pkg}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
@@ -67,13 +70,14 @@ export default function (providerContext: FtrProviderContext) {
       })
       .catch(() => {});
 
-  // FLAKY: https://github.com/elastic/kibana/issues/161624
-  describe.skip('When installing system integration in multiple spaces', async () => {
+  describe('When installing system integration in multiple spaces', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
-      if (!server.enabled) return;
+      await fleetAndAgents.setup();
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
+        return;
+      }
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await installPackage(pkgName, pkgVersion);
 
@@ -89,15 +93,24 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install kibana assets', async function () {
       // These are installed from Fleet along with every package
-      const resIndexPatternLogs = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'logs-*',
-      });
+      const resIndexPatternLogs = await pRetry(
+        () =>
+          kibanaServer.savedObjects.get({
+            type: 'index-pattern',
+            id: 'logs-*',
+          }),
+        { retries: 3 }
+      );
       expect(resIndexPatternLogs.id).equal('logs-*');
-      const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'metrics-*',
-      });
+
+      const resIndexPatternMetrics = await pRetry(
+        () =>
+          kibanaServer.savedObjects.get({
+            type: 'index-pattern',
+            id: 'metrics-*',
+          }),
+        { retries: 3 }
+      );
       expect(resIndexPatternMetrics.id).equal('metrics-*');
     });
 
@@ -120,6 +133,42 @@ export default function (providerContext: FtrProviderContext) {
     it('should create package tag saved objects', async () => {
       const spaceTag = await getTag(`fleet-pkg-${pkgName}-fleet_test_space`, testSpaceId);
       expect(spaceTag).not.equal(undefined);
+    });
+
+    it('should keep assets in space when format version is bumped', async () => {
+      const nginxPkgName = 'nginx';
+      const nginxPkgVersion = '1.17.0';
+
+      const installResponse = await installPackageInSpace(
+        nginxPkgName,
+        nginxPkgVersion,
+        testSpaceId
+      );
+
+      const firstAsset = installResponse.body.items.find((item: any) => item.type === 'dashboard');
+
+      // Bump format version directly on installation saved object, then call setup to trigger a reinstall
+      await es.update({
+        index: INGEST_SAVED_OBJECT_INDEX,
+        id: `${PACKAGES_SAVED_OBJECT_TYPE}:${nginxPkgName}`,
+        body: {
+          doc: {
+            [PACKAGES_SAVED_OBJECT_TYPE]: {
+              install_format_schema_version: '99.99.99',
+            },
+          },
+        },
+      });
+
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').send();
+
+      const res = await es.get({
+        index: '.kibana_analytics',
+        id: `${firstAsset.type}:${firstAsset.id}`,
+      });
+
+      expect(res.found).to.be(true);
+      expect((res._source as any).namespaces).to.eql([testSpaceId]);
     });
   });
 }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { calculateRowOptions } from './calculate_row_options';
 
 interface SwimLanePaginationProps {
   fromPage: number;
@@ -50,25 +52,26 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
 
   const pageCount = Math.ceil(cardinality / perPage);
 
-  const items = [5, 10, 20, 50, 100].map((v) => {
-    return (
-      <EuiContextMenuItem
-        key={`${v}_rows`}
-        icon={v === perPage ? 'check' : 'empty'}
-        onClick={() => {
-          closePopover();
-          setPerPage(v);
-        }}
-        data-test-subj={`${v} rows`}
-      >
-        <FormattedMessage
-          id="xpack.ml.explorer.swimLaneSelectRowsPerPage"
-          defaultMessage="{rowsCount} rows"
-          values={{ rowsCount: v }}
-        />
-      </EuiContextMenuItem>
-    );
-  });
+  const rowOptions = [5, 10, 20, 50, 100];
+  const items = calculateRowOptions(rowOptions, cardinality);
+
+  const menuItems = items.map((v) => (
+    <EuiContextMenuItem
+      key={`${v}_rows`}
+      icon={v === perPage ? 'check' : 'empty'}
+      onClick={() => {
+        closePopover();
+        setPerPage(v);
+      }}
+      data-test-subj={`${v} rows`}
+    >
+      <FormattedMessage
+        id="xpack.ml.explorer.swimLaneSelectRowsPerPage"
+        defaultMessage="{rowsCount} rows"
+        values={{ rowsCount: v }}
+      />
+    </EuiContextMenuItem>
+  ));
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -96,7 +99,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
           closePopover={closePopover}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel items={items} data-test-subj="mlSwimLanePageSizePanel" />
+          <EuiContextMenuPanel items={menuItems} data-test-subj="mlSwimLanePageSizePanel" />
         </EuiPopover>
       </EuiFlexItem>
 

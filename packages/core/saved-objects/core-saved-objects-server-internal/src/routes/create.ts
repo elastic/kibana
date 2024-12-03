@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -21,16 +23,24 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
+  deprecationInfo: RouteDeprecationInfo;
 }
 
 export const registerCreateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/{type}/{id?}',
+      options: {
+        summary: `Create a saved object`,
+        tags: ['oas-tag:saved objects'],
+        access,
+        deprecated: deprecationInfo,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -57,15 +67,15 @@ export const registerCreateRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'post',
         path: '/api/saved_objects/{type}/{id?}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
-      const { overwrite } = req.query;
+      const { type, id } = request.params;
+      const { overwrite } = request.query;
       const {
         attributes,
         migrationVersion,
@@ -73,10 +83,10 @@ export const registerCreateRoute = (
         typeMigrationVersion,
         references,
         initialNamespaces,
-      } = req.body;
+      } = request.body;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsCreate({ request, types: [type] }).catch(() => {});
 
       const { savedObjects } = await context.core;
       if (!allowHttpApiAccess) {
@@ -93,7 +103,7 @@ export const registerCreateRoute = (
         migrationVersionCompatibility: 'compatible' as const,
       };
       const result = await savedObjects.client.create(type, attributes, options);
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

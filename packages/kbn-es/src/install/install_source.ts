@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
@@ -33,6 +34,7 @@ export async function installSource({
   installPath = path.resolve(basePath, 'source'),
   log = defaultLog,
   esArgs,
+  resources,
 }: InstallSourceOptions) {
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
@@ -59,6 +61,7 @@ export async function installSource({
     installPath,
     log,
     esArgs,
+    resources,
   });
 }
 
@@ -81,7 +84,7 @@ async function sourceInfo(cwd: string, license: string, log: ToolingLog = defaul
   log.info('on %s at %s', chalk.bold(branch), chalk.bold(sha));
   log.info('%s locally modified file(s)', chalk.bold(status.modified.length));
 
-  const etag = crypto.createHash('md5').update(branch);
+  const etag = crypto.createHash('sha256').update(branch);
   etag.update(sha);
 
   // for changed files, use last modified times in hash calculation
@@ -89,7 +92,7 @@ async function sourceInfo(cwd: string, license: string, log: ToolingLog = defaul
     etag.update(fs.statSync(path.join(cwd, file.path)).mtime.toString());
   });
 
-  const cwdHash = crypto.createHash('md5').update(cwd).digest('hex').substr(0, 8);
+  const cwdHash = crypto.createHash('sha256').update(cwd).digest('hex').substr(0, 8);
 
   const basename = `${branch}-${task}-${cwdHash}`;
   const filename = `${basename}.${ext}`;

@@ -1,0 +1,121 @@
+openapi: 3.0.0
+info:
+  title: Create rule exception list items API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/{id}/exceptions:
+    post:
+      x-labels: [serverless, ess]
+      operationId: CreateRuleExceptionListItems
+      x-codegen-enabled: true
+      summary: Create rule exception list items
+      description: Create exception items that apply to a single detection rule. 
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Detection rule's identifier
+          schema:
+            $ref: '#/components/schemas/RuleId'
+      requestBody:
+        description: Rule exception list items
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CreateRuleExceptionListItemProps'
+              required: [items]
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItem'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    RuleId:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/UUID'
+
+    CreateRuleExceptionListItemComment:
+      type: object
+      properties:
+        comment:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      required:
+        - comment
+
+    CreateRuleExceptionListItemCommentArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/CreateRuleExceptionListItemComment'
+
+    CreateRuleExceptionListItemProps:
+      type: object
+      properties:
+        item_id:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
+        type:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemType'
+        name:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemName'
+        description:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemDescription'
+        entries:
+          $ref: '../model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+        namespace_type:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
+          default: 'single'
+        os_types:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
+        tags:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
+          default: []
+        meta:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
+        expire_time:
+          type: string
+          format: date-time
+        comments:
+          $ref: '#/components/schemas/CreateRuleExceptionListItemCommentArray'
+          default: []
+      required:
+        - type
+        - name
+        - description
+        - entries

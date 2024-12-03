@@ -9,31 +9,29 @@ import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
-  CoreKibanaRequest,
-  FakeRawRequest,
-  Headers,
-  IBasePath,
-  ISavedObjectsRepository,
-  Logger,
-  SavedObject,
-  SavedObjectReference,
-} from '@kbn/core/server';
-import {
-  LoadIndirectParamsResult,
+  createTaskRunError,
   RunContext,
+  TaskErrorSource,
   throwRetryableError,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
-import { ActionExecutorContract, ActionInfo } from './action_executor';
+import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { type IBasePath, type Headers, type FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { Logger } from '@kbn/logging';
+import type {
+  ISavedObjectsRepository,
+  SavedObject,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { ActionExecutorContract } from './action_executor';
 import {
   ActionTaskExecutorParams,
   ActionTaskParams,
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
-  isPersistedActionTask,
-  RawAction,
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
@@ -44,7 +42,7 @@ import {
 } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
 import { ActionTypeDisabledError } from './errors';
 
 export interface TaskRunnerContext {
@@ -55,14 +53,6 @@ export interface TaskRunnerContext {
   basePathService: IBasePath;
   savedObjectsRepository: ISavedObjectsRepository;
 }
-
-export interface ActionData extends LoadedIndirectParams<RawAction> {
-  indirectParams: RawAction;
-  actionInfo: ActionInfo;
-  taskParams: TaskParams;
-}
-
-export type ActionDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
 
 type TaskParams = Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>;
 
@@ -102,54 +92,12 @@ export class TaskRunnerFactory {
     const taskInfo = {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
-      numSkippedRuns: taskInstance.numSkippedRuns,
     };
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
-    let actionData: ActionDataResult<ActionData>;
-
     return {
-      async loadIndirectParams(): Promise<ActionDataResult<ActionData>> {
-        try {
-          const taskParams = await getActionTaskParams(
-            actionTaskExecutorParams,
-            encryptedSavedObjectsClient,
-            spaceIdToNamespace
-          );
-
-          const { spaceId } = actionTaskExecutorParams;
-          const request = getFakeRequest(taskParams.attributes.apiKey);
-          const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
-
-          const actionInfo = await actionExecutor.getActionInfoInternal(
-            taskParams.attributes.actionId,
-            request,
-            namespace.namespace
-          );
-          actionData = {
-            data: {
-              indirectParams: actionInfo.rawAction,
-              taskParams,
-              actionInfo,
-            },
-          };
-          return actionData;
-        } catch (error) {
-          actionData = { error };
-          return { error };
-        }
-      },
       async run() {
-        if (!actionData) {
-          actionData = await this.loadIndirectParams();
-        }
-        if (actionData.error) {
-          return throwRetryableError(actionData.error, true);
-        }
-
-        const { spaceId } = actionTaskExecutorParams;
-        const { taskParams, actionInfo } = actionData.data;
         const {
           attributes: {
             actionId,
@@ -161,11 +109,17 @@ export class TaskRunnerFactory {
             relatedSavedObjects,
           },
           references,
-        } = taskParams;
+        } = await getActionTaskParams(
+          actionTaskExecutorParams,
+          encryptedSavedObjectsClient,
+          spaceIdToNamespace,
+          logger
+        );
 
+        const { spaceId } = actionTaskExecutorParams;
         const path = addSpaceIdToPath('/', spaceId);
-
         const request = getFakeRequest(apiKey);
+
         basePathService.set(request, path);
 
         let executorResult: ActionTypeExecutorResult<unknown> | undefined;
@@ -173,10 +127,8 @@ export class TaskRunnerFactory {
           executorResult = await actionExecutor.execute({
             params,
             actionId: actionId as string,
-            isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
             taskInfo,
-            actionInfo,
             executionId,
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
@@ -184,22 +136,36 @@ export class TaskRunnerFactory {
             ...getSource(references, source),
           });
         } catch (e) {
-          logger.error(`Action '${actionId}' failed: ${e.message}`);
+          const errorSource =
+            e instanceof ActionTypeDisabledError
+              ? TaskErrorSource.USER
+              : getErrorSource(e) || TaskErrorSource.FRAMEWORK;
+          logger.error(`Action '${actionId}' failed: ${e.message}`, {
+            tags: ['connector-run-failed', `${errorSource}-error`],
+          });
           if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
-            throwUnrecoverableError(e);
+            throwUnrecoverableError(createTaskRunError(e, errorSource));
           }
-          throw e;
+          throw createTaskRunError(e, errorSource);
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
         if (executorResult.status === 'error') {
           inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
-          logger.error(`Action '${actionId}' failed: ${executorResult.message}`);
+
+          let message = executorResult.message;
+          if (executorResult.serviceMessage) {
+            message = `${message}: ${executorResult.serviceMessage}`;
+          }
+          logger.error(`Action '${actionId}' failed: ${message}`, {
+            tags: ['connector-run-failed', `${executorResult.errorSource}-error`],
+          });
+
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw throwRetryableError(
-            new Error(executorResult.message),
+            createTaskRunError(new Error(executorResult.message), executorResult.errorSource),
             executorResult.retry as boolean | Date
           );
         }
@@ -214,7 +180,8 @@ export class TaskRunnerFactory {
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
-          spaceIdToNamespace
+          spaceIdToNamespace,
+          logger
         );
 
         const request = getFakeRequest(apiKey);
@@ -240,19 +207,17 @@ export class TaskRunnerFactory {
       },
       cleanup: async () => {
         // Cleanup action_task_params object now that we're done with it
-        if (isPersistedActionTask(actionTaskExecutorParams)) {
-          try {
-            await savedObjectsRepository.delete(
-              ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              actionTaskExecutorParams.actionTaskParamsId,
-              { refresh: false, namespace: spaceIdToNamespace(actionTaskExecutorParams.spaceId) }
-            );
-          } catch (e) {
-            // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
-            logger.error(
-              `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
-            );
-          }
+        try {
+          await savedObjectsRepository.delete(
+            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+            actionTaskExecutorParams.actionTaskParamsId,
+            { refresh: false, namespace: spaceIdToNamespace(actionTaskExecutorParams.spaceId) }
+          );
+        } catch (e) {
+          // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
+          logger.error(
+            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
+          );
         }
       },
     };
@@ -272,17 +237,18 @@ function getFakeRequest(apiKey?: string) {
 
   // Since we're using API keys and accessing elasticsearch can only be done
   // via a request, we're faking one with the proper authorization headers.
-  return CoreKibanaRequest.from(fakeRawRequest);
+  return kibanaRequestFactory(fakeRawRequest);
 }
 
 async function getActionTaskParams(
   executorParams: ActionTaskExecutorParams,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-  spaceIdToNamespace: SpaceIdToNamespaceFunction
+  spaceIdToNamespace: SpaceIdToNamespaceFunction,
+  logger: Logger
 ): Promise<TaskParams> {
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
-  if (isPersistedActionTask(executorParams)) {
+  try {
     const actionTask =
       await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -305,8 +271,18 @@ async function getActionTaskParams(
         ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
       },
     };
-  } else {
-    return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
+  } catch (e) {
+    const errorSource = SavedObjectsErrorHelpers.isNotFoundError(e)
+      ? TaskErrorSource.USER
+      : TaskErrorSource.FRAMEWORK;
+    logger.error(
+      `Failed to load action task params ${executorParams.actionTaskParamsId}: ${e.message}`,
+      { tags: ['connector-run-failed', `${errorSource}-error`] }
+    );
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw createRetryableError(createTaskRunError(e, errorSource), true);
+    }
+    throw createRetryableError(createTaskRunError(e, errorSource), true);
   }
 }
 

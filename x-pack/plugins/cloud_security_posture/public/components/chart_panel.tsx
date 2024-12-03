@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, FC, PropsWithChildren } from 'react';
 import {
   EuiPanel,
   EuiText,
@@ -23,6 +23,8 @@ interface ChartPanelProps {
   isLoading?: boolean;
   isError?: boolean;
   rightSideItems?: ReactNode[];
+  styles?: React.CSSProperties;
+  children: React.ReactNode;
 }
 
 const Loading = () => (
@@ -47,13 +49,14 @@ const Error = () => (
   </EuiFlexGroup>
 );
 
-export const ChartPanel: React.FC<ChartPanelProps> = ({
+export const ChartPanel: FC<PropsWithChildren<ChartPanelProps>> = ({
   title,
   hasBorder = true,
   isLoading,
   isError,
   children,
   rightSideItems,
+  styles,
 }) => {
   const { euiTheme } = useEuiTheme();
   const renderChart = () => {
@@ -63,7 +66,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   };
 
   return (
-    <EuiPanel hasBorder={hasBorder} hasShadow={false} data-test-subj="chart-panel">
+    <EuiPanel hasBorder={hasBorder} hasShadow={false} style={styles} data-test-subj="chart-panel">
       <EuiFlexGroup direction="column" gutterSize="m" style={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent={'spaceBetween'}>

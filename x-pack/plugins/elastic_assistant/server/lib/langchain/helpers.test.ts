@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import type { Message } from '@kbn/elastic-assistant';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import { KibanaRequest } from '@kbn/core-http-server';
+import type { Message } from '@kbn/elastic-assistant-common';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
-import { getLangChainMessage, getLangChainMessages, getMessageContentAndRole } from './helpers';
+import {
+  getLangChainMessage,
+  getLangChainMessages,
+  requestHasRequiredAnonymizationParams,
+} from './helpers';
 import { langChainMessages } from '../../__mocks__/lang_chain_messages';
 
 describe('helpers', () => {
@@ -90,19 +96,41 @@ describe('helpers', () => {
     });
   });
 
-  describe('getMessageContentAndRole', () => {
-    const testCases: Array<[string, Pick<Message, 'content' | 'role'>]> = [
-      ['Prompt 1', { content: 'Prompt 1', role: 'user' }],
-      ['Prompt 2', { content: 'Prompt 2', role: 'user' }],
-      ['', { content: '', role: 'user' }],
-    ];
+  describe('requestHasRequiredAnonymizationParams', () => {
+    it('returns true if the request has valid anonymization params', () => {
+      const request = {
+        body: {
+          replacements: { key: 'value' },
+        },
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
-    testCases.forEach(([prompt, expectedOutput]) => {
-      test(`Given the prompt "${prompt}", it returns the prompt as content with a "user" role`, () => {
-        const result = getMessageContentAndRole(prompt);
+      const result = requestHasRequiredAnonymizationParams(request);
 
-        expect(result).toEqual(expectedOutput);
-      });
+      expect(result).toBe(true);
+    });
+
+    it('returns true if replacements is empty', () => {
+      const request = {
+        body: {
+          replacements: {},
+        },
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+
+      const result = requestHasRequiredAnonymizationParams(request);
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false if replacements has non-string values', () => {
+      const request = {
+        body: {
+          replacements: { key: 76543 }, // <-- non-string value
+        },
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+
+      const result = requestHasRequiredAnonymizationParams(request);
+
+      expect(result).toBe(false);
     });
   });
 });

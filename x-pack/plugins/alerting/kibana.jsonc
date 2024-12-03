@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/alerting-plugin",
-  "owner": "@elastic/response-ops",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "alerting",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "alerting"
@@ -25,13 +29,13 @@
       "management",
       "esUiShared",
       "unifiedSearch",
+      "embeddable"
     ],
     "optionalPlugins": [
       "usageCollection",
       "security",
       "monitoringCollection",
-      "spaces",
-      "serverless",
+      "spaces"
     ],
     "extraPublicDirs": [
       "common",

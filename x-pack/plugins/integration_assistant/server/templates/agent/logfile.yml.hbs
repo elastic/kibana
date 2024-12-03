@@ -1,0 +1,13 @@
+paths:
+{{#each paths as |path i|}}
+  - {{path}}
+{{/each}}
+{{#if exclude_files}}
+exclude_files:
+{{#each exclude_files as |file f|}}
+  - {{file}}
+{{/each}}
+{{/if}}
+{{#if custom}}
+{{custom}}
+{{/if}}

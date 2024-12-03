@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
@@ -15,7 +16,9 @@ import type {
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import useMountedState from 'react-use/lib/useMountedState';
+import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
@@ -23,8 +26,8 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
-
-export const IndexDataVisualizerPage: FC = () => {
+import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
+export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: {
@@ -34,24 +37,30 @@ export const IndexDataVisualizerPage: FC = () => {
         dataViews: { get: getDataView },
       },
       mlServices: {
-        mlApiServices: { recognizeIndex },
+        mlApi: { recognizeIndex },
       },
     },
   } = useMlKibana();
+  const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
   const mlLocator = useMlLocator()!;
   const mlFeaturesDisabled = !isFullLicense();
-  getMlNodeCount();
+  getMlNodeCount(mlApi);
 
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
     null
   );
-
+  const isMounted = useMountedState();
   useEffect(() => {
     if (dataVisualizer !== undefined) {
       const { getIndexDataVisualizerComponent } = dataVisualizer;
-      getIndexDataVisualizerComponent().then(setIndexDataVisualizer);
+      getIndexDataVisualizerComponent().then((component) => {
+        if (isMounted()) {
+          setIndexDataVisualizer(component);
+        }
+      });
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -180,19 +189,33 @@ export const IndexDataVisualizerPage: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator, mlFeaturesDisabled]
   );
+  const { euiTheme } = useEuiTheme();
   return IndexDataVisualizer ? (
     <Fragment>
       {IndexDataVisualizer !== null ? (
         <>
           <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.dataVisualizer.pageHeader"
-              defaultMessage="Data Visualizer"
-            />
+            <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
+              <FormattedMessage
+                id="xpack.ml.dataVisualizer.pageHeader"
+                defaultMessage="Data Visualizer"
+              />
+              {esql ? (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage id="xpack.ml.datavisualizer" defaultMessage="(ES|QL)" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
+                    <TechnicalPreviewBadge />
+                  </EuiFlexItem>
+                </>
+              ) : null}
+            </EuiFlexGroup>
           </MlPageHeader>
           <IndexDataVisualizer
             getAdditionalLinks={getAdditionalLinks}
             showFrozenDataTierChoice={showNodeInfo}
+            esql={esql}
           />
         </>
       ) : null}

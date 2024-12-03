@@ -21,6 +21,20 @@ export const INVESTIGATION_GUIDE_TAB_LABEL = i18n.translate(
   }
 );
 
+export const UPDATES_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updatesTabLabel',
+  {
+    defaultMessage: 'Updates',
+  }
+);
+
+export const JSON_VIEW_UPDATES_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewUpdatesTabLabel',
+  {
+    defaultMessage: 'JSON view',
+  }
+);
+
 export const DISMISS_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.dismissButtonLabel',
   {
@@ -157,7 +171,7 @@ export const RULE_NAME_OVERRIDE_FIELD_LABEL = i18n.translate(
 export const THREAT_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFieldLabel',
   {
-    defaultMessage: 'MITRE ATT&CK\\u2122',
+    defaultMessage: 'MITRE ATT&CK\u2122',
   }
 );
 
@@ -326,5 +340,54 @@ export const FROM_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.fromFieldLabel',
   {
     defaultMessage: 'Additional look-back time',
+  }
+);
+
+export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.maxAlertsFieldLabel',
+  {
+    defaultMessage: 'Max alerts per run',
+  }
+);
+
+export const MODIFIED_PREBUILT_RULE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.customizedPrebuiltRuleLabel',
+  {
+    defaultMessage: 'Modified Elastic rule',
+  }
+);
+
+export const QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.queryLanguageLabel',
+  {
+    defaultMessage: 'Custom query language',
+  }
+);
+
+export const THREAT_QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.threatQueryLanguageLabel',
+  {
+    defaultMessage: 'Indicator index query language',
+  }
+);
+
+export const SAVED_QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.savedQueryLanguageLabel',
+  {
+    defaultMessage: 'Saved query language',
+  }
+);
+
+export const KUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.kqlLanguageLabel',
+  {
+    defaultMessage: 'KQL',
+  }
+);
+
+export const LUCENE_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.luceneLanguageLabel',
+  {
+    defaultMessage: 'Lucene',
   }
 );

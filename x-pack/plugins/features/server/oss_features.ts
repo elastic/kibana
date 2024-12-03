@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { KibanaFeatureScope } from '../common';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
@@ -30,6 +31,7 @@ export const buildOSSFeatures = ({
       },
       order: 100,
       category: DEFAULT_APP_CATEGORIES.kibana,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['discover', 'kibana'],
       catalogue: ['discover'],
       privileges: {
@@ -125,6 +127,7 @@ export const buildOSSFeatures = ({
       },
       order: 700,
       category: DEFAULT_APP_CATEGORIES.kibana,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['visualize', 'lens', 'kibana'],
       catalogue: ['visualize'],
       privileges: {
@@ -189,6 +192,7 @@ export const buildOSSFeatures = ({
       },
       order: 200,
       category: DEFAULT_APP_CATEGORIES.kibana,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['dashboards', 'kibana'],
       catalogue: ['dashboard'],
       privileges: {
@@ -203,11 +207,13 @@ export const buildOSSFeatures = ({
               'visualization',
               'canvas-workpad',
               'lens',
+              'links',
               'map',
               'tag',
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
+          api: ['bulkGetUserProfiles', 'dashboardUsageStats'],
         },
         read: {
           app: ['dashboards', 'kibana'],
@@ -220,6 +226,7 @@ export const buildOSSFeatures = ({
               'visualization',
               'canvas-workpad',
               'lens',
+              'links',
               'map',
               'dashboard',
               'query',
@@ -227,6 +234,7 @@ export const buildOSSFeatures = ({
             ],
           },
           ui: ['show'],
+          api: ['bulkGetUserProfiles', 'dashboardUsageStats'],
         },
       },
       subFeatures: [
@@ -298,6 +306,7 @@ export const buildOSSFeatures = ({
       }),
       order: 1300,
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['dev_tools', 'kibana'],
       catalogue: ['console', 'searchprofiler', 'grokdebugger'],
       privileges: {
@@ -334,6 +343,7 @@ export const buildOSSFeatures = ({
       }),
       order: 1500,
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: ['advanced_settings'],
       management: {
@@ -373,6 +383,7 @@ export const buildOSSFeatures = ({
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: ['indexPatterns'],
       management: {
@@ -390,6 +401,7 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['save'],
+          api: ['indexPatterns:manage'],
         },
         read: {
           app: ['kibana'],
@@ -412,6 +424,7 @@ export const buildOSSFeatures = ({
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: [],
       management: {
@@ -451,6 +464,7 @@ export const buildOSSFeatures = ({
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.filesSharedImagesPrivilegesTooltip', {
@@ -484,6 +498,7 @@ export const buildOSSFeatures = ({
       }),
       order: 1700,
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: ['saved_objects'],
       management: {
@@ -525,6 +540,7 @@ export const buildOSSFeatures = ({
       }),
       order: 1750,
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
@@ -540,10 +556,12 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['saveQuery'],
-        }, // No read-only mode supported
+        },
+        // No read-only mode supported
+        read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
       },
     },
-  ] as KibanaFeatureConfig[];
+  ];
 };
 
 const reportingPrivilegeGroupName = i18n.translate(
@@ -603,7 +621,7 @@ const reportingFeatures: {
           {
             id: 'download_csv_report',
             name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
-              defaultMessage: 'Download CSV reports from Saved Search panels',
+              defaultMessage: 'Generate CSV reports from Saved Search panels',
             }),
             includeIn: 'all',
             savedObject: { all: [], read: [] },

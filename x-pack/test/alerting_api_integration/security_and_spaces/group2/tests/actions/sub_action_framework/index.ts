@@ -7,8 +7,10 @@
 
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 /**
  * The sub action connector is defined here
@@ -21,7 +23,7 @@ const createSubActionConnector = async ({
   connectorTypeId = 'test.sub-action-connector',
   expectedHttpCode = 200,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   config?: Record<string, unknown>;
   secrets?: Record<string, unknown>;
   connectorTypeId?: string;
@@ -55,7 +57,7 @@ const executeSubAction = async ({
   subActionParams,
   expectedHttpCode = 200,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   connectorId: string;
   subAction: string;
   subActionParams: Record<string, unknown>;
@@ -78,6 +80,7 @@ const executeSubAction = async ({
 // eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('Sub action framework', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -86,7 +89,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
     describe('Create', () => {
       it('creates the sub action connector correctly', async () => {
         const res = await createSubActionConnector({ supertest });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
 
         expect(res.body).to.eql({
           id: res.body.id,
@@ -137,14 +140,36 @@ export default function createActionTests({ getService }: FtrProviderContext) {
     describe('Sub actions', () => {
       it('executes a sub action with parameters correctly', async () => {
         const res = await createSubActionConnector({ supertest });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
+
+        const connectorId = res.body.id as string;
+        const subActionParams = { id: 'test-id' };
 
         const execRes = await executeSubAction({
           supertest,
-          connectorId: res.body.id as string,
+          connectorId,
           subAction: 'subActionWithParams',
-          subActionParams: { id: 'test-id' },
+          subActionParams,
         });
+
+        const events: IValidatedEvent[] = await retry.try(async () => {
+          return await getEventLog({
+            getService,
+            spaceId: 'default',
+            type: 'action',
+            id: connectorId,
+            provider: 'actions',
+            actions: new Map([
+              ['execute-start', { equal: 1 }],
+              ['execute', { equal: 1 }],
+            ]),
+          });
+        });
+
+        const executeEvent = events[1];
+        expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.eql(
+          Buffer.byteLength(JSON.stringify(subActionParams))
+        );
 
         expect(execRes.body).to.eql({
           status: 'ok',
@@ -155,7 +180,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
       it('validates the subParams correctly', async () => {
         const res = await createSubActionConnector({ supertest });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
 
         const execRes = await executeSubAction({
           supertest,
@@ -169,6 +194,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
+          errorSource: TaskErrorSource.USER,
           service_message:
             'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])',
         });
@@ -176,7 +202,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
       it('validates correctly if the subActionParams is not an object', async () => {
         const res = await createSubActionConnector({ supertest });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
 
         for (const subActionParams of ['foo', 1, true, null, ['bar']]) {
           const execRes = await executeSubAction({
@@ -192,13 +218,14 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             status: 'error',
             retry: false,
             connector_id: res.body.id,
+            errorSource: TaskErrorSource.USER,
           });
         }
       });
 
       it('should execute correctly without schema validation', async () => {
         const res = await createSubActionConnector({ supertest });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
 
         const execRes = await executeSubAction({
           supertest,
@@ -216,7 +243,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
       it('should return an empty object if the func returns undefined', async () => {
         const res = await createSubActionConnector({ supertest });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
 
         const execRes = await executeSubAction({
           supertest,
@@ -234,7 +261,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
       it('should return an error if sub action is not registered', async () => {
         const res = await createSubActionConnector({ supertest });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
 
         const execRes = await executeSubAction({
           supertest,
@@ -248,13 +275,14 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
+          errorSource: TaskErrorSource.FRAMEWORK,
           service_message: `Sub action \"notRegistered\" is not registered. Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: test.sub-action-connector`,
         });
       });
 
       it('should return an error if the registered method is not a function', async () => {
         const res = await createSubActionConnector({ supertest });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
 
         const execRes = await executeSubAction({
           supertest,
@@ -268,13 +296,14 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
+          errorSource: TaskErrorSource.FRAMEWORK,
           service_message: `Method \"notAFunction\" does not exists in service. Sub action: \"notAFunction\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: test.sub-action-connector`,
         });
       });
 
       it('should return an error if the registered method does not exists', async () => {
         const res = await createSubActionConnector({ supertest });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
 
         const execRes = await executeSubAction({
           supertest,
@@ -288,6 +317,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
+          errorSource: TaskErrorSource.FRAMEWORK,
           service_message: `Method \"notExist\" does not exists in service. Sub action: \"notExist\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: test.sub-action-connector`,
         });
       });
@@ -297,7 +327,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           supertest,
           connectorTypeId: 'test.sub-action-connector-without-sub-actions',
         });
-        objectRemover.add('default', res.body.id, 'action', 'actions');
+        objectRemover.add('default', res.body.id, 'connector', 'actions');
 
         const execRes = await executeSubAction({
           supertest,
@@ -311,6 +341,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
+          errorSource: TaskErrorSource.FRAMEWORK,
           service_message: 'You should register at least one subAction for your connector type',
         });
       });

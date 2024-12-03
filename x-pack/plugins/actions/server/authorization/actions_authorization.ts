@@ -12,20 +12,11 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import { AuthorizationMode } from './get_authorization_mode_by_source';
+import { isBidirectionalConnectorType } from '../lib/bidirectional_connectors';
 
 export interface ConstructorOptions {
   request: KibanaRequest;
   authorization?: SecurityPluginSetup['authz'];
-  authentication?: SecurityPluginSetup['authc'];
-  // In order to support legacy Alerts which predate the introduction of the
-  // Actions feature in Kibana we need a way of "dialing down" the level of
-  // authorization for certain opearations.
-  // Specifically, we want to allow these old alerts and their scheduled
-  // actions to continue to execute - which requires that we exempt auth on
-  // `get` for Connectors and `execute` for Action execution when used by
-  // these legacy alerts
-  authorizationMode?: AuthorizationMode;
 }
 
 const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz']) => string[]> = {
@@ -38,21 +29,13 @@ const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz'
   ],
 };
 
-const LEGACY_RBAC_EXEMPT_OPERATIONS = new Set(['get', 'execute']);
-
 export class ActionsAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
-  private readonly authorizationMode: AuthorizationMode;
-  constructor({
-    request,
-    authorization,
-    authentication,
-    authorizationMode = AuthorizationMode.RBAC,
-  }: ConstructorOptions) {
+
+  constructor({ request, authorization }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
-    this.authorizationMode = authorizationMode;
   }
 
   public async ensureAuthorized({
@@ -66,31 +49,28 @@ export class ActionsAuthorization {
   }) {
     const { authorization } = this;
     if (authorization?.mode?.useRbacForRequest(this.request)) {
-      if (!this.isOperationExemptDueToLegacyRbac(operation)) {
-        const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+      const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
 
-        const privileges = operationAlias[operation]
-          ? operationAlias[operation](authorization)
-          : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
+      const privileges = operationAlias[operation]
+        ? operationAlias[operation](authorization)
+        : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
 
-        const { hasAllRequested } = await checkPrivileges({
-          kibana: [...privileges, ...additionalPrivileges],
-        });
-        if (!hasAllRequested) {
-          throw Boom.forbidden(
-            `Unauthorized to ${operation} ${
-              actionTypeId ? `a "${actionTypeId}" action` : `actions`
-            }`
-          );
-        }
+      const { hasAllRequested } = await checkPrivileges({
+        kibana: [
+          ...privileges,
+          ...additionalPrivileges,
+          // SentinelOne and Crowdstrike sub-actions require that a user have `all` privilege to Actions and Connectors.
+          // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
+          isBidirectionalConnectorType(actionTypeId)
+            ? 'api:actions:execute-advanced-connectors'
+            : 'api:actions:execute-basic-connectors',
+        ],
+      });
+      if (!hasAllRequested) {
+        throw Boom.forbidden(
+          `Unauthorized to ${operation} ${actionTypeId ? `a "${actionTypeId}" action` : `actions`}`
+        );
       }
     }
-  }
-
-  private isOperationExemptDueToLegacyRbac(operation: string) {
-    return (
-      this.authorizationMode === AuthorizationMode.Legacy &&
-      LEGACY_RBAC_EXEMPT_OPERATIONS.has(operation)
-    );
   }
 }

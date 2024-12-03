@@ -9,6 +9,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import type { Role } from '@kbn/security-plugin-types-common';
+import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 
@@ -16,8 +18,6 @@ import { KibanaPrivilegesRegion } from './kibana_privileges_region';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
-import type { Role } from '../../../../../../common/model';
-import { KibanaPrivileges } from '../../../model';
 import { RoleValidator } from '../../validate_role';
 
 const spacesManager = spacesManagerMock.create();

@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/global-search-bar-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "globalSearchBar",
-    "server": false,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "global_search_bar"
@@ -16,9 +20,6 @@
     "optionalPlugins": [
       "usageCollection",
       "savedObjectsTagging"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
     ]
   }
 }

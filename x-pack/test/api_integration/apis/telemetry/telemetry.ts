@@ -14,7 +14,13 @@ import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
 import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
 import monitoringRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_monitoring.json';
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import ossPlatformTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_platform.json';
+import ossPackagesTelemetrySchema from '@kbn/telemetry-plugin/schema/kbn_packages.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
+import xpackPlatformTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_platform.json';
+import xpackObservabilityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_observability.json';
+import xpackSearchTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_search.json';
+import xpackSecurityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_security.json';
 import type { UnencryptedTelemetryPayload } from '@kbn/telemetry-plugin/common/types';
 import type {
   UsageStatsPayload,
@@ -25,9 +31,9 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 import basicClusterFixture from './fixtures/basiccluster.json';
 import multiClusterFixture from './fixtures/multicluster.json';
-import type { SecurityService } from '../../../../../test/common/services/security/security';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 function omitCacheDetails(usagePayload: Array<Record<string, unknown>>) {
@@ -42,6 +48,22 @@ function getCacheDetails(body: UnencryptedTelemetryPayload): CacheDetails[] {
   return body.map(({ stats }) => (stats as UsageStatsPayload).cacheDetails);
 }
 
+function updateClusterUuidInLogstashStats(
+  clusterUuid: string,
+  payload: Array<Record<string, any>>
+) {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  return payload.map(({ stack_stats, ...item }) => {
+    const { logstash } = stack_stats;
+    if (logstash) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { cluster_stats } = logstash;
+      cluster_stats.monitoringClusterUuid = clusterUuid;
+    }
+    return { stack_stats, ...item };
+  });
+}
+
 /**
  * Update the .monitoring-* documents loaded via the archiver to the recent `timestamp`
  * @param esSupertest The client to send requests to ES
@@ -50,7 +72,7 @@ function getCacheDetails(body: UnencryptedTelemetryPayload): CacheDetails[] {
  * @param timestamp The new timestamp to be set
  */
 function updateMonitoringDates(
-  esSupertest: SuperTest.SuperTest<SuperTest.Test>,
+  esSupertest: SuperTest.Agent,
   fromTimestamp: string,
   toTimestamp: string,
   timestamp: string
@@ -112,7 +134,12 @@ export default function ({ getService }: FtrProviderContext) {
       const toTimestamp = '2017-08-16T00:00:00.000Z';
 
       before(async () => {
-        await esArchiver.load(archive);
+        await esArchiver.load(archive, {
+          performance: {
+            batchSize: 300,
+            concurrency: 1,
+          },
+        });
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
 
         const { body }: { body: UnencryptedTelemetryPayload } = await supertest
@@ -139,7 +166,17 @@ export default function ({ getService }: FtrProviderContext) {
           // It's nested because of the way it's collected and declared
           monitoringRootTelemetrySchema.properties.monitoringTelemetry.properties.stats.items
         );
-        const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+
+        const plugins = [
+          ossPluginsTelemetrySchema,
+          ossPackagesTelemetrySchema,
+          ossPlatformTelemetrySchema,
+          xpackPluginsTelemetrySchema,
+          xpackPlatformTelemetrySchema,
+          xpackObservabilityTelemetrySchema,
+          xpackSearchTelemetrySchema,
+          xpackSecurityTelemetrySchema,
+        ].reduce((acc, schema) => deepmerge(acc, schema));
 
         try {
           assertTelemetryPayload({ root, plugins }, localXPack);
@@ -147,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
             assertTelemetryPayload({ root: monitoringRoot, plugins }, stats);
           });
         } catch (err) {
-          err.message = `The telemetry schemas in 'x-pack/plugins/telemetry_collection_xpack/schema/' are out-of-date, please update it as required: ${err.message}`;
+          err.message = `The telemetry schemas in are out-of-date. Please define the schema of your collector and run "node scripts/telemetry_check --fix" to update them: ${err.message}`;
           throw err;
         }
       });
@@ -156,7 +193,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(monitoring).length(3);
         expect(localXPack.collectionSource).to.eql('local_xpack');
 
-        expect(omitCacheDetails(monitoring)).to.eql(
+        const withoutCacheDetailsMonitoring = omitCacheDetails(monitoring);
+        const lsClusterUuidChangedMonitoring = updateClusterUuidInLogstashStats(
+          'integrationTestClusterUuid',
+          withoutCacheDetailsMonitoring
+        );
+        expect(lsClusterUuidChangedMonitoring).to.eql(
           updateFixtureTimestamps(multiClusterFixture, timestamp)
         );
       });

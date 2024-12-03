@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/runtime-fields-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "runtimeFields",
-    "server": false,
     "browser": true,
+    "server": false,
     "configPath": [
       "xpack",
       "runtime_fields"

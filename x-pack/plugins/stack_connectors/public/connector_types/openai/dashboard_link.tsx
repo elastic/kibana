@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
-import { useGetDashboard } from './use_get_dashboard';
+import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 
 interface Props {
   connectorId: string;
@@ -20,16 +20,16 @@ interface Props {
 export const DashboardLink: React.FC<Props> = ({
   connectorId,
   connectorName,
-  selectedProvider = '',
+  selectedProvider = 'OpenAI',
 }) => {
-  const { dashboardUrl } = useGetDashboard({ connectorId });
+  const { dashboardUrl } = useGetDashboard({ connectorId, selectedProvider });
   const {
     services: {
       application: { navigateToUrl },
     },
   } = useKibana();
   const onClick = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       if (dashboardUrl) {
         navigateToUrl(dashboardUrl);
@@ -38,7 +38,10 @@ export const DashboardLink: React.FC<Props> = ({
     [dashboardUrl, navigateToUrl]
   );
   return dashboardUrl != null ? (
-    <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick}>
+    // href gives us right click -> open in new tab
+    // onclick prevents page reload
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick} href={dashboardUrl}>
       {i18n.USAGE_DASHBOARD_LINK(selectedProvider, connectorName)}
     </EuiLink>
   ) : null;

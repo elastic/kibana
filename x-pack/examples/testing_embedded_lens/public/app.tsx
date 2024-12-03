@@ -29,7 +29,6 @@ import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
-  LensEmbeddableInput,
   DateHistogramIndexPatternColumn,
   DatatableVisualizationState,
   HeatmapVisualizationState,
@@ -42,7 +41,7 @@ import type {
   MetricVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { CodeEditor, HJsonLang, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, HJsonLang } from '@kbn/code-editor';
 import type { StartDependencies } from './plugin';
 import {
   AllOverrides,
@@ -469,7 +468,7 @@ export const App = (props: {
   const currentSO = useRef<string>(initialAttributes);
   const [currentValid, saveValidSO] = useState(initialAttributes);
   const switchChartPreset = useCallback(
-    (newIndex) => {
+    (newIndex: number) => {
       const newChart = charts[newIndex];
       const newAttributes = JSON.stringify(newChart.attributes, null, 2);
       currentSO.current = newAttributes;
@@ -495,269 +494,256 @@ export const App = (props: {
   const [overrides, setOverrides] = useState<AllOverrides | undefined>();
 
   return (
-    <KibanaContextProvider
-      services={{
-        uiSettings: props.core.uiSettings,
-        settings: props.core.settings,
-        theme: props.core.theme,
-      }}
-    >
-      <EuiPage>
-        <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <EuiPageHeader
-            paddingSize="s"
-            bottomBorder={true}
-            pageTitle="Lens embeddable playground"
-          />
-          <EuiPageSection paddingSize="s">
-            <EuiFlexGroup
-              className="eui-fullHeight"
-              gutterSize="none"
-              direction="column"
-              responsive={false}
-            >
-              <EuiFlexItem className="eui-fullHeight">
-                <EuiFlexGroup className="eui-fullHeight" gutterSize="l">
-                  <EuiFlexItem grow={3}>
-                    <EuiPanel hasShadow={false}>
-                      <p>
-                        This app embeds a Lens visualization by specifying the configuration. Data
-                        fetching and rendering is completely managed by Lens itself.
-                      </p>
-                      <p>
-                        The editor on the right hand side make it possible to paste a Lens
-                        attributes configuration, and have it rendered. Presets are available to
-                        have a starting configuration, and new presets can be saved as well (not
-                        persisted).
-                      </p>
-                      <p>
-                        The Open with Lens button will take the current configuration and navigate
-                        to a prefilled editor.
-                      </p>
-                      <EuiSpacer />
-                      <EuiFlexGroup wrap>
-                        <EuiFlexItem grow={false}>
-                          <AttributesMenu
-                            currentSO={currentSO}
-                            currentAttributes={currentAttributes}
-                            saveValidSO={saveValidSO}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <OverridesMenu
-                            currentAttributes={currentAttributes}
-                            overrides={overrides}
-                            setOverrides={setOverrides}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <PanelMenu
-                            enableTriggers={enableTriggers}
-                            toggleTriggers={toggleTriggers}
-                            enableDefaultAction={enableDefaultAction}
-                            setEnableDefaultAction={setEnableDefaultAction}
-                            enableExtraAction={enableExtraAction}
-                            setEnableExtraAction={setEnableExtraAction}
-                          />
-                        </EuiFlexItem>
+    <EuiPage>
+      <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="Lens embeddable playground" />
+        <EuiPageSection paddingSize="s">
+          <EuiFlexGroup
+            className="eui-fullHeight"
+            gutterSize="none"
+            direction="column"
+            responsive={false}
+          >
+            <EuiFlexItem className="eui-fullHeight">
+              <EuiFlexGroup className="eui-fullHeight" gutterSize="l">
+                <EuiFlexItem grow={3}>
+                  <EuiPanel hasShadow={false}>
+                    <p>
+                      This app embeds a Lens visualization by specifying the configuration. Data
+                      fetching and rendering is completely managed by Lens itself.
+                    </p>
+                    <p>
+                      The editor on the right hand side make it possible to paste a Lens attributes
+                      configuration, and have it rendered. Presets are available to have a starting
+                      configuration, and new presets can be saved as well (not persisted).
+                    </p>
+                    <p>
+                      The Open with Lens button will take the current configuration and navigate to
+                      a prefilled editor.
+                    </p>
+                    <EuiSpacer />
+                    <EuiFlexGroup wrap>
+                      <EuiFlexItem grow={false}>
+                        <AttributesMenu
+                          currentSO={currentSO}
+                          currentAttributes={currentAttributes}
+                          saveValidSO={saveValidSO}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <OverridesMenu
+                          currentAttributes={currentAttributes}
+                          overrides={overrides}
+                          setOverrides={setOverrides}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <PanelMenu
+                          enableTriggers={enableTriggers}
+                          toggleTriggers={toggleTriggers}
+                          enableDefaultAction={enableDefaultAction}
+                          setEnableDefaultAction={setEnableDefaultAction}
+                          enableExtraAction={enableExtraAction}
+                          setEnableExtraAction={setEnableExtraAction}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          aria-label="Save visualization into library or embed directly into any dashboard"
+                          data-test-subj="lns-example-save"
+                          isDisabled={isDisabled}
+                          onClick={() => {
+                            setIsSaveModalVisible(true);
+                          }}
+                        >
+                          Save Visualization
+                        </EuiButton>
+                      </EuiFlexItem>
+                      {props.defaultDataView?.isTimeBased() ? (
                         <EuiFlexItem grow={false}>
                           <EuiButton
-                            aria-label="Save visualization into library or embed directly into any dashboard"
-                            data-test-subj="lns-example-save"
+                            aria-label="Change time range"
+                            data-test-subj="lns-example-change-time-range"
                             isDisabled={isDisabled}
                             onClick={() => {
-                              setIsSaveModalVisible(true);
-                            }}
-                          >
-                            Save Visualization
-                          </EuiButton>
-                        </EuiFlexItem>
-                        {props.defaultDataView?.isTimeBased() ? (
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              aria-label="Change time range"
-                              data-test-subj="lns-example-change-time-range"
-                              isDisabled={isDisabled}
-                              onClick={() => {
-                                setTime(
-                                  time.to === 'now'
-                                    ? {
-                                        from: '2015-09-18T06:31:44.000Z',
-                                        to: '2015-09-23T18:31:44.000Z',
-                                      }
-                                    : {
-                                        from: 'now-5d',
-                                        to: 'now',
-                                      }
-                                );
-                              }}
-                            >
-                              {time.to === 'now' ? 'Change time range' : 'Reset time range'}
-                            </EuiButton>
-                          </EuiFlexItem>
-                        ) : null}
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            aria-label="Open lens in new tab"
-                            isDisabled={!props.plugins.lens.canUseEditor()}
-                            onClick={() => {
-                              props.plugins.lens.navigateToPrefilledEditor(
-                                {
-                                  id: '',
-                                  timeRange: time,
-                                  attributes: currentAttributes,
-                                },
-                                {
-                                  openInNewTab: true,
-                                }
+                              setTime(
+                                time.to === 'now'
+                                  ? {
+                                      from: '2015-09-18T06:31:44.000Z',
+                                      to: '2015-09-23T18:31:44.000Z',
+                                    }
+                                  : {
+                                      from: 'now-5d',
+                                      to: 'now',
+                                    }
                               );
                             }}
                           >
-                            Open in Lens (new tab)
+                            {time.to === 'now' ? 'Change time range' : 'Reset time range'}
                           </EuiButton>
                         </EuiFlexItem>
-                        <EuiFlexItem>
-                          <p>State: {isLoading ? 'Loading...' : 'Rendered'}</p>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                      <EuiFlexGroup>
-                        <EuiFlexItem>
-                          <LensComponent
-                            id="myLens"
-                            style={{ height: 500 }}
-                            timeRange={time}
-                            attributes={currentAttributes}
-                            overrides={overrides}
-                            onLoad={(val) => {
-                              setIsLoading(val);
-                            }}
-                            onBrushEnd={({ range }) => {
-                              setTime({
-                                from: new Date(range[0]).toISOString(),
-                                to: new Date(range[1]).toISOString(),
-                              });
-                            }}
-                            onFilter={(_data) => {
-                              // call back event for on filter event
-                            }}
-                            onTableRowClick={(_data) => {
-                              // call back event for on table row click event
-                            }}
-                            disableTriggers={!enableTriggers}
-                            viewMode={ViewMode.VIEW}
-                            withDefaultActions={enableDefaultAction}
-                            extraActions={
-                              enableExtraAction
-                                ? [
-                                    {
-                                      id: 'testAction',
-                                      type: 'link',
-                                      getIconType: () => 'save',
-                                      async isCompatible(
-                                        context: ActionExecutionContext<object>
-                                      ): Promise<boolean> {
-                                        return true;
-                                      },
-                                      execute: async (context: ActionExecutionContext<object>) => {
-                                        alert('I am an extra action');
-                                        return;
-                                      },
-                                      getDisplayName: () => 'Extra action',
-                                    },
-                                  ]
-                                : undefined
-                            }
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                    {isSaveModalVisible && (
-                      <LensSaveModalComponent
-                        initialInput={currentAttributes as unknown as LensEmbeddableInput}
-                        onSave={() => {}}
-                        onClose={() => setIsSaveModalVisible(false)}
-                      />
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={2}>
-                    <EuiPanel hasShadow={false}>
-                      <EuiFlexGroup>
-                        <EuiFlexItem>
-                          <EuiText>
-                            <p>Paste or edit here your Lens document</p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                      <EuiFlexGroup>
-                        <EuiFlexItem grow={false}>
-                          <EuiSelect
-                            options={charts.map(({ id }, i) => ({ value: i, text: id }))}
-                            value={undefined}
-                            onChange={(e) => switchChartPreset(Number(e.target.value))}
-                            aria-label="Load from a preset"
-                            prepend={'Load preset'}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            aria-label="Save the preset"
-                            data-test-subj="lns-example-save"
-                            isDisabled={isDisabled || hasParsingError}
-                            onClick={() => {
-                              const attributes = checkAndParseSO(currentSO.current);
-                              if (attributes) {
-                                const label = `custom-chart-${chartCounter}`;
-                                addChartConfiguration([
-                                  ...loadedCharts,
+                      ) : null}
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          aria-label="Open lens in new tab"
+                          isDisabled={!props.plugins.lens.canUseEditor()}
+                          onClick={() => {
+                            props.plugins.lens.navigateToPrefilledEditor(
+                              {
+                                id: '',
+                                timeRange: time,
+                                attributes: currentAttributes,
+                              },
+                              {
+                                openInNewTab: true,
+                              }
+                            );
+                          }}
+                        >
+                          Open in Lens (new tab)
+                        </EuiButton>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <p>State: {isLoading ? 'Loading...' : 'Rendered'}</p>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiFlexGroup>
+                      <EuiFlexItem>
+                        <LensComponent
+                          id="myLens"
+                          style={{ height: 500 }}
+                          timeRange={time}
+                          attributes={currentAttributes}
+                          overrides={overrides}
+                          onLoad={(val) => {
+                            setIsLoading(val);
+                          }}
+                          onBrushEnd={({ range }) => {
+                            setTime({
+                              from: new Date(range[0]).toISOString(),
+                              to: new Date(range[1]).toISOString(),
+                            });
+                          }}
+                          onFilter={(_data) => {
+                            // call back event for on filter event
+                          }}
+                          onTableRowClick={(_data) => {
+                            // call back event for on table row click event
+                          }}
+                          disableTriggers={!enableTriggers}
+                          viewMode={ViewMode.VIEW}
+                          withDefaultActions={enableDefaultAction}
+                          extraActions={
+                            enableExtraAction
+                              ? [
                                   {
-                                    id: label,
-                                    attributes,
+                                    id: 'testAction',
+                                    type: 'link',
+                                    getIconType: () => 'save',
+                                    async isCompatible(
+                                      context: ActionExecutionContext<object>
+                                    ): Promise<boolean> {
+                                      return true;
+                                    },
+                                    execute: async (context: ActionExecutionContext<object>) => {
+                                      alert('I am an extra action');
+                                      return;
+                                    },
+                                    getDisplayName: () => 'Extra action',
                                   },
-                                ]);
-                                chartCounter++;
-                                alert(`The preset has been saved as "${label}"`);
-                              }
-                            }}
-                          >
-                            Save as preset
-                          </EuiButton>
-                        </EuiFlexItem>
-                        {hasParsingErrorDebounced && currentSO.current !== currentValid && (
-                          <EuiCallOut title="Error" color="danger" iconType="warning">
-                            <p>Check the spec</p>
-                          </EuiCallOut>
-                        )}
-                      </EuiFlexGroup>
-                      <EuiFlexGroup style={{ height: '75vh' }} direction="column">
-                        <EuiFlexItem>
-                          <CodeEditor
-                            languageId={HJsonLang}
-                            options={{
-                              fontSize: 14,
-                              wordWrap: 'on',
-                            }}
-                            value={currentSO.current}
-                            onChange={(newSO) => {
-                              const isValid = Boolean(checkAndParseSO(newSO));
-                              setErrorFlag(!isValid);
-                              currentSO.current = newSO;
-                              if (isValid) {
-                                // reset the debounced error
-                                setErrorDebounced(isValid);
-                                saveValidSO(newSO);
-                              }
-                            }}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageSection>
-        </EuiPageBody>
-      </EuiPage>
-    </KibanaContextProvider>
+                                ]
+                              : undefined
+                          }
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                  {isSaveModalVisible && (
+                    <LensSaveModalComponent
+                      initialInput={{ attributes: currentAttributes }}
+                      onSave={() => {}}
+                      onClose={() => setIsSaveModalVisible(false)}
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={2}>
+                  <EuiPanel hasShadow={false}>
+                    <EuiFlexGroup>
+                      <EuiFlexItem>
+                        <EuiText>
+                          <p>Paste or edit here your Lens document</p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiSelect
+                          options={charts.map(({ id }, i) => ({ value: i, text: id }))}
+                          value={undefined}
+                          onChange={(e) => switchChartPreset(+e.target.value)}
+                          aria-label="Load from a preset"
+                          prepend={'Load preset'}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          aria-label="Save the preset"
+                          data-test-subj="lns-example-save"
+                          isDisabled={isDisabled || hasParsingError}
+                          onClick={() => {
+                            const attributes = checkAndParseSO(currentSO.current);
+                            if (attributes) {
+                              const label = `custom-chart-${chartCounter}`;
+                              addChartConfiguration([
+                                ...loadedCharts,
+                                {
+                                  id: label,
+                                  attributes,
+                                },
+                              ]);
+                              chartCounter++;
+                              alert(`The preset has been saved as "${label}"`);
+                            }
+                          }}
+                        >
+                          Save as preset
+                        </EuiButton>
+                      </EuiFlexItem>
+                      {hasParsingErrorDebounced && currentSO.current !== currentValid && (
+                        <EuiCallOut title="Error" color="danger" iconType="warning">
+                          <p>Check the spec</p>
+                        </EuiCallOut>
+                      )}
+                    </EuiFlexGroup>
+                    <EuiFlexGroup style={{ height: '75vh' }} direction="column">
+                      <EuiFlexItem>
+                        <CodeEditor
+                          languageId={HJsonLang}
+                          options={{
+                            fontSize: 14,
+                            wordWrap: 'on',
+                          }}
+                          value={currentSO.current}
+                          onChange={(newSO) => {
+                            const isValid = Boolean(checkAndParseSO(newSO));
+                            setErrorFlag(!isValid);
+                            currentSO.current = newSO;
+                            if (isValid) {
+                              // reset the debounced error
+                              setErrorDebounced(isValid);
+                              saveValidSO(newSO);
+                            }
+                          }}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageSection>
+      </EuiPageBody>
+    </EuiPage>
   );
 };

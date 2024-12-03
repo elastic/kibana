@@ -27,7 +27,7 @@ import {
   ExternalReferenceStorageType,
   CustomFieldTypes,
 } from '../../common/types/domain';
-import type { ActionLicense, CaseUI, CasesStatus, UserActionUI } from './types';
+import type { ActionLicense, CaseUI, UserActionUI } from './types';
 
 import type {
   ResolvedCase,
@@ -45,6 +45,7 @@ import type {
   AttachmentUI,
   CaseUICustomField,
   CasesConfigurationUICustomField,
+  CasesConfigurationUITemplate,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -55,11 +56,7 @@ import type {
   AttachmentViewObject,
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
-import type {
-  CasesFindResponse,
-  CasesStatusResponse,
-  UserActionWithResponse,
-} from '../../common/types/api';
+import type { CasesFindResponse, UserActionWithResponse } from '../../common/types/api';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
@@ -265,6 +262,11 @@ export const basicFileMock: FileJSON = {
   fileKind: '',
   status: 'READY',
   extension: 'png',
+  hash: {
+    md5: 'md5',
+    sha1: 'sha1',
+    sha256: 'sha256',
+  },
 };
 
 export const caseWithAlerts = {
@@ -392,14 +394,13 @@ export const basicCaseCommentPatch = {
   comments: [basicCommentPatch],
 };
 
-export const casesStatus: CasesStatus = {
-  countOpenCases: 20,
-  countInProgressCases: 40,
-  countClosedCases: 130,
-};
-
 export const casesMetrics: CasesMetrics = {
   mttr: 12,
+  status: {
+    open: 20,
+    inProgress: 40,
+    closed: 130,
+  },
 };
 
 export const basicPush = {
@@ -455,7 +456,9 @@ export const allCases: CasesFindResponseUI = {
   page: 1,
   perPage: 5,
   total: 10,
-  ...casesStatus,
+  countOpenCases: 20,
+  countInProgressCases: 40,
+  countClosedCases: 130,
 };
 
 export const actionLicenses: ActionLicense[] = [
@@ -566,12 +569,6 @@ export const caseWithRegisteredAttachmentsSnake = {
   comments: [externalReferenceAttachmentSnake, persistableStateAttachmentSnake],
 };
 
-export const casesStatusSnake: CasesStatusResponse = {
-  count_closed_cases: 130,
-  count_in_progress_cases: 40,
-  count_open_cases: 20,
-};
-
 export const pushSnake = {
   connector_id: pushConnectorId,
   connector_name: 'My SN connector',
@@ -620,7 +617,9 @@ export const allCasesSnake: CasesFindResponse = {
   page: 1,
   per_page: 5,
   total: 10,
-  ...casesStatusSnake,
+  count_closed_cases: 130,
+  count_in_progress_cases: 40,
+  count_open_cases: 20,
 };
 
 export const getUserAction = (
@@ -1150,9 +1149,121 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
 export const customFieldsMock: CaseUICustomField[] = [
   { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: 'My text test value 1' },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_3', value: null },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', value: null },
+  { type: CustomFieldTypes.NUMBER, key: 'test_key_5', value: 1234 },
+  { type: CustomFieldTypes.NUMBER, key: 'test_key_6', value: null },
 ];
 
 export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
-  { type: CustomFieldTypes.TEXT, key: 'test_key_1', label: 'My test label 1', required: true },
-  { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', label: 'My test label 2', required: false },
+  {
+    type: CustomFieldTypes.TEXT,
+    key: 'test_key_1',
+    label: 'My test label 1',
+    required: true,
+    defaultValue: 'My default value',
+  },
+  {
+    type: CustomFieldTypes.TOGGLE,
+    key: 'test_key_2',
+    label: 'My test label 2',
+    required: true,
+    defaultValue: true,
+  },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_3', label: 'My test label 3', required: false },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', label: 'My test label 4', required: false },
+  {
+    type: CustomFieldTypes.NUMBER,
+    key: 'test_key_5',
+    label: 'My test label 5',
+    required: true,
+    defaultValue: 123,
+  },
+  {
+    type: CustomFieldTypes.NUMBER,
+    key: 'test_key_6',
+    label: 'My test label 6',
+    required: false,
+  },
+];
+
+export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [
+  {
+    key: 'test_template_1',
+    name: 'First test template',
+    description: 'This is a first test template',
+    caseFields: null,
+  },
+  {
+    key: 'test_template_2',
+    name: 'Second test template',
+    description: 'This is a second test template',
+    tags: [],
+    caseFields: {},
+  },
+  {
+    key: 'test_template_3',
+    name: 'Third test template',
+    description: 'This is a third test template with few case fields',
+    tags: ['foo'],
+    caseFields: {
+      title: 'This is case title using a test template',
+      severity: CaseSeverity.MEDIUM,
+      tags: ['third-template', 'medium'],
+    },
+  },
+  {
+    key: 'test_template_4',
+    name: 'Fourth test template',
+    description: 'This is a fourth test template',
+    tags: ['foo', 'bar'],
+    caseFields: {
+      title: 'Case with sample template 4',
+      description: 'case desc',
+      severity: CaseSeverity.LOW,
+      category: null,
+      tags: ['sample-4'],
+      assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+      customFields: [
+        {
+          key: 'first_custom_field_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'this is a text field value',
+        },
+      ],
+      connector: {
+        id: 'none',
+        name: 'My Connector',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
+    },
+  },
+  {
+    key: 'test_template_5',
+    name: 'Fifth test template',
+    description: 'This is a fifth test template',
+    tags: ['foo', 'bar'],
+    caseFields: {
+      title: 'Case with sample template 5',
+      description: 'case desc',
+      severity: CaseSeverity.HIGH,
+      category: 'my category',
+      tags: ['sample-4'],
+      assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+      customFields: [
+        {
+          key: 'first_custom_field_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'this is a text field value',
+        },
+      ],
+      connector: {
+        id: 'jira-1',
+        name: 'Jira',
+        type: ConnectorTypes.jira,
+        fields: { issueType: 'Task', priority: 'Low', parent: null },
+      },
+    },
+  },
 ];

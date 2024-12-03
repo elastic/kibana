@@ -208,6 +208,42 @@ export const CREATE_FORM_CATEGORY_STACK_RULES = i18n.translate(
   }
 );
 
+export const CREATE_FORM_SCOPED_QUERY_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.scopedQuery.title',
+  {
+    defaultMessage: 'Filters',
+  }
+);
+
+export const CREATE_FORM_SCOPED_QUERY_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.scopedQuery.description',
+  {
+    defaultMessage:
+      'Add filters that refine the scope of the maintenance window. You can select only one category when filters are enabled.',
+  }
+);
+
+export const CREATE_FORM_SCOPED_QUERY_TOGGLE_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.scopedQuery.toggleTitle',
+  {
+    defaultMessage: 'Filter alerts',
+  }
+);
+
+export const CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.scopedQuery.invalidErrorMessage',
+  {
+    defaultMessage: 'Invalid scoped query.',
+  }
+);
+
+export const CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.scopedQuery.emptyErrorMessage',
+  {
+    defaultMessage: 'Scoped query is required.',
+  }
+);
+
 export const CREATE_FORM_FREQUENCY_WEEKLY_ON = (dayOfWeek: string) =>
   i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.weeklyOnWeekday', {
     defaultMessage: 'Weekly on {dayOfWeek}',
@@ -290,7 +326,7 @@ export const CREATE_FORM_ENDS_ON_DATE = i18n.translate(
 export const CREATE_FORM_ENDS_AFTER_X = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.ends.afterX',
   {
-    defaultMessage: 'After \\{x\\}',
+    defaultMessage: `After '{x}'`,
   }
 );
 

@@ -16,6 +16,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import TriggersActionsUIHome, { MatchParams } from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('../common/lib/kibana');
 jest.mock('../common/get_experimental_features');
@@ -32,10 +33,21 @@ jest.mock('./context/health_context', () => ({
   HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+jest.mock('./hooks/use_load_rule_types_query', () => ({
+  useLoadRuleTypesQuery: jest.fn().mockReturnValue({
+    authorizedToReadAnyRules: true,
+  }),
+}));
+
+const { useLoadRuleTypesQuery } = jest.requireMock('./hooks/use_load_rule_types_query');
+
+const queryClient = new QueryClient();
+
 describe('home', () => {
   beforeEach(() => {
     (hasShowActionsCapability as jest.Mock).mockClear();
-    (getIsExperimentalFeatureEnabled as jest.Mock).mockClear();
+    (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => false);
+    useLoadRuleTypesQuery.mockClear();
   });
 
   it('renders rule list components', async () => {
@@ -57,7 +69,9 @@ describe('home', () => {
     render(
       <IntlProvider locale="en">
         <Router history={props.history}>
-          <TriggersActionsUIHome {...props} />
+          <QueryClientProvider client={queryClient}>
+            <TriggersActionsUIHome {...props} />
+          </QueryClientProvider>
         </Router>
       </IntlProvider>
     );
@@ -67,7 +81,7 @@ describe('home', () => {
     });
   });
 
-  it('hides the internal alerts table route if the config is not set', async () => {
+  it('shows the correct number of tabs', async () => {
     (hasShowActionsCapability as jest.Mock).mockImplementation(() => {
       return true;
     });
@@ -76,7 +90,7 @@ describe('home', () => {
       location: createLocation('/'),
       match: {
         isExact: true,
-        path: `/connectorss`,
+        path: `/connectors`,
         url: '',
         params: {
           section: 'connectors',
@@ -84,28 +98,46 @@ describe('home', () => {
       },
     };
 
-    let home = mountWithIntl(
+    const home = mountWithIntl(
       <Router history={props.history}>
-        <TriggersActionsUIHome {...props} />
+        <QueryClientProvider client={queryClient}>
+          <TriggersActionsUIHome {...props} />
+        </QueryClientProvider>
       </Router>
     );
 
-    // Just rules/logs
+    // Just rules and logs
     expect(home.find('span.euiTab__content').length).toBe(2);
+  });
 
-    (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      if (feature === 'internalAlertsTable') {
-        return true;
-      }
-      return false;
+  it('hides the logs tab if the read rules privilege is missing', async () => {
+    useLoadRuleTypesQuery.mockReturnValue({
+      authorizedToReadAnyRules: false,
     });
+    const props: RouteComponentProps<MatchParams> = {
+      history: createMemoryHistory({
+        initialEntries: ['/rules'],
+      }),
+      location: createLocation('/rules'),
+      match: {
+        isExact: true,
+        path: `/rules`,
+        url: '',
+        params: {
+          section: 'rules',
+        },
+      },
+    };
 
-    home = mountWithIntl(
+    const home = mountWithIntl(
       <Router history={props.history}>
-        <TriggersActionsUIHome {...props} />
+        <QueryClientProvider client={queryClient}>
+          <TriggersActionsUIHome {...props} />
+        </QueryClientProvider>
       </Router>
     );
-    // alerts now too!
-    expect(home.find('span.euiTab__content').length).toBe(3);
+
+    // Just rules
+    expect(home.find('span.euiTab__content').length).toBe(1);
   });
 });

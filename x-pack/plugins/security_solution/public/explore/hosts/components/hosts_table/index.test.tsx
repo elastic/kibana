@@ -8,17 +8,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import '../../../../common/mock/match_media';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../../common/mock';
+import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { HostsTable } from '.';
@@ -55,17 +46,20 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
+
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
-
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createMockStore();
   const mount = useMountAppended();
-
-  beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
 
   describe('rendering', () => {
     test('it renders the default Hosts table', () => {
@@ -159,6 +153,31 @@ describe('Hosts Table', () => {
       );
 
       expect(queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
+    });
+
+    test('it renders "Asset Criticality" column when "isPlatinumOrTrialLicense" is truthy, user has risk-entity capability and Asset Criticality is enabled in Kibana settings', () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
+      mockUseHasSecurityCapability.mockReturnValue(true);
+      mockUseUiSetting.mockReturnValue([true]);
+
+      const { queryByTestId } = render(
+        <TestProviders store={store}>
+          <HostsTable
+            id="hostsQuery"
+            isInspect={false}
+            loading={false}
+            data={mockData}
+            totalCount={0}
+            fakeTotalCount={-1}
+            setQuerySkip={jest.fn()}
+            showMorePagesIndicator={false}
+            loadPage={loadPage}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('tableHeaderCell_node.criticality_5')).toBeInTheDocument();
     });
 
     describe('Sorting on Table', () => {

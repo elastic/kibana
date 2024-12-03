@@ -8,7 +8,10 @@
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesSettingsClientMock, RulesSettingsClientMock } from '../rules_settings_client.mock';
+import {
+  rulesSettingsClientMock,
+  RulesSettingsClientMock,
+} from '../rules_settings/rules_settings_client.mock';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;
@@ -34,11 +37,16 @@ describe('getFlappingSettingsRoute', () => {
     expect(config).toMatchInlineSnapshot(`
       Object {
         "options": Object {
-          "tags": Array [
-            "access:read-flapping-settings",
-          ],
+          "access": "internal",
         },
         "path": "/internal/alerting/rules/settings/_flapping",
+        "security": Object {
+          "authz": Object {
+            "requiredPrivileges": Array [
+              "read-flapping-settings",
+            ],
+          },
+        },
         "validate": false,
       }
     `);

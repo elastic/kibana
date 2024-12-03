@@ -26,4 +26,9 @@ export const configureToggleCustomFieldFactory: CustomFieldFactory<CaseCustomFie
     View,
     Create,
   }),
+  filterOptions: [
+    { key: 'on', label: i18n.TOGGLE_FIELD_ON_LABEL, value: true },
+    { key: 'off', label: i18n.TOGGLE_FIELD_OFF_LABEL, value: false },
+  ],
+  getDefaultValue: () => false,
 });

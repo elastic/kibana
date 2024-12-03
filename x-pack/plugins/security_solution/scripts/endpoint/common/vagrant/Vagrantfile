@@ -5,11 +5,13 @@
 hostname = ENV["VMNAME"] || 'ubuntu'
 cachedAgentSource = ENV["CACHED_AGENT_SOURCE"] || ''
 cachedAgentFilename = ENV["CACHED_AGENT_FILENAME"] || ''
+agentDestinationFolder = ENV["AGENT_DESTINATION_FOLDER"] || ''
 
 Vagrant.configure("2") do |config|
   config.vm.hostname = hostname
   config.vm.box = 'ubuntu/jammy64'
   config.vm.box_check_update = false
+  config.vm.boot_timeout = 600
 
   config.vm.provider :virtualbox do |vb|
     vb.memory = 4096
@@ -29,6 +31,8 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provision "file", source: cachedAgentSource, destination: "~/#{cachedAgentFilename}"
-  config.vm.provision "shell", inline: "tar -zxf #{cachedAgentFilename} && rm -f #{cachedAgentFilename}"
+  config.vm.provision "shell", inline: "mkdir #{agentDestinationFolder}"
+  config.vm.provision "shell", inline: "tar -zxf #{cachedAgentFilename} --directory #{agentDestinationFolder} --strip-components=1 && rm -f #{cachedAgentFilename}"
+  config.vm.provision "shell", inline: "sudo apt-get update"
   config.vm.provision "shell", inline: "sudo apt-get install unzip"
 end

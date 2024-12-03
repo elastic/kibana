@@ -19,18 +19,22 @@ import {
   PreconfiguredOutputsSchema,
   PreconfiguredFleetServerHostsSchema,
   PreconfiguredFleetProxiesSchema,
+  PreconfiguredSpaceSettingsSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
-const REGISTRY_SPEC_MAX_VERSION = '3.0';
+const REGISTRY_SPEC_MAX_VERSION = '3.3';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
     agents: {
+      enabled: true,
+    },
+    agentless: {
       enabled: true,
     },
     enableExperimental: true,
@@ -39,7 +43,6 @@ export const config: PluginConfigDescriptor = {
     },
     internal: {
       fleetServerStandalone: true,
-      disableProxies: true,
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
@@ -126,6 +129,8 @@ export const config: PluginConfigDescriptor = {
   ],
   schema: schema.object(
     {
+      isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
+      enableDeleteUnenrolledAgents: schema.maybe(schema.boolean({ defaultValue: false })),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       agents: schema.object({
@@ -141,15 +146,35 @@ export const config: PluginConfigDescriptor = {
           })
         ),
       }),
+      agentless: schema.maybe(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
+          api: schema.maybe(
+            schema.object({
+              url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+              tls: schema.maybe(
+                schema.object({
+                  certificate: schema.maybe(schema.string()),
+                  key: schema.maybe(schema.string()),
+                  ca: schema.maybe(schema.string()),
+                })
+              ),
+            })
+          ),
+        })
+      ),
       packages: PreconfiguredPackagesSchema,
       agentPolicies: PreconfiguredAgentPoliciesSchema,
       outputs: PreconfiguredOutputsSchema,
       fleetServerHosts: PreconfiguredFleetServerHostsSchema,
       proxies: PreconfiguredFleetProxiesSchema,
+      spaceSettings: PreconfiguredSpaceSettingsSchema,
       agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+      eventIngestedEnabled: schema.boolean({ defaultValue: false }),
       setup: schema.maybe(
         schema.object({
           agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
+          uninstallTokenVerificationBatchSize: schema.maybe(schema.number()),
         })
       ),
       developer: schema.object({
@@ -157,6 +182,9 @@ export const config: PluginConfigDescriptor = {
         disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
         allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
         bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+        disableBundledPackagesCache: schema.boolean({
+          defaultValue: false,
+        }),
       }),
       packageVerification: schema.object({
         gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
@@ -174,67 +202,71 @@ export const config: PluginConfigDescriptor = {
         defaultValue: () => [],
       }),
 
-      internal: schema.maybe(
-        schema.object({
-          disableILMPolicies: schema.boolean({
-            defaultValue: false,
-          }),
-          disableProxies: schema.boolean({
-            defaultValue: false,
-          }),
-          fleetServerStandalone: schema.boolean({
-            defaultValue: false,
-          }),
-          onlyAllowAgentUpgradeToKnownVersions: schema.boolean({
-            defaultValue: false,
-          }),
-          activeAgentsSoftLimit: schema.maybe(
-            schema.number({
-              min: 0,
-            })
-          ),
-          retrySetupOnBoot: schema.boolean({ defaultValue: false }),
-          registry: schema.object(
-            {
-              kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
-              excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
-              spec: schema.object(
-                {
-                  min: schema.maybe(schema.string()),
-                  max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
-                },
-                {
-                  defaultValue: {
-                    max: REGISTRY_SPEC_MAX_VERSION,
-                  },
-                }
-              ),
-              capabilities: schema.arrayOf(
-                schema.oneOf([
-                  // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
-                  schema.literal('apm'),
-                  schema.literal('enterprise_search'),
-                  schema.literal('observability'),
-                  schema.literal('security'),
-                  schema.literal('serverless_search'),
-                  schema.literal('uptime'),
-                ]),
-                { defaultValue: [] }
-              ),
-            },
-            {
-              defaultValue: {
-                kibanaVersionCheckEnabled: true,
-                capabilities: [],
-                excludePackages: [],
-                spec: {
+      internal: schema.object({
+        useMeteringApi: schema.boolean({
+          defaultValue: false,
+        }),
+        disableILMPolicies: schema.boolean({
+          defaultValue: false,
+        }),
+        fleetServerStandalone: schema.boolean({
+          defaultValue: false,
+        }),
+        onlyAllowAgentUpgradeToKnownVersions: schema.boolean({
+          defaultValue: false,
+        }),
+        activeAgentsSoftLimit: schema.maybe(
+          schema.number({
+            min: 0,
+          })
+        ),
+        retrySetupOnBoot: schema.boolean({ defaultValue: false }),
+        registry: schema.object(
+          {
+            // Must be set back to `true`  before v9 release
+            // Requires all registry packages to add v9 as a compatible semver range
+            // https://github.com/elastic/kibana/issues/192624
+            kibanaVersionCheckEnabled: schema.boolean({ defaultValue: false }),
+            excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
+            spec: schema.object(
+              {
+                min: schema.maybe(schema.string()),
+                max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
+              },
+              {
+                defaultValue: {
                   max: REGISTRY_SPEC_MAX_VERSION,
                 },
+              }
+            ),
+            capabilities: schema.arrayOf(
+              schema.oneOf([
+                // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
+                schema.literal('apm'),
+                schema.literal('enterprise_search'),
+                schema.literal('observability'),
+                schema.literal('security'),
+                schema.literal('serverless_search'),
+                schema.literal('uptime'),
+              ]),
+              { defaultValue: [] }
+            ),
+          },
+          {
+            defaultValue: {
+              // Must be set back to `true`  before v9 release
+              // Requires all registry packages to add v9 as a compatible semver range
+              // https://github.com/elastic/kibana/issues/192624
+              kibanaVersionCheckEnabled: false,
+              capabilities: [],
+              excludePackages: [],
+              spec: {
+                max: REGISTRY_SPEC_MAX_VERSION,
               },
-            }
-          ),
-        })
-      ),
+            },
+          }
+        ),
+      }),
       enabled: schema.boolean({ defaultValue: true }),
       /**
        * The max size of the artifacts encoded_size sum in a batch when more than one (there is at least one artifact in a batch).

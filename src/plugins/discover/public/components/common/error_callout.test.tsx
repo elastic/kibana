@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
@@ -14,13 +15,13 @@ import React, { ReactNode } from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { ErrorCallout } from './error_callout';
 
-const mockGetSearchErrorOverrideDisplay = jest.fn();
+const mockRenderSearchError = jest.fn();
 
-jest.mock('@kbn/data-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/data-plugin/public');
+jest.mock('@kbn/search-errors', () => {
+  const originalModule = jest.requireActual('@kbn/search-errors');
   return {
     ...originalModule,
-    getSearchErrorOverrideDisplay: () => mockGetSearchErrorOverrideDisplay(),
+    renderSearchError: () => mockRenderSearchError(),
   };
 });
 
@@ -31,7 +32,7 @@ describe('ErrorCallout', () => {
     );
 
   afterEach(() => {
-    mockGetSearchErrorOverrideDisplay.mockReset();
+    mockRenderSearchError.mockReset();
   });
 
   it('should render', () => {
@@ -42,11 +43,9 @@ describe('ErrorCallout', () => {
     expect(prompt).toHaveLength(1);
     expect(prompt.prop('title')).toBeDefined();
     expect(prompt.prop('title')).not.toBeInstanceOf(String);
-    expect(prompt.prop('body')).toBeDefined();
-    expect(findTestSubject(prompt, 'discoverErrorCalloutTitle').contains(title)).toBe(true);
-    expect(findTestSubject(prompt, 'discoverErrorCalloutMessage').contains(error.message)).toBe(
-      true
-    );
+    expect(prompt.find('EuiCodeBlock')).toHaveLength(1);
+    expect(prompt.find('EuiCodeBlock').text()).toContain(error.message);
+    expect(prompt.find('[data-test-subj="discoverErrorCalloutTitle"]').contains(title)).toBe(true);
     expect(prompt.find(EuiButton)).toHaveLength(1);
   });
 
@@ -54,7 +53,7 @@ describe('ErrorCallout', () => {
     const title = 'Override title';
     const error = new Error('My error');
     const overrideDisplay = <div>Override display</div>;
-    mockGetSearchErrorOverrideDisplay.mockReturnValue({ title, body: overrideDisplay });
+    mockRenderSearchError.mockReturnValue({ title, body: overrideDisplay });
     const wrapper = mountWithServices(<ErrorCallout title="Original title" error={error} />);
     const prompt = wrapper.find(EuiEmptyPrompt);
     expect(prompt).toHaveLength(1);
@@ -76,5 +75,21 @@ describe('ErrorCallout', () => {
       title,
       error,
     });
+  });
+
+  it('should not render the "View details" button for ES|QL', () => {
+    (discoverServiceMock.core.notifications.showErrorDialog as jest.Mock).mockClear();
+    const title = 'Error title';
+    const error = new Error('My error');
+    const wrapper = mountWithServices(<ErrorCallout title={title} error={error} isEsqlMode />);
+    expect(findTestSubject(wrapper, 'discoverErrorCalloutShowDetailsButton')).toHaveLength(0);
+  });
+
+  it('should render the "ES|QL reference" button for ES|QL', () => {
+    (discoverServiceMock.core.notifications.showErrorDialog as jest.Mock).mockClear();
+    const title = 'Error title';
+    const error = new Error('My error');
+    const wrapper = mountWithServices(<ErrorCallout title={title} error={error} isEsqlMode />);
+    expect(findTestSubject(wrapper, 'discoverErrorCalloutESQLReferenceButton')).toHaveLength(1);
   });
 });

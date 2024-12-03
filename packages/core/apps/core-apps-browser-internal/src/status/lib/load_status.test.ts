@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { StatusResponse } from '@kbn/core-status-common-internal';
+import type { StatusResponse } from '@kbn/core-status-common';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mocked } from '@kbn/core-metrics-collectors-server-mocks';
 import { loadStatus } from './load_status';
@@ -21,6 +22,7 @@ const mockedResponse: StatusResponse = {
     build_number: 12,
     build_snapshot: false,
     build_date: '2023-05-15T23:12:09.000Z',
+    build_flavor: 'traditional',
   },
   status: {
     overall: {
@@ -76,6 +78,8 @@ const mockedResponse: StatusResponse = {
           total_in_bytes: 0,
         },
         resident_set_size_in_bytes: 1,
+        array_buffers_in_bytes: 1,
+        external_in_bytes: 1,
       },
       event_loop_delay: 1,
       event_loop_delay_histogram: mocked.createHistogram(),
@@ -96,6 +100,8 @@ const mockedResponse: StatusResponse = {
             total_in_bytes: 0,
           },
           resident_set_size_in_bytes: 1,
+          array_buffers_in_bytes: 1,
+          external_in_bytes: 1,
         },
         event_loop_delay: 1,
         event_loop_delay_histogram: mocked.createHistogram(),

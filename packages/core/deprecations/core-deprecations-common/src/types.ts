@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -21,7 +22,7 @@ export interface BaseDeprecationDetails {
    * The description message to be displayed for the deprecation.
    * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
    */
-  message: string;
+  message: string | string[];
   /**
    * levels:
    * - warning: will not break deployment upon upgrade
@@ -38,7 +39,7 @@ export interface BaseDeprecationDetails {
    * Predefined types are necessary to reduce having similar definitions with different keywords
    * across kibana deprecations.
    */
-  deprecationType?: 'config' | 'feature';
+  deprecationType?: 'config' | 'api' | 'feature';
   /** (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
   /** (optional) specify the fix for this deprecation requires a full kibana restart. */
@@ -69,7 +70,29 @@ export interface BaseDeprecationDetails {
      * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
      */
     manualSteps: string[];
+    /**
+     * (optional) The api to be called to mark the deprecation as resolved
+     * This corrective action when called should not resolve the deprecation
+     * instead it helps users track manually deprecated apis
+     * If the API used does resolve the deprecation use `correctiveActions.api`
+     */
+    mark_as_resolved_api?: {
+      apiTotalCalls: number;
+      totalMarkedAsResolved: number;
+      timestamp: Date | number | string;
+      routePath: string;
+      routeMethod: string;
+      routeVersion?: string;
+    };
   };
+}
+
+/**
+ * @public
+ */
+export interface ApiDeprecationDetails extends BaseDeprecationDetails {
+  apiId: string;
+  deprecationType: 'api';
 }
 
 /**
@@ -90,12 +113,15 @@ export interface FeatureDeprecationDetails extends BaseDeprecationDetails {
 /**
  * @public
  */
-export type DeprecationsDetails = ConfigDeprecationDetails | FeatureDeprecationDetails;
+export type DeprecationsDetails =
+  | ConfigDeprecationDetails
+  | ApiDeprecationDetails
+  | FeatureDeprecationDetails;
 
 /**
  * @public
  */
-export type DomainDeprecationDetails = DeprecationsDetails & {
+export type DomainDeprecationDetails<ExtendedDetails = DeprecationsDetails> = ExtendedDetails & {
   domainId: string;
 };
 

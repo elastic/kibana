@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TrainedModelType } from '@kbn/ml-trained-models-utils';
 import type {
   DataFrameAnalyticsConfig,
   FeatureImportanceBaseline,
   TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -113,6 +114,14 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   version: string;
   inference_config?: Record<string, any>;
   indices?: Array<Record<IndexName, IndicesIndexState | null>>;
+  /**
+   * Whether the model has inference services
+   */
+  hasInferenceServices?: boolean;
+  /**
+   * Inference services associated with the model
+   */
+  inference_apis?: InferenceAPIConfigResponse[];
 };
 
 export interface PipelineDefinition {
@@ -132,47 +141,46 @@ export interface InferenceConfigResponse {
   trained_model_configs: TrainedModelConfigResponse[];
 }
 
-export interface TrainedModelDeploymentStatsResponse {
-  model_id: string;
-  deployment_id: string;
-  inference_threads: number;
-  model_threads: number;
-  state: DeploymentState;
+type NodesDeploymentStats = Array<{
+  node: Record<
+    string,
+    {
+      transport_address: string;
+      roles: string[];
+      name: string;
+      attributes: {
+        'ml.machine_memory': string;
+        'xpack.installed': string;
+        'ml.max_open_jobs': string;
+        'ml.max_jvm_size': string;
+      };
+      ephemeral_id: string;
+    }
+  >;
+  inference_count: number;
+  routing_state: { routing_state: string };
+  average_inference_time_ms: number;
+  last_access: number;
+  number_of_pending_requests: number;
+  start_time: number;
+  throughput_last_minute: number;
   threads_per_allocation: number;
   number_of_allocations: number;
-  allocation_status: { target_allocation_count: number; state: string; allocation_count: number };
-  nodes: Array<{
-    node: Record<
-      string,
-      {
-        transport_address: string;
-        roles: string[];
-        name: string;
-        attributes: {
-          'ml.machine_memory': string;
-          'xpack.installed': string;
-          'ml.max_open_jobs': string;
-          'ml.max_jvm_size': string;
-        };
-        ephemeral_id: string;
-      }
-    >;
-    inference_count: number;
-    routing_state: { routing_state: string };
-    average_inference_time_ms: number;
-    last_access: number;
-    number_of_pending_requests: number;
-    start_time: number;
-    throughput_last_minute: number;
-    threads_per_allocation: number;
-    number_of_allocations: number;
-  }>;
-}
+}>;
+
+export type TrainedModelDeploymentStatsResponse = estypes.MlTrainedModelDeploymentStats & {
+  nodes: NodesDeploymentStats;
+  // TODO update types in elasticsearch-specification
+  adaptive_allocations?: {
+    enabled: boolean;
+    min_number_of_allocations?: number;
+    max_number_of_allocations?: number;
+  };
+};
 
 export interface AllocatedModel {
   key: string;
   deployment_id: string;
-  inference_threads: number;
   allocation_status: {
     target_allocation_count: number;
     state: string;
@@ -185,7 +193,7 @@ export interface AllocatedModel {
    */
   model_id?: string;
   state: string;
-  model_threads: number;
+  reason?: string;
   model_size_bytes: number;
   required_native_memory_bytes: number;
   node: {
@@ -203,9 +211,14 @@ export interface AllocatedModel {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
-    number_of_allocations: number;
-    threads_per_allocation: number;
+    number_of_allocations?: number;
+    threads_per_allocation?: number;
     error_count?: number;
+  };
+  adaptive_allocations?: {
+    enabled: boolean;
+    min_number_of_allocations?: number;
+    max_number_of_allocations?: number;
   };
 }
 
@@ -290,4 +303,9 @@ export interface MemoryStatsResponse {
 export interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
   model_size_stats?: TrainedModelModelSizeStats;
+}
+
+export interface ModelDownloadState {
+  total_parts: number;
+  downloaded_parts: number;
 }

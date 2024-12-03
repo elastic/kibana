@@ -62,13 +62,13 @@ export const DELETE_API_KEY_BUTTON_DESCRIPTION = i18n.translate(
 
 export const CREATE_MESSAGE = (name: string) =>
   i18n.translate('xpack.enterpriseSearch.workplaceSearch.apiKeys.createdMessage', {
-    defaultMessage: "API key '{name}' was created",
+    defaultMessage: "API key ''{name}'' was created",
     values: { name },
   });
 
 export const DELETE_MESSAGE = (name: string) =>
   i18n.translate('xpack.enterpriseSearch.workplaceSearch.apiKeys.deletedMessage', {
-    defaultMessage: "API key '{name}' was deleted",
+    defaultMessage: "API key ''{name}'' was deleted",
     values: { name },
   });
 

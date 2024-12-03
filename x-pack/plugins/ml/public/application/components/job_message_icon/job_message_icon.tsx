@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { AuditMessageBase } from '../../../../common/types/audit_message';
+import type { AuditMessageBase } from '../../../../common/types/audit_message';
 
 interface Props {
   message: AuditMessageBase;

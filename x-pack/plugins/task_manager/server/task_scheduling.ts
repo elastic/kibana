@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { filter, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import pMap from 'p-map';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { v4 as uuidv4 } from 'uuid';
 import { chunk, flatten, pick } from 'lodash';
@@ -40,6 +39,7 @@ import { TaskLifecycleEvent } from './polling_lifecycle';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
+import { ErrorOutput } from './lib/bulk_operation_buffer';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -63,7 +63,7 @@ export interface BulkUpdateTaskResult {
   /**
    * list of failed tasks and errors caused failure
    */
-  errors: Array<{ type: string; id: string; error: SavedObjectError }>;
+  errors: ErrorOutput[];
 }
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
@@ -176,9 +176,15 @@ export class TaskScheduling {
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !task.enabled,
-      map: (task) => {
+      map: (task, i) => {
         if (runSoon) {
-          return { ...task, enabled: true, scheduledAt: new Date(), runAt: new Date() };
+          // Run the first task now. Run all other tasks a random number of ms in the future,
+          // with a maximum of 5 minutes or the task interval, whichever is smaller.
+          const taskToRun =
+            i === 0
+              ? { ...task, runAt: new Date(), scheduledAt: new Date() }
+              : randomlyOffsetRunTimestamp(task);
+          return { ...taskToRun, enabled: true };
         }
         return { ...task, enabled: true };
       },
@@ -384,8 +390,8 @@ export class TaskScheduling {
             (taskInstance: OkResultOf<TaskLifecycleEvent>) => {
               // resolve if the task has run sucessfully
               if (isTaskRunEvent(taskEvent)) {
-                subscription.unsubscribe();
                 resolve(pick((taskInstance as RanTask).task, ['id', 'state']));
+                subscription.unsubscribe();
               }
             },
             async (errorResult: ErrResultOf<TaskLifecycleEvent>) => {
@@ -408,9 +414,11 @@ export class TaskScheduling {
       });
 
       if (cancel) {
-        cancel.then(() => {
-          subscription.unsubscribe();
-        });
+        cancel
+          .then(() => {
+            subscription.unsubscribe();
+          })
+          .catch(() => {});
       }
     });
   }
@@ -438,5 +446,20 @@ const cancellablePromise = () => {
       .pipe(take(1))
       .toPromise()
       .then(() => {}),
+  };
+};
+
+const randomlyOffsetRunTimestamp: (task: ConcreteTaskInstance) => ConcreteTaskInstance = (task) => {
+  const now = Date.now();
+  const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes
+  const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+  const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
+
+  // Offset between 1 and maximumRunAt ms
+  const runAt = new Date(now + Math.floor(Math.random() * (maximumRunAt - now) + 1));
+  return {
+    ...task,
+    runAt,
+    scheduledAt: runAt,
   };
 };

@@ -4,10 +4,11 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-APM_CYPRESS_RECORD_KEY="$(retry 5 5 vault read -field=CYPRESS_RECORD_KEY secret/kibana-issues/dev/apm-cypress-dashboard-record-key)"
+APM_CYPRESS_RECORD_KEY="$(vault_get apm-cypress-dashboard-record-key CYPRESS_RECORD_KEY)"
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
+.buildkite/scripts/copy_es_snapshot_cache.sh
 
 export JOB=kibana-apm-cypress
 IS_FLAKY_TEST_RUNNER=${CLI_COUNT:-0}
@@ -30,6 +31,6 @@ echo "--- APM Cypress Tests"
 
 cd "$XPACK_DIR"
 
-node plugins/apm/scripts/test/e2e.js \
+node plugins/observability_solution/apm/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   $CYPRESS_ARGS

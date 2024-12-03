@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import type { ReactElement } from 'react';
+import type { ReactElement, PropsWithChildren } from 'react';
 import type React from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -18,7 +18,10 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
+  TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -27,15 +30,17 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
 import type { canUseCases } from './client/helpers/can_use_cases';
 import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
 import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
-import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../common/ui';
+import type { CasesMetrics, CasesFindResponseUI } from '../common/ui';
 import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
@@ -45,7 +50,6 @@ import type {
   CasesByAlertIDRequest,
   GetRelatedCasesByAlertResponse,
   CasesFindRequest,
-  CasesStatusRequest,
   CasesBulkGetRequest,
   CasesBulkGetResponse,
   CasesMetricsRequest,
@@ -58,21 +62,28 @@ import type {
   ExternalReferenceSOAttachmentPayload,
 } from '../common/types/domain';
 
-export interface CasesPluginSetup {
+export interface CasesPublicSetupDependencies {
   files: FilesSetup;
   security: SecurityPluginSetup;
   serverless?: ServerlessPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
+  triggersActionsUi: TriggersActionsSetup;
 }
 
-export interface CasesPluginStart {
+export interface CasesPublicStartDependencies {
   apm?: ApmBase;
+  cloud?: CloudStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   features: FeaturesPluginStart;
   files: FilesStart;
   lens: LensPublicStart;
+  /**
+   * Cases in used by other plugins. Plugins pass the
+   * service to their KibanaContext. ML does not pass
+   * the licensing service thus it is optional.
+   */
   licensing?: LicensingPluginStart;
   contentManagement: ContentManagementPublicStart;
   security: SecurityPluginStart;
@@ -89,23 +100,23 @@ export interface CasesPluginStart {
  * Leaving it out currently in lieu of RBAC changes
  */
 
-export type StartServices = CoreStart & CasesPluginStart;
+export type StartServices = CoreStart & CasesPublicStartDependencies;
 
 export interface RenderAppProps {
   mountParams: ManagementAppMountParams;
   coreStart: CoreStart;
-  pluginsStart: CasesPluginStart;
+  pluginsStart: CasesPublicStartDependencies;
   storage: Storage;
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
 
-export interface CasesUiSetup {
+export interface CasesPublicSetup {
   attachmentFramework: AttachmentFramework;
 }
 
-export interface CasesUiStart {
+export interface CasesPublicStart {
   api: {
     getRelatedCases: (
       alertId: string,
@@ -113,7 +124,6 @@ export interface CasesUiStart {
     ) => Promise<GetRelatedCasesByAlertResponse>;
     cases: {
       find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<CasesFindResponseUI>;
-      getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
       getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
       bulkGet: (params: CasesBulkGetRequest, signal?: AbortSignal) => Promise<CasesBulkGetResponse>;
     };
@@ -125,7 +135,7 @@ export interface CasesUiStart {
      * @return {ReactElement<GetCasesProps>}
      */
     getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
-    getCasesContext: () => React.FC<GetCasesContextProps>;
+    getCasesContext: () => React.FC<PropsWithChildren<GetCasesContextProps>>;
 
     /**
      * Modal to select a case in a list of all owner cases
@@ -145,6 +155,7 @@ export interface CasesUiStart {
   hooks: {
     useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+    useIsAddToCaseOpen: UseIsAddToCaseOpen;
   };
   helpers: {
     /**
@@ -172,5 +183,6 @@ export type SupportedCaseAttachment =
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
 export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
+export type { LensProps } from './components/visualizations/types';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;

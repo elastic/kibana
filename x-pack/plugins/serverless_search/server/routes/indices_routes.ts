@@ -8,10 +8,14 @@
 import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
+import { fetchSearchResults } from '@kbn/search-index-documents/lib';
+import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 import { fetchIndices } from '../lib/indices/fetch_indices';
+import { fetchIndex } from '../lib/indices/fetch_index';
 import { RouteDependencies } from '../plugin';
+import { errorHandler } from '../utils/error_handler';
 
-export const registerIndicesRoutes = ({ router, security }: RouteDependencies) => {
+export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/serverless_search/indices',
@@ -23,9 +27,10 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
         }),
       },
     },
-    async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const user = security.authc.getCurrentUser(request);
+    errorHandler(logger)(async (context, request, response) => {
+      const core = await context.core;
+      const client = core.elasticsearch.client.asCurrentUser;
+      const user = core.security.authc.getCurrentUser();
 
       if (!user) {
         return response.customError({
@@ -43,7 +48,7 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.get(
@@ -55,7 +60,7 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
 
       const result = await client.indices.get({
@@ -70,7 +75,76 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/serverless_search/index/{indexName}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const body = await fetchIndex(client.asCurrentUser, request.params.indexName);
+      return body
+        ? response.ok({
+            body,
+            headers: { 'content-type': 'application/json' },
+          })
+        : response.notFound();
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/serverless_search/indices/{index_name}/search',
+      validate: {
+        body: schema.object({
+          searchQuery: schema.string({
+            defaultValue: '',
+          }),
+          trackTotalHits: schema.boolean({ defaultValue: false }),
+        }),
+        params: schema.object({
+          index_name: schema.string(),
+        }),
+        query: schema.object({
+          page: schema.number({ defaultValue: 0, min: 0 }),
+          size: schema.number({
+            defaultValue: DEFAULT_DOCS_PER_PAGE,
+            min: 0,
+          }),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
+      const indexName = decodeURIComponent(request.params.index_name);
+      const searchQuery = request.body.searchQuery;
+      const { page = 0, size = DEFAULT_DOCS_PER_PAGE } = request.query;
+      const from = page * size;
+      const trackTotalHits = request.body.trackTotalHits;
+
+      const searchResults = await fetchSearchResults(
+        client,
+        indexName,
+        searchQuery,
+        from,
+        size,
+        trackTotalHits
+      );
+
+      return response.ok({
+        body: {
+          results: searchResults,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
   );
 };
 

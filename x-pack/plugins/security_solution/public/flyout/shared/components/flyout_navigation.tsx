@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, SyntheticEvent } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlyoutHeader,
@@ -15,7 +15,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -32,7 +32,7 @@ export interface FlyoutNavigationProps {
   /**
    * If flyoutIsExpandable is true, pass a callback to open left panel
    */
-  expandDetails?: () => void;
+  expandDetails?: (e: SyntheticEvent) => void;
   /**
    * Optional actions to be placed on the right hand side of navigation
    */
@@ -46,9 +46,11 @@ export interface FlyoutNavigationProps {
 export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
   ({ flyoutIsExpandable = false, expandDetails, actions }) => {
     const { euiTheme } = useEuiTheme();
-    const { closeLeftPanel, panels } = useExpandableFlyoutContext();
 
-    const isExpanded: boolean = panels.left != null;
+    const panels = useExpandableFlyoutState();
+    const isExpanded: boolean = !!panels.left;
+
+    const { closeLeftPanel } = useExpandableFlyoutApi();
     const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
 
     const collapseButton = useMemo(
@@ -109,7 +111,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
           responsive={false}
           css={css`
             padding-left: ${euiTheme.size.s};
-            padding-right: ${euiTheme.size.xl};
+            padding-right: ${euiTheme.size.xxxxl};
             height: ${euiTheme.size.xxl};
           `}
         >

@@ -22,6 +22,7 @@ describe('EncryptedSavedObjects Plugin', () => {
         Object {
           "canEncrypt": false,
           "createMigration": [Function],
+          "createModelVersion": [Function],
           "registerType": [Function],
         }
       `);
@@ -39,6 +40,7 @@ describe('EncryptedSavedObjects Plugin', () => {
         Object {
           "canEncrypt": true,
           "createMigration": [Function],
+          "createModelVersion": [Function],
           "registerType": [Function],
         }
       `);
@@ -48,6 +50,31 @@ describe('EncryptedSavedObjects Plugin', () => {
       expect(infoLogs.length).toBe(1);
       expect(infoLogs[0]).toEqual([
         `Hashed 'xpack.encryptedSavedObjects.encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
+      ]);
+    });
+
+    it('logs the hash for the saved object encryption key and all decryption-only keys', () => {
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        ConfigSchema.validate(
+          {
+            encryptionKey: 'z'.repeat(32),
+            keyRotation: { decryptionOnlyKeys: ['a'.repeat(32), 'b'.repeat(32)] },
+          },
+          { dist: true }
+        )
+      );
+
+      const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
+      plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
+
+      const infoLogs = loggingSystemMock.collect(mockInitializerContext.logger).info;
+
+      expect(infoLogs.length).toBe(2);
+      expect(infoLogs[0]).toEqual([
+        `Hashed 'xpack.encryptedSavedObjects.encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
+      ]);
+      expect(infoLogs[1]).toEqual([
+        "Hashed 'xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys' for this instance: Lu5CspnLRLs9XdCgIhDOKd68IRC3xGRP84xTCElAviE=,3SPdLHuCi17QOhWjiG3GMBTIk/5B7Oteg3k4rX+arNU=",
       ]);
     });
   });

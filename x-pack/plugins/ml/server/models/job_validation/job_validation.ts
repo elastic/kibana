@@ -6,11 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { VALIDATION_STATUS } from '@kbn/ml-validators';
+
 import { fieldsServiceProvider } from '../fields_service';
-import { getMessages, MessageId, JobValidationMessage } from '../../../common/constants/messages';
-import { VALIDATION_STATUS } from '../../../common/constants/validation';
+import type { MessageId, JobValidationMessage } from '../../../common/constants/messages';
+import { getMessages } from '../../../common/constants/messages';
 
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
 import { validateBucketSpan } from './validate_bucket_span';
@@ -19,7 +22,7 @@ import { validateInfluencers } from './validate_influencers';
 import { validateDatafeedPreviewWithMessages } from './validate_datafeed_preview';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
-import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
+import type { validateJobSchema } from '../../routes/schemas/job_validation_schema';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';

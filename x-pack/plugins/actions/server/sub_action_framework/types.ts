@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
+import { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -18,6 +19,7 @@ import type {
   ValidatorType as ValidationSchema,
 } from '../types';
 import type { SubActionConnector } from './sub_action_connector';
+import type { HookServices } from '../types';
 
 export interface ServiceParams<Config, Secrets> {
   /**
@@ -30,6 +32,7 @@ export interface ServiceParams<Config, Secrets> {
   logger: Logger;
   secrets: Secrets;
   services: Services;
+  request?: KibanaRequest;
 }
 
 export type SubActionRequestParams<R> = {
@@ -44,6 +47,11 @@ export type IService<Config, Secrets> = new (
 
 export type IServiceAbstract<Config, Secrets> = abstract new (
   params: ServiceParams<Config, Secrets>
+) => SubActionConnector<Config, Secrets>;
+
+export type ICaseServiceAbstract<Config, Secrets, Incident, GetIncidentResponse> = abstract new (
+  params: ServiceParams<Config, Secrets>,
+  pushToServiceIncidentParamsSchema: Record<string, Type<unknown>>
 ) => SubActionConnector<Config, Secrets>;
 
 export enum ValidatorType {
@@ -69,6 +77,35 @@ export type Validators<Config, Secrets> = Array<
   ConfigValidator<Config> | SecretsValidator<Secrets>
 >;
 
+export interface PreSaveConnectorHookParams<Config, Secrets> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+}
+
+export interface PostSaveConnectorHookParams<Config, Secrets> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+  wasSuccessful: boolean;
+}
+
+export interface PostDeleteConnectorHookParams<Config, Secrets> {
+  connectorId: string;
+  config: Config;
+  logger: Logger;
+  services: HookServices;
+  request: KibanaRequest;
+}
+
 export interface SubActionConnectorType<Config, Secrets> {
   id: string;
   name: string;
@@ -81,6 +118,13 @@ export interface SubActionConnectorType<Config, Secrets> {
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
+  isSystemActionType?: boolean;
+  getKibanaPrivileges?: (args?: {
+    params?: { subAction: string; subActionParams: Record<string, unknown> };
+  }) => string[];
+  preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
 }
 
 export interface ExecutorParams extends ActionTypeParams {

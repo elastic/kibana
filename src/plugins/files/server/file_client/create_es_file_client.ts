@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { getFips } from 'crypto';
 import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
 import { FileClientImpl } from './file_client';
 import type { FileClient } from './types';
@@ -65,12 +67,18 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
     maxSizeBytes,
     indexIsAlias,
   } = arg;
+
+  let hashes: Array<'sha1' | 'sha256' | 'sha512' | 'md5'> = ['sha1', 'sha256', 'sha512'];
+  if (getFips() !== 1) {
+    hashes = ['md5', ...hashes];
+  }
+
   return new FileClientImpl(
     {
       id: NO_FILE_KIND,
       http: {},
       maxSizeBytes,
-      hashes: ['md5', 'sha1', 'sha256', 'sha512'],
+      hashes,
     },
     new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger, indexIsAlias),
     new ElasticsearchBlobStorageClient(

@@ -14,7 +14,7 @@ import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { consoleMappings } from '../console_mappings';
-import { readConsoleRequestBody } from '../../../../../common/api/risk_score';
+import { readConsoleRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getView } from '../utils';
@@ -24,10 +24,13 @@ const getReadables = (dataPath: string) => fs.promises.readFile(dataPath, { enco
 class ConsoleResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
+  // @ts-expect-error upgrade typescript v4.9.5
   error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+    // @ts-expect-error upgrade typescript v4.9.5
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'text/plain; charset=utf-8',
     };
+    // @ts-expect-error upgrade typescript v4.9.5
     const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
       ...contentType,
       ...(headers ?? {}),
@@ -36,6 +39,7 @@ class ConsoleResponseFactory {
     return this.response.custom({
       headers: defaultedHeaders,
       statusCode,
+      // @ts-expect-error upgrade typescript v4.9.5
       body,
     });
   }
@@ -49,8 +53,10 @@ export const readPrebuiltDevToolContentRoute = (router: SecuritySolutionPluginRo
     .get({
       access: 'internal',
       path: DEV_TOOL_PREBUILT_CONTENT,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

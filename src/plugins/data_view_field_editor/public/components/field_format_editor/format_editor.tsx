@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
@@ -63,7 +64,7 @@ export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorS
             fallback={
               // We specify minHeight to avoid too mitigate layout shifts while loading an editor
               // ~430 corresponds to "4 lines" of EuiSkeletonText
-              <div style={{ minHeight: 430, marginTop: 8 }}>
+              <div css={{ minHeight: 430, marginTop: 8 }}>
                 <EuiDelayRender>
                   <EuiSkeletonText lines={4} />
                 </EuiDelayRender>

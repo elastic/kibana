@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: Asset Criticality Common Schema
+  description: Common schema for asset criticality
+  version: '1'
+paths: {}
+components:
+  parameters:
+    id_value:
+      name: id_value
+      in: query
+      required: true
+      schema:
+        type: string
+      description: The ID value of the asset.
+    id_field:
+      name: id_field
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/IdField'
+      example: 'host.name'
+      description: The field representing the ID.
+
+  schemas:
+    IdField:
+      type: string
+      enum:
+        - 'host.name'
+        - 'user.name'
+    AssetCriticalityRecordIdParts:
+      type: object
+      properties:
+        id_value:
+          type: string
+          description: The ID value of the asset.
+        id_field:
+          $ref: '#/components/schemas/IdField'
+          example: 'host.name'
+          description: The field representing the ID.
+      required:
+        - id_value
+        - id_field
+    AssetCriticalityLevel:
+      type: string
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+      description: The criticality level of the asset.
+    CreateAssetCriticalityRecord:
+      allOf:
+        - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+        - type: object
+          properties:
+            criticality_level:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality_level
+    AssetCriticalityRecord:
+      allOf:
+        - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+        - $ref: '#/components/schemas/AssetCriticalityRecordEcsParts'
+        - type: object
+          properties:
+            '@timestamp':
+              type: string
+              format: 'date-time'
+              example: '2017-07-21T17:32:28Z'
+              description: The time the record was created or updated.
+          required:
+            - '@timestamp'
+    AssetCriticalityRecordEcsParts:
+      type: object
+      properties:
+        'asset':
+          type: object
+          properties:
+            'criticality':
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - 'asset'
+        'host':
+          type: object
+          properties:
+            'name':
+              type: string
+            'asset':
+              type: object
+              properties:
+                'criticality':
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - 'criticality'
+          required:
+            - 'name'
+        'user':
+          type: object
+          properties:
+            'name':
+              type: string
+            'asset':
+              type: object
+              properties:
+                'criticality':
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - 'criticality'
+          required:
+            - 'name'
+      required:
+        - 'asset'

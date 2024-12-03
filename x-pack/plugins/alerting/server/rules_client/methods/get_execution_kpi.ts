@@ -19,7 +19,8 @@ import {
 } from '../../lib/get_execution_log_aggregation';
 import { RulesClientContext } from '../types';
 import { parseDate } from '../common';
-import { get } from './get';
+import { getRule } from '../../application/rule/methods/get/get_rule';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetRuleExecutionKPIParams {
   id: string;
@@ -40,7 +41,7 @@ export async function getRuleExecutionKPI(
   { id, dateStart, dateEnd, filter }: GetRuleExecutionKPIParams
 ) {
   context.logger.debug(`getRuleExecutionKPI(): getting execution KPI for rule ${id}`);
-  const rule = (await get(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
   try {
     // Make sure user has access to this rule
@@ -54,7 +55,7 @@ export async function getRuleExecutionKPI(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
         error,
       })
     );
@@ -64,7 +65,7 @@ export async function getRuleExecutionKPI(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
     })
   );
 
@@ -77,7 +78,7 @@ export async function getRuleExecutionKPI(
 
   try {
     const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       [id],
       {
         start: parsedDateStart.toISOString(),
@@ -104,16 +105,16 @@ export async function getGlobalExecutionKpiWithAuth(
 
   let authorizationTuple;
   try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Alert,
-      {
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Alert,
+      filterOpts: {
         type: AlertingAuthorizationFilterType.KQL,
         fieldNames: {
           ruleTypeId: 'kibana.alert.rule.rule_type_id',
           consumer: 'kibana.alert.rule.consumer',
         },
-      }
-    );
+      },
+    });
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -138,7 +139,7 @@ export async function getGlobalExecutionKpiWithAuth(
 
   try {
     const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       authorizationTuple.filter as KueryNode,
       {
         start: parsedDateStart.toISOString(),

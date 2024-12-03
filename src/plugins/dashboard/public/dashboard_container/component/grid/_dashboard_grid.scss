@@ -19,7 +19,7 @@
 .dshLayout--editing {
   .react-resizable-handle {
     @include size($euiSizeL);
-    z-index: $euiZLevel1; /* 1 */
+    z-index: $euiZLevel2; /* 1 */
     right: 0;
     bottom: 0;
     padding-right: $euiSizeS;
@@ -33,6 +33,10 @@
  */
 .dshLayout-isMaximizedPanel {
   height: 100% !important; /* 1. */
+
+  .embPanel__hoverActionsLeft {
+    visibility: hidden;
+  }
 }
 
 /**
@@ -40,9 +44,7 @@
  * Shifting the rendered panels offscreen prevents a quick flash when redrawing the panels on minimize
  */
 .dshDashboardGrid__item--hidden {
-  position: absolute;
-  top: -9999px;
-  left: -9999px;
+  transform: translate(-9999px, -9999px);
 }
 
 /**
@@ -89,7 +91,7 @@
 
     &:hover,
     &:focus {
-      background-color: $embEditingModeHoverColor;
+      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
     }
   }
 
@@ -99,13 +101,28 @@
    */
   &.resizing,
   &.react-draggable-dragging {
-    z-index: $euiZLevel2 !important;
+    z-index: $euiZLevel3 !important;
   }
 
   &.react-draggable-dragging {
     transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
     @include euiBottomShadowLarge;
     border-radius: $euiBorderRadius; // keeps shadow within bounds
+
+    .embPanel__hoverActionsWrapper {
+      z-index: $euiZLevel9;
+      top: -$euiSizeXL;
+
+      // Show hover actions with drag handle
+      .embPanel__hoverActions:has(.embPanel--dragHandle) {
+        opacity: 1;
+      }
+
+      // Hide hover actions without drag handle
+      .embPanel__hoverActions:not(:has(.embPanel--dragHandle)) {
+        opacity: 0;
+      }
+    }
   }
 
   /**

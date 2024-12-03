@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   OUTLIER_ANALYSIS_METHOD,
   ANALYSIS_ADVANCED_FIELDS,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { AdvancedParamErrors, getNumberValue } from './advanced_step_form';
+import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import type { AdvancedParamErrors } from './advanced_step_form';
+import { getNumberValue } from './advanced_step_form';
 
 interface Props extends CreateAnalyticsFormProps {
   advancedParamErrors: AdvancedParamErrors;
@@ -154,10 +156,10 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
                 ),
               },
             ]}
-            value={standardizationEnabled}
+            value={standardizationEnabled ? 'true' : 'false'}
             hasNoInitialSelection={true}
             onChange={(e) => {
-              setFormState({ standardizationEnabled: e.target.value });
+              setFormState({ standardizationEnabled: e.target.value === 'true' ? true : false });
             }}
           />
         </EuiFormRow>

@@ -1,29 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
-import { MaintenanceWindow, MaintenanceWindowStatus } from './types';
+import { MaintenanceWindowStatus } from './types';
 
-export const RUNNING_MAINTENANCE_WINDOW_1: Partial<MaintenanceWindow> = {
+export const RUNNING_MAINTENANCE_WINDOW_1 = {
   title: 'Running maintenance window 1',
   id: '63057284-ac31-42ba-fe22-adfe9732e5ae',
   status: MaintenanceWindowStatus.Running,
   events: [{ gte: '2023-04-20T16:27:30.753Z', lte: '2023-04-20T16:57:30.753Z' }],
 };
 
-export const RUNNING_MAINTENANCE_WINDOW_2: Partial<MaintenanceWindow> = {
+export const RUNNING_MAINTENANCE_WINDOW_2 = {
   title: 'Running maintenance window 2',
   id: '45894340-df98-11ed-ac81-bfcb4982b4fd',
   status: MaintenanceWindowStatus.Running,
   events: [{ gte: '2023-04-20T16:47:42.871Z', lte: '2023-04-20T17:11:32.192Z' }],
 };
 
-export const RECURRING_RUNNING_MAINTENANCE_WINDOW: Partial<AsApiContract<MaintenanceWindow>> = {
+export const RECURRING_RUNNING_MAINTENANCE_WINDOW = {
   title: 'Recurring running maintenance window',
   id: 'e2228300-e9ad-11ed-ba37-db17c6e6182b',
   status: MaintenanceWindowStatus.Running,
@@ -42,7 +42,7 @@ export const RECURRING_RUNNING_MAINTENANCE_WINDOW: Partial<AsApiContract<Mainten
   },
 };
 
-export const UPCOMING_MAINTENANCE_WINDOW: Partial<MaintenanceWindow> = {
+export const UPCOMING_MAINTENANCE_WINDOW = {
   title: 'Upcoming maintenance window',
   id: '5eafe070-e030-11ed-ac81-bfcb4982b4fd',
   status: MaintenanceWindowStatus.Upcoming,

@@ -41,8 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
         ..._monitors[0],
         locations: [
           {
-            id: 'localhost',
-            label: 'Local Synthetics Service',
+            id: 'dev',
+            label: 'Dev Service',
             isServiceManaged: true,
           },
         ],
@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
                       enabled: true,
                       schedule: '@every 5m',
                       tags: ['tag1', 'tag2'],
-                      timeout: '3ms',
+                      timeout: '180s',
                       name: 'test-monitor-name',
                       namespace: 'testnamespace',
                       origin: 'ui',
@@ -111,8 +111,8 @@ export default function ({ getService }: FtrProviderContext) {
         }),
         locations: [
           {
-            id: 'localhost',
-            label: 'Local Synthetics Service',
+            id: 'dev',
+            label: 'Dev Service',
             isServiceManaged: true,
           },
         ],
@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('inspect http monitor  in private location', async () => {
-      const location = await testPrivateLocations.addTestPrivateLocation();
+      const location = await testPrivateLocations.addPrivateLocation();
       const apiResponse = await monitorTestService.inspectMonitor({
         ..._monitors[0],
         locations: [
@@ -204,7 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
         enabled: true,
         urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
         schedule: '@every 5m',
-        timeout: '3ms',
+        timeout: '180s',
         max_redirects: 3,
         max_attempts: 2,
         proxy_url: 'http://proxy.com',

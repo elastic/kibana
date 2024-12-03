@@ -23,13 +23,16 @@ import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 import type { EventGroupingMultiBucketAggregationResult } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../../utils/single_search_after';
-import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
+import { bulkCreateWithSuppression } from '../../utils/bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { bulkCreateUnsuppressedAlerts } from './bulk_create_unsuppressed_alerts';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { createEnrichEventsFunction } from '../../utils/enrichments';
+import { getNumberOfSuppressedAlerts } from '../../utils/get_number_of_suppressed_alerts';
 
 export interface BucketHistory {
   key: Record<string, string | number | null>;
@@ -45,6 +48,7 @@ export interface GroupAndBulkCreateParams {
   bucketHistory?: BucketHistory[];
   groupByFields: string[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
@@ -123,6 +127,7 @@ export const groupAndBulkCreate = async ({
   bucketHistory,
   groupByFields,
   eventsTelemetry,
+  experimentalFeatures,
 }: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
     const tuple = runOpts.tuple;
@@ -256,6 +261,7 @@ export const groupAndBulkCreate = async ({
         buildReasonMessage,
         alertTimestampOverride: runOpts.alertTimestampOverride,
         ruleExecutionLogger: runOpts.ruleExecutionLogger,
+        intendedTimestamp: runOpts.intendedTimestamp,
       });
 
       const suppressionDuration = runOpts.completeRule.ruleParams.alertSuppression?.duration;
@@ -269,12 +275,27 @@ export const groupAndBulkCreate = async ({
           services,
           suppressionWindow,
           alertTimestampOverride: runOpts.alertTimestampOverride,
+          experimentalFeatures,
+          ruleType: 'query',
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       } else {
-        const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
-        addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+        const bulkCreateResult = await runOpts.bulkCreate(
+          wrappedAlerts,
+          undefined,
+          createEnrichEventsFunction({
+            services,
+            logger: runOpts.ruleExecutionLogger,
+          })
+        );
+        addToSearchAfterReturn({
+          current: toReturn,
+          next: {
+            ...bulkCreateResult,
+            suppressedItemsCount: getNumberOfSuppressedAlerts(bulkCreateResult.createdItems, []),
+          },
+        });
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       }
 

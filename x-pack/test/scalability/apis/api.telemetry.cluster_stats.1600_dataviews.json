@@ -20,9 +20,7 @@
   },
   "testData": {
     "esArchives": [],
-    "kbnArchives": [
-      "x-pack/test/scalability/fixtures/kbn_archiver/1600-dataviews.json"
-    ]
+    "kbnArchives": ["x-pack/test/scalability/fixtures/kbn_archiver/1600-dataviews.json"]
   },
   "streams": [
     {

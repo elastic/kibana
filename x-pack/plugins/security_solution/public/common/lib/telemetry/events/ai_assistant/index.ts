@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../../types';
-import { TelemetryEventTypes } from '../../constants';
+import type { AssistantTelemetryEvent } from './types';
+import { AssistantEventTypes } from './types';
 
-export const assistantInvokedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssistantInvoked,
+export const assistantInvokedEvent: AssistantTelemetryEvent = {
+  eventType: AssistantEventTypes.AssistantInvoked,
   schema: {
     conversationId: {
       type: 'keyword',
@@ -28,8 +28,8 @@ export const assistantInvokedEvent: TelemetryEvent = {
   },
 };
 
-export const assistantMessageSentEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssistantMessageSent,
+export const assistantMessageSentEvent: AssistantTelemetryEvent = {
+  eventType: AssistantEventTypes.AssistantMessageSent,
   schema: {
     conversationId: {
       type: 'keyword',
@@ -45,11 +45,38 @@ export const assistantMessageSentEvent: TelemetryEvent = {
         optional: false,
       },
     },
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana connector type',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
+      },
+    },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
+      },
+    },
   },
 };
 
-export const assistantQuickPrompt: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssistantQuickPrompt,
+export const assistantQuickPrompt: AssistantTelemetryEvent = {
+  eventType: AssistantEventTypes.AssistantQuickPrompt,
   schema: {
     conversationId: {
       type: 'keyword',
@@ -67,3 +94,30 @@ export const assistantQuickPrompt: TelemetryEvent = {
     },
   },
 };
+
+export const assistantSettingToggledEvent: AssistantTelemetryEvent = {
+  eventType: AssistantEventTypes.AssistantSettingToggled,
+  schema: {
+    alertsCountUpdated: {
+      type: 'boolean',
+      _meta: {
+        description: 'Did alerts count update',
+        optional: true,
+      },
+    },
+    assistantStreamingEnabled: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is streaming enabled',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const assistantTelemetryEvents = [
+  assistantInvokedEvent,
+  assistantMessageSentEvent,
+  assistantQuickPrompt,
+  assistantSettingToggledEvent,
+];

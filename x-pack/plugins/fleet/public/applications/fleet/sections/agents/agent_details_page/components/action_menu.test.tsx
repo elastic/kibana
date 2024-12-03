@@ -48,8 +48,10 @@ describe('AgentDetailsActionMenu', () => {
     } as any);
     mockedUseAuthz.mockReturnValue({
       fleet: {
-        all: true,
+        readAgents: true,
+        allAgents: true,
       },
+      integrations: {},
     } as any);
     mockedUseAgentVersion.mockReturnValue('8.10.2');
   });
@@ -125,6 +127,25 @@ describe('AgentDetailsActionMenu', () => {
 
       expect(res).not.toBe(null);
       expect(res).not.toBeEnabled();
+    });
+
+    it('should not render an active action button if agent version >= 8.7 and user do not have Agent:Read authz', async () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          readAgents: false,
+        },
+        integrations: {},
+      } as any);
+      const res = renderAndGetDiagnosticsButton({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+        } as any,
+        agentPolicy: {} as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
     });
   });
 
@@ -238,7 +259,7 @@ describe('AgentDetailsActionMenu', () => {
       expect(res).toBeEnabled();
     });
 
-    it('should render a disabled action button if agent version is latest', async () => {
+    it('should render an enabled action button if agent version is latest', async () => {
       const res = renderAndGetUpgradeButton({
         agent: {
           active: true,
@@ -249,7 +270,7 @@ describe('AgentDetailsActionMenu', () => {
       });
 
       expect(res).not.toBe(null);
-      expect(res).not.toBeEnabled();
+      expect(res).toBeEnabled();
     });
   });
 });

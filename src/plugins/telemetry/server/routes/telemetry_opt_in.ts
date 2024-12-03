@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, type Observable } from 'rxjs';
@@ -118,9 +119,8 @@ export function registerTelemetryOptInRoutes({
     request: { body: schema.object({ enabled: schema.boolean() }) },
     response: {
       200: {
-        body: schema.arrayOf(
-          schema.object({ clusterUuid: schema.string(), stats: schema.string() })
-        ),
+        body: () =>
+          schema.arrayOf(schema.object({ clusterUuid: schema.string(), stats: schema.string() })),
       },
     },
   };
@@ -128,6 +128,30 @@ export function registerTelemetryOptInRoutes({
   router.versioned
     .post({ access: 'internal', path: OptInRoute })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
-    .addVersion({ version: '1', validate: v2Validations }, v2Handler)
-    .addVersion({ version: '2', validate: v2Validations }, v2Handler);
+    .addVersion(
+      {
+        version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: v2Validations,
+      },
+      v2Handler
+    )
+    .addVersion(
+      {
+        version: '2',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: v2Validations,
+      },
+      v2Handler
+    );
 }

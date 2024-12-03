@@ -8,16 +8,16 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-
-import { MLSavedObjectService } from '../../saved_objects';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { MLSavedObjectService } from '../../saved_objects';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
-import { JobType } from '../../../common/types/saved_objects';
+import type { JobType } from '../../../common/types/saved_objects';
 
-import { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import type { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { searchProvider } from './search';
 
 import { MLJobNotFound, MLModelNotFound } from './errors';
-import {
+import type {
   MlClient,
   MlClientParams,
   MlGetADParams,
@@ -25,10 +25,12 @@ import {
   MlGetDatafeedParams,
   MlGetTrainedModelParams,
 } from './types';
+import type { MlAuditLogger } from './ml_audit_logger';
 
 export function getMlClient(
   client: IScopedClusterClient,
-  mlSavedObjectService: MLSavedObjectService
+  mlSavedObjectService: MLSavedObjectService,
+  auditLogger: MlAuditLogger
 ): MlClient {
   const mlClient = client.asInternalUser.ml;
 
@@ -160,28 +162,44 @@ export function getMlClient(
   return {
     async closeJob(...p: Parameters<MlClient['closeJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.closeJob(...p);
+      return auditLogger.wrapTask(() => mlClient.closeJob(...p), 'ml_close_ad_job', p);
     },
     async deleteCalendar(...p: Parameters<MlClient['deleteCalendar']>) {
-      return mlClient.deleteCalendar(...p);
+      return auditLogger.wrapTask(() => mlClient.deleteCalendar(...p), 'ml_delete_calendar', p);
     },
     async deleteCalendarEvent(...p: Parameters<MlClient['deleteCalendarEvent']>) {
-      return mlClient.deleteCalendarEvent(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.deleteCalendarEvent(...p),
+        'ml_delete_calendar_event',
+        p
+      );
     },
     async deleteCalendarJob(...p: Parameters<MlClient['deleteCalendarJob']>) {
-      return mlClient.deleteCalendarJob(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.deleteCalendarJob(...p),
+        'ml_delete_calendar_job',
+        p
+      );
     },
     async deleteDataFrameAnalytics(...p: Parameters<MlClient['deleteDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      const resp = await mlClient.deleteDataFrameAnalytics(...p);
+      const resp = await auditLogger.wrapTask(
+        () => mlClient.deleteDataFrameAnalytics(...p),
+        'ml_delete_dfa_job',
+        p
+      );
       // don't delete the job saved object as the real job will not be
       // deleted initially and could still fail.
       return resp;
     },
     async deleteDatafeed(...p: Parameters<MlClient['deleteDatafeed']>) {
       await datafeedIdsCheck(p);
-      const resp = await mlClient.deleteDatafeed(...p);
       const [datafeedId] = getDatafeedIdsFromRequest(p);
+      const resp = await auditLogger.wrapTask(
+        () => mlClient.deleteDatafeed(...p),
+        'ml_delete_ad_datafeed',
+        p
+      );
       if (datafeedId !== undefined) {
         await mlSavedObjectService.deleteDatafeed(datafeedId);
       }
@@ -192,26 +210,33 @@ export function getMlClient(
       return mlClient.deleteExpiredData(...p);
     },
     async deleteFilter(...p: Parameters<MlClient['deleteFilter']>) {
-      return mlClient.deleteFilter(...p);
+      return auditLogger.wrapTask(() => mlClient.deleteFilter(...p), 'ml_delete_filter', p);
     },
     async deleteForecast(...p: Parameters<MlClient['deleteForecast']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.deleteForecast(...p);
+      return auditLogger.wrapTask(() => mlClient.deleteForecast(...p), 'ml_delete_forecast', p);
     },
     async deleteJob(...p: Parameters<MlClient['deleteJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      const resp = await mlClient.deleteJob(...p);
+      return auditLogger.wrapTask(() => mlClient.deleteJob(...p), 'ml_delete_ad_job', p);
       // don't delete the job saved object as the real job will not be
       // deleted initially and could still fail.
-      return resp;
     },
     async deleteModelSnapshot(...p: Parameters<MlClient['deleteModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.deleteModelSnapshot(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.deleteModelSnapshot(...p),
+        'ml_delete_model_snapshot',
+        p
+      );
     },
     async deleteTrainedModel(...p: Parameters<MlClient['deleteTrainedModel']>) {
       await modelIdsCheck(p);
-      return mlClient.deleteTrainedModel(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.deleteTrainedModel(...p),
+        'ml_delete_trained_model',
+        p
+      );
     },
     async estimateModelMemory(...p: Parameters<MlClient['estimateModelMemory']>) {
       return mlClient.estimateModelMemory(...p);
@@ -229,7 +254,7 @@ export function getMlClient(
     },
     async forecast(...p: Parameters<MlClient['forecast']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.forecast(...p);
+      return auditLogger.wrapTask(() => mlClient.forecast(...p), 'ml_forecast', p);
     },
     async getBuckets(...p: Parameters<MlClient['getBuckets']>) {
       await jobIdsCheck('anomaly-detector', p);
@@ -500,23 +525,50 @@ export function getMlClient(
     },
     async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {
       await modelIdsCheck(p);
-      return mlClient.startTrainedModelDeployment(...p);
+      // TODO use mlClient.startTrainedModelDeployment when esClient is updated
+      const { model_id: modelId, adaptive_allocations: adaptiveAllocations, ...queryParams } = p[0];
+      return auditLogger.wrapTask(
+        () =>
+          client.asInternalUser.transport.request<estypes.MlStartTrainedModelDeploymentResponse>(
+            {
+              method: 'POST',
+              path: `_ml/trained_models/${modelId}/deployment/_start`,
+              ...(isPopulatedObject(queryParams) ? { querystring: queryParams } : {}),
+              ...(isPopulatedObject(adaptiveAllocations)
+                ? { body: { adaptive_allocations: adaptiveAllocations } }
+                : {}),
+            },
+            p[1]
+          ),
+        'ml_start_trained_model_deployment',
+        p
+      );
     },
     async updateTrainedModelDeployment(...p: Parameters<MlClient['updateTrainedModelDeployment']>) {
       await modelIdsCheck(p);
 
-      const { deployment_id: deploymentId, number_of_allocations: numberOfAllocations } = p[0];
-      return client.asInternalUser.transport.request({
-        method: 'POST',
-        path: `/_ml/trained_models/${deploymentId}/deployment/_update`,
-        body: { number_of_allocations: numberOfAllocations },
-      });
+      const { deployment_id: deploymentId, model_id: modelId, ...bodyParams } = p[0];
+      // TODO use mlClient.updateTrainedModelDeployment when esClient is updated
+      return auditLogger.wrapTask(
+        () =>
+          client.asInternalUser.transport.request({
+            method: 'POST',
+            path: `/_ml/trained_models/${deploymentId}/deployment/_update`,
+            body: bodyParams,
+          }),
+        'ml_update_trained_model_deployment',
+        p
+      );
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
       await modelIdsCheck(p);
       switchDeploymentId(p);
 
-      return mlClient.stopTrainedModelDeployment(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.stopTrainedModelDeployment(...p),
+        'ml_stop_trained_model_deployment',
+        p
+      );
     },
     async inferTrainedModel(...p: Parameters<MlClient['inferTrainedModel']>) {
       await modelIdsCheck(p);
@@ -534,14 +586,19 @@ export function getMlClient(
       // @ts-expect-error body doesn't exist in the type
       const { model_id: id, body, query: querystring } = p[0];
 
-      return client.asInternalUser.transport.request(
-        {
-          method: 'POST',
-          path: `/_ml/trained_models/${id}/_infer`,
-          body,
-          querystring,
-        },
-        p[1]
+      return auditLogger.wrapTask(
+        () =>
+          client.asInternalUser.transport.request(
+            {
+              method: 'POST',
+              path: `/_ml/trained_models/${id}/_infer`,
+              body,
+              querystring,
+            },
+            p[1]
+          ),
+        'ml_infer_trained_model',
+        p
       );
     },
     async info(...p: Parameters<MlClient['info']>) {
@@ -549,36 +606,44 @@ export function getMlClient(
     },
     async openJob(...p: Parameters<MlClient['openJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.openJob(...p);
+      return auditLogger.wrapTask(() => mlClient.openJob(...p), 'ml_open_ad_job', p);
     },
     async postCalendarEvents(...p: Parameters<MlClient['postCalendarEvents']>) {
-      return mlClient.postCalendarEvents(...p);
-    },
-    async postData(...p: Parameters<MlClient['postData']>) {
-      await jobIdsCheck('anomaly-detector', p);
-      return mlClient.postData(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.postCalendarEvents(...p),
+        'ml_post_calendar_events',
+        p
+      );
     },
     async previewDatafeed(...p: Parameters<MlClient['previewDatafeed']>) {
       await datafeedIdsCheck(p);
       return mlClient.previewDatafeed(...p);
     },
     async putCalendar(...p: Parameters<MlClient['putCalendar']>) {
-      return mlClient.putCalendar(...p);
+      return auditLogger.wrapTask(() => mlClient.putCalendar(...p), 'ml_put_calendar', p);
     },
     async putCalendarJob(...p: Parameters<MlClient['putCalendarJob']>) {
-      return mlClient.putCalendarJob(...p);
+      return auditLogger.wrapTask(() => mlClient.putCalendarJob(...p), 'ml_put_calendar_job', p);
     },
     async putDataFrameAnalytics(...p: Parameters<MlClient['putDataFrameAnalytics']>) {
-      const resp = await mlClient.putDataFrameAnalytics(...p);
       const [analyticsId] = getDFAJobIdsFromRequest(p);
+      const resp = await auditLogger.wrapTask(
+        () => mlClient.putDataFrameAnalytics(...p),
+        'ml_put_dfa_job',
+        p
+      );
       if (analyticsId !== undefined) {
         await mlSavedObjectService.createDataFrameAnalyticsJob(analyticsId);
       }
       return resp;
     },
     async putDatafeed(...p: Parameters<MlClient['putDatafeed']>) {
-      const resp = await mlClient.putDatafeed(...p);
       const [datafeedId] = getDatafeedIdsFromRequest(p);
+      const resp = await auditLogger.wrapTask(
+        () => mlClient.putDatafeed(...p),
+        'ml_put_ad_datafeed',
+        p
+      );
       const jobId = getJobIdFromBody(p);
       if (datafeedId !== undefined && jobId !== undefined) {
         await mlSavedObjectService.addDatafeed(datafeedId, jobId);
@@ -587,18 +652,22 @@ export function getMlClient(
       return resp;
     },
     async putFilter(...p: Parameters<MlClient['putFilter']>) {
-      return mlClient.putFilter(...p);
+      return auditLogger.wrapTask(() => mlClient.putFilter(...p), 'ml_put_filter', p);
     },
     async putJob(...p: Parameters<MlClient['putJob']>) {
-      const resp = await mlClient.putJob(...p);
       const [jobId] = getADJobIdsFromRequest(p);
+      const resp = await auditLogger.wrapTask(() => mlClient.putJob(...p), 'ml_put_ad_job', p);
       if (jobId !== undefined) {
         await mlSavedObjectService.createAnomalyDetectionJob(jobId);
       }
       return resp;
     },
     async putTrainedModel(...p: Parameters<MlClient['putTrainedModel']>) {
-      const resp = await mlClient.putTrainedModel(...p);
+      const resp = await auditLogger.wrapTask(
+        () => mlClient.putTrainedModel(...p),
+        'ml_put_trained_model',
+        p
+      );
       const [modelId] = getModelIdsFromRequest(p);
       if (modelId !== undefined) {
         const model = (p[0] as estypes.MlPutTrainedModelRequest).body;
@@ -609,70 +678,61 @@ export function getMlClient(
     },
     async revertModelSnapshot(...p: Parameters<MlClient['revertModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.revertModelSnapshot(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.revertModelSnapshot(...p),
+        'ml_revert_ad_snapshot',
+        p
+      );
     },
     async setUpgradeMode(...p: Parameters<MlClient['setUpgradeMode']>) {
       return mlClient.setUpgradeMode(...p);
     },
     async startDataFrameAnalytics(...p: Parameters<MlClient['startDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      return mlClient.startDataFrameAnalytics(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.startDataFrameAnalytics(...p),
+        'ml_start_dfa_job',
+        p
+      );
     },
     async startDatafeed(...p: Parameters<MlClient['startDatafeed']>) {
       await datafeedIdsCheck(p);
-      return mlClient.startDatafeed(...p);
+      return auditLogger.wrapTask(() => mlClient.startDatafeed(...p), 'ml_start_ad_datafeed', p);
     },
     async stopDataFrameAnalytics(...p: Parameters<MlClient['stopDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      return mlClient.stopDataFrameAnalytics(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.stopDataFrameAnalytics(...p),
+        'ml_stop_dfa_job',
+        p
+      );
     },
     async stopDatafeed(...p: Parameters<MlClient['stopDatafeed']>) {
       await datafeedIdsCheck(p);
-      return mlClient.stopDatafeed(...p);
+      return auditLogger.wrapTask(() => mlClient.stopDatafeed(...p), 'ml_stop_ad_datafeed', p);
     },
     async updateDataFrameAnalytics(...p: Parameters<MlClient['updateDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      return mlClient.updateDataFrameAnalytics(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.updateDataFrameAnalytics(...p),
+        'ml_update_dfa_job',
+        p
+      );
     },
     async updateDatafeed(...p: Parameters<MlClient['updateDatafeed']>) {
       await datafeedIdsCheck(p);
-
-      // Temporary workaround for the incorrect updateDatafeed function in the esclient
-      if (
-        // @ts-expect-error TS complains it's always false
-        p.length === 0 ||
-        p[0] === undefined
-      ) {
-        // Temporary generic error message. This should never be triggered
-        // but is added for type correctness below
-        throw new Error('Incorrect arguments supplied');
-      }
-      // @ts-expect-error body doesn't exist in the type
-      const { datafeed_id: id, body } = p[0];
-
-      return client.asInternalUser.transport.request(
-        {
-          method: 'POST',
-          path: `/_ml/datafeeds/${id}/_update`,
-          body,
-        },
-        p[1]
-      );
-
-      // this should be reinstated once https://github.com/elastic/elasticsearch-js/issues/1601
-      // is fixed
-      // return mlClient.updateDatafeed(...p);
+      return auditLogger.wrapTask(() => mlClient.updateDatafeed(...p), 'ml_update_ad_datafeed', p);
     },
     async updateFilter(...p: Parameters<MlClient['updateFilter']>) {
-      return mlClient.updateFilter(...p);
+      return auditLogger.wrapTask(() => mlClient.updateFilter(...p), 'ml_update_filter', p);
     },
     async updateJob(...p: Parameters<MlClient['updateJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.updateJob(...p);
+      return auditLogger.wrapTask(() => mlClient.updateJob(...p), 'ml_update_ad_job', p);
     },
     async resetJob(...p: Parameters<MlClient['resetJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.resetJob(...p);
+      return auditLogger.wrapTask(() => mlClient.resetJob(...p), 'ml_reset_ad_job', p);
     },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
@@ -692,29 +752,29 @@ export function getMlClient(
   } as MlClient;
 }
 
-function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
+export function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
   const ids = params?.id?.split(',');
   return ids || [];
 }
 
-function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[] {
+export function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[] {
   const id = params?.model_id;
   const ids = Array.isArray(id) ? id : id?.split(',');
   return ids || [];
 }
 
-function getADJobIdsFromRequest([params]: MlGetADParams): string[] {
+export function getADJobIdsFromRequest([params]: MlGetADParams): string[] {
   const ids = typeof params?.job_id === 'string' ? params?.job_id.split(',') : params?.job_id;
   return ids || [];
 }
 
-function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
+export function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
   const ids =
     typeof params?.datafeed_id === 'string' ? params?.datafeed_id.split(',') : params?.datafeed_id;
   return ids || [];
 }
 
-function getJobIdFromBody(p: any): string | undefined {
+export function getJobIdFromBody(p: any): string | undefined {
   const [params] = p;
   return params?.body?.job_id;
 }

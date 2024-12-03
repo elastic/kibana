@@ -21,6 +21,15 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
 
+  const runSoon = async (id: string) => {
+    return retry.try(async () => {
+      await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rule/${id}/_run_soon`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+    });
+  };
+
   describe('bulk untrack', () => {
     const objectRemover = new ObjectRemover(supertest);
 
@@ -31,8 +40,9 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
           match_all: {},
         },
         conflicts: 'proceed',
+        ignore_unavailable: true,
       });
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -128,5 +138,90 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    it('should create new alerts if run rules again after alerts are untracked', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '24h' },
+            throttle: undefined,
+            notify_when: undefined,
+            params: {
+              index: ES_TEST_INDEX_NAME,
+              reference: 'test',
+            },
+          })
+        )
+        .expect(200);
+
+      objectRemover.add('space1', createdRule.id, 'rule', 'alerting');
+
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'space1',
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['active-instance', { equal: 2 }]]),
+        });
+      });
+
+      const {
+        hits: { hits: activeAlerts },
+      } = await es.search({
+        index: alertAsDataIndex,
+        body: { query: { match_all: {} } },
+      });
+
+      const ids = activeAlerts.map((activeAlert: any) => activeAlert._source[ALERT_UUID]);
+
+      await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/alerts/_bulk_untrack`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          indices: [alertAsDataIndex],
+          alert_uuids: ids,
+        });
+
+      await runSoon(createdRule.id);
+
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'space1',
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['active-instance', { equal: 4 }]]),
+        });
+      });
+
+      await retry.try(async () => {
+        const {
+          hits: { hits: alerts },
+        } = await es.search({
+          index: alertAsDataIndex,
+          body: { query: { match_all: {} } },
+        });
+
+        const activeAlertsRemaining = [];
+        const untrackedAlertsRemaining = [];
+
+        alerts.forEach((alert: any) => {
+          if (alert._source[ALERT_STATUS] === 'active') {
+            activeAlertsRemaining.push(alert);
+          } else {
+            untrackedAlertsRemaining.push(alert);
+          }
+        });
+
+        expect(activeAlertsRemaining.length).eql(2);
+        expect(untrackedAlertsRemaining.length).eql(2);
+      });
+    });
   });
 }

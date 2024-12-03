@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -218,7 +217,6 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 8,
           online: 2,
           active: 8,
           all: 11,
@@ -229,14 +227,6 @@ export default function ({ getService }: FtrProviderContext) {
           unenrolled: 1,
         },
       });
-    });
-
-    it('should work with deprecated api', async () => {
-      await supertest
-        .get(`/api/fleet/agent-status`)
-        .set('kbn-xsrf', 'xxxx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
-        .expect(200);
     });
 
     it('should work with adequate package privileges', async () => {
@@ -301,7 +291,6 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 10,
           online: 3,
           active: 10,
           all: 11,
@@ -332,18 +321,44 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should return 400 if passed kuery has non existing parameters', async () => {
+    it('with enableStrictKQLValidation should return 400 if passed kuery has non existing parameters', async () => {
       await supertest
         .get(`/api/fleet/agent_status?kuery=fleet-agents.non_existent_parameter:healthy`)
         .set('kbn-xsrf', 'xxxx')
         .expect(400);
     });
 
-    it('should return 400 if passed kuery is not correct', async () => {
+    it('with enableStrictKQLValidation should return 400 if passed kuery is not correct', async () => {
       await supertest
         .get(`/api/fleet/agent_status?kuery='test%3A'`)
         .set('kbn-xsrf', 'xxxx')
         .expect(400);
+    });
+
+    it('should return incoming data status for specified agents', async () => {
+      // force install the system package to override package verification
+      await supertest
+        .post(`/api/fleet/epm/packages/system/1.50.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      const { body: apiResponse1 } = await supertest
+        .get(`/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2`)
+        .expect(200);
+      const { body: apiResponse2 } = await supertest
+        .get(
+          `/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2&pkgName=system&pkgVersion=1.50.0`
+        )
+        .expect(200);
+      expect(apiResponse1).to.eql({
+        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        dataPreview: [],
+      });
+      expect(apiResponse2).to.eql({
+        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        dataPreview: [],
+      });
     });
   });
 }

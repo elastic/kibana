@@ -16,9 +16,9 @@ exports[`Header should render normally 1`] = `
         </span>
         <br />
         <span
+          class="emotion-EuiIcon"
           color="warning"
           data-euiicon-type="warning"
-          style="margin-right: 4px;"
         />
         <span>
           Scripted fields are deprecated. Use 
@@ -26,9 +26,7 @@ exports[`Header should render normally 1`] = `
             class="euiLink emotion-euiLink-primary"
             type="button"
           >
-            <span>
-              runtime fields
-            </span>
+            runtime fields
           </button>
            instead.
         </span>

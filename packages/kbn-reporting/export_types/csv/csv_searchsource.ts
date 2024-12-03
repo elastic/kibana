@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Writable } from 'stream';
@@ -20,6 +21,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
+import { CsvPagingStrategy, TaskInstanceFields } from '@kbn/reporting-common/types';
 import {
   CSV_JOB_TYPE,
   CSV_REPORT_TYPE,
@@ -66,17 +68,20 @@ export class CsvSearchSourceExportType extends ExportType<
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
-    return { ...jobParams };
+    const pagingStrategy = this.config.csv.scroll.strategy as CsvPagingStrategy;
+    return { pagingStrategy, ...jobParams };
   };
 
   public runTask = async (
     jobId: string,
     job: TaskPayloadCSV,
+    taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
-    const { encryptionKey, csv: csvConfig } = this.config;
     const logger = this.logger.get(`execute-job:${jobId}`);
+
+    const { encryptionKey, csv: csvConfig } = this.config;
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
     const uiSettings = await this.getUiSettingsClient(fakeRequest, logger);
@@ -99,6 +104,7 @@ export class CsvSearchSourceExportType extends ExportType<
     const csv = new CsvGenerator(
       job,
       csvConfig,
+      taskInstanceFields,
       clients,
       dependencies,
       cancellationToken,

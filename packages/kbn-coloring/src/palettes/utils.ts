@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -19,6 +20,9 @@ import {
   DEFAULT_PALETTE_NAME,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  DEFAULT_FALLBACK_PALETTE,
+  LEGACY_COMPLIMENTARY_PALETTE,
+  COMPLEMENTARY_PALETTE,
 } from './constants';
 
 /** @internal **/
@@ -188,4 +192,15 @@ export function reversePalette(paletteColorRepresentation: ColorStop[] = []) {
       stop: stops[paletteColorRepresentation.length - i - 1],
     }))
     .reverse();
+}
+
+// This is a helper function used for backwards compatibility
+// for the mispelled complementary palette.
+// https://github.com/elastic/kibana/issues/161194
+export function getActivePaletteName(name?: string): string {
+  let paletteName = name || DEFAULT_FALLBACK_PALETTE;
+  if (paletteName === LEGACY_COMPLIMENTARY_PALETTE) {
+    paletteName = COMPLEMENTARY_PALETTE;
+  }
+  return paletteName;
 }

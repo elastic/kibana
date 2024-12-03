@@ -49,7 +49,7 @@ describe(
       // This is probably due to the tokenization of the fields when it's inactive
       cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click();
       cy.getBySel('flyout-body-osquery').contains("SELECT * FROM os_version where name='Ubuntu';");
-      cy.getBySel('flyout-body-osquery').contains('host.os.platform');
+      cy.getBySel('flyout-body-osquery').find('input[value="host.os.platform"]').should('exist');
       cy.getBySel('flyout-body-osquery').contains('platform');
     });
 
@@ -82,7 +82,7 @@ describe(
 
       it('should be able to run take action query against all enrolled agents', () => {
         cy.getBySel('expand-event').first().click();
-        cy.getBySel('take-action-dropdown-btn').click();
+        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
         cy.getBySel('osquery-action-item').click();
         cy.getBySel('agentSelection').within(() => {
           cy.getBySel('comboBoxClearButton').click();

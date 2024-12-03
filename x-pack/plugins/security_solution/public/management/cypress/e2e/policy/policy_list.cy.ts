@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { setCustomProtectionUpdatesManifestVersion } from '../../tasks/endpoint_policy';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { login } from '../../tasks/login';
@@ -16,11 +16,16 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 describe(
   'Policy List',
   {
-    // Not supported in serverless!
-    // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-    // `internal/kibana/settings` is not accessible in serverless
-    tags: ['@ess', '@serverless', '@brokenInServerless'],
-    env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
+    tags: ['@ess', '@serverless', '@serverlessQA'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'protectionUpdatesEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
     // Today API wont let us create a policy with a manifest version before October 1st 2023
@@ -38,7 +43,6 @@ describe(
 
       beforeEach(() => {
         login();
-        disableExpandableFlyoutAdvancedSettings();
       });
 
       before(() => {
@@ -77,7 +81,6 @@ describe(
 
       beforeEach(() => {
         login();
-        disableExpandableFlyoutAdvancedSettings();
       });
 
       before(() => {

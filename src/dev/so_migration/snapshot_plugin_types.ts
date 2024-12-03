@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as fs from 'fs';
@@ -92,7 +93,7 @@ function collectSOSnapshotMeta(): MigrationSnapshotMeta {
   const buildUrl = process.env.BUILDKITE_BUILD_URL || null;
   const prId = process.env.BUILDKITE_MESSAGE?.match(/\(#(\d+)\)/)?.[1];
   const pullRequestUrl = prId ? `https://github.com/elastic/kibana/pulls/${prId}` : null;
-  const kibanaCommitHash = process.env.BUILDKITE_COMMIT || getLocalHash();
+  const kibanaCommitHash = process.env.BUILDKITE_COMMIT || getLocalHash() || 'unknown';
 
   return {
     timestamp,

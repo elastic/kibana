@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,7 @@ function escapeLayerName(name: string) {
 }
 
 export interface ReduxStateProps {
+  inspectorAdapters: Adapters;
   isReadOnly: boolean;
   zoom: number;
   selectedLayer: ILayer | undefined;
@@ -322,12 +324,7 @@ export class TOCEntry extends Component<Props, State> {
       this.props.depth > 0 ? { paddingLeft: `${8 + this.props.depth * 24}px` } : {};
 
     return (
-      <div
-        style={depthStyle}
-        className={classes}
-        id={this.props.layer.getId()}
-        data-layerid={this.props.layer.getId()}
-      >
+      <div style={depthStyle} className={classes} data-layerid={this.props.layer.getId()}>
         {this._renderLayerHeader()}
 
         {this.props.isLegendDetailsOpen &&
@@ -337,7 +334,10 @@ export class TOCEntry extends Component<Props, State> {
             className="mapTocEntry__layerDetails"
             data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
           >
-            <LegendDetails layer={this.props.layer} />
+            <LegendDetails
+              inspectorAdapters={this.props.inspectorAdapters}
+              layer={this.props.layer}
+            />
           </div>
         ) : null}
 

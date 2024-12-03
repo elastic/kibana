@@ -11,26 +11,34 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExecuteActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import type { ResponseActionExecuteOutputContent } from '../../../../../common/endpoint/types';
+import type {
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
+} from '../../../../../common/endpoint/types';
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { parsedExecuteTimeout } from '../lib/utils';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
-  ActionRequestComponentProps<{
-    command: string;
-    timeout?: string;
-  }>
+  ActionRequestComponentProps<
+    {
+      command: string;
+      timeout?: string;
+    },
+    ResponseActionExecuteOutputContent,
+    ResponseActionsExecuteParameters
+  >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
 
     if (!endpointId) {
       return;
     }
     return {
+      agent_type: agentType,
       endpoint_ids: [endpointId],
       parameters: {
         command: command.args.args.command[0],
@@ -39,7 +47,7 @@ export const ExecuteActionResult = memo<
       comment: command.args.args?.comment?.[0],
     };
   }, [
-    command.commandDefinition?.meta?.endpointId,
+    command.commandDefinition?.meta,
     command.args.args.command,
     command.args.args.timeout,
     command.args.args?.comment,
@@ -47,7 +55,8 @@ export const ExecuteActionResult = memo<
 
   const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
     ExecuteActionRequestBody,
-    ResponseActionExecuteOutputContent
+    ResponseActionExecuteOutputContent,
+    ResponseActionsExecuteParameters
   >({
     ResultComponent,
     setStore,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { UseActionsColumnRegistry, BulkActionsVerbs } from '../../../../types';
-import { BulkActionsContext } from '../bulk_actions/context';
 
 const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
 
@@ -16,14 +16,19 @@ interface UseActionsColumnProps {
 }
 
 export const useActionsColumn = ({ options }: UseActionsColumnProps) => {
-  const [, updateBulkActionsState] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [, updateBulkActionsState],
+  } = useContext(AlertsTableContext);
 
-  const useUserActionsColumn = options
-    ? options
-    : () => ({
-        renderCustomActionsRow: undefined,
-        width: undefined,
-      });
+  const defaultActionsColum = useCallback(
+    () => ({
+      renderCustomActionsRow: undefined,
+      width: undefined,
+    }),
+    []
+  );
+
+  const useUserActionsColumn = options ? options : defaultActionsColum;
 
   const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
     useUserActionsColumn();
@@ -42,9 +47,11 @@ export const useActionsColumn = ({ options }: UseActionsColumnProps) => {
     [updateBulkActionsState]
   );
 
-  return {
-    renderCustomActionsRow,
-    actionsColumnWidth,
-    getSetIsActionLoadingCallback,
-  };
+  return useMemo(() => {
+    return {
+      renderCustomActionsRow,
+      actionsColumnWidth,
+      getSetIsActionLoadingCallback,
+    };
+  }, [renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback]);
 };

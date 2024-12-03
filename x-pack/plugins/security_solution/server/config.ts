@@ -13,6 +13,15 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
+/**
+ * Validates if the value provided is a valid duration for use with Task Manager (ex. 5m, 4s)
+ */
+const isValidTaskManagerDuration = (value: string): string | undefined => {
+  if (/^\d+[s,m]{1}$/.test(value)) {
+    return `Invalid duration [${value}]. Value must be a number followed by either 's' for seconds or 'm' for minutes `;
+  }
+};
+
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
   maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
@@ -92,14 +101,36 @@ export const configSchema = schema.object({
   }),
 
   /**
-   * Artifacts Configuration
+   * Endpoint Artifacts Configuration: the interval between runs of the task that builds the
+   * artifacts and associated manifest.
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 
   /**
+   * Endpoint Artifacts Configuration: timeout value for how long the task should run.
+   */
+  packagerTaskTimeout: schema.string({ defaultValue: '20m' }),
+
+  /**
    * Artifacts Configuration for package policy update concurrency
    */
-  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 10, max: 50, min: 1 }),
+  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 25, max: 50, min: 1 }),
+
+  /**
+   * Complete External Response Actions task: interval duration
+   */
+  completeExternalResponseActionsTaskInterval: schema.string({
+    defaultValue: '60s',
+    validate: isValidTaskManagerDuration,
+  }),
+
+  /**
+   * Complete External Response Actions task: Timeout value for how long the task should run
+   */
+  completeExternalResponseActionsTaskTimeout: schema.string({
+    defaultValue: '5m',
+    validate: isValidTaskManagerDuration,
+  }),
 
   /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
@@ -133,6 +164,24 @@ export const configSchema = schema.object({
    */
   offeringSettings: schema.recordOf(schema.string(), schema.boolean(), {
     defaultValue: {},
+  }),
+  entityAnalytics: schema.object({
+    riskEngine: schema.object({
+      alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
+    }),
+    assetCriticality: schema.object({
+      csvUpload: schema.object({
+        errorRetries: schema.number({ defaultValue: 1 }),
+        maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
+      }),
+    }),
+    entityStore: schema.object({
+      syncDelay: schema.duration({ defaultValue: '60s' }),
+      frequency: schema.duration({ defaultValue: '60s' }),
+      developer: schema.object({
+        pipelineDebugMode: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
 });
 

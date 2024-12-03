@@ -176,10 +176,10 @@ export default function ({ getService }: FtrProviderContext) {
                   timing_stats: '{"elapsed_time":49}',
                   n_neighbors: '0',
                   method: 'ensemble',
-                  compute_feature_influence: 'true',
+                  compute_feature_influence: true,
                   feature_influence_threshold: '0.1',
                   outlier_fraction: '0.05',
-                  standardization_enabled: 'true',
+                  standardization_enabled: true,
                 },
               },
             ],
@@ -305,6 +305,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
+          await ml.testExecution.logTestStep('displays the create data view switch');
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchCheckState(true);
+
           await ml.testExecution.logTestStep('continues to the validation step');
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
 
@@ -322,16 +326,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
-
-          await ml.testExecution.logTestStep('sets the create data view switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep('creates and starts the analytics job');
           await ml.dataFrameAnalyticsCreation.assertCreateButtonExists();
-          await ml.dataFrameAnalyticsCreation.assertStartJobCheckboxCheckState(true);
+          await ml.dataFrameAnalyticsCreation.assertStartJobSwitchCheckState(true);
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(testData.jobId);
 
           await ml.testExecution.logTestStep('finishes analytics processing');

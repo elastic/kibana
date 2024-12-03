@@ -12,7 +12,7 @@ import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/co
 import type { Status } from '../../../../common/api/detection_engine';
 import type { Note } from '../../../../common/api/timeline';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import type { TimelineModel } from '../../../timelines/store/timeline/model';
+import type { TimelineModel } from '../../../timelines/store/model';
 import type { inputsModel } from '../../../common/store';
 
 export interface SetEventsLoadingProps {
@@ -55,12 +55,9 @@ export interface UpdateAlertStatusActionProps {
 export interface SendAlertToTimelineActionProps {
   createTimeline: CreateTimeline;
   ecsData: Ecs | Ecs[];
-  updateTimelineIsLoading: UpdateTimelineLoading;
   searchStrategyClient: ISearchStart;
   getExceptionFilter: GetExceptionFilter;
 }
-
-export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 
 export interface CreateTimelineProps {
   from: string;
@@ -71,7 +68,7 @@ export interface CreateTimelineProps {
   ruleAuthor?: string | string[];
 }
 
-export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;
+export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => Promise<void>;
 export type GetExceptionFilter = (ecsData: Ecs) => Promise<Filter | undefined>;
 
 export interface ThresholdAggregationData {

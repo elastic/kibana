@@ -11,7 +11,16 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
+import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
+import {
+  deleteIndexedEndpointHeartbeats,
+  indexEndpointHeartbeats,
+} from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
+import {
+  getHostVmClient,
+  createVm,
+  generateVmName,
+} from '../../../../scripts/endpoint/common/vm_services';
 import { setupStackServicesUsingCypressConfig } from './common';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
@@ -26,10 +35,7 @@ import {
 import type { DeleteAllEndpointDataResponse } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
-import type {
-  CreateAndEnrollEndpointHostOptions,
-  CreateAndEnrollEndpointHostResponse,
-} from '../../../../scripts/endpoint/common/endpoint_host_services';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import {
   createAndEnrollEndpointHost,
   destroyEndpointHost,
@@ -60,12 +66,28 @@ import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/
 import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
+import {
+  installSentinelOneAgent,
+  S1Client,
+} from '../../../../scripts/endpoint/sentinelone_host/common';
+import {
+  addSentinelOneIntegrationToAgentPolicy,
+  deleteAgentPolicy,
+  fetchAgentPolicyEnrollmentKey,
+  getOrCreateDefaultAgentPolicy,
+} from '../../../../scripts/endpoint/common/fleet_services';
+import { startElasticAgentWithDocker } from '../../../../scripts/endpoint/common/elastic_agent_service';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   deleteIndexedFleetEndpointPolicies,
   indexFleetEndpointPolicy,
 } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loader';
+import type {
+  CreateAndEnrollEndpointHostCIOptions,
+  CreateAndEnrollEndpointHostCIResponse,
+} from './create_and_enroll_endpoint_host_ci';
+import { createAndEnrollEndpointHostCI } from './create_and_enroll_endpoint_host_ci';
 
 /**
  * Test Role/User loader for cypress. Checks to see if running in serverless and handles it as appropriate
@@ -127,6 +149,7 @@ export const dataLoaders = (
 ): void => {
   // Env. variable is set by `cypress_serverless.config.ts`
   const isServerless = config.env.IS_SERVERLESS;
+  const isCloudServerless = Boolean(config.env.CLOUD_SERVERLESS);
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
   const roleAndUserLoaderPromise: Promise<TestRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
@@ -152,12 +175,13 @@ export const dataLoaders = (
       endpointPackageVersion?: string;
       agentPolicyName?: string;
     }) => {
-      const { kbnClient } = await stackServicesPromise;
+      const { kbnClient, log } = await stackServicesPromise;
       return indexFleetEndpointPolicy(
         kbnClient,
         policyName,
         endpointPackageVersion,
-        agentPolicyName
+        agentPolicyName,
+        log
       );
     },
 
@@ -198,6 +222,7 @@ export const dataLoaders = (
         withResponseActions,
         numResponseActions,
         alertIds,
+        isServerless,
       });
     },
 
@@ -206,12 +231,27 @@ export const dataLoaders = (
       return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData);
     },
 
+    indexEndpointHeartbeats: async (options: { count?: number; unbilledCount?: number }) => {
+      const { esClient, log } = await setupStackServicesUsingCypressConfig(config);
+      return (await indexEndpointHeartbeats(esClient, log, options.count, options.unbilledCount))
+        .data;
+    },
+
+    deleteIndexedEndpointHeartbeats: async (
+      data: IndexedEndpointHeartbeats['data']
+    ): Promise<null> => {
+      const { esClient } = await stackServicesPromise;
+      await deleteIndexedEndpointHeartbeats(esClient, data);
+      return null;
+    },
+
     indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {
-      const { esClient, log } = await stackServicesPromise;
+      const { esClient, log, kbnClient } = await stackServicesPromise;
       return (
         await indexEndpointRuleAlerts({
           ...options,
           esClient,
+          kbnClient,
           log,
         })
       ).alerts;
@@ -259,8 +299,8 @@ export const dataLoaders = (
     }: {
       endpointAgentIds: string[];
     }): Promise<DeleteAllEndpointDataResponse> => {
-      const { esClient } = await stackServicesPromise;
-      return deleteAllEndpointData(esClient, endpointAgentIds);
+      const { esClient, log } = await stackServicesPromise;
+      return deleteAllEndpointData(esClient, log, endpointAgentIds, !isCloudServerless);
     },
 
     /**
@@ -289,41 +329,130 @@ export const dataLoadersForRealEndpoints = (
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
 
   on('task', {
-    createEndpointHost: async (
-      options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
-    ): Promise<CreateAndEnrollEndpointHostResponse> => {
-      const { kbnClient, log } = await stackServicesPromise;
+    createSentinelOneHost: async () => {
+      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
+        throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
+      }
 
-      let retryAttempt = 0;
-      const attemptCreateEndpointHost = async (): Promise<CreateAndEnrollEndpointHostResponse> => {
-        try {
-          log.info(`Creating endpoint host, attempt ${retryAttempt}`);
-          const newHost = await createAndEnrollEndpointHost({
-            useClosestVersionMatch: true,
-            ...options,
-            log,
-            kbnClient,
-          });
-          await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
-          return newHost;
-        } catch (err) {
-          log.info(`Caught error when setting up the agent: ${err}`);
-          if (retryAttempt === 0 && err.agentId) {
-            retryAttempt++;
-            await destroyEndpointHost(kbnClient, {
-              hostname: err.hostname || '', // No hostname in CI env for vagrant
-              agentId: err.agentId,
-            });
-            log.info(`Deleted endpoint host ${err.agentId} and retrying`);
-            return attemptCreateEndpointHost();
-          } else {
-            log.info(
-              `${retryAttempt} attempts of creating endpoint host failed, reason for the last failure was ${err}`
-            );
-            throw err;
-          }
-        }
+      const { log } = await stackServicesPromise;
+      const s1Client = new S1Client({
+        url: process.env.CYPRESS_SENTINELONE_URL,
+        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
+        log,
+      });
+
+      const vmName = generateVmName('sentinelone');
+
+      const hostVm = await createVm({
+        type: 'multipass',
+        name: vmName,
+        log,
+        memory: '2G',
+        disk: '10G',
+      });
+
+      const s1Info = await installSentinelOneAgent({
+        hostVm,
+        log,
+        s1Client,
+      });
+
+      // wait 30s before running malicious action
+      await new Promise((resolve) => setTimeout(resolve, 30000));
+
+      // nslookup triggers an alert on S1
+      await getHostVmClient(vmName).exec('nslookup amazon.com');
+
+      log.info(`Done!
+
+${hostVm.info()}
+
+SentinelOne Agent Status:
+${s1Info.status}
+`);
+
+      return hostVm;
+    },
+
+    createSentinelOneAgentPolicy: async () => {
+      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
+        throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
+      }
+
+      const { log, kbnClient } = await stackServicesPromise;
+      const agentPolicyId = (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
+
+      await addSentinelOneIntegrationToAgentPolicy({
+        kbnClient,
+        log,
+        agentPolicyId,
+        consoleUrl: process.env.CYPRESS_SENTINELONE_URL,
+        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
+      });
+
+      const enrollmentToken = await fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId);
+
+      const elasticAgent = await startElasticAgentWithDocker({
+        kbnClient,
+        logger: log,
+        enrollmentToken,
+      });
+
+      return {
+        ...elasticAgent,
+        policyId: agentPolicyId,
       };
+    },
+
+    deleteAgentPolicy: async (agentPolicyId: string) => {
+      const { kbnClient } = await stackServicesPromise;
+
+      await deleteAgentPolicy(kbnClient, agentPolicyId);
+    },
+
+    createEndpointHost: async (
+      options: Omit<CreateAndEnrollEndpointHostCIOptions, 'log' | 'kbnClient'>
+    ): Promise<CreateAndEnrollEndpointHostCIResponse> => {
+      const { kbnClient, log, esClient } = await stackServicesPromise;
+      let retryAttempt = 0;
+      const attemptCreateEndpointHost =
+        async (): Promise<CreateAndEnrollEndpointHostCIResponse> => {
+          try {
+            log.info(`Creating endpoint host, attempt ${retryAttempt}`);
+            const newHost = process.env.CI
+              ? await createAndEnrollEndpointHostCI({
+                  useClosestVersionMatch: true,
+                  ...options,
+                  log,
+                  kbnClient,
+                  esClient,
+                })
+              : await createAndEnrollEndpointHost({
+                  useClosestVersionMatch: true,
+                  ...options,
+                  log,
+                  kbnClient,
+                });
+            await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
+            return newHost;
+          } catch (err) {
+            log.info(`Caught error when setting up the agent: ${err}`);
+            if (retryAttempt === 0 && err.agentId) {
+              retryAttempt++;
+              await destroyEndpointHost(kbnClient, {
+                hostname: err.hostname || '', // No hostname in CI env for vagrant
+                agentId: err.agentId,
+              });
+              log.info(`Deleted endpoint host ${err.agentId} and retrying`);
+              return attemptCreateEndpointHost();
+            } else {
+              log.info(
+                `${retryAttempt} attempts of creating endpoint host failed, reason for the last failure was ${err}`
+              );
+              throw err;
+            }
+          }
+        };
 
       return attemptCreateEndpointHost();
     },

@@ -6,7 +6,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ExtensionsService, ExtensionsSetup } from './extensions_service';
+import { ExtensionsSetup } from '@kbn/index-management-shared-types/src/services/extensions_service';
+import { ExtensionsService } from './extensions_service';
 
 export type ExtensionsSetupMock = jest.Mocked<ExtensionsSetup>;
 
@@ -16,9 +17,12 @@ const createServiceMock = (): ExtensionsSetupMock => ({
   addBanner: jest.fn(),
   addFilter: jest.fn(),
   addToggle: jest.fn(),
+  addColumn: jest.fn(),
+  setEmptyListContent: jest.fn(),
   addIndexDetailsTab: jest.fn(),
   setIndexOverviewContent: jest.fn(),
   setIndexMappingsContent: jest.fn(),
+  setIndexDetailsPageRoute: jest.fn(),
 });
 
 const createMock = () => {

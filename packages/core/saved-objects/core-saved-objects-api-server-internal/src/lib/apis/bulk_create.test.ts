@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -56,7 +57,6 @@ import {
   mockTimestampFieldsWithCreated,
 } from '../../test_helpers/repository.test.common';
 
-// BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
 interface ExpectedErrorResult {
@@ -65,7 +65,7 @@ interface ExpectedErrorResult {
   error: Record<string, any>;
 }
 
-describe('SavedObjectsRepository', () => {
+describe('#bulkCreate', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -135,7 +135,7 @@ describe('SavedObjectsRepository', () => {
     references: [{ name: 'search_0', type: 'search', id: '123' }],
   });
 
-  describe('#bulkCreate', () => {
+  describe('performBulkCreate', () => {
     beforeEach(() => {
       mockPreflightCheckForCreate.mockReset();
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {

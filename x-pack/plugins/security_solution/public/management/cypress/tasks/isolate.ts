@@ -51,7 +51,7 @@ export const releaseHostWithComment = (comment: string, hostname: string): void 
 
 export const openCaseAlertDetails = (alertId: string): void => {
   cy.getByTestSubj(`comment-action-show-alert-${alertId}`).click();
-  cy.getByTestSubj('take-action-dropdown-btn').click();
+  cy.getByTestSubj('securitySolutionFlyoutFooterDropdownButton').click();
 };
 
 export const waitForReleaseOption = (alertId: string): void => {
@@ -124,7 +124,7 @@ const checkEndpointListForIsolationStatus = (expectIsolated: boolean): void => {
     cy.get('tbody tr')
       .eq(0)
       .within(() => {
-        cy.get('td').eq(1).should(chainer, 'Isolated');
+        cy.get('td', { timeout: 120000 }).eq(1).should(chainer, 'Isolated');
       });
   });
 };

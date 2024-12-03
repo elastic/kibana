@@ -19,10 +19,24 @@ if your data is stored in {es} and contains a time field, you can use the
 [role="screenshot"]
 image::user/ml/images/ml-data-visualizer-sample.png[{data-viz} for sample flight data]
 
-You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
-identifies the file format and field mappings. You can then optionally import
-that data into an {es} index. To change the default file size limit, see
-<<kibana-general-settings, fileUpload:maxFileSize advanced settings>>.
+You can upload different file formats for analysis with the *{data-viz}*.
+
+File formats supported up to 500 MB:
+
+* CSV
+* TSV
+* NDJSON
+* Log files
+
+File formats supported up to 60 MB:
+
+* PDF
+* Microsoft Office files (Word, Excel, PowerPoint)
+* Plain Text (TXT)
+* Rich Text (RTF)
+* Open Document Format (ODF)
+
+The *{data-viz}* identifies the file format and field mappings, and you can import the data into an {es} index. To change the default file size limit, see <<kibana-general-settings, `fileUpload:maxFileSize`>> in advanced settings.
 
 If {stack-security-features} are enabled, users must have the necessary
 privileges to use {ml-features}. Refer to
@@ -32,19 +46,20 @@ NOTE: There are limitations in {ml-features} that affect {kib}. For more
 information, refer to {ml-docs}/ml-limitations.html[{ml-cap}].
 
 [discrete]
-[[data-comparison-view]]
-== Data comparison
+[[data-drift-view]]
+== Data drift
 
 preview::[]
 
-You can find the data comparison view in **{ml-app}** > *{data-viz}* in {kib}. 
-The data comparison view shows you the differences in each field for two 
+You can find the data drift view in **{ml-app}** > *{data-viz}* in {kib} or by using
+the <<kibana-navigation-search,global search field>>. 
+The data drift view shows you the differences in each field for two 
 different time ranges in a given {data-source}. The view helps you to visualize 
 the changes in your data over time and enables you to understand its behavior 
 better.
 
 [role="screenshot"]
-image::user/ml/images/ml-data-comparison.png[Data comparison view for {kib} Sample Data Flights ]
+image::user/ml/images/ml-data-drift.png[Data drift view in {kib}]
 
 Select a {data-source} that you want to analyze, then select a time range for 
 the reference and the comparison data in the appearing histogram chart. You can 
@@ -148,37 +163,27 @@ advanced statistical methods to help you interpret your data and its behavior.
 [[log-rate-analysis]]
 === Log rate analysis
 
-preview::[]
+Log rate analysis uses advanced statistical methods to identify reasons for increases or decreases in log rates and displays the statistically significant data in a tabular format.
+It makes it easy to find and investigate causes of unusual spikes or drops by using the analysis workflow view.
+Examine the histogram chart of the log rates for a given {data-source}, and find the reason behind a particular change possibly in millions of log events across multiple fields and values.
 
-Log rate analysis is a feature that uses advanced statistical methods to 
-identify reasons for increases or decreases in log rates. It makes it easy to 
-find and investigate causes of unusual spikes or drops by using the analysis 
-workflow view. Examine the histogram chart of the log rates for a given 
-{data-source}, and find the reason behind a particular change possibly in 
-millions of log events across multiple fields and values.
-
-You can find log rate analysis under **{ml-app}** > **AIOps Labs** where 
-you can select the {data-source} or saved search that you want to analyze.
+You can find log rate analysis embedded in multiple applications.
+In {kib}, you can find it under **{ml-app}** > **AIOps Labs** or by using the <<kibana-navigation-search,global search field>>. Here, you can select the {data-source} or saved search that you want to analyze.
 
 [role="screenshot"]
 image::user/ml/images/ml-log-rate-analysis-before.png[Log event histogram chart]
 
-Select a spike or drop in the log event histogram chart to start the analysis. It 
-identifies statistically significant field-value combinations that contribute to 
-the spike or drop and displays them in a table. You can optionally choose to summarize 
-the results into groups. The table also shows an indicator of the level of 
-impact and a sparkline showing the shape of the impact in the chart. Hovering 
-over a row displays the impact on the histogram chart in more detail. You can 
-inspect a field in **Discover**, further investigate in **Log pattern analysis**, 
-or copy the table row information as a query filter to the clipboard by 
-selecting the corresponding option under the **Actions** column. You can also 
-pin a table row by clicking on it then move the cursor to the histogram chart. 
-It displays a tooltip with exact count values for the pinned field which enables 
-closer investigation.
+Select a spike or drop in the log event histogram chart to start the analysis.
+It identifies statistically significant field-value combinations that contribute to the spike or drop and displays them in a table.
+You can optionally choose to summarize the results into groups.
+The table also shows an indicator of the level of impact and a sparkline showing the shape of the impact in the chart.
+Hovering over a row displays the impact on the histogram chart in more detail.
+You can inspect a field in **Discover**, further investigate in **Log pattern analysis**, or copy the table row information as a query filter to the clipboard by selecting the corresponding option under the **Actions** column.
+You can also pin a table row by clicking on it then move the cursor to the histogram chart. 
+It displays a tooltip with exact count values for the pinned field which enables closer investigation.
 
-Brushes in the chart show the baseline time range and the deviation in the 
-analyzed data. You can move the brushes to redefine both the baseline and the 
-deviation and rerun the analysis with the modified values.
+Brushes in the chart show the baseline time range and the deviation in the analyzed data.
+You can move the brushes to redefine both the baseline and the deviation and rerun the analysis with the modified values.
 
 [role="screenshot"]
 image::user/ml/images/ml-log-rate-analysis.png[Log rate spike explained]
@@ -187,8 +192,6 @@ image::user/ml/images/ml-log-rate-analysis.png[Log rate spike explained]
 [discrete]
 [[log-pattern-analysis]]
 === Log pattern analysis
-
-preview::[]
 
 // The following intro is used on the `run-pattern-analysis-discover` page.
 //tag::log-pattern-analysis-intro[]
@@ -199,8 +202,8 @@ displays them together with a chart that shows the distribution of each category
 and an example document that matches the category.
 //end::log-pattern-analysis-intro[]
 
-You can find log pattern analysis under **{ml-app}** > **AIOps Labs** where you 
-can select the {data-source} or saved search that you want to analyze, or in 
+You can find log pattern analysis under **{ml-app}** > **AIOps Labs** or by using the <<kibana-navigation-search,global search field>>. 
+Here, you can select the {data-source} or saved search that you want to analyze, or in 
 **Discover** as an available action for any text field.
 
 [role="screenshot"]
@@ -224,8 +227,8 @@ Change point detection uses the
 to detect distribution changes, trend changes, and other statistically 
 significant change points in a metric of your time series data.
 
-You can find change point detection under **{ml-app}** > **AIOps Labs** where 
-you can select the {data-source} or saved search that you want to analyze.
+You can find change point detection under **{ml-app}** > **AIOps Labs** or by using the <<kibana-navigation-search,global search field>>. 
+Here, you can select the {data-source} or saved search that you want to analyze.
 
 [role="screenshot"]
 image::user/ml/images/ml-change-point-detection.png[Change point detection UI]

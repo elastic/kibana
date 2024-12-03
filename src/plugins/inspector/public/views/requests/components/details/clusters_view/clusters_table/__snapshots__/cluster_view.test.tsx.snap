@@ -2,12 +2,13 @@
 
 exports[`render partial should display callout when request timed out 1`] = `
 <EuiText
-  size="xs"
-  style={
+  css={
     Object {
       "width": "100%",
     }
   }
+  data-test-subj="inspectorRequestClustersDetails"
+  size="xs"
 >
   <EuiCallOut
     color="warning"
@@ -31,12 +32,13 @@ exports[`render partial should display callout when request timed out 1`] = `
 
 exports[`render partial should show view shard failure button when there are shard failures 1`] = `
 <EuiText
-  size="xs"
-  style={
+  css={
     Object {
       "width": "100%",
     }
   }
+  data-test-subj="inspectorRequestClustersDetails"
+  size="xs"
 >
   <ShardsView
     failures={
@@ -72,12 +74,13 @@ exports[`render partial should show view shard failure button when there are sha
 
 exports[`render should display success 1`] = `
 <EuiText
-  size="xs"
-  style={
+  css={
     Object {
       "width": "100%",
     }
   }
+  data-test-subj="inspectorRequestClustersDetails"
+  size="xs"
 >
   <ShardsView
     failures={Array []}
@@ -95,12 +98,13 @@ exports[`render should display success 1`] = `
 
 exports[`render skipped or failed should display callout when cluster is unavailable 1`] = `
 <EuiText
-  size="xs"
-  style={
+  css={
     Object {
       "width": "100%",
     }
   }
+  data-test-subj="inspectorRequestClustersDetails"
+  size="xs"
 >
   <EuiCallOut
     color="warning"
@@ -120,12 +124,13 @@ exports[`render skipped or failed should display callout when cluster is unavail
 
 exports[`render skipped or failed should display callout with view failed shards button when all shards fail 1`] = `
 <EuiText
-  size="xs"
-  style={
+  css={
     Object {
       "width": "100%",
     }
   }
+  data-test-subj="inspectorRequestClustersDetails"
+  size="xs"
 >
   <EuiCallOut
     color="warning"

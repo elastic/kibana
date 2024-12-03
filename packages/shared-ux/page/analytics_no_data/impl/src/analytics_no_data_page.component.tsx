@@ -1,36 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+
+import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+
 import { i18n } from '@kbn/i18n';
+import { AnalyticsNoDataPageFlavor, Services } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
-import { AnalyticsNoDataPageFlavor } from '@kbn/shared-ux-page-analytics-no-data-types';
+import { getHasApiKeys$ } from '../lib/get_has_api_keys';
 
 /**
  * Props for the pure component.
  */
 export interface Props {
-  /** A link to documentation. */
-  kibanaGuideDocLink: string;
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
   /** if set to true allows creation of an ad-hoc dataview from data view editor */
   allowAdHocDataView?: boolean;
   /** if the kibana instance is customly branded */
   showPlainSpinner: boolean;
-  /** The flavor of the empty page to use. */
-  pageFlavor?: AnalyticsNoDataPageFlavor;
-  prependBasePath: (path: string) => string;
+  /** If the cluster has data, this handler allows the user to try ES|QL */
+  onTryESQL?: () => void;
+  /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
+  onESQLNavigationComplete?: () => void;
 }
+
+type AnalyticsNoDataPageProps = Props &
+  Pick<Services, 'getHttp' | 'prependBasePath' | 'kibanaGuideDocLink' | 'pageFlavor'>;
 
 const flavors: {
   [K in AnalyticsNoDataPageFlavor]: (deps: {
     kibanaGuideDocLink: string;
+    hasApiKeys: boolean;
     prependBasePath: (path: string) => string;
   }) => KibanaNoDataPageProps['noDataConfig'];
 } = {
@@ -55,7 +63,7 @@ const flavors: {
     },
     docsLink: kibanaGuideDocLink,
   }),
-  serverless_search: ({ prependBasePath }) => ({
+  serverless_search: ({ hasApiKeys, prependBasePath }) => ({
     solution: i18n.translate('sharedUXPackages.noDataConfig.elasticsearch', {
       defaultMessage: 'Elasticsearch',
     }),
@@ -66,14 +74,16 @@ const flavors: {
     action: {
       elasticsearch: {
         title: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchTitle', {
-          defaultMessage: 'Get started',
+          defaultMessage: 'Add data',
         }),
         description: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchDescription', {
           defaultMessage:
             'Set up your programming language client, ingest some data, and start searching.',
         }),
-        'data-test-subj': 'kbnOverviewElasticsearchGettingStarted',
-        href: prependBasePath('/app/elasticsearch/'),
+        'data-test-subj': 'kbnOverviewElasticsearchAddData',
+        href: hasApiKeys
+          ? prependBasePath('/app/elasticsearch/#ingestData') // use Ingest Data section of Home page if project has ES API keys
+          : prependBasePath('/app/elasticsearch/'),
         /** force the no data card to be shown **/
         canAccessFleet: true,
       },
@@ -109,22 +119,33 @@ const flavors: {
 /**
  * A pure component of an entire page that can be displayed when Kibana "has no data", specifically for Analytics.
  */
-export const AnalyticsNoDataPage = ({
-  kibanaGuideDocLink,
+export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
   onDataViewCreated,
   allowAdHocDataView,
   showPlainSpinner,
-  prependBasePath,
-  pageFlavor = 'kibana',
-}: Props) => {
+  onTryESQL,
+  onESQLNavigationComplete,
+  ...services
+}) => {
+  const { prependBasePath, kibanaGuideDocLink, getHttp: get, pageFlavor } = services;
+  const { hasApiKeys } = useObservable(useMemo(() => getHasApiKeys$({ get }), [get])) ?? {};
+
   const noDataConfig: KibanaNoDataPageProps['noDataConfig'] = flavors[pageFlavor]({
     kibanaGuideDocLink,
     prependBasePath,
+    hasApiKeys: Boolean(hasApiKeys),
   });
 
   return (
     <KibanaNoDataPage
-      {...{ noDataConfig, onDataViewCreated, allowAdHocDataView, showPlainSpinner }}
+      {...{
+        noDataConfig,
+        onDataViewCreated,
+        allowAdHocDataView,
+        onTryESQL,
+        onESQLNavigationComplete,
+        showPlainSpinner,
+      }}
     />
   );
 };

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -18,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
-import { EuiThemeType } from '../../../../components/color_range_legend';
+import type { EuiThemeType } from '../../../../components/color_range_legend';
 
 const getJobTypeList = () => (
   <>
@@ -32,19 +33,46 @@ const getJobTypeList = () => (
   </>
 );
 
-export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
+export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType }> = ({
+  hasMissingJobNode,
+  theme,
+}) => {
   const [showJobTypes, setShowJobTypes] = useState<boolean>(false);
+  const {
+    euiSizeM,
+    euiSizeS,
+    euiColorGhost,
+    euiColorWarning,
+    euiBorderThin,
+    euiBorderRadius,
+    euiBorderRadiusSmall,
+    euiBorderWidthThick,
+  } = theme;
+
+  const cssOverrideBase = useMemo(
+    () => ({
+      height: euiSizeM,
+      width: euiSizeM,
+      backgroundColor: euiColorGhost,
+      display: 'inline-block',
+    }),
+    [euiSizeM, euiColorGhost]
+  );
 
   return (
-    <EuiFlexGroup
-      className="mlJobMapLegend__container"
-      alignItems="center"
-      data-test-subj="mlPageDataFrameAnalyticsMapLegend"
-    >
+    <EuiFlexGroup alignItems="center" data-test-subj="mlPageDataFrameAnalyticsMapLegend">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
-            <span className="mlJobMapLegend__sourceNode" />
+            <span
+              data-test-subj="mlJobMapLegend__sourceNode"
+              css={{
+                ...cssOverrideBase,
+                backgroundColor: euiColorWarning,
+                border: euiBorderThin,
+                borderRadius: euiBorderRadius,
+              }}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
@@ -59,7 +87,14 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
-            <span className="mlJobMapLegend__indexPattern" />
+            <span
+              data-test-subj="mlJobMapLegend__indexPattern"
+              css={{
+                ...cssOverrideBase,
+                border: `${euiBorderWidthThick} solid ${theme.euiColorVis2}`,
+                transform: 'rotate(45deg)',
+              }}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
@@ -74,7 +109,14 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
-            <span className="mlJobMapLegend__ingestPipeline" />
+            <span
+              data-test-subj="mlJobMapLegend__ingestPipeline"
+              css={{
+                ...cssOverrideBase,
+                border: `${euiBorderWidthThick} solid ${theme.euiColorVis7}`,
+                borderRadius: euiBorderRadiusSmall,
+              }}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
@@ -89,7 +131,13 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
-            <span className="mlJobMapLegend__transform" />
+            <span
+              data-test-subj="mlJobMapLegend__transform"
+              css={{
+                ...cssOverrideBase,
+                border: `${euiBorderWidthThick} solid ${theme.euiColorVis1}`,
+              }}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
@@ -106,9 +154,9 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
                 display: 'inline-block',
                 width: '0px',
                 height: '0px',
-                borderLeft: `${theme.euiSizeS} solid ${theme.euiPageBackgroundColor}`,
-                borderRight: `${theme.euiSizeS} solid ${theme.euiPageBackgroundColor}`,
-                borderBottom: `${theme.euiSizeM} solid ${theme.euiColorVis3}`,
+                borderLeft: `${euiSizeS} solid ${theme.euiPageBackgroundColor}`,
+                borderRight: `${euiSizeS} solid ${theme.euiPageBackgroundColor}`,
+                borderBottom: `${euiSizeM} solid ${theme.euiColorVis3}`,
               }}
             />
           </EuiFlexItem>
@@ -122,10 +170,41 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {hasMissingJobNode ? (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <span
+                data-test-subj="mlJobMapLegend__analyticsMissing"
+                css={{
+                  ...cssOverrideBase,
+                  border: `${euiBorderWidthThick} solid ${theme.euiColorFullShade}`,
+                  borderRadius: '50%',
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsMap.legend.missingAnalyticsJobLabel"
+                  defaultMessage="missing analytics job"
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
-            <span className="mlJobMapLegend__analytics" />
+            <span
+              data-test-subj="mlJobMapLegend__analytics"
+              css={{
+                ...cssOverrideBase,
+                border: `${euiBorderWidthThick} solid ${theme.euiColorVis0}`,
+                borderRadius: '50%',
+              }}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center">

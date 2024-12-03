@@ -79,7 +79,7 @@
         "tags": [],
         "label": "externals",
         "description": [
-          "\nExternals mapping inteded to be used in a webpack config"
+          "\nExternals mapping intended to be used in a webpack config"
         ],
         "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
         "deprecated": false,
@@ -344,6 +344,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fastestlevenshtein",
+            "type": "string",
+            "tags": [],
+            "label": "'fastest-levenshtein'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.rxjs",
             "type": "string",
             "tags": [],
@@ -351,17 +362,6 @@
             "description": [
               "/**\n   * big deps which are locked to a single version\n   */"
             ],
-            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.rxjsoperators",
-            "type": "string",
-            "tags": [],
-            "label": "'rxjs/operators'",
-            "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false
@@ -423,6 +423,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticeuilibcomponentsprovidernested",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/eui/lib/components/provider/nested'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.elasticeuilibservices",
             "type": "string",
             "tags": [],
@@ -445,10 +456,10 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.elasticeuidisteui_charts_theme",
+            "id": "def-common.externals.elasticeuithemeborealis",
             "type": "string",
             "tags": [],
-            "label": "'@elastic/eui/dist/eui_charts_theme'",
+            "label": "'@elastic/eui-theme-borealis'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
@@ -537,10 +548,32 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncryptobrowser",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/crypto-browser'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.kbnesquery",
             "type": "string",
             "tags": [],
             "label": "'@kbn/es-query'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnsearcherrors",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/search-errors'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
@@ -629,6 +662,61 @@
             "type": "string",
             "tags": [],
             "label": "'@tanstack/react-query-devtools'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncodeeditor",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/code-editor'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnesqlast",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/esql-ast'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnebttools",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/ebt-tools'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticapmrumcore",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/apm-rum-core'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnreactkibanacontexttheme",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/react-kibana-context-theme'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

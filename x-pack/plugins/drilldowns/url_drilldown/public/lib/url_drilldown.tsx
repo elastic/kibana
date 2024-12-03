@@ -8,42 +8,37 @@
 import React from 'react';
 import { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
 import {
+  type EmbeddableApiContext,
+  getInheritedViewMode,
+  apiCanAccessViewMode,
+} from '@kbn/presentation-publishing';
+import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
-  IEmbeddable,
-  EmbeddableInput,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
-import { UrlTemplateEditorVariable, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import {
-  UiActionsEnhancedDrilldownDefinition as Drilldown,
-  UrlDrilldownGlobalScope,
-  UrlDrilldownConfig,
-  UrlDrilldownCollectConfig,
-  urlDrilldownValidateUrlTemplate,
-  urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
+  UiActionsEnhancedDrilldownDefinition as Drilldown,
+  UrlDrilldownCollectConfig,
+  urlDrilldownCompileUrl,
+  UrlDrilldownConfig,
+  UrlDrilldownGlobalScope,
+  urlDrilldownValidateUrlTemplate,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { EuiText, EuiTextBlockTruncate } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { txtUrlDrilldownDisplayName } from './i18n';
-import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
-import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
+import { getEventScopeValues, getEventVariableList } from './variables/event_variables';
+import { getContextScopeValues, getContextVariableList } from './variables/context_variables';
 import { getGlobalVariableList } from './variables/global_variables';
-
-interface EmbeddableQueryInput extends EmbeddableInput {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-}
-
-/** @internal */
-export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
   externalUrl: IExternalUrl;
@@ -55,7 +50,6 @@ interface UrlDrilldownDeps {
   theme: () => ThemeServiceStart;
 }
 
-export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
 export type Config = UrlDrilldownConfig;
 export type UrlTrigger =
   | typeof VALUE_CLICK_TRIGGER
@@ -64,14 +58,20 @@ export type UrlTrigger =
   | typeof CONTEXT_MENU_TRIGGER
   | typeof IMAGE_CLICK_TRIGGER;
 
-export interface ActionFactoryContext extends BaseActionFactoryContext {
-  embeddable?: EmbeddableWithQueryInput;
-}
+export type ActionFactoryContext = Partial<EmbeddableApiContext> & BaseActionFactoryContext;
+
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
 const URL_DRILLDOWN = 'URL_DRILLDOWN';
 
-export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFactoryContext> {
+const getViewMode = (context: ChartActionContext) => {
+  if (apiCanAccessViewMode(context.embeddable)) {
+    return getInheritedViewMode(context.embeddable);
+  }
+  throw new Error('Cannot access view mode');
+};
+
+export class UrlDrilldown implements Drilldown<Config, ChartActionContext, ActionFactoryContext> {
   public readonly id = URL_DRILLDOWN;
 
   constructor(private readonly deps: UrlDrilldownDeps) {}
@@ -85,23 +85,42 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly actionMenuItem: React.FC<{
     config: Omit<SerializedAction<UrlDrilldownConfig>, 'factoryId'>;
-    context: ActionContext | ActionExecutionContext<ActionContext>;
+    context: ChartActionContext | ActionExecutionContext<ChartActionContext>;
   }> = ({ config, context }) => {
     const [title, setTitle] = React.useState(config.name);
+    const [error, setError] = React.useState<string | undefined>();
     React.useEffect(() => {
-      let unmounted = false;
       const variables = this.getRuntimeVariables(context);
       urlDrilldownCompileUrl(title, variables, false)
         .then((result) => {
-          if (unmounted) return;
           if (title !== result) setTitle(result);
         })
         .catch(() => {});
-      return () => {
-        unmounted = true;
-      };
-    });
-    return <>{title}</>;
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    React.useEffect(() => {
+      this.buildUrl(config.config, context).catch((e) => {
+        setError(e.message);
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return (
+      /* title is used as a tooltip, EuiToolTip doesn't work in this context menu due to hacky zIndex */
+      <span title={error}>
+        {title}
+        {/* note: ideally we'd use EuiIconTip for the error, but it doesn't play well with this context menu*/}
+        {error ? (
+          <EuiText color={'danger'} size={'xs'}>
+            <EuiTextBlockTruncate lines={3} data-test-subj={'urlDrilldown-error'}>
+              {error}
+            </EuiTextBlockTruncate>
+          </EuiText>
+        ) : null}
+      </span>
+    );
   };
 
   public readonly euiIcon = 'link';
@@ -152,51 +171,82 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return !!config.url.template;
   };
 
-  public readonly isCompatible = async (config: Config, context: ActionContext) => {
-    const scope = this.getRuntimeVariables(context);
-    const { isValid, error } = await urlDrilldownValidateUrlTemplate(config.url, scope);
+  public readonly isCompatible = async (config: Config, context: ChartActionContext) => {
+    const viewMode = getViewMode(context);
 
-    if (!isValid) {
+    if (viewMode === 'edit') {
+      // check if context is compatible by building the scope
+      const scope = this.getRuntimeVariables(context);
+      return !!scope;
+    }
+
+    try {
+      await this.buildUrl(config, context);
+      return true;
+    } catch (e) {
       // eslint-disable-next-line no-console
-      console.warn(
-        `UrlDrilldown [${config.url.template}] is not valid. Error [${error}]. Skipping execution.`
-      );
+      console.warn(e);
       return false;
     }
-
-    const url = await this.buildUrl(config, context);
-    const validUrl = this.deps.externalUrl.validateUrl(url);
-    if (!validUrl) {
-      return false;
-    }
-
-    return true;
   };
 
-  private async buildUrl(config: Config, context: ActionContext): Promise<string> {
+  private async buildUrl(config: Config, context: ChartActionContext): Promise<string> {
+    const scope = this.getRuntimeVariables(context);
+    const { isValid, error, invalidUrl } = await urlDrilldownValidateUrlTemplate(config.url, scope);
+
+    if (!isValid) {
+      const errorMessage = i18n.translate('xpack.urlDrilldown.invalidUrlErrorMessage', {
+        defaultMessage:
+          'Error building URL: {error} Use drilldown editor to check your URL template. Invalid URL: {invalidUrl}',
+        values: {
+          error,
+          invalidUrl,
+        },
+      });
+      throw new Error(errorMessage);
+    }
+
     const doEncode = config.encodeUrl ?? true;
+
     const url = await urlDrilldownCompileUrl(
       config.url.template,
       this.getRuntimeVariables(context),
       doEncode
     );
+
+    const validUrl = this.deps.externalUrl.validateUrl(url);
+    if (!validUrl) {
+      const errorMessage = i18n.translate('xpack.urlDrilldown.invalidUrlErrorMessage', {
+        defaultMessage:
+          'Error building URL: external URL was denied. Administrator can configure external URL policies using "externalUrl.policy" setting in kibana.yml. Invalid URL: {invalidUrl}',
+        values: {
+          invalidUrl: url,
+        },
+      });
+      throw new Error(errorMessage);
+    }
+
     return url;
   }
 
-  public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
-    const url = await this.buildUrl(config, context);
-    const validUrl = this.deps.externalUrl.validateUrl(url);
-    if (!validUrl) {
-      throw new Error(
-        `External URL [${url}] was denied by ExternalUrl service. ` +
-          `You can configure external URL policies using "externalUrl.policy" setting in kibana.yml.`
-      );
+  public readonly getHref = async (
+    config: Config,
+    context: ChartActionContext
+  ): Promise<string | undefined> => {
+    try {
+      const url = await this.buildUrl(config, context);
+      return url;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn(e);
+      return undefined;
     }
-    return url;
   };
 
-  public readonly execute = async (config: Config, context: ActionContext) => {
+  public readonly execute = async (config: Config, context: ChartActionContext) => {
     const url = await this.getHref(config, context);
+    if (!url) return;
+
     if (config.openInNewTab) {
       window.open(url, '_blank', 'noopener');
     } else {
@@ -204,7 +254,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     }
   };
 
-  public readonly getRuntimeVariables = (context: ActionContext) => {
+  public readonly getRuntimeVariables = (context: ChartActionContext) => {
     return {
       event: getEventScopeValues(context),
       context: getContextScopeValues(context),

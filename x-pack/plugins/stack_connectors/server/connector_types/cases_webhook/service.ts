@@ -8,10 +8,13 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
-import { isString } from 'lodash';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
+import { WebhookMethods } from '../../../common/auth/constants';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
   createServiceError,
@@ -20,12 +23,11 @@ import {
   removeSlash,
   throwDescriptiveErrorIfResponseIsNotValid,
 } from './utils';
-import {
+import type {
   CreateIncidentParams,
   ExternalServiceCredentials,
   ExternalService,
   CasesWebhookPublicConfigurationType,
-  CasesWebhookSecretConfigurationType,
   ExternalServiceIncidentResponse,
   GetIncidentResponse,
   UpdateIncidentParams,
@@ -38,7 +40,8 @@ export const createExternalService = (
   actionId: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  connectorUsageCollector: ConnectorUsageCollector
 ): ExternalService => {
   const {
     createCommentJson,
@@ -50,35 +53,53 @@ export const createExternalService = (
     createIncidentUrl: createIncidentUrlConfig,
     getIncidentResponseExternalTitleKey,
     getIncidentUrl,
+    getIncidentMethod,
+    getIncidentJson,
     hasAuth,
+    authType,
     headers,
     viewIncidentUrl,
     updateIncidentJson,
     updateIncidentMethod,
     updateIncidentUrl,
+    verificationMode,
+    ca,
   } = config as CasesWebhookPublicConfigurationType;
-  const { password, user } = secrets as CasesWebhookSecretConfigurationType;
-  if (
-    !getIncidentUrl ||
-    !createIncidentUrlConfig ||
-    !viewIncidentUrl ||
-    !updateIncidentUrl ||
-    (hasAuth && (!password || !user))
-  ) {
+
+  const { basicAuth, sslOverrides } = buildConnectorAuth({
+    hasAuth,
+    authType,
+    secrets,
+    verificationMode,
+    ca,
+  });
+
+  validateConnectorAuthConfiguration({
+    hasAuth,
+    authType,
+    basicAuth,
+    sslOverrides,
+    connectorName: i18n.NAME,
+  });
+
+  if (!getIncidentUrl || !createIncidentUrlConfig || !viewIncidentUrl || !updateIncidentUrl) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const createIncidentUrl = removeSlash(createIncidentUrlConfig);
+  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+    username: basicAuth.auth?.username,
+    password: basicAuth.auth?.password,
+    headers,
+  });
 
   const axiosInstance = axios.create({
-    ...(hasAuth && isString(secrets.user) && isString(secrets.password)
-      ? { auth: { username: secrets.user, password: secrets.password } }
-      : {}),
     headers: {
       ['content-type']: 'application/json',
-      ...(headers != null ? headers : {}),
+      ...headersWithBasicAuth,
     },
   });
+
+  const createIncidentUrl = removeSlash(createIncidentUrlConfig);
 
   const getIncident = async (id: string): Promise<GetIncidentResponse> => {
     try {
@@ -95,11 +116,31 @@ export const createExternalService = (
         configurationUtilities,
         'Get case URL'
       );
+
+      const json =
+        getIncidentMethod === WebhookMethods.POST && getIncidentJson
+          ? renderMustacheStringNoEscape(getIncidentJson, {
+              external: {
+                system: {
+                  id: JSON.stringify(id),
+                },
+              },
+            })
+          : null;
+
+      if (json !== null) {
+        validateJson(json, 'Get case JSON body');
+      }
+
       const res = await request({
         axios: axiosInstance,
         url: normalizedUrl,
+        method: getIncidentMethod,
         logger,
+        ...(getIncidentMethod === WebhookMethods.POST ? { data: json } : {}),
         configurationUtilities,
+        sslOverrides,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -108,6 +149,7 @@ export const createExternalService = (
       });
 
       const title = getObjectValueByKeyAsString(res.data, getIncidentResponseExternalTitleKey)!;
+
       return { id, title };
     } catch (error) {
       throw createServiceError(error, `Unable to get case with id ${id}`);
@@ -137,6 +179,7 @@ export const createExternalService = (
       );
 
       validateJson(json, 'Create case JSON body');
+
       const res: AxiosResponse = await request({
         axios: axiosInstance,
         url: normalizedUrl,
@@ -144,6 +187,8 @@ export const createExternalService = (
         method: createIncidentMethod,
         data: json,
         configurationUtilities,
+        sslOverrides,
+        connectorUsageCollector,
       });
 
       const { status, statusText, data } = res;
@@ -153,6 +198,7 @@ export const createExternalService = (
         requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
       });
       const externalId = getObjectValueByKeyAsString(data, createIncidentResponseKey)!;
+
       const insertedIncident = await getIncident(externalId);
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
@@ -227,6 +273,8 @@ export const createExternalService = (
         logger,
         data: json,
         configurationUtilities,
+        sslOverrides,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -299,6 +347,8 @@ export const createExternalService = (
         logger,
         data: json,
         configurationUtilities,
+        sslOverrides,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({

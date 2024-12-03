@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { decodeEnrollmentToken, EnrollmentTokenForm } from './enrollment_token_form';
 import { Providers } from './plugin';
@@ -17,6 +18,7 @@ import type { EnrollmentToken } from '../common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
 const token: EnrollmentToken = {
@@ -29,8 +31,6 @@ const token: EnrollmentToken = {
 describe('EnrollmentTokenForm', () => {
   jest.setTimeout(20_000);
 
-  const theme$ = themeServiceMock.createTheme$();
-
   it('calls enrollment API when submitting form', async () => {
     const coreStart = coreMock.createStart();
     coreStart.http.post.mockResolvedValue({});
@@ -38,7 +38,7 @@ describe('EnrollmentTokenForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers services={coreStart} theme$={theme$}>
+      <Providers services={coreStart}>
         <EnrollmentTokenForm onSuccess={onSuccess} />
       </Providers>
     );
@@ -64,7 +64,7 @@ describe('EnrollmentTokenForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers services={coreStart} theme$={theme$}>
+      <Providers services={coreStart}>
         <EnrollmentTokenForm onSuccess={onSuccess} />
       </Providers>
     );

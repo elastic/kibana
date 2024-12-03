@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -15,7 +16,12 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { DATA_VIEW_SWAP_REFERENCES_PATH, INITIAL_REST_VERSION } from '../../constants';
+import {
+  DATA_VIEW_SWAP_REFERENCES_PATH,
+  INITIAL_REST_VERSION,
+  PREVIEW_SWAP_REFERENCES_DESCRIPTION,
+  SWAP_REFERENCES_DESCRIPTION,
+} from '../../constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 interface GetDataViewArgs {
@@ -58,9 +64,20 @@ export const swapReferencesRoute =
     const path = previewRoute
       ? `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`
       : DATA_VIEW_SWAP_REFERENCES_PATH;
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    const description = previewRoute
+      ? PREVIEW_SWAP_REFERENCES_DESCRIPTION
+      : SWAP_REFERENCES_DESCRIPTION;
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            // We don't use the indexPatterns:manage privilege for this route because it can be used for saved object
+            // types other than index-pattern
+            reason: 'Authorization provided by saved objects client',
+          },
+        },
         validate: {
           request: {
             body: schema.object({
@@ -74,15 +91,16 @@ export const swapReferencesRoute =
           },
           response: {
             200: {
-              body: schema.object({
-                result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
-                deleteStatus: schema.maybe(
-                  schema.object({
-                    remainingRefs: schema.number(),
-                    deletePerformed: schema.boolean(),
-                  })
-                ),
-              }),
+              body: () =>
+                schema.object({
+                  result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
+                  deleteStatus: schema.maybe(
+                    schema.object({
+                      remainingRefs: schema.number(),
+                      deletePerformed: schema.boolean(),
+                    })
+                  ),
+                }),
             },
           },
         },

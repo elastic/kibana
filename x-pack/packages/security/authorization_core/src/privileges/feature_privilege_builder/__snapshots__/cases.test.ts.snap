@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`cases feature_privilege_builder within feature grants all privileges under feature with id observability 1`] = `
+Array [
+  "cases:observability/pushCase",
+  "cases:observability/createCase",
+  "cases:observability/getCase",
+  "cases:observability/getComment",
+  "cases:observability/getTags",
+  "cases:observability/getReporters",
+  "cases:observability/getUserActions",
+  "cases:observability/findConfigurations",
+  "cases:observability/updateCase",
+  "cases:observability/updateComment",
+  "cases:observability/deleteCase",
+  "cases:observability/deleteComment",
+  "cases:observability/createConfiguration",
+  "cases:observability/updateConfiguration",
+  "cases:observability/createComment",
+  "cases:observability/reopenCase",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants create privileges under feature with id securitySolution 1`] = `
+Array [
+  "cases:securitySolution/createCase",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants createComment privileges under feature with id securitySolution 1`] = `
+Array [
+  "cases:securitySolution/createComment",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants delete privileges under feature with id securitySolution 1`] = `
+Array [
+  "cases:securitySolution/deleteCase",
+  "cases:securitySolution/deleteComment",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants push privileges under feature with id obs 1`] = `
+Array [
+  "cases:obs/pushCase",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants read privileges under feature with id observability 1`] = `
+Array [
+  "cases:observability/getCase",
+  "cases:observability/getComment",
+  "cases:observability/getTags",
+  "cases:observability/getReporters",
+  "cases:observability/getUserActions",
+  "cases:observability/findConfigurations",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants reopenCase privileges under feature with id observability 1`] = `
+Array [
+  "cases:observability/reopenCase",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants settings privileges under feature with id observability 1`] = `
+Array [
+  "cases:observability/createConfiguration",
+  "cases:observability/updateConfiguration",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants update privileges under feature with id observability 1`] = `
+Array [
+  "cases:observability/updateCase",
+  "cases:observability/updateComment",
+]
+`;

@@ -8,56 +8,89 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
-import type {
-  ManagedUserData,
-  ObservedUserData,
-} from '../../../timelines/components/side_panel/new_user_detail/types';
-import { ManagedUser } from '../../../timelines/components/side_panel/new_user_detail/managed_user';
-import { ObservedUser } from '../../../timelines/components/side_panel/new_user_detail/observed_user';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import type { RiskScoreState } from '../../../explore/containers/risk_score';
-import { RiskSummary } from '../shared/components/risk_summary';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+
+import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
+import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
+import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { ManagedUser } from './components/managed_user';
+import type { ManagedUserData } from './types';
+import type { RiskScoreEntity, UserItem } from '../../../../common/search_strategy';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
+import { ObservedEntity } from '../shared/components/observed_entity';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import { useObservedUserItems } from './hooks/use_observed_user_items';
+import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 
 interface UserPanelContentProps {
-  observedUser: ObservedUserData;
+  userName: string;
+  observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
   riskScoreState: RiskScoreState<RiskScoreEntity.user>;
+  recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
+  onAssetCriticalityChange: () => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
 export const UserPanelContent = ({
+  userName,
   observedUser,
   managedUser,
   riskScoreState,
+  recalculatingScore,
   contextID,
   scopeId,
   isDraggable,
+  openDetailsPanel,
+  onAssetCriticalityChange,
+  isPreviewMode,
 }: UserPanelContentProps) => {
+  const observedFields = useObservedUserItems(observedUser);
+  const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
+
   return (
     <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
         <>
-          <RiskSummary riskScoreData={riskScoreState} queryId={USER_PANEL_RISK_SCORE_QUERY_ID} />
-          <EuiHorizontalRule margin="m" />
+          <FlyoutRiskSummary
+            riskScoreData={riskScoreState}
+            recalculatingScore={recalculatingScore}
+            queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+            openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
+          />
+          <EuiHorizontalRule />
         </>
       )}
-      <ObservedUser
-        observedUser={observedUser}
+      <AssetCriticalityAccordion
+        entity={{ name: userName, type: 'user' }}
+        onChange={onAssetCriticalityChange}
+      />
+      <EntityInsight value={userName} field={'user.name'} isPreviewMode={isPreviewMode} />
+      <ObservedEntity
+        observedData={observedUser}
         contextID={contextID}
         scopeId={scopeId}
         isDraggable={isDraggable}
+        observedFields={observedFields}
+        queryId={OBSERVED_USER_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
-      <ManagedUser
-        managedUser={managedUser}
-        contextID={contextID}
-        scopeId={scopeId}
-        isDraggable={isDraggable}
-      />
+      {isManagedUserEnable && (
+        <ManagedUser
+          managedUser={managedUser}
+          contextID={contextID}
+          isDraggable={isDraggable}
+          openDetailsPanel={openDetailsPanel}
+        />
+      )}
     </FlyoutBody>
   );
 };

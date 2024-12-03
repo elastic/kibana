@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
 import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 
@@ -50,6 +52,7 @@ export function DataViewPicker({
         data-test-subj="open-data-view-picker"
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         label={label}
+        size="s"
         fullWidth
         {...colorProp}
         {...rest}
@@ -67,6 +70,7 @@ export function DataViewPicker({
       isOpen={isPopoverOpen}
       input={createTrigger()}
       closePopover={() => setPopoverIsOpen(false)}
+      panelMinWidth={calculateWidthFromEntries(dataViews, ['name', 'id'])}
       panelProps={{
         'data-test-subj': 'data-view-picker-popover',
       }}
@@ -97,6 +101,9 @@ export function DataViewPicker({
         searchProps={{
           compressed: true,
           ...(selectableProps ? selectableProps.searchProps : undefined),
+        }}
+        listProps={{
+          truncationProps: { truncation: 'middle' },
         }}
       >
         {(list, search) => (

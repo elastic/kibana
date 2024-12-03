@@ -6,7 +6,9 @@
  */
 
 import * as React from 'react';
+import { Suspense } from 'react';
 import { shallow } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
@@ -21,14 +23,33 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from '../../alerts_table/maintenance_windows/index.mock';
+import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../lib/rule_api/rule_types');
+jest.mocked(loadRuleTypes).mockResolvedValue([]);
+
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('../../../../common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 jest.mock('../../alerts_table/hooks/use_bulk_get_maintenance_windows');
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
   loadExecutionLogAggregations: jest.fn(),
+}));
+
+const mockAlertsTable = jest.fn(() => {
+  return <div data-test-subj="alertsTable" />;
+});
+jest.mock('../../alerts_table/alerts_table_state', () => ({
+  __esModule: true,
+  AlertsTableState: mockAlertsTable,
+  default: mockAlertsTable,
 }));
 
 const { loadExecutionLogAggregations } = jest.requireMock(
@@ -54,7 +75,7 @@ const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mo
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { waitFor } from '@testing-library/react';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -111,9 +132,11 @@ const queryClient = new QueryClient({
 
 const RuleComponentWithProvider = (props: RuleComponentProps) => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <RuleComponent {...props} />
-    </QueryClientProvider>
+    <Suspense fallback={null}>
+      <QueryClientProvider client={queryClient}>
+        <RuleComponent {...props} />
+      </QueryClientProvider>
+    </Suspense>
   );
 };
 
@@ -269,6 +292,48 @@ describe('rules', () => {
       alertToListItem(fakeNow.getTime(), 'us-west', ruleUsWest),
       alertToListItem(fakeNow.getTime(), 'us-east', ruleUsEast),
     ]);
+  });
+
+  it('requests a table refresh when the refresh token changes', async () => {
+    jest.useFakeTimers();
+    const rule = mockRule({
+      enabled: false,
+    });
+    const ruleType = mockRuleType({
+      hasFieldsForAAD: true,
+    });
+    const ruleSummary = mockRuleSummary();
+    jest.setSystemTime(fake2MinutesAgo);
+
+    const wrapper = mountWithIntl(
+      <RuleComponentWithProvider
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    await waitFor(() => wrapper.find('[data-test-subj="alertsTable"]'));
+
+    jest.setSystemTime(fakeNow);
+
+    wrapper.setProps({
+      refreshToken: {
+        resolve: () => undefined,
+        reject: () => undefined,
+      },
+    });
+
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lastReloadRequestTime: fakeNow.getTime(),
+      }),
+      expect.anything()
+    );
+
+    jest.useRealTimers();
   });
 });
 
@@ -537,6 +602,7 @@ function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
     producer: 'rules',
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
+    category: 'my-category',
     ...overloads,
   };
 }

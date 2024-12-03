@@ -7,11 +7,11 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { SavedObjectReference } from '@kbn/core/public';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { LensState } from './types';
-import { Datasource, DatasourceMap, VisualizationMap } from '../types';
+import { DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from './utils';
+import { mergeToNewDoc } from './shared_logic';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
 export const selectQuery = (state: LensState) => state.lens.query;
@@ -36,6 +36,7 @@ export const selectVisualizationState = (state: LensState) => state.lens.visuali
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectDataViews = (state: LensState) => state.lens.dataViews;
+export const selectIsManaged = (state: LensState) => state.lens.managed;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
@@ -46,9 +47,11 @@ export const selectTriggerApplyChanges = (state: LensState) => {
   return shouldApply;
 };
 
+// TODO - is there any point to keeping this around since we have selectExecutionSearchContext?
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],
   (query, filters, dateRange) => ({
+    now: Date.now(),
     dateRange,
     query,
     filters,
@@ -56,7 +59,8 @@ export const selectExecutionContext = createSelector(
 );
 
 export const selectExecutionContextSearch = createSelector(selectExecutionContext, (res) => ({
-  query: res.query,
+  now: res.now,
+  query: isOfAggregateQueryType(res.query) ? undefined : res.query,
   timeRange: {
     from: res.dateRange.fromDate,
     to: res.dateRange.toDate,
@@ -85,107 +89,7 @@ export const selectSavedObjectFormat = createSelector(
       extractFilterReferences: FilterManager['extract'];
     }>,
   ],
-  (
-    persistedDoc,
-    visualization,
-    datasourceStates,
-    query,
-    filters,
-    activeDatasourceId,
-    adHocDataViews,
-    { datasourceMap, visualizationMap, extractFilterReferences }
-  ) => {
-    const activeVisualization =
-      visualization.state && visualization.activeId
-        ? visualizationMap[visualization.activeId]
-        : null;
-    const activeDatasource =
-      datasourceStates && activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
-        ? datasourceMap[activeDatasourceId]
-        : undefined;
-
-    if (!activeDatasource || !activeVisualization) {
-      return;
-    }
-
-    const activeDatasources: Record<string, Datasource> = Object.keys(datasourceStates).reduce(
-      (acc, datasourceId) => ({
-        ...acc,
-        [datasourceId]: datasourceMap[datasourceId],
-      }),
-      {}
-    );
-
-    const persistibleDatasourceStates: Record<string, unknown> = {};
-    const references: SavedObjectReference[] = [];
-    const internalReferences: SavedObjectReference[] = [];
-    Object.entries(activeDatasources).forEach(([id, datasource]) => {
-      const { state: persistableState, savedObjectReferences } = datasource.getPersistableState(
-        datasourceStates[id].state
-      );
-      persistibleDatasourceStates[id] = persistableState;
-      savedObjectReferences.forEach((r) => {
-        if (r.type === 'index-pattern' && adHocDataViews[r.id]) {
-          internalReferences.push(r);
-        } else {
-          references.push(r);
-        }
-      });
-    });
-
-    let persistibleVisualizationState = visualization.state;
-    if (activeVisualization.getPersistableState) {
-      const { state: persistableState, savedObjectReferences } =
-        activeVisualization.getPersistableState(visualization.state);
-      persistibleVisualizationState = persistableState;
-      savedObjectReferences.forEach((r) => {
-        if (r.type === 'index-pattern' && adHocDataViews[r.id]) {
-          internalReferences.push(r);
-        } else {
-          references.push(r);
-        }
-      });
-    }
-
-    const persistableAdHocDataViews = Object.fromEntries(
-      Object.entries(adHocDataViews).map(([id, dataView]) => {
-        const { references: dataViewReferences, state } =
-          DataViewPersistableStateService.extract(dataView);
-        references.push(...dataViewReferences);
-        return [id, state];
-      })
-    );
-
-    const adHocFilters = filters
-      .filter((f) => !references.some((r) => r.type === 'index-pattern' && r.id === f.meta.index))
-      .map((f) => ({ ...f, meta: { ...f.meta, value: undefined } }));
-
-    const referencedFilters = filters.filter((f) =>
-      references.some((r) => r.type === 'index-pattern' && r.id === f.meta.index)
-    );
-
-    const { state: persistableFilters, references: filterReferences } =
-      extractFilterReferences(referencedFilters);
-
-    references.push(...filterReferences);
-
-    return {
-      savedObjectId: persistedDoc?.savedObjectId,
-      title: persistedDoc?.title || '',
-      description: persistedDoc?.description,
-      visualizationType: visualization.activeId,
-      type: 'lens',
-      references,
-      state: {
-        visualization: persistibleVisualizationState,
-        query,
-        filters: [...persistableFilters, ...adHocFilters],
-        datasourceStates: persistibleDatasourceStates,
-        internalReferences,
-        adHocDataViews: persistableAdHocDataViews,
-      },
-    };
-  }
+  mergeToNewDoc
 );
 
 export const selectCurrentVisualization = createSelector(
@@ -233,6 +137,7 @@ export const selectFramePublicAPI = createSelector(
       activeData,
       dataViews,
       ...context,
+      absDateRange: context.dateRange,
     };
   }
 );

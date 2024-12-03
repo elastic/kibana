@@ -14,10 +14,12 @@ import { createSlackConnectorAndObjectRemover, getConnectorByName } from './util
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const find = getService('find');
   const retry = getService('retry');
   const supertest = getService('supertest');
   const actions = getService('actions');
   const rules = getService('rules');
+  const toasts = getService('toasts');
   let objectRemover: ObjectRemover;
 
   describe('Slack', () => {
@@ -35,8 +37,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should only show one slack connector', async () => {
-        if (await testSubjects.exists('createActionButton')) {
-          await testSubjects.click('createActionButton');
+        if (await testSubjects.exists('createConnectorButton')) {
+          await testSubjects.click('createConnectorButton');
         } else {
           await testSubjects.click('createFirstActionButton');
         }
@@ -52,7 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           url: 'https://test.com',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -65,7 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
         const connector = await getConnectorByName(connectorName, supertest);
-        objectRemover.add(connector.id, 'action', 'actions');
+        objectRemover.add(connector.id, 'connector', 'actions');
       });
 
       /* FUTURE ENGINEER
@@ -80,7 +82,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           token: 'supersecrettoken',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -93,11 +95,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
         const connector = await getConnectorByName(connectorName, supertest);
-        objectRemover.add(connector.id, 'action', 'actions');
+        objectRemover.add(connector.id, 'connector', 'actions');
       });
     });
 
-    describe('rule creation', async () => {
+    describe('rule creation', () => {
       const webhookConnectorName = generateUniqueKey();
       const webApiConnectorName = generateUniqueKey();
       let webApiAction: { id: string };
@@ -118,10 +120,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         return response.body.data[0].id;
       };
 
-      const selectSlackConnectorInRuleAction = async ({ connectorId }: { connectorId: string }) => {
-        await testSubjects.click('.slack-alerting-ActionTypeSelectOption'); // "Slack" in connector list
-        await testSubjects.click('selectActionConnector-.slack-0');
-        await testSubjects.click(`dropdown-connector-${connectorId}`);
+      const selectSlackConnectorInRuleAction = async ({
+        connectorName,
+      }: {
+        connectorName: string;
+      }) => {
+        await testSubjects.click('ruleActionsAddActionButton');
+        await testSubjects.existOrFail('ruleActionsConnectorsModal');
+        await find.clickByButtonText(connectorName);
       };
 
       before(async () => {
@@ -139,8 +145,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           connectorTypeId: '.slack',
         });
 
-        objectRemover.add(webhookAction.id, 'action', 'actions');
-        objectRemover.add(webApiAction.id, 'action', 'actions');
+        objectRemover.add(webhookAction.id, 'connector', 'actions');
+        objectRemover.add(webApiAction.id, 'connector', 'actions');
         await pageObjects.common.navigateToApp('triggersActions');
       });
 
@@ -148,9 +154,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const ruleName = await setupRule();
 
         await selectSlackConnectorInRuleAction({
-          connectorId: webhookAction.id,
+          connectorName: webhookConnectorName,
         });
-        await testSubjects.click('saveRuleButton');
+        await testSubjects.click('rulePageFooterSaveButton');
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
+
+        await pageObjects.common.navigateToApp('triggersActions');
+        await testSubjects.click('rulesTab');
         await pageObjects.triggersActionsUI.searchAlerts(ruleName);
 
         const ruleId = await getRuleIdByName(ruleName);
@@ -165,9 +176,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             tags: '',
           },
         ]);
-
-        const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
 
       /* FUTURE ENGINEER
@@ -178,12 +186,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it.skip('should save webapi type slack connectors', async () => {
         await setupRule();
         await selectSlackConnectorInRuleAction({
-          connectorId: webApiAction.id,
+          connectorName: webhookConnectorName,
         });
 
         await testSubjects.click('saveRuleButton');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Failed to retrieve Slack channels list');
 
         // We are not saving the rule yet as we currently have no way
@@ -210,7 +218,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         //     tags: '',
         //   },
         // ]);
-        // const toastTitle = await pageObjects.common.closeToast();
+        // const toastTitle = await toasts.getTitleAndDismiss();
         // expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
     });

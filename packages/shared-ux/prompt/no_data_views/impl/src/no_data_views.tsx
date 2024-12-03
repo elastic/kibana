@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
@@ -27,8 +28,14 @@ type CloseDataViewEditorFn = ReturnType<NoDataViewsPromptServices['openDataViewE
 export const NoDataViewsPrompt = ({
   onDataViewCreated,
   allowAdHocDataView = false,
+  onTryESQL: onTryESQLProp,
+  onESQLNavigationComplete,
 }: NoDataViewsPromptProps) => {
-  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink } = useServices();
+  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, esqlDocLink, ...services } =
+    useServices();
+
+  const onTryESQL = onTryESQLProp ?? services.onTryESQL;
+
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
 
   useEffect(() => {
@@ -72,6 +79,21 @@ export const NoDataViewsPrompt = ({
   ]);
 
   return (
-    <NoDataViewsPromptComponent {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink }} />
+    <NoDataViewsPromptComponent
+      {...{
+        onClickCreate,
+        canCreateNewDataView,
+        dataViewsDocLink,
+        esqlDocLink,
+        onTryESQL: onTryESQL
+          ? () => {
+              onTryESQL();
+              if (onESQLNavigationComplete) {
+                onESQLNavigationComplete();
+              }
+            }
+          : undefined,
+      }}
+    />
   );
 };

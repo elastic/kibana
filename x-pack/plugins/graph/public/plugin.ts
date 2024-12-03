@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import {
-  AppNavLinkStatus,
+  AppStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -32,7 +32,7 @@ import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plu
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { checkLicense } from '../common/check_license';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface GraphPluginSetupDependencies {
@@ -143,11 +143,11 @@ export class GraphPlugin
       const licenseInformation = checkLicense(license);
 
       this.appUpdater$.next(() => ({
-        navLinkStatus: licenseInformation.showAppLink
+        status: licenseInformation.showAppLink
           ? licenseInformation.enableAppLink
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.disabled
-          : AppNavLinkStatus.hidden,
+            ? AppStatus.accessible
+            : AppStatus.inaccessible
+          : AppStatus.inaccessible,
         tooltip: licenseInformation.showAppLink ? licenseInformation.message : undefined,
       }));
 

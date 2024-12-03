@@ -1,32 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  createServer,
-  getListenerOptions,
-  getServerOptions,
-  setTlsConfig,
-  getRequestId,
-} from '@kbn/server-http-tools';
-
+import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, pairwise } from 'rxjs/operators';
+import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
-// @ts-expect-error no type definition
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreVersionedRouter, isSafeMethod, Router } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -43,11 +35,15 @@ import type {
   HttpServerInfo,
   HttpAuth,
   IAuthHeadersStorage,
+  RouterDeprecatedApiDetails,
+  RouteMethod,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
-import { identity } from 'lodash';
+import { identity, isObject } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import { Env } from '@kbn/config';
+import { CoreContext } from '@kbn/core-base-server-internal';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -146,6 +142,7 @@ export interface HttpServerSetup {
   registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
+  getDeprecatedRoutes: HttpServiceSetup['getDeprecatedRoutes'];
   authRequestHeaders: IAuthHeadersStorage;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
@@ -166,6 +163,11 @@ export interface HttpServerSetupOptions {
   executionContext?: InternalExecutionContextSetup;
 }
 
+/** @internal */
+export interface GetRoutersOptions {
+  pluginId?: string;
+}
+
 export class HttpServer {
   private server?: Server;
   private config?: HttpConfig;
@@ -178,15 +180,20 @@ export class HttpServer {
   private stopped = false;
 
   private readonly log: Logger;
+  private readonly logger: LoggerFactory;
   private readonly authState: AuthStateStorage;
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
+  private readonly env: Env;
 
   constructor(
-    private readonly logger: LoggerFactory,
+    private readonly coreContext: CoreContext,
     private readonly name: string,
     private readonly shutdownTimeout$: Observable<Duration>
   ) {
+    const { logger, env } = this.coreContext;
+    this.logger = logger;
+    this.env = env;
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();
@@ -224,9 +231,8 @@ export class HttpServer {
     this.config = config;
 
     const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
 
-    this.server = createServer(serverOptions, listenerOptions);
+    this.server = createServer(serverOptions);
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
       await this.server.register({
@@ -269,10 +275,15 @@ export class HttpServer {
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
 
-    const staticAssets = new StaticAssets(basePathService, config.cdn);
+    const staticAssets = new StaticAssets({
+      basePath: basePathService,
+      cdnConfig: config.cdn,
+      shaDigest: this.env.packageInfo.buildShaShort,
+    });
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      getDeprecatedRoutes: this.getDeprecatedRoutes.bind(this),
       registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       staticAssets,
@@ -281,8 +292,14 @@ export class HttpServer {
       registerAuth: this.registerAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
-      createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
-        this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+      createCookieSessionStorageFactory: <T extends object>(
+        cookieOptions: SessionStorageCookieOptions<T>
+      ) =>
+        this.createCookieSessionStorageFactory(
+          cookieOptions,
+          config.csp.disableEmbedding,
+          config.basePath
+        ),
       basePath: basePathService,
       csp: config.csp,
       auth: {
@@ -370,6 +387,52 @@ export class HttpServer {
     if (authRequired === false) {
       return false;
     }
+  }
+
+  private getDeprecatedRoutes(): RouterDeprecatedApiDetails[] {
+    const deprecatedRoutes: RouterDeprecatedApiDetails[] = [];
+
+    for (const router of this.registeredRouters) {
+      const allRouterRoutes = [
+        // exclude so we dont get double entries.
+        // we need to call the versioned getRoutes to grab the full version options details
+        router.getRoutes({ excludeVersionedRoutes: true }),
+        router.versioned.getRoutes(),
+      ].flat();
+
+      deprecatedRoutes.push(
+        ...allRouterRoutes
+          .flat()
+          .map((route) => {
+            const access = route.options.access;
+            if (route.isVersioned === true) {
+              return [...route.handlers.entries()].map(([_, { options }]) => {
+                const deprecated = options.options?.deprecated;
+                return { route, version: `${options.version}`, deprecated, access };
+              });
+            }
+
+            return { route, version: undefined, deprecated: route.options.deprecated, access };
+          })
+          .flat()
+          .filter(({ deprecated, access }) => {
+            const isRouteDeprecation = isObject(deprecated);
+            const isAccessDeprecation = access === 'internal';
+            return isRouteDeprecation || isAccessDeprecation;
+          })
+          .flatMap(({ route, deprecated, version, access }) => {
+            return {
+              routeDeprecationOptions: deprecated!,
+              routeMethod: route.method as RouteMethod,
+              routePath: route.path,
+              routeVersion: version,
+              routeAccess: access,
+            };
+          })
+      );
+    }
+
+    return deprecatedRoutes;
   }
 
   private setupGracefulShutdownHandlers() {
@@ -543,8 +606,9 @@ export class HttpServer {
     this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
   }
 
-  private async createCookieSessionStorageFactory<T>(
+  private async createCookieSessionStorageFactory<T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>,
+    disableEmbedding: boolean,
     basePath?: string
   ) {
     if (this.server === undefined) {
@@ -561,6 +625,7 @@ export class HttpServer {
       this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
       this.server,
       cookieOptions,
+      disableEmbedding,
       basePath
     );
     return sessionStorageFactory;
@@ -612,6 +677,38 @@ export class HttpServer {
     });
   }
 
+  public getRouters({ pluginId }: GetRoutersOptions = {}): {
+    routers: Router[];
+    versionedRouters: CoreVersionedRouter[];
+  } {
+    const routers: {
+      routers: Router[];
+      versionedRouters: CoreVersionedRouter[];
+    } = {
+      routers: [],
+      versionedRouters: [],
+    };
+    const pluginIdFilter = pluginId ? Symbol(pluginId).toString() : undefined;
+
+    for (const router of this.registeredRouters) {
+      const matchesIdFilter =
+        !pluginIdFilter || (router as Router).pluginId?.toString() === pluginIdFilter;
+
+      if (
+        matchesIdFilter &&
+        (router as Router).getRoutes({ excludeVersionedRoutes: true }).length > 0
+      ) {
+        routers.routers.push(router as Router);
+      }
+
+      const versionedRouter = router.versioned as CoreVersionedRouter;
+      if (matchesIdFilter && versionedRouter.getRoutes().length > 0) {
+        routers.versionedRouters.push(versionedRouter);
+      }
+    }
+    return routers;
+  }
+
   private registerStaticDir(path: string, dirPath: string) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
@@ -646,12 +743,14 @@ export class HttpServer {
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-    const { authRequired, tags, body = {}, timeout } = route.options;
+    const { authRequired, tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? 'internal',
+      deprecated,
+      security: route.security,
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(
@@ -673,7 +772,6 @@ export class HttpServer {
         // validation applied in ./http_tools#getServerOptions
         // (All NP routes are already required to specify their own validation in order to access the payload)
         validate,
-        // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
         payload: [allow, override, maxBytes, output, parse, timeout?.payload].some(
           (x) => x !== undefined
         )

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 import {
-  DataProviderType,
   IS_OPERATOR,
   EXISTS_OPERATOR,
   IS_ONE_OF_OPERATOR,
 } from '../timeline/data_providers/data_provider';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 
 import { StatefulEditDataProvider } from '.';
 
@@ -42,7 +42,8 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText(field)).toBeInTheDocument();
+    const fieldWrapper = screen.getByTestId('field');
+    expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue(field);
   });
 
   test('it renders the expected placeholder for the current field when field is empty', () => {
@@ -82,7 +83,8 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('is')).toBeInTheDocument();
+    const fieldWrapper = screen.getByTestId('operator');
+    expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue('is');
   });
 
   test('it renders the negated "is" operator in a humanized format when isExcluded is true', () => {
@@ -102,7 +104,8 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('is not')).toBeInTheDocument();
+    const fieldWrapper = screen.getByTestId('operator');
+    expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue('is not');
   });
 
   test('it renders the "exists" operator in human-readable format', () => {
@@ -122,7 +125,8 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('exists')).toBeInTheDocument();
+    const fieldWrapper = screen.getByTestId('operator');
+    expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue('exists');
   });
 
   test('it renders the negated "exists" operator in a humanized format when isExcluded is true', () => {
@@ -142,7 +146,8 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('does not exist')).toBeInTheDocument();
+    const fieldWrapper = screen.getByTestId('operator');
+    expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue('does not exist');
   });
 
   test('it renders the "is one of" operator in human-readable format', () => {
@@ -162,7 +167,8 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('is one of')).toBeInTheDocument();
+    const fieldWrapper = screen.getByTestId('operator');
+    expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue('is one of');
   });
 
   test('it renders the negated "is one of" operator in a humanized format when isExcluded is true', () => {
@@ -182,7 +188,8 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('is not one of')).toBeInTheDocument();
+    const fieldWrapper = screen.getByTestId('operator');
+    expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue('is not one of');
   });
 
   test('it renders the current value when the operator is "is"', () => {
@@ -244,7 +251,9 @@ describe('StatefulEditDataProvider', () => {
         />
       </TestProviders>
     );
-    expect(screen.getByText('enter one or more values')).toBeInTheDocument();
+
+    const wrapper = screen.getByTestId('is-one-of-combobox-input');
+    expect(within(wrapper).getByPlaceholderText('enter one or more values')).toBeInTheDocument();
   });
 
   test('it renders selected values when the type of value is an array and the operator is "is one of"', () => {
@@ -326,8 +335,8 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    // EuiCombobox does not render placeholder text with placeholder tag
-    expect(screen.getByText('enter one or more values')).toBeInTheDocument();
+    const wrapper = screen.getByTestId('is-one-of-combobox-input');
+    expect(within(wrapper).getByPlaceholderText('enter one or more values')).toBeInTheDocument();
   });
 
   test('it does NOT render value when the operator is "exists"', () => {
@@ -384,7 +393,7 @@ describe('StatefulEditDataProvider', () => {
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
-          type={DataProviderType.template}
+          type={DataProviderTypeEnum.template}
         />
       </TestProviders>
     );
@@ -452,7 +461,7 @@ describe('StatefulEditDataProvider', () => {
     expect(screen.getByTestId('save')).toBeDisabled();
   });
 
-  test('it invokes onDataProviderEdited with the expected values when the user clicks the save button', () => {
+  test('it invokes onDataProviderEdited with the expected values when the user clicks the save button', async () => {
     const onDataProviderEdited = jest.fn();
 
     render(
@@ -471,7 +480,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('save'));
+    await userEvent.click(screen.getByTestId('save'));
 
     expect(onDataProviderEdited).toBeCalledWith({
       andProviderId: undefined,

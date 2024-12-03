@@ -1,0 +1,2106 @@
+{
+  "id": "@kbn/security-plugin-types-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ApiKeyAggregations",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiKeyAggregations",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyAggregations.usernames",
+            "type": "Object",
+            "tags": [],
+            "label": "usernames",
+            "description": [],
+            "signature": [
+              "AggregationsStringTermsAggregate",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyAggregations.types",
+            "type": "Object",
+            "tags": [],
+            "label": "types",
+            "description": [],
+            "signature": [
+              "AggregationsStringTermsAggregate",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyAggregations.expired",
+            "type": "Object",
+            "tags": [],
+            "label": "expired",
+            "description": [],
+            "signature": [
+              "AggregationsFilterAggregateKeys",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyAggregations.managed",
+            "type": "Object",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "{ buckets: { metadataBased: ",
+              "AggregationsFilterAggregateKeys",
+              "; namePrefixBased: ",
+              "AggregationsFilterAggregateKeys",
+              "; }; } | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ApiKeyToInvalidate",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiKeyToInvalidate",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyToInvalidate.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyToInvalidate.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.AuthenticatedUser",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthenticatedUser",
+        "description": [
+          "\nRepresents the currently authenticated user."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-security-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityCommonPluginApi",
+            "section": "def-common.AuthenticatedUser",
+            "text": "AuthenticatedUser"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-security-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityCommonPluginApi",
+            "section": "def-common.User",
+            "text": "User"
+          }
+        ],
+        "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticatedUser.authentication_realm",
+            "type": "Object",
+            "tags": [],
+            "label": "authentication_realm",
+            "description": [
+              "\nThe name and type of the Realm that has authenticated the user."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticatedUser.lookup_realm",
+            "type": "Object",
+            "tags": [],
+            "label": "lookup_realm",
+            "description": [
+              "\nThe name and type of the Realm where the user information were retrieved from."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticatedUser.authentication_provider",
+            "type": "Object",
+            "tags": [],
+            "label": "authentication_provider",
+            "description": [
+              "\nThe authentication provider that used to authenticate user."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticationProvider",
+                "text": "AuthenticationProvider"
+              }
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticatedUser.authentication_type",
+            "type": "string",
+            "tags": [],
+            "label": "authentication_type",
+            "description": [
+              "\nThe AuthenticationType used by ES to authenticate the user.\n"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticatedUser.elastic_cloud_user",
+            "type": "boolean",
+            "tags": [],
+            "label": "elastic_cloud_user",
+            "description": [
+              "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticatedUser.profile_uid",
+            "type": "string",
+            "tags": [],
+            "label": "profile_uid",
+            "description": [
+              "\nUser profile ID of this user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.AuthenticationProvider",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthenticationProvider",
+        "description": [
+          "\nType and name tuple to identify provider used to authenticate user."
+        ],
+        "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticationProvider.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the Kibana authentication provider."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticationProvider.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the Kibana authentication provider (arbitrary string)."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.BaseApiKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseApiKey",
+        "description": [
+          "\nFixing up `estypes.SecurityApiKey` type since some fields are marked as optional even though they are guaranteed to be returned.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.BaseApiKey",
+            "text": "BaseApiKey"
+          },
+          " extends ",
+          "SecurityApiKey"
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.realm",
+            "type": "string",
+            "tags": [],
+            "label": "realm",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.creation",
+            "type": "number",
+            "tags": [],
+            "label": "creation",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "SecurityRoleDescriptor",
+              "; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.CrossClusterApiKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "CrossClusterApiKey",
+        "description": [
+          "\nInterface representing a cross-cluster API key the way it is returned by Elasticsearch GET endpoint.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.CrossClusterApiKey",
+            "text": "CrossClusterApiKey"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.BaseApiKey",
+            "text": "BaseApiKey"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.CrossClusterApiKey.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"cross_cluster\""
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.CrossClusterApiKey.access",
+            "type": "Object",
+            "tags": [],
+            "label": "access",
+            "description": [
+              "\nThe access to be granted to this API key. The access is composed of permissions for cross-cluster\nsearch and cross-cluster replication. At least one of them must be specified."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.CrossClusterApiKeyAccess",
+                "text": "CrossClusterApiKeyAccess"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.CrossClusterApiKeyAccess",
+        "type": "Interface",
+        "tags": [],
+        "label": "CrossClusterApiKeyAccess",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.CrossClusterApiKeyAccess.search",
+            "type": "Array",
+            "tags": [],
+            "label": "search",
+            "description": [
+              "\nA list of indices permission entries for cross-cluster search."
+            ],
+            "signature": [
+              "CrossClusterApiKeySearch[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.CrossClusterApiKeyAccess.replication",
+            "type": "Array",
+            "tags": [],
+            "label": "replication",
+            "description": [
+              "\nA list of indices permission entries for cross-cluster replication."
+            ],
+            "signature": [
+              "CrossClusterApiKeyReplication[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.FeaturesPrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeaturesPrivileges",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/features_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.FeaturesPrivileges.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[featureId: string]: string[]",
+            "description": [],
+            "signature": [
+              "[featureId: string]:  string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/features_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ManagedApiKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "ManagedApiKey",
+        "description": [
+          "\nInterface representing a REST API key that is managed by Kibana."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.ManagedApiKey",
+            "text": "ManagedApiKey"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.BaseApiKey",
+            "text": "BaseApiKey"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ManagedApiKey.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"managed\""
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RawKibanaFeaturePrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "RawKibanaFeaturePrivileges",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaFeaturePrivileges.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[featureId: string]: { [privilegeId: string]: string[]; }",
+            "description": [],
+            "signature": [
+              "[featureId: string]:  { [privilegeId: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RawKibanaPrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "RawKibanaPrivileges",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaPrivileges.global",
+            "type": "Object",
+            "tags": [],
+            "label": "global",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaPrivileges.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RawKibanaFeaturePrivileges",
+                "text": "RawKibanaFeaturePrivileges"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaPrivileges.space",
+            "type": "Object",
+            "tags": [],
+            "label": "space",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaPrivileges.reserved",
+            "type": "Object",
+            "tags": [],
+            "label": "reserved",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RestApiKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "RestApiKey",
+        "description": [
+          "\nInterface representing a REST API key the way it is returned by Elasticsearch GET endpoint.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.RestApiKey",
+            "text": "RestApiKey"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.BaseApiKey",
+            "text": "BaseApiKey"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RestApiKey.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rest\""
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.Role",
+        "type": "Interface",
+        "tags": [],
+        "label": "Role",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.Role.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.Role.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.Role.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "{ cluster: string[]; remote_cluster?: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleRemoteClusterPrivilege",
+                "text": "RoleRemoteClusterPrivilege"
+              },
+              "[] | undefined; indices: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleIndexPrivilege",
+                "text": "RoleIndexPrivilege"
+              },
+              "[]; remote_indices?: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleRemoteIndexPrivilege",
+                "text": "RoleRemoteIndexPrivilege"
+              },
+              "[] | undefined; run_as: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.Role.kibana",
+            "type": "Array",
+            "tags": [],
+            "label": "kibana",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleKibanaPrivilege",
+                "text": "RoleKibanaPrivilege"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.Role.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [anyKey: string]: any; } | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.Role.transient_metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "transient_metadata",
+            "description": [],
+            "signature": [
+              "{ [anyKey: string]: any; } | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.Role._transform_error",
+            "type": "Array",
+            "tags": [],
+            "label": "_transform_error",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.Role._unrecognized_applications",
+            "type": "Array",
+            "tags": [],
+            "label": "_unrecognized_applications",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RoleIndexPrivilege",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleIndexPrivilege",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleIndexPrivilege.names",
+            "type": "Array",
+            "tags": [],
+            "label": "names",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleIndexPrivilege.privileges",
+            "type": "Array",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleIndexPrivilege.field_security",
+            "type": "Object",
+            "tags": [],
+            "label": "field_security",
+            "description": [],
+            "signature": [
+              "{ grant?: string[] | undefined; except?: string[] | undefined; } | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleIndexPrivilege.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RoleKibanaPrivilege",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleKibanaPrivilege",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleKibanaPrivilege.spaces",
+            "type": "Array",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleKibanaPrivilege.base",
+            "type": "Array",
+            "tags": [],
+            "label": "base",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleKibanaPrivilege.feature",
+            "type": "Object",
+            "tags": [],
+            "label": "feature",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.FeaturesPrivileges",
+                "text": "FeaturesPrivileges"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleKibanaPrivilege._reserved",
+            "type": "Array",
+            "tags": [],
+            "label": "_reserved",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RoleRemoteClusterPrivilege",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleRemoteClusterPrivilege",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleRemoteClusterPrivilege.clusters",
+            "type": "Array",
+            "tags": [],
+            "label": "clusters",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleRemoteClusterPrivilege.privileges",
+            "type": "Array",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RoleRemoteIndexPrivilege",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleRemoteIndexPrivilege",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.RoleRemoteIndexPrivilege",
+            "text": "RoleRemoteIndexPrivilege"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.RoleIndexPrivilege",
+            "text": "RoleIndexPrivilege"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleRemoteIndexPrivilege.clusters",
+            "type": "Array",
+            "tags": [],
+            "label": "clusters",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.SecurityLicense",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecurityLicense",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicense.isLicenseAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isLicenseAvailable",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicense.getLicenseType",
+            "type": "Function",
+            "tags": [],
+            "label": "getLicenseType",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicense.getUnavailableReason",
+            "type": "Function",
+            "tags": [],
+            "label": "getUnavailableReason",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicense.isEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicense.getFeatures",
+            "type": "Function",
+            "tags": [],
+            "label": "getFeatures",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.SecurityLicenseFeatures",
+                "text": "SecurityLicenseFeatures"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicense.hasAtLeast",
+            "type": "Function",
+            "tags": [],
+            "label": "hasAtLeast",
+            "description": [],
+            "signature": [
+              "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-common",
+                "id": "def-common.SecurityLicense.hasAtLeast.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "licenseType",
+                "description": [],
+                "signature": [
+                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                ],
+                "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicense.features$",
+            "type": "Object",
+            "tags": [],
+            "label": "features$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.SecurityLicenseFeatures",
+                "text": "SecurityLicenseFeatures"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.SecurityLicenseFeatures",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecurityLicenseFeatures",
+        "description": [
+          "\nDescribes Security plugin features that depend on license."
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.showLogin",
+            "type": "boolean",
+            "tags": [],
+            "label": "showLogin",
+            "description": [
+              "\nIndicates whether we show login page or skip it."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowLogin",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowLogin",
+            "description": [
+              "\nIndicates whether we allow login or disable it on the login page."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.showLinks",
+            "type": "boolean",
+            "tags": [],
+            "label": "showLinks",
+            "description": [
+              "\nIndicates whether we show security links throughout the kibana app."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.showRoleMappingsManagement",
+            "type": "boolean",
+            "tags": [],
+            "label": "showRoleMappingsManagement",
+            "description": [
+              "\nIndicates whether we show the Role Mappings UI."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowAccessAgreement",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowAccessAgreement",
+            "description": [
+              "\nIndicates whether we allow users to access agreement UI and acknowledge it."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowAuditLogging",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowAuditLogging",
+            "description": [
+              "\nIndicates whether we allow logging of audit events."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowRoleDocumentLevelSecurity",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleDocumentLevelSecurity",
+            "description": [
+              "\nIndicates whether we allow users to define document level security in roles."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowRoleFieldLevelSecurity",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleFieldLevelSecurity",
+            "description": [
+              "\nIndicates whether we allow users to define field level security in roles."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowRoleRemoteIndexPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleRemoteIndexPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote index privileges in roles."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowRemoteClusterPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRemoteClusterPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote cluster privileges in roles."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowRbac",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRbac",
+            "description": [
+              "\nIndicates whether we allow Role-based access control (RBAC)."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowSubFeaturePrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowSubFeaturePrivileges",
+            "description": [
+              "\nIndicates whether we allow sub-feature privileges."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowUserProfileCollaboration",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowUserProfileCollaboration",
+            "description": [
+              "\nIndicates whether we allow user profile collaboration features (suggest and privileges checks APIs)."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [
+              "\nDescribes the layout of the login form if it's displayed."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.LoginLayout",
+                "text": "LoginLayout"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowFips",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowFips",
+            "description": [
+              "\nIndicates whether we allow FIPS mode"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.User",
+        "type": "Interface",
+        "tags": [],
+        "label": "User",
+        "description": [
+          "\nA set of fields describing Kibana user."
+        ],
+        "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.User.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.User.email",
+            "type": "string",
+            "tags": [],
+            "label": "email",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.User.full_name",
+            "type": "string",
+            "tags": [],
+            "label": "full_name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.User.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.User.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.User.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.UserProfile",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfile",
+        "description": [
+          "\nIMPORTANT:\n\nThe types in this file are duplicated at\n`packages/kbn-user-profile-components/src/user_profile.ts`\n\nWhen making changes please ensure to keep both files in sync.\n\nDescribes basic properties stored in user profile."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfile",
+            "text": "UserProfile"
+          },
+          "<D>"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfile.uid",
+            "type": "string",
+            "tags": [],
+            "label": "uid",
+            "description": [
+              "\nUnique ID for of the user profile."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfile.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nIndicates whether user profile is enabled or not."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfile.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nInformation about the user that owns profile."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileUserInfo",
+                "text": "UserProfileUserInfo"
+              }
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfile.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nUser specific data associated with the profile."
+            ],
+            "signature": [
+              "{ [P in keyof D]?: D[P] | undefined; }"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.UserProfileUserInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileUserInfo",
+        "description": [
+          "\nBasic user information returned in user profile."
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfileUserInfo.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [
+              "\nUsername of the user."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfileUserInfo.email",
+            "type": "string",
+            "tags": [],
+            "label": "email",
+            "description": [
+              "\nOptional email of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfileUserInfo.full_name",
+            "type": "string",
+            "tags": [],
+            "label": "full_name",
+            "description": [
+              "\nOptional full name of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.UserProfileUserInfoWithSecurity",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileUserInfoWithSecurity",
+        "description": [
+          "\nExtended user information returned in user profile (both basic and security related properties)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfileUserInfoWithSecurity",
+            "text": "UserProfileUserInfoWithSecurity"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfileUserInfo",
+            "text": "UserProfileUserInfo"
+          }
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfileUserInfoWithSecurity.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "\nList of the user roles."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfileUserInfoWithSecurity.realm_name",
+            "type": "string",
+            "tags": [],
+            "label": "realm_name",
+            "description": [
+              "\nName of the Elasticsearch security realm that was used to authenticate user."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfileUserInfoWithSecurity.realm_domain",
+            "type": "string",
+            "tags": [],
+            "label": "realm_domain",
+            "description": [
+              "\nOptional name of the security domain that Elasticsearch security realm that was\nused to authenticate user resides in (if any)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.UserProfileWithSecurity",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileWithSecurity",
+        "description": [
+          "\nDescribes all properties stored in user profile (both basic and security related properties)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfileWithSecurity",
+            "text": "UserProfileWithSecurity"
+          },
+          "<D, L> extends ",
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfile",
+            "text": "UserProfile"
+          },
+          "<D>"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfileWithSecurity.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nInformation about the user that owns profile."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileUserInfoWithSecurity",
+                "text": "UserProfileUserInfoWithSecurity"
+              }
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserProfileWithSecurity.labels",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "labels",
+            "description": [
+              "\nUser specific _searchable_ labels associated with the profile. Note that labels are considered\nsecurity related field since it's going to be used to store user's space ID."
+            ],
+            "signature": [
+              "L"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.UserRealm",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserRealm",
+        "description": [
+          "\nAn Elasticsearch realm that was used to resolve and authenticate the user."
+        ],
+        "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserRealm.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nArbitrary name of the security realm."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.UserRealm.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the security realm (file, native, saml etc.)."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ApiKey",
+        "type": "Type",
+        "tags": [],
+        "label": "ApiKey",
+        "description": [
+          "\nInterface representing an API key the way it is returned by Elasticsearch GET endpoint."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.RestApiKey",
+            "text": "RestApiKey"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.CrossClusterApiKey",
+            "text": "CrossClusterApiKey"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ApiKeyRoleDescriptors",
+        "type": "Type",
+        "tags": [],
+        "label": "ApiKeyRoleDescriptors",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          "SecurityRoleDescriptor",
+          "; }"
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.CategorizedApiKey",
+        "type": "Type",
+        "tags": [],
+        "label": "CategorizedApiKey",
+        "description": [
+          "\nInterface representing an API key the way it is presented in the Kibana UI  (with Kibana system\nAPI keys given its own dedicated `managed` type)."
+        ],
+        "signature": [
+          "(",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.ApiKey",
+            "text": "ApiKey"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.ManagedApiKey",
+            "text": "ManagedApiKey"
+          },
+          ") & { expired: boolean; }"
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.LoginLayout",
+        "type": "Type",
+        "tags": [],
+        "label": "LoginLayout",
+        "description": [
+          "\nRepresents types of login form layouts."
+        ],
+        "signature": [
+          "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\""
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.QueryApiKeyResult",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryApiKeyResult",
+        "description": [
+          "\nResponse of Kibana Query API keys endpoint."
+        ],
+        "signature": [
+          "SuccessQueryApiKeyResult | ErrorQueryApiKeyResult"
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.UserProfileData",
+        "type": "Type",
+        "tags": [],
+        "label": "UserProfileData",
+        "description": [
+          "\nPlaceholder for data stored in user profile."
+        ],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.UserProfileLabels",
+        "type": "Type",
+        "tags": [],
+        "label": "UserProfileLabels",
+        "description": [
+          "\nType of the user profile labels structure (currently"
+        ],
+        "signature": [
+          "{ [x: string]: string; }"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -8,20 +8,20 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
-import {
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  VULN_MGMT_POLICY_TEMPLATE,
-  CNVM_POLICY_TEMPLATE,
-} from '../../../common/constants';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import { VULN_MGMT_POLICY_TEMPLATE, CNVM_POLICY_TEMPLATE } from '../../../common/constants';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
+import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
 import { AwsCredentialsForm } from './aws_credentials_form/aws_credentials_form';
+import { AwsCredentialsFormAgentless } from './aws_credentials_form/aws_credentials_form_agentless';
 import { EksCredentialsForm } from './eks_credentials_form';
-import { GcpCredentialsForm } from './gcp_credential_form';
+import { GcpCredentialsForm } from './gcp_credentials_form/gcp_credential_form';
+import { GcpCredentialsFormAgentless } from './gcp_credentials_form/gcp_credentials_form_agentless';
 
 interface PolicyTemplateSelectorProps {
   selectedTemplate: CloudSecurityPolicyTemplate;
@@ -57,7 +57,11 @@ export const PolicyTemplateSelector = ({
       </EuiText>
       <EuiSpacer size="m" />
       <RadioGroup
-        options={Array.from(policyTemplates, (v) => ({ id: v, label: getPolicyTemplateLabel(v) }))}
+        options={Array.from(policyTemplates, (v) => ({
+          id: v,
+          label: getPolicyTemplateLabel(v),
+          testId: `policy-template-radio-button-${v}`,
+        }))}
         idSelected={selectedTemplate}
         onChange={(id: CloudSecurityPolicyTemplate) => setPolicyTemplate(id)}
         disabled={disabled}
@@ -74,17 +78,37 @@ interface PolicyTemplateVarsFormProps {
   onChange: PackagePolicyReplaceDefineStepExtensionComponentProps['onChange'];
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
+  setupTechnology: SetupTechnology;
+  isEditPage?: boolean;
 }
 
-export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFormProps) => {
+export const PolicyTemplateVarsForm = ({
+  input,
+  setupTechnology,
+  ...props
+}: PolicyTemplateVarsFormProps) => {
+  const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
+
   switch (input.type) {
-    case 'cloudbeat/cis_aws':
-      return <AwsCredentialsForm {...props} input={input} />;
     case 'cloudbeat/cis_eks':
       return <EksCredentialsForm {...props} input={input} />;
+    case 'cloudbeat/cis_aws':
+      if (isAgentless) {
+        return <AwsCredentialsFormAgentless {...props} input={input} />;
+      }
+
+      return <AwsCredentialsForm {...props} input={input} />;
     case 'cloudbeat/cis_gcp':
+      if (isAgentless) {
+        return <GcpCredentialsFormAgentless {...props} input={input} />;
+      }
+
       return <GcpCredentialsForm {...props} input={input} />;
     case 'cloudbeat/cis_azure':
+      if (isAgentless) {
+        return <AzureCredentialsFormAgentless {...props} input={input} />;
+      }
+
       return <AzureCredentialsForm {...props} input={input} />;
     default:
       return null;
@@ -133,8 +157,16 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
         </EuiCallOut>
         <EuiSpacer size="m" />
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.cnvm.configureIntegrationDescription"
-          defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
+          id="xpack.csp.fleetIntegration.cnvm.awsSupportText"
+          defaultMessage="We currently support <b>AWS(Amazon Web Services)</b> cloud provider"
+          values={{
+            b: (chunks) => <b>{chunks}</b>,
+          }}
+        />
+        <EuiSpacer size="s" />
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.cnvm.chooseNameAndDescriptionText"
+          defaultMessage="Choose a name and description to help identify this integration"
         />
       </>
     )}

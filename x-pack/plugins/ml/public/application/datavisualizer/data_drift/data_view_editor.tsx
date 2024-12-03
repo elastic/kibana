@@ -7,7 +7,8 @@
 
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
-import React, { ChangeEvent, ReactNode, useMemo, useState, useEffect } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -79,8 +80,7 @@ export function DataViewEditor({
   const { onTableChange, pagination } = useTableSettings<MatchedItem>(
     matchedReferenceIndices.length,
     pageState,
-    // @ts-expect-error callback will have all the 4 necessary params
-    updatePageState
+    updatePageState as Parameters<typeof useTableSettings>['2']
   );
 
   const pageOfItems = useMemo(() => {

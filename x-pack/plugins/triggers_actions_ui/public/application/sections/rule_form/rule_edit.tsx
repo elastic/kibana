@@ -5,51 +5,55 @@
  * 2.0.
  */
 
-import React, { useReducer, useState, useEffect, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyout,
-  EuiFlyoutFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
   EuiFlyoutBody,
-  EuiPortal,
-  EuiCallOut,
-  EuiSpacer,
-  EuiLoadingSpinner,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiIconTip,
+  EuiLoadingSpinner,
+  EuiPortal,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { cloneDeep, omit } from 'lodash';
+import { RuleNotifyWhen, parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import {
-  Rule,
-  RuleFlyoutCloseReason,
-  RuleEditProps,
-  IErrorObject,
-  RuleType,
-  TriggersActionsUiConfig,
-  RuleNotifyWhenType,
-} from '../../../types';
-import { RuleForm } from './rule_form';
-import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
-import { ruleReducer, ConcreteRuleReducer } from './rule_reducer';
-import { updateRule } from '../../lib/rule_api/update';
-import { loadRuleTypes } from '../../lib/rule_api/rule_types';
-import { HealthCheck } from '../../components/health_check';
-import { HealthContextProvider } from '../../context/health_context';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { fetchUiConfig as triggersActionsUiConfig, updateRule } from '@kbn/response-ops-rule-form';
+import { cloneDeep, omit } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
+import {
+  IErrorObject,
+  Rule,
+  RuleAction,
+  RuleEditProps,
+  RuleFlyoutCloseReason,
+  RuleNotifyWhenType,
+  RuleType,
+  RuleTypeMetaData,
+  RuleTypeParams,
+  RuleUiAction,
+  TriggersActionsUiConfig,
+} from '../../../types';
+import { HealthCheck } from '../../components/health_check';
+import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+import { HealthContextProvider } from '../../context/health_context';
+import { loadRuleTypes } from '../../lib/rule_api/rule_types';
+import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { ConfirmRuleClose } from './confirm_rule_close';
 import { hasRuleChanged } from './has_rule_changed';
-import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { triggersActionsUiConfig } from '../../../common/lib/config_api';
-import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
+import { RuleForm } from './rule_form';
+import { getRuleReducer } from './rule_reducer';
+import { ShowRequestModal } from './show_request_modal';
 
 const defaultUpdateRuleErrorMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleEdit.saveErrorNotificationText',
@@ -57,6 +61,14 @@ const defaultUpdateRuleErrorMessage = i18n.translate(
     defaultMessage: 'Cannot update rule.',
   }
 );
+
+// Separate function for determining if an untyped action has a group property or not, which helps determine if
+// it is a default action or a system action. Consolidated here to deal with type definition complexity
+const actionHasDefinedGroup = (action: RuleUiAction): action is RuleAction => {
+  if (!('group' in action)) return false;
+  // If the group property is present, ensure that it isn't null or undefined
+  return Boolean(action.group);
+};
 
 const cloneAndMigrateRule = (initialRule: Rule) => {
   const clonedRule = cloneDeep(omit(initialRule, 'notifyWhen', 'throttle'));
@@ -73,15 +85,26 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
             initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
-    clonedRule.actions = clonedRule.actions.map((action) => ({
-      ...action,
-      frequency,
-    }));
+
+    clonedRule.actions = clonedRule.actions.map((action: RuleUiAction) => {
+      if (actionHasDefinedGroup(action)) {
+        return {
+          ...action,
+          frequency,
+        };
+      }
+      return action;
+    });
   }
   return clonedRule;
 };
 
-export const RuleEdit = ({
+export type RuleEditComponent = typeof RuleEdit;
+
+export const RuleEdit = <
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+>({
   initialRule,
   onClose,
   reloadRules,
@@ -91,9 +114,10 @@ export const RuleEdit = ({
   actionTypeRegistry,
   metadata: initialMetadata,
   ...props
-}: RuleEditProps) => {
+}: RuleEditProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
-  const [{ rule }, dispatch] = useReducer(ruleReducer as ConcreteRuleReducer, {
+  const ruleReducer = useMemo(() => getRuleReducer<Rule>(actionTypeRegistry), [actionTypeRegistry]);
+  const [{ rule }, dispatch] = useReducer(ruleReducer, {
     rule: cloneAndMigrateRule(initialRule),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -101,6 +125,8 @@ export const RuleEdit = ({
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
   const [isConfirmRuleCloseModalOpen, setIsConfirmRuleCloseModalOpen] = useState<boolean>(false);
+  const [isShowRequestModalOpen, setIsShowRequestModalOpen] = useState<boolean>(false);
+  const [isRuleValid, setIsRuleValid] = useState<boolean>(false);
   const [ruleActionsErrors, setRuleActionsErrors] = useState<IErrorObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
@@ -109,11 +135,14 @@ export const RuleEdit = ({
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
 
   const [metadata, setMetadata] = useState(initialMetadata);
-  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
+  const onChangeMetaData = useCallback((newMetadata: any) => setMetadata(newMetadata), []);
 
   const {
     http,
     notifications: { toasts },
+    i18n: i18nStart,
+    theme,
+    isServerless,
   } = useKibana().services;
 
   const setRule = (value: Rule) => {
@@ -153,7 +182,9 @@ export const RuleEdit = ({
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
     rule as Rule,
     ruleType,
-    config
+    config,
+    actionTypeRegistry,
+    isServerless
   );
 
   const checkForChangesAndCloseFlyout = () => {
@@ -172,10 +203,18 @@ export const RuleEdit = ({
         isValidRule(rule, ruleErrors, ruleActionsErrors) &&
         !hasActionsWithBrokenConnector
       ) {
-        const newRule = await updateRule({ http, rule, id: rule.id });
+        const { flapping, ...restRule } = rule;
+        const newRule = await updateRule({
+          http,
+          rule: {
+            ...restRule,
+            ...(IS_RULE_SPECIFIC_FLAPPING_ENABLED ? { flapping } : {}),
+          },
+          id: rule.id,
+        });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.ruleEdit.saveSuccessNotificationText', {
-            defaultMessage: "Updated '{ruleName}'",
+            defaultMessage: "Updated ''{ruleName}''",
             values: {
               ruleName: newRule.name,
             },
@@ -198,13 +237,18 @@ export const RuleEdit = ({
         title: message.summary,
         ...(message.details && {
           text: toMountPoint(
-            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
+            { i18n: i18nStart, theme }
           ),
         }),
       });
     }
     setIsSaving(false);
   }
+
+  useEffect(() => {
+    setIsRuleValid(isValidRule(rule, ruleErrors, ruleActionsErrors));
+  }, [rule, ruleErrors, ruleActionsErrors]);
 
   return (
     <EuiPortal>
@@ -213,7 +257,7 @@ export const RuleEdit = ({
         aria-labelledby="flyoutRuleEditTitle"
         size="m"
         maxWidth={620}
-        ownFocus={false}
+        ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="editRuleFlyoutTitle">
@@ -233,7 +277,7 @@ export const RuleEdit = ({
                   <EuiCallOut
                     size="s"
                     color="danger"
-                    iconType="rule"
+                    iconType="error"
                     data-test-subj="hasActionsDisabled"
                     title={i18n.translate(
                       'xpack.triggersActionsUI.sections.ruleEdit.disabledActionsWarningTitle',
@@ -285,23 +329,23 @@ export const RuleEdit = ({
                   <></>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center">
-                    {config.isUsingSecurity && (
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          type="warning"
-                          position="top"
-                          data-test-subj="changeInPrivilegesTip"
-                          content={i18n.translate(
-                            'xpack.triggersActionsUI.sections.ruleEdit.changeInPrivilegesLabel',
-                            {
-                              defaultMessage:
-                                'Saving this rule will change its privileges and might change its behavior.',
-                            }
-                          )}
+                  <EuiFlexGroup alignItems="center" gutterSize="m">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        color="primary"
+                        data-test-subj="showEditedRequestButton"
+                        isDisabled={!isRuleValid}
+                        onClick={() => {
+                          setIsShowRequestModalOpen(true);
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.ruleEdit.showRequestButtonLabel"
+                          defaultMessage="Show API request"
                         />
-                      </EuiFlexItem>
-                    )}
+                      </EuiButton>
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         fill
@@ -318,6 +362,22 @@ export const RuleEdit = ({
                         />
                       </EuiButton>
                     </EuiFlexItem>
+                    {config.isUsingSecurity && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="warning"
+                          position="top"
+                          data-test-subj="changeInPrivilegesTip"
+                          content={i18n.translate(
+                            'xpack.triggersActionsUI.sections.ruleEdit.changeInPrivilegesLabel',
+                            {
+                              defaultMessage:
+                                'Saving this rule will change its privileges and might change its behavior.',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -333,6 +393,16 @@ export const RuleEdit = ({
             onCancel={() => {
               setIsConfirmRuleCloseModalOpen(false);
             }}
+          />
+        )}
+        {isShowRequestModalOpen && (
+          <ShowRequestModal
+            onClose={() => {
+              setIsShowRequestModalOpen(false);
+            }}
+            rule={rule}
+            ruleId={rule.id}
+            edit={true}
           />
         )}
       </EuiFlyout>

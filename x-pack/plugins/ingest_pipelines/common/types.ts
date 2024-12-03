@@ -25,18 +25,23 @@ export interface Pipeline {
   _meta?: { [key: string]: any };
   on_failure?: Processor[];
   isManaged?: boolean;
-}
-
-export interface PipelinesByName {
-  [key: string]: {
-    description: string;
-    version?: number;
-    processors: Processor[];
-    on_failure?: Processor[];
-  };
+  deprecated?: boolean;
 }
 
 export enum FieldCopyAction {
   Copy = 'copy',
   Rename = 'rename',
+}
+
+export type DatabaseType = 'maxmind' | 'ipinfo' | 'web' | 'local' | 'unknown';
+
+export interface DatabaseNameOption {
+  value: string;
+  text: string;
+}
+
+export interface GeoipDatabase {
+  name: string;
+  id: string;
+  type: DatabaseType;
 }

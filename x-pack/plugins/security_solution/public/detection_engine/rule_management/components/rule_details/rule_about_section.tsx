@@ -25,14 +25,15 @@ import type {
   Threats,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
+import { requiredOptional } from '@kbn/zod-helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
-import { ThreatEuiFlexGroup } from '../../../../detections/components/rules/description_step/threat_description';
+import { ThreatEuiFlexGroup } from '../../../rule_creation_ui/components/description_step/threat_description';
 
 import { BadgeList } from './badge_list';
-import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
+import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 
 const OverrideColumn = styled(EuiFlexItem)`
@@ -42,10 +43,10 @@ const OverrideColumn = styled(EuiFlexItem)`
   text-overflow: ellipsis;
 `;
 
-const OverrideValueColumn = styled(EuiFlexItem)`
-  width: 30px;
-  max-width: 30px;
+const OverrideValueColumn = styled.div`
+  width: 50px;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 `;
 
@@ -71,11 +72,11 @@ interface AuthorProps {
   author: string[];
 }
 
-const Author = ({ author }: AuthorProps) => (
+export const Author = ({ author }: AuthorProps) => (
   <BadgeList badges={author} data-test-subj="authorPropertyValue" />
 );
 
-const BuildingBlock = () => (
+export const BuildingBlock = () => (
   <EuiText size="s" data-test-subj="buildingBlockPropertyValue">
     {i18n.BUILDING_BLOCK_FIELD_DESCRIPTION}
   </EuiText>
@@ -85,7 +86,7 @@ interface SeverityMappingItemProps {
   severityMappingItem: SeverityMappingItemType;
 }
 
-const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) => (
+export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
     <OverrideColumn>
       <EuiToolTip
@@ -95,16 +96,18 @@ const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) 
         <span data-test-subj="severityOverrideField">{`${severityMappingItem.field}:`}</span>
       </EuiToolTip>
     </OverrideColumn>
-    <OverrideValueColumn>
+    <EuiFlexItem grow={false}>
       <EuiToolTip
         content={severityMappingItem.value}
         data-test-subj={`severityOverrideValue-${severityMappingItem.value}`}
       >
-        <span data-test-subj="severityOverrideValue">
-          {defaultToEmptyTag(severityMappingItem.value)}
-        </span>
+        <OverrideValueColumn>
+          <span data-test-subj="severityOverrideValue">
+            {defaultToEmptyTag(severityMappingItem.value)}
+          </span>
+        </OverrideValueColumn>
       </EuiToolTip>
-    </OverrideValueColumn>
+    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiIcon type={'sortRight'} />
     </EuiFlexItem>
@@ -121,7 +124,7 @@ interface RiskScoreProps {
   riskScore: number;
 }
 
-const RiskScore = ({ riskScore }: RiskScoreProps) => (
+export const RiskScore = ({ riskScore }: RiskScoreProps) => (
   <EuiText size="s" data-test-subj="riskScorePropertyValue">
     {riskScore}
   </EuiText>
@@ -131,7 +134,7 @@ interface RiskScoreMappingItemProps {
   riskScoreMappingItem: RiskScoreMappingItemType;
 }
 
-const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingItemProps) => (
+export const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingItemProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
     <OverrideColumn>
       <EuiToolTip
@@ -154,7 +157,7 @@ interface ReferencesProps {
   references: string[];
 }
 
-const References = ({ references }: ReferencesProps) => (
+export const References = ({ references }: ReferencesProps) => (
   <EuiText size="s">
     <ul>
       {references
@@ -170,7 +173,7 @@ const References = ({ references }: ReferencesProps) => (
   </EuiText>
 );
 
-const FalsePositives = ({ falsePositives }: { falsePositives: string[] }) => (
+export const FalsePositives = ({ falsePositives }: { falsePositives: string[] }) => (
   <EuiText size="s">
     <ul>
       {falsePositives.map((falsePositivesItem) => (
@@ -189,7 +192,7 @@ interface InvestigationFieldsProps {
   investigationFields: string[];
 }
 
-const InvestigationFields = ({ investigationFields }: InvestigationFieldsProps) => (
+export const InvestigationFields = ({ investigationFields }: InvestigationFieldsProps) => (
   <BadgeList badges={investigationFields} data-test-subj="investigationFieldsPropertyValue" />
 );
 
@@ -197,7 +200,7 @@ interface LicenseProps {
   license: string;
 }
 
-const License = ({ license }: LicenseProps) => (
+export const License = ({ license }: LicenseProps) => (
   <EuiText size="s" data-test-subj="licensePropertyValue">
     {license}
   </EuiText>
@@ -207,7 +210,7 @@ interface RuleNameOverrideProps {
   ruleNameOverride: string;
 }
 
-const RuleNameOverride = ({ ruleNameOverride }: RuleNameOverrideProps) => (
+export const RuleNameOverride = ({ ruleNameOverride }: RuleNameOverrideProps) => (
   <EuiText size="s" data-test-subj="ruleNameOverridePropertyValue">
     {ruleNameOverride}
   </EuiText>
@@ -217,7 +220,7 @@ interface ThreatProps {
   threat: Threats;
 }
 
-const Threat = ({ threat }: ThreatProps) => (
+export const Threat = ({ threat }: ThreatProps) => (
   <ThreatEuiFlexGroup threat={filterEmptyThreats(threat)} data-test-subj="threatPropertyValue" />
 );
 
@@ -225,7 +228,7 @@ interface ThreatIndicatorPathProps {
   threatIndicatorPath: string;
 }
 
-const ThreatIndicatorPath = ({ threatIndicatorPath }: ThreatIndicatorPathProps) => (
+export const ThreatIndicatorPath = ({ threatIndicatorPath }: ThreatIndicatorPathProps) => (
   <EuiText size="s">{threatIndicatorPath}</EuiText>
 );
 
@@ -233,9 +236,19 @@ interface TimestampOverrideProps {
   timestampOverride: string;
 }
 
-const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
+export const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
   <EuiText size="s" data-test-subj="timestampOverridePropertyValue">
     {timestampOverride}
+  </EuiText>
+);
+
+interface MaxSignalsProps {
+  maxSignals: number;
+}
+
+export const MaxSignals = ({ maxSignals }: MaxSignalsProps) => (
+  <EuiText size="s" data-test-subj="maxSignalsPropertyValue">
+    {maxSignals}
   </EuiText>
 );
 
@@ -243,7 +256,7 @@ interface TagsProps {
   tags: string[];
 }
 
-const Tags = ({ tags }: TagsProps) => (
+export const Tags = ({ tags }: TagsProps) => (
   <BadgeList badges={tags} data-test-subj="tagsPropertyValue" />
 );
 
@@ -333,7 +346,9 @@ const prepareAboutSectionListItems = (
               ) : (
                 ''
               ),
-            description: <RiskScoreMappingItem riskScoreMappingItem={riskScoreMappingItem} />,
+            description: (
+              <RiskScoreMappingItem riskScoreMappingItem={requiredOptional(riskScoreMappingItem)} />
+            ),
           };
         })
     );
@@ -411,6 +426,13 @@ const prepareAboutSectionListItems = (
     });
   }
 
+  if (rule.max_signals) {
+    aboutSectionListItems.push({
+      title: <span data-test-subj="maxSignalsPropertyTitle">{i18n.MAX_SIGNALS_FIELD_LABEL}</span>,
+      description: <MaxSignals maxSignals={rule.max_signals} />,
+    });
+  }
+
   if (rule.tags && rule.tags.length > 0) {
     aboutSectionListItems.push({
       title: <span data-test-subj="tagsPropertyTitle">{i18n.TAGS_FIELD_LABEL}</span>,
@@ -423,12 +445,14 @@ const prepareAboutSectionListItems = (
 
 export interface RuleAboutSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
+  columnWidths?: EuiDescriptionListProps['columnWidths'];
   hideName?: boolean;
   hideDescription?: boolean;
 }
 
 export const RuleAboutSection = ({
   rule,
+  columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   hideName,
   hideDescription,
   ...descriptionListProps
@@ -442,7 +466,7 @@ export const RuleAboutSection = ({
         type={descriptionListProps.type ?? 'column'}
         rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={aboutSectionListItems}
-        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+        columnWidths={columnWidths}
         data-test-subj="listItemColumnStepRuleDescription"
         {...descriptionListProps}
       />

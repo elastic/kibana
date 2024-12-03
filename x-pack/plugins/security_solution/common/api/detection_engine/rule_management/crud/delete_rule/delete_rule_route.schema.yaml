@@ -1,13 +1,15 @@
 openapi: 3.0.0
 info:
   title: Delete Rule API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/rules:
     delete:
-      operationId: DeleteRule
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      description: Deletes a single rule using the `rule_id` or `id` field.
+      operationId: DeleteRule
+      summary: Delete a detection rule
+      description: Delete a detection rule using the `rule_id` or `id` field.
       tags:
         - Rules API
       parameters:

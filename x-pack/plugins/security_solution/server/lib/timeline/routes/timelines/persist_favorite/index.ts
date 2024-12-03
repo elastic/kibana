@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_FAVORITE_URL } from '../../../../../../common/constants';
-
-import type { SetupPlugins } from '../../../../../plugin';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../../..';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { persistFavorite } from '../../../saved_object/timelines';
-import { TimelineType, persistFavoriteSchema } from '../../../../../../common/api/timeline';
+import {
+  type PersistFavoriteRouteResponse,
+  PersistFavoriteRouteRequestBody,
+  TimelineTypeEnum,
+} from '../../../../../../common/api/timeline';
 
-export const persistFavoriteRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: TIMELINE_FAVORITE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -37,32 +37,39 @@ export const persistFavoriteRoute = (
       {
         version: '2023-10-31',
         validate: {
-          request: { body: buildRouteValidationWithExcess(persistFavoriteSchema) },
+          request: { body: buildRouteValidationWithZod(PersistFavoriteRouteRequestBody) },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PersistFavoriteRouteResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { timelineId, templateTimelineId, templateTimelineVersion, timelineType } =
             request.body;
 
-          const timeline = await persistFavorite(
+          const persistFavoriteResponse = await persistFavorite(
             frameworkRequest,
             timelineId || null,
             templateTimelineId || null,
             templateTimelineVersion || null,
-            timelineType || TimelineType.default
+            timelineType || TimelineTypeEnum.default
           );
 
-          return response.ok({
-            body: {
-              data: {
-                persistFavorite: timeline,
-              },
-            },
-          });
+          if (persistFavoriteResponse.code !== 200) {
+            return siemResponse.error({
+              body: persistFavoriteResponse.message,
+              statusCode: persistFavoriteResponse.code,
+            });
+          } else {
+            return response.ok({
+              body: persistFavoriteResponse.favoriteTimeline,
+            });
+          }
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

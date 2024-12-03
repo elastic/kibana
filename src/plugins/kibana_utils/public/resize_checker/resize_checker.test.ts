@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ResizeChecker } from './resize_checker';
@@ -11,8 +12,8 @@ import { EventEmitter } from 'events';
 
 // If you want to know why these mocks are created,
 // please check: https://github.com/elastic/kibana/pull/44750
-jest.mock('@juggle/resize-observer');
-import { ResizeObserver } from '@juggle/resize-observer';
+jest.mock('resize-observer-polyfill');
+import ResizeObserver from 'resize-observer-polyfill';
 
 class MockElement {
   public clientWidth: number;

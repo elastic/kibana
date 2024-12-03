@@ -10,55 +10,32 @@ import { useRef, useCallback, useMemo } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import { isRunningResponse } from '@kbn/data-plugin/public';
-import { useStorage } from '@kbn/ml-local-storage';
 
-import { createCategoryRequest } from '../../../common/api/log_categorization/create_category_request';
-import { processCategoryResults } from '../../../common/api/log_categorization/process_category_results';
-import type {
-  Category,
-  CatResponse,
-  SparkLinesPerCategory,
-} from '../../../common/api/log_categorization/types';
-
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
-  type AiOpsKey,
-  type AiOpsStorageMapped,
-  AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE,
-  AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE,
-} from '../../types/storage';
+  type CategorizationAdditionalFilter,
+  createCategoryRequest,
+} from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_category_results';
+import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+
+import type { RandomSamplerStorage } from './sampling_menu';
 import { RandomSampler } from './sampling_menu';
-import { RANDOM_SAMPLER_OPTION, DEFAULT_PROBABILITY } from './sampling_menu/random_sampler';
 
 export type EventRate = Array<{
   key: number;
   docCount: number;
 }>;
 
-export function useCategorizeRequest() {
-  const [randomSamplerMode, setRandomSamplerMode] = useStorage<
-    AiOpsKey,
-    AiOpsStorageMapped<typeof AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE>
-  >(AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
-
-  const [randomSamplerProbability, setRandomSamplerProbability] = useStorage<
-    AiOpsKey,
-    AiOpsStorageMapped<typeof AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE>
-  >(AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE, DEFAULT_PROBABILITY);
-
+export function useCategorizeRequest(randomSamplerStorage: RandomSamplerStorage) {
   const { data } = useAiopsAppContext();
 
   const abortController = useRef(new AbortController());
 
   const randomSampler = useMemo(
-    () =>
-      new RandomSampler(
-        randomSamplerMode,
-        setRandomSamplerMode,
-        randomSamplerProbability,
-        setRandomSamplerProbability
-      ),
+    () => new RandomSampler(randomSamplerStorage),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -68,17 +45,30 @@ export function useCategorizeRequest() {
       index: string,
       field: string,
       timeField: string,
-      from: number | undefined,
-      to: number | undefined,
+      timeRange: { from: number; to: number },
       query: QueryDslQueryContainer,
-      intervalMs?: number
-    ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
+      runtimeMappings: MappingRuntimeFields | undefined,
+      intervalMs?: number,
+      additionalFilter?: CategorizationAdditionalFilter
+    ): Promise<ReturnType<typeof processCategoryResults>> => {
       const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
 
       return new Promise((resolve, reject) => {
         data.search
           .search<ReturnType<typeof createCategoryRequest>, CatResponse>(
-            createCategoryRequest(index, field, timeField, from, to, query, wrap, intervalMs),
+            createCategoryRequest(
+              index,
+              field,
+              timeField,
+              timeRange,
+              query,
+              runtimeMappings,
+              wrap,
+              intervalMs,
+              additionalFilter,
+              true,
+              additionalFilter === undefined // don't include the outer sparkline if there is an additional filter
+            ),
             { abortSignal: abortController.current.signal }
           )
           .subscribe({
@@ -93,7 +83,7 @@ export function useCategorizeRequest() {
             },
             error: (error) => {
               if (error.name === 'AbortError') {
-                return resolve({ categories: [], sparkLinesPerCategory: {} });
+                return resolve({ categories: [], hasExamples: false });
               }
               reject(error);
             },

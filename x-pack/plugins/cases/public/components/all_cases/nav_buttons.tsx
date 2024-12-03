@@ -7,24 +7,14 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { ConfigureCaseButton, LinkButton } from '../links';
 import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
-
-const ButtonFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    & {
-      @media only screen and (max-width: ${theme.eui.euiBreakpoints.s}) {
-        flex-direction: column;
-      }
-    }
-  `}
-`;
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];
@@ -35,22 +25,32 @@ type Props = OwnProps;
 export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
+  const { euiTheme } = useEuiTheme();
   const navigateToCreateCaseClick = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       navigateToCreateCase();
     },
     [navigateToCreateCase]
   );
 
-  if (!permissions.create && !permissions.update) {
+  if (!permissions.create && !permissions.settings) {
     return null;
   }
 
   return (
     <EuiFlexItem>
-      <ButtonFlexGroup responsive={false}>
-        {permissions.update && (
+      <EuiFlexGroup
+        responsive={false}
+        css={css`
+          & {
+            @media only screen and (max-width: ${euiTheme.breakpoint.s}) {
+              flex-direction: column;
+            }
+          }
+        `}
+      >
+        {permissions.settings && (
           <EuiFlexItem grow={false}>
             <ConfigureCaseButton
               label={i18n.CONFIGURE_CASES_BUTTON}
@@ -73,7 +73,7 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
             </LinkButton>
           </EuiFlexItem>
         )}
-      </ButtonFlexGroup>
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
 };

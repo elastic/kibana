@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  ReadEndpointListItemRequestQuery,
+  ReadEndpointListItemResponse,
+} from '@kbn/securitysolution-endpoint-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import {
-  ReadEndpointListItemRequestQueryDecoded,
-  readEndpointListItemRequestQuery,
-  readEndpointListItemResponse,
-} from '../../common/api';
 
 import {
-  buildRouteValidation,
   buildSiemResponse,
   getErrorMessageExceptionListItem,
   getExceptionListClient,
@@ -27,19 +25,18 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
-      },
       path: ENDPOINT_LIST_ITEM_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
+      },
     })
     .addVersion(
       {
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof readEndpointListItemRequestQuery,
-              ReadEndpointListItemRequestQueryDecoded
-            >(readEndpointListItemRequestQuery),
+            query: buildRouteValidationWithZod(ReadEndpointListItemRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -60,12 +57,7 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
                 statusCode: 404,
               });
             } else {
-              const [validated, errors] = validate(exceptionListItem, readEndpointListItemResponse);
-              if (errors != null) {
-                return siemResponse.error({ body: errors, statusCode: 500 });
-              } else {
-                return response.ok({ body: validated ?? {} });
-              }
+              return response.ok({ body: ReadEndpointListItemResponse.parse(exceptionListItem) });
             }
           } else {
             return siemResponse.error({ body: 'id or item_id required', statusCode: 400 });

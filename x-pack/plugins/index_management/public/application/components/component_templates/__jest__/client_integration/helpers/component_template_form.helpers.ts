@@ -183,9 +183,11 @@ export type ComponentTemplateFormTestSubjects =
   | 'stepReview.summaryTab'
   | 'stepReview.requestTab'
   | 'valueDataRetentionField'
+  | 'deprecatedTemplateCallout'
   | 'dataRetentionToggle.input'
   | 'versionField'
   | 'aliasesEditor'
   | 'mappingsEditor'
   | 'settingsEditor'
+  | 'affectedMappingsList'
   | 'versionField.input';

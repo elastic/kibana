@@ -5,34 +5,23 @@
  * 2.0.
  */
 import type { Criteria } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { BoolQuery, Filter, Query, EsQueryConfig } from '@kbn/es-query';
-import { CspFinding } from '../../common/schemas/csp_finding';
-
-export type FindingsGroupByKind = 'default' | 'resource';
+import type { Filter, Query, EsQueryConfig } from '@kbn/es-query';
 
 export interface FindingsBaseURLQuery {
   query: Query;
   filters: Filter[];
-}
-
-export interface FindingsBaseProps {
-  dataView: DataView;
+  /**
+   * Filters that are part of the query but not persisted in the URL or in the Filter Manager
+   */
+  nonPersistedFilters?: Filter[];
+  /**
+   * Grouping component selection
+   */
+  groupBy?: string[];
 }
 
 export interface FindingsBaseESQueryConfig {
   config: EsQueryConfig;
-}
-
-export interface FindingsBaseEsQuery {
-  query?: {
-    bool: BoolQuery;
-  };
-}
-
-export interface CspFindingsQueryData {
-  page: CspFinding[];
-  total: number;
 }
 
 export type Sort<T> = NonNullable<Criteria<T>['sort']>;

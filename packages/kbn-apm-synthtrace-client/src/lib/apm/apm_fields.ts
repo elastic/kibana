@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Fields } from '../entity';
@@ -50,6 +51,35 @@ export interface GeoLocation {
   type: string;
 }
 
+export interface APMStacktrace {
+  abs_path?: string;
+  classname?: string;
+  context?: {
+    post?: string[];
+    pre?: string[];
+  };
+  exclude_from_grouping?: boolean;
+  filename?: string;
+  function?: string;
+  module?: string;
+  library_frame?: boolean;
+  line?:
+    | {
+        column?: number;
+        number: number;
+      }
+    | {
+        context?: string;
+      };
+  sourcemap?: {
+    error?: string;
+    updated?: boolean;
+  };
+  vars?: {
+    [key: string]: unknown;
+  };
+}
+
 type ExperimentalFields = Partial<{
   'metricset.interval': string;
   'transaction.duration.summary': string;
@@ -80,6 +110,8 @@ export type ApmFields = Fields<{
     'cloud.provider': string;
     'cloud.region': string;
     'cloud.service.name': string;
+    // otel
+    'code.stacktrace': string;
     'container.id': string;
     'destination.address': string;
     'destination.port': number;
@@ -93,6 +125,7 @@ export type ApmFields = Fields<{
     'error.grouping_name': string;
     'error.id': string;
     'error.type': string;
+    'error.culprit': string;
     'event.ingested': number;
     'event.name': string;
     'event.action': string;
@@ -169,6 +202,7 @@ export type ApmFields = Fields<{
     'span.duration.us': number;
     'span.id': string;
     'span.name': string;
+    'span.stacktrace': APMStacktrace[];
     'span.self_time.count': number;
     'span.self_time.sum.us': number;
     'span.subtype': string;
@@ -178,6 +212,7 @@ export type ApmFields = Fields<{
       span: { id: string };
     }>;
     'url.original': string;
+    'url.domain': string;
   }> &
   ApmApplicationMetricFields &
   ExperimentalFields;

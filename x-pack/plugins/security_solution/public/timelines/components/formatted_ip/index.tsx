@@ -6,14 +6,13 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
+import type { ComponentProps } from 'react';
 import React, { useCallback, useMemo, useContext } from 'react';
-import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import type { ExpandedDetailType } from '../../../../common/types';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { getScopedActions } from '../../../helpers';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
@@ -26,9 +25,8 @@ import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
 import type { DataProvider } from '../timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { activeTimeline } from '../../containers/active_timeline_context';
 import { NetworkDetailsLink } from '../../../common/components/links';
+import { NetworkPanelKey } from '../../../flyout/network_details';
 
 const getUniqueId = ({
   contextId,
@@ -117,8 +115,8 @@ const NonDecoratedIpComponent: React.FC<{
     [value]
   );
 
-  const render = useCallback(
-    (dataProvider, _, snapshot) =>
+  const render: ComponentProps<typeof DraggableWrapper>['render'] = useCallback(
+    (dataProvider: DataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />
@@ -166,6 +164,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   truncate,
   title,
 }) => {
+  const { openFlyout } = useExpandableFlyoutApi();
+
   const key = `address-links-draggable-wrapper-${getUniqueId({
     contextId,
     eventId,
@@ -178,46 +178,32 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     [address, contextId, eventId, fieldName]
   );
 
-  const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
   const isInTimelineContext =
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       if (onClick) {
         onClick();
       }
 
       if (eventContext && isInTimelineContext) {
-        const { tabType, timelineID } = eventContext;
-        const updatedExpandedDetail: ExpandedDetailType = {
-          panelView: 'networkDetail',
-          params: {
-            ip: address,
-            flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
-              ? FlowTargetSourceDest.destination
-              : FlowTargetSourceDest.source,
+        openFlyout({
+          right: {
+            id: NetworkPanelKey,
+            params: {
+              ip: address,
+              flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
+                ? FlowTargetSourceDest.destination
+                : FlowTargetSourceDest.source,
+            },
           },
-        };
-        const scopedActions = getScopedActions(timelineID);
-        if (scopedActions) {
-          dispatch(
-            scopedActions.toggleDetailPanel({
-              ...updatedExpandedDetail,
-              id: timelineID,
-              tabType: tabType as TimelineTabs,
-            })
-          );
-        }
-
-        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-        }
+        });
       }
     },
-    [onClick, eventContext, isInTimelineContext, address, fieldName, dispatch]
+    [onClick, eventContext, isInTimelineContext, address, fieldName, openFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -254,7 +240,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     ]
   );
 
-  const render = useCallback(
+  const render: ComponentProps<typeof DraggableWrapper>['render'] = useCallback(
     (_props, _provided, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>

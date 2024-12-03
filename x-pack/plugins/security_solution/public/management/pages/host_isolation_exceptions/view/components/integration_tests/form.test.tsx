@@ -64,7 +64,9 @@ describe('When on the host isolation exceptions entry form', () => {
         ).resolves.toHaveLength(10);
       });
 
-      userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListPage-pageAddButton'));
+      await userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptionsListPage-pageAddButton')
+      );
 
       await waitFor(() => {
         expect(renderResult.getByTestId('hostIsolationExceptions-form')).toBeTruthy();
@@ -97,8 +99,10 @@ describe('When on the host isolation exceptions entry form', () => {
     it('should keep submit button disabled if only the name is entered', async () => {
       const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
 
-      userEvent.type(nameInput, 'test name');
-      userEvent.click(renderResult.getByTestId('hostIsolationExceptions-form-description-input'));
+      await userEvent.type(nameInput, 'test name');
+      await userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptions-form-description-input')
+      );
 
       await waitFor(() => {
         expect(submitButtonDisabledState()).toBe(true);
@@ -110,8 +114,10 @@ describe('When on the host isolation exceptions entry form', () => {
       async (value: string) => {
         const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
 
-        userEvent.type(ipInput, value);
-        userEvent.click(renderResult.getByTestId('hostIsolationExceptions-form-description-input'));
+        await userEvent.type(ipInput, value);
+        await userEvent.click(
+          renderResult.getByTestId('hostIsolationExceptions-form-description-input')
+        );
 
         await waitFor(() => {
           expect(formRowHasError('hostIsolationExceptions-form-ip-input-formRow')).toBe(true);
@@ -126,8 +132,8 @@ describe('When on the host isolation exceptions entry form', () => {
         const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
         const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
 
-        userEvent.type(nameInput, 'test name');
-        userEvent.type(ipInput, value);
+        await userEvent.type(nameInput, 'test name');
+        await userEvent.type(ipInput, value);
 
         expect(formRowHasError('hostIsolationExceptions-form-ip-input-formRow')).toBe(false);
 
@@ -146,7 +152,9 @@ describe('When on the host isolation exceptions entry form', () => {
     });
 
     it('should show policy as selected when user clicks on it', async () => {
-      userEvent.click(renderResult.getByTestId('perPolicy'));
+      await userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
+      );
       await clickOnEffectedPolicy(renderResult, testIdPrefix);
 
       await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
@@ -154,20 +162,26 @@ describe('When on the host isolation exceptions entry form', () => {
 
     it('should retain the previous policy selection when switching from per-policy to global', async () => {
       // move to per-policy and select the first
-      userEvent.click(renderResult.getByTestId('perPolicy'));
+      await userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
+      );
       await clickOnEffectedPolicy(renderResult, testIdPrefix);
 
       await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
 
       // move back to global
-      userEvent.click(renderResult.getByTestId('globalPolicy'));
+      await userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-global')
+      );
 
       expect(
         renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
       ).toBeFalsy();
 
       // move back to per-policy
-      userEvent.click(renderResult.getByTestId('perPolicy'));
+      await userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
+      );
       await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
     });
   });
@@ -229,8 +243,8 @@ describe('When on the host isolation exceptions entry form', () => {
     it('should update field with new value', async () => {
       await render();
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
-      userEvent.clear(ipInput);
-      userEvent.type(ipInput, '10.0.100.1');
+      await userEvent.clear(ipInput);
+      await userEvent.type(ipInput, '10.0.100.1');
 
       expect(
         (renderResult.getByTestId('hostIsolationExceptions-form-ip-input') as HTMLInputElement)

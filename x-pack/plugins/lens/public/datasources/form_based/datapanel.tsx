@@ -12,8 +12,9 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
+import { Query } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type DataView } from '@kbn/data-plugin/common';
+import { type DataView, DataViewField, FieldSpec } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -28,6 +29,9 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import useLatest from 'react-use/lib/useLatest';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
+import { buildIndexPatternField } from '../../data_views_service/loader';
 import type {
   DatasourceDataPanelProps,
   FramePublicAPI,
@@ -38,8 +42,8 @@ import type { FormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from '../common/field_item';
 
-export type Props = Omit<
-  DatasourceDataPanelProps<FormBasedPrivateState>,
+export type FormBasedDataPanelProps = Omit<
+  DatasourceDataPanelProps<FormBasedPrivateState, Query>,
   'core' | 'onChangeIndexPattern'
 > & {
   data: DataPublicPluginStart;
@@ -94,7 +98,7 @@ export function FormBasedDataPanel({
   onIndexPatternRefresh,
   usedIndexPatterns,
   layerFields,
-}: Props) {
+}: FormBasedDataPanelProps) {
   const { indexPatterns, indexPatternRefs } = frame.dataViews;
   const { currentIndexPatternId } = state;
 
@@ -182,7 +186,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   showNoDataPopover,
   activeIndexPatterns,
 }: Omit<
-  DatasourceDataPanelProps,
+  DatasourceDataPanelProps<unknown, Query>,
   'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
 > & {
   data: DataPublicPluginStart;
@@ -238,7 +242,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [layerFields]
   );
 
-  const onOverrideFieldGroupDetails = useCallback((groupName) => {
+  const onOverrideFieldGroupDetails = useCallback((groupName: string) => {
     if (groupName === FieldsGroupNames.AvailableFields) {
       return {
         helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
@@ -249,18 +253,20 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     }
   }, []);
 
-  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<IndexPatternField>({
-    dataViewId: currentIndexPatternId,
-    allFields,
-    services: {
-      dataViews,
-      core,
-    },
-    isAffectedByGlobalFilter: Boolean(filters.length),
-    onSupportedFieldFilter,
-    onSelectedFieldFilter,
-    onOverrideFieldGroupDetails,
-  });
+  const { fieldListFiltersProps, fieldListGroupedProps, hasNewFields } =
+    useGroupedFields<IndexPatternField>({
+      dataViewId: currentIndexPatternId,
+      allFields,
+      services: {
+        dataViews,
+        core,
+      },
+      isAffectedByGlobalFilter: Boolean(filters.length),
+      onSupportedFieldFilter,
+      onSelectedFieldFilter,
+      onOverrideFieldGroupDetails,
+      getNewFieldsBySpec,
+    });
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -273,7 +279,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     };
   }, []);
 
-  const refreshFieldList = useCallback(async () => {
+  const refreshFieldList = useLatest(async () => {
     if (currentIndexPattern) {
       const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
         patterns: [currentIndexPattern.id],
@@ -289,27 +295,27 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     }
     // start a new session so all charts are refreshed
     data.search.session.start();
-  }, [
-    indexPatternService,
-    currentIndexPattern,
-    onIndexPatternRefresh,
-    frame.dataViews.indexPatterns,
-    data.search.session,
-  ]);
+  });
+
+  useEffect(() => {
+    if (hasNewFields) {
+      refreshFieldList.current();
+    }
+  }, [hasNewFields, refreshFieldList]);
 
   const editField = useMemo(
     () =>
       editPermission
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
-            closeFieldEditor.current = indexPatternFieldEditor.openEditor({
+            closeFieldEditor.current = await indexPatternFieldEditor.openEditor({
               ctx: {
                 dataView: indexPatternInstance,
               },
               fieldName,
               onSave: () => {
                 if (indexPatternInstance.isPersisted()) {
-                  refreshFieldList();
+                  refreshFieldList.current();
                   refetchFieldsExistenceInfo(indexPatternInstance.id);
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
@@ -334,14 +340,14 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       editPermission
         ? async (fieldName: string) => {
             const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
-            closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
+            closeFieldEditor.current = await indexPatternFieldEditor.openDeleteModal({
               ctx: {
                 dataView: indexPatternInstance,
               },
               fieldName,
               onDelete: () => {
                 if (indexPatternInstance.isPersisted()) {
-                  refreshFieldList();
+                  refreshFieldList.current();
                   refetchFieldsExistenceInfo(indexPatternInstance.id);
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
@@ -407,5 +413,17 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     </FieldList>
   );
 };
+
+function getNewFieldsBySpec(spec: FieldSpec[], dataView: DataView | null) {
+  const metaKeys = dataView ? new Set(dataView.metaFields) : undefined;
+
+  return spec.reduce((result: IndexPatternField[], fieldSpec: FieldSpec) => {
+    const field = new DataViewField(fieldSpec);
+    if (isFieldLensCompatible(field)) {
+      result.push(buildIndexPatternField(field, metaKeys));
+    }
+    return result;
+  }, []);
+}
 
 export const MemoizedDataPanel = memo(InnerFormBasedDataPanel);

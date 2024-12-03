@@ -11,6 +11,12 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 
+import type {
+  SetAlertsStatusByIds,
+  SetAlertsStatusByQuery,
+  SetAlertsStatusRequestBodyInput,
+  SearchAlertsRequestBody,
+} from '../../../../../common/api/detection_engine/signals';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -27,52 +33,52 @@ import {
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
 import {
+  BOOTSTRAP_PREBUILT_RULES_URL,
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  getPerformBulkActionSchemaMock,
+  getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import type {
-  QuerySignalsSchemaDecoded,
-  SetSignalsStatusSchemaDecoded,
-} from '../../../../../common/api/detection_engine/signals';
+
 import {
   getFinalizeSignalsMigrationSchemaMock,
   getSignalsMigrationStatusSchemaMock,
 } from '../../../../../common/api/detection_engine/signals_migration/mocks';
 
 // eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleNotificationAlertType } from '../../rule_actions_legacy';
+import type { LegacyRuleNotificationRuleType } from '../../rule_actions_legacy';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 
 import { requestMock } from './request';
 import type { HapiReadableStream } from '../../../../types';
 
-export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
+export const typicalSetStatusSignalByIdsPayload = (): SetAlertsStatusByIds => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
+export const typicalSetStatusSignalByQueryPayload = (): SetAlertsStatusByQuery => ({
   query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
+  conflicts: 'abort',
 });
 
-export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
+export const typicalSignalsQuery = (): SearchAlertsRequestBody => ({
   aggs: {},
   query: { match_all: {} },
 });
 
-export const typicalSignalsQueryAggs = (): QuerySignalsSchemaDecoded => ({
+export const typicalSignalsQueryAggs = (): SearchAlertsRequestBody => ({
   aggs: { statuses: { terms: { field: ALERT_WORKFLOW_STATUS, size: 10 } } },
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
+// @ts-expect-error data with missing required fields
+export const setStatusSignalMissingIdsAndQueryPayload = (): SetAlertsStatusRequestBodyInput => ({
   status: 'closed',
 });
 
@@ -131,11 +137,11 @@ export const getPatchBulkRequest = () =>
     body: [getCreateRulesSchemaMock()],
   });
 
-export const getBulkActionRequest = () =>
+export const getBulkDisableRuleActionRequest = () =>
   requestMock.create({
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
-    body: getPerformBulkActionSchemaMock(),
+    body: getBulkDisableRuleActionSchemaMock(),
   });
 
 export const getBulkActionEditRequest = () =>
@@ -196,6 +202,12 @@ export const getRuleManagementFiltersRequest = () =>
   requestMock.create({
     method: 'get',
     path: RULE_MANAGEMENT_FILTERS_URL,
+  });
+
+export const getBootstrapRulesRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: BOOTSTRAP_PREBUILT_RULES_URL,
   });
 
 export interface FindHit<T = RuleAlertType> {
@@ -352,7 +364,10 @@ export const nonRuleAlert = () => ({
   alertTypeId: 'something',
 });
 
-export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> => ({
+export const getRuleMock = <T extends RuleParams>(
+  params: T,
+  rewrites?: Partial<SanitizedRule<T>>
+): SanitizedRule<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [],
@@ -377,6 +392,7 @@ export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> =
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
   revision: 0,
+  ...rewrites,
 });
 
 export const resolveRuleMock = <T extends RuleParams>(params: T): ResolvedSanitizedRule<T> => ({
@@ -389,38 +405,23 @@ export const getMockPrivilegesResult = () => ({
   has_all_requested: false,
   cluster: {
     monitor_ml: true,
-    manage_ccr: false,
     manage_index_templates: true,
-    monitor_watcher: true,
     monitor_transform: true,
-    read_ilm: true,
     manage_api_key: false,
     manage_security: false,
     manage_own_api_key: false,
-    manage_saml: false,
     all: false,
-    manage_ilm: true,
-    manage_ingest_pipelines: true,
-    read_ccr: false,
-    manage_rollup: true,
     monitor: true,
-    manage_watcher: true,
     manage: true,
     manage_transform: true,
-    manage_token: false,
     manage_ml: true,
     manage_pipeline: true,
-    monitor_rollup: true,
-    transport_client: true,
-    create_snapshot: true,
   },
   index: {
     '.siem-signals-test-space': {
       all: false,
-      manage_ilm: true,
       read: false,
       create_index: true,
-      read_cross_cluster: false,
       index: false,
       monitor: true,
       delete: false,
@@ -429,8 +430,6 @@ export const getMockPrivilegesResult = () => ({
       create_doc: false,
       view_index_metadata: true,
       create: false,
-      manage_follow_index: true,
-      manage_leader_index: true,
       write: false,
     },
   },
@@ -506,6 +505,11 @@ export const getSignalsMigrationStatusRequest = () =>
     query: getSignalsMigrationStatusSchemaMock(),
   });
 
+export const getMockUserProfiles = () => [
+  { uid: 'default-test-assignee-id-1', enabled: true, user: { username: 'user1' }, data: {} },
+  { uid: 'default-test-assignee-id-2', enabled: true, user: { username: 'user2' }, data: {} },
+];
+
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
@@ -515,7 +519,7 @@ export const legacyGetNotificationResult = ({
 }: {
   id?: string;
   ruleId?: string;
-} = {}): LegacyRuleNotificationAlertType => ({
+} = {}): LegacyRuleNotificationRuleType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],
@@ -562,7 +566,7 @@ export const legacyGetNotificationResult = ({
  */
 export const legacyGetFindNotificationsResultWithSingleHit = (
   ruleId = '123'
-): FindHit<LegacyRuleNotificationAlertType> => ({
+): FindHit<LegacyRuleNotificationRuleType> => ({
   page: 1,
   perPage: 1,
   total: 1,

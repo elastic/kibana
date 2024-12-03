@@ -382,7 +382,7 @@
                 "section": "def-common.EventAnnotationGroupConfig",
                 "text": "EventAnnotationGroupConfig"
               },
-              ", \"ignoreGlobalFilters\" | \"annotations\" | \"indexPatternId\">[]; }) => ",
+              ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]; }) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -434,7 +434,7 @@
                         "section": "def-common.EventAnnotationGroupConfig",
                         "text": "EventAnnotationGroupConfig"
                       },
-                      ", \"ignoreGlobalFilters\" | \"annotations\" | \"indexPatternId\">[]"
+                      ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]"
                     ],
                     "path": "packages/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
@@ -584,9 +584,9 @@
                             "signature": [
                               {
                                 "pluginId": "@kbn/content-management-utils",
-                                "scope": "common",
+                                "scope": "server",
                                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                                "section": "def-common.SOWithMetadata",
+                                "section": "def-server.SOWithMetadata",
                                 "text": "SOWithMetadata"
                               },
                               "<",
@@ -687,9 +687,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-lifecycle-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                  "section": "def-common.CoreStart",
+                  "section": "def-public.CoreStart",
                   "text": "CoreStart"
                 }
               ],
@@ -803,14 +803,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
           },
           ">>"
         ],
@@ -1093,7 +1085,7 @@
         "signature": [
           "{ item: ",
           "EventAnnotationGroupSavedObject",
-          "; }"
+          "; meta?: undefined; }"
         ],
         "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
         "deprecated": false,
@@ -1110,9 +1102,9 @@
         "signature": [
           {
             "pluginId": "@kbn/content-management-utils",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-common.ContentManagementCrudTypes",
+            "section": "def-server.ContentManagementCrudTypes",
             "text": "ContentManagementCrudTypes"
           },
           "<\"event-annotation-group\", ",
@@ -1818,7 +1810,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"solid\" | \"dashed\" | \"dotted\")[]"
+                      "(\"dashed\" | \"solid\" | \"dotted\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
@@ -1919,7 +1911,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"circle\" | \"triangle\")[]"
+                      "(\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
@@ -2940,7 +2932,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"solid\" | \"dashed\" | \"dotted\")[]"
+                      "(\"dashed\" | \"solid\" | \"dotted\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
@@ -3041,7 +3033,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"circle\" | \"triangle\")[]"
+                      "(\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,

@@ -36,18 +36,22 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_URL,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
+  ALERT_INTENDED_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TYPE,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import { requiredOptional } from '@kbn/zod-helpers';
 
 import { createHash } from 'crypto';
 
 import { getAlertDetailsUrl } from '../../../../../../common/utils/alert_detail_path';
-import type { BaseSignalHit, SimpleHit } from '../../types';
+import type { SimpleHit } from '../../types';
 import type { ThresholdResult } from '../../threshold/types';
 import {
   getField,
@@ -61,8 +65,6 @@ import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
-  ALERT_THRESHOLD_RESULT,
-  ALERT_ORIGINAL_EVENT,
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_RULE_ACTIONS,
   ALERT_RULE_INDICES,
@@ -78,6 +80,14 @@ import {
   ALERT_RULE_THREAT,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_IMMUTABLE,
+  LEGACY_ALERT_HOST_CRITICALITY,
+  LEGACY_ALERT_USER_CRITICALITY,
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
 } from '../../../../../../common/field_maps/field_names';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
@@ -86,6 +96,23 @@ import type {
   AncestorLatest,
   BaseFieldsLatest,
 } from '../../../../../../common/api/detection_engine/model/alerts';
+
+export interface BuildAlertFieldsProps {
+  docs: SimpleHit[];
+  completeRule: CompleteRule<RuleParams>;
+  spaceId: string | null | undefined;
+  reason: string;
+  indicesToQuery: string[];
+  alertUuid: string;
+  publicBaseUrl: string | undefined;
+  alertTimestampOverride: Date | undefined;
+  overrides?: {
+    nameOverride: string;
+    severityOverride: string;
+    riskScoreOverride: number;
+  };
+  intendedTimestamp: Date | undefined;
+}
 
 export const generateAlertId = (alert: BaseFieldsLatest) => {
   return createHash('sha256')
@@ -127,6 +154,11 @@ export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
   return [...existingAncestors, newAncestor];
 };
 
+enum RULE_EXECUTION_TYPE {
+  MANUAL = 'manual',
+  SCHEDULED = 'scheduled',
+}
+
 /**
  * Builds the `kibana.alert.*` fields that are common across all alerts.
  * @param docs The parent alerts/events of the new alert to be built.
@@ -135,21 +167,18 @@ export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
  * @param reason Human readable string summarizing alert.
  * @param indicesToQuery Array of index patterns searched by the rule.
  */
-export const buildAlert = (
-  docs: SimpleHit[],
-  completeRule: CompleteRule<RuleParams>,
-  spaceId: string | null | undefined,
-  reason: string,
-  indicesToQuery: string[],
-  alertUuid: string,
-  publicBaseUrl: string | undefined,
-  alertTimestampOverride: Date | undefined,
-  overrides?: {
-    nameOverride: string;
-    severityOverride: string;
-    riskScoreOverride: number;
-  }
-): BaseFieldsLatest => {
+export const buildAlertFields = ({
+  docs,
+  completeRule,
+  spaceId,
+  reason,
+  indicesToQuery,
+  alertUuid,
+  publicBaseUrl,
+  alertTimestampOverride,
+  overrides,
+  intendedTimestamp,
+}: BuildAlertFieldsProps): BaseFieldsLatest => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce(
@@ -229,7 +258,7 @@ export const buildAlert = (
     [ALERT_RULE_NAMESPACE_FIELD]: params.namespace,
     [ALERT_RULE_NOTE]: params.note,
     [ALERT_RULE_REFERENCES]: params.references,
-    [ALERT_RULE_RISK_SCORE_MAPPING]: params.riskScoreMapping,
+    [ALERT_RULE_RISK_SCORE_MAPPING]: requiredOptional(params.riskScoreMapping),
     [ALERT_RULE_RULE_ID]: params.ruleId,
     [ALERT_RULE_RULE_NAME_OVERRIDE]: params.ruleNameOverride,
     [ALERT_RULE_SEVERITY_MAPPING]: params.severityMapping,
@@ -248,36 +277,30 @@ export const buildAlert = (
     [ALERT_URL]: alertUrl,
     [ALERT_UUID]: alertUuid,
     [ALERT_WORKFLOW_TAGS]: [],
+    [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     ...flattenWithPrefix(ALERT_RULE_META, params.meta),
     // These fields don't exist in the mappings, but leaving here for now to limit changes to the alert building logic
     'kibana.alert.rule.risk_score': params.riskScore,
     'kibana.alert.rule.severity': params.severity,
     'kibana.alert.rule.building_block_type': params.buildingBlockType,
+    // asset criticality fields will be enriched before ingestion
+    [LEGACY_ALERT_HOST_CRITICALITY]: undefined,
+    [LEGACY_ALERT_USER_CRITICALITY]: undefined,
+    [ALERT_HOST_CRITICALITY]: undefined,
+    [ALERT_USER_CRITICALITY]: undefined,
+    [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
+    [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
+    [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp ? intendedTimestamp.toISOString() : timestamp,
+    [ALERT_RULE_EXECUTION_TYPE]: intendedTimestamp
+      ? RULE_EXECUTION_TYPE.MANUAL
+      : RULE_EXECUTION_TYPE.SCHEDULED,
   };
 };
 
-const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is ThresholdResult => {
+export const isThresholdResult = (
+  thresholdResult: SearchTypes
+): thresholdResult is ThresholdResult => {
   return typeof thresholdResult === 'object';
-};
-
-/**
- * Creates signal fields that are only available in the special case where a signal has only 1 parent signal/event.
- * We copy the original time from the document as "original_time" since we override the timestamp with the current date time.
- * @param doc The parent signal/event of the new signal to be built.
- */
-export const additionalAlertFields = (doc: BaseSignalHit) => {
-  const thresholdResult = doc._source?.threshold_result;
-  if (thresholdResult != null && !isThresholdResult(thresholdResult)) {
-    throw new Error(`threshold_result failed to validate: ${thresholdResult}`);
-  }
-  const additionalFields: Record<string, SearchTypes> = {
-    ...(thresholdResult != null ? { [ALERT_THRESHOLD_RESULT]: thresholdResult } : {}),
-  };
-
-  for (const [key, val] of Object.entries(doc._source ?? {})) {
-    if (key.startsWith('event.')) {
-      additionalFields[`${ALERT_ORIGINAL_EVENT}.${key.replace('event.', '')}`] = val;
-    }
-  }
-  return additionalFields;
 };

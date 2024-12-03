@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.concatStreamProviders",
+        "id": "def-server.concatStreamProviders",
         "type": "Function",
         "tags": [
           "return"
@@ -44,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.concatStreamProviders.$1",
+            "id": "def-server.concatStreamProviders.$1",
             "type": "Array",
             "tags": [],
             "label": "sourceProviders",
@@ -61,7 +53,7 @@
           },
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.concatStreamProviders.$2",
+            "id": "def-server.concatStreamProviders.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -85,7 +77,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.createConcatStream",
+        "id": "def-server.createConcatStream",
         "type": "Function",
         "tags": [
           "return"
@@ -104,7 +96,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createConcatStream.$1",
+            "id": "def-server.createConcatStream.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "initial",
@@ -125,7 +117,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.createFilterStream",
+        "id": "def-server.createFilterStream",
         "type": "Function",
         "tags": [],
         "label": "createFilterStream",
@@ -140,7 +132,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createFilterStream.$1",
+            "id": "def-server.createFilterStream.$1",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -159,7 +151,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.createIntersperseStream",
+        "id": "def-server.createIntersperseStream",
         "type": "Function",
         "tags": [
           "return"
@@ -178,7 +170,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createIntersperseStream.$1",
+            "id": "def-server.createIntersperseStream.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "intersperseChunk",
@@ -197,7 +189,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.createListStream",
+        "id": "def-server.createListStream",
         "type": "Function",
         "tags": [
           "return"
@@ -216,7 +208,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createListStream.$1",
+            "id": "def-server.createListStream.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "items",
@@ -237,7 +229,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.createMapStream",
+        "id": "def-server.createMapStream",
         "type": "Function",
         "tags": [],
         "label": "createMapStream",
@@ -252,7 +244,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createMapStream.$1",
+            "id": "def-server.createMapStream.$1",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -271,7 +263,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.createPromiseFromStreams",
+        "id": "def-server.createPromiseFromStreams",
         "type": "Function",
         "tags": [],
         "label": "createPromiseFromStreams",
@@ -289,7 +281,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createPromiseFromStreams.$1",
+            "id": "def-server.createPromiseFromStreams.$1",
             "type": "Object",
             "tags": [],
             "label": "streams",
@@ -312,7 +304,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.createReduceStream",
+        "id": "def-server.createReduceStream",
         "type": "Function",
         "tags": [
           "return"
@@ -331,7 +323,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createReduceStream.$1",
+            "id": "def-server.createReduceStream.$1",
             "type": "Function",
             "tags": [],
             "label": "reducer",
@@ -346,7 +338,7 @@
           },
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createReduceStream.$2",
+            "id": "def-server.createReduceStream.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "initial",
@@ -367,7 +359,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.createReplaceStream",
+        "id": "def-server.createReplaceStream",
         "type": "Function",
         "tags": [],
         "label": "createReplaceStream",
@@ -382,7 +374,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createReplaceStream.$1",
+            "id": "def-server.createReplaceStream.$1",
             "type": "string",
             "tags": [],
             "label": "toReplace",
@@ -397,7 +389,7 @@
           },
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createReplaceStream.$2",
+            "id": "def-server.createReplaceStream.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "replacement",
@@ -416,7 +408,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.createSplitStream",
+        "id": "def-server.createSplitStream",
         "type": "Function",
         "tags": [
           "return"
@@ -435,7 +427,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-common.createSplitStream.$1",
+            "id": "def-server.createSplitStream.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "splitChunk",
@@ -451,6 +443,41 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utils",
+        "id": "def-server.prettyPrintAndSortKeys",
+        "type": "Function",
+        "tags": [],
+        "label": "prettyPrintAndSortKeys",
+        "description": [
+          "\nGiven a JS object, will return a JSON.stringified result with consistently\nsorted keys."
+        ],
+        "signature": [
+          "(object: object) => string"
+        ],
+        "path": "packages/kbn-utils/src/json/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utils",
+            "id": "def-server.prettyPrintAndSortKeys.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "object",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "packages/kbn-utils/src/json/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -458,7 +485,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-common.PathConfigType",
+        "id": "def-server.PathConfigType",
         "type": "Type",
         "tags": [],
         "label": "PathConfigType",
@@ -472,6 +499,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

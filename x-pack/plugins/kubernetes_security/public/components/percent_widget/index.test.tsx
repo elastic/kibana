@@ -35,6 +35,8 @@ const DATA_VALUE_MAP = {
   },
 };
 
+const MOCK_DATA_VIEW_ID = 'dataViewId';
+
 jest.mock('../../hooks/use_filter', () => ({
   useSetFilter: () => ({
     getFilterForValueButton: jest.fn(),
@@ -54,6 +56,7 @@ describe('PercentWidget component', () => {
       <PercentWidget
         title={TITLE}
         dataValueMap={DATA_VALUE_MAP}
+        dataViewId={MOCK_DATA_VIEW_ID}
         widgetKey="percentWidget"
         globalFilter={GLOBAL_FILTER}
         groupedBy={ENTRY_LEADER_INTERACTIVE}

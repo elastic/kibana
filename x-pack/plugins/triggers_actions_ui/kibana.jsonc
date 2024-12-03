@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/triggers-actions-ui-plugin",
-  "owner": "@elastic/response-ops",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "triggersActionsUi",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "trigger_actions_ui"
@@ -16,22 +20,25 @@
       "data",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjects",
       "unifiedSearch",
+      "fieldFormats",
       "dataViews",
       "dataViewEditor",
       "alerting",
       "actions",
       "dashboard",
       "licensing",
-      "expressions"
+      "expressions",
+      "lens",
+      "controls",
+      "embeddable"
     ],
     "optionalPlugins": [
       "cloud",
       "features",
       "home",
       "spaces",
-      "serverless",
+      "serverless"
     ],
     "requiredBundles": [
       "alerting",

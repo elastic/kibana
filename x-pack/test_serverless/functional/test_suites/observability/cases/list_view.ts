@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { SeverityAll } from '@kbn/cases-plugin/common/ui';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
@@ -18,10 +17,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
+  const toasts = getService('toasts');
 
   describe('Cases list', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
     });
@@ -29,7 +29,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
       await cases.casesTable.waitForCasesToBeDeleted();
-      await svlCommonPage.forceLogout();
     });
 
     describe('empty state', () => {
@@ -177,20 +176,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         // by default filter by all
         await cases.casesTable.validateCasesTableHasNthRows(5);
 
-        // low
         await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
         await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
 
-        // high
         await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
         await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
 
-        // critical
         await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
         await cases.casesTable.validateCasesTableHasNthRows(1);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
 
-        // back to all
-        await cases.casesTable.filterBySeverity(SeverityAll);
         await cases.casesTable.validateCasesTableHasNthRows(5);
       });
     });
@@ -211,6 +211,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAll();
+      });
+
       describe('Status', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 

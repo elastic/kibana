@@ -1,22 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-export type { CodeEditorProps } from './code_editor';
-export {
-  CssLang,
-  MarkdownLang,
-  YamlLang,
-  HandlebarsLang,
-  HJsonLang,
-  GrokLang,
-  CodeEditor,
-  CodeEditorField,
-} from './code_editor';
 
 export type { UrlTemplateEditorVariable, UrlTemplateEditorProps } from './url_template_editor';
 export { UrlTemplateEditor } from './url_template_editor';
@@ -41,6 +30,8 @@ export {
   useUiSetting$,
   useGlobalUiSetting$,
 } from './ui_settings';
+
+export { useDarkMode } from './dark_mode';
 
 export { useExecutionContext } from './use_execution_context';
 
@@ -79,6 +70,7 @@ export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } fro
 export function plugin() {
   return new (class KibanaReactPlugin {
     setup() {}
+
     start() {}
   })();
 }

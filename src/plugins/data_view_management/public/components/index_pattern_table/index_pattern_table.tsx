@@ -1,46 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   EuiBadge,
+  EuiBasicTableColumn,
   EuiButton,
-  EuiLink,
+  EuiIconTip,
   EuiInMemoryTable,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
-  EuiIconTip,
-  EuiBasicTableColumn,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
-import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+
+import React, { useMemo, useState } from 'react';
+import { RouteComponentProps, useLocation, withRouter } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import { NoDataViewsPromptComponent, useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
-import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
-import { IndexPatternManagmentContext } from '../../types';
-import { IndexPatternTableItem } from '../types';
+import { DataViewType } from '@kbn/data-views-plugin/public';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
+
+import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
-import { SpacesList } from './spaces_list';
-import { removeDataView, RemoveDataViewProps } from '../edit_index_pattern';
-import { deleteModalMsg } from './delete_modal_msg';
+import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';
+import { IndexPatternTableItem } from '../types';
 import {
   DataViewTableController,
   dataViewTableControllerStateDefaults as defaults,
 } from './data_view_table_controller';
+import { deleteModalMsg } from './delete_modal_msg';
+import { NoData } from './no_data';
+import { SpacesList } from './spaces_list';
 
-const pagination = {
-  initialPageSize: 10,
-  pageSizeOptions: [5, 10, 25, 50],
-};
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 const sorting = {
   sort: {
@@ -76,14 +80,18 @@ export const IndexPatternTable = ({
 }: Props) => {
   const {
     setBreadcrumbs,
+    http,
     uiSettings,
     application,
     chrome,
     dataViews,
+    share,
     IndexPatternEditor,
     spaces,
     overlays,
     docLinks,
+    noDataPage,
+    ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
@@ -108,6 +116,18 @@ export const IndexPatternTable = ({
   const hasDataView = useObservable(dataViewController.hasDataView$, defaults.hasDataView);
   const hasESData = useObservable(dataViewController.hasESData$, defaults.hasEsData);
 
+  const useOnTryESQLParams = {
+    locatorClient: share?.url.locators,
+    navigateToApp: application.navigateToApp,
+  };
+  const onTryESQL = useOnTryESQL(useOnTryESQLParams);
+
+  const { pageSize, onTableChange } = useEuiTablePersist<IndexPatternTableItem>({
+    tableId: 'dataViewsIndexPattern',
+    initialPageSize: 10,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  });
+
   const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
     if (!error) {
       setQuery(queryText);
@@ -123,6 +143,7 @@ export const IndexPatternTable = ({
         setSelectedItems([]);
         dataViewController.loadDataViews();
       },
+      startServices,
     });
     if (selectedItems.length === 0) {
       return;
@@ -165,7 +186,7 @@ export const IndexPatternTable = ({
   chrome.docTitle.change(title);
 
   const isRollup =
-    new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+    new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
     dataViews.getRollupsEnabled();
 
   const ContextWrapper = useMemo(
@@ -178,6 +199,7 @@ export const IndexPatternTable = ({
     uiSettings,
     overlays,
     onDelete: () => dataViewController.loadDataViews(),
+    startServices,
   });
 
   const alertColumn = {
@@ -213,11 +235,11 @@ export const IndexPatternTable = ({
         defaultMessage: 'Name',
       }),
       width: spaces ? '70%' : '90%',
-      render: (name: string, dataView: IndexPatternTableItem) => (
+      render: (_name: string, dataView: IndexPatternTableItem) => (
         <div>
           <EuiLink
             {...reactRouterNavigate(history, `patterns/${dataView.id}`)}
-            data-test-subj={`detail-link-${dataView.name}`}
+            data-test-subj={`detail-link-${dataView.getName()}`}
           >
             {dataView.getName()}
             {dataView.name ? (
@@ -239,7 +261,14 @@ export const IndexPatternTable = ({
           )}
           {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
             <span key={tagKey}>
-              &emsp;<EuiBadge>{tagName}</EuiBadge>
+              &emsp;
+              {tagKey === DataViewType.ROLLUP ? (
+                <RollupDeprecationTooltip>
+                  <EuiBadge color="warning">{tagName}</EuiBadge>
+                </RollupDeprecationTooltip>
+              ) : (
+                <EuiBadge>{tagName}</EuiBadge>
+              )}
             </span>
           ))}
         </div>
@@ -256,7 +285,7 @@ export const IndexPatternTable = ({
         defaultMessage: 'Spaces',
       }),
       width: '20%',
-      render: (name: string, dataView: IndexPatternTableItem) => {
+      render: (_name: string, dataView: IndexPatternTableItem) => {
         return spaces ? (
           <SpacesList
             spacesApi={spaces}
@@ -285,7 +314,7 @@ export const IndexPatternTable = ({
       fill={true}
       iconType="plusInCircle"
       onClick={() => setShowCreateDialog(true)}
-      data-test-subj="createIndexPatternButton"
+      data-test-subj="createDataViewButton"
     >
       <FormattedMessage
         id="indexPatternManagement.dataViewTable.createBtn"
@@ -335,11 +364,14 @@ export const IndexPatternTable = ({
         <EuiInMemoryTable
           allowNeutralSort={false}
           itemId="id"
-          isSelectable={dataViews.getCanSaveSync()}
           items={indexPatterns}
           columns={columns}
-          pagination={pagination}
+          pagination={{
+            pageSize,
+            pageSizeOptions: PAGE_SIZE_OPTIONS,
+          }}
           sorting={sorting}
+          onTableChange={onTableChange}
           search={search}
           selection={dataViews.getCanSaveSync() ? selection : undefined}
         />
@@ -354,6 +386,8 @@ export const IndexPatternTable = ({
           onClickCreate={() => setShowCreateDialog(true)}
           canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
           dataViewsDocLink={docLinks.links.indexPatterns.introduction}
+          onTryESQL={onTryESQL}
+          esqlDocLink={docLinks.links.query.queryESQL}
           emptyPromptColor={'subdued'}
         />
       </>
@@ -362,12 +396,14 @@ export const IndexPatternTable = ({
     displayIndexPatternSection = (
       <>
         <EuiSpacer size="xxl" />
-        <EmptyIndexListPrompt
-          onRefresh={dataViewController.loadDataViews}
-          createAnyway={() => setShowCreateDialog(true)}
-          canSaveIndexPattern={!!application.capabilities.indexPatterns.save}
-          navigateToApp={application.navigateToApp}
-          addDataUrl={docLinks.links.indexPatterns.introduction}
+        <NoData
+          noDataPage={noDataPage}
+          docLinks={docLinks}
+          uiSettings={uiSettings}
+          http={http}
+          application={application}
+          dataViewController={dataViewController}
+          setShowCreateDialog={setShowCreateDialog}
         />
       </>
     );
@@ -375,7 +411,7 @@ export const IndexPatternTable = ({
   return (
     <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
       {isLoadingDataState ? (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div css={{ display: 'flex', justifyContent: 'center' }}>
           <EuiLoadingSpinner size="xxl" />
         </div>
       ) : (

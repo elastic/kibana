@@ -28,20 +28,24 @@ import {
   EuiCallOut,
   EuiAccordion,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import type { RiskEngineStatus } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import * as i18n from '../translations';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
-import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/risk_engine';
-
-import { RiskInformationFlyout } from '../../explore/components/risk_score/risk_information';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { RiskInformationFlyout } from './risk_information';
 import { useOnOpenCloseHandler } from '../../helper_hooks';
+import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
+const toastOptions = {
+  toastLifeTimeMs: 5000,
+};
 
 const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
   <>
@@ -63,47 +67,6 @@ const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
             </div>
           ))}
         </>
-      </EuiAccordion>
-
-      <EuiAccordion id="risk-engine-privileges" buttonContent={i18n.CHECK_PRIVILEGES}>
-        <p>
-          {i18n.NEED_TO_HAVE}
-          <ul>
-            <li>
-              <FormattedMessage
-                id="xpack.securitySolution.riskScore.errors.privileges.requiredPrivilege"
-                defaultMessage="{required_privilege} privileges for {index} index"
-                values={{
-                  required_privilege: <b>{'all'}</b>,
-                  index: <b>{'risk-score.risk-score-*'}</b>,
-                }}
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.securitySolution.riskScore.errors.privileges.securityPrivilege"
-                defaultMessage="{security_privileges} security privileges"
-                values={{
-                  security_privileges: (
-                    <span>
-                      <b>{'manage_index_templates'}</b>
-                      {','} <b>{'manage_transform'}</b>
-                    </span>
-                  ),
-                }}
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.securitySolution.riskScore.errors.privileges.kibanaPrivilege"
-                defaultMessage="{kibana_privilege} Kibana privilege"
-                values={{
-                  kibana_privilege: <b>{'Saved Objects Management'}</b>,
-                }}
-              />
-            </li>
-          </ul>
-        </p>
       </EuiAccordion>
     </EuiCallOut>
   </>
@@ -177,17 +140,81 @@ const RiskScoreUpdateModal = ({
   );
 };
 
-export const RiskScoreEnableSection = () => {
+const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | null }> = ({
+  currentRiskEngineStatus,
+}) => {
+  if (!currentRiskEngineStatus) {
+    return <EuiHealth color="subdued">{'-'}</EuiHealth>;
+  }
+  if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
+    return <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>;
+  }
+  return <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>;
+};
+
+const RiskEngineStatusRow: React.FC<{
+  currentRiskEngineStatus?: RiskEngineStatus | null;
+  onSwitchClick: () => void;
+  isLoading: boolean;
+  privileges: RiskEngineMissingPrivilegesResponse;
+}> = ({ currentRiskEngineStatus, onSwitchClick, isLoading, privileges }) => {
+  const userHasRequiredPrivileges =
+    'hasAllRequiredPrivileges' in privileges && privileges.hasAllRequiredPrivileges;
+  const btnIsDisabled = !currentRiskEngineStatus || isLoading || !userHasRequiredPrivileges;
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems={'center'}>
+      {isLoading && (
+        <EuiFlexItem>
+          <EuiLoadingSpinner data-test-subj="risk-score-status-loading" size="m" />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem
+        css={{ minWidth: MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING }}
+        data-test-subj="risk-score-status"
+      >
+        <RiskEngineHealth currentRiskEngineStatus={currentRiskEngineStatus} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiSwitch
+          label={''}
+          data-test-subj="risk-score-switch"
+          checked={currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED}
+          onChange={onSwitchClick}
+          compressed
+          disabled={btnIsDisabled}
+          aria-describedby={'switchRiskModule'}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const RiskScoreEnableSection: React.FC<{
+  privileges: RiskEngineMissingPrivilegesResponse;
+}> = ({ privileges }) => {
+  const { addSuccess } = useAppToasts();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
+    onSuccess: () => {
+      addSuccess(i18n.RISK_SCORE_MODULE_TURNED_ON, toastOptions);
+    },
     onSettled: () => {
       setIsModalVisible(false);
     },
   });
 
-  const enableRiskEngineMutation = useEnableRiskEngineMutation();
-  const disableRiskEngineMutation = useDisableRiskEngineMutation();
+  const enableRiskEngineMutation = useEnableRiskEngineMutation({
+    onSuccess: () => {
+      addSuccess(i18n.RISK_SCORE_MODULE_TURNED_ON, toastOptions);
+    },
+  });
+  const disableRiskEngineMutation = useDisableRiskEngineMutation({
+    onSuccess: () => {
+      addSuccess(i18n.RISK_SCORE_MODULE_TURNED_OFF, toastOptions);
+    },
+  });
 
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
 
@@ -200,50 +227,29 @@ export const RiskScoreEnableSection = () => {
     initRiskEngineMutation.isLoading ||
     enableRiskEngineMutation.isLoading ||
     disableRiskEngineMutation.isLoading ||
+    privileges.isLoading ||
     isStatusLoading;
 
   const isUpdateAvailable = riskEngineStatus?.isUpdateAvailable;
-  const btnIsDisabled = !currentRiskEngineStatus || isLoading;
 
   const onSwitchClick = () => {
-    if (btnIsDisabled) {
+    if (!currentRiskEngineStatus || isLoading) {
       return;
     }
 
-    if (currentRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED) {
+    if (currentRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
       initRiskEngineMutation.mutate();
-    } else if (currentRiskEngineStatus === RiskEngineStatus.ENABLED) {
+    } else if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
       disableRiskEngineMutation.mutate();
-    } else if (currentRiskEngineStatus === RiskEngineStatus.DISABLED) {
+    } else if (currentRiskEngineStatus === RiskEngineStatusEnum.DISABLED) {
       enableRiskEngineMutation.mutate();
     }
   };
 
   let initRiskEngineErrors: string[] = [];
-
   if (initRiskEngineMutation.isError) {
     const errorBody = initRiskEngineMutation.error.body;
-    if (errorBody?.full_error?.errors) {
-      initRiskEngineErrors = errorBody.full_error?.errors;
-    } else {
-      initRiskEngineErrors = [errorBody.message];
-    }
-  }
-
-  if (
-    currentRiskEngineStatus !== RiskEngineStatus.ENABLED &&
-    riskEngineStatus?.is_max_amount_of_risk_engines_reached
-  ) {
-    return (
-      <EuiCallOut
-        title={i18n.getMaxSpaceTitle(MAX_SPACES_COUNT)}
-        color="warning"
-        iconType="error"
-        data-test-subj="risk-score-warning-panel"
-      >
-        <p>{i18n.MAX_SPACE_PANEL_MESSAGE}</p>
-      </EuiCallOut>
-    );
+    initRiskEngineErrors = [errorBody.message];
   }
   return (
     <>
@@ -295,30 +301,12 @@ export const RiskScoreEnableSection = () => {
                 </EuiFlexGroup>
               )}
               {!isUpdateAvailable && (
-                <EuiFlexGroup gutterSize="s" alignItems={'center'}>
-                  <EuiFlexItem>{isLoading && <EuiLoadingSpinner size="m" />}</EuiFlexItem>
-                  <EuiFlexItem
-                    css={{ minWidth: MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING }}
-                    data-test-subj="risk-score-status"
-                  >
-                    {currentRiskEngineStatus === RiskEngineStatus.ENABLED ? (
-                      <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>
-                    ) : (
-                      <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiSwitch
-                      label={''}
-                      data-test-subj="risk-score-switch"
-                      checked={currentRiskEngineStatus === RiskEngineStatus.ENABLED}
-                      onChange={onSwitchClick}
-                      compressed
-                      disabled={btnIsDisabled}
-                      aria-describedby={'switchRiskModule'}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <RiskEngineStatusRow
+                  currentRiskEngineStatus={currentRiskEngineStatus}
+                  onSwitchClick={onSwitchClick}
+                  isLoading={isLoading}
+                  privileges={privileges}
+                />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>

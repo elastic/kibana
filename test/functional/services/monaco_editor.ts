@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type monaco } from '@kbn/monaco';
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class MonacoEditorService extends FtrService {
@@ -25,7 +28,8 @@ export class MonacoEditorService extends FtrService {
     await this.retry.try(async () => {
       values = await this.browser.execute(
         () =>
-          (window as any).MonacoEnvironment.monaco.editor
+          // @ts-expect-error this value is provided in @kbn/monaco for this specific purpose, see {@link packages/kbn-monaco/src/register_globals.ts}
+          (window.MonacoEnvironment?.monaco.editor as typeof monaco.editor)
             .getModels()
             .map((model: any) => model.getValue()) as string[]
       );
@@ -40,16 +44,30 @@ export class MonacoEditorService extends FtrService {
     await textarea.type(value);
   }
 
-  public async setCodeEditorValue(value: string, nthIndex = 0) {
+  public async setCodeEditorValue(value: string, nthIndex?: number) {
     await this.retry.try(async () => {
       await this.browser.execute(
         (editorIndex, codeEditorValue) => {
-          const editor = (window as any).MonacoEnvironment.monaco.editor;
-          const instance = editor.getModels()[editorIndex];
-          instance.setValue(codeEditorValue);
+          // @ts-expect-error this value is provided in @kbn/monaco for this specific purpose, see {@link packages/kbn-monaco/src/register_globals.ts}
+          const editor = window.MonacoEnvironment?.monaco.editor as typeof monaco.editor;
+          const textModels = editor.getModels();
+
+          if (editorIndex) {
+            textModels[editorIndex].setValue(codeEditorValue);
+          } else {
+            // when specific model instance is unknown, update all models returned
+            textModels.forEach((model) => model.setValue(codeEditorValue));
+          }
         },
         nthIndex,
         value
+      );
+    });
+    await this.retry.try(async () => {
+      const newCodeEditorValue = await this.getCodeEditorValue(nthIndex);
+      expect(newCodeEditorValue).equal(
+        value,
+        `Expected value was: ${value}, but got: ${newCodeEditorValue}`
       );
     });
   }

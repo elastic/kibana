@@ -13,8 +13,10 @@ import type { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
@@ -27,8 +29,7 @@ import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import { SavedObjectIndexStore, type Document } from '../../../persistence';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import { SavedObjectIndexStore, type LensDocument } from '../../../persistence';
 import { DOC_TYPE } from '../../../../common/constants';
 
 export type EditLensConfigurationProps = Omit<
@@ -86,6 +87,41 @@ export const updatingMiddleware =
     }
   };
 
+const MaybeWrapper = ({
+  wrapInFlyout,
+  closeFlyout,
+  children,
+}: {
+  wrapInFlyout?: boolean;
+  children: JSX.Element;
+  closeFlyout?: () => void;
+}) => {
+  if (!wrapInFlyout) {
+    return children;
+  }
+  return (
+    <EuiFlyout
+      data-test-subj="lnsEditOnFlyFlyout"
+      type="push"
+      ownFocus
+      paddingSize="m"
+      onClose={() => {
+        closeFlyout?.();
+      }}
+      aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
+        defaultMessage: 'Edit configuration',
+      })}
+      size="s"
+      hideCloseButton
+      css={css`
+        clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+      `}
+    >
+      {children}
+    </EuiFlyout>
+  );
+};
+
 export async function getEditLensConfiguration(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
@@ -108,24 +144,29 @@ export async function getEditLensConfiguration(
     datasourceId,
     panelId,
     savedObjectId,
-    output$,
+    dataLoading$,
     lensAdapters,
     updateByRefInput,
     navigateToLensEditor,
     displayFlyoutHeader,
     canEditTextBasedQuery,
+    isNewPanel,
+    hidesSuggestions,
+    onApply,
+    onCancel,
+    hideTimeFilterInfo,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
     }
     const [currentAttributes, setCurrentAttributes] =
-      useState<TypedLensByValueInput['attributes']>(attributes);
+      useState<TypedLensSerializedState['attributes']>(attributes);
     /**
      * During inline editing of a by reference panel, the panel is converted to a by value one.
      * When the user applies the changes we save them to the Lens SO
      */
     const saveByRef = useCallback(
-      async (attrs: Document) => {
+      async (attrs: LensDocument) => {
         const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement);
         await savedObjectStore.save({
           ...attrs,
@@ -160,33 +201,6 @@ export async function getEditLensConfiguration(
       })
     );
 
-    const getWrapper = (children: JSX.Element) => {
-      if (wrapInFlyout) {
-        return (
-          <EuiFlyout
-            type="push"
-            ownFocus
-            paddingSize="m"
-            onClose={() => {
-              closeFlyout?.();
-            }}
-            aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
-              defaultMessage: 'Edit configuration',
-            })}
-            size="s"
-            hideCloseButton
-            css={css`
-              clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
-            `}
-          >
-            {children}
-          </EuiFlyout>
-        );
-      } else {
-        return children;
-      }
-    };
-
     const configPanelProps = {
       attributes: currentAttributes,
       updatePanelState,
@@ -196,7 +210,7 @@ export async function getEditLensConfiguration(
       coreStart,
       startDependencies,
       visualizationMap,
-      output$,
+      dataLoading$,
       lensAdapters,
       datasourceMap,
       saveByRef,
@@ -205,17 +219,26 @@ export async function getEditLensConfiguration(
       navigateToLensEditor,
       displayFlyoutHeader,
       canEditTextBasedQuery,
+      hidesSuggestions,
       setCurrentAttributes,
+      isNewPanel,
+      onApply,
+      onCancel,
+      hideTimeFilterInfo,
     };
 
-    return getWrapper(
-      <Provider store={lensStore}>
-        <KibanaContextProvider services={lensServices}>
-          <RootDragDropProvider>
-            <LensEditConfigurationFlyout {...configPanelProps} />
-          </RootDragDropProvider>
-        </KibanaContextProvider>
-      </Provider>
+    return (
+      <MaybeWrapper wrapInFlyout={wrapInFlyout} closeFlyout={closeFlyout}>
+        <Provider store={lensStore}>
+          <KibanaRenderContextProvider {...coreStart}>
+            <KibanaContextProvider services={lensServices}>
+              <RootDragDropProvider>
+                <LensEditConfigurationFlyout {...configPanelProps} />
+              </RootDragDropProvider>
+            </KibanaContextProvider>
+          </KibanaRenderContextProvider>
+        </Provider>
+      </MaybeWrapper>
     );
   };
 }

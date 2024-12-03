@@ -304,7 +304,7 @@
             "section": "def-common.Presentable",
             "text": "Presentable"
           },
-          "<Context>, \"order\" | \"getDisplayName\" | \"getIconType\" | \"getDisplayNameTooltip\">>"
+          "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
         "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
@@ -318,56 +318,6 @@
             "label": "id",
             "description": [],
             "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ui-actions-browser",
-        "id": "def-common.RowClickContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "RowClickContext",
-        "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.RowClickContext.embeddable",
-            "type": "Unknown",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.RowClickContext.data",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "{ rowIndex: number; table: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              },
-              "; columns?: string[] | undefined; }"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -469,6 +419,37 @@
         "description": [],
         "signature": [
           "\"ROW_CLICK_TRIGGER\""
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.RowClickContext",
+        "type": "Type",
+        "tags": [],
+        "label": "RowClickContext",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          "> & { data: { rowIndex: number; table: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          "; columns?: string[] | undefined; }; }"
         ],
         "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,

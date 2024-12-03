@@ -1,45 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
-
+import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  ViewMode,
-  EmbeddablePanel,
-  isErrorEmbeddable,
-  CONTEXT_MENU_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
-import {
-  EMPTY_EMBEDDABLE,
-  ContactCardEmbeddable,
   CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  ContactCardEmbeddableFactory,
+  EMPTY_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
-import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
-import { createEditModeActionDefinition } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
+import {
+  buildMockDashboard,
+  getSampleDashboardInput,
+  getSampleDashboardPanel,
+  mockControlGroupApi,
+} from '../../mocks';
+import { embeddableService } from '../../services/kibana_services';
 import { DashboardContainer } from './dashboard_container';
-import { pluginServices } from '../../services/plugin_services';
-import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(embeddableFactory);
+embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(embeddableFactory);
 
 test('DashboardContainer initializes embeddables', (done) => {
   const container = buildMockDashboard({
@@ -130,10 +120,11 @@ test('DashboardContainer.replacePanel', (done) => {
   );
 
   // replace the panel now
-  container.replacePanel(container.getInput().panels[ID], {
-    type: EMPTY_EMBEDDABLE,
-    explicitInput: { id: ID },
-  });
+  container.replaceEmbeddable(
+    container.getInput().panels[ID].explicitInput.id,
+    { id: ID },
+    EMPTY_EMBEDDABLE
+  );
 });
 
 test('Container view mode change propagates to existing children', async () => {
@@ -181,8 +172,16 @@ test('searchSessionId propagates to children', async () => {
     0,
     undefined,
     undefined,
-    { lastSavedInput: sampleInput }
+    {
+      anyMigrationRun: false,
+      isEmbeddedExternally: false,
+      lastSavedInput: sampleInput,
+      lastSavedId: undefined,
+      managed: false,
+      fullScreenMode: false,
+    }
   );
+  container?.setControlGroupApi(mockControlGroupApi);
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -194,82 +193,6 @@ test('searchSessionId propagates to children', async () => {
   expect(embeddable.getInput().searchSessionId).toBe(searchSessionId1);
 });
 
-test('DashboardContainer in edit mode shows edit mode actions', async () => {
-  // mock embeddable dependencies so that the embeddable panel renders
-  setStubKibanaServices();
-  const uiActionsSetup = uiActionsPluginMock.createSetupContract();
-
-  const editModeAction = createEditModeActionDefinition();
-  uiActionsSetup.registerAction(editModeAction);
-  uiActionsSetup.addTriggerAction(CONTEXT_MENU_TRIGGER, editModeAction);
-
-  const container = buildMockDashboard({ overrides: { viewMode: ViewMode.VIEW } });
-
-  const embeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Bob',
-  });
-
-  let wrapper: ReactWrapper;
-  await act(async () => {
-    wrapper = await mount(
-      <I18nProvider>
-        <EmbeddablePanel embeddable={embeddable} />
-      </I18nProvider>
-    );
-  });
-  const component = wrapper!;
-  await component.update();
-  await nextTick();
-
-  const button = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
-
-  expect(button.length).toBe(1);
-  act(() => {
-    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  });
-  await nextTick();
-  await component.update();
-
-  expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
-
-  const editAction = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
-
-  expect(editAction.length).toBe(0);
-
-  act(() => {
-    container.updateInput({ viewMode: ViewMode.EDIT });
-  });
-  await nextTick();
-  await component.update();
-
-  act(() => {
-    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  });
-  await nextTick();
-  component.update();
-
-  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(0);
-
-  act(() => {
-    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  });
-  await nextTick();
-  component.update();
-
-  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
-
-  await nextTick();
-  component.update();
-
-  // TODO: Address this.
-  // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
-  // expect(action.length).toBe(1);
-});
-
 describe('getInheritedInput', () => {
   const dashboardTimeRange = {
     to: 'now',
@@ -278,11 +201,10 @@ describe('getInheritedInput', () => {
   const dashboardTimeslice = [1688061910000, 1688062209000] as [number, number];
 
   test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', async () => {
-    const container = buildMockDashboard({
-      overrides: {
-        timeRange: dashboardTimeRange,
-        timeslice: dashboardTimeslice,
-      },
+    const container = buildMockDashboard();
+    container.updateInput({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
     });
     const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
       CONTACT_CARD_EMBEDDABLE,
@@ -303,11 +225,10 @@ describe('getInheritedInput', () => {
   });
 
   test('Should not pass dashboard timeRange and timeslice to panel when panel has custom time range', async () => {
-    const container = buildMockDashboard({
-      overrides: {
-        timeRange: dashboardTimeRange,
-        timeslice: dashboardTimeslice,
-      },
+    const container = buildMockDashboard();
+    container.updateInput({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
     });
     const embeddableTimeRange = {
       to: 'now',
@@ -328,5 +249,26 @@ describe('getInheritedInput', () => {
     };
     expect(embeddableInput.timeRange).toEqual(embeddableTimeRange);
     expect(embeddableInput.timeslice).toBeUndefined();
+  });
+
+  test('Should pass dashboard settings to inherited input', async () => {
+    const container = buildMockDashboard({});
+    const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
+      CONTACT_CARD_EMBEDDABLE,
+      {
+        firstName: 'Kibana',
+      }
+    );
+    expect(embeddable).toBeDefined();
+
+    const embeddableInput = container
+      .getChild<ContactCardEmbeddable>(embeddable.id)
+      .getInput() as ContactCardEmbeddableInput & {
+      timeRange: TimeRange;
+      timeslice: [number, number];
+    };
+    expect(embeddableInput.syncTooltips).toBe(false);
+    expect(embeddableInput.syncColors).toBe(false);
+    expect(embeddableInput.syncCursor).toBe(true);
   });
 });

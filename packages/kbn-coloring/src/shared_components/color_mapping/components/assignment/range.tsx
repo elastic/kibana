@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,9 +13,8 @@ import { ColorMapping } from '../../config';
 
 export const Range: React.FC<{
   rule: ColorMapping.RuleRange;
-  editable: boolean;
   updateValue: (min: number, max: number, minInclusive: boolean, maxInclusive: boolean) => void;
-}> = ({ rule, updateValue, editable }) => {
+}> = ({ rule, updateValue }) => {
   const minValid = rule.min <= rule.max;
   const maxValid = rule.max >= rule.min;
 
@@ -34,7 +34,6 @@ export const Range: React.FC<{
           placeholder="min"
           value={rule.min}
           isInvalid={!minValid}
-          disabled={!editable}
           onChange={(e) =>
             updateValue(+e.currentTarget.value, rule.max, rule.minInclusive, rule.maxInclusive)
           }
@@ -54,7 +53,6 @@ export const Range: React.FC<{
             </EuiButtonEmpty>
           }
           placeholder="max"
-          disabled={!editable}
           value={rule.max}
           onChange={(e) =>
             updateValue(rule.min, +e.currentTarget.value, rule.minInclusive, rule.maxInclusive)

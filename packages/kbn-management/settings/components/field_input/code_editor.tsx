@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // This component was ported directly from `advancedSettings`, and hasn't really
@@ -15,11 +16,12 @@
 
 import React, { useCallback } from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
+
 import {
   CodeEditor as KibanaReactCodeEditor,
-  MarkdownLang,
   type CodeEditorProps as KibanaReactCodeEditorProps,
-} from '@kbn/kibana-react-plugin/public';
+  MarkdownLang,
+} from '@kbn/code-editor';
 
 type Props = Pick<KibanaReactCodeEditorProps, 'aria-label' | 'value' | 'onChange'>;
 type Options = KibanaReactCodeEditorProps['options'];
@@ -69,7 +71,7 @@ export const CodeEditor = ({ onChange, type, isReadOnly, name, ...props }: CodeE
     editorModel.setValue(trimmedValue);
   }, []);
 
-  const editorDidMount = useCallback(
+  const editorDidMount = useCallback<NonNullable<KibanaReactCodeEditorProps['editorDidMount']>>(
     (editor) => {
       setEditorCalculatedHeight(editor);
 

@@ -17,28 +17,47 @@ import { handleTree } from './resolver/tree/handler';
 import { handleEntities } from './resolver/entity/handler';
 import { handleEvents } from './resolver/events';
 
-export const registerResolverRoutes = async (
+export const registerResolverRoutes = (
   router: SecuritySolutionPluginRouter,
   startServices: StartServicesAccessor<StartPlugins>,
   config: ConfigType
 ) => {
-  const [, { ruleRegistry, licensing }] = await startServices();
+  const getRuleRegistry = async () => {
+    const [, { ruleRegistry }] = await startServices();
+    return ruleRegistry;
+  };
+
+  const getLicensing = async () => {
+    const [, { licensing }] = await startServices();
+    return licensing;
+  };
+
   router.post(
     {
       path: '/api/endpoint/resolver/tree',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       validate: validateTree,
       options: { authRequired: true },
     },
-    handleTree(ruleRegistry, config, licensing)
+    handleTree(getRuleRegistry, getLicensing)
   );
 
   router.post(
     {
       path: '/api/endpoint/resolver/events',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       validate: validateEvents,
       options: { authRequired: true },
     },
-    handleEvents(ruleRegistry)
+    handleEvents(getRuleRegistry)
   );
 
   /**
@@ -47,9 +66,14 @@ export const registerResolverRoutes = async (
   router.get(
     {
       path: '/api/endpoint/resolver/entity',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       validate: validateEntities,
       options: { authRequired: true },
     },
-    handleEntities()
+    handleEntities(config.experimentalFeatures)
   );
 };

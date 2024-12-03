@@ -13,6 +13,9 @@ import {
   mapToColumns,
   getTimeScale,
   getDatatable,
+  formulaIntervalFn,
+  formulaNowFn,
+  formulaTimeRangeFn,
 } from '../../common/expressions';
 import { getDatatableUtilitiesFactory, getFormatFactory, getTimeZoneFactory } from './utils';
 
@@ -23,6 +26,9 @@ export const setupExpressions = (
   expressions: ExpressionsServerSetup
 ) => {
   [
+    formulaNowFn,
+    formulaIntervalFn,
+    formulaTimeRangeFn,
     counterRate,
     formatColumn,
     mapToColumns,

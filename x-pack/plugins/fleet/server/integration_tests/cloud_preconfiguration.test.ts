@@ -30,6 +30,7 @@ import {
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
 describe('Fleet cloud preconfiguration', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
@@ -49,56 +50,74 @@ describe('Fleet cloud preconfiguration', () => {
 
     esServer = await startES();
     const startOrRestartKibana = async (kbnConfig: any = defaultKbnConfig) => {
-      if (kbnServer) {
-        await kbnServer.stop();
-      }
+      const maxTries = 3;
+      let currentTry = 0;
 
-      const root = createRootWithCorePlugins(
-        {
-          xpack: {
-            ...kbnConfig.xpack,
-            fleet: {
-              ...kbnConfig.xpack.fleet,
-              registryUrl,
+      const startOrRestart = async () => {
+        if (kbnServer) {
+          await kbnServer.stop();
+        }
+
+        const root = createRootWithCorePlugins(
+          {
+            xpack: {
+              ...kbnConfig.xpack,
+              fleet: {
+                ...kbnConfig.xpack.fleet,
+                registryUrl,
+              },
             },
-          },
-          logging: {
-            appenders: {
-              file: {
-                type: 'file',
-                fileName: logFilePath,
-                layout: {
-                  type: 'json',
+            logging: {
+              appenders: {
+                file: {
+                  type: 'file',
+                  fileName: logFilePath,
+                  layout: {
+                    type: 'json',
+                  },
                 },
               },
+              loggers: [
+                {
+                  name: 'root',
+                  appenders: ['file'],
+                },
+                {
+                  name: 'plugins.fleet',
+                  level: 'all',
+                },
+              ],
             },
-            loggers: [
-              {
-                name: 'root',
-                appenders: ['file'],
-              },
-              {
-                name: 'plugins.fleet',
-                level: 'all',
-              },
-            ],
           },
-        },
-        { oss: false }
-      );
+          { oss: false }
+        );
 
-      await root.preboot();
-      const coreSetup = await root.setup();
-      const coreStart = await root.start();
+        await root.preboot();
+        const coreSetup = await root.setup();
+        const coreStart = await root.start();
 
-      kbnServer = {
-        root,
-        coreSetup,
-        coreStart,
-        stop: async () => await root.shutdown(),
+        kbnServer = {
+          root,
+          coreSetup,
+          coreStart,
+          stop: async () => await root.shutdown(),
+        };
+
+        await waitForFleetSetup(kbnServer.root);
       };
-      await waitForFleetSetup(kbnServer.root);
+
+      try {
+        currentTry++;
+        await startOrRestart();
+      } catch (e) {
+        if (currentTry < maxTries) {
+          await startOrRestart();
+        } else {
+          throw e;
+        }
+      }
     };
+
     await startOrRestartKibana();
 
     return {
@@ -172,6 +191,7 @@ describe('Fleet cloud preconfiguration', () => {
                 enabled: false,
                 logs: false,
                 metrics: false,
+                traces: false,
               },
               protection: {
                 enabled: false,
@@ -333,6 +353,7 @@ describe('Fleet cloud preconfiguration', () => {
               'es-containerhost': {
                 hosts: ['https://cloudinternales:9200'],
                 type: 'elasticsearch',
+                preset: 'balanced',
               },
             },
             revision: 5,

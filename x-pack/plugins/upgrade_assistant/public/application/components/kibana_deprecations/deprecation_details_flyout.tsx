@@ -50,6 +50,12 @@ const i18nTexts = {
       defaultMessage: 'Quick resolve',
     }
   ),
+  markAsResolvedButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveButtonLabel',
+    {
+      defaultMessage: 'Mark as Resolved',
+    }
+  ),
   retryQuickResolveButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.retryQuickResolveButtonLabel',
     {
@@ -97,7 +103,15 @@ const i18nTexts = {
   ),
 };
 
-const getQuickResolveButtonLabel = (deprecationResolutionState?: DeprecationResolutionState) => {
+interface AvailableCorrectiveActions {
+  api: boolean;
+  manual: boolean;
+  markAsResolved: boolean;
+}
+const getQuickResolveButtonLabel = (
+  deprecationResolutionState: DeprecationResolutionState | undefined,
+  avilableCorrectiveActions: AvailableCorrectiveActions
+) => {
   if (deprecationResolutionState?.resolveDeprecationStatus === 'in_progress') {
     return i18nTexts.quickResolveInProgressButtonLabel;
   }
@@ -110,7 +124,13 @@ const getQuickResolveButtonLabel = (deprecationResolutionState?: DeprecationReso
     return i18nTexts.retryQuickResolveButtonLabel;
   }
 
-  return i18nTexts.quickResolveButtonLabel;
+  if (avilableCorrectiveActions.api) {
+    return i18nTexts.quickResolveButtonLabel;
+  }
+
+  if (avilableCorrectiveActions.markAsResolved) {
+    return i18nTexts.markAsResolvedButtonLabel;
+  }
 };
 
 export const DeprecationDetailsFlyout = ({
@@ -120,8 +140,18 @@ export const DeprecationDetailsFlyout = ({
   deprecationResolutionState,
 }: DeprecationDetailsFlyoutProps) => {
   const { documentationUrl, message, correctiveActions, title } = deprecation;
+  const messages = Array.isArray(message) ? message : [message];
+
   const isCurrent = deprecationResolutionState?.id === deprecation.id;
+  const avilableCorrectiveActions: AvailableCorrectiveActions = {
+    api: !!correctiveActions.api,
+    manual: correctiveActions.manualSteps && correctiveActions.manualSteps.length > 0,
+    markAsResolved: !!correctiveActions.mark_as_resolved_api,
+  };
   const isResolved = isCurrent && deprecationResolutionState?.resolveDeprecationStatus === 'ok';
+
+  const hasResolveButton =
+    avilableCorrectiveActions.api || avilableCorrectiveActions.markAsResolved;
 
   const onResolveDeprecation = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_KIBANA_QUICK_RESOLVE_CLICK);
@@ -155,7 +185,11 @@ export const DeprecationDetailsFlyout = ({
         )}
 
         <EuiText>
-          <p className="eui-textBreakWord">{message}</p>
+          {messages.map((m, i) => (
+            <p key={i} className="eui-textBreakWord">
+              {m}
+            </p>
+          ))}
           {documentationUrl && (
             <p>
               <DeprecationFlyoutLearnMoreLink documentationUrl={documentationUrl} />
@@ -221,7 +255,7 @@ export const DeprecationDetailsFlyout = ({
           </EuiFlexItem>
 
           {/* Only show the "Quick resolve" button if deprecation supports it and deprecation is not yet resolved */}
-          {correctiveActions.api && !isResolved && (
+          {hasResolveButton && !isResolved && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
@@ -231,7 +265,7 @@ export const DeprecationDetailsFlyout = ({
                   deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'
                 )}
               >
-                {getQuickResolveButtonLabel(deprecationResolutionState)}
+                {getQuickResolveButtonLabel(deprecationResolutionState, avilableCorrectiveActions)}
               </EuiButton>
             </EuiFlexItem>
           )}

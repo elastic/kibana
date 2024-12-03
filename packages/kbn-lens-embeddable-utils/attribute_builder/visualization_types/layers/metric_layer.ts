@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -16,6 +17,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { ChartColumn, ChartLayer, FormulaValueConfig } from '../../types';
 import { getDefaultReferences, getHistogramColumn } from '../../utils';
+import { METRIC_TREND_LINE_ID } from '../constants';
 import { FormulaColumn } from './columns/formula';
 
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -30,6 +32,7 @@ export interface MetricLayerOptions {
 export interface MetricLayerConfig {
   data: FormulaValueConfig;
   options?: MetricLayerOptions;
+  layerType?: typeof METRIC_TREND_LINE_ID;
   /**
    * It is possible to define a specific dataView for the layer. It will override the global chart one
    **/
@@ -38,8 +41,13 @@ export interface MetricLayerConfig {
 
 export class MetricLayer implements ChartLayer<MetricVisualizationState> {
   private column: ChartColumn;
-  constructor(private layerConfig: MetricLayerConfig) {
+  private layerConfig: MetricLayerConfig;
+  constructor(layerConfig: MetricLayerConfig) {
     this.column = new FormulaColumn(layerConfig.data);
+    this.layerConfig = {
+      ...layerConfig,
+      layerType: layerConfig.layerType ?? 'metricTrendline',
+    };
   }
 
   getLayer(

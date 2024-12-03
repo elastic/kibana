@@ -1,71 +1,67 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useState } from 'react';
-import { omit } from 'lodash';
 
 import {
-  EuiRadio,
   EuiButton,
-  EuiSpacer,
+  EuiButtonEmpty,
   EuiFormRow,
   EuiModalBody,
-  EuiButtonEmpty,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiRadio,
+  EuiSpacer,
 } from '@elastic/eui';
-import {
-  EmbeddablePackageState,
-  IEmbeddable,
-  PanelNotFoundError,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
-
-import { DashboardPanelState } from '../../common';
-import { pluginServices } from '../services/plugin_services';
-import { type DashboardContainer } from '../dashboard_container';
+import { omit } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../dashboard_constants';
+import { embeddableService } from '../services/kibana_services';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
+import { CopyToDashboardAPI } from './copy_to_dashboard_action';
 
 interface CopyToDashboardModalProps {
-  embeddable: IEmbeddable;
-  dashboardId?: string;
+  api: CopyToDashboardAPI;
   closeModal: () => void;
 }
 
 const DashboardPicker = withSuspense(LazyDashboardPicker);
 
-export function CopyToDashboardModal({
-  dashboardId,
-  embeddable,
-  closeModal,
-}: CopyToDashboardModalProps) {
-  const {
-    embeddable: { getStateTransfer },
-    dashboardCapabilities: { createNew: canCreateNew, showWriteControls: canEditExisting },
-  } = pluginServices.getServices();
-  const stateTransfer = getStateTransfer();
+export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalProps) {
+  const stateTransfer = useMemo(() => embeddableService.getStateTransfer(), []);
+  const { createNew: canCreateNew, showWriteControls: canEditExisting } = useMemo(
+    () => getDashboardCapabilities(),
+    []
+  );
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing'>('existing');
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
   );
 
-  const onSubmit = useCallback(() => {
-    const dashboard = embeddable.getRoot() as DashboardContainer;
-    const panelToCopy = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
-    if (!panelToCopy) {
+  const dashboardId = api.parentApi.savedObjectId.value;
+
+  const onSubmit = useCallback(async () => {
+    const dashboard = api.parentApi;
+    const panelToCopy = await dashboard.getDashboardPanelFromId(api.uuid);
+    const runtimeSnapshot = apiHasSnapshottableState(api) ? api.snapshotRuntimeState() : undefined;
+
+    if (!panelToCopy && !runtimeSnapshot) {
       throw new PanelNotFoundError();
     }
 
     const state: EmbeddablePackageState = {
-      type: embeddable.type,
-      input: {
+      type: panelToCopy.type,
+      input: runtimeSnapshot ?? {
         ...omit(panelToCopy.explicitInput, 'id'),
       },
       size: {
@@ -84,7 +80,7 @@ export function CopyToDashboardModal({
       state,
       path,
     });
-  }, [dashboardOption, embeddable, selectedDashboard, stateTransfer, closeModal]);
+  }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);
 
   const titleId = 'copyToDashboardTitle';
   const descriptionId = 'copyToDashboardDescription';

@@ -326,7 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
 
           await transform.testExecution.logTestStep('enables the index preview histogram charts');
-          await transform.wizard.enableIndexPreviewHistogramCharts(false);
+          await transform.wizard.enableIndexPreviewHistogramCharts(true);
           await transform.testExecution.logTestStep('displays the index preview histogram charts');
           await transform.wizard.assertIndexPreviewHistogramCharts(
             testData.expected.histogramCharts
@@ -406,9 +406,16 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertTransformDescriptionValue('');
           await transform.wizard.setTransformDescription(testData.transformDescription);
 
-          await transform.testExecution.logTestStep('inputs the destination index');
+          await transform.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
+          await transform.wizard.assertDestIndexSameAsIdSwitchExists();
+          await transform.wizard.assertDestIndexSameAsIdCheckState(true);
+
+          await transform.testExecution.logTestStep('should input the destination index');
+          await transform.wizard.setDestIndexSameAsIdCheckState(false);
           await transform.wizard.assertDestinationIndexInputExists();
-          await transform.wizard.assertDestinationIndexValue('');
+          await transform.wizard.assertDestinationIndexValue(testData.transformId);
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('displays the create data view switch');

@@ -7,17 +7,22 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { RuleDefinition } from './rule_definition';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('./rule_actions', () => ({
   RuleActions: () => {
     return <></>;
   },
+}));
+
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
 jest.mock('../../../lib/capabilities', () => ({
@@ -28,27 +33,10 @@ jest.mock('../../../lib/capabilities', () => ({
   hasManageApiKeysCapability: jest.fn(() => true),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../..', () => ({
-  useLoadRuleTypes: jest.fn(),
+jest.mock('../../../hooks/use_load_rule_types_query', () => ({
+  useLoadRuleTypesQuery: jest.fn(),
 }));
-const { useLoadRuleTypes } = jest.requireMock('../../../..');
-const ruleTypes = [
-  {
-    id: 'test_rule_type',
-    name: 'some rule type',
-    actionGroups: [{ id: 'default', name: 'Default' }],
-    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-    actionVariables: { context: [], state: [] },
-    defaultActionGroupId: 'default',
-    producer: ALERTS_FEATURE_ID,
-    minimumLicenseRequired: 'basic',
-    enabledInLicense: true,
-    authorizedConsumers: {
-      [ALERTS_FEATURE_ID]: { read: true, all: false },
-    },
-    ruleTaskTimeout: '1m',
-  },
-];
+const { useLoadRuleTypesQuery } = jest.requireMock('../../../hooks/use_load_rule_types_query');
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({
@@ -56,16 +44,46 @@ const mockedRuleTypeIndex = new Map(
       enabledInLicense: true,
       id: 'test_rule_type',
       name: 'test rule',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTING_FEATURE_ID,
+      minimumLicenseRequired: 'basic',
+      authorizedConsumers: {
+        [ALERTING_FEATURE_ID]: { read: true, all: false },
+      },
+      ruleTaskTimeout: '1m',
     },
     '2': {
       enabledInLicense: true,
       id: '2',
       name: 'test rule ok',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTING_FEATURE_ID,
+      minimumLicenseRequired: 'basic',
+      authorizedConsumers: {
+        [ALERTING_FEATURE_ID]: { read: true, all: false },
+      },
+      ruleTaskTimeout: '1m',
     },
     '3': {
       enabledInLicense: true,
       id: '3',
       name: 'test rule pending',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTING_FEATURE_ID,
+      minimumLicenseRequired: 'basic',
+      authorizedConsumers: {
+        [ALERTING_FEATURE_ID]: { read: true, all: false },
+      },
+      ruleTaskTimeout: '1m',
     },
   })
 );
@@ -116,15 +134,17 @@ describe('Rule Definition', () => {
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
 
-    useLoadRuleTypes.mockReturnValue({ ruleTypes, ruleTypeIndex: mockedRuleTypeIndex });
+    useLoadRuleTypesQuery.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
 
     wrapper = mount(
-      <RuleDefinition
-        rule={mockedRule}
-        actionTypeRegistry={actionTypeRegistry}
-        onEditRule={jest.fn()}
-        ruleTypeRegistry={ruleTypeRegistry}
-      />
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleDefinition
+          rule={mockedRule}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
     );
     await act(async () => {
       await nextTick();
@@ -141,8 +161,8 @@ describe('Rule Definition', () => {
     expect(wrapper.find('[data-test-subj="ruleSummaryRuleDefinition"]')).toBeTruthy();
   });
 
-  it('show rule type name from "useLoadRuleTypes"', async () => {
-    expect(useLoadRuleTypes).toHaveBeenCalledTimes(2);
+  it('show rule type name from "useLoadRuleTypesQuery"', async () => {
+    expect(useLoadRuleTypesQuery).toHaveBeenCalledTimes(2);
     const ruleType = wrapper.find('[data-test-subj="ruleSummaryRuleType"]');
     expect(ruleType).toBeTruthy();
     expect(ruleType.find('div.euiText').text()).toEqual(

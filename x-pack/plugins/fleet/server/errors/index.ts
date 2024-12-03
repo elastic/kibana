@@ -26,8 +26,10 @@ export class RegistryResponseError extends RegistryError {
     super(message);
   }
 }
-export class PackageNotFoundError extends FleetError {}
-export class PackageKeyInvalidError extends FleetError {}
+
+// Package errors
+
+export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
@@ -37,22 +39,54 @@ export class PackageFailedVerificationError extends FleetError {
     };
   }
 }
-export class AgentPolicyError extends FleetError {}
-export class AgentPolicyNotFoundError extends FleetError {}
-export class AgentNotFoundError extends FleetError {}
-export class AgentActionNotFoundError extends FleetError {}
-export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class PackageUnsupportedMediaTypeError extends FleetError {}
 export class PackageInvalidArchiveError extends FleetError {}
-export class PackageCacheError extends FleetError {}
-export class PackageOperationNotSupportedError extends FleetError {}
+export class PackageRemovalError extends FleetError {}
+export class PackageESError extends FleetError {}
 export class ConcurrentInstallOperationError extends FleetError {}
+export class PackageSavedObjectConflictError extends FleetError {}
+export class KibanaSOReferenceError extends FleetError {}
+export class PackageAlreadyInstalledError extends FleetError {}
+
+export class AgentPolicyError extends FleetError {}
+export class AgentRequestInvalidError extends FleetError {}
+export class AgentPolicyInvalidError extends FleetError {}
+
+export class AgentlessAgentCreateError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating agentless agent in Fleet, ${message}`);
+  }
+}
+export class AgentlessAgentDeleteError extends FleetError {
+  constructor(message: string) {
+    super(`Error deleting agentless agent in Fleet, ${message}`);
+  }
+}
+export class AgentlessAgentConfigError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating Agentless API configuration in Fleet, ${message}`);
+  }
+}
+
+export class AgentlessPolicyExistsRequestError extends AgentPolicyError {
+  constructor(message: string) {
+    super(`Unable to create integration. ${message}`);
+  }
+}
+
+export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
 export class PackagePolicyNameExistsError extends FleetError {}
-export class PackagePolicyNotFoundError extends FleetError {}
-export class BundledPackageNotFoundError extends FleetError {}
+export class BundledPackageLocationNotFoundError extends FleetError {}
+
+export class PackagePolicyRequestError extends FleetError {}
+export class PackagePolicyMultipleAgentPoliciesError extends FleetError {}
+export class PackagePolicyOutputError extends FleetError {}
+export class PackagePolicyContentPackageError extends FleetError {}
+
+export class EnrollmentKeyNameExistsError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(
@@ -71,11 +105,31 @@ export class FleetEncryptedSavedObjectEncryptionKeyRequired extends FleetError {
 export class FleetSetupError extends FleetError {}
 export class GenerateServiceTokenError extends FleetError {}
 export class FleetUnauthorizedError extends FleetError {}
+export class FleetNotFoundError<TMeta = unknown> extends FleetError<TMeta> {}
+export class FleetTooManyRequestsError extends FleetError {}
 
 export class OutputUnauthorizedError extends FleetError {}
 export class OutputInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
+export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}
+
+// Not found errors
+export class AgentNotFoundError extends FleetNotFoundError<{ agentId: string }> {}
+export class AgentPolicyNotFoundError extends FleetNotFoundError {}
+export class AgentActionNotFoundError extends FleetNotFoundError {}
+export class DownloadSourceNotFound extends FleetNotFoundError {}
+export class EnrollmentKeyNotFoundError extends FleetNotFoundError {}
+export class FleetServerHostNotFoundError extends FleetNotFoundError {}
+export class SigningServiceNotFoundError extends FleetNotFoundError {}
+export class InputNotFoundError extends FleetNotFoundError {}
+export class OutputNotFoundError extends FleetNotFoundError {}
+export class PackageNotFoundError extends FleetNotFoundError {}
+export class PackagePolicyNotFoundError extends FleetNotFoundError<{
+  /** The package policy ID that was not found */
+  packagePolicyId: string;
+}> {}
+export class StreamNotFoundError extends FleetNotFoundError {}
 
 export class FleetServerHostUnauthorizedError extends FleetUnauthorizedError {}
 export class FleetProxyUnauthorizedError extends FleetUnauthorizedError {}

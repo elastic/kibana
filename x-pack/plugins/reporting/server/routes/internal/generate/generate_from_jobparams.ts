@@ -7,8 +7,8 @@
 
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import type { Logger } from '@kbn/core/server';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingCore } from '../../..';
-import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { authorizedUserPreRouting } from '../../common';
 import { RequestHandler } from '../../common/generate';
 

@@ -1,38 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { LANDING_PAGE_PATH } from '../../dashboard_constants';
-import { pluginServices } from '../../services/plugin_services';
+import { coreServices, urlForwardingService } from '../../services/kibana_services';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 let bannerId: string | undefined;
 
 export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
   const { restorePreviousUrl } = useDashboardMountContext();
-  const {
-    settings: {
-      theme: { theme$ },
-    },
-    overlays: { banners },
-    urlForwarding: { navigateToLegacyKibanaUrl },
-  } = pluginServices.getServices();
 
   useEffect(() => {
     restorePreviousUrl();
-    const { navigated } = navigateToLegacyKibanaUrl(
+    const { navigated } = urlForwardingService.navigateToLegacyKibanaUrl(
       history.location.pathname + history.location.search
     );
 
@@ -41,7 +35,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
         defaultMessage: 'Page not found',
       });
 
-      bannerId = banners.replace(
+      bannerId = coreServices.overlays.banners.replace(
         bannerId,
         toMountPoint(
           <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
@@ -55,20 +49,20 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
               />
             </p>
           </EuiCallOut>,
-          { theme$ }
+          { analytics: coreServices.analytics, i18n: coreServices.i18n, theme: coreServices.theme }
         )
       );
 
       // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
       setTimeout(() => {
         if (bannerId) {
-          banners.remove(bannerId);
+          coreServices.overlays.banners.remove(bannerId);
         }
       }, 15000);
 
       history.replace(LANDING_PAGE_PATH);
     }
-  }, [restorePreviousUrl, navigateToLegacyKibanaUrl, banners, theme$, history]);
+  }, [restorePreviousUrl, history]);
 
   return null;
 };

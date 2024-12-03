@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -42,128 +43,134 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
     const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
-    it('should handle snooze rule request appropriately', async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          connector_type_id: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
-
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            enabled: false,
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
+    describe('handle snooze rule request appropriately', function () {
+      this.tags('skipFIPS');
+      it('should handle snooze rule request appropriately', async () => {
+        const { body: createdConnector } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY Connector',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
           })
-        )
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
-      const response = await alertUtils
-        .getSnoozeRequest(createdRule.id)
-        .send({ snooze_schedule: SNOOZE_SCHEDULE });
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+              actions: [
+                {
+                  id: createdConnector.id,
+                  group: 'default',
+                  params: {},
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      expect(response.statusCode).to.eql(204);
-      expect(response.body).to.eql('');
-      const { body: updatedAlert } = await supertestWithoutAuth
-        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
-      expect(updatedAlert.snooze_schedule.length).to.eql(1);
-      const { rRule, duration } = updatedAlert.snooze_schedule[0];
-      expect(rRule.dtstart).to.eql(NOW);
-      expect(duration).to.eql(SNOOZE_SCHEDULE.duration);
-      expect(updatedAlert.mute_all).to.eql(false);
-      // Ensure AAD isn't broken
-      await checkAAD({
-        supertest,
-        spaceId: Spaces.space1.id,
-        type: 'alert',
-        id: createdRule.id,
+        const response = await alertUtils
+          .getSnoozeRequest(createdRule.id)
+          .send({ snooze_schedule: SNOOZE_SCHEDULE });
+
+        expect(response.statusCode).to.eql(204);
+        expect(response.body).to.eql('');
+        const { body: updatedAlert } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        expect(updatedAlert.snooze_schedule.length).to.eql(1);
+        const { rRule, duration } = updatedAlert.snooze_schedule[0];
+        expect(rRule.dtstart).to.eql(NOW);
+        expect(duration).to.eql(SNOOZE_SCHEDULE.duration);
+        expect(updatedAlert.mute_all).to.eql(false);
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest,
+          spaceId: Spaces.space1.id,
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: createdRule.id,
+        });
       });
     });
 
-    it('should handle snooze rule request appropriately when duration is -1', async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          connector_type_id: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
-
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            enabled: false,
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
+    describe('handle snooze rule request appropriately when duration is -1', function () {
+      this.tags('skipFIPS');
+      it('should handle snooze rule request appropriately when duration is -1', async () => {
+        const { body: createdConnector } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY Connector',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
           })
-        )
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
-      const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-        snooze_schedule: {
-          ...SNOOZE_SCHEDULE,
-          duration: -1,
-        },
-      });
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+              actions: [
+                {
+                  id: createdConnector.id,
+                  group: 'default',
+                  params: {},
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      expect(response.statusCode).to.eql(204);
-      expect(response.body).to.eql('');
-      const { body: updatedAlert } = await supertestWithoutAuth
-        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
-      expect(updatedAlert.snooze_schedule).to.eql([]);
-      expect(updatedAlert.mute_all).to.eql(true);
-      // Ensure AAD isn't broken
-      await checkAAD({
-        supertest,
-        spaceId: Spaces.space1.id,
-        type: 'alert',
-        id: createdRule.id,
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            duration: -1,
+          },
+        });
+
+        expect(response.statusCode).to.eql(204);
+        expect(response.body).to.eql('');
+        const { body: updatedAlert } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        expect(updatedAlert.snooze_schedule).to.eql([]);
+        expect(updatedAlert.mute_all).to.eql(true);
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest,
+          spaceId: Spaces.space1.id,
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: createdRule.id,
+        });
       });
     });
 
     it('should not trigger actions when snoozed', async () => {
-      const { body: createdAction, status: connStatus } = await supertest
+      const { body: createdConnector, status: connStatus } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'MY action',
+          name: 'MY Connector',
           connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         });
       expect(connStatus).to.be(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       log.info('creating rule');
       const { body: createdRule, status: ruleStatus } = await supertest
@@ -181,7 +188,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
             },
             actions: [
               {
-                id: createdAction.id,
+                id: createdConnector.id,
                 group: 'default',
                 params: {},
               },
@@ -242,156 +249,162 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       expect(actionsDuring).to.be(0);
     });
 
-    it('should prevent more than 5 schedules from being added to a rule', async () => {
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            enabled: false,
+    describe('prevent more than 5 schedules from being added to a rule', function () {
+      this.tags('skipFIPS');
+      it('should prevent more than 5 schedules from being added to a rule', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        // Creating 5 snooze schedules, using Promise.all is very flaky, therefore
+        // the schedules are being created 1 at a time
+        await alertUtils
+          .getSnoozeRequest(createdRule.id)
+          .send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
+            },
           })
-        )
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+          .expect(204);
+        await alertUtils
+          .getSnoozeRequest(createdRule.id)
+          .send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
+            },
+          })
+          .expect(204);
+        await alertUtils
+          .getSnoozeRequest(createdRule.id)
+          .send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
+            },
+          })
+          .expect(204);
 
-      // Creating 5 snooze schedules, using Promise.all is very flaky, therefore
-      // the schedules are being created 1 at a time
-      await alertUtils
-        .getSnoozeRequest(createdRule.id)
-        .send({
-          snooze_schedule: {
-            ...SNOOZE_SCHEDULE,
-            id: uuidv4(),
-          },
-        })
-        .expect(204);
-      await alertUtils
-        .getSnoozeRequest(createdRule.id)
-        .send({
-          snooze_schedule: {
-            ...SNOOZE_SCHEDULE,
-            id: uuidv4(),
-          },
-        })
-        .expect(204);
-      await alertUtils
-        .getSnoozeRequest(createdRule.id)
-        .send({
-          snooze_schedule: {
-            ...SNOOZE_SCHEDULE,
-            id: uuidv4(),
-          },
-        })
-        .expect(204);
+        await alertUtils
+          .getSnoozeRequest(createdRule.id)
+          .send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
+            },
+          })
+          .expect(204);
 
-      await alertUtils
-        .getSnoozeRequest(createdRule.id)
-        .send({
+        await alertUtils
+          .getSnoozeRequest(createdRule.id)
+          .send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
+            },
+          })
+          .expect(204);
+
+        // Adding the 6th snooze schedule, should fail
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
             id: uuidv4(),
           },
-        })
-        .expect(204);
-
-      await alertUtils
-        .getSnoozeRequest(createdRule.id)
-        .send({
-          snooze_schedule: {
-            ...SNOOZE_SCHEDULE,
-            id: uuidv4(),
-          },
-        })
-        .expect(204);
-
-      // Adding the 6th snooze schedule, should fail
-      const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-        snooze_schedule: {
-          ...SNOOZE_SCHEDULE,
-          id: uuidv4(),
-        },
+        });
+        expect(response.statusCode).to.eql(400);
+        expect(response.body.message).to.eql('Rule cannot have more than 5 snooze schedules');
       });
-      expect(response.statusCode).to.eql(400);
-      expect(response.body.message).to.eql('Rule cannot have more than 5 snooze schedules');
     });
 
-    it('should clear the snooze after it expires', async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          connector_type_id: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
-
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            name: 'should not trigger actions when snoozed',
-            rule_type_id: 'test.patternFiring',
-            schedule: { interval: '1s' },
-            throttle: null,
-            notify_when: 'onActiveAlert',
-            params: {
-              pattern: { instance: arrayOfTrues(100) },
-            },
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
+    describe('clear the snooze after it expires', function () {
+      this.tags('skipFIPS');
+      it('should clear the snooze after it expires', async () => {
+        const { body: createdConnector } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY Connector',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
           })
-        )
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-      const dateStart = new Date().toISOString();
-      const snooze = {
-        ...SNOOZE_SCHEDULE,
-        rRule: {
-          ...SNOOZE_SCHEDULE.rRule,
-          // updating the dtstart to the current time because otherwise the snooze might be over already
-          dtstart: dateStart,
-        },
-        duration: 3000,
-      };
-
-      const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-        snooze_schedule: snooze,
-      });
-
-      expect(response.statusCode).to.eql(204);
-      expect(response.body).to.eql('');
-
-      await retry.try(async () => {
-        const { body: updatedAlert } = await supertestWithoutAuth
-          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
-          .set('kbn-xsrf', 'foo')
           .expect(200);
-        expect(updatedAlert.snooze_schedule).to.eql([snooze]);
-      });
-      log.info('wait for snoozing to end');
-      await retry.try(async () => {
-        const { body: alertWithExpiredSnooze } = await supertestWithoutAuth
-          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+        objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
+
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              name: 'should not trigger actions when snoozed',
+              rule_type_id: 'test.patternFiring',
+              schedule: { interval: '1s' },
+              throttle: null,
+              notify_when: 'onActiveAlert',
+              params: {
+                pattern: { instance: arrayOfTrues(100) },
+              },
+              actions: [
+                {
+                  id: createdConnector.id,
+                  group: 'default',
+                  params: {},
+                },
+              ],
+            })
+          )
           .expect(200);
-        expect(alertWithExpiredSnooze.snooze_schedule).to.eql([]);
-      });
-      // Ensure AAD isn't broken
-      await checkAAD({
-        supertest,
-        spaceId: Spaces.space1.id,
-        type: 'alert',
-        id: createdRule.id,
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const dateStart = new Date().toISOString();
+        const snooze = {
+          ...SNOOZE_SCHEDULE,
+          rRule: {
+            ...SNOOZE_SCHEDULE.rRule,
+            // updating the dtstart to the current time because otherwise the snooze might be over already
+            dtstart: dateStart,
+          },
+          duration: 3000,
+        };
+
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+          snooze_schedule: snooze,
+        });
+
+        expect(response.statusCode).to.eql(204);
+        expect(response.body).to.eql('');
+
+        await retry.try(async () => {
+          const { body: updatedAlert } = await supertestWithoutAuth
+            .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(200);
+          expect(updatedAlert.snooze_schedule).to.eql([snooze]);
+        });
+        log.info('wait for snoozing to end');
+        await retry.try(async () => {
+          const { body: alertWithExpiredSnooze } = await supertestWithoutAuth
+            .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(200);
+          expect(alertWithExpiredSnooze.snooze_schedule).to.eql([]);
+        });
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest,
+          spaceId: Spaces.space1.id,
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: createdRule.id,
+        });
       });
     });
   });

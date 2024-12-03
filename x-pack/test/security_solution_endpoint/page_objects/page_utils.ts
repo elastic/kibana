@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export function EndpointPageUtils({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
 
   return {
     /**
@@ -19,15 +18,9 @@ export function EndpointPageUtils({ getService }: FtrProviderContext) {
      * @param euiCheckBoxTestId
      */
     async clickOnEuiCheckbox(euiCheckBoxTestId: string) {
-      // This utility is needed because EuiCheckbox forwards the test subject on to
-      // the actual `<input>` which is not actually visible/accessible on the page.
-      // In order to actually cause the state of the checkbox to change, the `<label>`
-      // must be clicked.
-      const euiCheckboxLabelElement = await find.byXPath(
-        `//input[@data-test-subj='${euiCheckBoxTestId}']/../label`
-      );
-
-      await euiCheckboxLabelElement.click();
+      const euiCheckboxInput = await testSubjects.find(euiCheckBoxTestId);
+      await euiCheckboxInput.scrollIntoView();
+      await euiCheckboxInput.click();
     },
 
     /**

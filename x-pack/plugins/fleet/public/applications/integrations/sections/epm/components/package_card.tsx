@@ -7,10 +7,20 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -25,12 +35,21 @@ import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../component
 import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 
+import {
+  InstallationStatus,
+  getLineClampStyles,
+  shouldShowInstallationStatus,
+} from './installation_status';
+
 export type PackageCardProps = IntegrationCardItem;
 
 // Min-height is roughly 3 lines of content.
 // This keeps the cards from looking overly unbalanced because of content differences.
-const Card = styled(EuiCard)`
+const Card = styled(EuiCard)<{ isquickstart?: boolean; $maxCardHeight?: number }>`
   min-height: 127px;
+  border-color: ${({ isquickstart }) => (isquickstart ? '#ba3d76' : null)};
+  ${({ $maxCardHeight }) =>
+    $maxCardHeight ? `max-height: ${$maxCardHeight}px; overflow: hidden;` : ''};
 `;
 
 export function PackageCard({
@@ -38,6 +57,7 @@ export function PackageCard({
   name,
   title,
   version,
+  type,
   icons,
   integration,
   url,
@@ -48,9 +68,17 @@ export function PackageCard({
   isUnverified,
   isUpdateAvailable,
   showLabels = true,
+  showInstallationStatus,
+  extraLabelsBadges,
+  isQuickstart = false,
+  installStatus,
+  onCardClick: onClickProp = undefined,
+  isCollectionCard = false,
+  titleLineClamp,
+  descriptionLineClamp,
+  maxCardHeight,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
-
   if (release && release !== 'ga') {
     releaseBadge = (
       <EuiFlexItem grow={false}>
@@ -63,7 +91,6 @@ export function PackageCard({
   }
 
   let verifiedBadge: React.ReactNode | null = null;
-
   if (isUnverified && showLabels) {
     verifiedBadge = (
       <EuiFlexItem grow={false}>
@@ -81,7 +108,6 @@ export function PackageCard({
   }
 
   let hasDeferredInstallationsBadge: React.ReactNode | null = null;
-
   if (isReauthorizationRequired && showLabels) {
     hasDeferredInstallationsBadge = (
       <EuiFlexItem grow={false}>
@@ -100,16 +126,50 @@ export function PackageCard({
   }
 
   let updateAvailableBadge: React.ReactNode | null = null;
-
   if (isUpdateAvailable && showLabels) {
     updateAvailableBadge = (
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
-          <EuiBadge color="warning">
+          <EuiBadge color="hollow" iconType="sortUp">
             <FormattedMessage
               id="xpack.fleet.packageCard.updateAvailableLabel"
               defaultMessage="Update available"
+            />
+          </EuiBadge>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  let collectionButton: React.ReactNode | null = null;
+  if (isCollectionCard) {
+    collectionButton = (
+      <EuiFlexItem>
+        <EuiButton
+          color="text"
+          data-test-subj="xpack.fleet.packageCard.collectionButton"
+          iconType="package"
+        >
+          <FormattedMessage
+            id="xpack.fleet.packageCard.collectionButton.copy"
+            defaultMessage="View collection"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    );
+  }
+
+  let contentBadge: React.ReactNode | null = null;
+  if (type === 'content') {
+    contentBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="hollow">
+            <FormattedMessage
+              id="xpack.fleet.packageCard.contentPackageLabel"
+              defaultMessage="Content only"
             />
           </EuiBadge>
         </span>
@@ -143,7 +203,31 @@ export function PackageCard({
     >
       <TrackApplicationView viewId={testid}>
         <Card
+          // EUI TODO: Custom component CSS
+          css={css`
+            position: relative;
+            [class*='euiCard__content'] {
+              display: flex;
+              flex-direction: column;
+              block-size: 100%;
+            }
+
+            [class*='euiCard__description'] {
+              flex-grow: 1;
+              ${descriptionLineClamp
+                ? shouldShowInstallationStatus({ installStatus, showInstallationStatus })
+                  ? getLineClampStyles(1) // Show only one line of description if installation status is shown
+                  : getLineClampStyles(descriptionLineClamp)
+                : ''}
+            }
+
+            [class*='euiCard__titleButton'] {
+              ${getLineClampStyles(titleLineClamp)}
+            }
+          `}
           data-test-subj={testid}
+          isquickstart={isQuickstart}
+          betaBadgeProps={quickstartBadge(isQuickstart)}
           layout="horizontal"
           title={title || ''}
           titleSize="xs"
@@ -158,16 +242,35 @@ export function PackageCard({
               size="xl"
             />
           }
-          onClick={onCardClick}
+          onClick={onClickProp ?? onCardClick}
+          $maxCardHeight={maxCardHeight}
         >
           <EuiFlexGroup gutterSize="xs" wrap={true}>
+            {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
             {verifiedBadge}
             {updateAvailableBadge}
+            {contentBadge}
             {releaseBadge}
             {hasDeferredInstallationsBadge}
+            {collectionButton}
+            <InstallationStatus
+              installStatus={installStatus}
+              showInstallationStatus={showInstallationStatus}
+            />
           </EuiFlexGroup>
         </Card>
       </TrackApplicationView>
     </WithGuidedOnboardingTour>
   );
+}
+
+function quickstartBadge(isQuickstart: boolean): { label: string; color: 'accent' } | undefined {
+  return isQuickstart
+    ? {
+        label: i18n.translate('xpack.fleet.packageCard.quickstartBadge.label', {
+          defaultMessage: 'Quickstart',
+        }),
+        color: 'accent',
+      }
+    : undefined;
 }

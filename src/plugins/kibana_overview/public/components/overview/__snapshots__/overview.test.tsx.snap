@@ -35,16 +35,8 @@ exports[`Overview renders correctly 1`] = `
   }
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -78,22 +70,22 @@ exports[`Overview renders correctly 1`] = `
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -120,19 +112,36 @@ exports[`Overview renders correctly 1`] = `
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
   newsFetchResult={
@@ -216,10 +225,9 @@ exports[`Overview renders correctly 1`] = `
       Object {
         "bottomBorder": true,
         "iconType": "logoKibana",
-        "pageTitle": <FormattedMessage
+        "pageTitle": <Memo(MemoizedFormattedMessage)
           defaultMessage="Analytics"
           id="kibanaOverview.header.title"
-          values={Object {}}
         />,
         "rightSideItems": Array [],
       }
@@ -266,16 +274,8 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
   }
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -309,22 +309,22 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -351,19 +351,36 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
   newsFetchResult={
@@ -442,7 +459,7 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
     ]
   }
 >
-  <AnalyticsNoDataPageKibanaProvider
+  <ForwardRef
     coreStart={
       Object {
         "application": Object {
@@ -482,48 +499,6 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                   "/app/integrations/browse",
                 ],
                 Array [
-                  "kibana_landing_page",
-                ],
-                Array [
-                  "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                ],
-                Array [
-                  "path-to-solution-two",
-                ],
-                Array [
-                  "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                ],
-                Array [
-                  "path-to-solution-three",
-                ],
-                Array [
-                  "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                ],
-                Array [
-                  "path-to-solution-four",
-                ],
-                Array [
-                  "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
                   "/app/integrations/browse",
                 ],
                 Array [
@@ -552,6 +527,69 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                 ],
                 Array [
                   "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "kibana_landing_page",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                ],
+                Array [
+                  "path-to-solution-two",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                ],
+                Array [
+                  "path-to-solution-three",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                ],
+                Array [
+                  "path-to-solution-four",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                ],
+                Array [
+                  "/app/integrations/browse",
                 ],
                 Array [
                   "/app/integrations/browse",
@@ -588,62 +626,6 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                 },
                 Object {
                   "type": "return",
-                  "value": "kibana_landing_page",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                },
-                Object {
-                  "type": "return",
-                  "value": "path-to-solution-two",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                },
-                Object {
-                  "type": "return",
-                  "value": "path-to-solution-three",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                },
-                Object {
-                  "type": "return",
-                  "value": "path-to-solution-four",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
                   "value": "/app/integrations/browse",
                 },
                 Object {
@@ -681,6 +663,90 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                 Object {
                   "type": "return",
                   "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "kibana_landing_page",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-two",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-three",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-four",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
                 },
                 Object {
                   "type": "return",
@@ -727,9 +793,382 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
         "hasUserDataView": [MockFunction],
       }
     }
+    share={
+      Object {
+        "url": Object {
+          "locators": Object {
+            "get": [Function],
+          },
+        },
+      }
+    }
   >
-    <MockedAnalyticsNoDataPage />
-  </AnalyticsNoDataPageKibanaProvider>
+    <KibanaErrorBoundaryProvider>
+      <KibanaErrorBoundary>
+        <ErrorBoundaryInternal
+          services={
+            Object {
+              "errorService": KibanaErrorService {
+                "analytics": undefined,
+              },
+              "onClickRefresh": [Function],
+            }
+          }
+        >
+          <Suspense
+            fallback={<Fallback />}
+          >
+            <AnalyticsNoDataPageKibanaProvider
+              coreStart={
+                Object {
+                  "application": Object {
+                    "capabilities": Object {
+                      "navLinks": Object {
+                        "integrations": Object {
+                          "canAccessFleet": false,
+                        },
+                      },
+                    },
+                    "currentAppId$": Observable {},
+                    "navigateToUrl": [MockFunction],
+                  },
+                  "chrome": undefined,
+                  "customBranding": undefined,
+                  "docLinks": Object {
+                    "links": Object {
+                      "kibana": Object {
+                        "guide": "kibana_docs_url",
+                      },
+                    },
+                  },
+                  "http": Object {
+                    "basePath": Object {
+                      "prepend": [MockFunction] {
+                        "calls": Array [
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "kibana_landing_page",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                          ],
+                          Array [
+                            "path-to-solution-two",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                          ],
+                          Array [
+                            "path-to-solution-three",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                          ],
+                          Array [
+                            "path-to-solution-four",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "kibana_landing_page",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                          ],
+                          Array [
+                            "path-to-solution-two",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                          ],
+                          Array [
+                            "path-to-solution-three",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                          ],
+                          Array [
+                            "path-to-solution-four",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                        ],
+                        "results": Array [
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "kibana_landing_page",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "path-to-solution-two",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "path-to-solution-three",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "path-to-solution-four",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "kibana_landing_page",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "path-to-solution-two",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "path-to-solution-three",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "path-to-solution-four",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                        ],
+                      },
+                    },
+                  },
+                }
+              }
+              dataViewEditor={
+                Object {
+                  "IndexPatternEditorComponent": [MockFunction],
+                  "dataViewEditorServiceFactory": [MockFunction],
+                  "openEditor": [MockFunction],
+                  "userPermissions": Object {
+                    "editDataView": [MockFunction],
+                  },
+                }
+              }
+              dataViews={
+                Object {
+                  "hasData": Object {
+                    "hasESData": [Function],
+                    "hasUserDataView": [Function],
+                  },
+                  "hasUserDataView": [MockFunction],
+                }
+              }
+              share={
+                Object {
+                  "url": Object {
+                    "locators": Object {
+                      "get": [Function],
+                    },
+                  },
+                }
+              }
+            >
+              <MockedAnalyticsNoDataPage />
+            </AnalyticsNoDataPageKibanaProvider>
+          </Suspense>
+        </ErrorBoundaryInternal>
+      </KibanaErrorBoundary>
+    </KibanaErrorBoundaryProvider>
+  </ForwardRef>
 </Overview>
 `;
 
@@ -738,16 +1177,8 @@ exports[`Overview renders correctly without features 1`] = `
   features={Array []}
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -781,22 +1212,22 @@ exports[`Overview renders correctly without features 1`] = `
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -823,19 +1254,36 @@ exports[`Overview renders correctly without features 1`] = `
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
   newsFetchResult={
@@ -919,10 +1367,9 @@ exports[`Overview renders correctly without features 1`] = `
       Object {
         "bottomBorder": true,
         "iconType": "logoKibana",
-        "pageTitle": <FormattedMessage
+        "pageTitle": <Memo(MemoizedFormattedMessage)
           defaultMessage="Analytics"
           id="kibanaOverview.header.title"
-          values={Object {}}
         />,
         "rightSideItems": Array [],
       }
@@ -969,16 +1416,8 @@ exports[`Overview renders correctly without solutions 1`] = `
   }
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -1012,22 +1451,22 @@ exports[`Overview renders correctly without solutions 1`] = `
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -1054,19 +1493,36 @@ exports[`Overview renders correctly without solutions 1`] = `
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
   newsFetchResult={
@@ -1115,10 +1571,9 @@ exports[`Overview renders correctly without solutions 1`] = `
       Object {
         "bottomBorder": true,
         "iconType": "logoKibana",
-        "pageTitle": <FormattedMessage
+        "pageTitle": <Memo(MemoizedFormattedMessage)
           defaultMessage="Analytics"
           id="kibanaOverview.header.title"
-          values={Object {}}
         />,
         "rightSideItems": Array [],
       }

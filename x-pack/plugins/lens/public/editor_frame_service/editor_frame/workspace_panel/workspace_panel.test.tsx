@@ -18,11 +18,6 @@ import {
 } from '../../../mocks';
 
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
-jest.mock('../../../debounced_component', () => {
-  return {
-    debouncedComponent: (fn: unknown) => fn,
-  };
-});
 
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
@@ -44,7 +39,7 @@ import { getLensInspectorService } from '../../../lens_inspector_service';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
 import { Ast, toExpression } from '@kbn/interpreter';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -62,7 +57,7 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
 
 const mockVisualization = createMockVisualization();
 const mockVisualization2 = createMockVisualization();
-const mockDatasource = createMockDatasource('testDatasource');
+const mockDatasource = createMockDatasource();
 
 let expressionRendererMock = createExpressionRendererMock();
 const trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
@@ -673,6 +668,7 @@ describe('workspace_panel', () => {
     it('should show configuration error messages if present', async () => {
       const messages: UserMessage[] = [
         {
+          uniqueId: 'unique_id_1',
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }],
@@ -680,6 +676,7 @@ describe('workspace_panel', () => {
           longMessage: "i'm an error",
         },
         {
+          uniqueId: 'unique_id_2',
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }],
@@ -703,9 +700,9 @@ describe('workspace_panel', () => {
       instance.update();
 
       // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
-      expect(
-        instance.find('[data-test-subj="workspace-more-errors-button"]').last().text()
-      ).toEqual(' +1 error');
+      expect(instance.find('[data-test-subj="workspace-error-message"]').last().text()).toEqual(
+        `hey there i'm an error`
+      );
       expect(instance.find(expressionRendererMock)).toHaveLength(0);
       expect(getUserMessages).toHaveBeenCalledWith(['visualization', 'visualizationInEditor'], {
         severity: 'error',
@@ -941,14 +938,12 @@ describe('workspace_panel', () => {
           datasourceState: {},
         }),
       });
-      expect(screen.getByTestId('lnsWorkspace').classList).toContain('domDragDrop-isDropTarget');
+      expect(screen.getByTestId('lnsWorkspace').classList).toContain('domDroppable--active');
     });
 
     it('should refuse to drop if there are no suggestions', () => {
       renderWithDndAndRedux();
-      expect(screen.getByTestId('lnsWorkspace').classList).not.toContain(
-        'domDragDrop-isDropTarget'
-      );
+      expect(screen.getByTestId('lnsWorkspace').classList).not.toContain('domDroppable--active');
     });
   });
 });

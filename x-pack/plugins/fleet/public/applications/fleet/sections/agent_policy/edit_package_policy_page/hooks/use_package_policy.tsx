@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 
@@ -15,7 +15,7 @@ import type {
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../../common/types/rest_spec';
 import {
-  sendGetOneAgentPolicy,
+  sendBulkGetAgentPolicies,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
   sendGetSettings,
@@ -74,13 +74,14 @@ export function usePackagePolicyWithRelatedData(
     description: '',
     namespace: '',
     policy_id: '',
+    policy_ids: [],
     enabled: true,
     inputs: [],
     version: '',
   });
   const [originalPackagePolicy, setOriginalPackagePolicy] =
     useState<GetOnePackagePolicyResponse['item']>();
-  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
+  const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
   const [loadingError, setLoadingError] = useState<Error>();
@@ -93,11 +94,14 @@ export function usePackagePolicyWithRelatedData(
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const savePackagePolicy = async () => {
+  const savePackagePolicy = async (packagePolicyOverride?: Partial<PackagePolicy>) => {
     setFormState('LOADING');
     const {
       policy: { elasticsearch, ...restPackagePolicy },
-    } = await prepareInputPackagePolicyDataset(packagePolicy);
+    } = await prepareInputPackagePolicyDataset({
+      ...packagePolicy,
+      ...(packagePolicyOverride ?? {}),
+    });
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
 
     setFormState('SUBMITTED');
@@ -111,7 +115,7 @@ export function usePackagePolicyWithRelatedData(
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          safeLoad
+          load
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -170,16 +174,16 @@ export function usePackagePolicyWithRelatedData(
           throw packagePolicyError;
         }
 
-        const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
-          packagePolicyData!.item.policy_id
-        );
+        if (packagePolicyData!.item.policy_ids && packagePolicyData!.item.policy_ids.length > 0) {
+          const { data, error: agentPolicyError } = await sendBulkGetAgentPolicies(
+            packagePolicyData!.item.policy_ids
+          );
 
-        if (agentPolicyError) {
-          throw agentPolicyError;
-        }
+          if (agentPolicyError) {
+            throw agentPolicyError;
+          }
 
-        if (agentPolicyData?.item) {
-          setAgentPolicy(agentPolicyData.item);
+          setAgentPolicies(data?.items ?? []);
         }
 
         const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
@@ -259,7 +263,7 @@ export function usePackagePolicyWithRelatedData(
                 ...restOfInput
               } = input;
 
-              let basePolicyInputVars: any =
+              const basePolicyInputVars: any =
                 isUpgradeScenario &&
                 basePolicy.inputs.find(
                   (i) => i.type === input.type && i.policy_template === input.policy_template
@@ -267,14 +271,7 @@ export function usePackagePolicyWithRelatedData(
               let newInputVars = inputVars;
               if (basePolicyInputVars && inputVars) {
                 // merging vars from dry run with updated ones
-                basePolicyInputVars = Object.keys(inputVars).reduce(
-                  (acc, curr) => ({ ...acc, [curr]: basePolicyInputVars[curr] }),
-                  {}
-                );
-                newInputVars = {
-                  ...inputVars,
-                  ...basePolicyInputVars,
-                };
+                newInputVars = mergeVars(inputVars, basePolicyInputVars);
               }
               // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
               if (basePackage.name === 'apm') {
@@ -317,7 +314,7 @@ export function usePackagePolicyWithRelatedData(
               const newValidationResults = validatePackagePolicy(
                 newPackagePolicy,
                 packageData.item,
-                safeLoad
+                load
               );
               setValidationResults(newValidationResults);
 
@@ -352,7 +349,7 @@ export function usePackagePolicyWithRelatedData(
     isUpgrade,
     savePackagePolicy,
     isLoadingData,
-    agentPolicy,
+    agentPolicies,
     loadingError,
     packagePolicy,
     originalPackagePolicy,

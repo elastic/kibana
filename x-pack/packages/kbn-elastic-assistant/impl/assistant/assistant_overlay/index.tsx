@@ -5,36 +5,38 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiModal } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiFlyoutResizable } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
+import { css } from '@emotion/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
-import { Assistant } from '..';
-import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
+import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
-const StyledEuiModal = styled(EuiModal)`
-  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
-  min-width: 95vw;
-  min-height: 25vh;
-`;
 
 /**
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
+
+export const UnifiedTimelineGlobalStyles = createGlobalStyle`
+  body:has(.timeline-portal-overlay-mask) .euiOverlayMask {
+    z-index: 1003 !important;
+  }
+`;
+
 export const AssistantOverlay = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>(
-    WELCOME_CONVERSATION_TITLE
-  );
+  // Why is this named Title and not Id?
+  const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay, localStorageLastConversationId } =
+  const { assistantTelemetry, setShowAssistantOverlay, getLastConversationId } =
     useAssistantContext();
+
+  const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
 
   // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
@@ -42,18 +44,16 @@ export const AssistantOverlay = React.memo(() => {
       ({
         showOverlay: so,
         promptContextId: pid,
-        conversationId: cid,
+        conversationTitle: cTitle,
       }: ShowAssistantOverlayProps) => {
-        if (so)
-          assistantTelemetry?.reportAssistantInvoked({
-            conversationId: cid ?? 'unknown',
-            invokedBy: 'click',
-          });
+        const conversationId = getLastConversationId(cTitle);
+        if (so) assistantTelemetry?.reportAssistantInvoked({ conversationId, invokedBy: 'click' });
+
         setIsModalVisible(so);
         setPromptContextId(pid);
-        setConversationId(cid);
+        setConversationTitle(conversationId);
       },
-    [assistantTelemetry]
+    [assistantTelemetry, getLastConversationId]
   );
   useEffect(() => {
     setShowAssistantOverlay(showOverlay);
@@ -63,15 +63,15 @@ export const AssistantOverlay = React.memo(() => {
   const handleShortcutPress = useCallback(() => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
-      setConversationId(localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE);
+      setConversationTitle(getLastConversationId());
       assistantTelemetry?.reportAssistantInvoked({
         invokedBy: 'shortcut',
-        conversationId: localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
+        conversationId: getLastConversationId(),
       });
     }
 
     setIsModalVisible(!isModalVisible);
-  }, [assistantTelemetry, isModalVisible, localStorageLastConversationId]);
+  }, [isModalVisible, getLastConversationId, assistantTelemetry]);
 
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
@@ -89,20 +89,57 @@ export const AssistantOverlay = React.memo(() => {
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
     setPromptContextId(undefined);
-    setConversationId(conversationId);
-  }, [conversationId]);
+    setConversationTitle(conversationTitle);
+  }, [conversationTitle]);
 
   const handleCloseModal = useCallback(() => {
     cleanupAndCloseModal();
   }, [cleanupAndCloseModal]);
 
+  const toggleChatHistory = useCallback(() => {
+    setChatHistoryVisible((prev) => {
+      if (flyoutRef?.current) {
+        const currentValue = parseInt(flyoutRef.current.style.inlineSize.split('px')[0], 10);
+        flyoutRef.current.style.inlineSize = `${
+          prev
+            ? currentValue - CONVERSATION_SIDE_PANEL_WIDTH
+            : currentValue + CONVERSATION_SIDE_PANEL_WIDTH
+        }px`;
+      }
+
+      return !prev;
+    });
+  }, []);
+
+  const flyoutRef = useRef<HTMLDivElement>();
+
+  if (!isModalVisible) return null;
+
   return (
     <>
-      {isModalVisible && (
-        <StyledEuiModal onClose={handleCloseModal} data-test-subj="ai-assistant-modal">
-          <Assistant conversationId={conversationId} promptContextId={promptContextId} />
-        </StyledEuiModal>
-      )}
+      <EuiFlyoutResizable
+        ref={flyoutRef}
+        css={css`
+          max-inline-size: calc(100% - 20px);
+          min-inline-size: 400px;
+          > div {
+            height: 100%;
+          }
+        `}
+        onClose={handleCloseModal}
+        data-test-subj="ai-assistant-flyout"
+        paddingSize="none"
+        hideCloseButton
+      >
+        <Assistant
+          conversationTitle={conversationTitle}
+          promptContextId={promptContextId}
+          onCloseFlyout={handleCloseModal}
+          chatHistoryVisible={chatHistoryVisible}
+          setChatHistoryVisible={toggleChatHistory}
+        />
+      </EuiFlyoutResizable>
+      <UnifiedTimelineGlobalStyles />
     </>
   );
 });

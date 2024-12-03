@@ -55,7 +55,7 @@ describe('Bedrock Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring Amazon Bedrock action: Error: URL Error: Invalid URL: example.com/do-something"'
+        `"Error configuring Amazon Bedrock action: Error: URL Error: Invalid URL: example.com/do-something"`
       );
     });
 

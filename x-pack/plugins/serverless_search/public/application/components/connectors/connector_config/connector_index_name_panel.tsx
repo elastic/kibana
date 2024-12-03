@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { Connector } from '@kbn/search-connectors';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
@@ -18,11 +17,15 @@ import { ConnectorIndexNameForm } from './connector_index_name_form';
 
 interface ConnectorIndexNamePanelProps {
   connector: Connector;
+  canManageConnectors: boolean;
 }
 
-export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = ({ connector }) => {
-  const { http, notifications } = useKibanaServices();
-  const { data, error, isLoading, isSuccess, mutate, reset } = useMutation({
+export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = ({
+  canManageConnectors,
+  connector,
+}) => {
+  const { http } = useKibanaServices();
+  const { data, isLoading, isSuccess, mutate, reset } = useMutation({
     mutationFn: async (inputName: string) => {
       if (inputName && inputName !== connector.index_name) {
         const body = { index_name: inputName };
@@ -44,22 +47,12 @@ export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = (
     }
   }, [data, isSuccess, connector, queryClient, queryKey, reset]);
 
-  useEffect(() => {
-    if (error) {
-      notifications.toasts.addError(error as Error, {
-        title: i18n.translate('xpack.serverlessSearch.connectors.config.connectorIndexNameError', {
-          defaultMessage: 'Error updating index name',
-        }),
-      });
-    }
-  }, [error, notifications]);
-
   const [newIndexName, setNewIndexName] = useState(connector.index_name || '');
 
   return (
     <>
       <ConnectorIndexNameForm
-        isDisabled={isLoading}
+        isDisabled={isLoading || !canManageConnectors}
         indexName={newIndexName}
         onChange={(name) => setNewIndexName(name)}
       />

@@ -8,13 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import { AppFeaturesPrivilegeId, AppFeaturesPrivileges } from '../app_features_privileges';
+import {
+  ProductFeaturesPrivilegeId,
+  ProductFeaturesPrivileges,
+} from '../product_features_privileges';
 
-import { SecuritySubFeatureId } from '../app_features_keys';
+import { SecuritySubFeatureId } from '../product_features_keys';
 import { APP_ID } from '../constants';
 import type { SecurityFeatureParams } from './types';
 
-const endpointListSubFeature: SubFeatureConfig = {
+const endpointListSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointList.privilegesTooltip',
@@ -64,8 +67,9 @@ const endpointListSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
-const trustedApplicationsSubFeature: SubFeatureConfig = {
+});
+
+const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
@@ -121,8 +125,8 @@ const trustedApplicationsSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
-const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
+});
+const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
@@ -178,8 +182,8 @@ const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
-const blocklistSubFeature: SubFeatureConfig = {
+});
+const blocklistSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.blockList.privilegesTooltip',
@@ -232,8 +236,8 @@ const blocklistSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
-const eventFiltersSubFeature: SubFeatureConfig = {
+});
+const eventFiltersSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
@@ -289,8 +293,8 @@ const eventFiltersSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
-const policyManagementSubFeature: SubFeatureConfig = {
+});
+const policyManagementSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.policyManagement.privilegesTooltip',
@@ -340,9 +344,9 @@ const policyManagementSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
+});
 
-const responseActionsHistorySubFeature: SubFeatureConfig = {
+const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
@@ -391,8 +395,8 @@ const responseActionsHistorySubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
-const hostIsolationSubFeature: SubFeatureConfig = {
+});
+const hostIsolationSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolation.privilegesTooltip',
@@ -428,9 +432,9 @@ const hostIsolationSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
+});
 
-const processOperationsSubFeature: SubFeatureConfig = {
+const processOperationsSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.processOperations.privilegesTooltip',
@@ -468,8 +472,8 @@ const processOperationsSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
-const fileOperationsSubFeature: SubFeatureConfig = {
+});
+const fileOperationsSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
@@ -507,11 +511,11 @@ const fileOperationsSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
+});
 
 // execute operations are not available in 8.7,
 // but will be available in 8.8
-const executeActionSubFeature: SubFeatureConfig = {
+const executeActionSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
@@ -549,9 +553,50 @@ const executeActionSubFeature: SubFeatureConfig = {
       ],
     },
   ],
-};
+});
 
-const endpointExceptionsSubFeature: SubFeatureConfig = {
+// 8.15 feature
+const scanActionSubFeature = (): SubFeatureConfig => ({
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for Scan Operations access.',
+    }
+  ),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations',
+    {
+      defaultMessage: 'Scan Operations',
+    }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations.description',
+    {
+      defaultMessage: 'Perform folder scan response actions in the response console.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeScanOperations`],
+          id: 'scan_operations_all',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeScanOperations'],
+        },
+      ],
+    },
+  ],
+});
+
+const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.privilegesTooltip',
@@ -583,7 +628,7 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ...AppFeaturesPrivileges[AppFeaturesPrivilegeId.endpointExceptions].all,
+          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].all,
         },
         {
           id: 'endpoint_exceptions_read',
@@ -593,12 +638,12 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ...AppFeaturesPrivileges[AppFeaturesPrivilegeId.endpointExceptions].read,
+          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].read,
         },
       ],
     },
   ],
-};
+});
 
 /**
  * Sub-features that will always be available for Security
@@ -612,19 +657,61 @@ export const getSecurityBaseKibanaSubFeatureIds = (
  * Defines all the Security Assistant subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const securitySubFeaturesMap = Object.freeze(
-  new Map<SecuritySubFeatureId, SubFeatureConfig>([
-    [SecuritySubFeatureId.endpointList, endpointListSubFeature],
-    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature],
-    [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature],
-    [SecuritySubFeatureId.hostIsolationExceptions, hostIsolationExceptionsSubFeature],
-    [SecuritySubFeatureId.blocklist, blocklistSubFeature],
-    [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature],
-    [SecuritySubFeatureId.policyManagement, policyManagementSubFeature],
-    [SecuritySubFeatureId.responseActionsHistory, responseActionsHistorySubFeature],
-    [SecuritySubFeatureId.hostIsolation, hostIsolationSubFeature],
-    [SecuritySubFeatureId.processOperations, processOperationsSubFeature],
-    [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature],
-    [SecuritySubFeatureId.executeAction, executeActionSubFeature],
-  ])
-);
+
+export const getSecuritySubFeaturesMap = ({
+  experimentalFeatures,
+}: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
+  const enableSpaceAwarenessIfNeeded = (subFeature: SubFeatureConfig): SubFeatureConfig => {
+    if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      subFeature.requireAllSpaces = false;
+      subFeature.privilegesTooltip = undefined;
+    }
+
+    return subFeature;
+  };
+
+  const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
+    [SecuritySubFeatureId.endpointList, enableSpaceAwarenessIfNeeded(endpointListSubFeature())],
+    [
+      SecuritySubFeatureId.endpointExceptions,
+      enableSpaceAwarenessIfNeeded(endpointExceptionsSubFeature()),
+    ],
+    [
+      SecuritySubFeatureId.trustedApplications,
+      enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature()),
+    ],
+    [
+      SecuritySubFeatureId.hostIsolationExceptionsBasic,
+      enableSpaceAwarenessIfNeeded(hostIsolationExceptionsBasicSubFeature()),
+    ],
+    [SecuritySubFeatureId.blocklist, enableSpaceAwarenessIfNeeded(blocklistSubFeature())],
+    [SecuritySubFeatureId.eventFilters, enableSpaceAwarenessIfNeeded(eventFiltersSubFeature())],
+    [
+      SecuritySubFeatureId.policyManagement,
+      enableSpaceAwarenessIfNeeded(policyManagementSubFeature()),
+    ],
+    [
+      SecuritySubFeatureId.responseActionsHistory,
+      enableSpaceAwarenessIfNeeded(responseActionsHistorySubFeature()),
+    ],
+    [SecuritySubFeatureId.hostIsolation, enableSpaceAwarenessIfNeeded(hostIsolationSubFeature())],
+    [
+      SecuritySubFeatureId.processOperations,
+      enableSpaceAwarenessIfNeeded(processOperationsSubFeature()),
+    ],
+    [SecuritySubFeatureId.fileOperations, enableSpaceAwarenessIfNeeded(fileOperationsSubFeature())],
+    [SecuritySubFeatureId.executeAction, enableSpaceAwarenessIfNeeded(executeActionSubFeature())],
+    [SecuritySubFeatureId.scanAction, enableSpaceAwarenessIfNeeded(scanActionSubFeature())],
+  ];
+
+  // Use the following code to add feature based on feature flag
+  // if (experimentalFeatures.featureFlagName) {
+  //   securitySubFeaturesList.push([SecuritySubFeatureId.featureId, featureSubFeature]);
+  // }
+
+  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
+    securitySubFeaturesList
+  );
+
+  return Object.freeze(securitySubFeaturesMap);
+};

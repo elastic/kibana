@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { IErrorObject, RuleCreationValidConsumer } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
 
 const SELECT_LABEL: string = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.selectLabel',
@@ -61,39 +62,59 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.LOGS,
   AlertConsumers.INFRASTRUCTURE,
   'stackAlerts',
+  'alerts',
 ];
 
 export interface RuleFormConsumerSelectionProps {
   consumers: RuleCreationValidConsumer[];
   onChange: (consumer: RuleCreationValidConsumer | null) => void;
   errors: IErrorObject;
+  selectedConsumer?: RuleCreationValidConsumer | null;
+  /* FUTURE ENGINEER
+   * if this prop is set to null then we wont initialize the value and the user will have to set it
+   * if this prop is set to a valid consumers then we will set it up to what was passed
+   * if this prop is not valid or undefined but the valid consumers has stackAlerts then we will default it to stackAlerts
+   */
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 
 const SINGLE_SELECTION = { asPlainText: true };
 
 export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
-  const { consumers, errors, onChange } = props;
-  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer | undefined>();
-  const isInvalid = errors?.consumer?.length > 0;
+  const { isServerless } = useKibana().services;
+
+  const { consumers, errors, onChange, selectedConsumer, initialSelectedConsumer } = props;
+  const isInvalid = (errors?.consumer as string[])?.length > 0;
+
   const handleOnChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>) => {
       if (selected.length > 0) {
         const newSelectedConsumer = selected[0];
-        setSelectedConsumer(newSelectedConsumer.value);
         onChange(newSelectedConsumer.value!);
       } else {
-        setSelectedConsumer(undefined);
         onChange(null);
       }
     },
     [onChange]
   );
+
+  const validatedSelectedConsumer = useMemo(() => {
+    if (
+      selectedConsumer &&
+      consumers.includes(selectedConsumer) &&
+      featureNameMap[selectedConsumer]
+    ) {
+      return selectedConsumer;
+    }
+    return null;
+  }, [selectedConsumer, consumers]);
+
   const selectedOptions = useMemo(
     () =>
-      selectedConsumer
-        ? [{ value: selectedConsumer, label: featureNameMap[selectedConsumer] }]
+      validatedSelectedConsumer
+        ? [{ value: validatedSelectedConsumer, label: featureNameMap[validatedSelectedConsumer] }]
         : [],
-    [selectedConsumer]
+    [validatedSelectedConsumer]
   );
 
   const formattedSelectOptions: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>> =
@@ -115,25 +136,42 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     }, [consumers]);
 
   useEffect(() => {
-    // At initialization we set to NULL to know that nobody selected anything
-    onChange(null);
+    // At initialization, select initialSelectedConsumer or the first value
+    if (!validatedSelectedConsumer) {
+      if (initialSelectedConsumer === null) {
+        return;
+      } else if (initialSelectedConsumer && consumers.includes(initialSelectedConsumer)) {
+        onChange(initialSelectedConsumer);
+        return;
+      } else if (consumers.includes(STACK_ALERTS_FEATURE_ID)) {
+        onChange(STACK_ALERTS_FEATURE_ID);
+        return;
+      }
+      onChange(consumers[0]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (consumers.length === 1) {
       onChange(consumers[0] as RuleCreationValidConsumer);
-    } else if (consumers.includes(AlertConsumers.OBSERVABILITY)) {
+    } else if (isServerless && consumers.includes(AlertConsumers.OBSERVABILITY)) {
       onChange(AlertConsumers.OBSERVABILITY as RuleCreationValidConsumer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [consumers]);
 
-  if (consumers.length <= 1 || consumers.includes(AlertConsumers.OBSERVABILITY)) {
+  if (consumers.length <= 1 || (isServerless && consumers.includes(AlertConsumers.OBSERVABILITY))) {
     return null;
   }
+
   return (
-    <EuiFormRow fullWidth label={SELECT_LABEL} isInvalid={isInvalid} error={errors?.consumer ?? ''}>
+    <EuiFormRow
+      fullWidth
+      label={SELECT_LABEL}
+      isInvalid={isInvalid}
+      error={(errors?.consumer as string) ?? ''}
+    >
       <EuiComboBox
         data-test-subj="ruleFormConsumerSelect"
         aria-label={i18n.translate(

@@ -19,7 +19,8 @@ import { validateIndexPatterns } from '../utils';
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
-  const { version } = createOptions;
+  const { version, licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
@@ -40,6 +41,9 @@ export const createThresholdAlertType = (
           return mutatedRuleParams;
         },
       },
+    },
+    schemas: {
+      params: { type: 'zod', schema: ThresholdRuleParams },
     },
     actionGroups: [
       {
@@ -62,7 +66,7 @@ export const createThresholdAlertType = (
           completeRule,
           tuple,
           wrapHits,
-          ruleDataReader,
+          ruleDataClient,
           inputIndex,
           runtimeMappings,
           primaryTimestamp,
@@ -71,11 +75,11 @@ export const createThresholdAlertType = (
           aggregatableTimestampField,
           exceptionFilter,
           unprocessedExceptions,
-          inputIndexFields,
         },
         services,
         startedAt,
         state,
+        spaceId,
       } = execOptions;
       const result = await thresholdExecutor({
         completeRule,
@@ -87,7 +91,7 @@ export const createThresholdAlertType = (
         state,
         bulkCreate,
         wrapHits,
-        ruleDataReader,
+        ruleDataClient,
         inputIndex,
         runtimeMappings,
         primaryTimestamp,
@@ -95,7 +99,11 @@ export const createThresholdAlertType = (
         aggregatableTimestampField,
         exceptionFilter,
         unprocessedExceptions,
-        inputIndexFields,
+        spaceId,
+        runOpts: execOptions.runOpts,
+        licensing,
+        experimentalFeatures,
+        scheduleNotificationResponseActionsService,
       });
       return result;
     },

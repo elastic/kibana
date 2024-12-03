@@ -117,6 +117,21 @@ describe('Detections Rules API', () => {
         expect.objectContaining({
           body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1","invocationCount":1,"timeframeEnd":"2015-03-12 05:17:10"}',
           method: 'POST',
+          query: undefined,
+        })
+      );
+    });
+
+    test('sends enable_logged_requests in URL query', async () => {
+      const payload = getCreateRulesSchemaMock();
+      await previewRule({
+        rule: { ...payload, invocationCount: 1, timeframeEnd: '2015-03-12 05:17:10' },
+        enableLoggedRequests: true,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/preview',
+        expect.objectContaining({
+          query: { enable_logged_requests: true },
         })
       );
     });
@@ -767,6 +782,33 @@ describe('Detections Rules API', () => {
       );
     });
 
+    test('passes manual rule run payload', async () => {
+      const startDate = new Date().toISOString();
+      const endDate = new Date().toISOString();
+      await performBulkAction({
+        bulkAction: {
+          type: BulkActionTypeEnum.run,
+          ids: ['ruleId1'],
+          runPayload: { start_date: startDate, end_date: endDate },
+        },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_bulk_action',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'run',
+            ids: ['ruleId1'],
+            run: { start_date: startDate, end_date: endDate },
+          }),
+          query: {
+            dry_run: false,
+          },
+        })
+      );
+    });
+
     test('executes dry run', async () => {
       await performBulkAction({
         bulkAction: { type: BulkActionTypeEnum.disable, query: 'some query' },
@@ -812,9 +854,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          query: expect.objectContaining({
-            filter: 'alert.id:"alert:id1" or alert.id:"alert:id2"',
-          }),
+          body: '{"filter":"alert.id:\\"alert:id1\\" or alert.id:\\"alert:id2\\"","fields":"[\\"muteAll\\",\\"activeSnoozes\\",\\"isSnoozedUntil\\",\\"snoozeSchedule\\"]","per_page":2}',
         })
       );
     });
@@ -825,9 +865,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          query: expect.objectContaining({
-            per_page: 2,
-          }),
+          body: '{"filter":"alert.id:\\"alert:id1\\" or alert.id:\\"alert:id2\\"","fields":"[\\"muteAll\\",\\"activeSnoozes\\",\\"isSnoozedUntil\\",\\"snoozeSchedule\\"]","per_page":2}',
         })
       );
     });
@@ -838,14 +876,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          query: expect.objectContaining({
-            fields: JSON.stringify([
-              'muteAll',
-              'activeSnoozes',
-              'isSnoozedUntil',
-              'snoozeSchedule',
-            ]),
-          }),
+          body: '{"filter":"alert.id:\\"alert:id1\\" or alert.id:\\"alert:id2\\"","fields":"[\\"muteAll\\",\\"activeSnoozes\\",\\"isSnoozedUntil\\",\\"snoozeSchedule\\"]","per_page":2}',
         })
       );
     });
@@ -871,10 +902,12 @@ describe('Detections Rules API', () => {
       expect(result).toEqual({
         '1': {
           muteAll: false,
+          name: '',
           activeSnoozes: [],
         },
         '2': {
           muteAll: false,
+          name: '',
           activeSnoozes: [],
           isSnoozedUntil: new Date('2023-04-24T19:31:46.765Z'),
         },

@@ -1,0 +1,52 @@
+# * This file is auto-updated by running fix-location-collection.ts * #
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: kibana-buildkite-pipelines-list
+  description: This file points to individual buildkite pipeline definition files
+spec:
+  type: url
+  targets:
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-api-docs.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-apis-capacity-testing-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-artifacts-container-image.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-artifacts-snapshot.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-artifacts-staging.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-artifacts-trigger.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-chrome-forward-testing.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-codeql.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-console-definitions-sync.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-coverage-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-project.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-serverless-snapshots.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-esql-grammar-sync.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-fips-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-flaky.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-fleet-packages-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-migration-staging.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-on-merge-unsupported-ftrs.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-on-merge.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-package-registry.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-performance-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-performance-data-set-extraction-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-pointer-compression.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-pr.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-purge-cloud-deployments.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-emergency-release.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-quality-gates-emergency.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-quality-gates.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-release-testing.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-release.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-vm-images.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/scalability_testing-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-ess/security-solution-ess.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-defend-workflows.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-detection-engine.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-entity-analytics.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-explore.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-gen-ai.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-investigations.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-rule-management.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/trigger-version-dependent-jobs.yml

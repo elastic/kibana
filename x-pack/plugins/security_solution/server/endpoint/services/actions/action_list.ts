@@ -6,26 +6,30 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { fetchActionRequests } from './utils/fetch_action_requests';
+import type { FetchActionResponsesResult } from './utils/fetch_action_responses';
+import { fetchActionResponses } from './utils/fetch_action_responses';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
-
-import { getActions, getActionResponses } from '../../utils/action_list_helpers';
+import type { ActionListApiResponse, LogsEndpointAction } from '../../../../common/endpoint/types';
+import type {
+  ResponseActionAgentType,
+  ResponseActionStatus,
+  ResponseActionsApiCommandNames,
+  ResponseActionType,
+} from '../../../../common/endpoint/service/response_actions/constants';
 
 import {
-  formatEndpointActionResults,
-  categorizeResponseResults,
-  getActionCompletionInfo,
-  mapToNormalizedActionRequest,
+  createActionDetailsRecord,
   getAgentHostNamesWithIds,
-  getActionStatus,
+  mapResponsesByActionId,
+  mapToNormalizedActionRequest,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 interface OptionalFilterParams {
+  agentTypes?: ResponseActionAgentType[];
   commands?: string[];
   elasticAgentIds?: string[];
   endDate?: string;
@@ -47,6 +51,7 @@ interface OptionalFilterParams {
  * filter out action details based on statuses filter options
  */
 export const getActionListByStatus = async ({
+  agentTypes,
   commands,
   elasticAgentIds,
   esClient,
@@ -71,6 +76,7 @@ export const getActionListByStatus = async ({
   const page = _page ?? 1;
 
   const { actionDetails: allActionDetails } = await getActionDetailsList({
+    agentTypes,
     commands,
     elasticAgentIds,
     esClient,
@@ -96,6 +102,7 @@ export const getActionListByStatus = async ({
     pageSize: size,
     startDate,
     endDate,
+    agentTypes,
     elasticAgentIds,
     userIds,
     commands,
@@ -110,6 +117,7 @@ export const getActionListByStatus = async ({
  * Retrieve a list of Actions (`ActionDetails`)
  */
 export const getActionList = async ({
+  agentTypes,
   commands,
   elasticAgentIds,
   esClient,
@@ -134,6 +142,7 @@ export const getActionList = async ({
   const from = (page - 1) * size;
 
   const { actionDetails, totalRecords } = await getActionDetailsList({
+    agentTypes,
     commands,
     elasticAgentIds,
     esClient,
@@ -154,6 +163,7 @@ export const getActionList = async ({
     pageSize: size,
     startDate,
     endDate,
+    agentTypes,
     elasticAgentIds,
     userIds,
     commands,
@@ -170,6 +180,7 @@ export type GetActionDetailsListParam = OptionalFilterParams & {
   size: number;
 };
 const getActionDetailsList = async ({
+  agentTypes,
   commands,
   elasticAgentIds,
   esClient,
@@ -183,19 +194,19 @@ const getActionDetailsList = async ({
   unExpiredOnly,
   withOutputs,
   types,
-}: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
+}: GetActionDetailsListParam & {
+  metadataService: EndpointMetadataService;
+}): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
 }> => {
-  let actionRequests;
-  let actionReqIds;
-  let actionResponses;
-  let agentsHostInfo: { [id: string]: string };
+  let actionRequests: LogsEndpointAction[] = [];
+  let totalRecords: number = 0;
 
   try {
-    // fetch actions with matching agent_ids if any
-    const { actionIds, actionRequests: _actionRequests } = await getActions({
-      commands,
+    const { data, total } = await fetchActionRequests({
+      agentTypes,
+      commands: commands as ResponseActionsApiCommandNames[],
       esClient,
       elasticAgentIds,
       startDate,
@@ -204,10 +215,12 @@ const getActionDetailsList = async ({
       size,
       userIds,
       unExpiredOnly,
-      types,
+      types: types as ResponseActionType[],
+      logger,
     });
-    actionRequests = _actionRequests;
-    actionReqIds = actionIds;
+
+    actionRequests = data;
+    totalRecords = total;
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
@@ -220,32 +233,29 @@ const getActionDetailsList = async ({
     throw err;
   }
 
-  if (!actionRequests?.body?.hits?.hits) {
-    // return empty details array
+  if (!totalRecords) {
     return { actionDetails: [], totalRecords: 0 };
   }
 
-  // format endpoint actions into { type, item } structure
-  const formattedActionRequests = formatEndpointActionResults(actionRequests?.body?.hits?.hits);
-  const totalRecords = (actionRequests?.body?.hits?.total as unknown as SearchTotalHits).value;
-
-  // normalized actions with a flat structure to access relevant values
-  const normalizedActionRequests: Array<ReturnType<typeof mapToNormalizedActionRequest>> =
-    formattedActionRequests.map((action) => mapToNormalizedActionRequest(action.item.data));
+  const normalizedActionRequests = actionRequests.map(mapToNormalizedActionRequest);
+  const agentIds: string[] = [];
+  const actionReqIds = normalizedActionRequests.map((actionReq) => {
+    agentIds.push(...actionReq.agents);
+    return actionReq.id;
+  });
+  let actionResponses: FetchActionResponsesResult;
+  let agentsHostInfo: { [id: string]: string };
 
   try {
     // get all responses for given action Ids and agent Ids
     // and get host metadata info with queried agents
     [actionResponses, agentsHostInfo] = await Promise.all([
-      getActionResponses({
-        actionIds: actionReqIds,
-        elasticAgentIds,
-        esClient,
-      }),
-      await getAgentHostNamesWithIds({
+      fetchActionResponses({ esClient, agentIds: elasticAgentIds, actionIds: actionReqIds }),
+
+      getAgentHostNamesWithIds({
         esClient,
         metadataService,
-        agentIds: normalizedActionRequests.map((action) => action.agents).flat(),
+        agentIds,
       }),
     ]);
   } catch (error) {
@@ -260,55 +270,17 @@ const getActionDetailsList = async ({
     throw err;
   }
 
-  // categorize responses as fleet and endpoint responses
-  const categorizedResponses = categorizeResponseResults({
-    results: actionResponses?.body?.hits?.hits,
-  });
-
-  // compute action details list for each action id
+  const responsesByActionId = mapResponsesByActionId(actionResponses);
   const actionDetails: ActionListApiResponse['data'] = normalizedActionRequests.map((action) => {
-    // pick only those responses that match the current action id
-    const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
-      categorizedResponse.type === 'response'
-        ? categorizedResponse.item.data.EndpointActions.action_id === action.id
-        : categorizedResponse.item.data.action_id === action.id
+    const actionRecord = createActionDetailsRecord(
+      action,
+      responsesByActionId[action.id] ?? { fleetResponses: [], endpointResponses: [] },
+      agentsHostInfo
     );
 
-    // find the specific response's details using that set of matching responses
-    const { isCompleted, completedAt, wasSuccessful, errors, agentState, outputs } =
-      getActionCompletionInfo(action, matchedResponses);
-
-    const { isExpired, status } = getActionStatus({
-      expirationDate: action.expiration,
-      isCompleted,
-      wasSuccessful,
-    });
-
-    const actionRecord: ActionListApiResponse['data'][number] = {
-      id: action.id,
-      agents: action.agents,
-      hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
-        acc[id] = { name: agentsHostInfo[id] ?? '' };
-        return acc;
-      }, {}),
-      command: action.command,
-      startedAt: action.createdAt,
-      isCompleted,
-      completedAt,
-      wasSuccessful,
-      errors: action.error?.message ? [action.error.message] : errors,
-      agentState,
-      isExpired,
-      status,
-      // 8.8 onwards, show outputs only for actions with matching requested action ids
-      outputs: withOutputs && withOutputs.includes(action.id) ? outputs : undefined,
-      createdBy: action.createdBy,
-      comment: action.comment,
-      parameters: action.parameters,
-      alertIds: action.alertIds,
-      ruleId: action.ruleId,
-      ruleName: action.ruleName,
-    };
+    if (withOutputs && !withOutputs.includes(action.id)) {
+      delete actionRecord.outputs;
+    }
 
     return actionRecord;
   });

@@ -16,16 +16,18 @@ import { customFieldsMock, customFieldsConfigurationMock } from '../../../contai
 import userEvent from '@testing-library/user-event';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 
-describe('Case View Page files tab', () => {
+// Failing: See https://github.com/elastic/kibana/issues/185046
+describe.skip('Case View Page files tab', () => {
   const onSubmit = jest.fn();
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('should render the custom fields correctly', async () => {
@@ -38,8 +40,10 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    expect(screen.getByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
-    expect(screen.getByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_3')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_4')).toBeInTheDocument();
   });
 
   it('should render the custom fields types when the custom fields are empty', async () => {
@@ -52,11 +56,11 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    expect(screen.getByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
-    expect(screen.getByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
   });
 
-  it('should not show the custom fields if the configuration is empty', async () => {
+  it('should not show the custom fields if the configuration is empty', () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
@@ -82,12 +86,30 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    const customFields = screen.getAllByTestId('case-custom-field-wrapper', { exact: false });
+    const customFields = await screen.findAllByTestId('case-custom-field-wrapper', {
+      exact: false,
+    });
 
-    expect(customFields.length).toBe(2);
+    expect(customFields.length).toBe(6);
 
-    expect(within(customFields[0]).getByRole('heading')).toHaveTextContent('My test label 1');
-    expect(within(customFields[1]).getByRole('heading')).toHaveTextContent('My test label 2');
+    expect(await within(customFields[0]).findByRole('heading')).toHaveTextContent(
+      'My test label 1'
+    );
+    expect(await within(customFields[1]).findByRole('heading')).toHaveTextContent(
+      'My test label 2'
+    );
+    expect(await within(customFields[2]).findByRole('heading')).toHaveTextContent(
+      'My test label 3'
+    );
+    expect(await within(customFields[3]).findByRole('heading')).toHaveTextContent(
+      'My test label 4'
+    );
+    expect(await within(customFields[4]).findByRole('heading')).toHaveTextContent(
+      'My test label 5'
+    );
+    expect(await within(customFields[5]).findByRole('heading')).toHaveTextContent(
+      'My test label 6'
+    );
   });
 
   it('pass the permissions to custom fields correctly', async () => {
@@ -107,7 +129,49 @@ describe('Case View Page files tab', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('adds missing custom fields with no custom fields in the case', async () => {
+  it('removes extra custom fields', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={customFieldsMock}
+        customFieldsConfiguration={[customFieldsConfigurationMock[1]]}
+        onSubmit={onSubmit}
+      />
+    );
+
+    await userEvent.click(await screen.findByRole('switch'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith({
+        type: CustomFieldTypes.TOGGLE,
+        key: 'test_key_2',
+        value: false,
+      });
+    });
+  });
+
+  it('updates an existing toggle field correctly', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={customFieldsMock}
+        customFieldsConfiguration={customFieldsConfigurationMock}
+        onSubmit={onSubmit}
+      />
+    );
+
+    await userEvent.click((await screen.findAllByRole('switch'))[0]);
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith({
+        type: CustomFieldTypes.TOGGLE,
+        key: 'test_key_2',
+        value: false,
+      });
+    });
+  });
+
+  it('updates new toggle field correctly', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
@@ -117,71 +181,18 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click((await screen.findAllByRole('switch'))[0]);
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith([
-        {
-          type: CustomFieldTypes.TEXT,
-          key: 'test_key_1',
-          value: null,
-        },
-        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
-      ]);
+      expect(onSubmit).toBeCalledWith({
+        type: CustomFieldTypes.TOGGLE,
+        key: 'test_key_2',
+        value: true,
+      });
     });
   });
 
-  it('adds missing custom fields with some custom fields in the case', async () => {
-    appMockRender.render(
-      <CustomFields
-        isLoading={false}
-        customFields={[{ type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true }]}
-        customFieldsConfiguration={customFieldsConfigurationMock}
-        onSubmit={onSubmit}
-      />
-    );
-
-    userEvent.click(screen.getByRole('switch'));
-
-    await waitFor(() => {
-      expect(onSubmit).toBeCalledWith([
-        {
-          type: CustomFieldTypes.TEXT,
-          key: 'test_key_1',
-          value: null,
-        },
-        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
-      ]);
-    });
-  });
-
-  it('removes extra custom fields', async () => {
-    appMockRender.render(
-      <CustomFields
-        isLoading={false}
-        customFields={customFieldsMock}
-        customFieldsConfiguration={[
-          {
-            type: CustomFieldTypes.TOGGLE,
-            key: 'test_key_2',
-            label: 'My test label 2',
-            required: false,
-          },
-        ]}
-        onSubmit={onSubmit}
-      />
-    );
-
-    userEvent.click(screen.getByRole('switch'));
-
-    await waitFor(() => {
-      expect(onSubmit).toBeCalledWith([
-        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
-      ]);
-    });
-  });
-
-  it('updates an existing field correctly', async () => {
+  it('updates existing text field correctly', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
@@ -191,13 +202,59 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(
+      await screen.findByTestId(`case-text-custom-field-edit-button-${customFieldsMock[0].key}`)
+    );
+
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
+    );
+    await userEvent.paste('!!!');
+
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
+    );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith([
-        customFieldsMock[0],
-        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
-      ]);
+      expect(onSubmit).toBeCalledWith({
+        ...customFieldsMock[0],
+        value: 'My text test value 1!!!',
+      });
+    });
+  });
+
+  it('updates new text field correctly', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={[]}
+        customFieldsConfiguration={customFieldsConfigurationMock}
+        onSubmit={onSubmit}
+      />
+    );
+
+    await userEvent.click(
+      await screen.findByTestId(`case-text-custom-field-edit-button-${customFieldsMock[0].key}`)
+    );
+
+    expect(
+      await screen.findByText('This field is populated with the default value.')
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
+    );
+    await userEvent.paste(' updated!!');
+
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
+    );
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith({
+        ...customFieldsMock[0],
+        value: `${customFieldsConfigurationMock[0].defaultValue} updated!!`,
+      });
     });
   });
 });

@@ -9,17 +9,13 @@ import { useEffect, useMemo } from 'react';
 
 import { useLocation } from 'react-router-dom';
 import usePrevious from 'react-use/lib/usePrevious';
-import { useDispatch } from 'react-redux';
 import { safeDecode } from '@kbn/rison';
-import type { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import type { TimelineUrl } from '../../../timelines/store/model';
+import { timelineSelectors } from '../../../timelines/store';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
 import { useShallowEqualSelector } from '../use_selector';
 
-import {
-  dispatchUpdateTimeline,
-  queryTimelineById,
-} from '../../../timelines/components/open_timeline/helpers';
+import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import {
   getParamFromQueryString,
   getQueryStringFromLocation,
@@ -44,7 +40,6 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   const { search } = useLocation();
   const oldSearch = usePrevious(search);
   const timelineIdFromReduxStore = flyoutTimeline?.savedObjectId ?? '';
-  const dispatch = useDispatch();
 
   const [previousTimeline, currentTimeline] = useMemo(() => {
     const oldUrlStateString = getQueryStringKeyValue({
@@ -64,6 +59,8 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   const oldId = previousTimeline?.id;
   const { id: newId, activeTab, graphEventId } = currentTimeline || {};
 
+  const queryTimelineById = useQueryTimelineById();
+
   useEffect(() => {
     if (newId && newId !== oldId && newId !== timelineIdFromReduxStore) {
       queryTimelineById({
@@ -72,13 +69,10 @@ export const useQueryTimelineByIdOnUrlChange = () => {
         graphEventId,
         timelineId: newId,
         openTimeline: true,
-        updateIsLoading: (status: { id: string; isLoading: boolean }) =>
-          dispatch(timelineActions.updateIsLoading(status)),
-        updateTimeline: dispatchUpdateTimeline(dispatch),
       });
     }
-  }, [timelineIdFromReduxStore, dispatch, oldId, newId, activeTab, graphEventId]);
+  }, [timelineIdFromReduxStore, oldId, newId, activeTab, graphEventId, queryTimelineById]);
 };
 
-const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
+export const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
   getParamFromQueryString(getQueryStringFromLocation(search), urlKey);

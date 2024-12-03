@@ -1,35 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ErrorEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Filter, FilterStateStore, type AggregateQuery, type Query } from '@kbn/es-query';
+
+import { BehaviorSubject } from 'rxjs';
 import {
-  ContactCardEmbeddable,
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  ContactCardEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+  FiltersNotificationAction,
+  FiltersNotificationActionApi,
+} from './filters_notification_action';
 
-import { buildMockDashboard } from '../mocks';
-import { pluginServices } from '../services/plugin_services';
-import { FiltersNotificationAction } from './filters_notification_action';
-
-const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(mockEmbeddableFactory);
-
-const mockGetFilters = jest.fn(async () => [] as Filter[]);
-const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
-
-const getMockPhraseFilter = (key: string, value: string) => {
+const getMockPhraseFilter = (key: string, value: string): Filter => {
   return {
     meta: {
       type: 'phrase',
@@ -44,59 +30,64 @@ const getMockPhraseFilter = (key: string, value: string) => {
       },
     },
     $state: {
-      store: 'appState',
+      store: FilterStateStore.APP_STATE,
     },
   };
 };
 
-const buildEmbeddable = async (input?: Partial<ContactCardEmbeddableInput>) => {
-  const container = buildMockDashboard();
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibanana',
-    viewMode: ViewMode.EDIT,
-    ...input,
+describe('filters notification action', () => {
+  let action: FiltersNotificationAction;
+  let context: { embeddable: FiltersNotificationActionApi };
+
+  let updateFilters: (filters: Filter[]) => void;
+  let updateQuery: (query: Query | AggregateQuery | undefined) => void;
+
+  beforeEach(() => {
+    const filtersSubject = new BehaviorSubject<Filter[] | undefined>(undefined);
+    updateFilters = (filters) => filtersSubject.next(filters);
+    const querySubject = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
+    updateQuery = (query) => querySubject.next(query);
+
+    action = new FiltersNotificationAction();
+    context = {
+      embeddable: {
+        uuid: 'testId',
+        filters$: filtersSubject,
+        query$: querySubject,
+      },
+    };
   });
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
-    throw new Error('Failed to create embeddable');
-  }
 
-  const embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
-    getFilters: () => mockGetFilters(),
-    getQuery: () => mockGetQuery(),
+  it('is incompatible when api is missing required functions', async () => {
+    const emptyContext = { embeddable: {} };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
   });
 
-  return embeddable;
-};
+  it('is incompatible when api has no local filters or queries', async () => {
+    expect(await action.isCompatible(context)).toBe(false);
+  });
 
-const action = new FiltersNotificationAction();
+  it('is compatible when api has at least one local filter', async () => {
+    updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
+    expect(await action.isCompatible(context)).toBe(true);
+  });
 
-test('Badge is incompatible with Error Embeddables', async () => {
-  const errorEmbeddable = new ErrorEmbeddable('Wow what an awful error', { id: ' 404' });
-  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
-});
+  it('is compatible when api has at least one local query', async () => {
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
+    expect(await action.isCompatible(context)).toBe(true);
+  });
 
-test('Badge is not shown when panel has no app-level filters or queries', async () => {
-  const embeddable = await buildEmbeddable();
-  expect(await action.isCompatible({ embeddable })).toBe(false);
-});
+  it('calls onChange when filters change', async () => {
+    const onChange = jest.fn();
+    action.subscribeToCompatibilityChanges(context, onChange);
+    updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
+    expect(onChange).toHaveBeenCalledWith(true, action);
+  });
 
-test('Badge is shown when panel has at least one app-level filter', async () => {
-  const embeddable = await buildEmbeddable();
-  mockGetFilters.mockResolvedValue([getMockPhraseFilter('fieldName', 'someValue')] as Filter[]);
-  expect(await action.isCompatible({ embeddable })).toBe(true);
-});
-
-test('Badge is shown when panel has at least one app-level query', async () => {
-  const embeddable = await buildEmbeddable();
-  mockGetQuery.mockResolvedValue({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
-  expect(await action.isCompatible({ embeddable })).toBe(true);
-});
-
-test('Badge is not shown in view mode', async () => {
-  const embeddable = await buildEmbeddable({ viewMode: ViewMode.VIEW });
-  expect(await action.isCompatible({ embeddable })).toBe(false);
+  it('calls onChange when query changes', async () => {
+    const onChange = jest.fn();
+    action.subscribeToCompatibilityChanges(context, onChange);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
+    expect(onChange).toHaveBeenCalledWith(true, action);
+  });
 });

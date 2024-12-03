@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,15 +12,18 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiImage, EuiText } fro
 import { i18n } from '@kbn/i18n';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
+export * from './components/cloud_details';
 export * from './components/code_box';
+export * from './components/ingest_pipelines/ingest_pipeline_panel';
 export * from './components/github_link';
 export * from './components/ingest_data';
 export * from './components/ingestions_panel';
 export * from './components/language_client_panel';
 export * from './components/overview_panel';
+export * from './components/pipeline_panel';
 export * from './components/select_client';
-export * from './components/try_in_console_button';
 export * from './components/install_client';
+export * from './components/preprocess_data';
 
 export * from './types';
 export * from './utils';
@@ -54,18 +58,18 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
           </EuiFlexItem>
           {Boolean(user) && (
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
+              <EuiText>
                 <h4>
                   {user
                     ? i18n.translate('searchApiPanels.welcomeBanner.header.greeting.customTitle', {
-                        defaultMessage: 'Hi {name}!',
+                        defaultMessage: '👋 Hi {name}!',
                         values: { name: user.full_name || user.username },
                       })
                     : i18n.translate('searchApiPanels.welcomeBanner.header.greeting.defaultTitle', {
-                        defaultMessage: 'Hi!',
+                        defaultMessage: '👋 Hi',
                       })}
                 </h4>
-              </EuiTitle>
+              </EuiText>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

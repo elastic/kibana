@@ -9,12 +9,12 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import type { Output, DownloadSource, FleetServerHost, FleetProxy } from '../../../../types';
-import { useConfig } from '../../../../hooks';
 
 import { FleetServerHostsSection } from './fleet_server_hosts_section';
 import { OutputSection } from './output_section';
 import { AgentBinarySection } from './agent_binary_section';
 import { FleetProxiesSection } from './fleet_proxies_section';
+import { AdvancedSection } from './advanced_section';
 
 export interface SettingsPageProps {
   outputs: Output[];
@@ -37,8 +37,6 @@ export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
   deleteDownloadSource,
   deleteFleetProxy,
 }) => {
-  const showProxySection = useConfig().internal?.disableProxies !== true;
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -53,12 +51,10 @@ export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
         downloadSources={downloadSources}
         deleteDownloadSource={deleteDownloadSource}
       />
-      {showProxySection && (
-        <>
-          <EuiSpacer size="m" />
-          <FleetProxiesSection proxies={proxies} deleteFleetProxy={deleteFleetProxy} />
-        </>
-      )}
+      <EuiSpacer size="m" />
+      <FleetProxiesSection proxies={proxies} deleteFleetProxy={deleteFleetProxy} />
+      <EuiSpacer size="m" />
+      <AdvancedSection />
     </>
   );
 };

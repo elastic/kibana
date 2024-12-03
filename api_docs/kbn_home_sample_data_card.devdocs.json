@@ -157,7 +157,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
         "deprecated": false,
@@ -206,7 +206,7 @@
             "section": "def-common.KibanaDependencies",
             "text": "KibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/home/sample_data_card/src/services.tsx",
         "deprecated": false,
@@ -257,7 +257,7 @@
             "section": "def-common.Services",
             "text": "Services"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/home/sample_data_card/src/services.tsx",
         "deprecated": false,
@@ -268,7 +268,7 @@
             "id": "def-common.SampleDataCardProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",

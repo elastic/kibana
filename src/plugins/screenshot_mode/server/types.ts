@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 
-export interface ScreenshotModePluginStart {
+export interface ScreenshotModeServerStart {
   /**
    * Any context that requires access to the screenshot mode flag but does not have access
    * to request context {@link ScreenshotModeRequestHandlerContext}, for instance if they are pre-context,
@@ -17,7 +18,7 @@ export interface ScreenshotModePluginStart {
   isScreenshotMode(request: KibanaRequest): boolean;
 }
 
-export interface ScreenshotModePluginSetup extends ScreenshotModePluginStart {
+export interface ScreenshotModeServerSetup extends ScreenshotModeServerStart {
   /**
    * Stores a value in the screenshotting context.
    * @param key Context key to set.
@@ -31,6 +32,12 @@ export interface ScreenshotModePluginSetup extends ScreenshotModePluginStart {
    */
   setScreenshotModeEnabled(): void;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ScreenshotModeServerSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ScreenshotModeServerStartDependencies {}
 
 export type ScreenshotModeRequestHandlerContext = CustomRequestHandlerContext<{
   screenshotMode: {

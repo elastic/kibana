@@ -66,7 +66,8 @@ Sensitive properties, such as passwords, can also be stored in the
 [[managing-preconfigured-connectors]]
 === View preconfigured connectors
 
-When you open the main menu, click *{stack-manage-app} > {connectors-ui}*. 
+go to the *{connectors-ui}* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>. 
 Preconfigured connectors appear regardless of which space you are in.
 They are tagged as “preconfigured”, and you cannot delete them.
 
@@ -147,8 +148,8 @@ xpack.actions.preconfigured:
     name: preconfigured-bedrock-connector-type
     actionTypeId: .bedrock
     config:
-      apiUrl: https://bedrock.us-east-1.amazonaws.com <1>
-      defaultModel: anthropic.claude-v2 <2>
+      apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com <1>
+      defaultModel: anthropic.claude-3-5-sonnet-20240620-v1:0 <2>
     secrets:
       accessKey: key-value <3>
       secret: secret-value <4>
@@ -328,7 +329,7 @@ xpack.actions.preconfigured:
     config:
       apiUrl: https://api.openai.com/v1/chat/completions <1>
       apiProvider: 'OpenAI' <2>
-      defaultModel: gpt-4 <3>
+      defaultModel: gpt-4o <3>
     secrets:
       apiKey: superlongapikey <4>
 --
@@ -513,14 +514,19 @@ xpack.actions.preconfigured:
       jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
     secrets:
       clientSecret: secretsecret <5>
-      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+      privateKey: |  <6>
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIE...
+        KAgD...
+        ... multiple lines of key data ...
+        -----END RSA PRIVATE KEY----- 
 --
 <1> Specifies whether the connector uses basic or OAuth authentication.
 <2> The user identifier.
 <3> The client identifier assigned to your OAuth application.
 <4> The key identifier assigned to the JWT verifier map of your OAuth application.
 <5> The client secret assigned to your OAuth application.
-<6> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
+<6> The RSA private key in multiline format. If it has a password, you must also provide `privateKeyPassword`.
 
 [float]
 [[preconfigured-servicenow-configuration]]
@@ -563,14 +569,19 @@ xpack.actions.preconfigured:
       jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
     secrets:
       clientSecret: secretsecret <5>
-      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+      privateKey: | <6>
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIE...
+        KAgD...
+        ... multiple lines of key data ...
+        -----END RSA PRIVATE KEY----- 
 --
 <1> Specifies whether the connector uses basic or OAuth authentication.
 <2> The user identifier.
 <3> The client identifier assigned to your OAuth application.
 <4> The key ID assigned to the JWT verifier map of your OAuth application.
 <5> The client secret assigned to the OAuth application.
-<6> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
+<6> The RSA private key in multiline format. If it has a password, you must also provide `privateKeyPassword`.
 
 [float]
 [[preconfigured-servicenow-sir-configuration]]
@@ -613,14 +624,19 @@ xpack.actions.preconfigured:
       jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
     secrets:
       clientSecret: secretsecret <5>
-      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+      privateKey: | <6>
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIE...
+        KAgD...
+        ... multiple lines of key data ...
+        -----END RSA PRIVATE KEY----- 
 --
 <1> Specifies whether the connector uses basic or OAuth authentication.
 <2> The user identifier.
 <3> The client identifier assigned to the OAuth application.
 <4> The key ID assigned to the JWT verifier map of your OAuth application.
 <5> The client secret assigned to the OAuth application.
-<6> The RSA private key. If it has a password, you must also specify
+<6> The RSA private key in multiline format. If it has a password, you must also specify
 `privateKeyPassword`.
 
 
@@ -803,17 +819,17 @@ xpack.actions.preconfigured:
       hasAuth: true <1>
       headers: <2>
         'content-type': 'application/json'
-      createIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue' <3>
+      createIncidentUrl: 'https://example.com/rest/api/2/issue' <3>
       createIncidentMethod: 'post' <4>
       createIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}' <5>
-      getIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}' <6>
+      getIncidentUrl: 'https://example.com/rest/api/2/issue/{{{external.system.id}}}' <6>
       getIncidentResponseExternalTitleKey: 'key' <7>
-      viewIncidentUrl: 'https://testing-jira.atlassian.net/browse/{{{external.system.title}}}' <8>
-      updateIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}' <9>
+      viewIncidentUrl: 'https://example.com/browse/{{{external.system.title}}}' <8>
+      updateIncidentUrl: 'https://example.com/rest/api/2/issue/{{{external.system.id}}}' <9>
       updateIncidentMethod: 'put' <10>
       updateIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}' <11>
       createCommentMethod: 'post', <12>
-      createCommentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment', <13>
+      createCommentUrl: 'https://example.com/rest/api/2/issue/{{{external.system.id}}}/comment', <13>
       createCommentJson: '{"body": {{{case.comment}}}}', <14>
     secrets:
       user: testuser <15>

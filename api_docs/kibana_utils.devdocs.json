@@ -906,7 +906,8 @@
             "section": "def-public.ResizeChecker",
             "text": "ResizeChecker"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
         "deprecated": false,
@@ -1436,7 +1437,7 @@
             "label": "set",
             "description": [],
             "signature": [
-              "(key: string, value: any) => false | void"
+              "(key: string, value: any, includeUndefined?: boolean) => false | void"
             ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
@@ -1466,6 +1467,21 @@
                 "description": [],
                 "signature": [
                   "any"
+                ],
+                "path": "src/plugins/kibana_utils/public/storage/storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.Storage.set.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeUndefined",
+                "description": [],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
@@ -1958,17 +1974,17 @@
           "<",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppUpdater",
+            "section": "def-public.AppUpdater",
             "text": "AppUpdater"
           },
           ">; toastNotifications: ",
           {
             "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.IToasts",
+            "section": "def-public.IToasts",
             "text": "IToasts"
           },
           "; history?: ",
@@ -2064,9 +2080,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.AppUpdater",
+                    "section": "def-public.AppUpdater",
                     "text": "AppUpdater"
                   },
                   ">"
@@ -2087,9 +2103,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.IToasts",
+                    "section": "def-public.IToasts",
                     "text": "IToasts"
                   }
                 ],
@@ -2388,9 +2404,9 @@
           "<TPluginsStart extends object, TStart>(accessor: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.StartServicesAccessor",
+            "section": "def-public.StartServicesAccessor",
             "text": "StartServicesAccessor"
           },
           "<TPluginsStart, TStart>) => ",
@@ -2404,9 +2420,9 @@
           "<TPluginsStart, TStart, ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">"
@@ -2427,9 +2443,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.StartServicesAccessor",
+                "section": "def-public.StartServicesAccessor",
                 "text": "StartServicesAccessor"
               },
               "<TPluginsStart, TStart>"
@@ -3316,25 +3332,25 @@
           "<unknown>; navigateToApp: (appId: string, options?: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.NavigateToAppOptions",
+            "section": "def-public.NavigateToAppOptions",
             "text": "NavigateToAppOptions"
           },
           " | undefined) => Promise<void>; basePath: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.IBasePath",
+            "section": "def-public.IBasePath",
             "text": "IBasePath"
           },
           "; mapping: string | Mapping; toastNotifications: ",
           {
             "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.IToasts",
+            "section": "def-public.IToasts",
             "text": "IToasts"
           },
           "; onBeforeRedirect?: ((error: ",
@@ -3348,10 +3364,10 @@
           ") => void) | undefined; theme: ",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
+            "section": "def-public.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
           },
           "; }) => (error: ",
           {
@@ -3404,9 +3420,9 @@
                   "(appId: string, options?: ",
                   {
                     "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.NavigateToAppOptions",
+                    "section": "def-public.NavigateToAppOptions",
                     "text": "NavigateToAppOptions"
                   },
                   " | undefined) => Promise<void>"
@@ -3437,9 +3453,9 @@
                     "signature": [
                       {
                         "pluginId": "@kbn/core-application-browser",
-                        "scope": "common",
+                        "scope": "public",
                         "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                        "section": "def-common.NavigateToAppOptions",
+                        "section": "def-public.NavigateToAppOptions",
                         "text": "NavigateToAppOptions"
                       },
                       " | undefined"
@@ -3460,9 +3476,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.IBasePath",
+                    "section": "def-public.IBasePath",
                     "text": "IBasePath"
                   }
                 ],
@@ -3498,9 +3514,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.IToasts",
+                    "section": "def-public.IToasts",
                     "text": "IToasts"
                   }
                 ],
@@ -3566,10 +3582,10 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-theme-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
+                    "section": "def-public.ThemeServiceSetup",
+                    "text": "ThemeServiceSetup"
                   }
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
@@ -4186,9 +4202,9 @@
           "(toasts: ",
           {
             "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.IToasts",
+            "section": "def-public.IToasts",
             "text": "IToasts"
           },
           ") => { onGetError: (e: Error) => void; onSetError: (e: Error) => void; }"
@@ -4207,9 +4223,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
+                "section": "def-public.IToasts",
                 "text": "IToasts"
               }
             ],
@@ -4549,14 +4565,14 @@
               {
                 "parentPluginId": "kibanaUtils",
                 "id": "def-public.Configurable.CollectConfig.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -4570,7 +4586,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6649,9 +6665,9 @@
           "() => StartServices<Plugins, OwnContract, ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">"
@@ -6715,7 +6731,7 @@
             "section": "def-common.StateContainer",
             "text": "StateContainer"
           },
-          "<infer T, any, {}> ? T : never"
+          "<infer T extends object, any, {}> ? T : never"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
@@ -6941,55 +6957,20 @@
         "initialIsOpen": false
       }
     ],
-    "setup": {
+    "start": {
       "parentPluginId": "kibanaUtils",
-      "id": "def-public.KibanaUtilsSetup",
-      "type": "Interface",
+      "id": "def-public.KibanaUtilsPublicStart",
+      "type": "Type",
       "tags": [],
-      "label": "KibanaUtilsSetup",
+      "label": "KibanaUtilsPublicStart",
       "description": [],
+      "signature": [
+        "undefined"
+      ],
       "path": "src/plugins/kibana_utils/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "kibanaUtils",
-          "id": "def-public.KibanaUtilsSetup.setVersion",
-          "type": "Function",
-          "tags": [],
-          "label": "setVersion",
-          "description": [],
-          "signature": [
-            "(history: Pick<",
-            "History",
-            "<unknown>, \"replace\" | \"location\">) => void"
-          ],
-          "path": "src/plugins/kibana_utils/public/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "kibanaUtils",
-              "id": "def-public.KibanaUtilsSetup.setVersion.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "history",
-              "description": [],
-              "signature": [
-                "Pick<",
-                "History",
-                "<unknown>, \"replace\" | \"location\">"
-              ],
-              "path": "src/plugins/kibana_utils/public/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        }
-      ],
-      "lifecycle": "setup",
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
@@ -7509,9 +7490,9 @@
           "(res: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaResponseFactory",
+            "section": "def-server.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ", err: ",
@@ -7525,9 +7506,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IKibanaResponse",
+            "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
           "<any>"
@@ -7548,9 +7529,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaResponseFactory",
+                "section": "def-server.KibanaResponseFactory",
                 "text": "KibanaResponseFactory"
               }
             ],
@@ -11630,7 +11611,7 @@
             "section": "def-common.StateContainer",
             "text": "StateContainer"
           },
-          "<infer T, any, {}> ? T : never"
+          "<infer T extends object, any, {}> ? T : never"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,

@@ -230,6 +230,18 @@ export class ESGeoLineSource extends AbstractESAggSource {
         );
   }
 
+  getInspectorRequestIds(): string[] {
+    return [this._getTracksRequestId(), this._getEntitiesRequestId()];
+  }
+
+  private _getTracksRequestId() {
+    return `${this.getId()}_tracks`;
+  }
+
+  private _getEntitiesRequestId() {
+    return `${this.getId()}_entities`;
+  }
+
   async _getGeoLineByTimeseries(
     layerName: string,
     requestMeta: VectorSourceRequestMeta,
@@ -264,7 +276,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
     const warnings: SearchResponseWarning[] = [];
     const resp = await this._runEsQuery({
-      requestId: `${this.getId()}_tracks`,
+      requestId: this._getTracksRequestId(),
       requestName: getLayerFeaturesRequestName(layerName),
       searchSource,
       registerCancelCallback,
@@ -307,7 +319,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     if (!this._descriptor.splitField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
-          defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+          defaultMessage: `Unable to create tracks. Provide a value for required configuration ''{inputLabel}''`,
           values: { inputLabel: ENTITY_INPUT_LABEL },
         })
       );
@@ -316,7 +328,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     if (!this._descriptor.sortField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
-          defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+          defaultMessage: `Unable to create tracks. Provide a value for required configuration ''{inputLabel}''`,
           values: { inputLabel: SORT_INPUT_LABEL },
         })
       );
@@ -356,7 +368,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     }
 
     const entityResp = await this._runEsQuery({
-      requestId: `${this.getId()}_entities`,
+      requestId: this._getEntitiesRequestId(),
       requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {
         defaultMessage: `load track entities ({layerName})`,
         values: {
@@ -431,7 +443,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       },
     });
     const tracksResp = await this._runEsQuery({
-      requestId: `${this.getId()}_tracks`,
+      requestId: this._getTracksRequestId(),
       requestName: getLayerFeaturesRequestName(layerName),
       searchSource: tracksSearchSource,
       registerCancelCallback,

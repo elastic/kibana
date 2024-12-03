@@ -29,7 +29,9 @@
           "\nHook to help with managing the pagination and sorting for EuiInMemoryTable"
         ],
         "signature": [
-          "(items: T[], initialSortField: string, initialSortDirection: \"asc\" | \"desc\") => { onTableChange: ({ page, sort }: ",
+          "(items: T[], initialSortField: string, initialSortDirection: \"asc\" | \"desc\", initialPagionation: Partial<",
+          "Pagination",
+          "> | undefined) => { onTableChange: ({ page, sort }: ",
           "Criteria",
           "<T>) => void; pagination: ",
           "Pagination",
@@ -91,6 +93,23 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-in-memory-table",
+            "id": "def-common.useTableState.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "initialPagionation",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "Pagination",
+              "> | undefined"
+            ],
+            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -218,7 +237,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

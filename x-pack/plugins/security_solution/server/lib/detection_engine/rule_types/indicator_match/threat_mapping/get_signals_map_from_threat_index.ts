@@ -66,7 +66,8 @@ export async function getSignalsQueryMapFromThreatIndex(
     const signalMatch = signalsQueryMap.get(signalId);
 
     const threatQuery = {
-      id: threatHit._id,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      id: threatHit._id!,
       index: threatHit._index,
       field: decodedQuery.field,
       value: decodedQuery.value,
@@ -89,7 +90,9 @@ export async function getSignalsQueryMapFromThreatIndex(
 
   while (maxThreatsReachedMap.size < eventsCount && threatList?.hits.hits.length > 0) {
     threatList.hits.hits.forEach((threatHit) => {
-      const matchedQueries = threatHit?.matched_queries || [];
+      const matchedQueries = Array.isArray(threatHit?.matched_queries)
+        ? threatHit.matched_queries
+        : [];
 
       matchedQueries.forEach((matchedQuery) => {
         const decodedQuery = decodeThreatMatchNamedQuery(matchedQuery);

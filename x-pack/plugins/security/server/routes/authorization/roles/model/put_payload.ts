@@ -7,13 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/security-plugin-types-server';
 
 import type { ElasticsearchRole } from '../../../../authorization';
-import {
-  elasticsearchRoleSchema,
-  getKibanaRoleSchema,
-  transformPrivilegesToElasticsearchPrivileges,
-} from '../../../../lib';
+import { transformPrivilegesToElasticsearchPrivileges } from '../../../../lib';
 
 export const transformPutPayloadToElasticsearchRole = (
   rolePayload: RolePayloadSchemaType,
@@ -22,6 +19,7 @@ export const transformPutPayloadToElasticsearchRole = (
 ) => {
   const {
     elasticsearch = {
+      remote_cluster: undefined,
       cluster: undefined,
       indices: undefined,
       remote_indices: undefined,
@@ -34,8 +32,10 @@ export const transformPutPayloadToElasticsearchRole = (
   );
 
   return {
+    ...(rolePayload.description && { description: rolePayload.description }),
     metadata: rolePayload.metadata,
     cluster: elasticsearch.cluster || [],
+    remote_cluster: elasticsearch.remote_cluster,
     indices: elasticsearch.indices || [],
     remote_indices: elasticsearch.remote_indices,
     run_as: elasticsearch.run_as || [],
@@ -51,10 +51,30 @@ export function getPutPayloadSchema(
 ) {
   return schema.object({
     /**
+     * Optional text to describe the Role
+     */
+    description: schema.maybe(
+      schema.string({
+        maxLength: 2048,
+        meta: { description: 'A description for the role.' },
+      })
+    ),
+
+    /**
      * An optional meta-data dictionary. Within the metadata, keys that begin with _ are reserved
      * for system usage.
      */
-    metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    metadata: schema.maybe(
+      schema.recordOf(
+        schema.string({
+          meta: {
+            description:
+              'A metadata dictionary. Keys that begin with `_` are reserved for system usage.',
+          },
+        }),
+        schema.any()
+      )
+    ),
 
     /**
      * Elasticsearch specific portion of the role definition.

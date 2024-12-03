@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -12,7 +13,7 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService } from '../../../../common/data_views';
 import { RuntimeField } from '../../../../common/types';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSchema } from '../../../../common/schemas';
+import { runtimeFieldSchema } from '../../../schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
@@ -24,6 +25,7 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
+  CREATE_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
 import { runtimeResponseSchema } from '../../schema';
@@ -47,19 +49,20 @@ export const createRuntimeField = async ({
   runtimeField,
 }: CreateRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
-
-  if (dataView.fields.getByName(name) || dataView.getRuntimeField(name)) {
-    throw new Error(`Field [name = ${name}] already exists.`);
-  }
+  const dataView = await dataViewsService.getDataViewLazy(id);
 
   const firstNameSegment = name.split('.')[0];
 
-  if (dataView.fields.getByName(firstNameSegment) || dataView.getRuntimeField(firstNameSegment)) {
-    throw new Error(`Field [name = ${firstNameSegment}] already exists.`);
+  const fld = Object.keys(
+    (await dataView.getFields({ fieldName: [name, firstNameSegment] })).getFieldMap()
+  );
+
+  // check getRuntimeField to cover composite fields
+  if (fld.length || dataView.getRuntimeField(name) || dataView.getRuntimeField(firstNameSegment)) {
+    throw new Error(`Field [name = ${name}] already exists.`);
   }
 
-  const createdRuntimeFields = dataView.addRuntimeField(name, runtimeField);
+  const createdRuntimeFields = await dataView.addRuntimeField(name, runtimeField);
 
   await dataViewsService.updateSavedObject(dataView);
 
@@ -67,7 +70,7 @@ export const createRuntimeField = async ({
 };
 
 const runtimeCreateFieldRouteFactory =
-  (path: string, serviceKey: SERVICE_KEY_TYPE) =>
+  (path: string, serviceKey: SERVICE_KEY_TYPE, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -76,9 +79,14 @@ const runtimeCreateFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            requiredPrivileges: ['indexPatterns:manage'],
+          },
+        },
         validate: {
           request: {
             params: schema.object({
@@ -124,7 +132,7 @@ const runtimeCreateFieldRouteFactory =
           runtimeField: runtimeField as RuntimeField,
         });
 
-        const response: RuntimeResponseType = responseFormatter({
+        const response: RuntimeResponseType = await responseFormatter({
           serviceKey,
           dataView,
           fields,
@@ -137,7 +145,8 @@ const runtimeCreateFieldRouteFactory =
 
 export const registerCreateRuntimeFieldRoute = runtimeCreateFieldRouteFactory(
   RUNTIME_FIELD_PATH,
-  SERVICE_KEY
+  SERVICE_KEY,
+  CREATE_RUNTIME_FIELD_DESCRIPTION
 );
 
 export const registerCreateRuntimeFieldRouteLegacy = runtimeCreateFieldRouteFactory(

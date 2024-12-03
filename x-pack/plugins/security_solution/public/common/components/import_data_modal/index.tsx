@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiFilePickerProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,6 +19,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import type { WarningSchema } from '../../../../common/api/detection_engine';
 
@@ -78,6 +80,8 @@ export const ImportDataModalComponent = ({
   const [actionConnectorsWarnings, setActionConnectorsWarnings] = useState<WarningSchema[] | []>(
     []
   );
+  const descriptionElementId = useMemo(() => htmlIdGenerator()(), []);
+
   const [importedActionConnectorsCount, setImportedActionConnectorsCount] = useState<
     number | undefined
   >(0);
@@ -87,6 +91,7 @@ export const ImportDataModalComponent = ({
     setOverwriteExceptions(false);
     setOverwriteActionConnectors(false);
     setActionConnectorsWarnings([]);
+    setIsImporting(false);
   }, [closeModal, setOverwrite, setOverwriteExceptions]);
 
   const onImportComplete = useCallback(
@@ -168,6 +173,14 @@ export const ImportDataModalComponent = ({
   const handleActionConnectorsCheckboxClick = useCallback(() => {
     setOverwriteActionConnectors((shouldOverwrite) => !shouldOverwrite);
   }, []);
+
+  const handleFilePickerChange: EuiFilePickerProps['onChange'] = useCallback(
+    (files: FileList | null) => {
+      setSelectedFiles(files && files.length > 0 ? files : null);
+    },
+    []
+  );
+
   return (
     <>
       {showModal && (
@@ -178,7 +191,7 @@ export const ImportDataModalComponent = ({
 
           <EuiModalBody>
             <EuiText size="s">
-              <h4>{description}</h4>
+              <h4 id={descriptionElementId}>{description}</h4>
             </EuiText>
 
             <EuiSpacer size="s" />
@@ -187,12 +200,11 @@ export const ImportDataModalComponent = ({
               accept=".ndjson"
               id="rule-file-picker"
               initialPromptText={subtitle}
-              onChange={(files: FileList | null) => {
-                setSelectedFiles(files && files.length > 0 ? files : null);
-              }}
+              onChange={handleFilePickerChange}
               display={'large'}
               fullWidth={true}
               isLoading={isImporting}
+              aria-labelledby={descriptionElementId}
             />
             <EuiSpacer size="s" />
 

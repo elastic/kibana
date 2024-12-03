@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from './actions_client';
+import type { ActionsClient } from './actions_client';
 
 type ActionsClientContract = PublicMethodsOf<ActionsClient>;
 export type ActionsClientMock = jest.Mocked<ActionsClientContract>;
@@ -18,10 +18,10 @@ const createActionsClientMock = () => {
     delete: jest.fn(),
     update: jest.fn(),
     getAll: jest.fn(),
+    getAllSystemConnectors: jest.fn(),
     getBulk: jest.fn(),
     getOAuthAccessToken: jest.fn(),
     execute: jest.fn(),
-    ephemeralEnqueuedExecution: jest.fn(),
     bulkEnqueueExecution: jest.fn(),
     listTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),

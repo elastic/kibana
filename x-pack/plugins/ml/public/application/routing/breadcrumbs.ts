@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
-import { NavigateToPath } from '../contexts/kibana';
+import type { NavigateToPath } from '../contexts/kibana';
 
 export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {
@@ -48,6 +48,14 @@ export const TRAINED_MODELS: ChromeBreadcrumb = Object.freeze({
   }),
   href: '/trained_models',
   deepLinkId: 'ml:modelManagement',
+});
+
+export const SUPPLIED_CONFIGURATIONS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.suppliedConfigurationsLabel', {
+    defaultMessage: 'Supplied configurations',
+  }),
+  href: '/supplied_configurations',
+  deepLinkId: 'ml:suppliedConfigurations',
 });
 
 export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
@@ -120,6 +128,14 @@ export const CALENDAR_MANAGEMENT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   deepLinkId: 'ml:calendarSettings',
 });
 
+export const CALENDAR_DST_MANAGEMENT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
+    defaultMessage: 'Calendar DST management',
+  }),
+  href: '/settings/calendars_dst_list',
+  deepLinkId: 'ml:calendarSettings',
+});
+
 export const FILTER_LISTS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
     defaultMessage: 'Filter lists',
@@ -152,7 +168,9 @@ const breadcrumbs = {
   CHANGE_POINT_DETECTION,
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,
+  CALENDAR_DST_MANAGEMENT_BREADCRUMB,
   FILTER_LISTS_BREADCRUMB,
+  SUPPLIED_CONFIGURATIONS,
 };
 type Breadcrumb = keyof typeof breadcrumbs;
 

@@ -46,6 +46,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
+        ignoreTag: true,
       }
     ),
   },
@@ -210,6 +211,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -238,6 +261,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
+        ignoreTag: true,
       }
     ),
   },
@@ -423,6 +447,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -451,6 +486,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
+        ignoreTag: true,
       }
     ),
   },
@@ -605,6 +641,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.filewrite_sync',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.filewrite_sync',
+      {
+        defaultMessage:
+          'Send file kernel driver write notifications synchronously where possible.  May improve the reliability of file write and malware-on-write enrichments at the cost of system responsiveness. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.kernel.network',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -612,6 +659,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           "A value of 'false' overrides other config settings that would enable kernel network events. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.network_report_loopback',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.network_report_loopback',
+      {
+        defaultMessage:
+          'Controls whether the kernel reports loopback network events. Default: true.',
       }
     ),
   },
@@ -678,6 +736,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Report limited registry access (queryvalue, savekey) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.process_handle',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.process_handle',
+      {
+        defaultMessage: 'Capture process and thread handle events. Default: true.',
       }
     ),
   },
@@ -785,6 +853,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.enable_fork_scan',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.enable_fork_scan',
+      {
+        defaultMessage:
+          'Enable memory scanning on process fork events. This will have the effect of more memory regions being scanned. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.enable_shared_dirty_scan',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.enable_shared_dirty_scan',
+      {
+        defaultMessage:
+          'Instead of ignoring regions with just no Private_Dirty bytes, ingore regions with the combination of no Private_Dirty bytes, no Shared_Dirty bytes and is file backed. This has the effect of scanning more memory regions because of the loosened restrictions. Default: true.',
       }
     ),
   },
@@ -901,7 +991,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.etw',
       {
-        defaultMessage: 'Enable collection of ETW events. Default: true',
+        defaultMessage: 'Deprecated.',
       }
     ),
   },
@@ -1057,6 +1147,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.fanotify.seccomp_restricted',
+    first_supported_version: '8.13.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.seccomp_restricted',
+      {
+        defaultMessage:
+          'Prevent the Defend permission checking thread from calling the open/openat syscalls when running on kernels which require FAN_OPEN_PERM (older than 5.0). Will avoid potential deadlocks with other anti-virus vendors at the cost of racy hash-based trusted application entries. Ignored when running on newer kernels. Default: false',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.context_manipulation_detection',
     first_supported_version: '8.4',
     documentation: i18n.translate(
@@ -1112,6 +1213,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.events.enable_caps',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.enable_caps',
+      {
+        defaultMessage:
+          'This setting ensures thread capability arrays are not pruned from Linux process events before being sent to Elasticsearch. At the expense of higher Endpoint data volumes, a true value will ensure capability matching detection rules running within the Elastic stack can match. Detection rules running within Elastic Defend are unaffected because capabilities are conditionally pruned after rule processing. Default is false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.events.callstacks.emit_in_events',
     first_supported_version: '8.8',
     documentation: i18n.translate(
@@ -1159,6 +1271,105 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.registry',
       {
         defaultMessage: 'Collect callstacks during registry events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.timeout_microseconds',
+    first_supported_version: '8.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.timeout_microseconds',
+      {
+        defaultMessage:
+          'Maximum runtime of inline callstack collection/enrichment.  Default: 100000',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.use_hardware',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.use_hardware',
+      {
+        defaultMessage:
+          'Use hardware callstacks (e.g. Intel CET) if supported by the OS and CPU.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.exclude_hotpatch_extension_pages',
+    first_supported_version: '8.15.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.exclude_hotpatch_extension_pages',
+      {
+        defaultMessage:
+          'Exclude Windows 11 24H2 hotpatch extension pages, which resemble injected code, from callstack module stomp scanning.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.process_ancestry_length',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process_ancestry_length',
+      {
+        defaultMessage:
+          'Maximum number of process ancestry entries to include in process events. Default: 5',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.process_ancestry_length',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.process_ancestry_length',
+      {
+        defaultMessage:
+          'Maximum number of process ancestry entries to include in process events. Default: 5',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.process_ancestry_length',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.process_ancestry_length',
+      {
+        defaultMessage:
+          'Maximum number of process ancestry entries to include in process events. Default: 5',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.ancestry_in_all_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.ancestry_in_all_events',
+      {
+        defaultMessage:
+          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.ancestry_in_all_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.ancestry_in_all_events',
+      {
+        defaultMessage:
+          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.ancestry_in_all_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.ancestry_in_all_events',
+      {
+        defaultMessage:
+          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
       }
     ),
   },
@@ -1371,6 +1582,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.dev_drives.harden',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.dev_drives.harden',
+      {
+        defaultMessage:
+          'Controls whether malware protection is applied to dev drives. Default: false',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.malware.networkshare',
     first_supported_version: '8.9',
     documentation: i18n.translate(
@@ -1455,6 +1677,564 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.file_cache.file_object_cache_size',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.file_cache.file_object_cache_size',
+      {
+        defaultMessage:
+          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.file_cache.file_object_cache_size',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.file_cache.file_object_cache_size',
+      {
+        defaultMessage:
+          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.file_cache.file_object_cache_size',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.file_cache.file_object_cache_size',
+      {
+        defaultMessage:
+          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.resident_memory_target_mb',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.resident_memory_target_mb',
+      {
+        defaultMessage:
+          'How much memory (in MB) should Endpoint aim to keep resident in RAM? This setting affects Private Working Set on Windows. It does not affect the amount of virtual memory that Endpoint requests from the OS (Private Bytes aka Commit Charge). If plenty of unused RAM is available, Windows may give Endpoint more RAM than requested to reduce unnecessary paging and improve performance. If the current Defend configuration requires regularly touching more than the requested amount of memory, then the Private Working Set will be higher than requested here. Default 200. This value cannot be decreased below 50.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Windows alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Mac alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Linux alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.disable_image_load_suppression_cache',
+    first_supported_version: '8.12.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_image_load_suppression_cache',
+      {
+        defaultMessage:
+          'The image load suppression cache improves system performance by enabling Endpoint to tell its kernel driver about DLLs which are un-interesting and will never be evented upon. This feature improves system reponsiveness and reduces Endpoint CPU usage.  Use this setting only for troubleshooting if image load events are not being generated as expected. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.disable_registry_write_suppression',
+    first_supported_version: '8.12.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_registry_write_suppression',
+      {
+        defaultMessage:
+          'Registry write suppression improves system performance by enabling Endpoint to tell its driver that certain types of registry operations are uninteresting. Once deemed uninteresting, the driver can quickly drop these events, improving system responsiveness and reducing Endpoint CPU usage. Use this setting only for troubleshooting if registry events are not functioning as expected. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.process.creation_flags',
+    first_supported_version: '8.13.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.creation_flags',
+      {
+        defaultMessage:
+          'Enables an additional enrichment for process events. Use this setting only for troubleshooting if process events are not functioning as expected. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.memory_scan',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.memory_scan',
+      {
+        defaultMessage:
+          'On behavior alerts, this feature enables an additional scan of identified memory regions against well-known malware signatures. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.flags',
+    first_supported_version: '8.13.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.flags',
+      {
+        defaultMessage:
+          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.flags',
+    first_supported_version: '8.16.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.flags',
+      {
+        defaultMessage:
+          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.flags',
+    first_supported_version: '8.16.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.flags',
+      {
+        defaultMessage:
+          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.event_on_access.file_paths',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.event_on_access.file_paths',
+      {
+        defaultMessage:
+          'Comma-separated list of additional wildcard patterns that will be monitored for read access. Endpoint will report at most one match per pattern per process. Endpoint will attempt to convert drive letters to NT paths (e.g. \\\\Device\\\\HarddiskVolume4), but conversion will fail for per-user drives such as network drives. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. See Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.event_on_access.registry_paths',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.event_on_access.registry_paths',
+      {
+        defaultMessage:
+          'Comma-separated list of registry paths that will be monitored for read access. These must be NT paths (e.g. \\\\REGISTRY\\\\MACHINE\\\\SOFTWARE\\\\Microsoft\\\\...). Endpoint will report at most one match per pattern per process. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. See Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.event_on_access.file_paths',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.event_on_access.file_paths',
+      {
+        defaultMessage:
+          'Comma-separated list of additional wildcard patterns that will be monitored for read access.  Put only commas (no spaces) between entries. Wildcard matching is case-insensitive.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.deduplicate_network_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events',
+      {
+        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.deduplicate_network_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events',
+      {
+        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.deduplicate_network_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events',
+      {
+        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.deduplicate_network_events_below_bytes',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events_below_bytes',
+      {
+        defaultMessage:
+          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.deduplicate_network_events_below_bytes',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events_below_bytes',
+      {
+        defaultMessage:
+          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.deduplicate_network_events_below_bytes',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events_below_bytes',
+      {
+        defaultMessage:
+          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.registry.enforce_registry_filters',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.registry.enforce_registry_filters',
+      {
+        defaultMessage:
+          'Reduce data volume by filtering out registry events which are not relevant to behavioral protections.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.file.max_hash_size_mb',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.max_hash_size_mb',
+      {
+        defaultMessage:
+          "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.file.max_hash_size_mb',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.file.max_hash_size_mb',
+      {
+        defaultMessage:
+          "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.file.max_hash_size_mb',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.file.max_hash_size_mb',
+      {
+        defaultMessage:
+          "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.aggregate_process',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related process events into fewer aggregate events. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.aggregate_process',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related process events into fewer aggregate events. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.aggregate_process',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related process events into fewer aggregate events. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.hash.sha256',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha256',
+      {
+        defaultMessage:
+          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.alerts.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.alerts.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.hash.sha256',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha256',
+      {
+        defaultMessage:
+          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.hash.sha256',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha256',
+      {
+        defaultMessage:
+          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.set_extended_host_information',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.set_extended_host_information',
+      {
+        defaultMessage:
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.set_extended_host_information',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.set_extended_host_information',
+      {
+        defaultMessage:
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.set_extended_host_information',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.set_extended_host_information',
+      {
+        defaultMessage:
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: true',
       }
     ),
   },

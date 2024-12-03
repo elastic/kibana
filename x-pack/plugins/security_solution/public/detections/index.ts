@@ -11,6 +11,8 @@ import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 import { routes } from './routes';
 import type { SecuritySubPlugin } from '../app/types';
+import { runDetectionMigrations } from './migrations';
+import type { StartPlugins } from '../types';
 
 export const DETECTIONS_TABLE_IDS: TableIdLiteral[] = [
   TableId.alertsOnRuleDetailsPage,
@@ -20,7 +22,9 @@ export const DETECTIONS_TABLE_IDS: TableIdLiteral[] = [
 export class Detections {
   public setup() {}
 
-  public start(storage: Storage): SecuritySubPlugin {
+  public async start(storage: Storage, plugins: StartPlugins): Promise<SecuritySubPlugin> {
+    await runDetectionMigrations(storage, plugins);
+
     return {
       storageDataTables: {
         tableById: getDataTablesInStorageByIds(storage, DETECTIONS_TABLE_IDS),

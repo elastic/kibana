@@ -8,14 +8,22 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+import type { KbnClient } from '@kbn/test';
+import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import pRetry from 'p-retry';
+import { fetchActiveSpace } from '../common/spaces';
+import { dump } from '../common/utils';
+import { type RuleResponse } from '../../../common/api/detection_engine';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type {
   S1SitesListApiResponse,
   S1AgentPackage,
   S1AgentPackageListApiResponse,
 } from './types';
-import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import type { HostVm } from '../common/types';
+import { createConnector, fetchConnectorByType } from '../common/connectors_services';
+import { createRule, findRules } from '../common/detection_rules_services';
 
 interface S1ClientOptions {
   /** The base URL for SentinelOne */
@@ -79,13 +87,18 @@ export class S1Client {
 
     this.log.debug(`Request: `, requestOptions);
 
-    return axios
-      .request<T>(requestOptions)
-      .then((response) => {
-        this.log.verbose(`Response: `, response);
-        return response.data;
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
+    return pRetry(
+      async () => {
+        return axios
+          .request<T>(requestOptions)
+          .then((response) => {
+            this.log.verbose(`Response: `, response);
+            return response.data;
+          })
+          .catch(catchAxiosErrorFormatAndThrow);
+      },
+      { maxTimeout: 10000 }
+    );
   }
 
   public buildUrl(path: string): string {
@@ -200,6 +213,16 @@ export const installSentinelOneAgent = async ({
 
     const status = (await hostVm.exec(`sudo ${installPath} control status`)).stdout;
 
+    try {
+      // Generate an alert in SentinelOne
+      const command = 'nslookup elastic.co';
+
+      log?.info(`Triggering alert using command: ${command}`);
+      await hostVm.exec(command);
+    } catch (e) {
+      log?.warning(`Attempted to generate an alert on SentinelOne host failed: ${e.message}`);
+    }
+
     log.info('done');
 
     return {
@@ -207,4 +230,86 @@ export const installSentinelOneAgent = async ({
       status,
     };
   });
+};
+
+interface CreateSentinelOneStackConnectorIfNeededOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  s1Url: string;
+  s1ApiToken: string;
+  name?: string;
+}
+
+export const createSentinelOneStackConnectorIfNeeded = async ({
+  kbnClient,
+  log,
+  s1ApiToken,
+  s1Url,
+  name: _name,
+}: CreateSentinelOneStackConnectorIfNeededOptions): Promise<void> => {
+  const name =
+    _name ?? `SentinelOne Dev instance (space: ${(await fetchActiveSpace(kbnClient)).id})`;
+  const connector = await fetchConnectorByType(kbnClient, SENTINELONE_CONNECTOR_ID);
+
+  if (connector) {
+    log.debug(`Nothing to do. A connector for SentinelOne is already configured`);
+    log.verbose(dump(connector));
+    return;
+  }
+
+  log.info(`Creating SentinelOne Connector with name: ${name}`);
+
+  await createConnector(kbnClient, {
+    name,
+    config: {
+      url: s1Url,
+    },
+    secrets: {
+      token: s1ApiToken,
+    },
+    connector_type_id: SENTINELONE_CONNECTOR_ID,
+  });
+};
+
+export const createDetectionEngineSentinelOneRuleIfNeeded = async (
+  kbnClient: KbnClient,
+  log: ToolingLog,
+  /** If defined, then the Index patterns used the SIEM rule will include this value */
+  namespace?: string
+): Promise<RuleResponse> => {
+  const ruleName = 'Promote SentinelOne alerts';
+  const tag = 'dev-script-run-sentinelone-host';
+  const indexNamespace = namespace ? `-${namespace}` : '';
+  const index = [
+    `logs-sentinel_one.alert${indexNamespace}*`,
+    `logs-sentinel_one.threat${indexNamespace}*`,
+  ];
+  const ruleQueryValue = 'sentinel_one.alert.agent.id:* OR sentinel_one.threat.agent.id:*';
+
+  const { data } = await findRules(kbnClient, {
+    filter: `alert.attributes.tags:("${tag}")`,
+  });
+
+  if (data.length) {
+    log.info(
+      `Detection engine rule for SentinelOne alerts already exists [${data[0].name}]. No need to create a new one.`
+    );
+
+    return data[0];
+  }
+
+  log.info(`Creating new detection engine rule named [${ruleName}] for SentinelOne`);
+
+  const createdRule = await createRule(kbnClient, {
+    index,
+    query: ruleQueryValue,
+    from: 'now-3660s',
+    name: ruleName,
+    description: `Created by dev script located at: ${__filename}`,
+    tags: [tag],
+  });
+
+  log.verbose(dump(createdRule));
+
+  return createdRule;
 };

@@ -23,10 +23,19 @@ export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
 export type KafkaVerificationMode = typeof kafkaVerificationModes;
+export type OutputSecret =
+  | string
+  | {
+      id: string;
+      hash?: string;
+    };
+
+export type OutputPreset = 'custom' | 'balanced' | 'throughput' | 'scale' | 'latency';
 
 interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_internal?: boolean;
   is_preconfigured?: boolean;
   name: string;
   type: ValueOf<OutputType>;
@@ -43,15 +52,8 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
-  secrets?: {
-    ssl?: {
-      key?:
-        | string
-        | {
-            id: string;
-          };
-    };
-  };
+  secrets?: {};
+  preset?: OutputPreset;
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {
@@ -60,11 +62,19 @@ export interface NewElasticsearchOutput extends NewBaseOutput {
 
 export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   type: OutputType['RemoteElasticsearch'];
-  service_token?: string;
+  service_token?: string | null;
+  secrets?: {
+    service_token?: OutputSecret;
+  };
 }
 
 export interface NewLogstashOutput extends NewBaseOutput {
   type: OutputType['Logstash'];
+  secrets?: {
+    ssl?: {
+      key?: OutputSecret;
+    };
+  };
 }
 
 export type NewOutput =
@@ -100,11 +110,11 @@ export interface KafkaOutput extends NewBaseOutput {
   compression_level?: number;
   auth_type?: ValueOf<KafkaAuthType>;
   connection_type?: ValueOf<KafkaConnectionTypeType>;
-  username?: string;
-  password?: string;
+  username?: string | null;
+  password?: string | null;
   sasl?: {
     mechanism?: ValueOf<KafkaSaslMechanism>;
-  };
+  } | null;
   partition?: ValueOf<KafkaPartitionType>;
   random?: {
     group_events?: number;
@@ -116,13 +126,7 @@ export interface KafkaOutput extends NewBaseOutput {
     hash?: string;
     random?: boolean;
   };
-  topics?: Array<{
-    topic: string;
-    when?: {
-      type?: ValueOf<KafkaTopicWhenType>;
-      condition?: string;
-    };
-  }>;
+  topic?: string;
   headers?: Array<{
     key: string;
     value: string;
@@ -131,17 +135,9 @@ export interface KafkaOutput extends NewBaseOutput {
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
   secrets?: {
-    password?:
-      | string
-      | {
-          id: string;
-        };
+    password?: OutputSecret;
     ssl?: {
-      key?:
-        | string
-        | {
-            id: string;
-          };
+      key?: OutputSecret;
     };
   };
 }

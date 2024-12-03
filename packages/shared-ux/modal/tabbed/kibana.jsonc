@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-tabbed-modal",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

@@ -43,7 +43,7 @@ import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { decodeOrThrow } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
 
 /**
@@ -139,12 +139,6 @@ export const push = async (
       entities: [{ owner: theCase.owner, id: caseId }],
       operation: Operations.pushCase,
     });
-
-    if (theCase?.status === CaseStatuses.closed) {
-      throw Boom.conflict(
-        `The ${theCase.title} case is closed. Pushing a closed case is not allowed.`
-      );
-    }
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
     const alerts = await getAlerts(alertsInfo, clientArgs);

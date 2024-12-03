@@ -7,13 +7,23 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const FleetServerHostSchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+  host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
+  is_default: schema.boolean({ defaultValue: false }),
+  is_internal: schema.maybe(schema.boolean()),
+  is_preconfigured: schema.boolean({ defaultValue: false }),
+  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+});
+
+export const FleetServerHostResponseSchema = schema.object({
+  item: FleetServerHostSchema,
+});
+
 export const PostFleetServerHostRequestSchema = {
-  body: schema.object({
+  body: FleetServerHostSchema.extends({
     id: schema.maybe(schema.string()),
-    name: schema.string(),
-    host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
-    is_default: schema.boolean({ defaultValue: false }),
-    proxy_id: schema.nullable(schema.string()),
   }),
 };
 
@@ -27,6 +37,7 @@ export const PutFleetServerHostRequestSchema = {
     name: schema.maybe(schema.string()),
     host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
     is_default: schema.maybe(schema.boolean({ defaultValue: false })),
+    is_internal: schema.maybe(schema.boolean()),
     proxy_id: schema.nullable(schema.string()),
   }),
 };

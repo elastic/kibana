@@ -5,27 +5,29 @@
  * 2.0.
  */
 
+import { type HttpSetup } from '@kbn/core/public';
+import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_DURATION,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
-  ValidFeatureId,
 } from '@kbn/rule-data-utils';
-import { type HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface Props {
   http: HttpSetup | undefined;
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   ruleId: string;
   dateRange: {
     from: string;
     to: string;
   };
+  instanceId?: string;
 }
 
 interface FetchAlertsHistory {
@@ -45,7 +47,17 @@ export const EMPTY_ALERTS_HISTORY = {
   histogramTriggeredAlerts: [] as AggregationsDateHistogramBucketKeys[],
   avgTimeToRecoverUS: 0,
 };
-export function useAlertsHistory({ featureIds, ruleId, dateRange, http }: Props): UseAlertsHistory {
+
+export function useAlertsHistory({
+  ruleTypeIds,
+  consumers,
+  ruleId,
+  dateRange,
+  http,
+  instanceId,
+}: Props): UseAlertsHistory {
+  const enabled = !!ruleTypeIds.length;
+
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
     queryFn: async ({ signal }) => {
@@ -53,18 +65,22 @@ export function useAlertsHistory({ featureIds, ruleId, dateRange, http }: Props)
         throw new Error('Http client is missing');
       }
       return fetchTriggeredAlertsHistory({
-        featureIds,
+        ruleTypeIds,
+        consumers,
         http,
         ruleId,
         dateRange,
         signal,
+        instanceId,
       });
     },
     refetchOnWindowFocus: false,
+    enabled,
   });
+
   return {
     data: isInitialLoading ? EMPTY_ALERTS_HISTORY : data ?? EMPTY_ALERTS_HISTORY,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    isLoading: enabled && (isInitialLoading || isLoading || isRefetching),
     isSuccess,
     isError,
   };
@@ -87,14 +103,18 @@ interface AggsESResponse {
     };
   };
 }
+
 export async function fetchTriggeredAlertsHistory({
-  featureIds,
+  ruleTypeIds,
+  consumers,
   http,
   ruleId,
   dateRange,
   signal,
+  instanceId,
 }: {
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   http: HttpSetup;
   ruleId: string;
   dateRange: {
@@ -102,13 +122,15 @@ export async function fetchTriggeredAlertsHistory({
     to: string;
   };
   signal?: AbortSignal;
+  instanceId?: string;
 }): Promise<FetchAlertsHistory> {
   try {
     const responseES = await http.post<AggsESResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
       signal,
       body: JSON.stringify({
         size: 0,
-        feature_ids: featureIds,
+        rule_type_ids: ruleTypeIds,
+        consumers,
         query: {
           bool: {
             must: [
@@ -117,6 +139,15 @@ export async function fetchTriggeredAlertsHistory({
                   [ALERT_RULE_UUID]: ruleId,
                 },
               },
+              ...(instanceId && instanceId !== '*'
+                ? [
+                    {
+                      term: {
+                        [ALERT_INSTANCE_ID]: instanceId,
+                      },
+                    },
+                  ]
+                : []),
               {
                 range: {
                   [ALERT_TIME_RANGE]: dateRange,

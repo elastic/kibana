@@ -5,6 +5,10 @@
  * 2.0.
  */
 import {
+  EuiTable,
+  EuiTableRow,
+  EuiTableRowCell,
+  EuiTableHeaderCell,
   EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
@@ -27,6 +31,7 @@ interface Props {
   content: string;
   index: number;
   loading: boolean;
+  ['data-test-subj']?: string;
 }
 
 const ANIMATION_TIME = 1;
@@ -115,36 +120,21 @@ const getPluginDependencies = () => {
     },
     table: (props) => (
       <>
-        <div className="euiBasicTable">
-          {' '}
-          <table className="euiTable" {...props} />
-        </div>
+        <EuiTable {...props} />
         <EuiSpacer size="m" />
       </>
     ),
     th: (props) => {
       const { children, ...rest } = props;
-      return (
-        <th className="euiTableHeaderCell" {...rest}>
-          <span className="euiTableCellContent">
-            <span className="euiTableCellContent__text" title={children}>
-              {children}
-            </span>
-          </span>
-        </th>
-      );
+      return <EuiTableHeaderCell {...rest}>{children}</EuiTableHeaderCell>;
     },
-    tr: (props) => <tr className="euiTableRow" {...props} />,
+    tr: (props) => <EuiTableRow {...props} />,
     td: (props) => {
       const { children, ...rest } = props;
       return (
-        <td className="euiTableRowCell" {...rest}>
-          <div className="euiTableCellContent euiTableCellContent--truncateText">
-            <span className="euiTableCellContent__text" title={children}>
-              {children}
-            </span>
-          </div>
-        </td>
+        <EuiTableRowCell truncateText={true} {...rest}>
+          {children}
+        </EuiTableRowCell>
       );
     },
   };
@@ -155,23 +145,24 @@ const getPluginDependencies = () => {
   };
 };
 
-export function MessageText({ loading, content, index }: Props) {
+export function MessageText({ loading, content, index, 'data-test-subj': dataTestSubj }: Props) {
   const { parsingPluginList, processingPluginList } = getPluginDependencies();
   parsingPluginList.push([mermaidPlugin.parser, {}]);
   processingPluginList[1][1].components.mermaid = mermaidPlugin.renderer;
 
   const containerClassName = css`
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
   `;
 
   return (
-    <EuiText className={containerClassName}>
+    <EuiText className={containerClassName} data-test-subj={dataTestSubj}>
       <EuiMarkdownFormat
         // used by augmentMessageCodeBlocks
         className={`message-${index}`}
         data-test-subj={'messageText'}
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
+        textSize="s"
       >
         {`${content}${loading ? CURSOR : ''}`}
       </EuiMarkdownFormat>

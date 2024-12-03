@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { debounce } from 'lodash';
@@ -23,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
-import { pluginServices } from '../../services';
+import { contentManagementService } from '../../services/kibana_services';
 
 export interface DashboardPickerProps {
   onChange: (dashboard: { name: string; id: string } | null) => void;
@@ -52,10 +53,6 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
 
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardOption | null>(null);
 
-  const {
-    contentManagement: { client: cmClient },
-  } = pluginServices.getServices();
-
   /**
    * Debounce the query to avoid many calls to content management.
    */
@@ -76,7 +73,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
     (async () => {
       setIsLoading(true);
 
-      const response = await cmClient.mSearch<DashboardHit>({
+      const response = await contentManagementService.client.mSearch<DashboardHit>({
         contentTypes: [{ contentTypeId: 'dashboard' }],
         query: {
           text: debouncedQuery ? `${debouncedQuery}*` : undefined,
@@ -94,7 +91,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
     return () => {
       canceled = true;
     };
-  }, [debouncedQuery, cmClient]);
+  }, [debouncedQuery]);
 
   /**
    * Format items with dashboard hits and selected option

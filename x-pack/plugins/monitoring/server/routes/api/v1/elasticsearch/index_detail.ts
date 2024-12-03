@@ -13,7 +13,7 @@ import {
   postElasticsearchIndexDetailResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../../../common/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
@@ -35,6 +35,9 @@ export function esIndexRoute(server: MonitoringCore) {
     validate: {
       params: validateParams,
       body: validateBody,
+    },
+    options: {
+      access: 'internal',
     },
     handler: async (req) => {
       try {
@@ -88,7 +91,7 @@ export function esIndexRoute(server: MonitoringCore) {
             cluster,
             'elasticsearch.cluster.stats.state.state_uuid',
             get(cluster, 'cluster_state.state_uuid')
-          );
+          ) as string;
           const allocationOptions = {
             shardFilter,
             stateUuid,

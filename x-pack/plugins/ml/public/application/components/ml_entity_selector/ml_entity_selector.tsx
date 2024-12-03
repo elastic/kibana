@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   EuiComboBox,
   type EuiComboBoxOptionOption,
@@ -15,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
 import useMount from 'react-use/lib/useMount';
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useEnabledFeatures } from '../../contexts/ml';
 
@@ -62,7 +63,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
   handleDuplicates = false,
 }) => {
   const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
-  const { jobs: jobsApi, trainedModels, dataFrameAnalytics } = useMlApiContext();
+  const { jobs: jobsApi, trainedModels, dataFrameAnalytics } = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
   const visColorsBehindText = euiPaletteColorBlindBehindText();
 

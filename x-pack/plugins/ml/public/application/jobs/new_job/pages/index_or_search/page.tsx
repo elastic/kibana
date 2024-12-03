@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
-import { EuiPageBody, EuiPanel } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 import { MlPageHeader } from '../../../../components/page_header';
@@ -20,7 +22,15 @@ export interface PageProps {
 
 const RESULTS_PER_PAGE = 20;
 
-export const Page: FC<PageProps> = ({ nextStepPath }) => {
+type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
+
+export const Page: FC<PageProps> = ({
+  nextStepPath,
+  extraButtons,
+}: {
+  nextStepPath: string;
+  extraButtons?: React.ReactNode;
+}) => {
   const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 
@@ -46,6 +56,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
         </MlPageHeader>
         <EuiPanel hasShadow={false} hasBorder>
           <SavedObjectFinder
+            id="mlJobsDatafeedDataView"
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
             showFilter
@@ -62,6 +73,9 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                     defaultMessage: 'Saved search',
                   }
                 ),
+                showSavedObject: (savedObject: SavedObject) =>
+                  // ES|QL Based saved searches are not supported across ML, filter them out
+                  savedObject.attributes.isTextBasedQuery !== true,
               },
               {
                 type: 'index-pattern',
@@ -80,7 +94,15 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
               uiSettings,
             }}
           >
-            <CreateDataViewButton onDataViewCreated={onObjectSelection} allowAdHocDataView={true} />
+            <EuiFlexGroup direction="row" gutterSize="s">
+              <CreateDataViewButton
+                onDataViewCreated={(dataView) => {
+                  onObjectSelection(dataView.id!, 'index-pattern', dataView.getIndexPattern());
+                }}
+                allowAdHocDataView={true}
+              />
+              {extraButtons ? extraButtons : null}
+            </EuiFlexGroup>
           </SavedObjectFinder>
         </EuiPanel>
       </EuiPageBody>

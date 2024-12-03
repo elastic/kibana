@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,50 +15,41 @@ import {
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
-import { ExpandableFlyoutContext } from '../context';
+import { TestProvider } from '../test/provider';
+import { initialUiState, State } from '../store/state';
 
 describe('PreviewSection', () => {
-  const context: ExpandableFlyoutContext = {
+  const context: State = {
     panels: {
-      right: {},
-      left: {},
-      preview: [
-        {
-          id: 'key',
+      byId: {
+        flyout: {
+          right: undefined,
+          left: undefined,
+          preview: [
+            {
+              id: 'key',
+            },
+          ],
         },
-      ],
+      },
     },
-  } as unknown as ExpandableFlyoutContext;
+    ui: initialUiState,
+  };
 
   const component = <div>{'component'}</div>;
-  const left = 500;
 
-  it('should render close button in header', () => {
-    const showBackButton = false;
-
+  it('should render back button and close button in header', () => {
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
-        <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
-      </ExpandableFlyoutContext.Provider>
+      <TestProvider state={context}>
+        <PreviewSection component={component} banner={undefined} showExpanded={false} />
+      </TestProvider>
     );
 
     expect(getByTestId(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render back button in header', () => {
-    const showBackButton = true;
-
-    const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
-        <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
-      </ExpandableFlyoutContext.Provider>
-    );
-
     expect(getByTestId(PREVIEW_SECTION_BACK_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render banner', () => {
-    const showBackButton = false;
     const title = 'test';
     const banner: PreviewBanner = {
       title,
@@ -66,14 +58,9 @@ describe('PreviewSection', () => {
     };
 
     const { getByTestId, getByText } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
-        <PreviewSection
-          component={component}
-          leftPosition={left}
-          showBackButton={showBackButton}
-          banner={banner}
-        />
-      </ExpandableFlyoutContext.Provider>
+      <TestProvider state={context}>
+        <PreviewSection component={component} banner={banner} showExpanded={false} />
+      </TestProvider>
     );
 
     expect(getByTestId(`${PREVIEW_SECTION_TEST_ID}BannerPanel`)).toHaveClass(

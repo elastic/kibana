@@ -22,10 +22,12 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 
 import { PLUGIN_ID } from '../../common/constants/app';
-import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
+import type { MLSavedObjectService } from '../saved_objects';
+import { mlSavedObjectServiceFactory } from '../saved_objects';
 import type { MlLicense } from '../../common/license';
 
-import { MlClient, getMlClient } from './ml_client';
+import type { MlClient } from './ml_client';
+import { MlAuditLogger, getMlClient } from './ml_client';
 import { getDataViewsServiceFactory } from './data_views_utils';
 
 type MLRequestHandlerContext = CustomRequestHandlerContext<{
@@ -40,6 +42,7 @@ type Handler<P = unknown, Q = unknown, B = unknown> = (handlerParams: {
   mlSavedObjectService: MLSavedObjectService;
   mlClient: MlClient;
   getDataViewsService(): Promise<DataViewsService>;
+  auditLogger: MlAuditLogger;
 }) => ReturnType<RequestHandler<P, Q, B>>;
 
 type GetMlSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientContract | null;
@@ -119,6 +122,8 @@ export class RouteGuard {
       const [coreStart] = await this._getStartServices();
       const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
 
+      const auditLogger = new MlAuditLogger(coreStart.security.audit, request);
+
       return await coreStart.executionContext.withContext(executionContext, () =>
         handler({
           client,
@@ -126,13 +131,14 @@ export class RouteGuard {
           response,
           context,
           mlSavedObjectService,
-          mlClient: getMlClient(client, mlSavedObjectService),
+          mlClient: getMlClient(client, mlSavedObjectService, auditLogger),
           getDataViewsService: getDataViewsServiceFactory(
             this._getDataViews,
             savedObjectClient,
             client,
             request
           ),
+          auditLogger,
         })
       );
     };

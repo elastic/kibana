@@ -24,17 +24,16 @@ import { Connector } from '@kbn/search-connectors';
 import { CANCEL_LABEL, CONNECTOR_LABEL, SAVE_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnector } from '../../hooks/api/use_connector';
-import { useShowErrorToast } from '../../hooks/use_error_toast';
 
 interface EditNameProps {
+  isDisabled?: boolean;
   connector: Connector;
 }
 
-export const EditName: React.FC<EditNameProps> = ({ connector }) => {
+export const EditName: React.FC<EditNameProps> = ({ connector, isDisabled }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(connector.name || CONNECTOR_LABEL);
   const { http } = useKibanaServices();
-  const showErrorToast = useShowErrorToast();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
 
@@ -48,16 +47,9 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
       });
       return inputName;
     },
-    onError: (error) =>
-      showErrorToast(
-        error,
-        i18n.translate('xpack.serverlessSearch.connectors.config.connectorNameError', {
-          defaultMessage: 'Error updating name',
-        })
-      ),
     onSuccess: (successData) => {
       queryClient.setQueryData(queryKey, {
-        connector: { ...connector, service_type: successData },
+        connector: { ...connector, name: successData },
       });
       queryClient.invalidateQueries(queryKey);
       setIsEditing(false);
@@ -69,8 +61,13 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
       {!isEditing ? (
         <>
           <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h1>{connector.name || CONNECTOR_LABEL}</h1>
+            <EuiTitle data-test-subj="serverlessSearchConnectorName">
+              <h1>
+                {connector.name ||
+                  i18n.translate('xpack.serverlessSearch.connector.chooseName', {
+                    defaultMessage: 'Choose a name for your connector',
+                  })}
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem
@@ -81,6 +78,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
           >
             <EuiButtonIcon
               data-test-subj="serverlessSearchEditNameButton"
+              isDisabled={isDisabled}
               color="text"
               iconType="pencil"
               aria-label={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {
@@ -113,7 +111,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
               `}
             >
               <EuiButton
-                data-test-subj="serverlessSearchEditNameButton"
+                data-test-subj="serverlessSearchSaveNameButton"
                 color="primary"
                 fill
                 type="submit"
@@ -131,7 +129,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
               `}
             >
               <EuiButton
-                data-test-subj="serverlessSearchEditNameButton"
+                data-test-subj="serverlessSearchCancelNameButton"
                 size="s"
                 isLoading={isLoading}
                 onClick={() => {

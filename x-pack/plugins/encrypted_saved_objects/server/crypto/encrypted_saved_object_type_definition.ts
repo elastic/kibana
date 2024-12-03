@@ -9,15 +9,33 @@ import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_obj
 
 /**
  * Represents the definition of the attributes of the specific saved object that are supposed to be
- * encrypted. The definition also dictates which attributes should be excluded from AAD and/or
+ * encrypted. The definition also dictates which attributes should be included in AAD and/or
  * stripped from response.
  */
 export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
-  private readonly attributesToExcludeFromAAD: ReadonlySet<string> | undefined;
+  private readonly attributesToIncludeInAAD: ReadonlySet<string> | undefined;
   private readonly attributesToStrip: ReadonlySet<string>;
+  public readonly enforceRandomId: boolean;
 
   constructor(typeRegistration: EncryptedSavedObjectTypeRegistration) {
+    if (typeRegistration.attributesToIncludeInAAD) {
+      const invalidAttributeKeys = new Array<string>();
+      typeRegistration.attributesToEncrypt.forEach((attribute) => {
+        const attributeKey = typeof attribute !== 'string' ? attribute.key : attribute;
+        if (typeRegistration.attributesToIncludeInAAD?.has(attributeKey)) {
+          invalidAttributeKeys.push(attributeKey);
+        }
+      });
+
+      if (invalidAttributeKeys.length > 0) {
+        throw new Error(
+          `Invalid EncryptedSavedObjectTypeRegistration for type '${typeRegistration.type}'. ` +
+            `attributesToIncludeInAAD must not contain any values in attributesToEncrypt: ${invalidAttributeKeys}`
+        );
+      }
+    }
+
     const attributesToEncrypt = new Set<string>();
     const attributesToStrip = new Set<string>();
     for (const attribute of typeRegistration.attributesToEncrypt) {
@@ -32,9 +50,11 @@ export class EncryptedSavedObjectAttributesDefinition {
       }
     }
 
+    this.enforceRandomId = typeRegistration.enforceRandomId !== false;
+
     this.attributesToEncrypt = attributesToEncrypt;
     this.attributesToStrip = attributesToStrip;
-    this.attributesToExcludeFromAAD = typeRegistration.attributesToExcludeFromAAD;
+    this.attributesToIncludeInAAD = typeRegistration.attributesToIncludeInAAD;
   }
 
   /**
@@ -47,14 +67,14 @@ export class EncryptedSavedObjectAttributesDefinition {
   }
 
   /**
-   * Determines whether particular attribute should be excluded from AAD.
+   * Determines whether particular attribute should be included in AAD.
    * @param attributeName Name of the attribute.
    */
-  public shouldBeExcludedFromAAD(attributeName: string) {
+  public shouldBeIncludedInAAD(attributeName: string) {
     return (
-      this.shouldBeEncrypted(attributeName) ||
-      (this.attributesToExcludeFromAAD != null &&
-        this.attributesToExcludeFromAAD.has(attributeName))
+      !this.shouldBeEncrypted(attributeName) &&
+      this.attributesToIncludeInAAD != null &&
+      this.attributesToIncludeInAAD.has(attributeName)
     );
   }
 
@@ -64,5 +84,21 @@ export class EncryptedSavedObjectAttributesDefinition {
    */
   public shouldBeStripped(attributeName: string) {
     return this.attributesToStrip.has(attributeName);
+  }
+
+  /**
+   * Collects all attributes (both keys and values) that should contribute to AAD.
+   * @param attributes Attributes of the saved object
+   */
+  public collectAttributesForAAD(attributes: Record<string, unknown>) {
+    const aadAttributes: Record<string, unknown> = {};
+    if (this.attributesToIncludeInAAD) {
+      for (const attributeKey of this.attributesToIncludeInAAD) {
+        if (!this.shouldBeEncrypted(attributeKey) && Object.hasOwn(attributes, attributeKey)) {
+          aadAttributes[attributeKey] = attributes[attributeKey];
+        }
+      }
+    }
+    return aadAttributes;
   }
 }

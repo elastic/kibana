@@ -6,11 +6,11 @@
  */
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { isLensEmbeddable } from './utils';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
@@ -22,20 +22,19 @@ interface DiscoverAppLocatorParams extends SerializableRecord {
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
-interface Context {
-  embeddable: IEmbeddable;
+type Context = EmbeddableApiContext & {
   filters?: Filter[];
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
   dataViews: Pick<DataViewsService, 'get'>;
   locator?: DiscoverAppLocator;
   timeFieldName?: string;
-}
+};
 
-export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
+export function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   if (!hasDiscoverAccess) return false;
   try {
-    return isLensEmbeddable(embeddable) && (await embeddable.canViewUnderlyingData());
+    return isLensApi(embeddable) && embeddable.canViewUnderlyingData$.getValue();
   } catch (e) {
     // Fetching underlying data failed, log the error and behave as if the action is not compatible
     // eslint-disable-next-line no-console
@@ -50,7 +49,7 @@ async function getDiscoverLocationParams({
   dataViews,
   timeFieldName,
 }: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
-  if (!isLensEmbeddable(embeddable)) {
+  if (!isLensApi(embeddable)) {
     // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
   }

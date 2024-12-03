@@ -119,7 +119,7 @@ export function isQuickFunction(operationType: string) {
 
 export function getParamEditor(
   temporaryStaticValue: boolean,
-  selectedOperationDefinition: typeof operationDefinitionMap[string] | undefined,
+  selectedOperationDefinition: (typeof operationDefinitionMap)[string] | undefined,
   showDefaultStaticValue: boolean
 ) {
   if (temporaryStaticValue) {

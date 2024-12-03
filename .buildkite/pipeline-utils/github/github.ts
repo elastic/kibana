@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
@@ -91,3 +92,27 @@ export const doAnyChangesMatch = async (
 
   return anyFilesMatchRequired;
 };
+
+export function addComment(
+  comment: string,
+  owner = process.env.GITHUB_PR_BASE_OWNER,
+  repo = process.env.GITHUB_PR_BASE_REPO,
+  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
+) {
+  if (!owner || !repo || !prNumber) {
+    throw Error(
+      "Couldn't retrieve Github PR info from environment variables in order to add a comment"
+    );
+  }
+
+  return github.issues.createComment({
+    owner,
+    repo,
+    issue_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
+    body: comment,
+  });
+}
+
+export function getGithubClient() {
+  return github;
+}

@@ -12,6 +12,8 @@ import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SearchHit, ESSearchResponse } from '@kbn/es-types';
 
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+
 import type {
   Artifact,
   ArtifactElasticsearchProperties,
@@ -20,7 +22,7 @@ import type {
 } from './types';
 import { newArtifactToElasticsearchProperties } from './mappings';
 
-export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterface> => {
+export const createArtifactsClientMock = (): DeeplyMockedKeys<ArtifactsClientInterface> => {
   return {
     getArtifact: jest.fn().mockResolvedValue(generateArtifactMock()),
     createArtifact: jest.fn().mockResolvedValue(generateArtifactMock()),
@@ -44,6 +46,34 @@ export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterfac
       encodedSha256: '446086d1609189c3ad93a943976e4b7474c028612e5ec4810a81cc01a631f0f9',
       encodedSize: 24,
     }),
+    fetchAll: jest.fn(() => {
+      return createFetchAllArtifactsIterableMock();
+    }),
+  };
+};
+
+export const createFetchAllArtifactsIterableMock = (artifactPages: Artifact[][] = []) => {
+  const totalPagesOfResults = artifactPages.length;
+  let nextResults = 0;
+
+  return {
+    [Symbol.asyncIterator]() {
+      return {
+        async next() {
+          return {
+            value: artifactPages[nextResults++] ?? [],
+            done: nextResults > totalPagesOfResults,
+          };
+        },
+
+        async return() {
+          return {
+            value: [],
+            done: true,
+          };
+        },
+      };
+    },
   };
 };
 
@@ -100,6 +130,7 @@ export const generateArtifactEsGetSingleHitMock = (
     _version: 1,
     _score: 1,
     _source,
+    sort: ['abc'],
   };
 };
 

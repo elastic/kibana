@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Status } from '../../../../../../common/types/api';
 import { docLinks } from '../../../../shared/doc_links';
+import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import {
@@ -29,6 +30,7 @@ export const MethodCrawler: React.FC = () => {
   const { makeRequest } = useActions(CreateCrawlerIndexApiLogic);
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
   const isGated = !isCloud && !hasPlatinumLicense;
 
@@ -45,7 +47,7 @@ export const MethodCrawler: React.FC = () => {
         <NewSearchIndexTemplate
           type="crawler"
           onSubmit={(indexName, language) => makeRequest({ indexName, language })}
-          disabled={isGated}
+          disabled={isGated || Boolean(errorConnectingMessage)}
           buttonLoading={status === Status.LOADING}
           docsUrl={docLinks.crawlerOverview}
         />

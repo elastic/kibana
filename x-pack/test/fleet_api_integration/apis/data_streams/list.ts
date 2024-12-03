@@ -106,31 +106,53 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // Failing ES Promotion: https://github.com/elastic/kibana/issues/151756
-  describe('data_streams_list', async () => {
+  describe('data_streams_list', () => {
     skipIfNoDockerRegistry(providerContext);
 
     beforeEach(async () => {
       await installPackage(pkgName, pkgVersion);
+
+      // Create index template that do use final pipeline
+      const sourceIndexTemplate = (
+        await es.indices.getIndexTemplate({
+          name: logsTemplateName,
+        })
+      ).index_templates[0].index_template;
+      await es.indices.putIndexTemplate({
+        name: `${logsTemplateName}-testwithoutfinalpipeline`,
+        template: sourceIndexTemplate.template,
+        _meta: sourceIndexTemplate._meta,
+        data_stream: sourceIndexTemplate.data_stream,
+        composed_of: sourceIndexTemplate.composed_of.filter(
+          (template) => template.includes('@settings') || template.includes('@package')
+        ),
+        index_patterns: [`${logsTemplateName}-testwithoutfinalpipeline`],
+        priority: 500,
+      });
     });
 
     afterEach(async () => {
-      await uninstallPackage(pkgName, pkgVersion);
-      try {
-        await es.transport.request({
-          method: 'DELETE',
-          path: `/_data_stream/${logsTemplateName}-default`,
-        });
-        await es.transport.request({
-          method: 'DELETE',
-          path: `/_data_stream/${metricsTemplateName}-default`,
-        });
-        await es.transport.request({
-          method: 'DELETE',
-          path: `/_data_stream/${notFleetTemplateName}-default`,
-        });
-      } catch (e) {
-        // Silently swallow errors here as not all tests seed data streams
+      const pathsToDelete = [
+        `/_data_stream/${logsTemplateName}-default`,
+        `/_data_stream/${metricsTemplateName}-default`,
+        `/_data_stream/${notFleetTemplateName}-default`,
+        `/_data_stream/${logsTemplateName}-testwithoutfinalpipeline`,
+      ];
+
+      for (const path of pathsToDelete) {
+        await es.transport
+          .request({
+            method: 'DELETE',
+            path,
+          })
+          // Silently swallow errors here as not all tests seed data streams
+          .catch((e) => {});
       }
+
+      await es.indices.deleteIndexTemplate({
+        name: `${logsTemplateName}-testwithoutfinalpipeline`,
+      });
+      await uninstallPackage(pkgName, pkgVersion);
     });
 
     it("should return no data streams when there isn't any data yet", async function () {
@@ -194,6 +216,40 @@ export default function (providerContext: FtrProviderContext) {
           expect(dataStream.last_activity_ms).to.eql(expectedTimestamp);
         });
       });
+    });
+
+    it('should work for datastream without event.ingested and use @timestamp for last_activity_ms', async function () {
+      const timestamp = Date.now() - 1000 * 60 * 60;
+
+      await es.index({
+        index: `${logsTemplateName}-testwithoutfinalpipeline`,
+        refresh: 'wait_for',
+
+        document: {
+          '@timestamp': new Date(timestamp).toISOString(),
+          logs_test_name: 'test',
+          data_stream: {
+            dataset: `${pkgName}.test_logs`,
+            namespace: 'testwithoutfinalpipeline',
+            type: 'logs',
+          },
+        },
+      });
+
+      const res = await es.search({
+        index: `${logsTemplateName}-testwithoutfinalpipeline`,
+      });
+
+      expect(res.hits.hits.length).to.eql(1);
+      expect((res.hits.hits[0]._source as any).event).to.eql(undefined);
+
+      const { body } = await getDataStreams();
+      expect(body.data_streams.length).to.eql(1);
+
+      const dataStream = body.data_streams[0];
+
+      expect(dataStream.dataset).to.eql('datastreams.test_logs');
+      expect(dataStream.last_activity_ms).to.eql(timestamp);
     });
 
     it('should return correct number of data streams regardless of number of backing indices', async function () {

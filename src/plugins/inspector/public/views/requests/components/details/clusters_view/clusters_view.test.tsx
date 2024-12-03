@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ClustersView } from './clusters_view';
 import { Request } from '../../../../../../common/adapters/request/types';
 
@@ -51,26 +52,33 @@ describe('shouldShow', () => {
 });
 
 describe('render', () => {
-  test('should render local cluster details from _shards', () => {
-    const request = {
-      response: {
-        json: {
-          rawResponse: {
-            _shards: {
-              total: 2,
-              successful: 2,
-              skipped: 0,
-              failed: 0,
+  describe('single cluster', () => {
+    test('should display table and not display search bar and health bar', () => {
+      const request = {
+        response: {
+          json: {
+            rawResponse: {
+              _shards: {
+                total: 2,
+                successful: 2,
+                skipped: 0,
+                failed: 0,
+              },
             },
           },
         },
-      },
-    } as unknown as Request;
-    const wrapper = shallow(<ClustersView request={request} />);
-    expect(wrapper).toMatchSnapshot();
+      } as unknown as Request;
+      render(<ClustersView request={request} />);
+      const table = screen.getByRole('table');
+      expect(table).not.toBeNull();
+      const searchbar = screen.queryByRole('searchbox');
+      expect(searchbar).toBeNull();
+      const healthbar = screen.queryByText('2 clusters');
+      expect(healthbar).toBeNull();
+    });
   });
 
-  test('should render local and remote cluster details from _clusters', () => {
+  describe('multiple clusters', () => {
     const request = {
       response: {
         json: {
@@ -110,7 +118,35 @@ describe('render', () => {
         },
       },
     } as unknown as Request;
-    const wrapper = shallow(<ClustersView request={request} />);
-    expect(wrapper).toMatchSnapshot();
+
+    test('should display table, search bar, and health bar', () => {
+      render(<ClustersView request={request} />);
+      const table = screen.getByRole('table');
+      expect(table).not.toBeNull();
+      const searchbar = screen.getByRole('searchbox');
+      expect(searchbar).not.toBeNull();
+      const healthbar = screen.getByText('2 clusters');
+      expect(healthbar).not.toBeNull();
+    });
+
+    test('should filter table and health bar', () => {
+      render(<ClustersView request={request} />);
+      const searchbar = screen.getByRole('searchbox');
+      fireEvent.change(searchbar, { target: { value: 'remot' } });
+      const tableRows = screen.getAllByRole('row');
+      expect(tableRows.length).toBe(2); // table header and matching table row
+      const healthbar = screen.getByText('1 cluster');
+      expect(healthbar).not.toBeNull();
+    });
+
+    test('should display search bar when there are no matches for search', () => {
+      render(<ClustersView request={request} />);
+      const searchbar = screen.getByRole('searchbox');
+      fireEvent.change(searchbar, { target: { value: 'nevergonafindme' } });
+      const notFoundRow = screen.getByRole('row', { name: 'No clusters found' });
+      expect(notFoundRow).not.toBeNull();
+      const searchbarAfterSearch = screen.getByRole('searchbox');
+      expect(searchbarAfterSearch).not.toBeNull();
+    });
   });
 });

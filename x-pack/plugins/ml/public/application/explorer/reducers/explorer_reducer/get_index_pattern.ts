@@ -6,16 +6,15 @@
  */
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
-
-import { getInfluencers, ExplorerJob } from '../../explorer_utils';
+import type { ExplorerJob } from '../../explorer_utils';
 
 // Creates index pattern in the format expected by the kuery bar/kuery autocomplete provider
 // Field objects required fields: name, type, aggregatable, searchable
-export function getIndexPattern(selectedJobs: ExplorerJob[]) {
+export function getIndexPattern(influencers: ExplorerJob[]) {
   return {
     title: ML_RESULTS_INDEX_PATTERN,
-    fields: getInfluencers(selectedJobs).map((influencer) => ({
-      name: influencer,
+    fields: influencers.map((influencer) => ({
+      name: influencer.id,
       type: 'string',
       aggregatable: true,
       searchable: true,

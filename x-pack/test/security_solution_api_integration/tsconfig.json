@@ -8,12 +8,13 @@
     "**/*",
     "../../../typings/**/*",
     "../../../packages/kbn-test/types/ftr_globals/**/*",
-  ], 
+  ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    { "path": "../../test_serverless/tsconfig.json" },
+    { "path": "../security_solution_endpoint/tsconfig.json" },
+    "@kbn/test-suites-serverless",
     { "path": "../../test_serverless/api_integration/**/*" },
     { "path": "../../test_serverless/shared/**/*" },
     { "path": "../../api_integration/services/**/*" },
@@ -36,5 +37,20 @@
     "@kbn/securitysolution-ecs",
     "@kbn/fleet-plugin",
     "@kbn/repo-info",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/datemath",
+    "@kbn/safer-lodash-set",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/actions-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/utility-types",
+    "@kbn/dev-cli-runner",
+    "@kbn/elastic-assistant-common",
+    "@kbn/search-types",
+    "@kbn/security-plugin",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/spaces-plugin",
+    "@kbn/elastic-assistant-plugin",
   ]
 }

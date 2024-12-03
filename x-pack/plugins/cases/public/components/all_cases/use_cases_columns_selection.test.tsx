@@ -6,7 +6,7 @@
  */
 
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 
@@ -18,7 +18,7 @@ jest.mock('./use_cases_columns_configuration');
 
 const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as jest.Mock;
 
-const localStorageKey = 'testAppId.cases.list.tableColumns';
+const localStorageKey = 'securitySolution.cases.list.tableColumns';
 const casesColumnsConfig = {
   title: {
     field: 'title',

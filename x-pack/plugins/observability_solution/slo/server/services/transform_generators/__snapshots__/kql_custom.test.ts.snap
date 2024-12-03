@@ -1,0 +1,411 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KQL Custom Transform Generator aggregates using the denominator kql 1`] = `
+Object {
+  "filter": Object {
+    "bool": Object {
+      "minimum_should_match": 1,
+      "should": Array [
+        Object {
+          "exists": Object {
+            "field": "http.status_code",
+          },
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`KQL Custom Transform Generator aggregates using the numerator kql 1`] = `
+Object {
+  "filter": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "range": Object {
+                  "latency": Object {
+                    "lt": "400",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match": Object {
+                        "http.status_code": "2xx",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match": Object {
+                        "http.status_code": "3xx",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match": Object {
+                        "http.status_code": "4xx",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`KQL Custom Transform Generator filters the source using the kql query 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "range": Object {
+          "log_timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "match": Object {
+                "labels.groupId": "group-4",
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`KQL Custom Transform Generator returns the expected transform params for timeslices slo 1`] = `
+Object {
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.3,
+  },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
+  "dest": Object {
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "slo.denominator": Object {
+        "filter": Object {
+          "match_all": Object {},
+        },
+      },
+      "slo.isGoodSlice": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "goodEvents": "slo.numerator>_count",
+            "totalEvents": "slo.denominator>_count",
+          },
+          "script": "if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0 }",
+        },
+      },
+      "slo.numerator": Object {
+        "filter": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "range": Object {
+                  "latency": Object {
+                    "lt": "300",
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "log_timestamp",
+          "fixed_interval": "2m",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": Array [
+      "my-index*",
+      "my-other-index*",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {},
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "log_timestamp",
+    },
+  },
+  "transform_id": "slo-irrelevant-1",
+}
+`;
+
+exports[`KQL Custom Transform Generator returns the expected transform params for timeslices slo using timesliceTarget = 0 1`] = `
+Object {
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.3,
+  },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
+  "dest": Object {
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "slo.denominator": Object {
+        "filter": Object {
+          "match_all": Object {},
+        },
+      },
+      "slo.isGoodSlice": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "goodEvents": "slo.numerator>_count",
+            "totalEvents": "slo.denominator>_count",
+          },
+          "script": "if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents > 0 ? 1 : 0 }",
+        },
+      },
+      "slo.numerator": Object {
+        "filter": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "range": Object {
+                  "latency": Object {
+                    "lt": "300",
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "log_timestamp",
+          "fixed_interval": "2m",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": Array [
+      "my-index*",
+      "my-other-index*",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {},
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "log_timestamp",
+    },
+  },
+  "transform_id": "slo-irrelevant-1",
+}
+`;
+
+exports[`KQL Custom Transform Generator returns the expected transform params with every specified indicator params 1`] = `
+Object {
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.3,
+  },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
+  "dest": Object {
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "slo.denominator": Object {
+        "filter": Object {
+          "match_all": Object {},
+        },
+      },
+      "slo.numerator": Object {
+        "filter": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "range": Object {
+                  "latency": Object {
+                    "lt": "300",
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "log_timestamp",
+          "fixed_interval": "1m",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": Array [
+      "my-index*",
+      "my-other-index*",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {},
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "log_timestamp",
+    },
+  },
+  "transform_id": "slo-irrelevant-1",
+}
+`;

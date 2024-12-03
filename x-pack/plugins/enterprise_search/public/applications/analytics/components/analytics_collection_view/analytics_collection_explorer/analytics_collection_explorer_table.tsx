@@ -48,7 +48,7 @@ import {
 
 import { AnalyticsCollectionExplorerCallout } from './analytics_collection_explorer_callout';
 
-interface TableSetting<T = ExploreTableItem, K = T> {
+interface TableSetting<T extends object = ExploreTableItem, K extends object = T> {
   columns: Array<
     EuiBasicTableColumn<T & K> & {
       render?: (euiTheme: UseEuiTheme['euiTheme']) => EuiTableFieldDataColumnType<T & K>['render'];
@@ -162,6 +162,7 @@ const tableSettings: {
   },
   [ExploreTables.Clicked]: {
     columns: [
+      // @ts-expect-error @types/react@18 - Type '(value: string) => React.JSX.Element' is not assignable to type 'ReactNode'
       {
         field: ExploreTableColumns.page,
         name: i18n.translate(
@@ -197,6 +198,7 @@ const tableSettings: {
   },
   [ExploreTables.Referrers]: {
     columns: [
+      // @ts-expect-error @types/react@18 - Type '(value: string) => React.JSX.Element' is not assignable to type 'ReactNode'
       {
         field: ExploreTableColumns.page,
         name: i18n.translate(
@@ -232,6 +234,7 @@ const tableSettings: {
   },
   [ExploreTables.Locations]: {
     columns: [
+      // @ts-expect-error @types/react@18 - Type '(value: string) => React.JSX.Element' is not assignable to type 'ReactNode'
       {
         field: ExploreTableColumns.location,
         name: i18n.translate(

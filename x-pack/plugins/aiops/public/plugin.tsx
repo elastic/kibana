@@ -8,13 +8,18 @@
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
+
+import { getChangePointDetectionComponent } from './shared_components';
+import { LogCategorizationForDiscover as PatternAnalysisComponent } from './shared_lazy_components';
 import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
-import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
+import { registerEmbeddables } from './embeddables';
+import { registerAiopsUiActions } from './ui_actions';
+import { registerCases } from './cases/register_cases';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -25,23 +30,13 @@ export class AiopsPlugin
     core: AiopsCoreSetup,
     { embeddable, cases, licensing, uiActions }: AiopsPluginSetupDeps
   ) {
-    Promise.all([
-      firstValueFrom(licensing.license$),
-      import('./embeddable/register_embeddable'),
-      import('./ui_actions'),
-      import('./cases/register_change_point_charts_attachment'),
-      core.getStartServices(),
-    ]).then(
-      ([
-        license,
-        { registerEmbeddable },
-        { registerAiopsUiActions },
-        { registerChangePointChartsAttachment },
-        [coreStart, pluginStart],
-      ]) => {
-        if (license.hasAtLeast('platinum')) {
+    Promise.all([firstValueFrom(licensing.license$), core.getStartServices()]).then(
+      ([license, [coreStart, pluginStart]]) => {
+        const { canUseAiops } = coreStart.application.capabilities.ml;
+
+        if (license.hasAtLeast('platinum') && canUseAiops) {
           if (embeddable) {
-            registerEmbeddable(core, embeddable);
+            registerEmbeddables(embeddable, core);
           }
 
           if (uiActions) {
@@ -49,7 +44,7 @@ export class AiopsPlugin
           }
 
           if (cases) {
-            registerChangePointChartsAttachment(cases, coreStart, pluginStart);
+            registerCases(cases, coreStart, pluginStart);
           }
         }
       }
@@ -58,7 +53,14 @@ export class AiopsPlugin
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
     return {
-      EmbeddableChangePointChart: getEmbeddableChangePointChart(core, plugins),
+      ChangePointDetectionComponent: getChangePointDetectionComponent(core, plugins),
+      getPatternAnalysisAvailable: async () => {
+        const { getPatternAnalysisAvailable } = await import(
+          './components/log_categorization/log_categorization_enabled'
+        );
+        return getPatternAnalysisAvailable(plugins.licensing);
+      },
+      PatternAnalysisComponent,
     };
   }
 

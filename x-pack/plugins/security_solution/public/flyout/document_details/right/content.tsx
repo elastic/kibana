@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import type { RightPanelPaths } from '.';
-import type { RightPanelTabsType } from './tabs';
+import type { RightPanelTabType } from './tabs';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import {} from './tabs';
 
 export interface PanelContentProps {
   /**
@@ -21,14 +20,14 @@ export interface PanelContentProps {
   /**
    * Tabs display right below the flyout's header
    */
-  tabs: RightPanelTabsType;
+  tabs: RightPanelTabType[];
 }
 
 /**
  * Document details expandable flyout right section, that will display the content
  * of the overview, table and json tabs.
  */
-export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId, tabs }) => {
+export const PanelContent: FC<PanelContentProps> = ({ selectedTabId, tabs }) => {
   const selectedTabContent = useMemo(() => {
     return tabs.find((tab) => tab.id === selectedTabId)?.content;
   }, [selectedTabId, tabs]);

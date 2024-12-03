@@ -6,33 +6,30 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import {
-  exportTimelinesQuerySchema,
-  exportTimelinesRequestBodySchema,
+  ExportTimelinesRequestQuery,
+  ExportTimelinesRequestBody,
 } from '../../../../../../common/api/timeline';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { SetupPlugins } from '../../../../../plugin';
 
 import { getExportTimelineByObjectIds } from './helpers';
 
 export * from './helpers';
 
-export const exportTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const exportTimelinesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.versioned
     .post({
       path: TIMELINE_EXPORT_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -40,8 +37,8 @@ export const exportTimelinesRoute = (
       {
         validate: {
           request: {
-            query: buildRouteValidationWithExcess(exportTimelinesQuerySchema),
-            body: buildRouteValidationWithExcess(exportTimelinesRequestBodySchema),
+            query: buildRouteValidationWithZod(ExportTimelinesRequestQuery),
+            body: buildRouteValidationWithZod(ExportTimelinesRequestBody),
           },
         },
         version: '2023-10-31',
@@ -49,7 +46,7 @@ export const exportTimelinesRoute = (
       async (context, request, response) => {
         try {
           const siemResponse = buildSiemResponse(response);
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
 
           const exportSizeLimit = config.maxTimelineImportExportSize;
 

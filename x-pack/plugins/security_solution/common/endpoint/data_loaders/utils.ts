@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { mergeWith } from 'lodash';
+import { memoize, mergeWith } from 'lodash';
 import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { Flags } from '@kbn/dev-cli-runner';
+import moment from 'moment/moment';
+import type { Space } from '@kbn/spaces-plugin/common';
+import type { KbnClient } from '@kbn/test';
+import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import { EndpointError } from '../errors';
 
 export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
   'no_shard_available_action_exception',
   'illegal_index_shard_state_exception',
 ];
 
-export class EndpointDataLoadingError extends Error {
+export class EndpointDataLoadingError extends EndpointError {
   constructor(message: string, public meta?: unknown) {
     super(message);
   }
@@ -76,18 +81,19 @@ export const retryOnError = async <T>(
     const thisAttempt = attempt;
     attempt++;
 
-    log.info(msg(`attempt ${thisAttempt} started at: ${new Date().toISOString()}`));
+    log.debug(msg(`attempt ${thisAttempt} started at: ${new Date().toISOString()}`));
 
     try {
       responsePromise = callback(); // store promise so that if it fails and no more attempts, we return the last failure
       const result = await responsePromise;
 
-      log.info(msg(`attempt ${thisAttempt} was successful. Exiting retry`));
+      log.debug(msg(`attempt ${thisAttempt} was successful. Exiting retry`));
       log.indent(-4);
 
       return result;
     } catch (err) {
-      log.info(msg(`attempt ${thisAttempt} failed with: ${err.message}`), err);
+      log.warning(msg(`attempt ${thisAttempt} failed with: ${err.message.split('\n').at(0)}`));
+      log.verbose(err);
 
       // If not an error that is retryable, then end loop here and return that error;
       if (!isRetryableError(err)) {
@@ -157,3 +163,36 @@ createToolingLogger.setDefaultLogLevelFromCliFlags = (flags) => {
     ? 'error'
     : 'info';
 };
+
+/**
+ * Get human readable string of time elapsed between to dates. Return value will be in the format
+ * of `hh:mm:ss.ms`
+ * @param startDate
+ * @param endTime
+ */
+export const getElapsedTime = (
+  startDate: string | Date,
+  endTime: string | Date = new Date()
+): string => {
+  const durationObj = moment.duration(moment(endTime).diff(startDate));
+  const pad = (num: number, max = 2): string => {
+    return String(num).padStart(max, '0');
+  };
+
+  const hours = pad(durationObj.hours());
+  const minutes = pad(durationObj.minutes());
+  const seconds = pad(durationObj.seconds());
+  const milliseconds = pad(durationObj.milliseconds(), 3);
+
+  return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+};
+
+export const fetchActiveSpaceId = memoize(async (kbnClient: KbnClient): Promise<string> => {
+  return kbnClient
+    .request<Space>({
+      method: 'GET',
+      path: `/internal/spaces/_active_space`,
+    })
+    .catch(catchAxiosErrorFormatAndThrow)
+    .then((response) => response.data.id);
+});

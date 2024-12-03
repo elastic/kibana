@@ -6,7 +6,7 @@
  */
 
 import { omit, isEmpty } from 'lodash';
-import { SavedObjectReference } from '@kbn/core/server';
+import { Logger, SavedObjectReference } from '@kbn/core/server';
 import {
   Rule,
   PartialRule,
@@ -15,6 +15,7 @@ import {
   RuleTypeParams,
   RuleWithLegacyId,
   PartialRuleWithLegacyId,
+  RuleTypeRegistry,
 } from '../../types';
 import {
   ruleExecutionStatusFromRaw,
@@ -23,8 +24,12 @@ import {
 } from '../../lib';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
-import { injectReferencesIntoActions, injectReferencesIntoParams } from '../common';
-import { RulesClientContext } from '../types';
+import { injectReferencesIntoParams } from '../common';
+import {
+  transformRawActionsToDomainActions,
+  transformRawActionsToDomainSystemActions,
+} from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
+import { fieldsToExcludeFromPublicApi } from '../rules_client';
 
 export interface GetAlertFromRawParams {
   id: string;
@@ -37,35 +42,52 @@ export interface GetAlertFromRawParams {
   omitGeneratedValues?: boolean;
 }
 
+interface GetAlertFromRawOpts {
+  excludeFromPublicApi?: boolean;
+  id: string;
+  includeLegacyId?: boolean;
+  includeSnoozeData?: boolean;
+  isSystemAction: (actionId: string) => boolean;
+  logger: Logger;
+  omitGeneratedValues?: boolean;
+  rawRule: RawRule;
+  references: SavedObjectReference[] | undefined;
+  ruleTypeId: string;
+  ruleTypeRegistry: RuleTypeRegistry;
+}
+
+type GetPartialRuleFromRawOpts = Omit<GetAlertFromRawOpts, 'ruleTypeRegistry'> & {
+  ruleType: UntypedNormalizedRuleType;
+};
 /**
  * @deprecated in favor of transformRuleAttributesToRuleDomain
  */
 export function getAlertFromRaw<Params extends RuleTypeParams>(
-  context: RulesClientContext,
-  id: string,
-  ruleTypeId: string,
-  rawRule: RawRule,
-  references: SavedObjectReference[] | undefined,
-  includeLegacyId: boolean = false,
-  excludeFromPublicApi: boolean = false,
-  includeSnoozeData: boolean = false,
-  omitGeneratedValues: boolean = true
+  opts: GetAlertFromRawOpts
 ): Rule | RuleWithLegacyId {
-  const ruleType = context.ruleTypeRegistry.get(ruleTypeId);
+  const {
+    excludeFromPublicApi = false,
+    includeLegacyId = false,
+    includeSnoozeData = false,
+    omitGeneratedValues = true,
+  } = opts;
+  const ruleType = opts.ruleTypeRegistry.get(opts.ruleTypeId);
   // In order to support the partial update API of Saved Objects we have to support
   // partial updates of an Alert, but when we receive an actual RawRule, it is safe
   // to cast the result to an Alert
-  const res = getPartialRuleFromRaw<Params>(
-    context,
-    id,
-    ruleType,
-    rawRule,
-    references,
-    includeLegacyId,
+  const res = getPartialRuleFromRaw<Params>({
     excludeFromPublicApi,
+    id: opts.id,
+    includeLegacyId,
     includeSnoozeData,
-    omitGeneratedValues
-  );
+    isSystemAction: opts.isSystemAction,
+    logger: opts.logger,
+    omitGeneratedValues,
+    rawRule: opts.rawRule,
+    references: opts.references,
+    ruleTypeId: opts.ruleTypeId,
+    ruleType,
+  });
   // include to result because it is for internal rules client usage
   if (includeLegacyId) {
     return res as RuleWithLegacyId;
@@ -74,11 +96,18 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
   return omit(res, ['legacyId']) as Rule;
 }
 
-export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
-  context: RulesClientContext,
-  id: string,
-  ruleType: UntypedNormalizedRuleType,
-  {
+function getPartialRuleFromRaw<Params extends RuleTypeParams>(
+  opts: GetPartialRuleFromRawOpts
+): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
+  const {
+    excludeFromPublicApi = false,
+    includeLegacyId = false,
+    includeSnoozeData = false,
+    omitGeneratedValues = true,
+    rawRule,
+  } = opts;
+
+  const {
     createdAt,
     updatedAt,
     meta,
@@ -93,14 +122,10 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     actions,
     snoozeSchedule,
     lastRun,
+    isSnoozedUntil: DoNotUseIsSnoozedUntil,
     ...partialRawRule
-  }: Partial<RawRule>,
-  references: SavedObjectReference[] | undefined,
-  includeLegacyId: boolean = false,
-  excludeFromPublicApi: boolean = false,
-  includeSnoozeData: boolean = false,
-  omitGeneratedValues: boolean = true
-): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
+  } = rawRule;
+
   const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
     ...s,
     rRule: {
@@ -118,15 +143,38 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       })
     : null;
   const includeMonitoring = monitoring && !excludeFromPublicApi;
+
   const rule: PartialRule<Params> = {
-    id,
+    id: opts.id,
     notifyWhen,
-    ...omit(partialRawRule, excludeFromPublicApi ? [...context.fieldsToExcludeFromPublicApi] : ''),
+    ...omit(partialRawRule, excludeFromPublicApi ? [...fieldsToExcludeFromPublicApi] : ''),
     // we currently only support the Interval Schedule type
     // Once we support additional types, this type signature will likely change
     schedule: schedule as IntervalSchedule,
-    actions: actions ? injectReferencesIntoActions(id, actions, references || []) : [],
-    params: injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
+    actions: actions
+      ? transformRawActionsToDomainActions({
+          ruleId: opts.id,
+          actions,
+          references: opts.references || [],
+          isSystemAction: opts.isSystemAction,
+          omitGeneratedValues,
+        })
+      : [],
+    systemActions: actions
+      ? transformRawActionsToDomainSystemActions({
+          ruleId: opts.id,
+          actions,
+          references: opts.references || [],
+          isSystemAction: opts.isSystemAction,
+          omitGeneratedValues,
+        })
+      : [],
+    params: injectReferencesIntoParams(
+      opts.id,
+      opts.ruleType,
+      params,
+      opts.references || []
+    ) as Params,
     ...(excludeFromPublicApi ? {} : { snoozeSchedule: snoozeScheduleDates ?? [] }),
     ...(includeSnoozeData && !excludeFromPublicApi
       ? {
@@ -134,17 +182,17 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
             snoozeSchedule,
             muteAll: partialRawRule.muteAll ?? false,
           })?.map((s) => s.id),
-          isSnoozedUntil,
+          isSnoozedUntil: isSnoozedUntil as PartialRule['isSnoozedUntil'],
         }
       : {}),
     ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
     ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
     ...(executionStatus
-      ? { executionStatus: ruleExecutionStatusFromRaw(context.logger, id, executionStatus) }
+      ? { executionStatus: ruleExecutionStatusFromRaw(opts.logger, opts.id, executionStatus) }
       : {}),
     ...(includeMonitoring
-      ? { monitoring: convertMonitoringFromRawAndVerify(context.logger, id, monitoring) }
+      ? { monitoring: convertMonitoringFromRawAndVerify(opts.logger, opts.id, monitoring) }
       : {}),
     ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     ...(lastRun
@@ -161,14 +209,16 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
 
   if (omitGeneratedValues) {
     if (rule.actions) {
-      rule.actions = rule.actions.map((ruleAction) => omit(ruleAction, 'alertsFilter.query.dsl'));
+      rule.actions = rule.actions.map((ruleAction) => {
+        return omit(ruleAction, 'alertsFilter.query.dsl');
+      });
     }
   }
 
   // Need the `rule` object to build a URL
   if (!excludeFromPublicApi) {
     const viewInAppRelativeUrl =
-      ruleType.getViewInAppRelativeUrl && ruleType.getViewInAppRelativeUrl({ rule });
+      opts.ruleType.getViewInAppRelativeUrl && opts.ruleType.getViewInAppRelativeUrl({ rule });
     if (viewInAppRelativeUrl) {
       rule.viewInAppRelativeUrl = viewInAppRelativeUrl;
     }

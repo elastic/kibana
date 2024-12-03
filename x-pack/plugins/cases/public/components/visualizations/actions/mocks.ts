@@ -4,49 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreTheme, PublicAppInfo } from '@kbn/core/public';
-import { BehaviorSubject, of } from 'rxjs';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+
 import { createBrowserHistory } from 'history';
-import type { CasesUIActionProps } from './types';
+import { BehaviorSubject } from 'rxjs';
+import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
+import type { PublicAppInfo } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { LensApi, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { Services } from './types';
 
-const mockTheme: CoreTheme = {
-  darkMode: false,
-};
+const coreStart = coreMock.createStart();
 
-const createThemeMock = (): CoreTheme => {
-  return { ...mockTheme };
-};
-
-export const createTheme$Mock = () => {
-  return of(createThemeMock());
-};
-
-export class MockEmbeddable {
-  public type;
-  private input;
-  constructor(
-    type: string,
-    input?: {
-      attributes: TypedLensByValueInput['attributes'];
-      id: string;
-      timeRange: { from: string; to: string; fromStr: string; toStr: string };
-    }
-  ) {
-    this.type = type;
-    this.input = input;
-  }
-  getFilters() {}
-  getQuery() {}
-  getInput() {
-    return this.input;
-  }
-  getFullAttributes() {
-    return this.input?.attributes;
-  }
-}
-
-export const mockAttributes = {
+export const mockLensAttributes = {
   title: 'mockTitle',
   description: 'mockDescription',
   references: [],
@@ -64,9 +34,21 @@ export const mockAttributes = {
       },
     },
   },
-} as unknown as TypedLensByValueInput['attributes'];
+} as unknown as LensSavedObjectAttributes;
 
-export const mockTimeRange = { from: '', to: '', fromStr: '', toStr: '' };
+export const getMockLensApi = (
+  { from, to = 'now' }: { from: string; to: string } = { from: 'now-24h', to: 'now' }
+): LensApi =>
+  getLensApiMock({
+    getFullAttributes: () => {
+      return mockLensAttributes;
+    },
+    panelTitle: new BehaviorSubject<string | undefined>('myPanel'),
+    timeRange$: new BehaviorSubject<TimeRange | undefined>({
+      from,
+      to,
+    }),
+  });
 
 export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('securitySolutionUI');
 export const getMockApplications$ = () =>
@@ -74,26 +56,17 @@ export const getMockApplications$ = () =>
     new Map([['securitySolutionUI', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
   );
 
-export const getMockCaseUiActionProps = () => {
-  const core = {
-    application: { currentAppId$: getMockCurrentAppId$(), capabilities: {} },
-    theme: { theme$: createTheme$Mock() },
-    uiSettings: {
-      get: jest.fn().mockReturnValue(true),
+export const getMockServices = () => {
+  return {
+    core: {
+      ...coreStart,
+      application: { currentAppId$: getMockCurrentAppId$(), capabilities: {} },
+      uiSettings: {
+        get: jest.fn().mockReturnValue(true),
+      },
     },
-  };
-  const plugins = {};
-  const storage = {};
-  const history = createBrowserHistory();
-  const caseContextProps = {};
-
-  const caseUiActionProps = {
-    core,
-    plugins,
-    storage,
-    history,
-    caseContextProps,
-  } as unknown as CasesUIActionProps;
-
-  return caseUiActionProps;
+    plugins: {},
+    storage: {},
+    history: createBrowserHistory(),
+  } as unknown as Services;
 };

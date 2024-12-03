@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { act } from 'react-test-renderer';
 import { useTestQuery } from './use_test_query';
 
@@ -15,7 +15,7 @@ describe('useTestQuery', () => {
       initialProps: () =>
         Promise.resolve({
           testResults: {
-            results: [{ group: 'all documents', hits: [], count: 1 }],
+            results: [{ group: 'all documents', hits: [], count: 1, sourceFields: [] }],
             truncated: false,
           },
           isGrouped: false,
@@ -46,8 +46,8 @@ describe('useTestQuery', () => {
         Promise.resolve({
           testResults: {
             results: [
-              { group: 'a', count: 1, value: 10, hits: [] },
-              { group: 'b', count: 2, value: 20, hits: [] },
+              { group: 'a', count: 1, value: 10, hits: [], sourceFields: [] },
+              { group: 'b', count: 2, value: 20, hits: [], sourceFields: [] },
             ],
             truncated: false,
           },

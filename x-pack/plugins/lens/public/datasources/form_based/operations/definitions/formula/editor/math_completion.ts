@@ -22,12 +22,14 @@ import type {
 } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
+import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import moment from 'moment';
-import { nonNullable } from '../../../../../../utils';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { getAbsoluteDateRange, nonNullable } from '../../../../../../utils';
 import { DateRange } from '../../../../../../../common/types';
 import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
+import { groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
@@ -149,7 +151,7 @@ export async function suggest({
   dataViews,
   unifiedSearch,
   dateHistogramInterval,
-  dateRange,
+  timefilter,
 }: {
   expression: string;
   zeroIndexedOffset: number;
@@ -159,7 +161,7 @@ export async function suggest({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
-  dateRange: DateRange;
+  timefilter: TimefilterContract;
 }): Promise<LensMathSuggestions> {
   const text =
     expression.substr(0, zeroIndexedOffset) + MARKER + expression.substr(zeroIndexedOffset);
@@ -168,6 +170,8 @@ export async function suggest({
 
     const tokenInfo = getInfoAtZeroIndexedPosition(ast, zeroIndexedOffset);
     const tokenAst = tokenInfo?.ast;
+
+    const dateRange = getAbsoluteDateRange(timefilter);
 
     const isNamedArgument =
       tokenInfo?.parent &&
@@ -215,18 +219,18 @@ export function getPossibleFunctions(
   operationDefinitionMap?: Record<string, GenericOperationDefinition>
 ) {
   const available = memoizedGetAvailableOperationsByMetadata(indexPattern, operationDefinitionMap);
-  const possibleOperationNames: string[] = [];
-  available.forEach((a) => {
+  const possibleOperationNames: Set<string> = new Set();
+  for (const a of available) {
     if (a.operationMetaData.dataType === 'number' && !a.operationMetaData.isBucketed) {
-      possibleOperationNames.push(
-        ...a.operations
-          .filter((o) => o.type !== 'managedReference' || o.usedInMath)
-          .map((o) => o.operationType)
-      );
+      for (const o of a.operations) {
+        if (o.type !== 'managedReference' || o.usedInMath) {
+          possibleOperationNames.add(o.operationType);
+        }
+      }
     }
-  });
+  }
 
-  return [...uniq(possibleOperationNames), ...Object.keys(tinymathFunctions)];
+  return Array.from(possibleOperationNames.keys()).concat(Object.keys(tinymathFunctions));
 }
 
 function getFunctionSuggestions(
@@ -261,7 +265,7 @@ function getArgumentSuggestions(
   if (tinymathFunction) {
     if (tinymathFunction.positionalArguments[position]) {
       return {
-        list: uniq(getPossibleFunctions(indexPattern, operationDefinitionMap)).map((f) => ({
+        list: getPossibleFunctions(indexPattern, operationDefinitionMap).map((f) => ({
           type: 'math' as const,
           label: f,
         })),

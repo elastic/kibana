@@ -28,12 +28,12 @@ import {
   EuiTableHeader,
   EuiTableHeaderCell,
   EuiTableHeaderCellCheckbox,
-  EuiTablePagination,
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiText,
 } from '@elastic/eui';
+import { get } from 'lodash';
 
 import {
   PageLoading,
@@ -41,53 +41,137 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
-import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
+import { getDataStreamDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { CreateIndexButton } from '../create_index/create_index_button';
+import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_pagination';
 
-const getHeaders = ({ showIndexStats }) => {
-  const headers = {};
+const getColumnConfigs = ({
+  showIndexStats,
+  showSizeAndDocCount,
+  history,
+  filterChanged,
+  extensionsService,
+  location,
+  application,
+  http,
+}) => {
+  const columns = [
+    {
+      fieldName: 'name',
+      label: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
+        defaultMessage: 'Name',
+      }),
+      order: 10,
+      render: (index) => {
+        return (
+          <>
+            <EuiLink
+              data-test-subj="indexTableIndexNameLink"
+              onClick={() => {
+                navigateToIndexDetailsPage(
+                  index.name,
+                  location.search || '',
+                  extensionsService,
+                  application,
+                  http
+                );
+              }}
+            >
+              {index.name}
+            </EuiLink>
+            {renderBadges(index, extensionsService, filterChanged)}
+          </>
+        );
+      },
+    },
+    {
+      fieldName: 'data_stream',
+      label: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
+        defaultMessage: 'Data stream',
+      }),
+      order: 80,
+      render: (index) => {
+        if (index.data_stream) {
+          return (
+            <EuiLink
+              data-test-subj="dataStreamLink"
+              {...reactRouterNavigate(history, {
+                pathname: getDataStreamDetailsLink(index.data_stream),
+                search: '?isDeepLink=true',
+              })}
+            >
+              {index.data_stream}
+            </EuiLink>
+          );
+        }
+      },
+    },
+  ];
 
-  headers.name = i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
-    defaultMessage: 'Name',
-  });
-
+  // size and docs count enabled by either "enableIndexStats" or "enableSizeAndDocCount" configs
+  if (showIndexStats || showSizeAndDocCount) {
+    columns.push(
+      {
+        fieldName: 'documents',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
+          defaultMessage: 'Documents count',
+        }),
+        order: 60,
+        render: (index) => {
+          return Number(index.documents ?? 0).toLocaleString();
+        },
+      },
+      {
+        fieldName: 'size',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
+          defaultMessage: 'Storage size',
+        }),
+        order: 70,
+      }
+    );
+  }
   if (showIndexStats) {
-    headers.health = i18n.translate('xpack.idxMgmt.indexTable.headers.healthHeader', {
-      defaultMessage: 'Health',
-    });
-
-    headers.status = i18n.translate('xpack.idxMgmt.indexTable.headers.statusHeader', {
-      defaultMessage: 'Status',
-    });
-
-    headers.primary = i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
-      defaultMessage: 'Primaries',
-    });
-
-    headers.replica = i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
-      defaultMessage: 'Replicas',
-    });
-
-    headers.documents = i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
-      defaultMessage: 'Docs count',
-    });
-
-    headers.size = i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
-      defaultMessage: 'Storage size',
-    });
+    columns.push(
+      {
+        fieldName: 'health',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.healthHeader', {
+          defaultMessage: 'Health',
+        }),
+        order: 20,
+        render: (index) => <DataHealth health={index.health} />,
+      },
+      {
+        fieldName: 'status',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.statusHeader', {
+          defaultMessage: 'Status',
+        }),
+        order: 30,
+      },
+      {
+        fieldName: 'primary',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
+          defaultMessage: 'Primaries',
+        }),
+        order: 40,
+      },
+      {
+        fieldName: 'replica',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
+          defaultMessage: 'Replicas',
+        }),
+        order: 50,
+      }
+    );
   }
 
-  headers.data_stream = i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
-    defaultMessage: 'Data stream',
-  });
+  columns.push(...extensionsService.columns);
 
-  return headers;
+  return columns.sort(({ order: orderA }, { order: orderB }) => orderA - orderB);
 };
 
 export class IndexTable extends Component {
@@ -119,24 +203,30 @@ export class IndexTable extends Component {
 
   componentDidMount() {
     this.props.loadIndices();
-    this.interval = setInterval(
-      () =>
-        this.props.reloadIndices(
-          this.props.indices.map((i) => i.name),
-          { asSystemRequest: true }
-        ),
-      REFRESH_RATE_INDEX_LIST
-    );
-    const { location, filterChanged } = this.props;
-    const { filter } = qs.parse((location && location.search) || '');
-    if (filter) {
-      const decodedFilter = attemptToURIDecode(filter);
 
+    const { filterChanged, pageSizeChanged, pageChanged, toggleNameToVisibleMap, toggleChanged } =
+      this.props;
+    const { filter, pageSize, pageIndex, ...rest } = this.readURLParams();
+
+    if (filter) {
       try {
-        const filter = EuiSearchBar.Query.parse(decodedFilter);
-        filterChanged(filter);
+        const parsedFilter = EuiSearchBar.Query.parse(filter);
+        filterChanged(parsedFilter);
       } catch (e) {
         this.setState({ filterError: e });
+      }
+    }
+    if (pageSize && PAGE_SIZE_OPTIONS.includes(pageSize)) {
+      pageSizeChanged(pageSize);
+    }
+    if (pageIndex && pageIndex > -1) {
+      pageChanged(pageIndex);
+    }
+    const toggleParams = Object.keys(rest);
+    const toggles = Object.keys(toggleNameToVisibleMap);
+    for (const toggleParam of toggleParams) {
+      if (toggles.includes(toggleParam)) {
+        toggleChanged(toggleParam, rest[toggleParam] === 'true');
       }
     }
   }
@@ -147,26 +237,29 @@ export class IndexTable extends Component {
     // navigating back to this tab would just show an empty list because the backing indices
     // would be hidden.
     this.props.filterChanged('');
-    clearInterval(this.interval);
   }
 
   readURLParams() {
     const { location } = this.props;
-    const { includeHiddenIndices } = qs.parse((location && location.search) || '');
+    const { filter, pageSize, pageIndex, ...rest } = qs.parse((location && location.search) || '');
     return {
-      includeHiddenIndices: includeHiddenIndices === 'true',
+      filter: filter ? attemptToURIDecode(String(filter)) : undefined,
+      pageSize: pageSize ? Number(String(pageSize)) : undefined,
+      pageIndex: pageIndex ? Number(String(pageIndex)) : undefined,
+      ...rest,
     };
   }
 
-  setIncludeHiddenParam(hidden) {
-    const { pathname, search } = this.props.location;
+  setURLParam(paramName, value) {
+    const { location, history } = this.props;
+    const { pathname, search } = location;
     const params = qs.parse(search);
-    if (hidden) {
-      params.includeHiddenIndices = 'true';
+    if (value) {
+      params[paramName] = value;
     } else {
-      delete params.includeHiddenIndices;
+      delete params[paramName];
     }
-    this.props.history.push(pathname + '?' + qs.stringify(params));
+    history.push(pathname + '?' + qs.stringify(params));
   }
 
   onSort = (column) => {
@@ -206,6 +299,7 @@ export class IndexTable extends Component {
     if (error) {
       this.setState({ filterError: error });
     } else {
+      this.setURLParam('filter', encodeURIComponent(query.text));
       this.props.filterChanged(query);
       this.setState({ filterError: null });
     }
@@ -254,18 +348,20 @@ export class IndexTable extends Component {
 
   areAllItemsSelected = () => {
     const { indices } = this.props;
+    if (indices.length <= 0) {
+      return false;
+    }
     const indexOfUnselectedItem = indices.findIndex((index) => !this.isItemSelected(index.name));
     return indexOfUnselectedItem === -1;
   };
 
-  buildHeader(config) {
+  buildHeader(columnConfigs) {
     const { sortField, isSortAscending } = this.props;
-    const headers = getHeaders({ showIndexStats: config.enableIndexStats });
-    return Object.entries(headers).map(([fieldName, label]) => {
+    return columnConfigs.map(({ fieldName, label }) => {
       const isSorted = sortField === fieldName;
       // we only want to make index name column 25% width when there are more columns displayed
       const widthClassName =
-        fieldName === 'name' && config.enableIndexStats ? 'indTable__header__width' : '';
+        fieldName === 'name' && columnConfigs.length > 2 ? 'indTable__header__width' : '';
       return (
         <EuiTableHeaderCell
           key={fieldName}
@@ -281,97 +377,74 @@ export class IndexTable extends Component {
     });
   }
 
-  buildRowCell(fieldName, value, index, appServices) {
-    const { filterChanged, history } = this.props;
-
-    if (fieldName === 'health') {
-      return <DataHealth health={value} />;
-    } else if (fieldName === 'name') {
-      return (
-        <Fragment>
-          <EuiLink
-            data-test-subj="indexTableIndexNameLink"
-            onClick={() => history.push(getIndexDetailsLink(value))}
-          >
-            {value}
-          </EuiLink>
-          {renderBadges(index, appServices.extensionsService, filterChanged)}
-        </Fragment>
-      );
-    } else if (fieldName === 'data_stream' && value) {
-      return (
-        <EuiLink
-          data-test-subj="dataStreamLink"
-          {...reactRouterNavigate(history, {
-            pathname: getDataStreamDetailsLink(value),
-            search: '?isDeepLink=true',
-          })}
-        >
-          {value}
-        </EuiLink>
-      );
-    } else if (fieldName === 'documents' && value) {
-      return Number(value).toLocaleString();
+  buildRowCell(index, columnConfig) {
+    if (columnConfig.render) {
+      return columnConfig.render(index);
     }
-
-    return value;
+    return get(index, columnConfig.fieldName);
   }
 
-  buildRowCells(index, appServices, config) {
-    const headers = getHeaders({ showIndexStats: config.enableIndexStats });
-    return Object.keys(headers).map((fieldName) => {
+  buildRowCells(index, columnConfigs) {
+    return columnConfigs.map((columnConfig) => {
       const { name } = index;
-      const value = index[fieldName];
-
-      if (fieldName === 'name') {
-        return (
-          <th
-            key={`${fieldName}-${name}`}
-            className="euiTableRowCell"
-            scope="row"
-            data-test-subj={`indexTableCell-${fieldName}`}
-          >
-            <div className={`euiTableCellContent indTable__cell--${fieldName}`}>
-              <span className="eui-textLeft">
-                {this.buildRowCell(fieldName, value, index, appServices)}
-              </span>
-            </div>
-          </th>
-        );
-      }
+      const { fieldName } = columnConfig;
       return (
         <EuiTableRowCell
           key={`${fieldName}-${name}`}
           truncateText={false}
+          setScopeRow={fieldName === 'name'}
           data-test-subj={`indexTableCell-${fieldName}`}
           className={'indTable__cell--' + fieldName}
           header={fieldName}
         >
-          {this.buildRowCell(fieldName, value, index, appServices)}
+          {this.buildRowCell(index, columnConfig)}
         </EuiTableRowCell>
       );
     });
   }
 
   renderBanners(extensionsService) {
-    const { allIndices = [], filterChanged } = this.props;
+    const { allIndices = [], filterChanged, performExtensionAction } = this.props;
     return extensionsService.banners.map((bannerExtension, i) => {
       const bannerData = bannerExtension(allIndices);
       if (!bannerData) {
         return null;
       }
 
-      const { type, title, message, filter, filterLabel } = bannerData;
+      const { type, title, message, filter, filterLabel, action } = bannerData;
 
       return (
         <Fragment key={`bannerExtension${i}`}>
           <EuiCallOut color={type} size="m" title={title}>
-            <EuiText>
-              {message}
-              {filter ? (
-                <EuiLink onClick={() => filterChanged(filter)}>{filterLabel}</EuiLink>
-              ) : null}
-            </EuiText>
+            {message && <p>{message}</p>}
+            {action || filter ? (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                {action ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="warning"
+                      fill
+                      onClick={() => {
+                        performExtensionAction(
+                          action.requestMethod,
+                          action.successMessage,
+                          action.indexNames
+                        );
+                      }}
+                    >
+                      {action.buttonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                ) : null}
+                {filter ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      <EuiLink onClick={() => filterChanged(filter)}>{filterLabel}</EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            ) : null}
           </EuiCallOut>
           <EuiSpacer size="m" />
         </Fragment>
@@ -379,7 +452,7 @@ export class IndexTable extends Component {
     });
   }
 
-  buildRows(appServices, config) {
+  buildRows(columnConfigs) {
     const { indices = [] } = this.props;
     return indices.map((index) => {
       const { name } = index;
@@ -388,11 +461,11 @@ export class IndexTable extends Component {
           data-test-subj="indexTableRow"
           isSelected={this.isItemSelected(name)}
           isSelectable
+          hasSelection
           key={`${name}-row`}
         >
           <EuiTableRowCellCheckbox key={`checkbox-${name}`}>
             <EuiCheckbox
-              type="inList"
               id={`checkboxSelectIndex-${name}`}
               checked={this.isItemSelected(name)}
               onChange={() => {
@@ -404,24 +477,10 @@ export class IndexTable extends Component {
               })}
             />
           </EuiTableRowCellCheckbox>
-          {this.buildRowCells(index, appServices, config)}
+          {this.buildRowCells(index, columnConfigs)}
         </EuiTableRow>
       );
     });
-  }
-
-  renderPager() {
-    const { pager, pageChanged, pageSizeChanged } = this.props;
-    return (
-      <EuiTablePagination
-        activePage={pager.getCurrentPageIndex()}
-        itemsPerPage={pager.itemsPerPage}
-        itemsPerPageOptions={[10, 50, 100]}
-        pageCount={pager.getTotalPages()}
-        onChangeItemsPerPage={pageSizeChanged}
-        onChangePage={pageChanged}
-      />
-    );
   }
 
   onItemSelectionChanged = (selectedIndices) => {
@@ -436,7 +495,10 @@ export class IndexTable extends Component {
           id={`checkboxToggles-${name}`}
           data-test-subj={`checkboxToggles-${name}`}
           checked={toggleNameToVisibleMap[name]}
-          onChange={(event) => toggleChanged(name, event.target.checked)}
+          onChange={(event) => {
+            this.setURLParam(name, event.target.checked);
+            toggleChanged(name, event.target.checked);
+          }}
           label={label}
         />
       </EuiFlexItem>
@@ -444,10 +506,21 @@ export class IndexTable extends Component {
   }
 
   render() {
-    const { filter, indices, loadIndices, indicesLoading, indicesError, allIndices, pager } =
-      this.props;
+    const {
+      filter,
+      filterChanged,
+      indices,
+      loadIndices,
+      indicesLoading,
+      indicesError,
+      allIndices,
+      pager,
+      pageChanged,
+      pageSizeChanged,
+      history,
+      location,
+    } = this.props;
 
-    const { includeHiddenIndices } = this.readURLParams();
     const hasContent = !indicesLoading && !indicesError;
 
     if (!hasContent) {
@@ -495,9 +568,21 @@ export class IndexTable extends Component {
 
     return (
       <AppContextConsumer>
-        {({ services, config }) => {
+        {({ services, config, core, plugins }) => {
           const { extensionsService } = services;
-
+          const { application, http } = core;
+          const { share } = plugins;
+          const columnConfigs = getColumnConfigs({
+            showIndexStats: config.enableIndexStats,
+            showSizeAndDocCount: config.enableSizeAndDocCount,
+            extensionsService,
+            filterChanged,
+            history,
+            location,
+            application,
+            http,
+          });
+          const columnsCount = columnConfigs.length + 1;
           return (
             <EuiPageSection paddingSize="none">
               <EuiFlexGroup alignItems="center">
@@ -532,21 +617,6 @@ export class IndexTable extends Component {
                       {extensionsService.toggles.map((toggle) => {
                         return this.renderToggleControl(toggle);
                       })}
-
-                      <EuiFlexItem grow={false}>
-                        <EuiSwitch
-                          id="checkboxShowHiddenIndices"
-                          data-test-subj="indexTableIncludeHiddenIndicesToggle"
-                          checked={includeHiddenIndices}
-                          onChange={(event) => this.setIncludeHiddenParam(event.target.checked)}
-                          label={
-                            <FormattedMessage
-                              id="xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel"
-                              defaultMessage="Include hidden indices"
-                            />
-                          }
-                        />
-                      </EuiFlexItem>
                     </EuiFlexGroup>
                   )}
                 </EuiFlexItem>
@@ -556,7 +626,7 @@ export class IndexTable extends Component {
 
               {this.renderBanners(extensionsService)}
 
-              <EuiFlexGroup gutterSize="l" alignItems="center">
+              <EuiFlexGroup gutterSize="m" alignItems="center">
                 {atLeastOneItemSelected ? (
                   <EuiFlexItem grow={false}>
                     <Route
@@ -565,6 +635,7 @@ export class IndexTable extends Component {
                         <IndexActionsContextMenu
                           indexNames={Object.keys(selectedIndicesMap)}
                           isOnListView={true}
+                          indicesListURLParams={location.search || ''}
                           resetSelection={() => {
                             this.setState({ selectedIndicesMap: {} });
                           }}
@@ -575,7 +646,7 @@ export class IndexTable extends Component {
                 ) : null}
 
                 {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
-                  <Fragment>
+                  <>
                     <EuiFlexItem>
                       <EuiSearchBar
                         filters={
@@ -593,6 +664,7 @@ export class IndexTable extends Component {
                               defaultMessage: 'Search',
                             }
                           ),
+                          'data-test-subj': 'indicesSearch',
                         }}
                         aria-label={i18n.translate(
                           'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
@@ -608,9 +680,7 @@ export class IndexTable extends Component {
                       <EuiButton
                         isLoading={indicesLoading}
                         color="success"
-                        onClick={() => {
-                          loadIndices();
-                        }}
+                        onClick={loadIndices}
                         iconType="refresh"
                         data-test-subj="reloadIndicesButton"
                       >
@@ -620,10 +690,10 @@ export class IndexTable extends Component {
                         />
                       </EuiButton>
                     </EuiFlexItem>
-                  </Fragment>
+                  </>
                 )}
                 <EuiFlexItem grow={false}>
-                  <CreateIndexButton loadIndices={loadIndices} />
+                  <CreateIndexButton loadIndices={loadIndices} share={share} />
                 </EuiFlexItem>
               </EuiFlexGroup>
 
@@ -631,47 +701,66 @@ export class IndexTable extends Component {
 
               <EuiSpacer size="m" />
 
-              {indices.length > 0 ? (
-                <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                  <EuiTable className="indTable" data-test-subj="indexTable">
-                    <EuiScreenReaderOnly>
-                      <caption role="status" aria-relevant="text" aria-live="polite">
-                        <FormattedMessage
-                          id="xpack.idxMgmt.indexTable.captionText"
-                          defaultMessage="Below is the indices table containing {count, plural, one {# row} other {# rows}} out of {total}."
-                          values={{ count: indices.length, total: pager.totalItems }}
-                        />
-                      </caption>
-                    </EuiScreenReaderOnly>
+              <div style={{ maxWidth: '100%', overflow: 'auto' }}>
+                <EuiTable className="indTable" data-test-subj="indexTable">
+                  <EuiScreenReaderOnly>
+                    <caption role="status" aria-relevant="text" aria-live="polite">
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexTable.captionText"
+                        defaultMessage="Below is the indices table containing {count, plural, one {# row} other {# rows}} out of {total}."
+                        values={{ count: indices.length, total: pager.totalItems }}
+                      />
+                    </caption>
+                  </EuiScreenReaderOnly>
 
-                    <EuiTableHeader>
-                      <EuiTableHeaderCellCheckbox>
-                        <EuiCheckbox
-                          id="selectAllIndexes"
-                          checked={this.areAllItemsSelected()}
-                          onChange={this.toggleAll}
-                          type="inList"
-                          aria-label={i18n.translate(
-                            'xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel',
-                            {
-                              defaultMessage: 'Select all rows',
-                            }
-                          )}
-                        />
-                      </EuiTableHeaderCellCheckbox>
-                      {this.buildHeader(config)}
-                    </EuiTableHeader>
+                  <EuiTableHeader>
+                    <EuiTableHeaderCellCheckbox>
+                      <EuiCheckbox
+                        id="selectAllIndexes"
+                        checked={this.areAllItemsSelected()}
+                        onChange={this.toggleAll}
+                        aria-label={i18n.translate(
+                          'xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel',
+                          {
+                            defaultMessage: 'Select all rows',
+                          }
+                        )}
+                      />
+                    </EuiTableHeaderCellCheckbox>
+                    {this.buildHeader(columnConfigs)}
+                  </EuiTableHeader>
 
-                    <EuiTableBody>{this.buildRows(services, config)}</EuiTableBody>
-                  </EuiTable>
-                </div>
-              ) : (
-                <NoMatch />
-              )}
+                  <EuiTableBody>
+                    {indices.length > 0 ? (
+                      this.buildRows(columnConfigs)
+                    ) : (
+                      <EuiTableRow>
+                        <EuiTableRowCell align="center" colSpan={columnsCount}>
+                          <NoMatch
+                            loadIndices={loadIndices}
+                            share={share}
+                            filter={filter}
+                            resetFilter={() => filterChanged('')}
+                            extensionsService={extensionsService}
+                          />
+                        </EuiTableRowCell>
+                      </EuiTableRow>
+                    )}
+                  </EuiTableBody>
+                </EuiTable>
+              </div>
 
               <EuiSpacer size="m" />
 
-              {indices.length > 0 ? this.renderPager() : null}
+              {indices.length > 0 ? (
+                <IndexTablePagination
+                  pager={pager}
+                  pageChanged={pageChanged}
+                  pageSizeChanged={pageSizeChanged}
+                  readURLParams={() => this.readURLParams()}
+                  setURLParam={(paramName, value) => this.setURLParam(paramName, value)}
+                />
+              ) : null}
             </EuiPageSection>
           );
         }}

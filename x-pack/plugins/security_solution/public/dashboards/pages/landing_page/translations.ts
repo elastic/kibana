@@ -13,16 +13,9 @@ export const DASHBOARDS_PAGE_CREATE_BUTTON = i18n.translate(
   }
 );
 
-export const DASHBOARDS_PAGE_SECTION_DEFAULT = i18n.translate(
-  'xpack.securitySolution.dashboards.landing.section.default',
-  {
-    defaultMessage: 'DEFAULT',
-  }
-);
-
 export const DASHBOARDS_PAGE_SECTION_CUSTOM = i18n.translate(
   'xpack.securitySolution.dashboards.landing.section.custom',
   {
-    defaultMessage: 'CUSTOM',
+    defaultMessage: 'Custom Dashboards',
   }
 );

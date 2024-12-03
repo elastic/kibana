@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
+import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
 
 import { SecretFormRow } from './output_form_secret_form_row';
 
@@ -14,15 +15,19 @@ describe('SecretFormRow', () => {
   const title = 'Test Secret';
   const initialValue = 'initial value';
   const clear = jest.fn();
-  const onUsePlainText = jest.fn();
+  const onToggleSecretStorage = jest.fn();
+  const cancelEdit = jest.fn();
+  const useSecretsStorage = true;
 
   it('should switch to edit mode when the replace button is clicked', () => {
-    const { getByText, queryByText, container } = render(
+    const { getByText, queryByText, container } = renderReactTestingLibraryWithI18n(
       <SecretFormRow
         title={title}
         initialValue={initialValue}
         clear={clear}
-        onUsePlainText={onUsePlainText}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
       >
         <input id="myinput" type="text" value={initialValue} />
       </SecretFormRow>
@@ -38,13 +43,36 @@ describe('SecretFormRow', () => {
     expect(queryByText(initialValue)).not.toBeInTheDocument();
   });
 
-  it('should call the clear function when the cancel button is clicked', () => {
-    const { getByText } = render(
+  it('should not enable action links if the row is disabled', () => {
+    const { getByText, queryByText } = renderReactTestingLibraryWithI18n(
       <SecretFormRow
         title={title}
         initialValue={initialValue}
         clear={clear}
-        onUsePlainText={onUsePlainText}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
+        disabled={true}
+      >
+        <input id="myinput" type="text" value={initialValue} />
+      </SecretFormRow>
+    );
+
+    expect(getByText('The saved Test Secret is hidden.')).toBeInTheDocument();
+    expect(queryByText('Replace Test Secret')).not.toBeInTheDocument();
+    expect(queryByText('Click to use secret storage instead')).not.toBeInTheDocument();
+    expect(queryByText('Click to use plain text storage instead')).not.toBeInTheDocument();
+  });
+
+  it('should call the cancelEdit function when the cancel button is clicked', () => {
+    const { getByText } = renderReactTestingLibraryWithI18n(
+      <SecretFormRow
+        title={title}
+        initialValue={initialValue}
+        clear={clear}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
       >
         <input type="text" value={initialValue} />
       </SecretFormRow>
@@ -53,18 +81,83 @@ describe('SecretFormRow', () => {
     fireEvent.click(getByText('Replace Test Secret'));
     fireEvent.click(getByText('Cancel Test Secret change'));
 
-    expect(clear).toHaveBeenCalled();
+    expect(cancelEdit).toHaveBeenCalled();
   });
 
-  it('should call the onUsePlainText function when the revert link is clicked', () => {
-    const { getByText } = render(
-      <SecretFormRow title={title} clear={clear} onUsePlainText={onUsePlainText}>
+  it('should call the onToggleSecretStorage function when the revert link is clicked', () => {
+    const { getByText } = renderReactTestingLibraryWithI18n(
+      <SecretFormRow
+        title={title}
+        clear={clear}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
+      >
         <input type="text" />
       </SecretFormRow>
     );
 
     fireEvent.click(getByText('Click to use plain text storage instead'));
 
-    expect(onUsePlainText).toHaveBeenCalled();
+    expect(onToggleSecretStorage).toHaveBeenCalledWith(false);
+  });
+
+  it('should not display the cancel change button when no initial value is provided', () => {
+    const { queryByTestId } = renderReactTestingLibraryWithI18n(
+      <SecretFormRow
+        title={title}
+        clear={clear}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
+        initialValue={''}
+      >
+        <input type="text" />
+      </SecretFormRow>
+    );
+
+    expect(queryByTestId('secretCancelChangeBtn')).not.toBeInTheDocument();
+  });
+
+  it('should call the onToggleSecretStorage function when the use secret storage button is clicked in plain text mode', () => {
+    const { getByText, queryByTestId } = renderReactTestingLibraryWithI18n(
+      <SecretFormRow
+        label={<div>Test Field</div>}
+        useSecretsStorage={false}
+        onToggleSecretStorage={onToggleSecretStorage}
+      >
+        <input type="text" />
+      </SecretFormRow>
+    );
+
+    expect(queryByTestId('lockIcon')).not.toBeInTheDocument();
+    expect(getByText('Test Field')).toBeInTheDocument();
+
+    fireEvent.click(getByText('Click to use secret storage instead'));
+
+    expect(onToggleSecretStorage).toHaveBeenCalledWith(true);
+  });
+
+  it('should display input normally and display a callout when the field is converted to secret storage', () => {
+    const { getByText, queryByText } = renderReactTestingLibraryWithI18n(
+      <SecretFormRow
+        title={title}
+        initialValue={initialValue}
+        clear={clear}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
+        isConvertedToSecret={true}
+      >
+        <input type="text" value={initialValue} />
+      </SecretFormRow>
+    );
+
+    expect(queryByText('Replace Test Secret')).not.toBeInTheDocument();
+    expect(
+      getByText('This field will be re-saved using secret storage from plain text storage.', {
+        exact: false,
+      })
+    ).toBeInTheDocument();
   });
 });

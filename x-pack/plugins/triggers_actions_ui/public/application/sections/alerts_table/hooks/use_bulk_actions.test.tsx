@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
+import { BulkActionsVerbs } from '../../../../types';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
@@ -37,7 +39,7 @@ describe('bulk action hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+    appMockRender = createAppMockRenderer(AlertsQueryContext);
   });
 
   const refresh = jest.fn();
@@ -307,7 +309,22 @@ describe('bulk action hooks', () => {
         },
       }));
       const { result } = renderHook(
-        () => useBulkUntrackActions({ setIsBulkActionsLoading, refresh, clearSelection }),
+        () =>
+          useBulkUntrackActions({
+            setIsBulkActionsLoading,
+            refresh,
+            clearSelection,
+            isAllSelected: true,
+            query: {
+              bool: {
+                must: {
+                  term: {
+                    test: 'test',
+                  },
+                },
+              },
+            },
+          }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -331,7 +348,7 @@ describe('bulk action hooks', () => {
 
     it('appends the case and untrack bulk actions', async () => {
       const { result } = renderHook(
-        () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh }),
+        () => useBulkActions({ alertsCount: 0, query: {}, casesConfig, refresh }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -360,7 +377,7 @@ describe('bulk action hooks', () => {
               },
               Object {
                 "data-test-subj": "mark-as-untracked",
-                "disableOnQuery": true,
+                "disableOnQuery": false,
                 "disabledLabel": "Mark as untracked",
                 "key": "mark-as-untracked",
                 "label": "Mark as untracked",
@@ -374,7 +391,14 @@ describe('bulk action hooks', () => {
 
     it('appends only the case bulk actions for SIEM', async () => {
       const { result } = renderHook(
-        () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh, featureIds: ['siem'] }),
+        () =>
+          useBulkActions({
+            alertsCount: 0,
+            query: {},
+            casesConfig,
+            refresh,
+            ruleTypeIds: ['siem.esqlRule'],
+          }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -405,6 +429,84 @@ describe('bulk action hooks', () => {
           },
         ]
       `);
+    });
+
+    it('should not append duplicate items on rerender', async () => {
+      const onClick = () => {};
+      const items = [
+        {
+          label: 'test',
+          key: 'test',
+          'data-test-subj': 'test',
+          disableOnQuery: true,
+          disabledLabel: 'test',
+          onClick,
+        },
+      ];
+      const customBulkActionConfig = [
+        {
+          id: 0,
+          items,
+        },
+      ];
+      const useBulkActionsConfig = () => customBulkActionConfig;
+      const { result, rerender } = renderHook(
+        () =>
+          useBulkActions({ alertsCount: 0, query: {}, casesConfig, refresh, useBulkActionsConfig }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+      const initialBulkActions = result.current.bulkActions[0].items
+        ? [...result.current.bulkActions[0].items]
+        : [];
+      result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectCurrentPage });
+      rerender();
+      result.current.updateBulkActionsState({ action: BulkActionsVerbs.clear });
+      rerender();
+      result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectCurrentPage });
+      rerender();
+      result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectAll });
+      rerender();
+      const newBulkActions = result.current.bulkActions[0].items;
+      expect(initialBulkActions).toEqual(newBulkActions);
+    });
+
+    it('hides bulk actions if hideBulkActions == true', () => {
+      // make sure by default some actions are returned for this
+      // config
+      const { result: resultWithoutHideBulkActions } = renderHook(
+        () =>
+          useBulkActions({
+            alertsCount: 0,
+            query: {},
+            casesConfig,
+            refresh,
+            ruleTypeIds: ['observability'],
+          }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      expect(resultWithoutHideBulkActions.current.bulkActions.length).toBeGreaterThan(0);
+
+      const { result: resultWithHideBulkActions } = renderHook(
+        () =>
+          useBulkActions({
+            alertsCount: 0,
+            query: {},
+            casesConfig,
+            refresh,
+            ruleTypeIds: ['observability'],
+            hideBulkActions: true,
+          }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      expect(resultWithHideBulkActions.current.bulkActions.length).toBe(0);
     });
   });
 });

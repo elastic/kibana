@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,21 +23,14 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
-  DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
-  TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-  ENABLE_ESQL,
 } from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
-
-const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
-  defaultMessage: 'technical preview',
-});
 
 export const getUiSettings: (
   docLinks: DocLinksServiceSetup,
@@ -186,33 +180,6 @@ export const getUiSettings: (
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
   },
-  [DOC_TABLE_LEGACY]: {
-    name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
-      defaultMessage: 'Document Explorer or classic view',
-    }),
-    value: false,
-    description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
-      defaultMessage:
-        'To use the new {documentExplorerDocs} instead of the classic view, turn off this option. ' +
-        'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
-      values: {
-        documentExplorerDocs:
-          `<a href=${docLinks.links.discover.documentExplorer} style="font-weight: 600;"
-            target="_blank" rel="noopener">` +
-          i18n.translate('discover.advancedSettings.documentExplorerLinkText', {
-            defaultMessage: 'Document Explorer',
-          }) +
-          '</a>',
-      },
-    }),
-    requiresPageReload: true,
-    category: ['discover'],
-    schema: schema.boolean(),
-    metric: {
-      type: METRIC_TYPE.CLICK,
-      name: 'discover:useLegacyDataGrid',
-    },
-  },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
       defaultMessage: 'Modify columns when changing data views',
@@ -241,6 +208,15 @@ export const getUiSettings: (
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+    deprecation: {
+      message: i18n.translate(
+        'discover.advancedSettings.discover.readFieldsFromSourceDeprecation',
+        {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }
+      ),
+      docLinksKey: 'discoverSettings',
+    },
   },
   [SHOW_FIELD_STATISTICS]: {
     name: i18n.translate('discover.advancedSettings.discover.showFieldStatistics', {
@@ -300,40 +276,5 @@ export const getUiSettings: (
         'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
     }),
     schema: schema.number({ min: -1 }),
-  },
-  [TRUNCATE_MAX_HEIGHT]: {
-    name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
-      defaultMessage: 'Maximum cell height in the classic table',
-    }),
-    value: 115,
-    category: ['discover'],
-    description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
-      defaultMessage:
-        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
-    }),
-    schema: schema.number({ min: 0 }),
-    requiresPageReload: true,
-  },
-  [ENABLE_ESQL]: {
-    name: i18n.translate('discover.advancedSettings.enableESQLTitle', {
-      defaultMessage: 'Enable ES|QL',
-    }),
-    value: true,
-    description: i18n.translate('discover.advancedSettings.enableESQLDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on {link}',
-      values: {
-        link:
-          `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
-          i18n.translate('discover.advancedSettings.enableESQL.discussLinkText', {
-            defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
-          }) +
-          '</a>',
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    requiresPageReload: true,
-    category: ['discover'],
-    schema: schema.boolean(),
   },
 });

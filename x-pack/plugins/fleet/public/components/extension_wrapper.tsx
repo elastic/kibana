@@ -11,10 +11,12 @@ import { EuiErrorBoundary } from '@elastic/eui';
 
 import { Loading } from './loading';
 
-export const ExtensionWrapper = memo<{ children: ReactNode }>(({ children }) => {
-  return (
-    <EuiErrorBoundary>
-      <Suspense fallback={<Loading />}>{children}</Suspense>
-    </EuiErrorBoundary>
-  );
-});
+export const ExtensionWrapper = memo<{ children: ReactNode }>(
+  ({ children }: { children?: React.ReactNode }) => {
+    return (
+      <EuiErrorBoundary>
+        <Suspense fallback={<Loading />}>{children}</Suspense>
+      </EuiErrorBoundary>
+    );
+  }
+);

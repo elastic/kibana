@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // ---------------------------------- WARNING ----------------------------------
 // this file was generated, and should not be edited by hand
@@ -69,25 +70,36 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const ObservabilityUptimeAlertRequired = rt.type({
 });
+// prettier-ignore
 const ObservabilityUptimeAlertOptional = rt.partial({
   'agent.name': schemaString,
   'anomaly.bucket_span.minutes': schemaString,
   'anomaly.start': schemaDate,
+  configId: schemaString,
   'error.message': schemaString,
+  'error.stack_trace': schemaString,
+  'host.name': schemaString,
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
   'kibana.alert.group': rt.array(
     rt.partial({
-      field: schemaString,
-      value: schemaString,
+      field: schemaStringArray,
+      value: schemaStringArray,
     })
   ),
+  labels: schemaUnknown,
+  'location.id': schemaStringArray,
+  'location.name': schemaStringArray,
   'monitor.id': schemaString,
   'monitor.name': schemaString,
+  'monitor.state.id': schemaString,
+  'monitor.tags': schemaStringArray,
   'monitor.type': schemaString,
-  'observer.geo.name': schemaString,
+  'observer.geo.name': schemaStringArray,
+  'observer.name': schemaStringArray,
+  'service.name': schemaString,
   'tls.server.hash.sha256': schemaString,
   'tls.server.x509.issuer.common_name': schemaString,
   'tls.server.x509.not_after': schemaDate,

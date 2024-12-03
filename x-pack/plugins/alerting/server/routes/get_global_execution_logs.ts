@@ -62,13 +62,17 @@ export const getGlobalExecutionLogRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_logs`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         query: querySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         return res.ok({
           body: await rulesClient.getGlobalExecutionLogWithAuth(rewriteReq(req.query)),
         });

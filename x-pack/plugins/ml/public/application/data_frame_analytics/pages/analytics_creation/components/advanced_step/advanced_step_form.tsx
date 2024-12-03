@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useMemo, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useMemo, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGrid,
@@ -29,9 +30,9 @@ import {
   ANALYSIS_ADVANCED_FIELDS,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { HyperParameters } from './hyper_parameters';
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/use_create_analytics_form/reducer';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlApi } from '../../../../../contexts/kibana';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
 import { fetchExplainData } from '../shared';
@@ -133,6 +134,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks },
   } = useMlKibana();
+  const mlApi = useMlApi();
   const classAucRocDocLink = docLinks.links.ml.classificationAucRoc;
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
@@ -204,7 +206,10 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     setFetchingAdvancedParamErrors(true);
     (async function () {
-      const { success, errorMessage, errorReason, expectedMemory } = await fetchExplainData(form);
+      const { success, errorMessage, errorReason, expectedMemory } = await fetchExplainData(
+        mlApi,
+        form
+      );
       const paramErrors: AdvancedParamErrors = {};
 
       if (success) {
@@ -291,11 +296,11 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                 ),
               },
             ]}
-            value={computeFeatureInfluence}
+            value={computeFeatureInfluence ? 'true' : 'false'}
             hasNoInitialSelection={false}
             onChange={(e) => {
               setFormState({
-                computeFeatureInfluence: e.target.value,
+                computeFeatureInfluence: e.target.value === 'true' ? true : false,
               });
             }}
           />
@@ -401,6 +406,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             {
               defaultMessage:
                 'Define the name of the prediction field in the results. The default is <dependent_variable>_prediction.',
+              ignoreTag: true,
             }
           )}
         >

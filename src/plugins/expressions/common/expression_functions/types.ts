@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
@@ -20,6 +21,7 @@ import {
   ExpressionFunctionDerivative,
   ExpressionFunctionMovingAverage,
   ExpressionFunctionOverallMetric,
+  ExpressionFunctionMathColumn,
 } from './specs';
 import { ExpressionAstFunction } from '../ast';
 
@@ -55,6 +57,11 @@ export interface ExpressionFunctionDefinition<
    * Name of type of value this function outputs.
    */
   type?: TypeString<Output> | UnmappedTypeStrings;
+
+  /**
+   * Opt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.
+   */
+  allowCache?: boolean;
 
   /**
    * List of allowed type names for input value of this function. If this
@@ -132,4 +139,5 @@ export interface ExpressionFunctionDefinitions {
   overall_metric: ExpressionFunctionOverallMetric;
   derivative: ExpressionFunctionDerivative;
   moving_average: ExpressionFunctionMovingAverage;
+  math_column: ExpressionFunctionMathColumn;
 }

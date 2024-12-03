@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import React from 'react';
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
@@ -26,3 +28,27 @@ export type MakeOverridesSerializable<T> = {
     ? MakeOverridesSerializable<T[KeyType]>
     : NonNullable<T[KeyType]>;
 };
+
+export interface ChartSizeEvent extends ExpressionRendererEvent {
+  name: 'chartSize';
+  data: ChartSizeSpec;
+}
+
+export type ChartSizeUnit = 'pixels' | 'percentage';
+
+interface ChartSizeDimensions {
+  x?: { value: number; unit: ChartSizeUnit };
+  y?: { value: number; unit: ChartSizeUnit };
+}
+
+export interface ChartSizeSpec {
+  // if maxDimensions are provided, the aspect ratio will be computed from them
+  maxDimensions?: ChartSizeDimensions;
+  minDimensions?: ChartSizeDimensions;
+  aspectRatio?: { x: number; y: number };
+}
+
+export function isChartSizeEvent(event: ExpressionRendererEvent): event is ChartSizeEvent {
+  const expectedName: ChartSizeEvent['name'] = 'chartSize';
+  return event.name === expectedName;
+}

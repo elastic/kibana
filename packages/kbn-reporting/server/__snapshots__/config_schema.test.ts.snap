@@ -7,14 +7,15 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
+    "maxConcurrentShardRequests": 5,
     "maxSizeBytes": ByteSizeValue {
       "valueInBytes": 262144000,
     },
     "scroll": Object {
       "duration": "30s",
       "size": 500,
+      "strategy": "pit",
     },
     "useByteOrderMarkEncoding": false,
   },
@@ -68,14 +69,15 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
+    "maxConcurrentShardRequests": 5,
     "maxSizeBytes": ByteSizeValue {
       "valueInBytes": 262144000,
     },
     "scroll": Object {
       "duration": "30s",
       "size": 500,
+      "strategy": "pit",
     },
     "useByteOrderMarkEncoding": false,
   },

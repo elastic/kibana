@@ -24,6 +24,27 @@ export const UPDATE_SELECTED_RULES = (numberOfSelectedRules: number) => {
   );
 };
 
+export const BULK_UPDATE_BUTTON_TOOLTIP_NO_PERMISSIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.bulkButtons.noPermissions',
+  {
+    defaultMessage: "You don't have permissions to update rules",
+  }
+);
+
+export const BULK_UPDATE_ALL_RULES_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.bulkButtons.allRules.conflicts',
+  {
+    defaultMessage: 'All rules have conflicts. Update them individually.',
+  }
+);
+
+export const BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.bulkButtons.selectedRules.conflicts',
+  {
+    defaultMessage: 'All selected rules have conflicts. Update them individually.',
+  }
+);
+
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.searchBarPlaceholder',
   {
@@ -35,5 +56,40 @@ export const UPDATE_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.updateButtonLabel',
   {
     defaultMessage: 'Update',
+  }
+);
+export const UPDATE_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updateError',
+  {
+    defaultMessage: 'Update error',
+  }
+);
+
+export const UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.perFieldTooltip',
+  {
+    defaultMessage: 'View changes field by field.',
+  }
+);
+
+export const UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewTooltip',
+  {
+    defaultMessage: 'View the latest rule changes in JSON format.',
+  }
+);
+
+export const RULE_TYPE_CHANGE_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeCalloutTitle',
+  {
+    defaultMessage: 'Rule type change',
+  }
+);
+
+export const RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeCalloutDescription',
+  {
+    defaultMessage:
+      'Your customization will be lost at update. Please take note of your customization or clone this rule before updating.',
   }
 );

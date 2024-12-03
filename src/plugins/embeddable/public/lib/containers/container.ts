@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import deepEqual from 'fast-deep-equal';
 import { isEqual, xor } from 'lodash';
-import { EMPTY, merge, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, merge, Subscription } from 'rxjs';
 import {
   catchError,
   combineLatestWith,
@@ -18,28 +19,32 @@ import {
   pairwise,
   switchMap,
   take,
-} from 'rxjs/operators';
-import deepEqual from 'fast-deep-equal';
+} from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
+import { PanelPackage } from '@kbn/presentation-containers';
+import { PresentationContainer } from '@kbn/presentation-containers';
+
+import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
+import { EmbeddableStart } from '../../plugin';
 import {
   Embeddable,
+  EmbeddableFactory,
   EmbeddableInput,
   EmbeddableOutput,
   ErrorEmbeddable,
-  EmbeddableFactory,
   IEmbeddable,
   isErrorEmbeddable,
 } from '../embeddables';
+import { EmbeddableFactoryNotFoundError, PanelNotFoundError } from '../errors';
 import {
-  IContainer,
   ContainerInput,
   ContainerOutput,
-  PanelState,
   EmbeddableContainerSettings,
+  IContainer,
+  PanelState,
 } from './i_container';
-import { EmbeddableStart } from '../../plugin';
-import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
-import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
+import { reactEmbeddableRegistryHasKey } from '../../react_embeddable_system';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -49,12 +54,13 @@ export abstract class Container<
     TContainerOutput extends ContainerOutput = ContainerOutput
   >
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput>
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput>, PresentationContainer
 {
   public readonly isContainer: boolean = true;
-  public readonly children: {
-    [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
-  } = {};
+
+  public children$: BehaviorSubject<{ [key: string]: unknown }> = new BehaviorSubject<{
+    [key: string]: unknown;
+  }>({});
 
   private subscription: Subscription | undefined;
   private readonly anyChildOutputChange$;
@@ -77,6 +83,9 @@ export abstract class Container<
     const init$ = this.getInput$().pipe(
       take(1),
       mergeMap(async (currentInput) => {
+        if (settings?.untilContainerInitialized) {
+          await settings.untilContainerInitialized();
+        }
         const initPromise = this.initializeChildEmbeddables(currentInput, settings);
         if (awaitingInitialize) await initPromise;
       })
@@ -114,6 +123,33 @@ export abstract class Container<
     );
   }
 
+  public getPanelCount() {
+    return Object.keys(this.getInput().panels).length;
+  }
+
+  public removePanel(id: string) {
+    this.removeEmbeddable(id);
+  }
+
+  public async addNewPanel<ApiType extends unknown = unknown>(
+    panelPackage: PanelPackage
+  ): Promise<ApiType | undefined> {
+    const newEmbeddable = await this.addNewEmbeddable(
+      panelPackage.panelType,
+      panelPackage.initialState as Partial<EmbeddableInput>
+    );
+    return newEmbeddable as ApiType;
+  }
+
+  public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
+    return await this.replaceEmbeddable(
+      idToRemove,
+      initialState as Partial<EmbeddableInput>,
+      panelType,
+      true
+    );
+  }
+
   public setChildLoaded(embeddable: IEmbeddable) {
     // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
     if (!this.input.panels[embeddable.id]) {
@@ -121,7 +157,11 @@ export abstract class Container<
       return;
     }
 
-    this.children[embeddable.id] = embeddable;
+    const currentChildren = this.children$.value;
+    this.children$.next({
+      ...currentChildren,
+      [embeddable.id]: embeddable,
+    });
     this.updateOutput({
       embeddableLoaded: {
         ...this.output.embeddableLoaded,
@@ -153,7 +193,9 @@ export abstract class Container<
   }
 
   public reload() {
-    Object.values(this.children).forEach((child) => child.reload());
+    for (const child of Object.values(this.children$.value)) {
+      (child as IEmbeddable)?.reload?.();
+    }
   }
 
   public async addNewEmbeddable<
@@ -238,11 +280,11 @@ export abstract class Container<
   }
 
   public getChildIds(): string[] {
-    return Object.keys(this.children);
+    return Object.keys(this.children$.value);
   }
 
   public getChild<E extends IEmbeddable>(id: string): E {
-    return this.children[id] as E;
+    return this.children$.value[id] as E;
   }
 
   public getInputForChild<TEmbeddableInput extends EmbeddableInput = EmbeddableInput>(
@@ -283,7 +325,9 @@ export abstract class Container<
 
   public destroy() {
     super.destroy();
-    Object.values(this.children).forEach((child) => child.destroy());
+    for (const child of Object.values(this.children$.value)) {
+      (child as IEmbeddable)?.destroy?.();
+    }
     this.subscription?.unsubscribe();
   }
 
@@ -295,20 +339,45 @@ export abstract class Container<
     }
 
     if (this.output.embeddableLoaded[id]) {
-      return this.children[id] as TEmbeddable;
+      return this.children$.value[id] as TEmbeddable;
     }
 
     return new Promise<TEmbeddable>((resolve, reject) => {
       const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
         if (this.output.embeddableLoaded[id]) {
           subscription.unsubscribe();
-          resolve(this.children[id] as TEmbeddable);
+          resolve(this.children$.value[id] as TEmbeddable);
         }
 
         // If we hit this, the panel was removed before the embeddable finished loading.
         if (this.input.panels[id] === undefined) {
           subscription.unsubscribe();
           // @ts-expect-error undefined in not assignable to TEmbeddable | ErrorEmbeddable
+          resolve(undefined);
+        }
+      });
+    });
+  }
+
+  public async untilReactEmbeddableLoaded<ApiType>(id: string): Promise<ApiType | undefined> {
+    if (!this.input.panels[id]) {
+      throw new PanelNotFoundError();
+    }
+
+    if (this.children$.value[id]) {
+      return this.children$.value[id] as ApiType;
+    }
+
+    return new Promise((resolve, reject) => {
+      const subscription = merge(this.children$, this.getInput$()).subscribe(() => {
+        if (this.children$.value[id]) {
+          subscription.unsubscribe();
+          resolve(this.children$.value[id] as ApiType);
+        }
+
+        // If we hit this, the panel was removed before the embeddable finished loading.
+        if (this.input.panels[id] === undefined) {
+          subscription.unsubscribe();
           resolve(undefined);
         }
       });
@@ -461,11 +530,13 @@ export abstract class Container<
   private onPanelRemoved(id: string) {
     // Clean up
     const embeddable = this.getChild(id);
-    if (embeddable) {
+    if (embeddable && embeddable.destroy) {
       embeddable.destroy();
 
       // Remove references.
-      delete this.children[id];
+      const nextChildren = this.children$.value;
+      delete nextChildren[id];
+      this.children$.next(nextChildren);
     }
 
     this.updateOutput({
@@ -477,6 +548,17 @@ export abstract class Container<
   }
 
   private async onPanelAdded(panel: PanelState) {
+    // do nothing if this panel's type is in the new Embeddable registry.
+    if (reactEmbeddableRegistryHasKey(panel.type)) {
+      this.updateOutput({
+        embeddableLoaded: {
+          ...this.output.embeddableLoaded,
+          [panel.explicitInput.id]: true,
+        },
+      } as Partial<TContainerOutput>);
+      return;
+    }
+
     this.updateOutput({
       embeddableLoaded: {
         ...this.output.embeddableLoaded,

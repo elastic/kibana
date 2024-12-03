@@ -7,12 +7,12 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ElasticsearchFeature, KibanaFeature } from '@kbn/features-plugin/server';
+import { Actions } from '@kbn/security-authorization-core';
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
-import { Actions } from './actions';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { authorizationMock } from './index.mock';
-import type { CheckPrivilegesResponse } from './types';
-import type { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common';
 
 type MockAuthzOptions =
   | { rejectCheckPrivileges: any }
@@ -362,6 +362,8 @@ describe('usingPrivileges', () => {
             { privilege: actions.ui.get('kibanaFeature2', 'bar'), authorized: false },
             { privilege: actions.ui.get('optOutFeature', 'foo'), authorized: false },
             { privilege: actions.ui.get('optOutFeature', 'bar'), authorized: false },
+            { privilege: actions.ui.get('spaces', 'manage'), authorized: false },
+            { privilege: actions.ui.get('globalSettings', 'show'), authorized: false },
           ],
           elasticsearch: {
             cluster: [
@@ -419,6 +421,12 @@ describe('usingPrivileges', () => {
           es_manage_sec: true,
         },
         esManagementFeature: {},
+        spaces: {
+          manage: true,
+        },
+        globalSettings: {
+          show: true,
+        },
       })
     );
 
@@ -457,6 +465,12 @@ describe('usingPrivileges', () => {
         es_manage_sec: true,
       },
       esManagementFeature: {},
+      spaces: {
+        manage: false,
+      },
+      globalSettings: {
+        show: false,
+      },
     });
   });
 
@@ -475,6 +489,8 @@ describe('usingPrivileges', () => {
             { privilege: actions.ui.get('kibanaFeature2', 'bar'), authorized: true },
             { privilege: actions.ui.get('optOutFeature', 'foo'), authorized: true },
             { privilege: actions.ui.get('optOutFeature', 'bar'), authorized: true },
+            { privilege: actions.ui.get('spaces', 'manage'), authorized: true },
+            { privilege: actions.ui.get('globalSettings', 'show'), authorized: true },
           ],
           elasticsearch: {
             cluster: [
@@ -528,6 +544,12 @@ describe('usingPrivileges', () => {
         es_manage_sec: false,
       },
       esManagementFeature: {},
+      spaces: {
+        manage: false,
+      },
+      globalSettings: {
+        show: false,
+      },
     });
     const result = await usingPrivileges(allFalseCapabilities);
 

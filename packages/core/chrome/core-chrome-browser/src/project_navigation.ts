@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, MouseEventHandler, ReactNode } from 'react';
 import type { Location } from 'history';
-import type { EuiThemeSizes, IconType } from '@elastic/eui';
+import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
+import type { Observable } from 'rxjs';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -19,14 +21,28 @@ import type {
   AppId as ManagementApp,
   DeepLinkId as ManagementLink,
 } from '@kbn/deeplinks-management';
-import type { AppId as SearchApp, DeepLinkId as SearchLink } from '@kbn/deeplinks-search';
+import type {
+  EnterpriseSearchApp,
+  EnterpriseSearchContentApp,
+  EnterpriseSearchApplicationsApp,
+  EnterpriseSearchAnalyticsApp,
+  EnterpriseSearchAppsearchApp,
+  EnterpriseSearchWorkplaceSearchApp,
+  ServerlessSearchApp,
+  DeepLinkId as SearchLink,
+} from '@kbn/deeplinks-search';
 import type {
   AppId as ObservabilityApp,
   DeepLinkId as ObservabilityLink,
 } from '@kbn/deeplinks-observability';
+import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
+import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
+import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
 
-import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
+import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
+
+export type SolutionId = 'es' | 'oblt' | 'security';
 
 /** @public */
 export type AppId =
@@ -34,8 +50,17 @@ export type AppId =
   | AnalyticsApp
   | MlApp
   | ManagementApp
-  | SearchApp
-  | ObservabilityApp;
+  | EnterpriseSearchApp
+  | EnterpriseSearchContentApp
+  | EnterpriseSearchApplicationsApp
+  | EnterpriseSearchAnalyticsApp
+  | EnterpriseSearchAppsearchApp
+  | EnterpriseSearchWorkplaceSearchApp
+  | ServerlessSearchApp
+  | ObservabilityApp
+  | SecurityApp
+  | FleetApp
+  | SharedApp;
 
 /** @public */
 export type AppDeepLinkId =
@@ -44,16 +69,47 @@ export type AppDeepLinkId =
   | MlLink
   | ManagementLink
   | SearchLink
-  | ObservabilityLink;
+  | ObservabilityLink
+  | SecurityLink
+  | FleetLink
+  | SharedLink;
 
 /** @public */
-export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
+export type CloudLinkId =
+  | 'userAndRoles'
+  | 'performance'
+  | 'billingAndSub'
+  | 'deployment'
+  | 'deployments'
+  | 'projects';
+
+export interface CloudURLs {
+  baseUrl?: string;
+  billingUrl?: string;
+  deploymentsUrl?: string;
+  deploymentUrl?: string;
+  projectsUrl?: string;
+  performanceUrl?: string;
+  usersAndRolesUrl?: string;
+}
+
+export interface CloudLink {
+  title: string;
+  href: string;
+}
+
+export type CloudLinks = {
+  [id in CloudLinkId]?: CloudLink;
+};
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
-export type EuiThemeSize = Exclude<typeof EuiThemeSizes[number], 'base' | 'xxs' | 'xxxl' | 'xxxxl'>;
+export type EuiThemeSize = Exclude<
+  (typeof EuiThemeSizes)[number],
+  'base' | 'xxs' | 'xxxl' | 'xxxxl'
+>;
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -77,6 +133,10 @@ interface NodeDefinitionBase {
    * href for absolute links only. Internal links should use "link".
    */
   href?: string;
+  /**
+   * Custom handler to execute when clicking on the node. This handler takes precedence over the "link" or "href" props.
+   */
+  onClick?: MouseEventHandler<HTMLButtonElement | HTMLElement>;
   /**
    * Optional status to indicate if the breadcrumb should be hidden when this node is active.
    * @default 'visible'
@@ -169,7 +229,7 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
   title: string;
   /** Path in the tree of the node */
-  path: string[];
+  path: string;
   /** App id or deeplink id */
   deepLink?: ChromeNavLink;
   /**
@@ -178,18 +238,22 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    */
   children?: ChromeProjectNavigationNode[];
   /**
-   * Flag to indicate if the node is currently active.
+   * Handler to render the node item with custom JSX. This handler is added to render the `children` of
+   * the Navigation.Item component when React components are used to declare the navigation tree.
    */
-  isActive?: boolean;
+  renderItem?: () => React.ReactNode;
+  /**
+   * Flag to indicate if the node is an "external" cloud link
+   */
+  isElasticInternalLink?: boolean;
 }
 
-/** @public */
-export interface ChromeProjectNavigation {
-  /**
-   * The navigation tree representation of the side bar navigation.
-   */
-  navigationTree: ChromeProjectNavigationNode[];
-}
+export type PanelSelectedNode = Pick<
+  ChromeProjectNavigationNode,
+  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink'
+> & {
+  title: string | ReactNode;
+};
 
 /** @public */
 export interface SideNavCompProps {
@@ -200,15 +264,9 @@ export interface SideNavCompProps {
 export type SideNavComponent = ComponentType<SideNavCompProps>;
 
 /** @public */
-export type ChromeProjectBreadcrumb = ChromeBreadcrumb;
-
-/** @public */
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }
-
-// --- NOTE: The following types are the ones that the consumer uses to configure their navigation.
-// ---       They are converted to the ChromeProjectNavigationNode type above.
 
 /**
  * @public
@@ -247,4 +305,158 @@ export type NodeDefinitionWithChildren<
   ChildrenID extends string = Id
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
+};
+
+/** The preset that can be pass to the NavigationBucket component */
+export type NavigationGroupPreset = 'analytics' | 'devtools' | 'ml' | 'management';
+
+/**
+ * @public
+ *
+ *  Definition for the "Recently accessed" section of the side navigation.
+ */
+export interface RecentlyAccessedDefinition {
+  type: 'recentlyAccessed';
+  /**
+   * Optional observable for recently accessed items. If not provided, the
+   * recently items from the Chrome service will be used.
+   */
+  recentlyAccessed$?: Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  /**
+   * If true, the recently accessed list will be collapsed by default.
+   * @default false
+   */
+  defaultIsCollapsed?: boolean;
+}
+
+/**
+ * @public
+ *
+ * A group root item definition.
+ */
+export interface GroupDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navGroup';
+  children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
+}
+
+/**
+ * @public
+ *
+ * A group root item definition built from a specific preset.
+ */
+export interface PresetDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children' | 'type'> {
+  type: 'preset';
+  preset: NavigationGroupPreset;
+}
+
+/**
+ * @public
+ *
+ * An navigation item at root level.
+ */
+export interface ItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navItem';
+}
+
+/**
+ * @public
+ *
+ * The navigation definition for a root item in the side navigation.
+ */
+export type RootNavigationItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> =
+  | RecentlyAccessedDefinition
+  | GroupDefinition<LinkId, Id, ChildrenId>
+  | PresetDefinition<LinkId, Id, ChildrenId>
+  | ItemDefinition<LinkId, Id, ChildrenId>;
+
+/**
+ * @public
+ *
+ * Definition for the complete navigation tree, including body and footer
+ */
+export interface NavigationTreeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> {
+  /**
+   * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items.
+   * */
+  body: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  /**
+   * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items.
+   * */
+  footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+}
+
+/**
+ * @public
+ *
+ * Definition for the complete navigation tree, including body and footer
+ * that is used by the UI to render the navigation.
+ * This interface is the result of parsing the definition above (validating, replacing "link" props
+ * with their corresponding "deepLink"...)
+ */
+export interface NavigationTreeDefinitionUI {
+  id: SolutionId;
+  body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+  footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+}
+
+/**
+ * @public
+ *
+ * Definition for a solution navigation in stateful Kibana.
+ *
+ * This definition is used to register a solution navigation in the Chrome service
+ * for the side navigation evolution to align with the Serverless UX.
+ */
+
+export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
+  /** Unique id for the solution navigation. */
+  id: SolutionId;
+  /** Title for the solution navigation. */
+  title: string;
+  /** The navigation tree definition */
+  navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
+  /** Optional icon for the solution navigation to render in the select dropdown. */
+  icon?: IconType;
+  /** React component to render in the side nav for the navigation */
+  sideNavComponent?: SideNavComponent;
+  /** The page to navigate to when clicking on the Kibana (or custom) logo. */
+  homePage?: LinkId;
+}
+
+export type SolutionNavigationDefinitions = {
+  [id in SolutionId]?: SolutionNavigationDefinition;
+};
+
+/**
+ * Temporary helper interface while we have to maintain both the legacy side navigation
+ * and the new "solution view" one. The legacy uses EuiSideNavItemType and its properties are not fully compatible
+ * with the NodeDefinition. Solution teams declare their "classic" navigation using the EuiSideNavItemType.
+ * Converting those to the `NodeDefinition` require some additional props.
+ */
+export type EuiSideNavItemTypeEnhanced<T = unknown> = Omit<EuiSideNavItemType<T>, 'items'> & {
+  items?: Array<EuiSideNavItemTypeEnhanced<unknown>>;
+  iconToString?: string;
+  nameToString?: string;
 };

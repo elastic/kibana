@@ -1,5 +1,7 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/shared-ux-page-analytics-no-data",
-  "owner": "@elastic/appex-sharedux"
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "private"
 }

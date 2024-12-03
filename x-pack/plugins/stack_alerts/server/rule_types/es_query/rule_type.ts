@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
-import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { STACK_ALERTS_AAD_CONFIG } from '..';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
@@ -18,14 +17,17 @@ import {
   EsQueryRuleParamsExtractedParams,
   EsQueryRuleParamsSchema,
   EsQueryRuleState,
+  validateServerless,
 } from './rule_type_params';
 import { ExecutorOptions } from './types';
 import { ActionGroupId } from './constants';
 import { executor } from './executor';
 import { isSearchSourceRule } from './util';
+import { StackAlertType } from '../types';
 
 export function getRuleType(
-  core: CoreSetup
+  core: CoreSetup,
+  isServerless: boolean
 ): RuleType<
   EsQueryRuleParams,
   EsQueryRuleParamsExtractedParams,
@@ -34,7 +36,7 @@ export function getRuleType(
   ActionContext,
   typeof ActionGroupId,
   never,
-  StackAlert
+  StackAlertType
 > {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
@@ -152,7 +154,21 @@ export function getRuleType(
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
     validate: {
-      params: EsQueryRuleParamsSchema,
+      params: {
+        validate: (object: unknown) => {
+          const validated = EsQueryRuleParamsSchema.validate(object);
+          if (isServerless) {
+            validateServerless(validated);
+          }
+          return validated;
+        },
+      },
+    },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: EsQueryRuleParamsSchema,
+      },
     },
     actionVariables: {
       context: [

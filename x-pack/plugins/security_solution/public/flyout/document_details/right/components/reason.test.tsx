@@ -7,18 +7,33 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { REASON_DETAILS_PREVIEW_BUTTON_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
-import { Reason } from './reason';
-import { RightPanelContext } from '../context';
+import { Reason, ALERT_REASON_BANNER } from './reason';
+import { DocumentDetailsContext } from '../../shared/context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { DocumentDetailsPreviewPanelKey } from '../../preview';
+import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
+import { TestProviders } from '../../../../common/mock';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutApi;
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
+
+jest.mock('@kbn/expandable-flyout');
 
 const panelContextValue = {
   eventId: 'event id',
@@ -26,22 +41,26 @@ const panelContextValue = {
   scopeId: 'scopeId',
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: mockGetFieldsData,
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
-const renderReason = (panelContext: RightPanelContext = panelContextValue) =>
+const renderReason = (panelContext: DocumentDetailsContext = panelContextValue) =>
   render(
-    <IntlProvider locale="en">
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={panelContext}>
+    <TestProviders>
+      <IntlProvider locale="en">
+        <DocumentDetailsContext.Provider value={panelContext}>
           <Reason />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
-    </IntlProvider>
+        </DocumentDetailsContext.Provider>
+      </IntlProvider>
+    </TestProviders>
   );
 
 const NO_DATA_MESSAGE = "There's no source event information for this alert.";
 
 describe('<Reason />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
   it('should render the component for alert', () => {
     const { getByTestId } = renderReason();
     expect(getByTestId(REASON_TITLE_TEST_ID)).toBeInTheDocument();
@@ -69,7 +88,7 @@ describe('<Reason />', () => {
     const panelContext = {
       ...panelContextValue,
       getFieldsData: () => {},
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByText } = renderReason(panelContext);
 
@@ -82,22 +101,12 @@ describe('<Reason />', () => {
     getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID).click();
 
     expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsPreviewPanelKey,
-      path: { tab: 'alert-reason-preview' },
+      id: DocumentDetailsAlertReasonPanelKey,
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,
         scopeId: panelContextValue.scopeId,
-        banner: {
-          title: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
-              defaultMessage="Preview alert reason"
-            />
-          ),
-          backgroundColor: 'warning',
-          textColor: 'warning',
-        },
+        banner: ALERT_REASON_BANNER,
       },
     });
   });

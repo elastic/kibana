@@ -22,13 +22,17 @@ export const runSoonRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_run_soon`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         params: paramSchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const message = await rulesClient.runSoon(req.params);
         return message ? res.ok({ body: message }) : res.noContent();
       })

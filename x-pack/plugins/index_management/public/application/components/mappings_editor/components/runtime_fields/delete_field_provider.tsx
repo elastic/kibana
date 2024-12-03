@@ -42,7 +42,7 @@ export const DeleteRuntimeFieldProvider = ({ children }: Props) => {
     modalTitle = i18n.translate(
       'xpack.idxMgmt.mappingsEditor.deleteRuntimeField.confirmationModal.title',
       {
-        defaultMessage: "Remove runtime field '{fieldName}'?",
+        defaultMessage: "Remove runtime field ''{fieldName}''?",
         values: {
           fieldName: source.name,
         },

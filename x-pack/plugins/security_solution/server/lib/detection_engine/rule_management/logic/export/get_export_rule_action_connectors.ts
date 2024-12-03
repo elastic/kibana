@@ -14,7 +14,7 @@ import type {
   SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { createConcatStream, createMapStream, createPromiseFromStreams } from '@kbn/utils';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { ExportableRule } from './exportable_rule';
 
 export interface DefaultActionConnectorDetails {
   exported_action_connector_count: number;
@@ -47,9 +47,9 @@ const filterOutPredefinedActionConnectorsIds = async (
   actionsClient: ActionsClient,
   actionsIdsToExport: string[]
 ): Promise<string[]> => {
-  const allActions = await actionsClient.getAll();
+  const allActions = await actionsClient.getAll({ includeSystemActions: true });
   const predefinedActionsIds = allActions
-    .filter(({ isPreconfigured }) => isPreconfigured)
+    .filter(({ isPreconfigured, isSystemAction }) => isPreconfigured || isSystemAction)
     .map(({ id }) => id);
   if (predefinedActionsIds.length)
     return actionsIdsToExport.filter((id) => !predefinedActionsIds.includes(id));
@@ -63,7 +63,7 @@ const filterOutPredefinedActionConnectorsIds = async (
 // to getAll actions connectors
 
 export const getRuleActionConnectorsForExport = async (
-  rules: RuleResponse[],
+  rules: ExportableRule[],
   actionsExporter: ISavedObjectsExporter,
   request: KibanaRequest,
   actionsClient: ActionsClient
@@ -77,6 +77,7 @@ export const getRuleActionConnectorsForExport = async (
   };
 
   let actionsIds = [...new Set(rules.flatMap((rule) => rule.actions.map(({ id }) => id)))];
+
   if (!actionsIds.length) return exportedActionConnectors;
 
   // handle preconfigured connectors

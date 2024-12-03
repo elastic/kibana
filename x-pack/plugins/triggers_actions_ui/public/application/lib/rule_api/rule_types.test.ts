@@ -8,7 +8,7 @@
 import { RuleType } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRuleTypes } from './rule_types';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -23,13 +23,14 @@ describe('loadRuleTypes', () => {
           state: [{ name: 'var2', description: 'val2' }],
           params: [{ name: 'var3', description: 'val3' }],
         },
-        producer: ALERTS_FEATURE_ID,
+        producer: ALERTING_FEATURE_ID,
         actionGroups: [{ id: 'default', name: 'Default' }],
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         defaultActionGroupId: 'default',
         authorizedConsumers: {},
         minimumLicenseRequired: 'basic',
         enabledInLicense: true,
+        category: 'my-category',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);

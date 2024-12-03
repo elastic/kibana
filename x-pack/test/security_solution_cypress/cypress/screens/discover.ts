@@ -15,7 +15,7 @@ export const DISCOVER_DATA_VIEW_SWITCHER = {
   INPUT: getDataTestSubjectSelector('indexPattern-switcher--input'),
   GET_DATA_VIEW: (title: string) => `.euiSelectableListItem[role=option][title^="${title}"]`,
   CREATE_NEW: getDataTestSubjectSelector('dataview-create-new'),
-  TEXT_BASE_LANG_SWICTHER: getDataTestSubjectSelector('select-text-based-language-panel'),
+  TEXT_BASE_LANG_SWITCHER: getDataTestSubjectSelector('select-text-based-language-btn'),
 };
 
 export const DISCOVER_DATA_VIEW_EDITOR_FLYOUT = {
@@ -32,7 +32,7 @@ export const DISCOVER_ESQL_INPUT = `${DISCOVER_CONTAINER} ${getDataTestSubjectSe
 
 export const DISCOVER_ESQL_INPUT_TEXT_CONTAINER = `${DISCOVER_ESQL_INPUT} .view-lines`;
 
-export const DISCOVER_ESQL_EDITABLE_INPUT = `${DISCOVER_ESQL_INPUT} textarea:first`;
+export const DISCOVER_ESQL_EDITABLE_INPUT = `${DISCOVER_ESQL_INPUT} textarea`;
 
 export const DISCOVER_ADD_FILTER = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(
   'addFilter'
@@ -42,7 +42,7 @@ export const DISCOVER_FILTER_BADGES = `${DISCOVER_CONTAINER} ${getDataTestSubjec
   'filter-badge-'
 )}`;
 
-export const DISCOVER_RESULT_HITS = getDataTestSubjectSelector('unifiedHistogramQueryHits');
+export const DISCOVER_RESULT_HITS = getDataTestSubjectSelector('discoverQueryHits');
 
 export const DISCOVER_FIELDS_LOADING = getDataTestSubjectSelector(
   'fieldListGroupedAvailableFields-countLoading'
@@ -79,6 +79,12 @@ export const GET_DISCOVER_COLUMN = (columnId: string) =>
 export const GET_DISCOVER_COLUMN_TOGGLE_BTN = (columnId: string) =>
   `${getDataTestSubjectSelector(`fieldToggle-${columnId}`)}`;
 
-export const DISCOVER_FIELD_SEARCH = getDataTestSubjectSelector('fieldListFiltersFieldSearch');
+export const DISCOVER_FIELD_SEARCH = `${getDataTestSubjectSelector(
+  'fieldList'
+)} ${getDataTestSubjectSelector('fieldListFiltersFieldSearch')}`;
 
 export const DISCOVER_FIELD_LIST_LOADING = getDataTestSubjectSelector('fieldListLoading');
+
+export const AVAILABLE_FIELD_COUNT = getDataTestSubjectSelector(
+  'fieldListGroupedAvailableFields-count'
+);

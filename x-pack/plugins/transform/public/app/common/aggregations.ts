@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { composeValidators, patternValidator } from '../../../common/shared_imports';
+import { composeValidators, patternValidator } from '@kbn/ml-validators';
 
-import { AggName } from '../../../common/types/aggregations';
+import type { AggName } from '../../../common/types/aggregations';
 
 export function isAggName(arg: unknown): arg is AggName {
   // allow all characters except `[]>` and must not start or end with a space.

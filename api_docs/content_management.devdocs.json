@@ -490,7 +490,7 @@
         "label": "ContentClientProvider",
         "description": [],
         "signature": [
-          "({ contentClient, children, }: React.PropsWithChildren<{ contentClient: ",
+          "({ contentClient, children }: React.PropsWithChildren<{ contentClient: ",
           {
             "pluginId": "contentManagement",
             "scope": "public",
@@ -498,7 +498,7 @@
             "section": "def-public.ContentClient",
             "text": "ContentClient"
           },
-          "; }>) => JSX.Element"
+          "; }>) => React.JSX.Element"
         ],
         "path": "src/plugins/content_management/public/content_client/content_client_context.tsx",
         "deprecated": false,
@@ -509,7 +509,7 @@
             "id": "def-public.ContentClientProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  contentClient,\n  children,\n}",
+            "label": "{ contentClient, children }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<{ contentClient: ",
@@ -1283,7 +1283,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string, options?: object | undefined) => Promise<{ item: T; } | { item: T; meta: any; }>"
+              ", id: string, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1361,7 +1361,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", ids: string[], options?: object | undefined) => Promise<{ hits: ({ item: T; } | { item: T; meta: any; })[]; }>"
+              ", ids: string[], options?: object | undefined) => Promise<{ hits: ({ item: T; meta?: undefined; } | { item: T; meta: any; })[]; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1439,7 +1439,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", data: object, options?: object | undefined) => Promise<{ item: T; } | { item: T; meta: any; }>"
+              ", data: object, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1517,7 +1517,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string, data: object, options?: object | undefined) => Promise<{ item: U; } | { item: U; meta: any; }>"
+              ", id: string, data: object, options?: object | undefined) => Promise<{ item: U; meta?: undefined; } | { item: U; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1846,9 +1846,9 @@
               ", savedObject: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindResult",
+                "section": "def-server.SavedObjectsFindResult",
                 "text": "SavedObjectsFindResult"
               },
               "<TSavedObjectAttributes>) => T"
@@ -1888,9 +1888,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsFindResult",
+                    "section": "def-server.SavedObjectsFindResult",
                     "text": "SavedObjectsFindResult"
                   },
                   "<TSavedObjectAttributes>"
@@ -1941,13 +1941,15 @@
             "type": "Object",
             "tags": [],
             "label": "requestHandlerContext",
-            "description": [],
+            "description": [
+              "The Core HTTP request handler context"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               }
             ],
@@ -2013,7 +2015,22 @@
       "path": "src/plugins/content_management/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "contentManagement",
+          "id": "def-server.ContentManagementServerSetup.favorites",
+          "type": "Object",
+          "tags": [],
+          "label": "favorites",
+          "description": [],
+          "signature": [
+            "{ registerFavoriteType: (type: string, config?: FavoriteTypeConfig) => void; }"
+          ],
+          "path": "src/plugins/content_management/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -2833,7 +2850,7 @@
         "label": "CreateResult",
         "description": [],
         "signature": [
-          "M extends void ? { item: T; } : { item: T; meta: M; }"
+          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/plugins/content_management/common/rpc/create.ts",
         "deprecated": false,
@@ -2848,7 +2865,7 @@
         "label": "GetResult",
         "description": [],
         "signature": [
-          "M extends void ? { item: T; } : { item: T; meta: M; }"
+          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/plugins/content_management/common/rpc/get.ts",
         "deprecated": false,
@@ -2944,7 +2961,7 @@
         "label": "UpdateResult",
         "description": [],
         "signature": [
-          "M extends void ? { item: T; } : { item: T; meta: M; }"
+          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/plugins/content_management/common/rpc/update.ts",
         "deprecated": false,

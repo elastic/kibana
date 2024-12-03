@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -20,36 +20,48 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  filterCalendarsForDst,
+  separateCalendarsByType,
+} from '../../../../../../../../../settings/calendars/dst_utils';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import { ml } from '../../../../../../../../../services/ml_api_service';
 import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
-import { Calendar } from '../../../../../../../../../../../common/types/calendars';
-import { useMlKibana } from '../../../../../../../../../contexts/kibana';
+import type { MlCalendar } from '../../../../../../../../../../../common/types/calendars';
+import { useMlApi, useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
+import { DescriptionDst } from './description_dst';
 
-export const CalendarsSelection: FC = () => {
+interface Props {
+  isDst?: boolean;
+}
+
+export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   const {
     services: {
       application: { getUrlForApp },
     },
   } = useMlKibana();
+  const mlApi = useMlApi();
 
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
-  const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>(jobCreator.calendars);
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<Calendar>>>(
-    []
+  const [selectedCalendars, setSelectedCalendars] = useState<MlCalendar[]>(
+    filterCalendarsForDst(jobCreator.calendars, isDst)
   );
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<Calendar>>>([]);
+  const [selectedOptions, setSelectedOptions] = useState<
+    Array<EuiComboBoxOptionOption<MlCalendar>>
+  >([]);
+  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<MlCalendar>>>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   async function loadCalendars() {
     setIsLoading(true);
-    const calendars = (await ml.calendars()).filter(
+    const { calendars, calendarsDst } = separateCalendarsByType(await mlApi.calendars());
+    const filteredCalendars = (isDst ? calendarsDst : calendars).filter(
       (c) => c.job_ids.includes(GLOBAL_CALENDAR) === false
     );
-    setOptions(calendars.map((c) => ({ label: c.calendar_id, value: c })));
+    setOptions(filteredCalendars.map((c) => ({ label: c.calendar_id, value: c })));
     setSelectedOptions(selectedCalendars.map((c) => ({ label: c.calendar_id, value: c })));
     setIsLoading(false);
   }
@@ -60,12 +72,14 @@ export const CalendarsSelection: FC = () => {
   }, []);
 
   useEffect(() => {
-    jobCreator.calendars = selectedCalendars;
+    const { calendars, calendarsDst } = separateCalendarsByType(jobCreator.calendars);
+    const otherCalendars = isDst ? calendars : calendarsDst;
+    jobCreator.calendars = [...selectedCalendars, ...otherCalendars];
     jobCreatorUpdate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCalendars.join()]);
 
-  const comboBoxProps: EuiComboBoxProps<Calendar> = {
+  const comboBoxProps: EuiComboBoxProps<MlCalendar> = {
     async: true,
     options,
     selectedOptions,
@@ -77,11 +91,13 @@ export const CalendarsSelection: FC = () => {
   };
 
   const manageCalendarsHref = getUrlForApp(PLUGIN_ID, {
-    path: ML_PAGES.CALENDARS_MANAGE,
+    path: isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE,
   });
 
+  const Desc = isDst ? DescriptionDst : Description;
+
   return (
-    <Description>
+    <Desc>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem>
           <EuiComboBox {...comboBoxProps} data-test-subj="mlJobWizardComboBoxCalendars" />
@@ -119,6 +135,6 @@ export const CalendarsSelection: FC = () => {
           />
         </EuiLink>
       </EuiText>
-    </Description>
+    </Desc>
   );
 };

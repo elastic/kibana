@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/
 import { indexOf } from 'lodash';
 import { useSelector } from 'react-redux';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { get } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -46,10 +46,10 @@ import type {
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
-import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
+import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -114,6 +114,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
   const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
   const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
+  const isAlertSourceEndpoint = useMemo(() => {
+    const eventModules = getOr([], 'kibana.alert.original_event.module', ecsRowData);
+    const kinds = getOr([], 'kibana.alert.original_event.kind', ecsRowData);
+
+    return eventModules.includes('endpoint') && kinds.includes('alert');
+  }, [ecsRowData]);
+
   const scopeIdAllowsAddEndpointEventFilter = useMemo(
     () => scopeId === TableId.hostsPageEvents || scopeId === TableId.usersPageEvents,
     [scopeId]
@@ -143,17 +150,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
-  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  };
-
   const refetchAll = useCallback(() => {
+    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+    };
     if (isActiveTimeline(scopeId ?? '')) {
       refetchQuery([timelineQuery]);
     } else {
       refetchQuery(globalQuery);
-      if (refetch) refetch();
     }
+
+    if (refetch) refetch();
   }, [scopeId, globalQuery, timelineQuery, refetch]);
 
   const ruleIndex =
@@ -199,7 +206,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   }, [closePopover, onAddEventFilterClick]);
 
   const { exceptionActionItems } = useAlertExceptionActions({
-    isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
+    isEndpointAlert: isAlertSourceEndpoint,
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
   const { eventFilterActionItems } = useEventFilterAction({
@@ -224,6 +231,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     refetch: refetchAll,
   });
 
+  const { alertAssigneesItems, alertAssigneesPanels } = useAlertAssigneesActions({
+    closePopover,
+    ecsRowData,
+    refetch: refetchAll,
+  });
+
   const items: AlertTableContextMenuItem[] = useMemo(
     () =>
       !isEvent && ruleId
@@ -231,6 +244,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             ...addToCaseActionItems,
             ...statusActionItems,
             ...alertTagsItems,
+            ...alertAssigneesItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
           ]
@@ -250,6 +264,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       eventFilterActionItems,
       canCreateEndpointEventFilters,
       alertTagsItems,
+      alertAssigneesItems,
     ]
   );
 
@@ -260,8 +275,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         items,
       },
       ...alertTagsPanels,
+      ...alertAssigneesPanels,
     ],
-    [alertTagsPanels, items]
+    [alertTagsPanels, alertAssigneesPanels, items]
   );
 
   const osqueryFlyout = useMemo(() => {
@@ -417,10 +433,17 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return null;
   }, [maybeRule]);
 
+  const ruleType = enrichedAlert?.['kibana.alert.rule.parameters']?.type;
+  const isAlertWithoutIndex = ruleType === 'esql' || ruleType === 'machine_learning';
+  const isWaitingForIndexOrDataView =
+    !isAlertWithoutIndex && memoRuleIndices == null && memoDataViewId == null;
+
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    (memoRuleIndices == null && memoDataViewId == null);
+    isWaitingForIndexOrDataView;
+
+  if (isLoading || isRuleLoading) return null;
 
   return (
     <AddExceptionFlyout

@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
-import type {
-  StartAddAttachmentToExistingCaseTransaction,
-  StartCreateCaseWithAttachmentsTransaction,
-} from './use_cases_transactions';
 import {
   useAddAttachmentToExistingCaseTransaction,
   useCreateCaseWithAttachmentsTransaction,
@@ -37,14 +33,10 @@ const bulkAttachments = [
 ] as CaseAttachmentsWithoutOwner;
 
 const renderUseCreateCaseWithAttachmentsTransaction = () =>
-  renderHook<void, { startTransaction: StartCreateCaseWithAttachmentsTransaction }>(
-    useCreateCaseWithAttachmentsTransaction
-  );
+  renderHook(useCreateCaseWithAttachmentsTransaction);
 
 const renderUseAddAttachmentToExistingCaseTransaction = () =>
-  renderHook<void, { startTransaction: StartAddAttachmentToExistingCaseTransaction }>(
-    useAddAttachmentToExistingCaseTransaction
-  );
+  renderHook(useAddAttachmentToExistingCaseTransaction);
 
 describe('cases transactions', () => {
   beforeEach(() => {
@@ -80,6 +72,15 @@ describe('cases transactions', () => {
       );
       expect(mockAddLabels).toHaveBeenCalledWith({ alert_count: 3 });
     });
+
+    it('should not start any transactions if the app ID is not defined', () => {
+      const { result } = renderUseCreateCaseWithAttachmentsTransaction();
+
+      result.current.startTransaction();
+
+      expect(mockStartTransaction).not.toHaveBeenCalled();
+      expect(mockAddLabels).not.toHaveBeenCalled();
+    });
   });
 
   describe('useAddAttachmentToExistingCaseTransaction', () => {
@@ -103,6 +104,15 @@ describe('cases transactions', () => {
         `Cases [${appId}] bulkAddAttachmentsToExistingCase`
       );
       expect(mockAddLabels).toHaveBeenCalledWith({ alert_count: 3 });
+    });
+
+    it('should not start any transactions if the app ID is not defined', () => {
+      const { result } = renderUseAddAttachmentToExistingCaseTransaction();
+
+      result.current.startTransaction({ attachments: bulkAttachments });
+
+      expect(mockStartTransaction).not.toHaveBeenCalled();
+      expect(mockAddLabels).not.toHaveBeenCalled();
     });
   });
 });

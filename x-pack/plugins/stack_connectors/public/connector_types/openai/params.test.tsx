@@ -8,21 +8,9 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_BODY, DEFAULT_BODY_AZURE, DEFAULT_URL } from './constants';
 
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 const messageVariables = [
   {
     name: 'myVar',
@@ -49,7 +37,7 @@ describe('Gen AI Params Fields renders', () => {
     expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '{"message": "test"}');
     expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
-  test.each([OpenAiProviderType.OpenAi, OpenAiProviderType.AzureAi])(
+  test.each([OpenAiProviderType.OpenAi, OpenAiProviderType.AzureAi, OpenAiProviderType.Other])(
     'useEffect handles the case when subAction and subActionParams are undefined and apiProvider is %p',
     (apiProvider) => {
       const actionParams = {
@@ -90,6 +78,9 @@ describe('Gen AI Params Fields renders', () => {
       }
       if (apiProvider === OpenAiProviderType.AzureAi) {
         expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY_AZURE }, 0);
+      }
+      if (apiProvider === OpenAiProviderType.Other) {
+        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY }, 0);
       }
     }
   );

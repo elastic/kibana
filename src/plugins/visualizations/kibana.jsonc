@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/visualizations-plugin",
-  "owner": "@elastic/kibana-visualizations",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "Contains the shared architecture among all the legacy visualizations, e.g. the visualization type registry or the visualization embeddable.",
   "plugin": {
     "id": "visualizations",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "data",
       "charts",
@@ -17,7 +21,6 @@
       "navigation",
       "embeddable",
       "inspector",
-      "savedObjects",
       "screenshotMode",
       "presentationUtil",
       "dataViews",
@@ -27,7 +30,7 @@
       "savedObjectsFinder",
       "savedObjectsManagement",
       "savedSearch",
-      "contentManagement",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "home",
@@ -35,12 +38,14 @@
       "spaces",
       "savedObjectsTaggingOss",
       "serverless",
-      "noDataPage"
+      "noDataPage",
+      "embeddableEnhanced"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "charts"
+      "charts",
+      "savedObjects"
     ],
     "extraPublicDirs": [
       "common/constants",

@@ -20,10 +20,11 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/share-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/storybook",
     "@kbn/shared-ux-link-redirect-app",
+    "@kbn/code-editor",
+    "@kbn/core-application-common",
   ],
   "exclude": [
     "target/**/*",

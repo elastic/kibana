@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/deeplinks-management",
-  "owner": "@elastic/platform-deployment-management"
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

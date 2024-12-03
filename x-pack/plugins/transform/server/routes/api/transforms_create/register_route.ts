@@ -6,15 +6,15 @@
  */
 
 import {
-  transformIdParamSchema,
-  type TransformIdParamSchema,
-} from '../../../../common/api_schemas/common';
+  dataViewCreateQuerySchema,
+  type DataViewCreateQuerySchema,
+} from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
+
+import { transformIdParamSchema, type TransformIdParamSchema } from '../../api_schemas/common';
 import {
   putTransformsRequestSchema,
-  putTransformsQuerySchema,
   type PutTransformsRequestSchema,
-  type PutTransformsQuerySchema,
-} from '../../../../common/api_schemas/transforms';
+} from '../../api_schemas/transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
@@ -22,7 +22,7 @@ import type { RouteDependencies } from '../../../types';
 import { routeHandlerFactory } from './route_handler_factory';
 
 export function registerRoute(routeDependencies: RouteDependencies) {
-  const { router, license } = routeDependencies;
+  const { router, getLicense } = routeDependencies;
 
   /**
    * @apiGroup Transforms
@@ -40,21 +40,31 @@ export function registerRoute(routeDependencies: RouteDependencies) {
       path: addInternalBasePath('transforms/{transformId}'),
       access: 'internal',
     })
-    .addVersion<TransformIdParamSchema, PutTransformsQuerySchema, PutTransformsRequestSchema>(
+    .addVersion<TransformIdParamSchema, DataViewCreateQuerySchema, PutTransformsRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             params: transformIdParamSchema,
-            query: putTransformsQuerySchema,
+            query: dataViewCreateQuerySchema,
             body: putTransformsRequestSchema,
           },
         },
       },
-      license.guardApiRoute<
-        TransformIdParamSchema,
-        PutTransformsQuerySchema,
-        PutTransformsRequestSchema
-      >(routeHandlerFactory(routeDependencies))
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<
+          TransformIdParamSchema,
+          DataViewCreateQuerySchema,
+          PutTransformsRequestSchema
+        >(routeHandlerFactory(routeDependencies))(ctx, request, response);
+      }
     );
 }

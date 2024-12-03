@@ -11,29 +11,16 @@ import {
   httpServerMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import {
-  createPackagePolicyServiceMock,
-  createArtifactsClientMock,
-  createMockPackageService,
-  createMockAgentService,
-  createMockAgentPolicyService,
-} from '@kbn/fleet-plugin/server/mocks';
 
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CloudDefendPlugin } from './plugin';
 import { CloudDefendPluginStartDeps } from './types';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  ExternalCallback,
-  FleetStartContract,
-  PostPackagePolicyPostCreateCallback,
-} from '@kbn/fleet-plugin/server';
+import { PostPackagePolicyPostCreateCallback } from '@kbn/fleet-plugin/server';
 import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import {
   ElasticsearchClient,
   RequestHandlerContext,
@@ -42,6 +29,7 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import * as onPackagePolicyPostCreateCallback from './lib/fleet_util';
+import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 
 const chance = new Chance();
 
@@ -49,29 +37,9 @@ const mockRouteContext = {
   core: coreMock.createRequestHandlerContext(),
 } as unknown as AwaitedProperties<RequestHandlerContext>;
 
-const createMockFleetStartContract = (): DeeplyMockedKeys<FleetStartContract> => {
-  return {
-    authz: {
-      fromRequest: jest.fn(async (_) => createFleetAuthzMock()),
-    },
-    fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
-    esIndexPatternService: {
-      getESIndexPattern: jest.fn().mockResolvedValue(undefined),
-    },
-    // @ts-expect-error 2322
-    agentService: createMockAgentService(),
-    // @ts-expect-error 2322
-    packageService: createMockPackageService(),
-    agentPolicyService: createMockAgentPolicyService(),
-    registerExternalCallback: jest.fn((..._: ExternalCallback) => {}),
-    packagePolicyService: createPackagePolicyServiceMock(),
-    createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
-  };
-};
-
 describe('Cloud Defend Plugin', () => {
   describe('start()', () => {
-    const fleetMock = createMockFleetStartContract();
+    const fleetMock = createFleetStartContractMock();
     const mockPlugins: CloudDefendPluginStartDeps = {
       fleet: fleetMock,
       data: dataPluginMock.createStartContract(),

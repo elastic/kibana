@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -26,15 +26,15 @@ import {
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
 } from '@kbn/search-api-panels';
-import { StatusDetails } from './status_details';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../../services/breadcrumbs';
 import { languageDefinitions, curlDefinition } from './languages';
+import { StatusDetails } from './status_details';
 import { DataStreamDetails } from './data_stream_details';
 import { StorageDetails } from './storage_details';
 import { AliasesDetails } from './aliases_details';
+import { SizeDocCountDetails } from './size_doc_count_details';
 
 interface Props {
   indexDetails: Index;
@@ -60,18 +60,18 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
     services: { extensionsService },
   } = useAppContext();
 
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsOverview);
-  }, []);
-
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
 
-  const elasticsearchURL = useMemo(() => {
-    return plugins.cloud?.elasticsearchUrl ?? 'https://your_deployment_url';
+  const [elasticsearchUrl, setElasticsearchUrl] = useState<string>('');
+
+  useEffect(() => {
+    plugins.cloud?.fetchElasticsearchConfig().then((config) => {
+      setElasticsearchUrl(config.elasticsearchUrl || 'https://your_deployment_url');
+    });
   }, [plugins.cloud]);
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
-    url: elasticsearchURL,
+    url: elasticsearchUrl,
     apiKey: 'your_api_key',
     indexName: name,
   };
@@ -89,6 +89,8 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
           status={status}
           health={health}
         />
+
+        <SizeDocCountDetails size={size} documents={documents} />
 
         <AliasesDetails aliases={aliases} />
 

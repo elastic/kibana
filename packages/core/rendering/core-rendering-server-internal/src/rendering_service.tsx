@@ -1,24 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { firstValueFrom, of } from 'rxjs';
-import { catchError, take, timeout } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
+import { catchError, take, timeout } from 'rxjs';
+import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
-import { UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import {
+  type DarkModeValue,
+  parseDarkModeValue,
+  parseThemeNameValue,
+  type UiSettingsParams,
+  type UserProvidedValues,
+} from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -29,8 +36,15 @@ import {
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import { getSettingValue, getStylesheetPaths } from './render_utils';
+import {
+  getSettingValue,
+  getCommonStylesheetPaths,
+  getThemeStylesheetPaths,
+  getScriptPaths,
+  getBrowserLoggingConfig,
+} from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
+import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
@@ -38,9 +52,12 @@ type RenderOptions =
   | (RenderingPrebootDeps & {
       status?: never;
       elasticsearch?: never;
+      featureFlags?: never;
       customBranding?: never;
       userSettings?: never;
     });
+
+const themeVersion: ThemeVersion = 'v8';
 
 /** @internal */
 export class RenderingService {
@@ -49,6 +66,7 @@ export class RenderingService {
   public async preboot({
     http,
     uiPlugins,
+    i18n,
   }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
     http.registerRoutes<InternalRenderingRequestHandlerContext>('', (router) => {
       registerBootstrapRoute({
@@ -63,17 +81,19 @@ export class RenderingService {
     });
 
     return {
-      render: this.render.bind(this, { http, uiPlugins }),
+      render: this.render.bind(this, { http, uiPlugins, i18n }),
     };
   }
 
   public async setup({
     elasticsearch,
+    featureFlags,
     http,
     status,
     uiPlugins,
     customBranding,
     userSettings,
+    i18n,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -89,11 +109,13 @@ export class RenderingService {
     return {
       render: this.render.bind(this, {
         elasticsearch,
+        featureFlags,
         http,
         uiPlugins,
         status,
         customBranding,
         userSettings,
+        i18n,
       }),
     };
   }
@@ -105,34 +127,54 @@ export class RenderingService {
       client: IUiSettingsClient;
       globalClient: IUiSettingsClient;
     },
-    { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
+    { isAnonymousPage = false, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings } = renderOptions;
+    const {
+      elasticsearch,
+      featureFlags,
+      http,
+      uiPlugins,
+      status,
+      customBranding,
+      userSettings,
+      i18n,
+    } = renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
     };
-    const buildNum = env.packageInfo.buildNum;
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
+    const usingCdn = http.staticAssets.isUsingCdn();
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
-    let settingsUserValues: Record<string, UserProvidedValues> = {};
-    let globalSettingsUserValues: Record<string, UserProvidedValues> = {};
-
-    if (!isAnonymousPage) {
-      const userValues = await Promise.all([
-        uiSettings.client?.getUserProvided(),
-        uiSettings.globalClient?.getUserProvided(),
-      ]);
-
-      settingsUserValues = userValues[0];
-      globalSettingsUserValues = userValues[1];
-    }
+    // Grouping all async HTTP requests to run them concurrently for performance reasons.
+    const [
+      defaultSettings,
+      settingsUserValues = {},
+      globalSettingsUserValues = {},
+      userSettingDarkMode,
+    ] = await Promise.all([
+      // All sites
+      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
+      // Only non-anonymous pages
+      ...(!isAnonymousPage
+        ? ([
+            uiSettings.client?.getUserProvided(),
+            uiSettings.globalClient?.getUserProvided(),
+            // dark mode
+            userSettings?.getUserSettingDarkMode(request),
+          ] as [
+            Promise<Record<string, UserProvidedValues>>,
+            Promise<Record<string, UserProvidedValues>>,
+            Promise<DarkModeValue> | undefined
+          ])
+        : []),
+    ]);
 
     const settings = {
-      defaults: uiSettings.client?.getRegistered() ?? {},
+      defaults: defaultSettings,
       user: settingsUserValues,
     };
     const globalSettings = {
@@ -160,42 +202,54 @@ export class RenderingService {
       // swallow error
     }
 
-    let userSettingDarkMode: boolean | undefined;
-
-    if (!isAnonymousPage) {
-      userSettingDarkMode = await userSettings?.getUserSettingDarkMode(request);
-    }
-
-    let darkMode: boolean;
-
+    // dark mode
     const isThemeOverridden = settings.user['theme:darkMode']?.isOverridden ?? false;
 
+    let darkMode: DarkModeValue;
     if (userSettingDarkMode !== undefined && !isThemeOverridden) {
       darkMode = userSettingDarkMode;
     } else {
-      darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+      darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
-    const themeVersion: ThemeVersion = 'v8';
+    const themeName = getSettingValue<string>('theme:name', settings, parseThemeNameValue);
 
-    const stylesheetPaths = getStylesheetPaths({
-      darkMode,
-      themeVersion,
+    const themeStylesheetPaths = (mode: boolean) =>
+      getThemeStylesheetPaths({
+        darkMode: mode,
+        baseHref: staticAssetsHrefBase,
+      });
+    const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,
-      buildNum,
+    });
+    const scriptPaths = getScriptPaths({
+      darkMode,
+      baseHref: staticAssetsHrefBase,
     });
 
+    const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
+
+    const locale = i18nLib.getLocale();
+    let translationsUrl: string;
+    if (usingCdn) {
+      translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
+    } else {
+      const translationHash = i18n.getTranslationHash();
+      translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
+    }
+
+    const apmConfig = getApmConfig(request.url.pathname);
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      i18n: i18n.translate,
-      locale: i18n.getLocale(),
-      darkMode,
+      locale,
       themeVersion,
-      stylesheetPaths,
+      darkMode,
+      stylesheetPaths: commonStylesheetPaths,
+      scriptPaths,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
@@ -210,16 +264,25 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         assetsHrefBase: staticAssetsHrefBase,
+        logging: loggingConfig,
         env,
+        featureFlags: {
+          overrides: featureFlags?.getOverrides() || {},
+        },
         clusterInfo,
+        apmConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
-          // TODO: Make this load as part of static assets!
-          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+          translationsUrl,
         },
         theme: {
           darkMode,
+          name: themeName,
           version: themeVersion,
+          stylesheetPaths: {
+            default: themeStylesheetPaths(false),
+            dark: themeStylesheetPaths(true),
+          },
         },
         customBranding: {
           logo: branding?.logo,
@@ -228,7 +291,6 @@ export class RenderingService {
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,
-        vars: vars ?? {},
         uiPlugins: await Promise.all(
           filteredPlugins.map(async ([id, plugin]) => {
             const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);
@@ -265,4 +327,30 @@ const isAuthenticated = (auth: HttpAuth, request: KibanaRequest) => {
   const { status: authStatus } = auth.get(request);
   // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
   return authStatus !== 'unauthenticated';
+};
+
+/**
+ * Load async values from the definitions that have a `getValue()` function
+ *
+ * @param defaultSettings The default settings to add async values to
+ * @param request The current KibanaRequest
+ * @returns The default settings with values updated with async values
+ */
+const withAsyncDefaultValues = async (
+  request: KibanaRequest,
+  defaultSettings: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>> = {}
+): Promise<Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>> => {
+  const updatedSettings = { ...defaultSettings };
+
+  await Promise.all(
+    Object.entries(defaultSettings)
+      .filter(([_, definition]) => typeof definition.getValue === 'function')
+      .map(([key, definition]) => {
+        return definition.getValue!({ request }).then((value) => {
+          updatedSettings[key] = { ...definition, value };
+        });
+      })
+  );
+
+  return updatedSettings;
 };

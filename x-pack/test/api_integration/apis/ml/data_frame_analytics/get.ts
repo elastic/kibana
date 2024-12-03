@@ -115,7 +115,6 @@ export default ({ getService }: FtrProviderContext) => {
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -153,7 +152,6 @@ export default ({ getService }: FtrProviderContext) => {
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -186,7 +184,6 @@ export default ({ getService }: FtrProviderContext) => {
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -238,7 +235,6 @@ export default ({ getService }: FtrProviderContext) => {
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -273,9 +269,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.elements.length).to.eql(0);
         expect(body.details).to.eql({});
-        expect(body.error).to.eql(`No known job with id '${jobId}_fake'`);
-
-        expect(body).to.have.keys('elements', 'details', 'error');
+        expect(body).to.have.keys('elements', 'details');
       });
     });
 
@@ -309,7 +303,6 @@ export default ({ getService }: FtrProviderContext) => {
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
   });

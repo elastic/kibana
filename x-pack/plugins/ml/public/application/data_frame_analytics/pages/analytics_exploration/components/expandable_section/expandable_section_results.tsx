@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,28 +14,23 @@ import { escapeKuery } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 
+import type { EuiDataGridColumn, EuiDataGridProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiDataGridColumn,
-  EuiDataGridProps,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { type MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
-import {
-  type DataGridItem,
-  DataGrid,
-  RowCountRelation,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from '@kbn/ml-data-grid';
+import type { RowCountRelation, UseIndexDataReturnType } from '@kbn/ml-data-grid';
+import { type DataGridItem, DataGrid, INDEX_STATUS } from '@kbn/ml-data-grid';
 import {
   getAnalysisType,
   isClassificationAnalysis,
@@ -42,11 +38,12 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { parseInterval } from '@kbn/ml-parse-interval';
 
-import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
+import type { useColorRange } from '../../../../../components/color_range_legend';
+import { ColorRangeLegend } from '../../../../../components/color_range_legend';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { defaultSearchQuery, renderCellPopoverFactory, SEARCH_SIZE } from '../../../../common';
@@ -56,9 +53,9 @@ import {
   openCustomUrlWindow,
 } from '../../../../../util/custom_url_utils';
 import { replaceStringTokens } from '../../../../../util/string_utils';
-import { parseInterval } from '../../../../../../../common/util/parse_interval';
 
-import { ExpandableSection, ExpandableSectionProps, HEADER_ITEMS_LOADING } from '.';
+import type { ExpandableSectionProps } from '.';
+import { ExpandableSection, HEADER_ITEMS_LOADING } from '.';
 import { DataViewPrompt } from '../data_view_prompt';
 
 const showingDocs = i18n.translate(
@@ -143,8 +140,12 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
       share,
       data,
       http: { basePath },
+      notifications: { toasts },
     },
   } = useMlKibana();
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
 
   const dataViewId = dataView?.id;
 
@@ -336,7 +337,12 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             anchorPosition="upCenter"
             button={
               <EuiButtonIcon
-                aria-label="Show actions"
+                aria-label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.exploration.dataGridActions.showActionsAriaLabel',
+                  {
+                    defaultMessage: 'Show actions',
+                  }
+                )}
                 iconType="gear"
                 color="text"
                 onClick={() => setIsPopoverVisible(!isPopoverVisible)}
@@ -374,14 +380,12 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   const resultsSectionContent = (
     <>
       {jobConfig !== undefined && needsDestDataView && (
-        <div className="mlExpandableSection-contentPadding">
-          <DataViewPrompt destIndex={jobConfig.dest.index} />
-        </div>
+        <DataViewPrompt destIndex={jobConfig.dest.index} />
       )}
       {jobConfig !== undefined &&
         (isRegressionAnalysis(jobConfig.analysis) ||
           isClassificationAnalysis(jobConfig.analysis)) && (
-          <EuiText size="xs" color="subdued" className="mlExpandableSection-contentPadding">
+          <EuiText size="xs" color="subdued" css={{ padding: `${size.s}` }}>
             {tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
           </EuiText>
         )}
@@ -397,7 +401,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
                   }
                   dataTestSubj="mlExplorationDataGrid"
                   renderCellPopover={renderCellPopover}
-                  toastNotifications={getToastNotifications()}
+                  toastNotifications={toasts}
                 />
               )}
           </>

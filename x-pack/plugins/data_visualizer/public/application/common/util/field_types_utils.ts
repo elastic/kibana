@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getFieldType } from '@kbn/field-utils/src/utils/get_field_type';
-import { SUPPORTED_FIELD_TYPES } from '../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES, SUPPORTED_FIELD_TYPES_LIST } from '../../../../common/constants';
 
 // convert kibana types to ML Job types
 // this is needed because kibana types only have string and not text and keyword.
@@ -23,6 +23,15 @@ export function kbnTypeToSupportedType(field: DataViewField) {
 
       if (field.esTypes?.includes(SUPPORTED_FIELD_TYPES.VERSION)) {
         type = SUPPORTED_FIELD_TYPES.VERSION;
+      }
+      break;
+
+    case KBN_FIELD_TYPES.UNKNOWN:
+      const maybeFieldType = field.esTypes?.[0];
+      if (maybeFieldType && SUPPORTED_FIELD_TYPES_LIST.includes(maybeFieldType)) {
+        type = maybeFieldType;
+      } else {
+        type = getFieldType(field);
       }
       break;
 

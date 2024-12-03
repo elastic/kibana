@@ -17,23 +17,25 @@ import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../../screens/alerts';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 const loadDetectionsPage = (role: SecurityRoleName) => {
   login(role);
-  visit(ALERTS_URL, { role });
+  visit(ALERTS_URL);
   waitForAlertsToPopulate();
 };
 
-describe('Alerts timeline', { tags: ['@ess'] }, () => {
-  before(() => {
+describe('Alerts timeline', () => {
+  beforeEach(() => {
     // First we login as a privileged user to create alerts.
-    login();
+    deleteAlertsAndRules();
     createRule(getNewRule());
+    login();
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 
-  context('Privileges: read only', () => {
+  context('Privileges: read only', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.reader);
     });
@@ -49,7 +51,7 @@ describe('Alerts timeline', { tags: ['@ess'] }, () => {
     });
   });
 
-  context('Privileges: can crud', () => {
+  context('Privileges: can crud', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.platform_engineer);
       cy.get(LOADING_INDICATOR).should('not.exist');

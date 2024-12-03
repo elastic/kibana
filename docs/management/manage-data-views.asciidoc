@@ -39,7 +39,7 @@ then define the field values by emitting a single value using
 the {ref}/modules-scripting-painless.html[Painless scripting language].
 You can also add runtime fields in <<add-field-in-discover,*Discover*>> and <<change-the-fields,*Lens*>>.
 
-. Open the main menu, then click *Stack Management > Data Views*.
+. Go to the *Data Views* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 . Select the data view that you want to add the runtime field to, then click *Add field*.
 
@@ -162,7 +162,7 @@ else {
 
 Edit the settings for runtime fields, or remove runtime fields from data views.
 
-. Open the main menu, then click *Stack Management > Data Views*.
+. Go to the *Data Views* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 . Select the data view that contains the runtime field you want to manage, then open the runtime field edit options or delete the runtime field.
 
@@ -198,7 +198,7 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 
 Create and add scripted fields to your data views.
 
-. Open the main menu, then click *Stack Management > Data Views*.
+. Go to the *Data Views* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 . Select the data view you want to add a scripted field to.
 
@@ -214,7 +214,7 @@ For more information about scripted fields in {es}, refer to {ref}/modules-scrip
 [[update-scripted-field]]
 ==== Manage scripted fields
 
-. Open the main menu, then click *Stack Management > Data Views*.
+. Go to the *Data Views* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 . Select the data view that contains the scripted field you want to manage.
 
@@ -230,7 +230,7 @@ exceptions when you view the dynamically generated data.
 {kib} uses the same field types as {es}, however, some {es} field types are unsupported in {kib}.
 To customize how {kib} displays data fields, use the formatting options.
 
-. Open the main menu, then click *Stack Management > Data Views*.
+. Go to the *Data Views* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 . Click the data view that contains the field you want to change.
 
@@ -239,6 +239,8 @@ To customize how {kib} displays data fields, use the formatting options.
 . Select *Set custom label*, then enter a *Custom label* for the field.
 
 . Select *Set format*, then enter the *Format* for the field.
+
+NOTE: For numeric fields the default field formatters are based on the `meta.unit` field. The unit is associated with a {ref}/api-conventions.html#time-units[time unit], percent, or  byte. The convention for percents is to use value 1 to mean 100%.  
 
 [float]
 [[string-field-formatters]]
@@ -278,7 +280,7 @@ include::field-formatters/string-formatter.asciidoc[]
 Numeric fields support *Bytes*, *Color*, *Duration*, *Histogram*, *Number*, *Percentage*, *String*, and *Url* formatters.
 
 The *Bytes*, *Number*, and *Percentage* formatters enable you to choose the display formats of numbers in the field using
-the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains.
+the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains. 
 
 The *Histogram* formatter is used only for the {ref}/histogram.html[histogram field type]. When you use the *Histogram* formatter,
 you can apply the *Bytes*, *Number*, or *Percentage* format to aggregated data.

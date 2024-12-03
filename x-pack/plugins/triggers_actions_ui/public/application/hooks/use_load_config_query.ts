@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
+import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule-form';
 import { useKibana } from '../../common/lib/kibana';
-import { triggersActionsUiConfig } from '../../common/lib/config_api';
 
 export const useLoadConfigQuery = () => {
   const { http } = useKibana().services;

@@ -7,7 +7,6 @@
 import type {
   ElasticsearchClient,
   KibanaResponseFactory,
-  RequestHandlerContext,
   SavedObjectsClientContract,
   KibanaRequest,
 } from '@kbn/core/server';
@@ -17,11 +16,15 @@ import {
   httpServerMock,
 } from '@kbn/core/server/mocks';
 
+import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 import { getAgentById } from '../../services/agents';
 import * as AgentService from '../../services/agents';
+import { type FleetRequestHandlerContext } from '../..';
 
 import { requestDiagnosticsHandler } from './request_diagnostics_handler';
 
+const requestDiagnosticsWithErrorHandler = withDefaultErrorHandler(requestDiagnosticsHandler);
 jest.mock('../../services/agents');
 
 const mockGetAgentById = getAgentById as jest.Mock;
@@ -30,8 +33,13 @@ describe('request diagnostics handler', () => {
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
-  let mockContext: RequestHandlerContext;
-  let mockRequest: KibanaRequest<{ agentId: string }, undefined, undefined, any>;
+  let mockContext: FleetRequestHandlerContext;
+  let mockRequest: KibanaRequest<
+    { agentId: string },
+    undefined,
+    { additional_metrics: RequestDiagnosticsAdditionalMetrics[] },
+    any
+  >;
 
   beforeEach(() => {
     mockSavedObjectsClient = savedObjectsClientMock.create();
@@ -49,8 +57,11 @@ describe('request diagnostics handler', () => {
           },
         },
       },
-    } as unknown as RequestHandlerContext;
-    mockRequest = httpServerMock.createKibanaRequest({ params: { agentId: 'agent1' } });
+    } as unknown as FleetRequestHandlerContext;
+    mockRequest = httpServerMock.createKibanaRequest({
+      params: { agentId: 'agent1' },
+      body: { additional_metrics: ['CPU'] },
+    });
   });
 
   it('should return ok if agent supports request diagnostics', async () => {
@@ -59,7 +70,7 @@ describe('request diagnostics handler', () => {
       local_metadata: { elastic: { agent: { version: '8.7.0' } } },
     });
 
-    await requestDiagnosticsHandler(mockContext, mockRequest, mockResponse);
+    await requestDiagnosticsWithErrorHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledWith({ body: { actionId: '1' } });
   });
@@ -70,7 +81,7 @@ describe('request diagnostics handler', () => {
       local_metadata: { elastic: { agent: { version: '8.6.0' } } },
     });
 
-    await requestDiagnosticsHandler(mockContext, mockRequest, mockResponse);
+    await requestDiagnosticsWithErrorHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockResponse.customError).toHaveBeenCalledWith({
       body: { message: 'Agent agent1 does not support request diagnostics action.' },

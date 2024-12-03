@@ -8,5 +8,7 @@
   "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/datemath",
+    "@kbn/core",
+    "@kbn/zod",
   ]
 }

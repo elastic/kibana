@@ -14,7 +14,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { rulesClientMock } from './rules_client.mock';
-import { PluginSetupContract, PluginStartContract } from './plugin';
+import { AlertingServerSetup, AlertingServerStart } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
   AlertInstanceContext,
@@ -27,7 +27,7 @@ import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
 export { rulesClientMock };
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<PluginSetupContract> = {
+  const mock: jest.Mocked<AlertingServerSetup> = {
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
     getConfig: jest.fn(),
@@ -36,6 +36,7 @@ const createSetupMock = () => {
       getContextInitializationPromise: jest.fn(),
     },
     getDataStreamAdapter: jest.fn(),
+    registerConnectorAdapter: jest.fn(),
   };
   return mock;
 };
@@ -56,7 +57,7 @@ const createShareStartMock = () => {
 };
 
 const createStartMock = () => {
-  const mock: jest.Mocked<PluginStartContract> = {
+  const mock: jest.Mocked<AlertingServerStart> = {
     listTypes: jest.fn(),
     getType: jest.fn(),
     getAllTypes: jest.fn(),
@@ -167,16 +168,17 @@ const createRuleExecutorServicesMock = <
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     alertsClient: publicAlertsClientMock.create(),
-    savedObjectsClient: savedObjectsClientMock.create(),
-    uiSettingsClient: uiSettingsServiceMock.createClient(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    shouldWriteAlerts: () => true,
-    shouldStopExecution: () => true,
-    search: createAbortableSearchServiceMock(),
-    searchSourceClient: searchSourceCommonMock,
+    getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+    getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
+    getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
     ruleMonitoringService: createRuleMonitoringServiceMock(),
+    savedObjectsClient: savedObjectsClientMock.create(),
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    search: createAbortableSearchServiceMock(),
     share: createShareStartMock(),
-    dataViews: dataViewPluginMocks.createStartContract(),
+    shouldStopExecution: () => true,
+    shouldWriteAlerts: () => true,
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;

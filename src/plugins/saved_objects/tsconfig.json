@@ -7,13 +7,12 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/data-views-plugin",
     "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/react-kibana-mount",
     "@kbn/test-jest-helpers",
-    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { spawnSync } from 'child_process';
@@ -41,7 +42,7 @@ describe('cli invalid config support', () => {
           .split('\n')
           .filter(Boolean)
           .map((line) => JSON.parse(line) as LogEntry)
-          .filter((line) => line.log.level === 'FATAL');
+          .filter((line) => line.log?.level === 'FATAL');
       } catch (e) {
         throw new Error(
           `error parsing log output:\n\n${e.stack}\n\nstdout: \n${stdout}\n\nstderr:\n${stderr}`

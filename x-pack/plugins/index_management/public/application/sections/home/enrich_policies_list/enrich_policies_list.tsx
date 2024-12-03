@@ -12,15 +12,11 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Location } from 'history';
 import { parse } from 'query-string';
 
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
-import type { SerializedEnrichPolicy } from '../../../../../common';
 import { useAppContext } from '../../../app_context';
 import { useRedirectPath } from '../../../hooks/redirect_path';
 
-import {
-  EnrichPoliciesAuthProvider,
-  EnrichPoliciesWithPrivileges,
-} from '../../../components/enrich_policies';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
 import { useLoadEnrichPolicies } from '../../../services/api';
@@ -34,9 +30,13 @@ const getEnrichPolicyNameFromLocation = (location: Location) => {
   return policy;
 };
 
-const ListView: React.FunctionComponent<RouteComponentProps> = ({ history, location }) => {
+export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = ({
+  history,
+  location,
+}) => {
   const {
     core: { executionContext },
+    privs,
   } = useAppContext();
   const redirectTo = useRedirectPath(history);
 
@@ -79,7 +79,7 @@ const ListView: React.FunctionComponent<RouteComponentProps> = ({ history, locat
     return <ErrorState error={error} resendRequest={reloadPolicies} />;
   }
 
-  if (policies?.length === 0) {
+  if (privs.manageEnrich && policies?.length === 0) {
     return <EmptyState />;
   }
 
@@ -151,11 +151,3 @@ const ListView: React.FunctionComponent<RouteComponentProps> = ({ history, locat
     </div>
   );
 };
-
-export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = (props) => (
-  <EnrichPoliciesAuthProvider>
-    <EnrichPoliciesWithPrivileges>
-      <ListView {...props} />
-    </EnrichPoliciesWithPrivileges>
-  </EnrichPoliciesAuthProvider>
-);

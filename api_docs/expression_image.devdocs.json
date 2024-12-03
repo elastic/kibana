@@ -11,14 +11,14 @@
         "label": "getImageRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.CoreTheme",
+            "section": "def-public.CoreTheme",
             "text": "CoreTheme"
           },
           ">) => () => ",
@@ -55,9 +55,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               ">"
@@ -82,9 +82,9 @@
           "(core: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreSetup",
+            "section": "def-public.CoreSetup",
             "text": "CoreSetup"
           },
           "<object, unknown>) => () => ",
@@ -119,9 +119,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>"
@@ -406,14 +406,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expression_image/common/types/expression_functions.ts",
@@ -431,7 +423,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"top\" | \"bottom\""
+          "\"right\" | \"top\" | \"bottom\" | \"left\""
         ],
         "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
         "deprecated": false,

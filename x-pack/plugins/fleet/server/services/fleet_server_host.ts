@@ -26,7 +26,9 @@ import type {
   NewFleetServerHost,
   AgentPolicy,
 } from '../types';
-import { FleetServerHostUnauthorizedError } from '../errors';
+import { FleetServerHostUnauthorizedError, FleetServerHostNotFoundError } from '../errors';
+
+import { appContextService } from './app_context';
 
 import { agentPolicyService } from './agent_policy';
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -46,6 +48,7 @@ export async function createFleetServerHost(
   data: NewFleetServerHost,
   options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
 ): Promise<FleetServerHost> {
+  const logger = appContextService.getLogger();
   if (data.is_default) {
     const defaultItem = await getDefaultFleetServerHost(soClient);
     if (defaultItem && defaultItem.id !== options?.id) {
@@ -61,13 +64,13 @@ export async function createFleetServerHost(
   if (data.host_urls) {
     data.host_urls = data.host_urls.map(normalizeHostsForAgents);
   }
-
+  logger.debug(`Creating fleet server host with ${data}`);
   const res = await soClient.create<FleetServerHostSOAttributes>(
     FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     data,
     { id: options?.id, overwrite: options?.overwrite }
   );
-
+  logger.debug(`Created fleet server host ${options?.id}`);
   return savedObjectToFleetServerHost(res);
 }
 
@@ -122,6 +125,9 @@ export async function deleteFleetServerHost(
   id: string,
   options?: { fromPreconfiguration?: boolean }
 ) {
+  const logger = appContextService.getLogger();
+  logger.debug(`Deleting fleet server host ${id}`);
+
   const fleetServerHost = await getFleetServerHost(soClient, id);
 
   if (fleetServerHost.is_preconfigured && !options?.fromPreconfiguration) {
@@ -136,7 +142,9 @@ export async function deleteFleetServerHost(
     );
   }
 
-  await agentPolicyService.removeFleetServerHostFromAll(soClient, esClient, id);
+  await agentPolicyService.removeFleetServerHostFromAll(esClient, id, {
+    force: options?.fromPreconfiguration,
+  });
 
   return await soClient.delete(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id);
 }
@@ -147,6 +155,9 @@ export async function updateFleetServerHost(
   data: Partial<FleetServerHost>,
   options?: { fromPreconfiguration?: boolean }
 ) {
+  const logger = appContextService.getLogger();
+  logger.debug(`Updating fleet server host ${id}`);
+
   const originalItem = await getFleetServerHost(soClient, id);
 
   if (data.is_preconfigured && !options?.fromPreconfiguration) {
@@ -174,7 +185,7 @@ export async function updateFleetServerHost(
   }
 
   await soClient.update<FleetServerHostSOAttributes>(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id, data);
-
+  logger.debug(`Updated fleet server host ${id}`);
   return {
     ...originalItem,
     ...data,
@@ -216,7 +227,7 @@ export async function bulkGetFleetServerHosts(
 
 export async function getFleetServerHostsForAgentPolicy(
   soClient: SavedObjectsClientContract,
-  agentPolicy: AgentPolicy
+  agentPolicy: Pick<AgentPolicy, 'fleet_server_host_id'>
 ) {
   if (agentPolicy.fleet_server_host_id) {
     return getFleetServerHost(soClient, agentPolicy.fleet_server_host_id);
@@ -224,7 +235,7 @@ export async function getFleetServerHostsForAgentPolicy(
 
   const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
   if (!defaultFleetServerHost) {
-    throw new Error('Default Fleet Server host is not setup');
+    throw new FleetServerHostNotFoundError('Default Fleet Server host is not setup');
   }
 
   return defaultFleetServerHost;

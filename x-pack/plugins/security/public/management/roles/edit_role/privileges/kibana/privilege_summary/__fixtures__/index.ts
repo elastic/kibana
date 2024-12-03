@@ -8,10 +8,10 @@
 import { EuiTableRow } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 
+import { FeatureTableCell } from '@kbn/security-ui-components';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 
-import type { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
-import { FeatureTableCell } from '../../feature_table_cell';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../../common';
 import { PrivilegeSummaryExpandedRow } from '../privilege_summary_expanded_row';
 
 interface DisplayedFeaturePrivileges {

@@ -8,17 +8,18 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useWithShowEndpointResponder } from '../../../../hooks';
+import { useWithShowResponder } from '../../../../hooks';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { getEndpointDetailsPath, getEndpointListPath } from '../../../../common/routing';
-import type { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
+import type { HostInfo, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from './hooks';
-import { agentPolicies, uiQueryParams } from '../../store/selectors';
+import { uiQueryParams } from '../../store/selectors';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
-import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
+import { getHostPlatform } from '../../../../../common/lib/endpoint/utils/get_host_platform';
 
 interface Options {
   isEndpointList: boolean;
@@ -26,40 +27,37 @@ interface Options {
 
 /**
  * Returns a list (array) of actions for an individual endpoint
- * @param endpointMetadata
+ * @param endpointInfo
  * @param options
  */
 export const useEndpointActionItems = (
-  endpointMetadata: MaybeImmutable<HostMetadata> | undefined,
+  endpointInfo: MaybeImmutable<HostInfo> | undefined,
   options?: Options
 ): ContextMenuItemNavByRouterProps[] => {
   const { getAppUrl } = useAppUrl();
-  const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
-  const showEndpointResponseActionsConsole = useWithShowEndpointResponder();
+  const showEndpointResponseActionsConsole = useWithShowResponder();
   const {
     canAccessResponseConsole,
     canIsolateHost,
     canUnIsolateHost,
     canAccessEndpointActionsLogManagement,
-    canAccessFleet,
+    canReadFleetAgentPolicies,
+    canWriteFleetAgents,
+    canReadFleetAgents,
   } = useUserPrivileges().endpointPrivileges;
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
-    if (!endpointMetadata) {
+    if (!endpointInfo) {
       return [];
     }
 
+    const endpointAgentPolicyId = endpointInfo.policy_info?.agent.applied.id;
+    const endpointMetadata = endpointInfo.metadata;
     const isIsolated = isEndpointHostIsolated(endpointMetadata);
     const endpointId = endpointMetadata.agent.id;
-    const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
-    const endpointHostName = endpointMetadata.host.hostname;
+    const endpointHostName = endpointMetadata.host.hostname.toLowerCase();
     const fleetAgentId = endpointMetadata.elastic.agent.id;
-    const isolationSupported = isIsolationSupported({
-      osName: endpointMetadata.host.os.name,
-      version: endpointMetadata.agent.version,
-      capabilities: endpointMetadata.Endpoint.capabilities,
-    });
     const { show, selected_endpoint: _selectedEndpoint, ...currentUrlParams } = allCurrentUrlParams;
     const endpointActionsPath = getEndpointDetailsPath({
       name: 'endpointActivityLog',
@@ -97,7 +95,7 @@ export const useEndpointActionItems = (
           />
         ),
       });
-    } else if (isolationSupported && canIsolateHost) {
+    } else if (canIsolateHost) {
       // For Platinum++ licenses, users also have ability to isolate
       isolationActions.push({
         'data-test-subj': 'isolateLink',
@@ -127,7 +125,14 @@ export const useEndpointActionItems = (
               key: 'consoleLink',
               onClick: (ev: React.MouseEvent) => {
                 ev.preventDefault();
-                showEndpointResponseActionsConsole(endpointMetadata);
+                showEndpointResponseActionsConsole({
+                  agentId: endpointMetadata.agent.id,
+                  agentType: 'endpoint',
+                  capabilities:
+                    (endpointMetadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
+                  hostName: endpointMetadata.host.name,
+                  platform: getHostPlatform(endpointMetadata),
+                });
               },
               children: (
                 <FormattedMessage
@@ -170,26 +175,30 @@ export const useEndpointActionItems = (
           />
         ),
       },
-      ...(canAccessFleet
+      ...(canReadFleetAgentPolicies
         ? [
             {
               icon: 'gear',
               key: 'agentConfigLink',
               'data-test-subj': 'agentPolicyLink',
               navigateAppId: 'fleet',
-              navigateOptions: {
-                path: `${
-                  pagePathGetters.policy_details({
-                    policyId: fleetAgentPolicies[endpointPolicyId],
-                  })[1]
-                }`,
-              },
-              href: `${getAppUrl({ appId: 'fleet' })}${
-                pagePathGetters.policy_details({
-                  policyId: fleetAgentPolicies[endpointPolicyId],
-                })[1]
-              }`,
-              disabled: fleetAgentPolicies[endpointPolicyId] === undefined,
+              ...(endpointAgentPolicyId
+                ? {
+                    navigateOptions: {
+                      path: `${
+                        pagePathGetters.policy_details({
+                          policyId: endpointAgentPolicyId,
+                        })[1]
+                      }`,
+                    },
+                    href: `${getAppUrl({ appId: 'fleet' })}${
+                      pagePathGetters.policy_details({
+                        policyId: endpointAgentPolicyId,
+                      })[1]
+                    }`,
+                  }
+                : {}),
+              disabled: endpointAgentPolicyId === undefined,
               children: (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.actions.agentPolicy"
@@ -197,6 +206,10 @@ export const useEndpointActionItems = (
                 />
               ),
             },
+          ]
+        : []),
+      ...(canReadFleetAgents
+        ? [
             {
               icon: 'gear',
               key: 'agentDetailsLink',
@@ -221,6 +234,10 @@ export const useEndpointActionItems = (
                 />
               ),
             },
+          ]
+        : []),
+      ...(canWriteFleetAgents
+        ? [
             {
               icon: 'gear',
               key: 'agentPolicyReassignLink',
@@ -258,13 +275,14 @@ export const useEndpointActionItems = (
     allCurrentUrlParams,
     canAccessResponseConsole,
     canAccessEndpointActionsLogManagement,
-    endpointMetadata,
-    fleetAgentPolicies,
+    endpointInfo,
     getAppUrl,
     showEndpointResponseActionsConsole,
     options?.isEndpointList,
     canIsolateHost,
     canUnIsolateHost,
-    canAccessFleet,
+    canReadFleetAgentPolicies,
+    canReadFleetAgents,
+    canWriteFleetAgents,
   ]);
 };

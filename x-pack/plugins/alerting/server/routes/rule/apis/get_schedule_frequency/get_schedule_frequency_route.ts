@@ -19,11 +19,13 @@ export const getScheduleFrequencyRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_schedule_frequency`,
+      options: { access: 'internal' },
       validate: {},
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async (context, req, res) => {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
 
         const scheduleFrequencyResult = await rulesClient.getScheduleFrequency();
 

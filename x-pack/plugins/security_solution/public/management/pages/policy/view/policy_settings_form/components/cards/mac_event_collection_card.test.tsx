@@ -10,7 +10,7 @@ import type { AppContextTestRender } from '../../../../../../../common/mock/endp
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import React from 'react';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { MacEventCollectionCardProps } from './mac_event_collection_card';
 import { MacEventCollectionCard } from './mac_event_collection_card';
 
@@ -87,6 +87,7 @@ describe('Policy Mac Event Collection Card', () => {
             'Mac ' +
             '2 / 3 event collections enabled' +
             'Events' +
+            'File' +
             'Process' +
             'Network'
         )

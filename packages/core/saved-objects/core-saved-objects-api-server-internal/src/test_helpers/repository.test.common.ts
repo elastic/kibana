@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -469,7 +470,9 @@ export const getMockGetResponse = (
 
 export const getMockMgetResponse = (
   registry: SavedObjectTypeRegistry,
-  objects: Array<TypeIdTuple & { found?: boolean; initialNamespaces?: string[] }>,
+  objects: Array<
+    TypeIdTuple & { found?: boolean; initialNamespaces?: string[]; originId?: string }
+  >,
   namespace?: string
 ) =>
   ({
@@ -649,10 +652,10 @@ export const getMockBulkUpdateResponse = (
   objects: TypeIdTuple[],
   options?: SavedObjectsBulkUpdateOptions,
   originId?: string
-) =>
-  ({
+) => {
+  return {
     items: objects.map(({ type, id }) => ({
-      update: {
+      index: {
         _id: `${
           registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
         }${type}:${id}`,
@@ -667,7 +670,8 @@ export const getMockBulkUpdateResponse = (
         result: 'updated',
       },
     })),
-  } as estypes.BulkResponse);
+  } as estypes.BulkResponse;
+};
 
 export const bulkUpdateSuccess = async (
   client: ElasticsearchClientMock,
@@ -678,19 +682,26 @@ export const bulkUpdateSuccess = async (
   originId?: string,
   multiNamespaceSpace?: string // the space for multi namespace objects returned by mock mget (this is only needed for space ext testing)
 ) => {
-  const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
-  if (multiNamespaceObjects?.length) {
-    const response = getMockMgetResponse(
-      registry,
-      multiNamespaceObjects,
-      multiNamespaceSpace ?? options?.namespace
-    );
-    client.mget.mockResponseOnce(response);
+  let mockedMgetResponse;
+  const validObjects = objects.filter(({ type }) => registry.getType(type) !== undefined);
+  const multiNamespaceObjects = validObjects.filter(({ type }) => registry.isMultiNamespace(type));
+
+  if (validObjects?.length) {
+    if (multiNamespaceObjects.length > 0) {
+      mockedMgetResponse = getMockMgetResponse(
+        registry,
+        validObjects,
+        multiNamespaceSpace ?? options?.namespace
+      );
+    } else {
+      mockedMgetResponse = getMockMgetResponse(registry, validObjects);
+    }
+    client.mget.mockResponseOnce(mockedMgetResponse);
   }
   const response = getMockBulkUpdateResponse(registry, objects, options, originId);
   client.bulk.mockResponseOnce(response);
   const result = await repository.bulkUpdate(objects, options);
-  expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
+  expect(client.mget).toHaveBeenCalledTimes(validObjects?.length ? 1 : 0);
   return result;
 };
 

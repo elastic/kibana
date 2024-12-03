@@ -276,14 +276,14 @@
               {
                 "parentPluginId": "dashboardEnhanced",
                 "id": "def-public.AbstractDashboardDrilldown.CollectConfig.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -297,7 +297,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -575,9 +575,9 @@
               "; }, unknown, ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ">"
@@ -910,8 +910,8 @@
                 "pluginId": "uiActionsEnhanced",
                 "scope": "server",
                 "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-server.SetupContract",
-                "text": "SetupContract"
+                "section": "def-server.UiActionsEnhancedServerSetup",
+                "text": "UiActionsEnhancedServerSetup"
               }
             ],
             "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",

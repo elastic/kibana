@@ -5,10 +5,17 @@
  * 2.0.
  */
 export class CustomHttpRequestError extends Error {
-  constructor(message: string, public readonly statusCode: number = 500, meta?: unknown) {
+  constructor(
+    message: string,
+    public readonly statusCode: number = 500,
+    public readonly meta?: unknown
+  ) {
     super(message);
     // For debugging - capture name of subclasses
     this.name = this.constructor.name;
-    this.message = message;
+
+    if (meta instanceof Error) {
+      this.stack += `\n----- original error -----\n${meta.stack}`;
+    }
   }
 }

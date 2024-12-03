@@ -1,0 +1,115 @@
+# -----
+# Source: project-controller/blob/main/internal/project/security/config/roles.yml
+# -----
+viewer:
+  cluster: []
+  indices:
+    - names:
+        - '/~(([.]|ilm-history-).*)/'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.siem-signals*'
+        - '.lists-*'
+        - '.items-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.alerts*'
+        - '.preview.alerts*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.slo-observability.*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'read'
+      resources:
+        - '*'
+  run_as: []
+editor:
+  cluster: []
+  indices:
+    - names:
+        - '/~(([.]|ilm-history-).*)/'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - 'observability-annotations'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+      allow_restricted_indices: false
+    - names:
+        - '.siem-signals*'
+        - '.lists-*'
+        - '.items-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.internal.alerts*'
+        - '.alerts*'
+        - '.internal.preview.alerts*'
+        - '.preview.alerts*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.slo-observability.*'
+      privileges:
+        - 'write'
+        - 'read'
+        - 'view_index_metadata'
+        - 'manage'
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'all'
+      resources:
+        - '*'
+  run_as: []
+
+# admin role defined in elasticsearch controller
+admin:
+  cluster: ['all']
+  indices:
+    - names: ['*']
+      privileges: ['all']
+      allow_restricted_indices: false
+  applications:
+    - application: '*'
+      privileges: ['*']
+      resources: ['*']
+
+# temporarily added for testing purpose
+system_indices_superuser:
+  cluster: ['all']
+  indices:
+    - names: ['*']
+      privileges: ['all']
+      allow_restricted_indices: true
+  applications:
+    - application: '*'
+      privileges: ['*']
+      resources: ['*']
+  run_as: ['*']

@@ -21,15 +21,13 @@ import type { ListResult, ListWithKuery } from './common';
 
 export interface GetAgentsRequest {
   query: ListWithKuery & {
-    showInactive: boolean;
+    showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
   };
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
-  // deprecated in 8.x
-  list?: Agent[];
   statusSummary?: Record<AgentStatus, number>;
 }
 
@@ -52,6 +50,11 @@ export interface GetOneAgentResponse {
 
 export interface GetAgentUploadsResponse {
   items: AgentDiagnostics[];
+}
+
+export interface DeleteAgentUploadResponse {
+  id: string;
+  deleted: boolean;
 }
 
 export interface PostNewAgentActionRequest {
@@ -114,6 +117,7 @@ export interface PostBulkAgentUpgradeRequest {
     rollout_duration_seconds?: number;
     start_time?: string;
     force?: boolean;
+    includeInactive?: boolean;
   };
 }
 
@@ -122,16 +126,6 @@ export type PostBulkAgentUpgradeResponse = BulkAgentAction;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
 
-// deprecated
-export interface PutAgentReassignRequest {
-  params: {
-    agentId: string;
-  };
-  body: { policy_id: string };
-}
-// deprecated
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PutAgentReassignResponse {}
 export interface PostAgentReassignRequest {
   params: {
     agentId: string;
@@ -147,6 +141,17 @@ export interface PostBulkAgentReassignRequest {
     policy_id: string;
     agents: string[] | string;
     batchSize?: number;
+    includeInactive?: boolean;
+  };
+}
+
+export enum RequestDiagnosticsAdditionalMetrics {
+  'CPU' = 'CPU',
+}
+
+export interface PostRequestDiagnosticsRequest {
+  body: {
+    additional_metrics: RequestDiagnosticsAdditionalMetrics[];
   };
 }
 
@@ -157,6 +162,7 @@ export interface PostRequestBulkDiagnosticsRequest {
   body: {
     agents: string[] | string;
     batchSize?: number;
+    additional_metrics: RequestDiagnosticsAdditionalMetrics[];
   };
 }
 
@@ -185,6 +191,7 @@ export interface PostBulkUpdateAgentTagsRequest {
     agents: string[] | string;
     tagsToAdd?: string[];
     tagsToRemove?: string[];
+    includeInactive?: boolean;
   };
 }
 
@@ -198,8 +205,6 @@ export interface GetAgentStatusRequest {
 export interface GetAgentStatusResponse {
   results: {
     events: number;
-    // deprecated
-    total: number;
     online: number;
     error: number;
     offline: number;
@@ -215,6 +220,8 @@ export interface GetAgentStatusResponse {
 export interface GetAgentIncomingDataRequest {
   query: {
     agentsIds: string[];
+    pkgName?: string;
+    pkgVersion?: string;
     previewData?: boolean;
   };
 }
@@ -229,6 +236,15 @@ export interface GetAgentIncomingDataResponse {
 
 export interface GetCurrentUpgradesResponse {
   items: CurrentUpgrade[];
+}
+
+export interface GetActionStatusRequest {
+  query: {
+    perPage?: number;
+    page?: number;
+    date?: string;
+    latest?: number;
+  };
 }
 export interface GetActionStatusResponse {
   items: ActionStatus[];

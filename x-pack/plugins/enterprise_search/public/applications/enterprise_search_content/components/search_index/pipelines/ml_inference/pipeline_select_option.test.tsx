@@ -13,7 +13,7 @@ import { EuiText, EuiTitle } from '@elastic/eui';
 
 import { MLModelTypeBadge } from '../ml_model_type_badge';
 
-import { MLInferencePipelineOption } from './ml_inference_logic';
+import { MLInferencePipelineOption } from './pipeline_select_logic';
 import { PipelineSelectOption, PipelineSelectOptionDisabled } from './pipeline_select_option';
 
 import { MODEL_REDACTED_VALUE } from './utils';
@@ -28,18 +28,20 @@ describe('PipelineSelectOption', () => {
     sourceFields: ['my-source-field1', 'my-source-field2'],
     indexFields: [],
   };
+  const label = pipeline.pipelineName;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
   it('renders pipeline selection option', () => {
-    const wrapper = shallow(<PipelineSelectOption pipeline={pipeline} />);
+    const wrapper = shallow(<PipelineSelectOption label={label} pipeline={pipeline} />);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
     expect(wrapper.find(MLModelTypeBadge)).toHaveLength(1);
   });
   it('does not render model type badge if model type is unknown', () => {
     const wrapper = shallow(
       <PipelineSelectOption
+        label={label}
         pipeline={{
           ...pipeline,
           modelType: '',
@@ -51,18 +53,20 @@ describe('PipelineSelectOption', () => {
   it("redacts model ID if it's unavailable", () => {
     const wrapper = shallow(
       <PipelineSelectOption
+        label={label}
         pipeline={{
           ...pipeline,
           modelId: '',
         }}
       />
     );
-    expect(wrapper.find(EuiText)).toHaveLength(4);
-    expect(wrapper.find(EuiText).at(1).children().text()).toEqual(MODEL_REDACTED_VALUE);
+    expect(wrapper.find(EuiText)).toHaveLength(2);
+    expect(wrapper.find(EuiText).at(0).children().text()).toEqual(MODEL_REDACTED_VALUE);
   });
   it('renders disable warning text if the pipeline is disabled', () => {
     const wrapper = shallow(
       <PipelineSelectOption
+        label={label}
         pipeline={{
           ...pipeline,
           disabled: true,
@@ -71,5 +75,7 @@ describe('PipelineSelectOption', () => {
       />
     );
     expect(wrapper.find(PipelineSelectOptionDisabled)).toHaveLength(1);
+    const disabledWarning = wrapper.find(PipelineSelectOptionDisabled).at(0);
+    expect(disabledWarning.render().text()).toMatch('my-reason');
   });
 });

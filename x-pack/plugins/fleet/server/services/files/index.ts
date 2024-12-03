@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchHit, UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { FileStatus } from '@kbn/files-plugin/common/types';
+import pMap from 'p-map';
 
 import {
   FILE_STORAGE_DATA_INDEX_PATTERN,
@@ -19,6 +20,8 @@ import {
 import { getFileMetadataIndexName } from '../../../common/services';
 
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
+
+import { MAX_CONCURRENT_AGENT_FILES_UPLOADS } from '../../constants';
 
 import { parseFileStorageIndex } from './utils';
 
@@ -78,12 +81,12 @@ export async function fileIdsWithoutChunksByIndex(
 ): Promise<{ fileIdsByIndex: FileIdsByIndex; allFileIds: Set<string> }> {
   const allFileIds: Set<string> = new Set();
   const noChunkFileIdsByIndex = files.reduce((acc, file) => {
-    allFileIds.add(file._id);
+    allFileIds.add(file._id!);
 
     const { index: metadataIndex } = parseFileStorageIndex(file._index);
     const fileIds = acc[metadataIndex];
 
-    acc[metadataIndex] = fileIds ? fileIds.add(file._id) : new Set([file._id]);
+    acc[metadataIndex] = fileIds ? fileIds.add(file._id!) : new Set([file._id!]);
 
     return acc;
   }, {} as FileIdsByIndex);
@@ -145,14 +148,15 @@ export async function fileIdsWithoutChunksByIndex(
  * @param fileIdsByIndex
  * @param status
  */
-export function updateFilesStatus(
+export async function updateFilesStatus(
   esClient: ElasticsearchClient,
-  abortController: AbortController,
+  abortController: AbortController | undefined,
   fileIdsByIndex: FileIdsByIndex,
   status: FileStatus
 ): Promise<UpdateByQueryResponse[]> {
-  return Promise.all(
-    Object.entries(fileIdsByIndex).map(([index, fileIds]) => {
+  return await pMap(
+    Object.entries(fileIdsByIndex),
+    ([index, fileIds]) => {
       return esClient
         .updateByQuery(
           {
@@ -168,12 +172,15 @@ export function updateFilesStatus(
               lang: 'painless',
             },
           },
-          { signal: abortController.signal }
+          abortController ? { signal: abortController.signal } : {}
         )
         .catch((err) => {
           Error.captureStackTrace(err);
           throw err;
         });
-    })
+    },
+    {
+      concurrency: MAX_CONCURRENT_AGENT_FILES_UPLOADS,
+    }
   );
 }

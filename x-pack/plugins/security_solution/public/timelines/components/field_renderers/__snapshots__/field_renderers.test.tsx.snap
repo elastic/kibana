@@ -2,15 +2,11 @@
 
 exports[`Field Renderers #autonomousSystemRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 .euiPopover__anchor {
-  width: 100%;
-}
-
-.c1 > span.euiToolTipAnchor {
+  .c0 > span.euiToolTipAnchor {
   display: block;
 }
 
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
+.c0 > span.euiToolTipAnchor.eui-textTruncate {
   display: inline-block;
 }
 
@@ -21,23 +17,19 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class=""
+        data-test-subj="cellActions-renderContent-source.as.organization.name"
       >
-        <div
-          class="euiPopover c0 emotion-euiPopover"
-        >
+        <div>
           <div
-            class="euiPopover__anchor css-16vtueo-render"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              data-test-subj="withHoverActionsButton"
-            >
+            <div>
               <div
                 data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_organization_name"
                 tabindex="-1"
               >
                 <span
-                  class="c1"
+                  class="c0"
                   data-test-subj="render-content-source.as.organization.name"
                 >
                   <span
@@ -61,23 +53,19 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class=""
+        data-test-subj="cellActions-renderContent-source.as.number"
       >
-        <div
-          class="euiPopover c0 emotion-euiPopover"
-        >
+        <div>
           <div
-            class="euiPopover__anchor css-16vtueo-render"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              data-test-subj="withHoverActionsButton"
-            >
+            <div>
               <div
                 data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_number"
                 tabindex="-1"
               >
                 <span
-                  class="c1"
+                  class="c0"
                   data-test-subj="render-content-source.as.number"
                 >
                   <span
@@ -96,48 +84,30 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 </DocumentFragment>
 `;
 
-exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
-<DocumentFragment>
-  <span
-    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-  >
-    Feb 7, 2019 @ 17:19:41.636
-  </span>
-</DocumentFragment>
-`;
-
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 .euiPopover__anchor {
-  width: 100%;
-}
-
-.c1 > span.euiToolTipAnchor {
+  .c0 > span.euiToolTipAnchor {
   display: block;
 }
 
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
+.c0 > span.euiToolTipAnchor.eui-textTruncate {
   display: inline-block;
 }
 
 <div
-    class=""
+    data-test-subj="cellActions-renderContent-host.name"
   >
-    <div
-      class="euiPopover c0 emotion-euiPopover"
-    >
+    <div>
       <div
-        class="euiPopover__anchor css-16vtueo-render"
+        class="euiPopover emotion-euiPopover-inline-block"
       >
-        <div
-          data-test-subj="withHoverActionsButton"
-        >
+        <div>
           <div
             data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
             tabindex="-1"
           >
             <span
-              class="c1"
+              class="c0"
               data-test-subj="render-content-host.name"
             >
               <span
@@ -163,36 +133,28 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
 
 exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 .euiPopover__anchor {
-  width: 100%;
-}
-
-.c1 > span.euiToolTipAnchor {
+  .c0 > span.euiToolTipAnchor {
   display: block;
 }
 
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
+.c0 > span.euiToolTipAnchor.eui-textTruncate {
   display: inline-block;
 }
 
 <div
-    class=""
+    data-test-subj="cellActions-renderContent-host.name"
   >
-    <div
-      class="euiPopover c0 emotion-euiPopover"
-    >
+    <div>
       <div
-        class="euiPopover__anchor css-16vtueo-render"
+        class="euiPopover emotion-euiPopover-inline-block"
       >
-        <div
-          data-test-subj="withHoverActionsButton"
-        >
+        <div>
           <div
             data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
             tabindex="-1"
           >
             <span
-              class="c1"
+              class="c0"
               data-test-subj="render-content-host.name"
             >
               <span
@@ -218,15 +180,11 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
 
 exports[`Field Renderers #locationRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 .euiPopover__anchor {
-  width: 100%;
-}
-
-.c1 > span.euiToolTipAnchor {
+  .c0 > span.euiToolTipAnchor {
   display: block;
 }
 
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
+.c0 > span.euiToolTipAnchor.eui-textTruncate {
   display: inline-block;
 }
 
@@ -237,23 +195,19 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class=""
+        data-test-subj="cellActions-renderContent-source.geo.city_name"
       >
-        <div
-          class="euiPopover c0 emotion-euiPopover"
-        >
+        <div>
           <div
-            class="euiPopover__anchor css-16vtueo-render"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              data-test-subj="withHoverActionsButton"
-            >
+            <div>
               <div
                 data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_city_name"
                 tabindex="-1"
               >
                 <span
-                  class="c1"
+                  class="c0"
                   data-test-subj="render-content-source.geo.city_name"
                 >
                   <span
@@ -273,23 +227,19 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class=""
+        data-test-subj="cellActions-renderContent-source.geo.region_name"
       >
-        <div
-          class="euiPopover c0 emotion-euiPopover"
-        >
+        <div>
           <div
-            class="euiPopover__anchor css-16vtueo-render"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              data-test-subj="withHoverActionsButton"
-            >
+            <div>
               <div
                 data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_region_name"
                 tabindex="-1"
               >
                 <span
-                  class="c1"
+                  class="c0"
                   data-test-subj="render-content-source.geo.region_name"
                 >
                   <span
@@ -324,15 +274,14 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
     >
       iana.org
       <span
-        class="emotion-euiLink__externalIcon"
+        class="emotion-EuiExternalLinkIcon"
         data-euiicon-type="popout"
-      >
-        External link
-      </span>
+        role="presentation"
+      />
       <span
-        class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+        class="emotion-euiScreenReaderOnly"
       >
-        (opens in a new tab or window)
+        (external, opens in a new tab or window)
       </span>
     </a>
   </span>

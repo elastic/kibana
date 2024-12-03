@@ -14,7 +14,7 @@ import {
   setCustomProtectionUpdatesNote,
 } from '../../tasks/endpoint_policy';
 import { login, ROLE } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 
 describe(
   'Policy Details',
@@ -22,14 +22,31 @@ describe(
     tags: [
       '@ess',
       '@serverless',
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      '@brokenInServerless',
+      // skipped on MKI since feature flags are not supported there
+      '@skipInServerlessMKI',
     ],
-    env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'sentinelOneManualHostActionsEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
+    const getAutomaticUpdatesToggle = () => cy.getByTestSubj('protection-updates-manifest-switch');
+    const clickAutomaticUpdatesToggle = () => getAutomaticUpdatesToggle().click();
+
+    const getProtectionUpdatesSaveButton = () => cy.getByTestSubj('protectionUpdatesSaveButton');
+    const clickProtectionUpdatesSaveButton = () => getProtectionUpdatesSaveButton().click();
+
+    const [expectSavedButtonToBeDisabled, expectSavedButtonToBeEnabled] = [
+      () => getProtectionUpdatesSaveButton().should('be.disabled'),
+      () => getProtectionUpdatesSaveButton().should('be.enabled'),
+    ];
+
     describe('Protection updates', () => {
       const loadProtectionUpdatesUrl = (policyId: string) =>
         loadPage(`/app/security/administration/policy/${policyId}/protectionUpdates`);
@@ -44,7 +61,6 @@ describe(
 
         beforeEach(() => {
           login();
-          disableExpandableFlyoutAdvancedSettings();
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
@@ -63,11 +79,10 @@ describe(
           loadProtectionUpdatesUrl(policy.id);
           cy.getByTestSubj('protection-updates-warning-callout');
           cy.getByTestSubj('protection-updates-automatic-updates-enabled');
-          cy.getByTestSubj('protection-updates-manifest-switch');
+          getAutomaticUpdatesToggle();
           cy.getByTestSubj('protection-updates-manifest-name-title');
-          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
-
-          cy.getByTestSubj('protection-updates-manifest-switch').click();
+          expectSavedButtonToBeDisabled();
+          clickAutomaticUpdatesToggle();
 
           cy.getByTestSubj('protection-updates-manifest-name-deployed-version-title');
           cy.getByTestSubj('protection-updates-deployed-version').contains('latest');
@@ -77,21 +92,44 @@ describe(
           });
           cy.getByTestSubj('protection-updates-manifest-name-note-title');
           cy.getByTestSubj('protection-updates-manifest-note');
-          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.enabled');
+          expectSavedButtonToBeEnabled();
+        });
+
+        it('should display warning modal when user has unsaved changes', () => {
+          loadProtectionUpdatesUrl(policy.id);
+          clickAutomaticUpdatesToggle();
+          cy.getByTestSubj('policySettingsTab').click();
+          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
+            cy.getByTestSubj('confirmModalCancelButton').click();
+          });
+          cy.url().should('include', 'protectionUpdates');
+          cy.getByTestSubj('policySettingsTab').click();
+          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
+            cy.getByTestSubj('confirmModalConfirmButton').click();
+          });
+          cy.url().should('include', 'settings');
         });
 
         it('should successfully update the manifest version to custom date', () => {
+          const todayMinusTwoDays = moment.utc().subtract(2, 'days');
+
           loadProtectionUpdatesUrl(policy.id);
-          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
-          cy.getByTestSubj('protection-updates-manifest-switch').click();
+          expectSavedButtonToBeDisabled();
+          clickAutomaticUpdatesToggle();
           cy.getByTestSubj('protection-updates-manifest-note').type(testNote);
+
+          cy.getByTestSubj('protection-updates-version-to-deploy-picker').find('input').clear();
+
+          cy.getByTestSubj('protection-updates-version-to-deploy-picker')
+            .find('input')
+            .type(todayMinusTwoDays.format('MMMM DD, YYYY'));
 
           cy.intercept('PUT', `/api/fleet/package_policies/${policy.id}`).as('policy');
           cy.intercept('POST', `/api/endpoint/protection_updates_note/${policy.id}`).as('note');
-          cy.getByTestSubj('protectionUpdatesSaveButton').click();
+          clickProtectionUpdatesSaveButton();
           cy.wait('@policy').then(({ request, response }) => {
             expect(request.body.inputs[0].config.policy.value.global_manifest_version).to.equal(
-              defaultDate.format('YYYY-MM-DD')
+              todayMinusTwoDays.format('YYYY-MM-DD')
             );
             expect(response?.statusCode).to.equal(200);
           });
@@ -102,9 +140,23 @@ describe(
           });
 
           cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
-          cy.getByTestSubj('protection-updates-deployed-version').contains(formattedDefaultDate);
+          cy.getByTestSubj('protection-updates-deployed-version').contains(
+            todayMinusTwoDays.format('MMMM DD, YYYY')
+          );
           cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
-          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
+          expectSavedButtonToBeDisabled();
+
+          // Reload page, make sure the changes are persisted
+          loadProtectionUpdatesUrl(policy.id);
+          // Date shouldn't match today, so the button should be enabled
+          expectSavedButtonToBeEnabled();
+          cy.getByTestSubj('protection-updates-deployed-version').contains(
+            todayMinusTwoDays.format('MMMM DD, YYYY')
+          );
+          cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
+
+          clickProtectionUpdatesSaveButton();
+          expectSavedButtonToBeDisabled();
         });
       });
 
@@ -116,7 +168,6 @@ describe(
 
         beforeEach(() => {
           login();
-          disableExpandableFlyoutAdvancedSettings();
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
@@ -132,14 +183,23 @@ describe(
           }
         });
 
+        it('should NOT display warning modal when user enters the page with previously selected custom date', () => {
+          loadProtectionUpdatesUrl(policy.id);
+          // The button is enabled because today is not the same as the date in the policy
+          expectSavedButtonToBeEnabled();
+
+          cy.getByTestSubj('policySettingsTab').click();
+          cy.getByTestSubj('policyDetailsUnsavedChangesModal').should('not.exist');
+          cy.url().should('include', 'settings');
+        });
+
         it('should update manifest version to latest when enabling automatic updates', () => {
           loadProtectionUpdatesUrl(policy.id);
-          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
-
-          cy.getByTestSubj('protection-updates-manifest-switch').click();
+          expectSavedButtonToBeEnabled();
+          clickAutomaticUpdatesToggle();
           cy.intercept('PUT', `/api/fleet/package_policies/${policy.id}`).as('policy_latest');
 
-          cy.getByTestSubj('protectionUpdatesSaveButton').click();
+          clickProtectionUpdatesSaveButton();
 
           cy.wait('@policy_latest').then(({ request, response }) => {
             expect(request.body.inputs[0].config.policy.value.global_manifest_version).to.equal(
@@ -149,7 +209,7 @@ describe(
           });
           cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
           cy.getByTestSubj('protection-updates-automatic-updates-enabled');
-          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
+          expectSavedButtonToBeDisabled();
         });
       });
 
@@ -161,7 +221,6 @@ describe(
 
         beforeEach(() => {
           login();
-          disableExpandableFlyoutAdvancedSettings();
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
@@ -180,7 +239,7 @@ describe(
 
         it('should update note on save', () => {
           loadProtectionUpdatesUrl(policy.id);
-          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
+          expectSavedButtonToBeEnabled();
 
           cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
           cy.getByTestSubj('protection-updates-manifest-note').clear();
@@ -189,14 +248,14 @@ describe(
           cy.intercept('POST', `/api/endpoint/protection_updates_note/${policy.id}`).as(
             'note_updated'
           );
-          cy.getByTestSubj('protectionUpdatesSaveButton').click();
+          clickProtectionUpdatesSaveButton();
           cy.wait('@note_updated').then(({ request, response }) => {
             expect(request.body.note).to.equal(updatedTestNote);
             expect(response?.statusCode).to.equal(200);
           });
           cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
           cy.getByTestSubj('protection-updates-manifest-note').contains(updatedTestNote);
-          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
+          expectSavedButtonToBeDisabled();
 
           loadProtectionUpdatesUrl(policy.id);
           cy.getByTestSubj('protection-updates-manifest-note').contains(updatedTestNote);
@@ -211,7 +270,6 @@ describe(
 
           beforeEach(() => {
             login(ROLE.t3_analyst);
-            disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {
                 indexedPolicy = data;
@@ -233,7 +291,7 @@ describe(
 
           it('should render the protection updates tab content', () => {
             loadProtectionUpdatesUrl(policy.id);
-            cy.getByTestSubj('protection-updates-manifest-switch').should('not.exist');
+            getAutomaticUpdatesToggle().should('not.exist');
             cy.getByTestSubj('protection-updates-state-view-mode');
             cy.getByTestSubj('protection-updates-manifest-name-title');
 
@@ -248,7 +306,7 @@ describe(
             cy.getByTestSubj('protection-updates-manifest-name-note-title');
             cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
             cy.getByTestSubj('protection-updates-manifest-note-view-mode').contains(testNote);
-            cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
+            expectSavedButtonToBeDisabled();
           });
         });
 
@@ -259,7 +317,6 @@ describe(
 
           beforeEach(() => {
             login(ROLE.t3_analyst);
-            disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {
                 indexedPolicy = data;
@@ -280,7 +337,7 @@ describe(
 
           it('should render the protection updates tab content', () => {
             loadProtectionUpdatesUrl(policy.id);
-            cy.getByTestSubj('protection-updates-manifest-switch').should('not.exist');
+            getAutomaticUpdatesToggle().should('not.exist');
             cy.getByTestSubj('protection-updates-state-view-mode');
             cy.getByTestSubj('protection-updates-manifest-name-title');
 
@@ -295,8 +352,50 @@ describe(
             cy.getByTestSubj('protection-updates-manifest-name-note-title').should('not.exist');
             cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
             cy.getByTestSubj('protection-updates-manifest-note-view-mode').should('not.exist');
-            cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
+            expectSavedButtonToBeDisabled();
           });
+        });
+      });
+    });
+    describe('Policy settings', () => {
+      const loadSettingsUrl = (policyId: string) =>
+        loadPage(`/app/security/administration/policy/${policyId}/settings`);
+
+      describe('Renders policy settings form', () => {
+        let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+        let policy: PolicyData;
+
+        beforeEach(() => {
+          login();
+          getEndpointIntegrationVersion().then((version) => {
+            createAgentPolicyTask(version).then((data) => {
+              indexedPolicy = data;
+              policy = indexedPolicy.integrationPolicies[0];
+            });
+          });
+        });
+
+        afterEach(() => {
+          if (indexedPolicy) {
+            cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+          }
+        });
+        it('should render disabled button and display modal if unsaved changes are present', () => {
+          loadSettingsUrl(policy.id);
+          cy.getByTestSubj('policyDetailsSaveButton').should('be.disabled');
+          cy.getByTestSubj('endpointPolicyForm-malware-enableDisableSwitch').click();
+          cy.getByTestSubj('policyDetailsSaveButton').should('not.be.disabled');
+          cy.getByTestSubj('policyProtectionUpdatesTab').click();
+          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
+            cy.getByTestSubj('confirmModalCancelButton').click();
+          });
+          cy.url().should('include', 'settings');
+          cy.getByTestSubj('policyProtectionUpdatesTab').click();
+
+          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
+            cy.getByTestSubj('confirmModalConfirmButton').click();
+          });
+          cy.url().should('include', 'protectionUpdates');
         });
       });
     });

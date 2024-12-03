@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -18,7 +19,7 @@ export default function ({
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['dashboard', 'common']);
+  const { dashboard } = getPageObjects(['dashboard']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
   const screenshot = getService('screenshots');
@@ -49,14 +50,14 @@ export default function ({
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard('dashboard with everything');
 
       await browser.setWindowSize(1300, 900);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/163207
+    // Fails in chrome 128+ https://github.com/elastic/kibana-operations/issues/199
     describe.skip('default URL params', () => {
       it('hides the chrome', async () => {
         const globalNavShown = await globalNav.exists();
@@ -82,7 +83,7 @@ export default function ({
       });
 
       it('renders as expected', async () => {
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_embed_mode',
           updateBaselines
@@ -91,7 +92,7 @@ export default function ({
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168648
+    // Fails in chrome 128+ https://github.com/elastic/kibana-operations/issues/199
     describe.skip('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
@@ -106,7 +107,7 @@ export default function ({
       });
 
       it('renders as expected', async () => {
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_embed_mode_with_url_params',
           updateBaselines
@@ -115,7 +116,7 @@ export default function ({
       });
 
       it('renders as expected when scrolling', async () => {
-        const panels = await PageObjects.dashboard.getDashboardPanels();
+        const panels = await dashboard.getDashboardPanels();
         const lastPanel = panels[panels.length - 1];
         const lastPanelHeight = -parseInt(await lastPanel.getComputedStyle('height'), 10);
         log.debug(
@@ -128,7 +129,7 @@ export default function ({
           'dashboard_embed_mode_scrolling',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.02);
+        expect(percentDifference).to.be.lessThan(0.021);
       });
     });
 

@@ -7,15 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { RoleMapping } from '../../../common/model';
-
-export interface CheckRoleMappingFeaturesResponse {
-  canManageRoleMappings: boolean;
-  canUseInlineScripts: boolean;
-  canUseStoredScripts: boolean;
-  hasCompatibleRealms: boolean;
-  canUseRemoteIndices: boolean;
-}
+import type { RoleMapping } from '../../../common';
 
 type DeleteRoleMappingsResponse = Array<{
   name: string;
@@ -25,10 +17,6 @@ type DeleteRoleMappingsResponse = Array<{
 
 export class RoleMappingsAPIClient {
   constructor(private readonly http: HttpStart) {}
-
-  public async checkRoleMappingFeatures(): Promise<CheckRoleMappingFeaturesResponse> {
-    return this.http.get(`/internal/security/_check_role_mapping_features`);
-  }
 
   public async getRoleMappings(): Promise<RoleMapping[]> {
     return this.http.get(`/internal/security/role_mapping`);

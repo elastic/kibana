@@ -7,19 +7,18 @@
 
 import React from 'react';
 
-import { mockTimelineData } from '../../../../../common/mock';
-import { defaultColumnHeaderType } from '../column_headers/default_headers';
+import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { REASON_FIELD_NAME } from './constants';
 import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { RowRendererId } from '../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '../../../../../../common/api/timeline';
 
 import { render } from '@testing-library/react';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { cloneDeep } from 'lodash';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { defaultColumnHeaderType } from '../column_headers/default_headers';
 jest.mock('./plain_column_renderer');
 
 jest.mock('../../../../../common/components/link_to', () => {
@@ -42,7 +41,7 @@ const field: ColumnHeaderOptions = {
 
 const rowRenderers: RowRenderer[] = [
   {
-    id: RowRendererId.alerts,
+    id: RowRendererIdEnum.alerts,
     isInstance: (ecs) => ecs === validEcs,
     renderRow: () => <span data-test-subj="test-row-render" />,
   },

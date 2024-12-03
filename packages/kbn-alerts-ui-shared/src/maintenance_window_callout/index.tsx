@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
@@ -12,20 +13,11 @@ import { EuiCallOut } from '@elastic/eui';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { MaintenanceWindowStatus, KibanaServices } from './types';
 import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
-
-const MAINTENANCE_WINDOW_FEATURE_ID = 'maintenanceWindow';
-const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
-  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveDescription',
-  {
-    defaultMessage: 'Rule notifications are stopped while maintenance windows are running.',
-  }
-);
-const MAINTENANCE_WINDOW_NO_CATEGORY_TITLE = i18n.translate(
-  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveNoCategories',
-  {
-    defaultMessage: 'One or more maintenance windows are running',
-  }
-);
+import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
+import {
+  MAINTENANCE_WINDOW_NO_CATEGORY_TITLE,
+  MAINTENANCE_WINDOW_RUNNING_DESCRIPTION,
+} from './translations';
 
 const maintenanceWindowTwoCategoryNames = (names: string[]) =>
   i18n.translate('alertsUIShared.maintenanceWindowCallout.maintenanceWindowTwoCategoryNames', {
@@ -101,6 +93,7 @@ export function MaintenanceWindowCallout({
           .flat()
       )
     );
+
     const activeCategories = activeCategoryIds
       .map(
         (categoryId) =>

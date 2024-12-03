@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -18,7 +19,7 @@ import { CoreStart, DocLinksStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
-import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
+import type { IndexPatternSelectProps, QueryStringInputProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 import { StatefulSearchBarDeps } from './search_bar/create_search_bar';
 
@@ -53,6 +54,7 @@ export interface UnifiedSearchPublicPluginStartUi {
   SearchBar: (props: StatefulSearchBarProps<Query>) => React.ReactElement;
   AggregateQuerySearchBar: AggQuerySearchBarComp;
   FiltersBuilderLazy: React.ComponentType<FiltersBuilderProps>;
+  QueryStringInput: React.ComponentType<Omit<QueryStringInputProps, 'deps'>>;
 }
 
 /**
@@ -91,6 +93,9 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   http: CoreStart['http'];
+  analytics: CoreStart['analytics'];
+  i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
   storage: IStorageWrapper;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;

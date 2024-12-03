@@ -20,8 +20,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const TEST_DS_NAME = 'test-ds-1';
 
   describe('Data Streams', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/181242
+    this.tags(['failsOnMKI']);
     before(async () => {
-      await log.debug('Creating required data stream');
+      log.debug('Creating required data stream');
       try {
         await es.cluster.putComponentTemplate({
           name: `${TEST_DS_NAME}_mapping`,
@@ -56,8 +58,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       await security.testUser.setRoles(['index_management_user']);
-      // Navigate to the index management page
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('indexManagement');
       // Navigate to the indices tab
       await pageObjects.indexManagement.changeTabs('data_streamsTab');
@@ -65,7 +66,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await log.debug('Cleaning up created data stream');
+      log.debug('Cleaning up created data stream');
 
       try {
         await es.indices.deleteDataStream({ name: TEST_DS_NAME });
@@ -88,7 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('shows the details flyout when clicking on a data stream', async () => {
       // Open details flyout
-      await pageObjects.indexManagement.clickDataStreamAt(0);
+      await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
       // Verify url is stateful
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/data_streams/${TEST_DS_NAME}`);
@@ -100,7 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('allows to update data retention', async () => {
       // Open details flyout
-      await pageObjects.indexManagement.clickDataStreamAt(0);
+      await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
       // Open the edit retention dialog
       await testSubjects.click('manageDataStreamButton');
       await testSubjects.click('editDataRetentionButton');
@@ -116,26 +117,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('saveButton');
 
       // Expect to see a success toast
-      const successToast = await toasts.getToastElement(1);
+      const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain('Data retention updated');
     });
 
-    it('allows to disable data retention', async () => {
+    describe('Project level data retention checks - security solution', () => {
+      this.tags(['skipSvlOblt', 'skipSvlSearch']);
+
+      it('shows project data retention in the datastreams list', async () => {
+        expect(await testSubjects.exists('projectLevelRetentionCallout')).to.be(true);
+        expect(await testSubjects.exists('cloudLinkButton')).to.be(true);
+      });
+    });
+
+    it('disabling data retention in serverless is not allowed', async () => {
       // Open details flyout
-      await pageObjects.indexManagement.clickDataStreamAt(0);
+      await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
       // Open the edit retention dialog
       await testSubjects.click('manageDataStreamButton');
       await testSubjects.click('editDataRetentionButton');
 
-      // Disable infinite retention
-      await testSubjects.click('dataRetentionEnabledField > input');
-
-      // Submit the form
-      await testSubjects.click('saveButton');
-
-      // Expect to see a success toast
-      const successToast = await toasts.getToastElement(1);
-      expect(await successToast.getVisibleText()).to.contain('Data retention disabled');
+      expect(await testSubjects.exists('dataRetentionEnabledField')).to.be(false);
     });
   });
 };

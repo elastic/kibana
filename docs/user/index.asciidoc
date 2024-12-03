@@ -2,9 +2,9 @@ include::introduction.asciidoc[]
 
 include::whats-new.asciidoc[]
 
-include::{kib-repo-dir}/concepts/index.asciidoc[]
+include::{kibana-root}/docs/concepts/index.asciidoc[]
 
-include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
+include::{kibana-root}/docs/getting-started/quick-start-guide.asciidoc[]
 
 include::setup.asciidoc[]
 
@@ -16,7 +16,7 @@ include::dashboard/dashboard.asciidoc[]
 
 include::canvas.asciidoc[]
 
-include::{kib-repo-dir}/maps/index.asciidoc[]
+include::{kibana-root}/docs/maps/index.asciidoc[]
 
 include::reporting/index.asciidoc[]
 
@@ -26,17 +26,17 @@ include::graph/index.asciidoc[]
 
 include::alerting/index.asciidoc[]
 
-include::{kib-repo-dir}/observability/index.asciidoc[]
+include::{kibana-root}/docs/observability/index.asciidoc[]
 
-include::{kib-repo-dir}/apm/index.asciidoc[]
+include::{kibana-root}/docs/search/index.asciidoc[]
 
-include::{kib-repo-dir}/siem/index.asciidoc[]
+include::{kibana-root}/docs/siem/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
 
-include::{kib-repo-dir}/fleet/fleet.asciidoc[]
+include::{kibana-root}/docs/fleet/fleet.asciidoc[]
 
-include::{kib-repo-dir}/osquery/osquery.asciidoc[]
+include::{kibana-root}/docs/osquery/osquery.asciidoc[]
 
 include::monitoring/index.asciidoc[]
 
@@ -47,4 +47,3 @@ include::api.asciidoc[]
 include::plugins.asciidoc[]
 
 include::troubleshooting/index.asciidoc[]
-

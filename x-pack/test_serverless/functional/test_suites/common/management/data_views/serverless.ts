@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const archivePath = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
@@ -18,18 +18,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('Serverless tests', function () {
-    this.beforeAll(async () => {
-      await PageObjects.svlCommonPage.login();
-    });
     describe('disables scripted fields', function () {
       let dataViewId = '';
 
       before(async () => {
         await esArchiver.load(archivePath);
 
-        const response = await supertest
+        const { body, status } = await supertest
           .post(DATA_VIEW_PATH)
           .set('kbn-xsrf', 'some-xsrf-token')
           .send({
@@ -39,8 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             override: true,
           });
 
-        expect(response.status).toBe(200);
-        dataViewId = response.body.data_view.id;
+        svlCommonApi.assertResponseStatusCode(200, status, body);
+        dataViewId = body.data_view.id;
       });
 
       after(async () => {
@@ -67,18 +65,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
         );
 
-        const response = await supertest
+        const { body, status } = await supertest
           .post(DATA_VIEW_PATH)
           .set('kbn-xsrf', 'some-xsrf-token')
           .send({
             data_view: {
               title: 'basic_index',
-              type: 'rollup',
+              type: DataViewType.ROLLUP,
             },
             override: true,
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
-        dataViewId = response.body.data_view.id;
+        svlCommonApi.assertResponseStatusCode(200, status, body);
+        dataViewId = body.data_view.id;
       });
 
       after(async () => {
@@ -101,7 +100,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('when in single space mode', function () {
+    // Skipped due to change in QA environment for role management and spaces
+    // TODO: revisit once the change is rolled out to all environments
+    describe.skip('when in single space mode', function () {
       let dataViewId = '';
       before(async () => {
         await esArchiver.load(

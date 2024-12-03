@@ -9,8 +9,9 @@ import { BehaviorSubject } from 'rxjs';
 import type { Observable } from 'rxjs';
 
 export type ContractComponents = Partial<{
-  GetStarted: React.ComponentType<{}>;
+  GetStarted: React.ComponentType<{ indicesExist?: boolean }>;
   DashboardsLandingCallout: React.ComponentType<{}>;
+  EnablementModalCallout: React.ComponentType<{}>;
 }>;
 
 export type SetComponents = (components: ContractComponents) => void;

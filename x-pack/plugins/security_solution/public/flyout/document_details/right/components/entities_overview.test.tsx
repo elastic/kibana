@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
@@ -15,7 +15,6 @@ import {
 } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
 import { TestProviders } from '../../../../common/mock';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
@@ -26,6 +25,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
@@ -39,7 +39,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../sourcerer/containers', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
@@ -49,7 +49,7 @@ const mockUseUserDetails = useObservedUserDetails as jest.Mock;
 jest.mock('../../../../explore/users/containers/users/observed_details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../explore/containers/risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../../common/containers/use_first_last_seen');
@@ -67,14 +67,14 @@ const mockContextValue = {
   indexName: 'index',
   scopeId: 'scopeId',
   getFieldsData: mockGetFieldsData,
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
-const renderEntitiesOverview = (contextValue: RightPanelContext) =>
+const renderEntitiesOverview = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <EntitiesOverview />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -97,6 +97,18 @@ describe('<EntitiesOverview />', () => {
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it('should not render link if isPreviewMode is true', () => {
+    const { getByTestId, queryByTestId } = renderEntitiesOverview({
+      ...mockContextValue,
+      isPreviewMode: true,
+    });
+
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
+  });
+
   it('should render user and host', () => {
     const { getByTestId, queryByText } = renderEntitiesOverview(mockContextValue);
     expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
@@ -108,7 +120,7 @@ describe('<EntitiesOverview />', () => {
     const contextValue = {
       ...mockContextValue,
       getFieldsData: (field: string) => (field === 'user.name' ? 'user1' : null),
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
 
@@ -121,7 +133,7 @@ describe('<EntitiesOverview />', () => {
     const contextValue = {
       ...mockContextValue,
       getFieldsData: (field: string) => (field === 'host.name' ? 'host1' : null),
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
 
@@ -134,7 +146,7 @@ describe('<EntitiesOverview />', () => {
     const contextValue = {
       ...mockContextValue,
       getFieldsData: (field: string) => {},
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByText } = renderEntitiesOverview(contextValue);
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();

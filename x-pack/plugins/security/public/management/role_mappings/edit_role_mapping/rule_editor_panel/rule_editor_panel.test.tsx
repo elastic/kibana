@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-// brace/ace uses the Worker class, which is not currently provided by JSDOM.
-// This is not required for the tests to pass, but it rather suppresses lengthy
-// warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/web-worker-stub';
-
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 
 import { JSONRuleEditor } from './json_rule_editor';
 import { RuleEditorPanel } from './rule_editor_panel';

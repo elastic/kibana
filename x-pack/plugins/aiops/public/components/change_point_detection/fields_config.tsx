@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, useState } from 'react';
+import React, { type FC, type PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -25,17 +25,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
+import {
+  CHANGE_POINT_DETECTION_VIEW_TYPE,
+  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+} from '@kbn/aiops-change-point-detection/constants';
+import type { ChangePointEmbeddableRuntimeState } from '../../embeddables/change_point_chart/types';
 import { MaxSeriesControl } from './max_series_control';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../../common/constants';
 import { useCasesModal } from '../../hooks/use_cases_modal';
-import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
@@ -43,14 +47,15 @@ import { MAX_CHANGE_POINT_CONFIGS, SPLIT_FIELD_CARDINALITY_LIMIT } from './const
 import { FunctionPicker } from './function_picker';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
+import type { SelectedChangePoint } from './change_point_detection_context';
 import {
   type ChangePointAnnotation,
   type FieldConfig,
-  SelectedChangePoint,
   useChangePointDetectionContext,
 } from './change_point_detection_context';
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
+import { ViewTypeSelector } from './view_type_selector';
 
 const selectControlCss = { width: '350px' };
 
@@ -191,10 +196,17 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const [dashboardAttachment, setDashboardAttachment] = useState<{
     applyTimeRange: boolean;
     maxSeriesToPlot: number;
+    viewType: ChangePointDetectionViewType;
   }>({
     applyTimeRange: false,
     maxSeriesToPlot: 6,
+    viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
   });
+
+  const [caseAttachment, setCaseAttachment] = useState<{
+    viewType: ChangePointDetectionViewType;
+  }>({ viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS });
+
   const [dashboardAttachmentReady, setDashboardAttachmentReady] = useState<boolean>(false);
 
   const {
@@ -249,7 +261,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
             disabled: removeDisabled,
           },
         ],
-        'data=test-subj': 'aiopsChangePointDetectionContextMenuPanel',
+        'data-test-subj': 'aiopsChangePointDetectionContextMenuPanel',
       },
       {
         id: 'attachMainPanel',
@@ -284,7 +296,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                   disabled: caseAttachmentButtonDisabled,
                   ...(caseAttachmentButtonDisabled
                     ? {
-                        toolTipPosition: 'left' as const,
+                        toolTipProps: { position: 'left' as const },
                         toolTipContent: i18n.translate(
                           'xpack.aiops.changePointDetection.attachToCaseTooltipContent',
                           {
@@ -294,20 +306,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                       }
                     : {}),
                   'data-test-subj': 'aiopsChangePointDetectionAttachToCaseButton',
-                  onClick: () => {
-                    openCasesModalCallback({
-                      timeRange,
-                      fn: fieldConfig.fn,
-                      metricField: fieldConfig.metricField,
-                      dataViewId: dataView.id,
-                      ...(fieldConfig.splitField
-                        ? {
-                            splitField: fieldConfig.splitField,
-                            partitions: selectedPartitions,
-                          }
-                        : {}),
-                    });
-                  },
+                  panel: 'attachToCasePanel',
                 },
               ]
             : []),
@@ -324,6 +323,17 @@ const FieldPanel: FC<FieldPanelProps> = ({
           <EuiPanel paddingSize={'s'}>
             <EuiSpacer size={'s'} />
             <EuiForm data-test-subj="aiopsChangePointDetectionDashboardAttachmentForm">
+              <ViewTypeSelector
+                value={dashboardAttachment.viewType}
+                onChange={(v) => {
+                  setDashboardAttachment((prevState) => {
+                    return {
+                      ...prevState,
+                      viewType: v,
+                    };
+                  });
+                }}
+              />
               <EuiFormRow fullWidth>
                 <EuiSwitch
                   label={i18n.translate('xpack.aiops.changePointDetection.applyTimeRangeLabel', {
@@ -366,7 +376,63 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 fill
                 type={'submit'}
                 fullWidth
-                onClick={setDashboardAttachmentReady.bind(null, true)}
+                onClick={() => {
+                  setIsActionMenuOpen(false);
+                  setDashboardAttachmentReady(true);
+                }}
+                disabled={!isDashboardFormValid}
+              >
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.submitDashboardAttachButtonLabel"
+                  defaultMessage="Attach"
+                />
+              </EuiButton>
+            </EuiForm>
+          </EuiPanel>
+        ),
+      },
+      {
+        id: 'attachToCasePanel',
+        title: i18n.translate('xpack.aiops.changePointDetection.attachToCaseTitle', {
+          defaultMessage: 'Attach to case',
+        }),
+        size: 's',
+        content: (
+          <EuiPanel paddingSize={'s'}>
+            <EuiSpacer size={'s'} />
+            <EuiForm data-test-subj="aiopsChangePointDetectionCaseAttachmentForm">
+              <ViewTypeSelector
+                value={caseAttachment.viewType}
+                onChange={(v) => {
+                  setCaseAttachment((prevState) => {
+                    return {
+                      ...prevState,
+                      viewType: v,
+                    };
+                  });
+                }}
+              />
+              <EuiButton
+                data-test-subj="aiopsChangePointDetectionSubmitCaseAttachButton"
+                fill
+                type={'submit'}
+                fullWidth
+                onClick={() => {
+                  setIsActionMenuOpen(false);
+                  openCasesModalCallback({
+                    timeRange,
+                    viewType: caseAttachment.viewType,
+                    fn: fieldConfig.fn,
+                    metricField: fieldConfig.metricField,
+                    dataViewId: dataView.id,
+                    ...(fieldConfig.splitField
+                      ? {
+                          splitField: fieldConfig.splitField,
+                          partitions: selectedPartitions,
+                        }
+                      : {}),
+                  });
+                }}
                 disabled={!isDashboardFormValid}
               >
                 <FormattedMessage
@@ -383,9 +449,11 @@ const FieldPanel: FC<FieldPanelProps> = ({
     canCreateCase,
     canEditDashboards,
     canUpdateCase,
+    caseAttachment.viewType,
     caseAttachmentButtonDisabled,
     dashboardAttachment.applyTimeRange,
     dashboardAttachment.maxSeriesToPlot,
+    dashboardAttachment.viewType,
     dataView.id,
     fieldConfig.fn,
     fieldConfig.metricField,
@@ -402,9 +470,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
     ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
-      const embeddableInput: Partial<EmbeddableChangePointChartInput> = {
+      const embeddableInput: Partial<ChangePointEmbeddableRuntimeState> = {
         title: newTitle,
         description: newDescription,
+        viewType: dashboardAttachment.viewType,
         dataViewId: dataView.id,
         metricField: fieldConfig.metricField,
         splitField: fieldConfig.splitField,
@@ -428,12 +497,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
     },
     [
       embeddable,
+      dashboardAttachment.viewType,
+      dashboardAttachment.applyTimeRange,
+      dashboardAttachment.maxSeriesToPlot,
       dataView.id,
       fieldConfig.metricField,
       fieldConfig.splitField,
       fieldConfig.fn,
-      dashboardAttachment.applyTimeRange,
-      dashboardAttachment.maxSeriesToPlot,
       timeRange,
       selectedChangePoints,
       panelIndex,
@@ -497,7 +567,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     )}
                     iconType="boxesHorizontal"
                     color="text"
-                    onClick={setIsActionMenuOpen.bind(null, true)}
+                    onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
                   />
                 }
                 isOpen={isActionMenuOpen}
@@ -561,10 +631,14 @@ interface FieldsControlsProps {
 /**
  * Renders controls for fields selection and emits updates on change.
  */
-export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange, children }) => {
+export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
+  fieldConfig,
+  onChange,
+  children,
+}) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
-  const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts, fieldStats, theme } = useAiopsAppContext();
   const timefilter = useTimefilter();
   // required in order to trigger state updates
   useTimeRangeUpdates();
@@ -603,6 +677,7 @@ export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange,
             }
           : undefined
       }
+      theme={theme}
     >
       <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'m'}>
         <EuiFlexItem grow={false} css={{ width: '200px' }}>

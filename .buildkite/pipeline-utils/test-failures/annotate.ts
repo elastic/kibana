@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { execSync } from 'child_process';
@@ -91,11 +92,12 @@ export const getPrComment = (
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
 
-        // job name could have #<number> in it, which Github will link to an issue, so we need to "escape" it with spans
-        return `* [[job]](${jobUrl})${logsLink} ${failure.jobName.replace(
-          '#',
-          '#<span></span>'
-        )} / ${failure.name}`;
+        // failure name could have #<number>, which Github will link to an issue or @<string>,
+        // which will send a notification so we need to "escape" it with spans
+        const failureString = `${failure.jobName} / ${failure.name}`
+          .replaceAll('#', '#<span></span>')
+          .replaceAll('@', '@<span></span>');
+        return `* [[job]](${jobUrl})${logsLink} ${failureString}`;
       })
       .join('\n')
   );
@@ -169,14 +171,17 @@ export const annotateTestFailures = async () => {
 
   buildkite.setAnnotation('test_failures', 'error', getAnnotation(failures, failureHtmlArtifacts));
 
-  if (process.env.PR_COMMENTS_ENABLED === 'true') {
+  if (
+    process.env.PR_COMMENTS_ENABLED === 'true' ||
+    process.env.ELASTIC_PR_COMMENTS_ENABLED === 'true'
+  ) {
     buildkite.setMetadata(
       'pr_comment:test_failures:body',
       getPrComment(failures, failureHtmlArtifacts)
     );
   }
 
-  if (process.env.SLACK_NOTIFICATIONS_ENABLED === 'true') {
+  if (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true') {
     buildkite.setMetadata(
       'slack:test_failures:body',
       getSlackMessage(failures, failureHtmlArtifacts)

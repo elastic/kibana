@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Reducer, RefObject } from 'react';
 import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
 import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import {
   ExpressionAstExpression,
@@ -25,7 +26,7 @@ export interface ExpressionRendererParams extends IExpressionLoaderParams {
   debounce?: number;
   expression: string | ExpressionAstExpression;
   hasCustomErrorRenderer?: boolean;
-  onData$?<TData, TInspectorAdapters>(
+  onData$?<TData, TInspectorAdapters extends unknown>(
     data: TData,
     adapters?: TInspectorAdapters,
     partial?: boolean
@@ -36,6 +37,7 @@ export interface ExpressionRendererParams extends IExpressionLoaderParams {
    * An observable which can be used to re-run the expression without destroying the component
    */
   reload$?: Observable<unknown>;
+  abortController?: AbortController;
 }
 
 interface ExpressionRendererState {
@@ -54,6 +56,7 @@ export function useExpressionRenderer(
     onEvent,
     onRender$,
     reload$,
+    abortController,
     ...loaderParams
   }: ExpressionRendererParams
 ): ExpressionRendererState {
@@ -76,6 +79,13 @@ export function useExpressionRenderer(
   const hasHandledErrorRef = useRef(false);
   // will call done() in LayoutEffect when done with rendering custom error state
   const errorRenderHandlerRef = useRef<IInterpreterRenderHandlers | null>(null);
+
+  useEffect(() => {
+    if (abortController?.signal)
+      abortController.signal.onabort = () => {
+        expressionLoaderRef.current?.cancel();
+      };
+  }, [abortController]);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()

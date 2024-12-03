@@ -7,14 +7,15 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import React, { FunctionComponent } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { render, screen, within } from '@testing-library/react';
+
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import RuleAdd from './rule_add';
-import { createRule } from '../../lib/rule_api/create';
-import { alertingFrameworkHealth } from '../../lib/rule_api/health';
+import { createRule } from '@kbn/response-ops-rule-form/src/common/apis/create_rule';
+
+import { fetchAlertingFrameworkHealth as fetchAlertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
@@ -28,39 +29,49 @@ import {
   RuleTypeModel,
 } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { ReactWrapper } from 'enzyme';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
-import { triggersActionsUiConfig } from '../../../common/lib/config_api';
-import { triggersActionsUiHealth } from '../../../common/lib/health_api';
-import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 
+import { fetchUiConfig } from '@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config';
+import { fetchUiHealthStatus } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status';
+import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { waitFor } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import userEvent from '@testing-library/user-event';
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
 }));
-jest.mock('../../lib/rule_api/create', () => ({
+jest.mock('@kbn/response-ops-rule-form/src/common/apis/create_rule', () => ({
   createRule: jest.fn(),
 }));
-jest.mock('../../lib/rule_api/health', () => ({
-  alertingFrameworkHealth: jest.fn(() => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => ({
+  fetchAlertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
 }));
 
-jest.mock('../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest.fn(),
+jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
+  fetchUiConfig: jest.fn(),
 }));
 
-jest.mock('../../../common/lib/health_api', () => ({
-  triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => ({
+  fetchUiHealthStatus: jest.fn(() => ({ isRulesAvailable: true })),
 }));
 
 jest.mock('../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),
+}));
+
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
+  fetchFlappingSettings: jest.fn().mockResolvedValue({
+    lookBackWindow: 20,
+    statusChangeThreshold: 20,
+  }),
 }));
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -86,7 +97,6 @@ describe('rule_add', () => {
   afterAll(() => {
     jest.resetAllMocks();
   });
-  let wrapper: ReactWrapper<any>;
 
   async function setup({
     initialValues,
@@ -125,9 +135,9 @@ describe('rule_add', () => {
         defaultScheduleInterval,
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        producer: ALERTS_FEATURE_ID,
+        producer: ALERTING_FEATURE_ID,
         authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          [ALERTING_FEATURE_ID]: { read: true, all: true },
           test: { read: true, all: true },
         },
         actionVariables: {
@@ -146,6 +156,9 @@ describe('rule_add', () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.application.capabilities = {
       ...capabilities,
+      rulesSettings: {
+        writeFlappingSettingsUI: true,
+      },
       rules: {
         show: true,
         save: true,
@@ -191,85 +204,116 @@ describe('rule_add', () => {
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);
 
-    wrapper = mountWithIntl(
-      <RuleAdd
-        consumer={ALERTS_FEATURE_ID}
-        onClose={onClose}
-        initialValues={initialValues}
-        onSave={() => {
-          return new Promise<void>(() => {});
-        }}
-        actionTypeRegistry={actionTypeRegistry}
-        ruleTypeRegistry={ruleTypeRegistry}
-        metadata={{ test: 'some value', fields: ['test'] }}
-        ruleTypeId={ruleTypeId}
-        validConsumers={validConsumers}
-      />
-    );
-
-    // Wait for active space to resolve before requesting the component to update
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    return {
+      consumer: ALERTING_FEATURE_ID,
+      onClose,
+      initialValues,
+      onSave: () => {
+        return new Promise<void>(() => {});
+      },
+      actionTypeRegistry,
+      ruleTypeRegistry,
+      metadata: { test: 'some value', fields: ['test'] },
+      ruleTypeId,
+      validConsumers,
+    };
   }
 
   it('renders rule add flyout', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
+
     const onClose = jest.fn();
-    await setup({
+    const props = await setup({
       initialValues: {},
       onClose,
     });
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
+    expect(await screen.findByTestId('addRuleFlyoutTitle')).toBeInTheDocument();
 
-    wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
+    expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('showRequestButton')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
     expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED, {
       fields: ['test'],
       test: 'some value',
     });
   });
 
-  it('renders a confirm close modal if the flyout is closed after inputs have changed', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+  it('renders selection of rule types to pick in the modal', async () => {
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup({
+    const props = await setup({
       initialValues: {},
       onClose,
     });
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    wrapper.find('[data-test-subj="my-rule-type-SelectOption"]').last().simulate('click');
-    expect(wrapper.find('input#ruleName').props().value).toBe('');
-    expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
-    expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
+    expect(await screen.findByTestId('my-rule-type-SelectOption')).toBeInTheDocument();
 
-    wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
-    expect(onClose).not.toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="confirmRuleCloseModal"]').exists()).toBe(true);
+    expect(await screen.findByText('Test')).toBeInTheDocument();
+    expect(await screen.findByText('test')).toBeInTheDocument();
   });
 
-  it('renders rule add flyout with initial values', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+  it('renders a confirm close modal if the flyout is closed after inputs have changed', async () => {
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup({
+
+    const props = await setup({
+      initialValues: {},
+      onClose,
+      ruleTypeId: 'my-rule-type',
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findByTestId('ruleNameInput')).toBeInTheDocument();
+
+    await userEvent.type(await screen.findByTestId('ruleNameInput'), 'my[Space]rule[Space]type');
+
+    expect(await screen.findByTestId('ruleNameInput')).toHaveValue('my rule type');
+    expect(await screen.findByTestId('comboBoxSearchInput')).toHaveValue('');
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
+
+    await userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(await screen.findByTestId('confirmRuleCloseModal')).toBeInTheDocument();
+  });
+
+  it('renders rule add flyout with initial values', async () => {
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+    const onClose = jest.fn();
+    const props = await setup({
       initialValues: {
         name: 'Simple status rule',
         tags: ['uptime', 'logs'],
@@ -281,32 +325,65 @@ describe('rule_add', () => {
       ruleTypeId: 'my-rule-type',
     });
 
-    expect(wrapper.find('input#ruleName').props().value).toBe('Simple status rule');
-    expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('uptimelogs');
-    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
-    expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('h');
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findByTestId('ruleNameInput')).toHaveValue('Simple status rule');
+
+    expect(
+      await within(await screen.findByTestId('tagsComboBox')).findByText('uptime')
+    ).toBeInTheDocument();
+    expect(
+      await within(await screen.findByTestId('tagsComboBox')).findByText('logs')
+    ).toBeInTheDocument();
+
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(1);
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('h');
   });
 
   it('renders rule add flyout with DEFAULT_RULE_INTERVAL if no initialValues specified and no minimumScheduleInterval', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({});
-    await setup({ ruleTypeId: 'my-rule-type' });
+    (fetchUiConfig as jest.Mock).mockResolvedValue({});
+    const props = await setup({ ruleTypeId: 'my-rule-type' });
 
-    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
-    expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(1);
+
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
   });
 
   it('renders rule add flyout with minimumScheduleInterval if minimumScheduleInterval is greater than DEFAULT_RULE_INTERVAL', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '5m', enforce: false },
     });
-    await setup({ ruleTypeId: 'my-rule-type' });
+    const props = await setup({ ruleTypeId: 'my-rule-type' });
 
-    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(5);
-    expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(5);
+
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
   });
 
   it('emit an onClose event when the rule is saved', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
@@ -314,7 +391,7 @@ describe('rule_add', () => {
 
     (createRule as jest.MockedFunction<typeof createRule>).mockResolvedValue(rule);
 
-    await setup({
+    const props = await setup({
       initialValues: {
         name: 'Simple status rule',
         ruleTypeId: 'my-rule-type',
@@ -326,107 +403,32 @@ describe('rule_add', () => {
       onClose,
     });
 
-    wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    // Wait for handlers to fire
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('saveRuleButton'));
+
+    await waitFor(() => {
+      return expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED, {
+        test: 'some value',
+        fields: ['test'],
+      });
     });
-
-    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED, {
-      test: 'some value',
-      fields: ['test'],
-    });
-  });
-
-  it('should NOT allow to save the rule if the consumer is not set', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
-      minimumScheduleInterval: { value: '1m', enforce: false },
-    });
-    const onClose = jest.fn();
-    await setup({
-      initialValues: {
-        name: 'Simple rule',
-        consumer: 'alerts',
-        ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-        tags: ['uptime', 'logs'],
-        schedule: {
-          interval: '1h',
-        },
-      },
-      onClose,
-      ruleTypesOverwrite: [
-        {
-          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          name: 'Threshold Rule',
-          actionGroups: [
-            {
-              id: 'testActionGroup',
-              name: 'Test Action Group',
-            },
-          ],
-          enabledInLicense: true,
-          defaultActionGroupId: 'threshold.fired',
-          minimumLicenseRequired: 'basic',
-          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-          producer: ALERTS_FEATURE_ID,
-          authorizedConsumers: {
-            alerts: { read: true, all: true },
-            apm: { read: true, all: true },
-            discover: { read: true, all: true },
-            infrastructure: { read: true, all: true },
-            logs: { read: true, all: true },
-            ml: { read: true, all: true },
-            monitoring: { read: true, all: true },
-            siem: { read: true, all: true },
-            // Setting SLO all to false, this shouldn't show up
-            slo: { read: true, all: false },
-            stackAlerts: { read: true, all: true },
-            uptime: { read: true, all: true },
-          },
-          actionVariables: {
-            context: [],
-            state: [],
-            params: [],
-          },
-        },
-      ],
-      ruleTypeModelOverwrite: {
-        id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-        iconClass: 'test',
-        description: 'test',
-        documentationUrl: null,
-        validate: (): ValidationResult => {
-          return { errors: {} };
-        },
-        ruleParamsExpression: TestExpression,
-        requiresAppContext: false,
-      },
-      validConsumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
-    });
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(createRule).toBeCalledTimes(0);
   });
 
   it('should set consumer automatically if only 1 authorized consumer exists', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup({
+    const props = await setup({
       initialValues: {
         name: 'Simple rule',
         consumer: 'alerts',
@@ -448,10 +450,11 @@ describe('rule_add', () => {
             },
           ],
           enabledInLicense: true,
+          category: 'my-category',
           defaultActionGroupId: 'threshold.fired',
           minimumLicenseRequired: 'basic',
           recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           authorizedConsumers: {
             logs: { read: true, all: true },
           },
@@ -476,35 +479,33 @@ describe('rule_add', () => {
       validConsumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
     });
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
-
-    wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(createRule).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        rule: expect.objectContaining({
-          consumer: 'logs',
-        }),
-      })
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
     );
+
+    expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
+
+    await waitFor(async () => {
+      await userEvent.click(await screen.findByTestId('saveRuleButton'));
+      return expect(createRule).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          rule: expect.objectContaining({
+            consumer: 'logs',
+          }),
+        })
+      );
+    });
   });
 
   it('should enforce any default interval', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
-    await setup({
+    const props = await setup({
       initialValues: { ruleTypeId: 'my-rule-type' },
       onClose: jest.fn(),
       defaultScheduleInterval: '3h',
@@ -512,63 +513,83 @@ describe('rule_add', () => {
       actionsShow: true,
     });
 
-    // Wait for handlers to fire
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    const intervalInputUnit = wrapper
-      .find('[data-test-subj="intervalInputUnit"]')
-      .first()
-      .getElement().props.value;
-    const intervalInput = wrapper.find('[data-test-subj="intervalInput"]').first().getElement()
-      .props.value;
-    expect(intervalInputUnit).toBe('h');
-    expect(intervalInput).toBe(3);
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('h');
+
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(3);
   });
 
   it('should load connectors and connector types when there is a pre-selected rule type', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
 
-    await setup({
+    const props = await setup({
       initialValues: {},
       onClose: jest.fn(),
       ruleTypeId: 'my-rule-type',
       actionsShow: true,
     });
 
-    expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
-    expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
-    expect(loadActionTypes).toHaveBeenCalledTimes(1);
-    expect(loadAllActions).toHaveBeenCalledTimes(1);
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    await waitFor(() => {
+      expect(fetchUiHealthStatus).toHaveBeenCalledTimes(1);
+      expect(fetchAlertingFrameworkHealth).toHaveBeenCalledTimes(1);
+      expect(loadActionTypes).toHaveBeenCalledTimes(1);
+      expect(loadAllActions).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should not load connectors and connector types when there is not an encryptionKey', async () => {
-    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
-    (alertingFrameworkHealth as jest.Mock).mockResolvedValue({
+    (fetchAlertingFrameworkHealth as jest.Mock).mockResolvedValue({
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: false,
     });
 
-    await setup({
+    const props = await setup({
       initialValues: {},
       onClose: jest.fn(),
       ruleTypeId: 'my-rule-type',
       actionsShow: true,
     });
 
-    expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
-    expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
-    expect(loadActionTypes).not.toHaveBeenCalled();
-    expect(loadAllActions).not.toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="actionNeededEmptyPrompt"]').first().text()).toContain(
-      'You must configure an encryption key to use Alerting'
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
     );
+
+    await waitFor(() => {
+      expect(fetchUiHealthStatus).toHaveBeenCalledTimes(1);
+      expect(fetchAlertingFrameworkHealth).toHaveBeenCalledTimes(1);
+      expect(loadActionTypes).not.toHaveBeenCalled();
+      expect(loadAllActions).not.toHaveBeenCalled();
+    });
+
+    expect(
+      await screen.findByText('You must configure an encryption key to use Alerting.', {
+        collapseWhitespace: false,
+      })
+    ).toBeInTheDocument();
   });
 });
 

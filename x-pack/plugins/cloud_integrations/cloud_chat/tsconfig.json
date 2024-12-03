@@ -12,15 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/cloud-plugin",
-    "@kbn/security-plugin",
-    "@kbn/storybook",
-    "@kbn/core-http-browser",
-    "@kbn/i18n",
     "@kbn/config-schema",
-    "@kbn/ui-theme",
-    "@kbn/cloud-experiments-plugin",
-    "@kbn/react-kibana-context-render",
+    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",

@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
-import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
-
-interface DropDownLabel {
-  label: string;
-  field: Field;
-}
+import type { DropDownLabel } from '@kbn/ml-field-stats-flyout';
+import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 
 interface Props {
   fields: Field[];
@@ -33,8 +30,8 @@ export const SplitFieldSelect: FC<Props> = ({
   testSubject,
   placeholder,
 }) => {
-  const { renderOption, optionCss } = useFieldStatsTrigger();
-  const options: EuiComboBoxOptionOption[] = fields.map(
+  const { optionCss } = useFieldStatsTrigger();
+  const options: DropDownLabel[] = fields.map(
     (f) =>
       ({
         label: f.name,
@@ -43,14 +40,14 @@ export const SplitFieldSelect: FC<Props> = ({
       } as DropDownLabel)
   );
 
-  const selection: EuiComboBoxOptionOption[] = [];
+  const selection: DropDownLabel[] = [];
   if (selectedField !== null) {
     selection.push({ label: selectedField.name, field: selectedField } as DropDownLabel);
   }
 
   function onChange(selectedOptions: EuiComboBoxOptionOption[]) {
     const option = selectedOptions[0] as DropDownLabel;
-    if (typeof option !== 'undefined') {
+    if (typeof option?.field !== 'undefined') {
       changeHandler(option.field);
     } else {
       changeHandler(null);
@@ -58,15 +55,14 @@ export const SplitFieldSelect: FC<Props> = ({
   }
 
   return (
-    <EuiComboBox
-      singleSelection={{ asPlainText: true }}
+    <OptionListWithFieldStats
+      singleSelection={true}
       options={options}
       selectedOptions={selection}
       onChange={onChange}
       isClearable={isClearable}
       placeholder={placeholder}
       data-test-subj={testSubject}
-      renderOption={renderOption}
     />
   );
 };

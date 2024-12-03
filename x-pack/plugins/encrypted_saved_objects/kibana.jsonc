@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/encrypted-saved-objects-plugin",
-  "owner": "@elastic/kibana-security",
+  "owner": [
+    "@elastic/kibana-security"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "This plugin provides encryption and decryption utilities for saved objects containing sensitive information.",
   "plugin": {
     "id": "encryptedSavedObjects",
-    "server": true,
     "browser": false,
+    "server": true,
     "configPath": [
       "xpack",
       "encryptedSavedObjects"

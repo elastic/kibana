@@ -127,7 +127,14 @@ export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';
 export const CCS_REMOTE_PATTERN = '*';
 export const INDEX_PATTERN = '.monitoring-*';
 export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-*';
-export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-*';
+export const INDEX_PATTERN_LOGSTASH = '*-logstash*';
+export const INDEX_PATTERN_LOGSTASH_MONITORING = '.monitoring-logstash-*';
+export const INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE =
+  '.ds-metrics-logstash.stack_monitoring.node-*';
+export const INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS =
+  '.ds-metrics-logstash.stack_monitoring.node_stats-*';
+export const INDEX_PATTERN_LOGSTASH_METRICS_NODE = '.ds-metrics-logstash.node-*';
+export const INDEX_PATTERN_LOGSTASH_METRICS_PLUGINS = '.ds-metrics-logstash.plugins-*';
 export const INDEX_PATTERN_BEATS = '.monitoring-beats-*';
 export const INDEX_ALERTS = '.monitoring-alerts-*';
 export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-*';
@@ -143,11 +150,6 @@ export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
 
 // We use this for metricbeat migration to identify specific products that we do not have constants for
 export const ELASTICSEARCH_SYSTEM_ID = 'elasticsearch';
-
-/**
- * The id of the infra source owned by the monitoring plugin.
- */
-export const INFRA_SOURCE_ID = 'internal-stack-monitoring';
 
 /*
  * These constants represent code paths within `getClustersFromRequest`

@@ -16,13 +16,13 @@ import type {
 import { createManagementSectionMock } from '@kbn/management-plugin/public/mocks';
 
 import { apiKeysManagementApp } from './api_keys';
-import type { ManagementAppConfigType } from './management_service';
 import { ManagementService } from './management_service';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
+import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
-import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
+import type { ConfigType } from '../config';
 import { securityMock } from '../mocks';
 
 const mockSection = createManagementSectionMock();
@@ -44,13 +44,14 @@ describe('ManagementService', () => {
         locator: {} as any,
       };
 
-      const service = new ManagementService();
+      const service = new ManagementService({} as unknown as ConfigType);
       service.setup({
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
         authc,
         management: managementSetup,
+        buildFlavor: 'traditional',
       });
 
       expect(mockSection.registerApp).toHaveBeenCalledTimes(4);
@@ -80,7 +81,7 @@ describe('ManagementService', () => {
       });
     });
 
-    it('Users, Roles, and Role Mappings are not registered when their UI config settings are set to false', () => {
+    it('Users, Roles, and Role Mappings are not registered when their config settings are set to false', () => {
       const mockSectionWithConfig = createManagementSectionMock();
       const { fatalErrors, getStartServices } = coreMock.createSetup();
       const { authc } = securityMock.createSetup();
@@ -96,20 +97,22 @@ describe('ManagementService', () => {
         locator: {} as any,
       };
 
-      const uiConfig: ManagementAppConfigType = {
-        userManagementEnabled: false,
+      const config = {
+        ui: {
+          userManagementEnabled: false,
+          roleMappingManagementEnabled: false,
+        },
         roleManagementEnabled: false,
-        roleMappingManagementEnabled: false,
-      };
+      } as unknown as ConfigType;
 
-      const service = new ManagementService();
+      const service = new ManagementService(config);
       service.setup({
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
         authc,
         management: managementSetup,
-        uiConfig,
+        buildFlavor: 'traditional',
       });
 
       // Only API Keys app should be registered
@@ -154,7 +157,15 @@ describe('ManagementService', () => {
       const license = licenseMock.create();
       license.features$ = licenseSubject;
 
-      const service = new ManagementService();
+      const config = {
+        ui: {
+          userManagementEnabled: true,
+          roleMappingManagementEnabled: true,
+        },
+        roleManagementEnabled: true,
+      } as unknown as ConfigType;
+
+      const service = new ManagementService(config);
 
       const managementSetup: ManagementSetup = {
         sections: {
@@ -166,19 +177,13 @@ describe('ManagementService', () => {
         locator: {} as any,
       };
 
-      const uiConfig: ManagementAppConfigType = {
-        userManagementEnabled: true,
-        roleManagementEnabled: true,
-        roleMappingManagementEnabled: true,
-      };
-
       service.setup({
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
         authc: securityMock.createSetup().authc,
         management: managementSetup,
-        uiConfig,
+        buildFlavor: 'traditional',
       });
 
       const getMockedApp = (id: string) => {
@@ -218,7 +223,6 @@ describe('ManagementService', () => {
           navLinks: {},
           catalogue: {},
         },
-        uiConfig,
       });
 
       return {

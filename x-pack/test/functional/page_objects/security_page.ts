@@ -6,7 +6,7 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import { AuthenticatedUser, Role } from '@kbn/security-plugin/common/model';
+import { AuthenticatedUser, Role, RoleRemoteClusterPrivilege } from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
@@ -306,42 +306,50 @@ export class SecurityPageObject extends FtrService {
       return;
     }
 
-    this.log.debug(`Redirecting to ${this.deployment.getHostPort()}/logout to force the logout`);
-    const url = this.deployment.getHostPort() + '/logout';
-    await this.browser.get(url);
+    const performForceLogout = async () => {
+      this.log.debug(`Redirecting to ${this.deployment.getHostPort()}/logout to force the logout`);
+      const url = this.deployment.getHostPort() + '/logout';
+      await this.browser.get(url);
 
-    // After logging out, the user can be redirected to various locations depending on the context. By default, we
-    // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
-    // we should simply wait until the user is redirected *elsewhere*.
-    if (waitForLoginPage) {
-      this.log.debug('Waiting on the login form to appear');
-      await this.waitForLoginPage();
-    } else {
-      this.log.debug('Waiting for logout to complete');
-      await this.retry.waitFor('logout to complete', async () => {
-        // There are cases when browser/Kibana would like users to confirm that they want to navigate away from the
-        // current page and lose the state (e.g. unsaved changes) via native alert dialog.
-        const alert = await this.browser.getAlert();
-        if (alert?.accept) {
-          await alert.accept();
-        }
+      // After logging out, the user can be redirected to various locations depending on the context. By default, we
+      // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
+      // we should simply wait until the user is redirected *elsewhere*.
+      if (waitForLoginPage) {
+        this.log.debug('Waiting on the login form to appear');
+        await this.waitForLoginPage();
+      } else {
+        this.log.debug('Waiting for logout to complete');
+        await this.retry.waitFor('logout to complete', async () => {
+          // There are cases when browser/Kibana would like users to confirm that they want to navigate away from the
+          // current page and lose the state (e.g. unsaved changes) via native alert dialog.
+          const alert = await this.browser.getAlert();
+          if (alert?.accept) {
+            await alert.accept();
+          }
 
-        await this.retry.waitFor('URL redirects to finish', async () => {
-          const urlBefore = await this.browser.getCurrentUrl();
-          await this.delay(1000);
-          const urlAfter = await this.browser.getCurrentUrl();
-          return urlAfter === urlBefore;
+          // Timeout has been doubled to 40s here in attempt to quiet the flakiness
+          await this.retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
+            const urlBefore = await this.browser.getCurrentUrl();
+            await this.delay(1000);
+            const urlAfter = await this.browser.getCurrentUrl();
+            this.log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
+            return urlAfter === urlBefore;
+          });
+
+          const currentUrl = await this.browser.getCurrentUrl();
+          if (this.config.get('serverless')) {
+            // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+            return currentUrl.includes('/login') || currentUrl.includes('/projects');
+          } else {
+            return !currentUrl.includes('/logout');
+          }
         });
+      }
+    };
 
-        const currentUrl = await this.browser.getCurrentUrl();
-        if (this.config.get('serverless')) {
-          // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
-          return currentUrl.includes('/login') || currentUrl.includes('/projects');
-        } else {
-          return !currentUrl.includes('/logout');
-        }
-      });
-    }
+    await this.retry.tryWithRetries('force logout with retries', performForceLogout, {
+      retryCount: 2,
+    });
   }
 
   async clickRolesSection() {
@@ -598,9 +606,54 @@ export class SecurityPageObject extends FtrService {
     return confirmText;
   }
 
+  async addRemoteClusterPrivilege(privilege: RoleRemoteClusterPrivilege, index = 0) {
+    this.log.debug('addRemoteClusterPrivilege, index = ', index);
+
+    await this.testSubjects.click('addRemoteClusterPrivilegesButton');
+
+    for (const cluster of privilege.clusters) {
+      await this.comboBox.setCustom(`remoteClusterClustersInput${index}`, cluster);
+    }
+
+    for (const clusterPrivilege of privilege.privileges) {
+      await this.comboBox.setCustom(`remoteClusterPrivilegesInput${index}`, clusterPrivilege);
+    }
+  }
+
+  async saveRole() {
+    this.log.debug('click save button');
+    await this.testSubjects.click('roleFormSaveButton');
+
+    // Signifies that the role management page redirected back to the role grid page,
+    // and successfully refreshed the grid
+    await this.testSubjects.existOrFail('roleRow');
+  }
+
+  async deleteRemoteClusterPrivilege(index: number) {
+    this.log.debug('deleteRemoteClusterPrivilege, index = ', index);
+
+    await this.testSubjects.click(`deleteRemoteClusterPrivilegesButton${index}`);
+  }
+
+  async getRemoteClusterPrivilege(index: number) {
+    this.log.debug('getRemoteClusterPrivilege, index = ', index);
+    const clusterOptions = await this.comboBox.getComboBoxSelectedOptions(
+      `remoteClusterClustersInput${index}`
+    );
+
+    const privilegeOptions = await this.comboBox.getComboBoxSelectedOptions(
+      `remoteClusterPrivilegesInput${index}`
+    );
+
+    return {
+      clusters: clusterOptions,
+      privileges: privilegeOptions,
+    };
+  }
+
   async addRole(
     roleName: string,
-    roleObj: { elasticsearch: Pick<Role['elasticsearch'], 'indices'> }
+    roleObj: { elasticsearch: Pick<Role['elasticsearch'], 'indices' | 'remote_cluster'> }
   ) {
     const self = this;
 
@@ -616,7 +669,11 @@ export class SecurityPageObject extends FtrService {
 
     if (roleObj.elasticsearch.indices[0].query) {
       await this.testSubjects.click('restrictDocumentsQuery0');
-      await this.monacoEditor.setCodeEditorValue(roleObj.elasticsearch.indices[0].query);
+
+      await this.monacoEditor.typeCodeEditorValue(
+        roleObj.elasticsearch.indices[0].query,
+        'kibanaCodeEditor'
+      );
     }
 
     await this.testSubjects.click('addSpacePrivilegeButton');
@@ -661,12 +718,18 @@ export class SecurityPageObject extends FtrService {
       await addGrantedField(roleObj.elasticsearch.indices[0].field_security!.grant!);
     }
 
-    this.log.debug('click save button');
-    await this.testSubjects.click('roleFormSaveButton');
+    if (roleObj.elasticsearch.remote_cluster) {
+      this.log.debug('adding remote_cluster privileges');
 
-    // Signifies that the role management page redirected back to the role grid page,
-    // and successfully refreshed the grid
-    await this.testSubjects.existOrFail('roleRow');
+      for (const [
+        index,
+        remoteClusterPrivilege,
+      ] of roleObj.elasticsearch.remote_cluster.entries()) {
+        await this.addRemoteClusterPrivilege(remoteClusterPrivilege, index);
+      }
+    }
+
+    await this.saveRole();
   }
 
   async selectRole(role: string) {

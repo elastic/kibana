@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { EuiText, EuiTextColor, EuiSpacer, EuiHealth } from '@elastic/eui';
@@ -42,7 +44,7 @@ const fieldTypeOptions = [
   'toggle',
 ] as const;
 
-type FieldType = typeof fieldTypeOptions[number];
+type FieldType = (typeof fieldTypeOptions)[number];
 
 const fieldConfigBase: FieldConfig<unknown> = {
   label: 'My field',
@@ -96,7 +98,7 @@ const getPropsForType = (type: FieldType) => {
               {
                 value: 'warning',
                 inputDisplay: (
-                  <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
+                  <EuiHealth color="subdued" css={{ lineHeight: 'inherit' }}>
                     Warning
                   </EuiHealth>
                 ),
@@ -105,7 +107,7 @@ const getPropsForType = (type: FieldType) => {
               {
                 value: 'minor',
                 inputDisplay: (
-                  <EuiHealth color="warning" style={{ lineHeight: 'inherit' }}>
+                  <EuiHealth color="warning" css={{ lineHeight: 'inherit' }}>
                     Minor
                   </EuiHealth>
                 ),
@@ -113,7 +115,7 @@ const getPropsForType = (type: FieldType) => {
               {
                 value: 'critical',
                 inputDisplay: (
-                  <EuiHealth color="danger" style={{ lineHeight: 'inherit' }}>
+                  <EuiHealth color="danger" css={{ lineHeight: 'inherit' }}>
                     Critical
                   </EuiHealth>
                 ),

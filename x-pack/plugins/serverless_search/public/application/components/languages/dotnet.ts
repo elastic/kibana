@@ -27,7 +27,7 @@ using Elastic.Clients.Elasticsearch.Serverless.QueryDsl;
 
 var client = new ElasticsearchClient("${cloudId}", new ApiKey("${apiKey}"));`,
   testConnection: `var info = await client.InfoAsync();`,
-  ingestData: `var doc = new Book
+  ingestData: ({ ingestPipeline }) => `var doc = new Book
 {
   Id = "9780553351927",
   Name = "Snow Crash",
@@ -36,7 +36,27 @@ var client = new ElasticsearchClient("${cloudId}", new ApiKey("${apiKey}"));`,
   PageCount = 470
 };
 
-var response = await client.IndexAsync(doc, "books");`,
+var response = await client.IndexAsync(doc, index: "books"${
+    ingestPipeline ? `, x => x.Pipeline("${ingestPipeline}")` : ''
+  }));`,
+  ingestDataIndex: ({ apiKey, cloudId, indexName, ingestPipeline }) => `using System;
+using Elastic.Clients.Elasticsearch.Serverless;
+using Elastic.Clients.Elasticsearch.Serverless.QueryDsl;
+
+var client = new ElasticsearchClient("${cloudId}", new ApiKey("${apiKey}"));
+
+var doc = new Book
+{
+  Id = "9780553351927",
+  Name = "Snow Crash",
+  Author = "Neal Stephenson",
+  ReleaseDate = new DateTime(1992, 06, 01),
+  PageCount = 470
+};
+
+var response = await client.IndexAsync(doc, index: "${indexName}"${
+    ingestPipeline ? `, x => x.Pipeline("${ingestPipeline}")` : ''
+  }));`,
   buildSearchQuery: `var response = await client.SearchAsync<Book>(s => s
   .Index("books")
   .From(0)

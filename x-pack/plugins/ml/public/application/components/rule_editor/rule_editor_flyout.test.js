@@ -7,7 +7,7 @@
 
 // Mock the services required for reading and writing job data.
 jest.mock('../../services/job_service', () => ({
-  mlJobService: {
+  mlJobServiceFactory: () => ({
     getJob: () => {
       return {
         job_id: 'farequote_no_by',
@@ -43,9 +43,8 @@ jest.mock('../../services/job_service', () => ({
         },
       };
     },
-  },
+  }),
 }));
-jest.mock('../../services/ml_api_service', () => 'ml');
 jest.mock('../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
@@ -91,6 +90,12 @@ function prepareTest() {
             ml: {
               customRules: 'jest-metadata-mock-url',
             },
+          },
+        },
+        mlServices: { mlApi: {} },
+        notifications: {
+          toasts: {
+            addDanger: () => {},
           },
         },
       },

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
 import del from 'del';
 import path from 'path';
-import type { Logger } from '@kbn/core/server';
-import { ChromiumArchivePaths, PackageInfo } from './chromium';
 import { download } from './download';
-import { md5 } from './download/checksum';
+import { sha256 } from './download/checksum';
 import { extract } from './extract';
 
 type BinaryPath = string;
@@ -27,7 +27,7 @@ export async function install(
 ): Promise<BinaryPath> {
   const { architecture, platform } = pkg;
   const binaryPath = paths.getBinaryPath(pkg, chromiumPath);
-  const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
+  const binaryChecksum = await sha256(binaryPath).catch(() => 'MISSING');
 
   if (binaryChecksum === pkg.binaryChecksum) {
     // validated a previously extracted browser binary
@@ -55,7 +55,7 @@ export async function install(
   }
 
   // check the newly extracted browser binary
-  const downloadedBinaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
+  const downloadedBinaryChecksum = await sha256(binaryPath).catch(() => 'MISSING');
   if (downloadedBinaryChecksum !== pkg.binaryChecksum) {
     const error = new Error(
       `Error installing browsers, binary checksums incorrect for [${architecture}/${platform}]`

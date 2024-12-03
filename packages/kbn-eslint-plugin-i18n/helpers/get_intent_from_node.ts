@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
-import { cleanString, lowerCaseFirstLetter, upperCaseFirstLetter } from './utils';
+import { geti18nIdentifierFromString, lowerCaseFirstLetter } from './utils';
 
 const EXEMPTED_TAG_NAMES = ['EuiCode', 'EuiBetaBadge', 'FormattedMessage'];
 
@@ -14,13 +16,7 @@ export function getIntentFromNode(
   value: string,
   parent: TSESTree.Node | undefined
 ): string | false {
-  const processedValue = lowerCaseFirstLetter(
-    cleanString(value)
-      .split(' ')
-      .filter((_, i) => i < 4)
-      .map(upperCaseFirstLetter)
-      .join('')
-  );
+  const intent = geti18nIdentifierFromString(value);
 
   if (
     parent &&
@@ -36,10 +32,10 @@ export function getIntentFromNode(
     }
 
     if (parentTagName.includes('Eui')) {
-      return `${processedValue}${parentTagName.replace('Eui', '')}Label`;
+      return `${intent}${parentTagName.replace('Eui', '')}Label`;
     }
 
-    return `${lowerCaseFirstLetter(parentTagName)}.${processedValue}Label`;
+    return `${lowerCaseFirstLetter(parentTagName)}.${intent}Label`;
   }
 
   if (
@@ -57,8 +53,8 @@ export function getIntentFromNode(
       return false;
     }
 
-    return `${lowerCaseFirstLetter(parentTagName)}.${processedValue}Label`;
+    return `${lowerCaseFirstLetter(parentTagName)}.${intent}Label`;
   }
 
-  return `${processedValue}Label`;
+  return `${intent}Label`;
 }

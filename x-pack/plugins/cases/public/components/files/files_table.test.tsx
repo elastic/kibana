@@ -40,8 +40,9 @@ describe('FilesTable', () => {
     expect(await screen.findByTestId('cases-files-table-filename')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-filetype')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-date-added')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
+    ).toBeInTheDocument();
   });
 
   it('renders loading state', async () => {
@@ -65,7 +66,7 @@ describe('FilesTable', () => {
 
     expect(addFileButton).toBeInTheDocument();
 
-    userEvent.click(addFileButton);
+    await userEvent.click(addFileButton);
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
   });
@@ -84,7 +85,7 @@ describe('FilesTable', () => {
 
     appMockRender.render(<FilesTable {...defaultProps} items={[nonImageFileMock]} />);
 
-    userEvent.click(
+    await userEvent.click(
       await within(await screen.findByTestId('cases-files-table-filename')).findByTitle(
         'No preview available'
       )
@@ -96,7 +97,7 @@ describe('FilesTable', () => {
   it('image rows open file preview', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByRole('button', {
         name: `${basicFileMock.name}.${basicFileMock.extension}`,
       })
@@ -132,8 +133,12 @@ describe('FilesTable', () => {
   it('download button renders correctly', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
+    await userEvent.click(
+      await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
+    );
+
     await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
+      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalled();
     });
 
     await waitFor(() => {
@@ -149,16 +154,9 @@ describe('FilesTable', () => {
   it('delete button renders correctly', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
-    });
-
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-        id: basicFileMock.id,
-      });
-    });
+    await userEvent.click(
+      await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
+    );
 
     expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
   });
@@ -166,24 +164,38 @@ describe('FilesTable', () => {
   it('clicking delete button opens deletion modal', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
-    });
+    await userEvent.click(
+      await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
+    );
 
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-        id: basicFileMock.id,
-      });
-    });
-
-    const deleteButton = await screen.findByTestId('cases-files-delete-button');
-
-    expect(deleteButton).toBeInTheDocument();
-
-    userEvent.click(deleteButton);
+    await userEvent.click(await screen.findByTestId('cases-files-delete-button'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+  });
+
+  it('clicking the copy file hash button rerenders the popover correctly', async () => {
+    appMockRender.render(<FilesTable {...defaultProps} />);
+
+    const popoverButton = await screen.findByTestId(
+      `cases-files-actions-popover-button-${basicFileMock.id}`
+    );
+
+    expect(popoverButton).toBeInTheDocument();
+    await userEvent.click(popoverButton);
+
+    expect(
+      await screen.findByTestId(`cases-files-popover-${basicFileMock.id}`)
+    ).toBeInTheDocument();
+
+    const copyFileHashButton = await screen.findByTestId('cases-files-copy-hash-button');
+
+    expect(copyFileHashButton).toBeInTheDocument();
+
+    await userEvent.click(copyFileHashButton);
+
+    expect(await screen.findByTestId('cases-files-copy-md5-hash-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-copy-sha1-hash-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-copy-sha256-hash-button')).toBeInTheDocument();
   });
 
   it('go to next page calls onTableChange with correct values', async () => {
@@ -197,7 +209,7 @@ describe('FilesTable', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('pagination-button-next'));
+    await userEvent.click(await screen.findByTestId('pagination-button-next'));
 
     await waitFor(() =>
       expect(onTableChange).toHaveBeenCalledWith({
@@ -217,7 +229,7 @@ describe('FilesTable', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('pagination-button-previous'));
+    await userEvent.click(await screen.findByTestId('pagination-button-previous'));
 
     await waitFor(() =>
       expect(onTableChange).toHaveBeenCalledWith({
@@ -231,13 +243,13 @@ describe('FilesTable', () => {
       <FilesTable {...defaultProps} items={[{ ...basicFileMock }, { ...basicFileMock }]} />
     );
 
-    userEvent.click(await screen.findByTestId('tablePaginationPopoverButton'));
+    await userEvent.click(await screen.findByTestId('tablePaginationPopoverButton'));
 
     const pageSizeOption = await screen.findByTestId('tablePagination-50-rows');
 
     pageSizeOption.style.pointerEvents = 'all';
 
-    userEvent.click(pageSizeOption);
+    await userEvent.click(pageSizeOption);
 
     await waitFor(() =>
       expect(onTableChange).toHaveBeenCalledWith({

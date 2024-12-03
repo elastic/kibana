@@ -10,13 +10,13 @@ import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
-import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
-import { betaBadgeProps } from './beta_badge_props';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -101,7 +101,11 @@ export const ActionTypeMenu = ({
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
       const card = (
         <EuiCard
-          betaBadgeProps={item.isExperimental ? betaBadgeProps : undefined}
+          betaBadgeProps={
+            item.isExperimental
+              ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
+              : undefined
+          }
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}

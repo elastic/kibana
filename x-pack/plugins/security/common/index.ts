@@ -5,27 +5,46 @@
  * 2.0.
  */
 
-export type { SecurityLicense, SecurityLicenseFeatures, LoginLayout } from './licensing';
+export type {
+  GetUserProfileResponse,
+  GetUserDisplayNameParams,
+  EditUser,
+  BuiltinESPrivileges,
+  RoleMapping,
+  RoleMappingRule,
+  RoleMappingAllRule,
+  RoleMappingAnyRule,
+  RoleMappingExceptRule,
+  RoleMappingFieldRule,
+  RoleTemplate,
+  StoredRoleTemplate,
+  InvalidRoleTemplate,
+  InlineRoleTemplate,
+} from './model';
+
+export { getUserDisplayName, isRoleReserved, isRoleWithWildcardBasePrivilege } from './model';
+
+// Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {
   AuthenticatedUser,
-  GetUserProfileResponse,
+  UserRealm,
+  User,
   AuthenticationProvider,
-  PrivilegeDeprecationsService,
-  PrivilegeDeprecationsRolesByFeatureIdRequest,
-  PrivilegeDeprecationsRolesByFeatureIdResponse,
   Role,
   RoleIndexPrivilege,
   RoleKibanaPrivilege,
+  RoleRemoteIndexPrivilege,
+  RoleRemoteClusterPrivilege,
   FeaturesPrivileges,
-  User,
+  LoginLayout,
+  RawKibanaPrivileges,
+  RawKibanaFeaturePrivileges,
+  SecurityLicenseFeatures,
+  SecurityLicense,
   UserProfile,
   UserProfileUserInfo,
   UserProfileWithSecurity,
   UserProfileData,
   UserProfileLabels,
   UserProfileUserInfoWithSecurity,
-  ApiKey,
-  UserRealm,
-  GetUserDisplayNameParams,
-} from './model';
-export { getUserDisplayName } from './model';
+} from '@kbn/security-plugin-types-common';

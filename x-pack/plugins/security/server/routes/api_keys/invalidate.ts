@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { ApiKey } from '@kbn/security-plugin-types-common';
 
 import type { RouteDefinitionParams } from '..';
-import type { ApiKey } from '../../../common/model';
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -21,6 +21,12 @@ export function defineInvalidateApiKeysRoutes({ router }: RouteDefinitionParams)
   router.post(
     {
       path: '/internal/security/api_key/invalidate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's ES client`,
+        },
+      },
       validate: {
         body: schema.object({
           apiKeys: schema.arrayOf(schema.object({ id: schema.string(), name: schema.string() })),

@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { BooleanRelation } from '@kbn/es-query';
 import { IEmbeddable } from '..';
 
+/**
+ * @deprecated use `EmbeddableApiContext` from `@kbn/presentation-publishing`
+ */
 export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
   embeddable: T;
 }
 
-export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable?: T;
+export type ValueClickContext = Partial<EmbeddableApiContext> & {
   data: {
     data: Array<{
       table: Pick<Datatable, 'rows' | 'columns'>;
@@ -28,10 +32,9 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
     timeFieldName?: string;
     negate?: boolean;
   };
-}
+};
 
-export interface MultiValueClickContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable?: T;
+export type MultiValueClickContext = Partial<EmbeddableApiContext> & {
   data: {
     data: Array<{
       table: Pick<Datatable, 'rows' | 'columns'>;
@@ -44,31 +47,29 @@ export interface MultiValueClickContext<T extends IEmbeddable = IEmbeddable> {
     timeFieldName?: string;
     negate?: boolean;
   };
-}
+};
 
-export interface CellValueContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable: T;
+export type CellValueContext = Partial<EmbeddableApiContext> & {
   data: Array<{
     value?: any;
     eventId?: string;
     columnMeta?: DatatableColumnMeta;
   }>;
-}
+};
 
-export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable?: T;
+export type RangeSelectContext = Partial<EmbeddableApiContext> & {
   data: {
     table: Datatable;
     column: number;
     range: number[];
     timeFieldName?: string;
   };
-}
+};
 
-export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
-  | ValueClickContext<T>
-  | MultiValueClickContext<T>
-  | RangeSelectContext<T>
+export type ChartActionContext =
+  | ValueClickContext
+  | MultiValueClickContext
+  | RangeSelectContext
   | RowClickContext;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';

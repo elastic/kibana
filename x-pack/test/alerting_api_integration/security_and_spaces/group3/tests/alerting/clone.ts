@@ -6,6 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
 import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
@@ -27,7 +30,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('clone', async () => {
+  describe('clone', () => {
     const objectRemover = new ObjectRemover(supertest);
     const space1 = Spaces[0].id;
     const space2 = Spaces[1].id;
@@ -144,6 +147,26 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                     uuid: response.body.actions[0].uuid,
                   },
                 ],
+                monitoring: {
+                  run: {
+                    history: [],
+                    calculated_metrics: {
+                      success_ratio: 0,
+                    },
+                    last_run: {
+                      timestamp: response.body.monitoring.run.last_run.timestamp,
+                      metrics: {
+                        duration: 0,
+                        total_search_duration_ms: null,
+                        total_indexing_duration_ms: null,
+                        total_alerts_detected: null,
+                        total_alerts_created: null,
+                        gap_duration_s: null,
+                      },
+                    },
+                  },
+                },
+                snooze_schedule: [],
                 enabled: true,
                 rule_type_id: 'test.noop',
                 running: false,
@@ -194,7 +217,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: response.body.id,
               });
               break;
@@ -247,6 +270,104 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       objectRemover.add(space1, cloneRuleResponse.body.id, 'rule', 'alerting');
 
       expect(cloneRuleResponse.body.scheduled_task_id).to.eql(undefined);
+    });
+
+    describe('Actions', () => {
+      it('should clone a rule with actions correctly', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space1)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const ruleCreated = await supertest
+          .post(`${getUrlPrefix(space1)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  id: createdAction.id,
+                  group: 'default',
+                  params: {},
+                },
+                {
+                  id: 'system-connector-test.system-action',
+                  params: {},
+                },
+              ],
+            })
+          );
+
+        objectRemover.add(space1, ruleCreated.body.id, 'rule', 'alerting');
+
+        const cloneRuleResponse = await supertest
+          .post(`${getUrlPrefix(space1)}/internal/alerting/rule/${ruleCreated.body.id}/_clone`)
+          .set('kbn-xsrf', 'foo')
+          .send()
+          .expect(200);
+
+        objectRemover.add(space1, cloneRuleResponse.body.id, 'rule', 'alerting');
+
+        const action = cloneRuleResponse.body.actions[0];
+        const systemAction = cloneRuleResponse.body.actions[1];
+        const { uuid, ...restAction } = action;
+        const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+        expect([restAction, restSystemAction]).to.eql([
+          {
+            id: createdAction.id,
+            connector_type_id: 'test.noop',
+            group: 'default',
+            params: {},
+          },
+          {
+            id: 'system-connector-test.system-action',
+            connector_type_id: 'test.system-action',
+            params: {},
+          },
+          ,
+        ]);
+
+        const esResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${cloneRuleResponse.body.id}`,
+          },
+          { meta: true }
+        );
+
+        expect(esResponse.statusCode).to.eql(200);
+        expect((esResponse.body._source as any)?.alert.systemActions).to.be(undefined);
+        const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+
+        const rawAction = rawActions[0];
+        const rawSystemAction = rawActions[1];
+
+        const { uuid: rawActionUuid, ...rawActionRest } = rawAction;
+        const { uuid: rawSystemActionUuid, ...rawSystemActionRest } = rawSystemAction;
+
+        expect(rawActionRest).to.eql({
+          actionRef: 'action_0',
+          actionTypeId: 'test.noop',
+          params: {},
+          group: 'default',
+        });
+
+        expect(rawSystemActionRest).to.eql({
+          actionRef: 'system_action:system-connector-test.system-action',
+          actionTypeId: 'test.system-action',
+          params: {},
+        });
+
+        expect(rawActionUuid).to.not.be(undefined);
+        expect(rawSystemActionUuid).to.not.be(undefined);
+      });
     });
   });
 }

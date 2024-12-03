@@ -48,6 +48,7 @@ import {
   SolutionSideNavPanelLinksGroupStyles,
   panelClassName,
   accordionButtonClassName,
+  SolutionSideNavPanelItemStyles,
 } from './solution_side_nav_panel.styles';
 
 export interface SolutionSideNavPanelContentProps {
@@ -333,8 +334,7 @@ interface SolutionSideNavPanelItemsProps {
  */
 const SolutionSideNavPanelItems: React.FC<SolutionSideNavPanelItemsProps> = React.memo(
   function SolutionSideNavPanelItems({ items, onClose }) {
-    const { euiTheme } = useEuiTheme();
-    const panelLinksGroupClassNames = classNames(SolutionSideNavPanelLinksGroupStyles(euiTheme));
+    const panelLinksGroupClassNames = classNames(SolutionSideNavPanelLinksGroupStyles());
     return (
       <EuiListGroup className={panelLinksGroupClassNames}>
         {items.map((item) => (
@@ -355,7 +355,8 @@ interface SolutionSideNavPanelItemProps {
 const SolutionSideNavPanelItem: React.FC<SolutionSideNavPanelItemProps> = React.memo(
   function SolutionSideNavPanelItem({ item, onClose }) {
     const { tracker } = useTelemetryContext();
-    const panelLinkClassNames = classNames('solutionSideNavPanelLink');
+    const { euiTheme } = useEuiTheme();
+    const panelLinkClassNames = classNames(SolutionSideNavPanelItemStyles(euiTheme));
     const { id, href, onClick, iconType, openInNewTab } = item;
     const onClickHandler = useCallback<React.MouseEventHandler>(
       (ev) => {

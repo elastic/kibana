@@ -40,7 +40,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -57,11 +57,9 @@
           "\nThe Lazily-loaded `ColorPicker` component.  Consumers should use `React.Suspense` or\nthe withSuspense` HOC to load this component."
         ],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, maxDepth, layerIndex, }: ",
           "ColorPickerProps",
-          "> & { readonly _result: ({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, maxDepth, layerIndex, }: ",
-          "ColorPickerProps",
-          ") => JSX.Element; }"
+          ") => React.JSX.Element>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",
         "deprecated": false,
@@ -78,7 +76,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -130,7 +128,7 @@
           "\nRender current time line annotation on @elastic/charts `Chart`"
         ],
         "signature": [
-          "({ isDarkMode, domainEnd }: React.PropsWithChildren<CurrentTimeProps>) => JSX.Element"
+          "({ isDarkMode, domainEnd }: CurrentTimeProps) => React.JSX.Element"
         ],
         "path": "src/plugins/charts/public/static/components/current_time.tsx",
         "deprecated": false,
@@ -139,12 +137,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.CurrentTime.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ isDarkMode, domainEnd }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<CurrentTimeProps>"
+              "CurrentTimeProps"
             ],
             "path": "src/plugins/charts/public/static/components/current_time.tsx",
             "deprecated": false,
@@ -165,7 +163,7 @@
         "signature": [
           "({ icon, iconColor, message, dataTestSubj, className, renderComplete, }: ",
           "EmptyPlaceholderProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
         "deprecated": false,
@@ -198,7 +196,7 @@
         "label": "Endzones",
         "description": [],
         "signature": [
-          "({ isDarkMode, domainStart, domainEnd, interval, domainMin, domainMax, hideTooltips, isFullBin, }: React.PropsWithChildren<EndzonesProps>) => JSX.Element"
+          "({ isDarkMode, domainStart, domainEnd, interval, domainMin, domainMax, hideTooltips, isFullBin, }: EndzonesProps) => React.JSX.Element"
         ],
         "path": "src/plugins/charts/public/static/components/endzones.tsx",
         "deprecated": false,
@@ -207,12 +205,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.Endzones.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  isDarkMode,\n  domainStart,\n  domainEnd,\n  interval,\n  domainMin,\n  domainMax,\n  hideTooltips = true,\n  isFullBin = false,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<EndzonesProps>"
+              "EndzonesProps"
             ],
             "path": "src/plugins/charts/public/static/components/endzones.tsx",
             "deprecated": false,
@@ -390,7 +388,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -407,11 +405,9 @@
           "\nThe Lazily-loaded `LegendToggle` component.  Consumers should use `React.Suspense` or\nthe withSuspense` HOC to load this component."
         ],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<React.MemoExoticComponent<({ onClick, showLegend, legendPosition }: ",
           "LegendToggleProps",
-          "> & { readonly _result: React.MemoExoticComponent<({ onClick, showLegend, legendPosition }: ",
-          "LegendToggleProps",
-          ") => JSX.Element>; }"
+          ") => React.JSX.Element>>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",
         "deprecated": false,
@@ -428,7 +424,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -609,7 +605,8 @@
           "Chart",
           ">, syncOptions: ",
           "ActiveCursorSyncOption",
-          ") => (cursor: any) => void"
+          ") => ",
+          "PointerUpdateListener"
         ],
         "path": "src/plugins/charts/public/services/active_cursor/use_active_cursor.ts",
         "deprecated": false,
@@ -695,7 +692,7 @@
         "label": "Warnings",
         "description": [],
         "signature": [
-          "({\n  warnings,\n  compressed = false,\n  'data-test-subj': dataTestSubj = 'chart-inline-warning-button',\n}: { warnings: React.ReactNode[]; compressed?: boolean | undefined; 'data-test-subj'?: string | undefined; }) => JSX.Element | null"
+          "({\n  warnings,\n  compressed = false,\n  'data-test-subj': dataTestSubj = 'chart-inline-warning-button',\n}: { warnings: React.ReactNode[]; compressed?: boolean | undefined; 'data-test-subj'?: string | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/plugins/charts/public/static/components/warnings.tsx",
         "deprecated": false,
@@ -853,7 +850,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+              ", \"columns\" | \"rows\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
             "path": "src/plugins/charts/public/index.ts",
             "deprecated": false,
@@ -1283,12 +1280,19 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.Labels.rotate",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "rotate",
             "description": [],
             "signature": [
-              "number | undefined"
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.LabelRotation",
+                "text": "LabelRotation"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/charts/common/types.ts",
             "deprecated": false,
@@ -1366,7 +1370,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+              ", \"columns\" | \"rows\">; cells: { column: number; row: number; }[]; relation?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1609,7 +1613,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "number"
+          "0 | 90 | 75 | 270"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -1673,7 +1677,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
+          "{ readonly Horizontal: 0; readonly Vertical: 90; readonly Angled: 75; readonly VerticalRotation: 270; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -2217,41 +2221,15 @@
       "children": [
         {
           "parentPluginId": "charts",
-          "id": "def-public.ChartsPluginSetup.legacyColors",
-          "type": "Object",
-          "tags": [],
-          "label": "legacyColors",
-          "description": [],
-          "signature": [
-            "{ readonly seedColors: string[]; readonly mappedColors: ",
-            "MappedColors",
-            "; createColorLookupFunction: (arrayOfStringsOrNumbers?: (string | number)[] | undefined, colorMapping?: Partial<Record<string, string>>) => (value: string | number) => any; }"
-          ],
-          "path": "src/plugins/charts/public/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "charts",
           "id": "def-public.ChartsPluginSetup.theme",
           "type": "Object",
           "tags": [],
           "label": "theme",
           "description": [],
           "signature": [
-            "{ readonly chartsDefaultTheme: ",
-            "RecursivePartial",
-            "<",
+            "{ readonly chartsDefaultBaseTheme: ",
             "Theme",
-            ">; readonly chartsDefaultBaseTheme: ",
-            "Theme",
-            "; chartsTheme$: ",
-            "Observable",
-            "<",
-            "RecursivePartial",
-            "<",
-            "Theme",
-            ">>; chartsBaseTheme$: ",
+            "; chartsBaseTheme$: ",
             "Observable",
             "<",
             "Theme",
@@ -2260,12 +2238,16 @@
             "<",
             {
               "pluginId": "@kbn/core-theme-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreThemeBrowserPluginApi",
-              "section": "def-common.CoreTheme",
+              "section": "def-public.CoreTheme",
               "text": "CoreTheme"
             },
             ">; useDarkMode: () => boolean; useChartsTheme: () => ",
+            "RecursivePartial",
+            "<",
+            "Theme",
+            ">; useSparklineOverrides: () => ",
             "RecursivePartial",
             "<",
             "Theme",
@@ -3135,12 +3117,19 @@
           {
             "parentPluginId": "charts",
             "id": "def-common.Labels.rotate",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "rotate",
             "description": [],
             "signature": [
-              "number | undefined"
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.LabelRotation",
+                "text": "LabelRotation"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/charts/common/types.ts",
             "deprecated": false,
@@ -3354,7 +3343,7 @@
         "label": "AllowedChartOverrides",
         "description": [],
         "signature": [
-          "{ chart?: { description?: string | undefined; title?: string | undefined; } | undefined; }"
+          "{ chart?: { title?: string | undefined; description?: string | undefined; } | undefined; }"
         ],
         "path": "src/plugins/charts/common/static/overrides/settings.ts",
         "deprecated": false,
@@ -3369,7 +3358,7 @@
         "label": "AllowedSettingsOverrides",
         "description": [],
         "signature": [
-          "{ settings?: { theme?: ",
+          "{ settings?: { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -3385,7 +3374,7 @@
           "LegendPositionConfig",
           " | undefined; rotation?: ",
           "Rotation",
-          " | undefined; debug?: boolean | undefined; locale?: string | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+          " | undefined; debug?: boolean | undefined; locale?: string | undefined; rendering?: ",
           "Rendering",
           " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
           "MakeOverridesSerializable",
@@ -3393,17 +3382,21 @@
           "ExternalPointerEventsSettings",
           " | undefined>; pointBuffer?: ",
           "MarkBuffer",
-          " | undefined; resizeDebounce?: number | undefined; pointerUpdateTrigger?: ",
+          " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
           " | undefined; brushAxis?: ",
           "BrushAxis",
-          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabel?: string | undefined; xDomain?: ",
+          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; dow?: number | undefined; legendValues?: ",
+          "MakeOverridesSerializable",
+          "<",
+          "LegendValue",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; ariaDescription?: string | undefined; ariaLabel?: string | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
+          " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabelledBy?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; } | undefined; }"
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; } | undefined; }"
         ],
         "path": "src/plugins/charts/common/static/overrides/settings.ts",
         "deprecated": false,
@@ -3497,7 +3490,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "number"
+          "0 | 90 | 75 | 270"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -3575,14 +3568,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/charts/common/expressions/palette/types.ts",
@@ -3615,7 +3600,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
+          "{ readonly Horizontal: 0; readonly Vertical: 90; readonly Angled: 75; readonly VerticalRotation: 270; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,

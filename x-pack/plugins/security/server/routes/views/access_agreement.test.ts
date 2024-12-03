@@ -16,8 +16,11 @@ import { httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineAccessAgreementRoutes } from './access_agreement';
-import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
-import type { AuthenticationProvider } from '../../../common/model';
+import type {
+  AuthenticationProvider,
+  SecurityLicense,
+  SecurityLicenseFeatures,
+} from '../../../common';
 import type { ConfigType } from '../../config';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
@@ -68,7 +71,7 @@ describe('Access agreement view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.options).toEqual({ excludeFromOAS: true });
       expect(routeConfig.validate).toBe(false);
     });
 

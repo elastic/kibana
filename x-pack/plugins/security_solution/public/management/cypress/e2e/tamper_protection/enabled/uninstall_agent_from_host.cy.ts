@@ -22,8 +22,7 @@ import { login } from '../../../tasks/login';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170601
-describe.skip(
+describe(
   'Uninstall agent from host when agent tamper protection is enabled',
   { tags: ['@ess'] },
   () => {
@@ -48,9 +47,11 @@ describe.skip(
     beforeEach(() => {
       login();
       // Create and enroll a new Endpoint host
-      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
-        createdHost = host as CreateAndEnrollEndpointHostResponse;
-      });
+      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_ids[0]).then(
+        (host) => {
+          createdHost = host as CreateAndEnrollEndpointHostResponse;
+        }
+      );
     });
 
     after(() => {
@@ -79,7 +80,7 @@ describe.skip(
         isAgentAndEndpointUninstalledFromHost(createdHost.hostname).then(
           (isUninstalledWithoutUninstallToken) => {
             expect(isUninstalledWithoutUninstallToken).to.eql(false);
-            getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_id).then(
+            getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_ids[0]).then(
               (uninstallToken) => {
                 uninstallAgentFromHost(createdHost.hostname, uninstallToken.body.item.token).then(
                   (withUninstallTokenResponse) => {

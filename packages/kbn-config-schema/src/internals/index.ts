@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Joi from 'joi';
@@ -152,6 +153,46 @@ export const internals: JoiRoot = Joi.extend(
         };
       }
       return { value };
+    },
+    rules: {
+      min: {
+        args: [
+          {
+            name: 'limit',
+            assert: Joi.alternatives([Joi.number(), Joi.string()]).required(),
+          },
+        ],
+        method(limit) {
+          return this.$_addRule({ name: 'min', args: { limit } });
+        },
+        validate(value, { error }, args) {
+          const limit = ensureDuration(args.limit);
+          if (value.asMilliseconds() < limit.asMilliseconds()) {
+            return error('duration.min', { value, limit });
+          }
+
+          return value;
+        },
+      },
+      max: {
+        args: [
+          {
+            name: 'limit',
+            assert: Joi.alternatives([Joi.number(), Joi.string()]).required(),
+          },
+        ],
+        method(limit) {
+          return this.$_addRule({ name: 'max', args: { limit } });
+        },
+        validate(value, { error }, args) {
+          const limit = ensureDuration(args.limit);
+          if (value.asMilliseconds() > limit.asMilliseconds()) {
+            return error('duration.max', { value, limit });
+          }
+
+          return value;
+        },
+      },
     },
   },
   {

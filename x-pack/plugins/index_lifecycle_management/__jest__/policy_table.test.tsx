@@ -21,6 +21,7 @@ import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { KibanaContextProvider } from '../public/shared_imports';
 import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
+import * as readOnlyHook from '../public/application/lib/use_is_read_only';
 
 initHttp(httpServiceMock.createSetupContract());
 initUiMetric(usageCollectionPluginMock.createSetupContract());
@@ -43,6 +44,7 @@ const testPolicy = {
 
 const isUsedByAnIndex = (i: number) => i % 2 === 0;
 const isDesignatedManagedPolicy = (i: number) => i > 0 && i % 3 === 0;
+const isDeprecatedPolicy = (i: number) => i > 0 && i % 2 === 0;
 
 const policies: PolicyFromES[] = [testPolicy];
 for (let i = 1; i < 105; i++) {
@@ -54,6 +56,7 @@ for (let i = 1; i < 105; i++) {
     name: `testy${i}`,
     policy: {
       name: `testy${i}`,
+      deprecated: i % 2 === 0,
       phases: {},
       ...(isDesignatedManagedPolicy(i)
         ? {
@@ -70,9 +73,16 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({
     createHref: jest.fn(),
+    location: {
+      search: '',
+    },
   }),
 }));
-
+const mockReactRouterNavigate = jest.fn();
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  reactRouterNavigate: () => mockReactRouterNavigate(),
+}));
 let component: ReactElement;
 
 const snapshot = (rendered: string[]) => {
@@ -96,6 +106,7 @@ const getPolicies = (rendered: ReactWrapper) => {
       version,
       name,
       isManagedPolicy: isDesignatedManagedPolicy(version),
+      isDeprecatedPolicy: isDeprecatedPolicy(version),
       isUsedByAnIndex: isUsedByAnIndex(version),
     };
   });
@@ -126,6 +137,7 @@ const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
 };
 describe('policy table', () => {
   beforeEach(() => {
+    jest.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(false);
     component = <TestComponent testPolicies={policies} />;
     window.localStorage.removeItem('ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT');
   });
@@ -198,9 +210,27 @@ describe('policy table', () => {
     });
   });
 
+  test('shows deprecated policies with Deprecated badges', () => {
+    const rendered = mountWithIntl(component);
+
+    // Initially the switch is off so we should not see any deprecated policies
+    let deprecatedPolicies = findTestSubject(rendered, 'deprecatedPolicyBadge');
+    expect(deprecatedPolicies.length).toBe(0);
+
+    // Enable filtering by deprecated policies
+    const searchInput = rendered.find('input.euiFieldSearch').first();
+    (searchInput.instance() as unknown as HTMLInputElement).value = 'is:policy.deprecated';
+    searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+    rendered.update();
+
+    // Now we should see all deprecated policies
+    deprecatedPolicies = findTestSubject(rendered, 'deprecatedPolicyBadge');
+    expect(deprecatedPolicies.length).toBeGreaterThan(0);
+  });
+
   test('filters based on content of search input', () => {
     const rendered = mountWithIntl(component);
-    const searchInput = rendered.find('.euiFieldSearch').first();
+    const searchInput = rendered.find('input.euiFieldSearch').first();
     (searchInput.instance() as unknown as HTMLInputElement).value = 'testy0';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();
@@ -275,7 +305,9 @@ describe('policy table', () => {
   test('add index template modal shows when add policy to index template button is pressed', () => {
     const rendered = mountWithIntl(component);
     const policyRow = findTestSubject(rendered, `policyTableRow-${testPolicy.name}`);
-    const addPolicyToTemplateButton = findTestSubject(policyRow, 'addPolicyToTemplate');
+    const actionsButton = findTestSubject(policyRow, 'euiCollapsedItemActionsButton');
+    actionsButton.simulate('click');
+    const addPolicyToTemplateButton = findTestSubject(rendered, 'addPolicyToTemplate');
     addPolicyToTemplateButton.simulate('click');
     rendered.update();
     expect(findTestSubject(rendered, 'addPolicyToTemplateModal').exists()).toBeTruthy();
@@ -286,11 +318,15 @@ describe('policy table', () => {
     const policyName = findTestSubject(firstRow, 'policyTablePolicyNameLink').text();
     expect(policyName).toBe(`${testPolicy.name}`);
     const policyIndexTemplates = findTestSubject(firstRow, 'policy-indexTemplates').text();
-    expect(policyIndexTemplates).toBe(`Linked index templates${testPolicy.indexTemplates.length}`);
+    expect(policyIndexTemplates).toBe(`${testPolicy.indexTemplates.length}`);
     const policyIndices = findTestSubject(firstRow, 'policy-indices').text();
-    expect(policyIndices).toBe(`Linked indices${testPolicy.indices.length}`);
+    expect(policyIndices).toBe(`${testPolicy.indices.length}`);
     const policyModifiedDate = findTestSubject(firstRow, 'policy-modifiedDate').text();
-    expect(policyModifiedDate).toBe(`Modified date${testDateFormatted}`);
+    expect(policyModifiedDate).toBe(`${testDateFormatted}`);
+
+    const cells = firstRow.find('td');
+    // columns are name, linked index templates, linked indices, modified date, actions
+    expect(cells.length).toBe(5);
   });
   test('opens a flyout with index templates', () => {
     const rendered = mountWithIntl(component);
@@ -301,5 +337,26 @@ describe('policy table', () => {
     expect(flyoutTitle).toContain('testy0');
     const indexTemplatesLinks = findTestSubject(rendered, 'indexTemplateLink');
     expect(indexTemplatesLinks.length).toBe(testPolicy.indexTemplates.length);
+  });
+  test('opens a flyout to view policy by calling reactRouterNavigate', async () => {
+    const rendered = mountWithIntl(component);
+    const policyNameLink = findTestSubject(rendered, 'policyTablePolicyNameLink').at(0);
+    policyNameLink.simulate('click');
+    rendered.update();
+    expect(mockReactRouterNavigate).toHaveBeenCalled();
+  });
+
+  describe('read only view', () => {
+    beforeEach(() => {
+      jest.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(true);
+      component = <TestComponent testPolicies={policies} />;
+    });
+    it(`doesn't show actions column in the table`, () => {
+      const rendered = mountWithIntl(component);
+      const policyRow = findTestSubject(rendered, `policyTableRow-testy0`);
+      const cells = policyRow.find('td');
+      // columns are name, linked index templates, linked indices, modified date
+      expect(cells.length).toBe(4);
+    });
   });
 });

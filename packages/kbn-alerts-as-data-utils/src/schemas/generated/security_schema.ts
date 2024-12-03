@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // ---------------------------------- WARNING ----------------------------------
 // this file was generated, and should not be edited by hand
@@ -117,20 +118,26 @@ const SecurityAlertRequired = rt.type({
   'kibana.alert.uuid': schemaString,
   'kibana.space_ids': schemaStringArray,
 });
+// prettier-ignore
 const SecurityAlertOptional = rt.partial({
   'ecs.version': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
+  'event.original': schemaString,
+  'host.asset.criticality': schemaString,
   'kibana.alert.action_group': schemaString,
   'kibana.alert.ancestors.rule': schemaString,
   'kibana.alert.building_block_type': schemaString,
   'kibana.alert.case_ids': schemaStringArray,
+  'kibana.alert.consecutive_matches': schemaStringOrNumber,
   'kibana.alert.duration.us': schemaStringOrNumber,
   'kibana.alert.end': schemaDate,
   'kibana.alert.flapping': schemaBoolean,
   'kibana.alert.flapping_history': schemaBooleanArray,
   'kibana.alert.group.id': schemaString,
   'kibana.alert.group.index': schemaNumber,
+  'kibana.alert.host.criticality_level': schemaString,
+  'kibana.alert.intended_timestamp': schemaDate,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
   'kibana.alert.new_terms': schemaStringArray,
@@ -147,6 +154,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.original_event.start': schemaDate,
   'kibana.alert.original_event.timezone': schemaString,
   'kibana.alert.original_event.url': schemaString,
+  'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,
   'kibana.alert.risk_score': schemaNumber,
   'kibana.alert.rule.author': schemaString,
@@ -155,6 +163,8 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.rule.created_by': schemaString,
   'kibana.alert.rule.description': schemaString,
   'kibana.alert.rule.enabled': schemaString,
+  'kibana.alert.rule.execution.timestamp': schemaDate,
+  'kibana.alert.rule.execution.type': schemaString,
   'kibana.alert.rule.execution.uuid': schemaString,
   'kibana.alert.rule.from': schemaString,
   'kibana.alert.rule.immutable': schemaStringArray,
@@ -175,6 +185,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.rule.updated_by': schemaString,
   'kibana.alert.rule.version': schemaString,
   'kibana.alert.severity': schemaString,
+  'kibana.alert.severity_improving': schemaBoolean,
   'kibana.alert.start': schemaDate,
   'kibana.alert.suppression.docs_count': schemaStringOrNumber,
   'kibana.alert.suppression.end': schemaDate,
@@ -193,12 +204,16 @@ const SecurityAlertOptional = rt.partial({
   ),
   'kibana.alert.time_range': schemaDateRange,
   'kibana.alert.url': schemaString,
+  'kibana.alert.user.criticality_level': schemaString,
+  'kibana.alert.workflow_assignee_ids': schemaStringArray,
   'kibana.alert.workflow_reason': schemaString,
   'kibana.alert.workflow_status': schemaString,
+  'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.alert.workflow_user': schemaString,
   'kibana.version': schemaString,
   tags: schemaStringArray,
+  'user.asset.criticality': schemaString,
 });
 
 // prettier-ignore

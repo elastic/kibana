@@ -11,6 +11,9 @@ import { fireEvent, render } from '@testing-library/react'; // eslint-disable-li
 import { JobSelectorTable } from './job_selector_table';
 
 jest.mock('../../../contexts/kibana');
+jest.mock('../../node_available_warning', () => {
+  return { MlNodeAvailableWarningShared: () => <div /> };
+});
 
 const props = {
   ganttBarWidth: 299,
@@ -110,14 +113,14 @@ describe('JobSelectorTable', () => {
       const singleSelectionProps = { ...props, singleSelection: true };
       const { getByTestId } = render(<JobSelectorTable {...singleSelectionProps} />);
       const radioButton = getByTestId('price-by-day-radio-button');
-      expect(radioButton.firstChild.checked).toEqual(true);
+      expect(radioButton.querySelector('input').checked).toEqual(true);
     });
 
     test('job cannot be selected if it is not a single metric viewer job', () => {
       const timeseriesOnlyProps = { ...props, singleSelection: true, timeseriesOnly: true };
       const { getByTestId } = render(<JobSelectorTable {...timeseriesOnlyProps} />);
       const radioButton = getByTestId('non-timeseries-job-radio-button');
-      expect(radioButton.firstChild.disabled).toEqual(true);
+      expect(radioButton.querySelector('input').disabled).toEqual(true);
     });
   });
 

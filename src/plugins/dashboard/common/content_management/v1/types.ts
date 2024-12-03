@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -13,7 +14,7 @@ import type {
 } from '@kbn/content-management-utils';
 import { Serializable } from '@kbn/utility-types';
 import { RefreshInterval } from '@kbn/data-plugin/common';
-import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
+import { ControlGroupChainingSystem, ControlLabelPosition } from '@kbn/controls-plugin/common';
 
 import { DashboardContentType } from '../types';
 
@@ -27,6 +28,8 @@ export type DashboardCrudTypes = ContentManagementCrudTypes<
     onlyTitle?: boolean;
   }
 >;
+
+export type DashboardItem = DashboardCrudTypes['Item'];
 
 /**
  * Grid type for React Grid Layout
@@ -59,9 +62,17 @@ export interface SavedDashboardPanel {
   version?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ControlGroupAttributesV1 = {
+  chainingSystem?: ControlGroupChainingSystem;
+  panelsJSON: string; // stringified version of ControlSerializedState
+  ignoreParentSettingsJSON: string;
+  controlStyle?: ControlLabelPosition;
+};
+
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
 export type DashboardAttributes = {
-  controlGroupInput?: RawControlGroupAttributes;
+  controlGroupInput?: ControlGroupAttributesV1;
   refreshInterval?: RefreshInterval;
   timeRestore: boolean;
   optionsJSON?: string;
@@ -69,7 +80,7 @@ export type DashboardAttributes = {
   description: string;
   panelsJSON: string;
   timeFrom?: string;
-  version: number;
+  version?: number;
   timeTo?: string;
   title: string;
   kibanaSavedObjectMeta: {

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import type { FC } from 'react';
+import React from 'react';
+
+import { renderHook, act } from '@testing-library/react';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';
@@ -30,7 +32,7 @@ const mockStorage: Storage = {
   clear: jest.fn(),
 };
 
-const Provider: FC = ({ children }) => {
+const Provider: FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
     <StorageContextProvider storage={mockStorage} storageKeys={ML_STORAGE_KEYS}>
       {children}
@@ -60,12 +62,9 @@ describe('useStorage', () => {
   });
 
   test('updates the storage value', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useStorage('ml.gettingStarted.isDismissed'),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+      wrapper: Provider,
+    });
 
     const [value, setValue] = result.current;
 
@@ -73,7 +72,6 @@ describe('useStorage', () => {
 
     await act(async () => {
       setValue(false);
-      await waitForNextUpdate();
     });
 
     expect(result.current[0]).toBe(false);
@@ -81,12 +79,9 @@ describe('useStorage', () => {
   });
 
   test('removes the storage value', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useStorage('ml.gettingStarted.isDismissed'),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+      wrapper: Provider,
+    });
 
     const [value, setValue] = result.current;
 
@@ -94,7 +89,6 @@ describe('useStorage', () => {
 
     await act(async () => {
       setValue(undefined);
-      await waitForNextUpdate();
     });
 
     expect(result.current[0]).toBe(undefined);
@@ -102,12 +96,9 @@ describe('useStorage', () => {
   });
 
   test('updates the value on storage event', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useStorage('ml.gettingStarted.isDismissed'),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+      wrapper: Provider,
+    });
 
     expect(result.current[0]).toBe(true);
 
@@ -129,7 +120,6 @@ describe('useStorage', () => {
           newValue: null,
         })
       );
-      await waitForNextUpdate();
     });
 
     expect(result.current[0]).toBe(undefined);
@@ -141,7 +131,6 @@ describe('useStorage', () => {
           newValue: 'false',
         })
       );
-      await waitForNextUpdate();
     });
 
     expect(result.current[0]).toBe(false);

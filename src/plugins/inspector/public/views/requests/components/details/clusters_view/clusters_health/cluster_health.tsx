@@ -1,22 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiHealth, EuiText } from '@elastic/eui';
+import { EuiHealth, EuiText, EuiTextProps } from '@elastic/eui';
 import { HEALTH_HEX_CODES } from './gradient';
 
 interface Props {
   count?: number;
   status: string;
+  textProps?: EuiTextProps;
 }
 
-export function ClusterHealth({ count, status }: Props) {
+const defaultTextProps: EuiTextProps = {
+  size: 'xs',
+  color: 'subdued',
+};
+
+export function ClusterHealth({ count, status, textProps = defaultTextProps }: Props) {
   if (typeof count === 'number' && count === 0) {
     return null;
   }
@@ -48,9 +55,7 @@ export function ClusterHealth({ count, status }: Props) {
   const label = typeof count === 'number' ? `${count} ${statusLabel}` : statusLabel;
   return (
     <EuiHealth color={color}>
-      <EuiText size="xs" color="subdued">
-        {label}
-      </EuiText>
+      <EuiText {...textProps}>{label}</EuiText>
     </EuiHealth>
   );
 }

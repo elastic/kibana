@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import { Logger } from '@kbn/core/server';
-import { Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -39,10 +39,15 @@ const headers = {
 
 let connectorType: SlackApiConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
+  connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 });
 
 describe('connector registration', () => {
@@ -198,13 +203,14 @@ describe('execute', () => {
         params: {} as PostMessageParams,
         configurationUtilities,
         logger: mockedLogger,
+        connectorUsageCollector,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"[Action][ExternalService] -> [Slack API] Unsupported subAction type undefined."`
     );
   });
 
-  test('should fail if subAction is not postMessage/validChannelId', async () => {
+  test('should fail if subAction is not postMessage/postBlockkit/validChannelId', async () => {
     requestMock.mockImplementation(() => ({
       data: {
         ok: true,
@@ -220,7 +226,8 @@ describe('execute', () => {
         config: {},
         secrets: { token: 'some token' },
         params: {
-          subAction: 'getMessage' as 'validChannelId',
+          // @ts-expect-error
+          subAction: 'getMessage',
           subActionParams: {},
         },
         configurationUtilities,
@@ -231,21 +238,51 @@ describe('execute', () => {
     );
   });
 
-  test('renders parameter templates as expected', async () => {
+  test('renders parameter templates as expected for postMessage', async () => {
     expect(connectorType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       subAction: 'postMessage' as const,
-      subActionParams: { text: 'some text', channels: ['general'] },
+      subActionParams: { text: 'some text {{injected}}', channels: ['general'] },
     };
-    const variables = { rogue: '*bold*' };
+    const variables = { injected: '*foo*' };
     const params = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables
     ) as PostMessageParams;
-    expect(params.subActionParams.text).toBe('some text');
+    expect(params.subActionParams.text).toBe('some text `*foo*`');
   });
 
-  test('should execute with success for post message', async () => {
+  test('renders parameter templates as expected for postBlockkit', async () => {
+    const text = `Hello, Assistant to the Regional Manager {{name}}! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n`;
+    const getBlock = (txt: string) => ({
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: txt,
+          },
+        },
+      ],
+    });
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      subAction: 'postBlockkit' as const,
+      subActionParams: { text: JSON.stringify(getBlock(text)), channelIds: ['LKJHGF345'] },
+    };
+    const variables = { name: '"Dwight"' };
+    const params = connectorType.renderParameterTemplates!(
+      mockedLogger,
+      paramsWithTemplates,
+      variables
+    ) as PostMessageParams;
+    expect(params.subActionParams.text).toBe(
+      JSON.stringify(getBlock(text.replace(`{{name}}`, `"Dwight"`)))
+    );
+  });
+
+  test('should execute with success for postMessage and channel', async () => {
     requestMock.mockImplementation(() => ({
       data: {
         ok: true,
@@ -265,6 +302,7 @@ describe('execute', () => {
       },
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
 
     expect(requestMock).toHaveBeenCalledWith({
@@ -275,6 +313,7 @@ describe('execute', () => {
       method: 'post',
       url: 'https://slack.com/api/chat.postMessage',
       data: { channel: 'general', text: 'some text' },
+      connectorUsageCollector,
     });
 
     expect(response).toEqual({
@@ -287,6 +326,187 @@ describe('execute', () => {
         ok: true,
       },
 
+      status: 'ok',
+    });
+  });
+
+  test('should execute with success for postMessage and channelIds', async () => {
+    const testResponse = {
+      ok: true,
+      channel: 'C01EHLV2S04',
+      ts: '1704384223.293029',
+      message: {
+        bot_id: 'B06AMU52C9E',
+        type: 'message',
+        text: 'test a normal message',
+        user: 'U069W74U6A1',
+        ts: '1704384223.293029',
+        app_id: 'A069Z4WDFEW',
+        blocks: [
+          {
+            type: 'rich_text',
+            block_id: 'HNAkB',
+            elements: [
+              {
+                type: 'rich_text_section',
+                elements: [
+                  {
+                    type: 'text',
+                    text: 'test a normal message',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        team: 'TC0AARLHE',
+        bot_profile: {
+          id: 'B06AMU52C9E',
+          app_id: 'A069Z4WDFEW',
+          name: 'test slack web api',
+          icons: {
+            image_36: 'https://a.slack-edge.com/80588/img/plugins/app/bot_36.png',
+            image_48: 'https://a.slack-edge.com/80588/img/plugins/app/bot_48.png',
+            image_72: 'https://a.slack-edge.com/80588/img/plugins/app/service_72.png',
+          },
+          deleted: false,
+          updated: 1702475971,
+          team_id: 'TC0AARLHE',
+        },
+      },
+    };
+    requestMock.mockImplementation(() => ({
+      data: {
+        ok: true,
+        channel: 'LKJHGF345',
+        message: testResponse,
+      },
+    }));
+
+    const response = await connectorType.executor({
+      actionId: SLACK_API_CONNECTOR_ID,
+      services,
+      config: { allowedChannels: [{ id: 'LKJHGF345', name: 'test' }] },
+      secrets: { token: 'some token' },
+      params: {
+        subAction: 'postMessage',
+        subActionParams: { channelIds: ['LKJHGF345'], text: 'some text' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock).toHaveBeenCalledWith({
+      axios,
+      configurationUtilities,
+      headers,
+      logger: mockedLogger,
+      method: 'post',
+      url: 'https://slack.com/api/chat.postMessage',
+      data: { channel: 'LKJHGF345', text: 'some text' },
+      connectorUsageCollector,
+    });
+
+    expect(response).toEqual({
+      actionId: SLACK_API_CONNECTOR_ID,
+      data: {
+        ok: true,
+        channel: 'LKJHGF345',
+        message: testResponse,
+      },
+      status: 'ok',
+    });
+  });
+
+  test('should execute with success for postBlockkit', async () => {
+    const testBlock = {
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n",
+          },
+        },
+      ],
+    };
+    const testResponse = {
+      bot_id: 'B06AMU52C9E',
+      type: 'message',
+      text: "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n",
+      user: 'U069W74U6A1',
+      ts: '1704383852.003159',
+      app_id: 'A069Z4WDFEW',
+      blocks: [
+        {
+          type: 'section',
+          block_id: 'sDltQ',
+          text: {
+            type: 'mrkdwn',
+            text: "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n",
+            verbatim: false,
+          },
+        },
+      ],
+      team: 'TC0AARLHE',
+      bot_profile: {
+        id: 'B06AMU52C9E',
+        app_id: 'A069Z4WDFEW',
+        name: 'test slack web api',
+        icons: {
+          image_36: 'https://a.slack-edge.com/80588/img/plugins/app/bot_36.png',
+          image_48: 'https://a.slack-edge.com/80588/img/plugins/app/bot_48.png',
+          image_72: 'https://a.slack-edge.com/80588/img/plugins/app/service_72.png',
+        },
+        deleted: false,
+        updated: 1702475971,
+        team_id: 'TC0AARLHE',
+      },
+    };
+    requestMock.mockImplementation(() => ({
+      data: {
+        ok: true,
+        channel: 'LKJHGF345',
+        message: testResponse,
+      },
+    }));
+
+    const response = await connectorType.executor({
+      actionId: SLACK_API_CONNECTOR_ID,
+      services,
+      config: { allowedChannels: [{ id: 'LKJHGF345', name: 'test' }] },
+      secrets: { token: 'some token' },
+      params: {
+        subAction: 'postBlockkit',
+        subActionParams: {
+          channelIds: ['LKJHGF345'],
+          text: JSON.stringify(testBlock),
+        },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock).toHaveBeenCalledWith({
+      axios,
+      configurationUtilities,
+      headers,
+      logger: mockedLogger,
+      method: 'post',
+      url: 'https://slack.com/api/chat.postMessage',
+      data: { channel: 'LKJHGF345', blocks: testBlock.blocks },
+      connectorUsageCollector,
+    });
+
+    expect(response).toEqual({
+      actionId: SLACK_API_CONNECTOR_ID,
+      data: {
+        ok: true,
+        channel: 'LKJHGF345',
+        message: testResponse,
+      },
       status: 'ok',
     });
   });
@@ -317,6 +537,7 @@ describe('execute', () => {
       },
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
 
     expect(requestMock).toHaveBeenCalledWith({
@@ -326,6 +547,7 @@ describe('execute', () => {
       logger: mockedLogger,
       method: 'get',
       url: 'https://slack.com/api/conversations.info?channel=ZXCVBNM567',
+      connectorUsageCollector,
     });
 
     expect(response).toEqual({

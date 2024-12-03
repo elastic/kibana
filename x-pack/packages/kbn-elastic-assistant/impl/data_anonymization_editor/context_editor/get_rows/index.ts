@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import { SelectedPromptContext } from '../../../assistant/prompt_context/types';
-import { isAllowed, isAnonymized, isDenied } from '../../helpers';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 import { ContextEditorRow } from '../types';
 
 export const getRows = ({
-  allow,
-  allowReplacement,
+  anonymizationFields,
   rawData,
 }: {
-  allow: SelectedPromptContext['allow'];
-  allowReplacement: SelectedPromptContext['allowReplacement'];
+  anonymizationFields?: FindAnonymizationFieldsResponse;
   rawData: Record<string, string[]> | null;
 }): ContextEditorRow[] => {
-  const allowReplacementSet = new Set(allowReplacement);
-  const allowSet = new Set(allow);
-
   if (rawData !== null && typeof rawData === 'object') {
     const rawFields = Object.keys(rawData).sort();
 
@@ -29,27 +24,21 @@ export const getRows = ({
         ...acc,
         {
           field,
-          allowed: isAllowed({ allowSet, field }),
-          anonymized: isAnonymized({ allowReplacementSet, field }),
-          denied: isDenied({ allowSet, field }),
+          allowed: isAllowed({ anonymizationFields: anonymizationFields?.data ?? [], field }),
+          anonymized: isAnonymized({ anonymizationFields: anonymizationFields?.data ?? [], field }),
+          denied: isDenied({ anonymizationFields: anonymizationFields?.data ?? [], field }),
           rawValues: rawData[field],
         },
       ],
       []
     );
   } else {
-    return allow.sort().reduce<ContextEditorRow[]>(
-      (acc, field) => [
-        ...acc,
-        {
-          field,
-          allowed: true,
-          anonymized: allowReplacementSet.has(field),
-          denied: false,
-          rawValues: [],
-        },
-      ],
-      []
-    );
+    return (anonymizationFields?.data ?? []).map<ContextEditorRow>((anonymizationField) => ({
+      field: anonymizationField.field,
+      allowed: anonymizationField.allowed ?? false,
+      anonymized: anonymizationField.anonymized ?? false,
+      denied: !(anonymizationField.allowed ?? false),
+      rawValues: [],
+    }));
   }
 };

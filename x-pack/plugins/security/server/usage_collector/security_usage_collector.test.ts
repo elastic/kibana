@@ -13,7 +13,7 @@ import {
 } from '@kbn/usage-collection-plugin/server/mocks';
 
 import { registerSecurityUsageCollector } from './security_usage_collector';
-import type { SecurityLicenseFeatures } from '../../common/licensing';
+import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 
@@ -26,6 +26,7 @@ describe('Security UsageCollector', () => {
     allowAccessAgreement = true,
     allowAuditLogging = true,
     allowRbac = true,
+    allowFips = true,
     isLicenseAvailable,
   }: Partial<SecurityLicenseFeatures> & { isLicenseAvailable: boolean }) => {
     const license = licenseMock.create();
@@ -34,6 +35,7 @@ describe('Security UsageCollector', () => {
       allowAccessAgreement,
       allowAuditLogging,
       allowRbac,
+      allowFips,
     } as SecurityLicenseFeatures);
     return license;
   };
@@ -44,6 +46,7 @@ describe('Security UsageCollector', () => {
     accessAgreementEnabled: false,
     authProviderCount: 1,
     enabledAuthProviders: ['basic'],
+    fipsModeEnabled: false,
     loginSelectorEnabled: false,
     httpAuthSchemes: ['apikey', 'bearer'],
     sessionIdleTimeoutInMinutes: 4320,
@@ -106,6 +109,7 @@ describe('Security UsageCollector', () => {
       accessAgreementEnabled: false,
       authProviderCount: 0,
       enabledAuthProviders: [],
+      fipsModeEnabled: false,
       loginSelectorEnabled: false,
       httpAuthSchemes: [],
       sessionIdleTimeoutInMinutes: 0,
@@ -422,6 +426,55 @@ describe('Security UsageCollector', () => {
       expect(usage).toEqual({
         ...DEFAULT_USAGE,
         auditLoggingEnabled: false,
+      });
+    });
+  });
+
+  describe('fipsMode enabled', () => {
+    it('reports when fipsMode is enabled', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          fipsMode: {
+            enabled: true,
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({
+        isLicenseAvailable: true,
+        allowFips: true,
+      });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        fipsModeEnabled: true,
+      });
+    });
+
+    it('does not report fipsMode when the license does not permit it', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          fipsMode: {
+            enabled: true,
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true, allowFips: false });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        fipsModeEnabled: false,
       });
     });
   });

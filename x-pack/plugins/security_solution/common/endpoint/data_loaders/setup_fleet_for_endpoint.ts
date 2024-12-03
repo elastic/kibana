@@ -29,10 +29,6 @@ import {
   wrapErrorAndRejectPromise,
 } from './utils';
 
-export interface SetupFleetForEndpointResponse {
-  endpointPackage: BulkInstallPackageInfo;
-}
-
 /**
  * Calls the fleet setup APIs and then installs the latest Endpoint package
  * @param kbnClient
@@ -43,7 +39,7 @@ export const setupFleetForEndpoint = usageTracker.track(
   async (kbnClient: KbnClient, logger?: ToolingLog): Promise<void> => {
     const log = logger ?? createToolingLogger();
 
-    log.info(`setupFleetForEndpoint(): Setting up fleet for endpoint`);
+    log.debug(`setupFleetForEndpoint(): Setting up fleet for endpoint`);
 
     // Setup Fleet
     try {
@@ -104,7 +100,7 @@ export const setupFleetForEndpoint = usageTracker.track(
 export const installOrUpgradeEndpointFleetPackage = usageTracker.track(
   'installOrUpgradeEndpointFleetPackage',
   async (kbnClient: KbnClient, logger: ToolingLog): Promise<BulkInstallPackageInfo> => {
-    logger.info(`installOrUpgradeEndpointFleetPackage(): starting`);
+    logger.debug(`installOrUpgradeEndpointFleetPackage(): starting`);
 
     const updatePackages = async () => {
       const installEndpointPackageResp = (await kbnClient

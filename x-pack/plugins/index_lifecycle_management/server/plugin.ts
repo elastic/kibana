@@ -26,7 +26,7 @@ const indexLifecycleDataEnricher = async (
   }
 
   const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
-    index: '*',
+    index: '*,.*',
   });
   return indicesList.map((index: Index) => {
     return {
@@ -74,7 +74,11 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
       privileges: [
         {
           requiredClusterPrivileges: ['manage_ilm'],
-          ui: [],
+          ui: ['save'],
+        },
+        {
+          requiredClusterPrivileges: ['read_ilm'],
+          ui: ['show'],
         },
       ],
     });

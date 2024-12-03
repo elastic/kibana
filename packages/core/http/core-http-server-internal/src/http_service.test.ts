@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockHttpServer } from './http_service.test.mocks';
@@ -23,6 +24,7 @@ import { HttpService } from './http_service';
 import { HttpConfigType, config } from './http_config';
 import { cspConfig } from './csp';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
+import { permissionsPolicyConfig } from './permissions_policy';
 
 const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -42,6 +44,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   configService.setSchema(config.path, config.schema);
   configService.setSchema(cspConfig.path, cspConfig.schema);
   configService.setSchema(externalUrlConfig.path, externalUrlConfig.schema);
+  configService.setSchema(permissionsPolicyConfig.path, permissionsPolicyConfig.schema);
   return configService;
 };
 const contextPreboot = contextServiceMock.createPrebootContract();
@@ -450,6 +453,7 @@ test('passes versioned config to router', async () => {
     versioned: {
       versionResolution: 'newest',
       strictClientVersionCheck: false,
+      useVersionResolutionStrategyForInternalPaths: ['/foo'],
     },
   });
 
@@ -481,6 +485,12 @@ test('passes versioned config to router', async () => {
     '/foo',
     expect.any(Object), // logger
     expect.any(Function), // context enhancer
-    expect.objectContaining({ isDev: true, versionedRouteResolution: 'newest' })
+    expect.objectContaining({
+      isDev: true,
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'newest',
+        useVersionResolutionStrategyForInternalPaths: ['/foo'],
+      },
+    })
   );
 });

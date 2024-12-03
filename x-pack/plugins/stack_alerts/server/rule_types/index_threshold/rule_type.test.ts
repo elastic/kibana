@@ -192,6 +192,7 @@ describe('ruleType', () => {
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
+      startedAtOverridden: false,
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
         {},
@@ -230,6 +231,7 @@ describe('ruleType', () => {
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       getTimeRange,
+      isServerless: false,
     });
 
     expect(alertServices.alertsClient.report).toHaveBeenCalledWith({
@@ -287,6 +289,7 @@ describe('ruleType', () => {
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
+      startedAtOverridden: false,
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
@@ -325,6 +328,7 @@ describe('ruleType', () => {
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       getTimeRange,
+      isServerless: false,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -356,6 +360,7 @@ describe('ruleType', () => {
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
+      startedAtOverridden: false,
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
@@ -394,6 +399,7 @@ describe('ruleType', () => {
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       getTimeRange,
+      isServerless: false,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -424,6 +430,7 @@ describe('ruleType', () => {
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
+      startedAtOverridden: false,
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
         {},
@@ -462,6 +469,7 @@ describe('ruleType', () => {
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       getTimeRange,
+      isServerless: false,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(

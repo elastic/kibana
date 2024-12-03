@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger } from '@kbn/logging';
@@ -17,11 +18,11 @@ import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import {
-  type SavedObjectsMigrationConfigType,
-  type MigrationResult,
+import type {
+  SavedObjectsMigrationConfigType,
+  MigrationResult,
+  IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { VersionedTransformer } from '../document_migrator';
 import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
 
@@ -35,7 +36,7 @@ export interface RunZeroDowntimeMigrationOpts {
   /** Logger to use for migration output */
   logger: Logger;
   /** The document migrator to use to convert the document */
-  documentMigrator: VersionedTransformer;
+  documentMigrator: IDocumentMigrator;
   /** The migration config to use for the migration */
   migrationConfig: SavedObjectsMigrationConfigType;
   /** docLinks contract to use to link to documentation */

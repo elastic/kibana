@@ -7,5 +7,7 @@
 
 export * from './artifacts';
 export * from './actions';
+export * from './agent';
 export * from './artifacts_exception_list';
+export * from './workflow_insights';
 export type { FeatureKeys } from './feature_usage';

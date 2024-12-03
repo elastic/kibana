@@ -9,7 +9,12 @@ import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten } from 'lodash';
-import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  InferenceInferenceEndpoint,
+  InferenceTaskType,
+  TasksTaskInfo,
+  TransformGetTransformTransformSummary,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IngestPipeline,
@@ -19,11 +24,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   ELASTIC_MODEL_DEFINITIONS,
-  type GetElserOptions,
+  type GetModelDownloadConfigOptions,
   type ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { PipelineDefinition } from '../../../common/types/trained_models';
+import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
+import type { ModelDownloadState, PipelineDefinition } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 
@@ -51,6 +57,8 @@ interface ModelMapResult {
    */
   error: null | any;
 }
+
+export type GetCuratedModelConfigParams = Parameters<ModelsProvider['getCuratedModelConfig']>;
 
 export class ModelsProvider {
   private _transforms?: TransformGetTransformTransformSummary[];
@@ -97,7 +105,7 @@ export class ModelsProvider {
 
   private getNodeId(
     elementOriginalId: string,
-    nodeType: typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES]
+    nodeType: (typeof JOB_MAP_NODE_TYPES)[keyof typeof JOB_MAP_NODE_TYPES]
   ): string {
     return `${elementOriginalId}-${nodeType}`;
   }
@@ -410,8 +418,6 @@ export class ModelsProvider {
       }
       throw error;
     }
-
-    return result;
   }
 
   /**
@@ -460,17 +466,18 @@ export class ModelsProvider {
 
     const modelDefinitionMap = new Map<string, ModelDefinitionResponse[]>();
 
-    for (const [name, def] of Object.entries(ELASTIC_MODEL_DEFINITIONS)) {
+    for (const [modelId, def] of Object.entries(ELASTIC_MODEL_DEFINITIONS)) {
       const recommended =
         (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
         (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
 
-      const { modelName, ...rest } = def;
+      const { modelName } = def;
 
       const modelDefinitionResponse = {
-        ...rest,
+        ...def,
         ...(recommended ? { recommended } : {}),
-        name,
+        supported: !!def.default || recommended,
+        model_id: modelId,
       };
 
       if (modelDefinitionMap.has(modelName)) {
@@ -494,14 +501,19 @@ export class ModelsProvider {
   }
 
   /**
-   * Provides an ELSER model name and configuration for download based on the current cluster architecture.
-   * The current default version is 2. If running on Cloud it returns the Linux x86_64 optimized version.
-   * If any of the ML nodes run a different OS rather than Linux, or the CPU architecture isn't x86_64,
-   * a portable version of the model is returned.
+   * Provides an appropriate model ID and configuration for download based on the current cluster architecture.
+   *
+   * @param modelName
+   * @param options
+   * @returns
    */
-  async getELSER(options?: GetElserOptions): Promise<ModelDefinitionResponse> | never {
-    const modelDownloadConfig = await this.getModelDownloads();
-
+  async getCuratedModelConfig(
+    modelName: ElasticCuratedModelName,
+    options?: GetModelDownloadConfigOptions
+  ): Promise<ModelDefinitionResponse> | never {
+    const modelDownloadConfig = (await this.getModelDownloads()).filter(
+      (model) => model.modelName === modelName
+    );
     let requestedModel: ModelDefinitionResponse | undefined;
     let recommendedModel: ModelDefinitionResponse | undefined;
     let defaultModel: ModelDefinitionResponse | undefined;
@@ -528,6 +540,18 @@ export class ModelsProvider {
   }
 
   /**
+   * Provides an ELSER model name and configuration for download based on the current cluster architecture.
+   * The current default version is 2. If running on Cloud it returns the Linux x86_64 optimized version.
+   * If any of the ML nodes run a different OS rather than Linux, or the CPU architecture isn't x86_64,
+   * a portable version of the model is returned.
+   */
+  async getELSER(
+    options?: GetModelDownloadConfigOptions
+  ): Promise<ModelDefinitionResponse> | never {
+    return await this.getCuratedModelConfig('elser', options);
+  }
+
+  /**
    * Puts the requested ELSER model into elasticsearch, triggering elasticsearch to download the model.
    * Assigns the model to the * space.
    * @param modelId
@@ -535,7 +559,7 @@ export class ModelsProvider {
    */
   async installElasticModel(modelId: string, mlSavedObjectService: MLSavedObjectService) {
     const availableModels = await this.getModelDownloads();
-    const model = availableModels.find((m) => m.name === modelId);
+    const model = availableModels.find((m) => m.model_id === modelId);
     if (!model) {
       throw Boom.notFound('Model not found');
     }
@@ -556,11 +580,69 @@ export class ModelsProvider {
     }
 
     const putResponse = await this._mlClient.putTrainedModel({
-      model_id: model.name,
+      model_id: model.model_id,
       body: model.config,
     });
 
     await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
     return putResponse;
+  }
+  /**
+   * Puts the requested Inference endpoint id into elasticsearch, triggering elasticsearch to create the inference endpoint id
+   * @param inferenceId - Inference Endpoint Id
+   * @param taskType - Inference Task type. Either sparse_embedding or text_embedding
+   * @param inferenceConfig - Model configuration based on service type
+   */
+  async createInferenceEndpoint(
+    inferenceId: string,
+    taskType: InferenceTaskType,
+    inferenceConfig: InferenceInferenceEndpoint
+  ) {
+    try {
+      const result = await this._client.asCurrentUser.inference.put(
+        {
+          inference_id: inferenceId,
+          task_type: taskType,
+          inference_config: inferenceConfig,
+        },
+        { maxRetries: 0 }
+      );
+      return result;
+    } catch (error) {
+      // Request timeouts will usually occur when the model is being downloaded/deployed
+      // Erroring out is misleading in these cases, so we return the model_id and task_type
+      if (error.name === 'TimeoutError') {
+        return {
+          model_id: inferenceConfig.service,
+          task_type: taskType,
+        };
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async getModelsDownloadStatus() {
+    const result = await this._client.asInternalUser.tasks.list({
+      actions: 'xpack/ml/model_import[n]',
+      detailed: true,
+      group_by: 'none',
+    });
+
+    if (!result.tasks?.length) {
+      return {};
+    }
+
+    // Groups results by model id
+    const byModelId = (result.tasks as TasksTaskInfo[]).reduce((acc, task) => {
+      const modelId = task.description!.replace(`model_id-`, '');
+      acc[modelId] = {
+        downloaded_parts: task.status.downloaded_parts,
+        total_parts: task.status.total_parts,
+      };
+      return acc;
+    }, {} as Record<string, ModelDownloadState>);
+
+    return byModelId;
   }
 }

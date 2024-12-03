@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import type { AppFeatureSecurityKey, SecuritySubFeatureId } from '../app_features_keys';
-import type { AppFeatureKibanaConfig } from '../types';
+import type { ProductFeatureSecurityKey, SecuritySubFeatureId } from '../product_features_keys';
+import type { ProductFeatureKibanaConfig } from '../types';
 
 export interface SecurityFeatureParams {
+  /**
+   * Experimental features.
+   * Unfortunately these can't be properly Typed due to it requiring an
+   * import directly from the Security Solution plugin. The list of `keys` in this
+   * object are defined here:
+   * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/experimental_features.ts#L14
+   */
   experimentalFeatures: Record<string, boolean>;
   savedObjects: string[];
 }
 
-export type DefaultSecurityAppFeaturesConfig = Omit<
-  Record<AppFeatureSecurityKey, AppFeatureKibanaConfig<SecuritySubFeatureId>>,
-  AppFeatureSecurityKey.endpointExceptions
-  // | add not default security app features here
+export type DefaultSecurityProductFeaturesConfig = Omit<
+  Record<ProductFeatureSecurityKey, ProductFeatureKibanaConfig<SecuritySubFeatureId>>,
+  ProductFeatureSecurityKey.endpointExceptions
+  // | add not generic security app features here
 >;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { User } from '../../common/types/domain';
+import type { CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -21,6 +21,7 @@ import type {
   GetCaseConnectorsResponse,
   UserActionFindResponse,
   SingleCaseMetricsResponse,
+  CustomFieldPutRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -33,8 +34,10 @@ import type {
   CaseUsers,
   CasesFindResponseUI,
   CasesUI,
+  FilterOptions,
+  CaseUICustomField,
 } from '../../common/ui/types';
-import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
+import { SortFieldCase } from '../../common/ui/types';
 import {
   getCaseCommentsUrl,
   getCasesDeleteFileAttachmentsUrl,
@@ -46,6 +49,7 @@ import {
   getCaseConnectorsUrl,
   getCaseUsersUrl,
   getCaseUserActionStatsUrl,
+  getCustomFieldReplaceUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -53,6 +57,7 @@ import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
+  CASES_INTERNAL_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -71,6 +76,7 @@ import {
 import type {
   ActionLicense,
   CaseUI,
+  FeatureIdsResponse,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   UserActionUI,
@@ -85,6 +91,7 @@ import {
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
+  constructCustomFieldsFilter,
 } from './utils';
 import { decodeCasesFindResponse } from '../api/decoders';
 
@@ -234,17 +241,31 @@ export const getCaseUserActionsStats = async (
   return convertToCamelCase(decodeCaseUserActionStatsResponse(response));
 };
 
+const removeOptionFromFilter = ({
+  filterKey,
+  filterOptions,
+  optionToBeRemoved,
+}: {
+  filterKey: keyof FilterOptions;
+  filterOptions: string[];
+  optionToBeRemoved: string;
+}) => {
+  const resultingFilterOptions = filterOptions.filter((option) => option !== optionToBeRemoved);
+  return resultingFilterOptions.length === 0 ? {} : { [filterKey]: resultingFilterOptions };
+};
+
 export const getCases = async ({
   filterOptions = {
     search: '',
     searchFields: [],
-    severity: SeverityAll,
+    severity: [],
     assignees: [],
     reporters: [],
-    status: StatusAll,
+    status: [],
     tags: [],
     owner: [],
     category: [],
+    customFields: {},
   },
   queryParams = {
     page: 1,
@@ -254,9 +275,17 @@ export const getCases = async ({
   },
   signal,
 }: FetchCasesProps): Promise<CasesFindResponseUI> => {
-  const query = {
-    ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
-    ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
+  const body = {
+    ...removeOptionFromFilter({
+      filterKey: 'status',
+      filterOptions: filterOptions.status,
+      optionToBeRemoved: 'all',
+    }),
+    ...removeOptionFromFilter({
+      filterKey: 'severity',
+      filterOptions: filterOptions.severity,
+      optionToBeRemoved: 'all',
+    }),
     ...constructAssigneesFilter(filterOptions.assignees),
     ...constructReportersFilter(filterOptions.reporters),
     ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),
@@ -264,14 +293,18 @@ export const getCases = async ({
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
+    ...constructCustomFieldsFilter(filterOptions.customFields),
     ...queryParams,
   };
 
-  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
-    method: 'GET',
-    query,
-    signal,
-  });
+  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(
+    `${CASES_INTERNAL_URL}/_search`,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
 
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
 };
@@ -335,6 +368,29 @@ export const updateCases = async ({
   });
 
   return convertCasesToCamelCase(decodeCasesResponse(response));
+};
+
+export const replaceCustomField = async ({
+  caseId,
+  customFieldId,
+  request,
+  signal,
+}: {
+  caseId: string;
+  customFieldId: string;
+  request: CustomFieldPutRequest;
+  signal?: AbortSignal;
+}): Promise<CaseUICustomField> => {
+  const response = await KibanaServices.get().http.fetch<CaseCustomField>(
+    getCustomFieldReplaceUrl(caseId, customFieldId),
+    {
+      method: 'PUT',
+      body: JSON.stringify(request),
+      signal,
+    }
+  );
+
+  return convertToCamelCase<CaseCustomField, CaseUICustomField>(response);
 };
 
 export const postComment = async (
@@ -482,16 +538,40 @@ export const getFeatureIds = async ({
   query,
   signal,
 }: {
-  query: { registrationContext: string[] };
+  query: {
+    ids: {
+      values: string[];
+    };
+  };
   signal?: AbortSignal;
-}): Promise<ValidFeatureId[]> => {
-  return KibanaServices.get().http.fetch<ValidFeatureId[]>(
-    `${BASE_RAC_ALERTS_API_PATH}/_feature_ids`,
-    {
-      signal,
+}): Promise<FeatureIdsResponse> => {
+  return KibanaServices.get().http.post<FeatureIdsResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
+    method: 'POST',
+    body: JSON.stringify({
+      aggs: {
+        consumer: {
+          terms: {
+            field: ALERT_RULE_CONSUMER,
+            size: 100,
+          },
+        },
+        producer: {
+          terms: {
+            field: ALERT_RULE_PRODUCER,
+            size: 100,
+          },
+        },
+        ruleTypeIds: {
+          terms: {
+            field: ALERT_RULE_TYPE_ID,
+            size: 100,
+          },
+        },
+      },
       query,
-    }
-  );
+    }),
+    signal,
+  });
 };
 
 export const getCaseConnectors = async (

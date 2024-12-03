@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -14,8 +14,8 @@ import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
-import type { PivotSupportedAggs } from '../../../common/types/pivot_aggs';
-import { PIVOT_SUPPORTED_AGGS, PivotAgg } from '../../../common/types/pivot_aggs';
+import type { PivotSupportedAggs, PivotAgg } from '../../../common/types/pivot_aggs';
+import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import type { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
@@ -95,7 +95,7 @@ export const SORT_DIRECTION = {
   DESC: 'desc',
 } as const;
 
-export type SortDirection = typeof SORT_DIRECTION[keyof typeof SORT_DIRECTION];
+export type SortDirection = (typeof SORT_DIRECTION)[keyof typeof SORT_DIRECTION];
 
 export const SORT_MODE = {
   MIN: 'min',
@@ -119,9 +119,9 @@ const SORT_NUMERIC_FIELD_TYPES = [
   ES_FIELD_TYPES.DATE_NANOS,
 ] as const;
 
-export type SortNumericFieldType = typeof SORT_NUMERIC_FIELD_TYPES[number];
+export type SortNumericFieldType = (typeof SORT_NUMERIC_FIELD_TYPES)[number];
 
-export type SortMode = typeof SORT_MODE[keyof typeof SORT_MODE];
+export type SortMode = (typeof SORT_MODE)[keyof typeof SORT_MODE];
 
 export const TOP_METRICS_SPECIAL_SORT_FIELDS = {
   _SCORE: '_score',
@@ -225,6 +225,7 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
     onChange: (arg: Partial<T>) => void;
     selectedField: string;
     isValid?: boolean;
+    errorMessages?: string[];
   }>;
   /** Aggregation specific configuration */
   aggConfig: Partial<T>;
@@ -238,6 +239,8 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
   getAggName?: () => string | undefined;
   /** Helper text for the aggregation reflecting some configuration info */
   helperText?: () => string | undefined;
+  /** Returns validation error messages */
+  getErrorMessages?: () => string[] | undefined;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {

@@ -12,11 +12,12 @@ import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getExternalAlertLensAttributes } from './external_alert';
 
-jest.mock('../../../../containers/sourcerer', () => ({
+jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
     indicesExist: true,
+    sourcererDataView: {},
   }),
 }));
 
@@ -55,7 +56,9 @@ describe('getExternalAlertLensAttributes', () => {
     );
 
     expect(result?.current?.state?.visualization).toEqual(
-      expect.objectContaining({ valuesInLegend: true })
+      expect.objectContaining({
+        legend: expect.objectContaining({ legendStats: ['currentAndLastValue'] }),
+      })
     );
   });
 });

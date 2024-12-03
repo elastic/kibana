@@ -31,7 +31,11 @@
     "@kbn/ebt-tools",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/field-utils",
-    "@kbn/ml-ui-actions",
+    "@kbn/visualization-utils",
+    "@kbn/search-types",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/ui-theme",
+    "@kbn/esql-utils",
   ],
   "exclude": ["target/**/*"]
 }

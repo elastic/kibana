@@ -9,6 +9,9 @@ import { AnalyticsCollection } from '../../../../common/types/analytics';
 import { KibanaLogic } from '../../shared/kibana/kibana_logic';
 
 export const findOrCreateDataView = async (collection: AnalyticsCollection) => {
+  if (!KibanaLogic.values.data) {
+    return null;
+  }
   const dataView = (
     await KibanaLogic.values.data.dataViews.find(collection.events_datastream, 1)
   ).find((result) => result.title === collection.events_datastream);

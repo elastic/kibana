@@ -7,11 +7,7 @@
 
 export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
-/**
- * A list of allowed values that can be used in `xpack.fleet.enableExperimental`.
- * This object is then used to validate and parse the value entered.
- */
-export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>({
+const _allowedExperimentalValues = {
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
   showDevtoolsRequest: true,
@@ -23,11 +19,27 @@ export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>(
   agentTamperProtectionEnabled: true,
   secretsStorage: true,
   kafkaOutput: true,
-  outputSecretsStorage: false,
-  remoteESOutput: false,
-});
+  outputSecretsStorage: true,
+  remoteESOutput: true,
+  enableStrictKQLValidation: true,
+  subfeaturePrivileges: false,
+  advancedPolicySettings: true,
+  useSpaceAwareness: false,
+  enableReusableIntegrationPolicies: true,
+  asyncDeployPolicies: true,
+  enableExportCSV: false,
+};
 
-type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
+/**
+ * A list of allowed values that can be used in `xpack.fleet.enableExperimental`.
+ * This object is then used to validate and parse the value entered.
+ */
+export const allowedExperimentalValues = Object.freeze<
+  Record<keyof typeof _allowedExperimentalValues, boolean>
+>({ ..._allowedExperimentalValues });
+
+type ExperimentalConfigKey = keyof ExperimentalFeatures;
+type ExperimentalConfigKeys = ExperimentalConfigKey[];
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
@@ -39,7 +51,7 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
  * @param configValue
  */
 export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
-  const enabledFeatures: Mutable<ExperimentalFeatures> = {};
+  const enabledFeatures: Mutable<ExperimentalFeatures> = { ...allowedExperimentalValues };
 
   for (const value of configValue) {
     if (isValidExperimentalValue(value)) {
@@ -53,8 +65,8 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
   };
 };
 
-export const isValidExperimentalValue = (value: string) => {
-  return allowedKeys.includes(value);
+export const isValidExperimentalValue = (value: string): value is ExperimentalConfigKey => {
+  return (allowedKeys as string[]).includes(value);
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];

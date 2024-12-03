@@ -12,6 +12,8 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { rulesClientMock } from '../../rules_client.mock';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -27,6 +29,7 @@ beforeEach(() => {
 });
 
 describe('getAlertStateRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
   const mockedAlertState = {
     alertTypeState: {
       some: 'value',
@@ -49,11 +52,12 @@ describe('getAlertStateRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAlertStateRoute(router, licenseState);
+    getAlertStateRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
+    expect(config.options?.access).toBe('public');
 
     rulesClient.getAlertState.mockResolvedValueOnce(mockedAlertState);
 
@@ -81,11 +85,23 @@ describe('getAlertStateRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAlertStateRoute(router, licenseState, docLinks, undefined, true);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
+    expect(config.options?.access).toBe('internal');
+  });
+
   it('returns NO-CONTENT when alert exists but has no task state yet', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAlertStateRoute(router, licenseState);
+    getAlertStateRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -121,7 +137,7 @@ describe('getAlertStateRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAlertStateRoute(router, licenseState);
+    getAlertStateRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -129,7 +145,9 @@ describe('getAlertStateRoute', () => {
 
     rulesClient.getAlertState = jest
       .fn()
-      .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
+      .mockResolvedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, '1')
+      );
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -159,12 +177,36 @@ describe('getAlertStateRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    getAlertStateRoute(router, licenseState, mockUsageCounter);
+    getAlertStateRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('state', mockUsageCounter);
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAlertStateRoute(router, licenseState, docLinks);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "type": "remove",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -20,13 +19,13 @@ import type {
   ApplicationStart,
   ChromeStart,
   ScopedHistory,
-  CoreTheme,
   ExecutionContextStart,
 } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
+import { DevToolsStartServices } from './types';
 
 export interface AppServices {
   docTitleService: DocTitleService;
@@ -37,10 +36,10 @@ export interface AppServices {
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
-  updateRoute: (newRoute: string) => void;
-  theme$: Observable<CoreTheme>;
+  history: RouteComponentProps['history'];
   appServices: AppServices;
   location: RouteComponentProps['location'];
+  startServices: DevToolsStartServices;
 }
 
 interface MountedDevToolDescriptor {
@@ -52,10 +51,10 @@ interface MountedDevToolDescriptor {
 function DevToolsWrapper({
   devTools,
   activeDevTool,
-  updateRoute,
-  theme$,
+  history,
   appServices,
   location,
+  startServices,
 }: DevToolsWrapperProps) {
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
@@ -76,7 +75,7 @@ function DevToolsWrapper({
 
   return (
     <main className="devApp">
-      <EuiTabs style={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
+      <EuiTabs css={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
         {devTools.map((currentDevTool) => (
           <EuiTab
             key={currentDevTool.id}
@@ -84,7 +83,7 @@ function DevToolsWrapper({
             isSelected={currentDevTool === activeDevTool}
             onClick={() => {
               if (!currentDevTool.isDisabled()) {
-                updateRoute(`/${currentDevTool.id}`);
+                history.push(`/${currentDevTool.id}`);
               }
             }}
           >
@@ -123,7 +122,8 @@ function DevToolsWrapper({
             const params = {
               element,
               location,
-              theme$,
+              history,
+              ...startServices,
             };
 
             const unmountHandler = await activeDevTool.mount(params);
@@ -169,9 +169,9 @@ export function renderApp(
   application: ApplicationStart,
   chrome: ChromeStart,
   history: ScopedHistory,
-  theme$: Observable<CoreTheme>,
   devTools: readonly DevToolApp[],
-  appServices: AppServices
+  appServices: AppServices,
+  startServices: DevToolsStartServices
 ) {
   if (redirectOnMissingCapabilities(application)) {
     return () => {};
@@ -180,37 +180,35 @@ export function renderApp(
   setBadge(application, chrome);
 
   ReactDOM.render(
-    <I18nProvider>
-      <KibanaThemeProvider theme$={theme$}>
-        <Router>
-          <Routes>
-            {devTools
-              // Only create routes for devtools that are not disabled
-              .filter((devTool) => !devTool.isDisabled())
-              .map((devTool) => (
-                <Route
-                  key={devTool.id}
-                  path={`/${devTool.id}`}
-                  exact={!devTool.enableRouting}
-                  render={(props) => (
-                    <DevToolsWrapper
-                      updateRoute={props.history.push}
-                      location={props.location}
-                      activeDevTool={devTool}
-                      devTools={devTools}
-                      theme$={theme$}
-                      appServices={appServices}
-                    />
-                  )}
-                />
-              ))}
-            <Route path="/">
-              <Redirect to={`/${devTools[0].id}`} />
-            </Route>
-          </Routes>
-        </Router>
-      </KibanaThemeProvider>
-    </I18nProvider>,
+    <KibanaRenderContextProvider {...startServices}>
+      <Router>
+        <Routes>
+          {devTools
+            // Only create routes for devtools that are not disabled
+            .filter((devTool) => !devTool.isDisabled())
+            .map((devTool) => (
+              <Route
+                key={devTool.id}
+                path={`/${devTool.id}`}
+                exact={!devTool.enableRouting}
+                render={(props) => (
+                  <DevToolsWrapper
+                    history={props.history}
+                    location={props.location}
+                    activeDevTool={devTool}
+                    devTools={devTools}
+                    appServices={appServices}
+                    startServices={startServices}
+                  />
+                )}
+              />
+            ))}
+          <Route path="/">
+            <Redirect to={`/${devTools[0].id}`} />
+          </Route>
+        </Routes>
+      </Router>
+    </KibanaRenderContextProvider>,
     element
   );
 

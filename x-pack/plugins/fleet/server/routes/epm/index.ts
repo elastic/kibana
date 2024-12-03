@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
-import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetAuthz } from '../../../common';
 
@@ -18,44 +18,53 @@ import {
 } from '../../services/security';
 import type { FleetAuthzRouteConfig } from '../../services/security/types';
 
-import type {
-  DeletePackageResponse,
-  GetInfoResponse,
-  InstallPackageResponse,
-  UpdatePackageResponse,
-} from '../../../common/types';
-
 import { EPM_API_ROUTES } from '../../constants';
-import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  GetInfoRequestSchemaDeprecated,
   GetBulkAssetsRequestSchema,
   InstallPackageFromRegistryRequestSchema,
-  InstallPackageFromRegistryRequestSchemaDeprecated,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
-  DeletePackageRequestSchemaDeprecated,
   BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
-  UpdatePackageRequestSchemaDeprecated,
   ReauthorizeTransformRequestSchema,
   GetDataStreamsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
+  InstallKibanaAssetsRequestSchema,
+  DeleteKibanaAssetsRequestSchema,
+  GetCategoriesResponseSchema,
+  GetPackagesResponseSchema,
+  GetInstalledPackagesResponseSchema,
+  GetLimitedPackagesResponseSchema,
+  GetStatsResponseSchema,
+  GetInputsResponseSchema,
+  GetFileResponseSchema,
+  GetInfoResponseSchema,
+  UpdatePackageResponseSchema,
+  InstallPackageResponseSchema,
+  InstallKibanaAssetsResponseSchema,
+  BulkInstallPackagesFromRegistryResponseSchema,
+  DeletePackageResponseSchema,
+  GetVerificationKeyIdResponseSchema,
+  GetDataStreamsResponseSchema,
+  GetBulkAssetsResponseSchema,
+  ReauthorizeTransformResponseSchema,
 } from '../../types';
+import type { FleetConfigType } from '../../config';
+
+import { genericErrorResponse } from '../schema/errors';
 
 import {
   getCategoriesHandler,
   getListHandler,
   getInstalledListHandler,
   getLimitedListHandler,
-  getFileHandler,
   getInfoHandler,
   getBulkAssetsHandler,
   installPackageFromRegistryHandler,
@@ -70,6 +79,11 @@ import {
   createCustomIntegrationHandler,
   getInputsHandler,
 } from './handlers';
+import { getFileHandler } from './file_handler';
+import {
+  deletePackageKibanaAssetsHandler,
+  installPackageKibanaAssetsHandler,
+} from './kibana_assets_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -81,16 +95,32 @@ export const READ_PACKAGE_INFO_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
   integrations: { readPackageInfo: true },
 };
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+
   router.versioned
     .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get package categories`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetCategoriesRequestSchema },
+        validate: {
+          request: GetCategoriesRequestSchema,
+          response: {
+            200: {
+              body: () => GetCategoriesResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getCategoriesHandler
     );
@@ -99,11 +129,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get packages`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetPackagesRequestSchema },
+        validate: {
+          request: GetPackagesRequestSchema,
+          response: {
+            200: {
+              body: () => GetPackagesResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getListHandler
     );
@@ -112,11 +156,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get installed packages`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetInstalledPackagesRequestSchema },
+        validate: {
+          request: GetInstalledPackagesRequestSchema,
+          response: {
+            200: {
+              body: () => GetInstalledPackagesResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getInstalledListHandler
     );
@@ -125,11 +183,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get a limited package list`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: false,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () => GetLimitedPackagesResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getLimitedListHandler
     );
@@ -138,11 +210,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.STATS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get package stats`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetStatsRequestSchema },
+        validate: {
+          request: GetStatsRequestSchema,
+          response: {
+            200: {
+              body: () => GetStatsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getStatsHandler
     );
@@ -151,11 +237,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.INPUTS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get an inputs template`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetInputsRequestSchema },
+        validate: {
+          request: GetInputsRequestSchema,
+          response: {
+            200: {
+              body: () => GetInputsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getInputsHandler
     );
@@ -164,11 +264,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get a package file`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetFileRequestSchema },
+        validate: {
+          request: GetFileRequestSchema,
+          response: {
+            200: {
+              body: () => GetFileResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getFileHandler
     );
@@ -179,11 +293,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
           .granted,
+      summary: `Get a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetInfoRequestSchema },
+        validate: {
+          request: GetInfoRequestSchema,
+          response: {
+            200: {
+              body: () => GetInfoResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getInfoHandler
     );
@@ -192,13 +320,27 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: EPM_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        integrations: { upgradePackages: true, writePackageSettings: true },
+        integrations: { writePackageSettings: true },
+      },
+      summary: `Update package settings`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: UpdatePackageRequestSchema },
+        validate: {
+          request: UpdatePackageRequestSchema,
+          response: {
+            200: {
+              body: () => UpdatePackageResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       updatePackageHandler
     );
@@ -207,14 +349,88 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       fleetAuthz: INSTALL_PACKAGES_AUTHZ,
+      summary: `Install a package from the registry`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: InstallPackageFromRegistryRequestSchema },
+        validate: {
+          request: InstallPackageFromRegistryRequestSchema,
+          response: {
+            200: {
+              body: () => InstallPackageResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       installPackageFromRegistryHandler
     );
+
+  if (experimentalFeatures.useSpaceAwareness) {
+    router.versioned
+      .post({
+        path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
+        fleetAuthz: {
+          integrations: { installPackages: true },
+        },
+        summary: `Install Kibana assets for a package`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: InstallKibanaAssetsRequestSchema,
+            response: {
+              200: {
+                body: () => InstallKibanaAssetsResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        installPackageKibanaAssetsHandler
+      );
+
+    router.versioned
+      .delete({
+        path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
+        fleetAuthz: {
+          integrations: { installPackages: true },
+        },
+        summary: `Delete Kibana assets for a package`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: DeleteKibanaAssetsRequestSchema,
+            response: {
+              200: {
+                body: () => InstallKibanaAssetsResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        deletePackageKibanaAssetsHandler
+      );
+  }
 
   router.versioned
     .post({
@@ -222,11 +438,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { installPackages: true, upgradePackages: true },
       },
+      summary: `Bulk install packages`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: BulkInstallPackagesFromRegistryRequestSchema },
+        validate: {
+          request: BulkInstallPackagesFromRegistryRequestSchema,
+          response: {
+            200: {
+              body: () => BulkInstallPackagesFromRegistryResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       bulkInstallPackagesFromRegistryHandler
     );
@@ -241,15 +471,27 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           parse: false,
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
+        tags: [`oas-tag:Elastic Package Manager (EPM)`],
       },
       fleetAuthz: {
         integrations: { uploadPackages: true },
       },
+      summary: `Install a package by upload`,
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: InstallPackageByUploadRequestSchema },
+        validate: {
+          request: InstallPackageByUploadRequestSchema,
+          response: {
+            200: {
+              body: () => InstallPackageResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       installPackageByUploadHandler
     );
@@ -258,11 +500,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: EPM_API_ROUTES.CUSTOM_INTEGRATIONS_PATTERN,
       fleetAuthz: INSTALL_PACKAGES_AUTHZ,
+      summary: `Create a custom integration`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: CreateCustomIntegrationRequestSchema },
+        validate: {
+          request: CreateCustomIntegrationRequestSchema,
+          response: {
+            200: {
+              body: () => InstallPackageResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       createCustomIntegrationHandler
     );
@@ -273,11 +529,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { removePackages: true },
       },
+      summary: `Delete a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: DeletePackageRequestSchema },
+        validate: {
+          request: DeletePackageRequestSchema,
+          response: {
+            200: {
+              body: () => DeletePackageResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
 
       deletePackageHandler
@@ -287,11 +557,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get a package signature verification key ID`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: false,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () => GetVerificationKeyIdResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getVerificationKeyIdHandler
     );
@@ -300,11 +584,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.DATA_STREAMS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get data streams`,
+      options: {
+        tags: ['oas-tag:Data streams'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetDataStreamsRequestSchema },
+        validate: {
+          request: GetDataStreamsRequestSchema,
+          response: {
+            200: {
+              body: () => GetDataStreamsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getDataStreamsHandler
     );
@@ -313,127 +611,27 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Bulk get assets`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetBulkAssetsRequestSchema },
+        validate: {
+          request: GetBulkAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => GetBulkAssetsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getBulkAssetsHandler
-    );
-
-  // deprecated since 8.0
-  // This endpoint should be marked as internal but the router selects this endpoint over the new GET one
-  // For now keeping it public
-  router.versioned
-    .get({
-      path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        calculateRouteAuthz(
-          fleetAuthz,
-          getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
-        ).granted,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: GetInfoRequestSchemaDeprecated },
-      },
-      async (context, request, response) => {
-        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-        const resp: IKibanaResponse<GetInfoResponse> = await getInfoHandler(
-          context,
-          newRequest,
-          response
-        );
-        if (resp.payload?.item) {
-          // returning item as well here, because pkgVersion is optional in new GET endpoint, and if not specified, the router selects the deprecated route
-          return response.ok({ body: { item: resp.payload.item, response: resp.payload.item } });
-        }
-        return resp;
-      }
-    );
-
-  router.versioned
-    .put({
-      path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
-
-      fleetAuthz: {
-        integrations: { upgradePackages: true, writePackageSettings: true },
-      },
-      access: INTERNAL_API_ACCESS,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: { request: UpdatePackageRequestSchemaDeprecated },
-      },
-      async (context, request, response) => {
-        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-        const resp: IKibanaResponse<UpdatePackageResponse> = await updatePackageHandler(
-          context,
-          newRequest,
-          response
-        );
-        if (resp.payload?.item) {
-          return response.ok({ body: { response: resp.payload.item } });
-        }
-        return resp;
-      }
-    );
-
-  // This endpoint should be marked as internal but the router selects this endpoint over the new POST
-  router.versioned
-    .post({
-      path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED,
-      fleetAuthz: INSTALL_PACKAGES_AUTHZ,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: InstallPackageFromRegistryRequestSchemaDeprecated },
-      },
-      async (context, request, response) => {
-        const newRequest = {
-          ...request,
-          params: splitPkgKey(request.params.pkgkey),
-          query: request.query,
-        } as any;
-        const resp: IKibanaResponse<InstallPackageResponse> =
-          await installPackageFromRegistryHandler(context, newRequest, response);
-        if (resp.payload?.items) {
-          return response.ok({ body: { ...resp.payload, response: resp.payload.items } });
-        }
-        return resp;
-      }
-    );
-
-  router.versioned
-    .delete({
-      path: EPM_API_ROUTES.DELETE_PATTERN_DEPRECATED,
-
-      fleetAuthz: {
-        integrations: { removePackages: true },
-      },
-      access: INTERNAL_API_ACCESS,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: { request: DeletePackageRequestSchemaDeprecated },
-      },
-      async (context, request, response) => {
-        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-        const resp: IKibanaResponse<DeletePackageResponse> = await deletePackageHandler(
-          context,
-          newRequest,
-          response
-        );
-        if (resp.payload?.items) {
-          return response.ok({ body: { response: resp.payload.items } });
-        }
-        return resp;
-      }
     );
 
   // Update transforms with es-secondary-authorization headers,
@@ -453,11 +651,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           },
         },
       },
+      summary: `Authorize transforms`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: ReauthorizeTransformRequestSchema },
+        validate: {
+          request: ReauthorizeTransformRequestSchema,
+          response: {
+            200: {
+              body: () => ReauthorizeTransformResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       reauthorizeTransformsHandler
     );

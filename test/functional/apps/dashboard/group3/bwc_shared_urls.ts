@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -11,7 +12,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['dashboard', 'header']);
+  const { dashboard, header } = getPageObjects(['dashboard', 'header']);
   const toasts = getService('toasts');
   const browser = getService('browser');
   const log = getService('log');
@@ -42,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('bwc shared urls', function describeIndexTests() {
     before(async function () {
-      await PageObjects.dashboard.initTests();
-      await PageObjects.dashboard.preserveCrossAppState();
+      await dashboard.initTests();
+      await dashboard.preserveCrossAppState();
 
       const currentUrl = await browser.getCurrentUrl();
       kibanaLegacyBaseUrl =
@@ -73,15 +74,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = `${kibanaLegacyBaseUrl}#/dashboard?${url56}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        const warningToast = await toasts.getToastElement(1);
+        const warningToast = await toasts.getElementByIndex(1);
         expect(await warningToast.getVisibleText()).to.contain('Cannot load panels');
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
       });
     });
 
@@ -92,73 +93,74 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        const warningToast = await toasts.getToastElement(1);
+        const warningToast = await toasts.getElementByIndex(1);
         expect(await warningToast.getVisibleText()).to.contain('Cannot load panels');
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
       });
 
       it('loads a saved dashboard', async function () {
-        await PageObjects.dashboard.saveDashboard('saved with colors', {
+        await dashboard.saveDashboard('saved with colors', {
+          saveAsNew: true,
           storeTimeWithDashboard: true,
         });
 
-        savedDashboardId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        savedDashboardId = await dashboard.getDashboardIdFromCurrentUrl();
         const url = `${kibanaLegacyBaseUrl}#/dashboard/${savedDashboardId}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
       });
 
       it('loads a saved dashboard with query via dashboard_no_match', async function () {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         const dashboardBaseUrl = currentUrl.substring(0, currentUrl.indexOf('/app/dashboards'));
         const url = `${dashboardBaseUrl}/app/dashboards#/dashboard/${savedDashboardId}?_a=(query:(language:kuery,query:'boop'))`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
         expect(query).to.equal('boop');
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
       });
 
       it('uiState in url takes precedence over saved dashboard state', async function () {
-        const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        const id = await dashboard.getDashboardIdFromCurrentUrl();
         const updatedQuery = urlQuery.replace(/F9D9F9/g, '000000');
         const url = `${kibanaLegacyBaseUrl}#/dashboard/${id}?${updatedQuery}`;
         log.debug(`Navigating to ${url}`);
 
         await browser.get(url, true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
       });
 
       it('back button works for old dashboards after state migrations', async () => {
-        await PageObjects.dashboard.preserveCrossAppState();
-        const oldId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.preserveCrossAppState();
+        const oldId = await dashboard.getDashboardIdFromCurrentUrl();
+        await dashboard.waitForRenderComplete();
 
         const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         await browser.goBack();
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const newId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        await header.waitUntilLoadingHasFinished();
+        const newId = await dashboard.getDashboardIdFromCurrentUrl();
         expect(newId).to.be.equal(oldId);
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         await queryBar.submitQuery();
       });
     });

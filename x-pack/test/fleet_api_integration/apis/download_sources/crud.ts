@@ -8,25 +8,25 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
-  describe('fleet_download_sources_crud', async function () {
+  describe('fleet_download_sources_crud', function () {
+    let defaultDownloadSourceId: string;
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-    setupFleetAndAgents(providerContext);
+      await fleetAndAgents.setup();
 
-    let defaultDownloadSourceId: string;
-
-    before(async function () {
       const { body: response } = await supertest
         .get(`/api/fleet/agent_download_sources`)
         .expect(200);
@@ -55,6 +55,40 @@ export default function (providerContext: FtrProviderContext) {
           is_default: true,
           host: 'https://artifacts.elastic.co/downloads/',
         });
+      });
+
+      it('should return a 200 if a user with the fleet all try to access the list', async () => {
+        await supertestWithoutAuth
+          .get(`/api/fleet/agent_download_sources`)
+          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+          .expect(200);
+      });
+
+      it('should return a 200 if a user with the fleet read try to access the list', async () => {
+        await supertestWithoutAuth
+          .get(`/api/fleet/agent_download_sources`)
+          .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+          .expect(200);
+      });
+
+      it('should return a 200 if a user with the fleet settings read try to access the list', async () => {
+        await supertestWithoutAuth
+          .get(`/api/fleet/agent_download_sources`)
+          .auth(
+            testUsers.fleet_settings_read_only.username,
+            testUsers.fleet_settings_read_only.password
+          )
+          .expect(200);
+      });
+
+      it('should return a 403 if a user without the fleet settings read try to access the list', async () => {
+        await supertestWithoutAuth
+          .get(`/api/fleet/agent_download_sources`)
+          .auth(
+            testUsers.fleet_minimal_all_only.username,
+            testUsers.fleet_minimal_all_only.password
+          )
+          .expect(403);
       });
     });
 
@@ -96,7 +130,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(downloadSource.host).to.eql('https://test.co:403');
       });
 
-      it('should allow to update an existing download source', async function () {
+      it('should allow to update is_default for existing download source', async function () {
         await supertest
           .put(`/api/fleet/agent_download_sources/${defaultDownloadSourceId}`)
           .set('kbn-xsrf', 'xxxx')
@@ -152,7 +186,6 @@ export default function (providerContext: FtrProviderContext) {
           name: 'My download source',
           host: 'http://test.fr:443',
           is_default: false,
-          proxy_id: null,
         });
       });
 

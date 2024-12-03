@@ -21,7 +21,6 @@
     "@kbn/discover-plugin",
     "@kbn/data-plugin",
     "@kbn/generate-csv",
-    "@kbn/core-http-server",
     "@kbn/reporting-server",
     "@kbn/reporting-export-types-csv-common",
     "@kbn/reporting-mocks-server",

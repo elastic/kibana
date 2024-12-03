@@ -11,14 +11,14 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('create email action', () => {
-    it('should return 403 when creating an email action', async () => {
+  describe('create email connector', () => {
+    it('should return 403 when creating an email connector', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'An email action',
-          actionTypeId: '.email',
+          name: 'An email connector',
+          connector_type_id: '.email',
           config: {
             service: '__json',
             from: 'bob@example.com',
@@ -33,6 +33,25 @@ export default function emailTest({ getService }: FtrProviderContext) {
           error: 'Forbidden',
           message:
             'Action type .email is disabled because your basic license does not support it. Please upgrade your license.',
+        });
+    });
+
+    it('should not execute a pre-configured email connector because of license', async () => {
+      await supertest
+        .post('/api/actions/connector/my-test-email/_execute')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: 'someone@example.com',
+            subject: 'testing',
+            message: 'still testing',
+          },
+        })
+        .expect(403, {
+          error: 'Forbidden',
+          message:
+            'Action type .email is disabled because your basic license does not support it. Please upgrade your license.',
+          statusCode: 403,
         });
     });
   });

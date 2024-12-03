@@ -11,12 +11,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
-
     // Required from './kibana.json'
     "@kbn/actions-plugin",
     "@kbn/rule-registry-plugin",
@@ -50,7 +48,6 @@
     "@kbn/core-saved-objects-common",
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
-    "@kbn/ecs",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/core-saved-objects-utils-server",
@@ -65,11 +62,23 @@
     "@kbn/ui-actions-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/core-theme-browser",
     "@kbn/serverless",
     "@kbn/core-http-server",
     "@kbn/alerting-plugin",
     "@kbn/content-management-plugin",
+    "@kbn/rison",
+    "@kbn/core-application-browser",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
+    "@kbn/datemath",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-logging-browser-mocks",
+    "@kbn/presentation-publishing",
+    "@kbn/securitysolution-rules",
+    "@kbn/alerts-ui-shared",
+    "@kbn/cloud-plugin",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-http-server-utils",
   ],
   "exclude": [
     "target/**/*",

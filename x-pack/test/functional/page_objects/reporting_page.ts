@@ -11,7 +11,8 @@ import path from 'path';
 import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
 import { promisify } from 'util';
-import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-plugin/common/constants';
+
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 import { FtrService } from '../ftr_provider_context';
 
 const writeFileAsync = promisify(fs.writeFile);
@@ -73,34 +74,36 @@ export class ReportingPageObject extends FtrService {
     });
     const urlWithoutBase = fullUrl.replace(baseURL, '');
     const res = await this.security.testUserSupertest.get(urlWithoutBase);
-    return res;
+    return res ?? '';
   }
 
-  async getRawPdfReportData(url: string): Promise<Buffer> {
-    this.log.debug(`getRawPdfReportData for ${url}`);
+  async getRawReportData(url: string): Promise<Buffer> {
+    this.log.debug(`getRawReportData for ${url}`);
     const response = await this.getResponse(url);
     expect(response.body).to.be.a(Buffer);
     return response.body as Buffer;
   }
 
-  async openCsvReportingPanel() {
-    this.log.debug('openCsvReportingPanel');
-    await this.share.openShareMenuItem('CSV Reports');
+  async openShareMenuItem(itemTitle: string) {
+    this.log.debug(`openShareMenuItem title:${itemTitle}`);
+    const isShareMenuOpen = await this.testSubjects.exists('shareContextMenu');
+    if (!isShareMenuOpen) {
+      await this.testSubjects.click('shareTopNavButton');
+    } else {
+      // there is no easy way to ensure the menu is at the top level
+      // so just close the existing menu
+      await this.testSubjects.click('shareTopNavButton');
+      // and then re-open the menu
+      await this.testSubjects.click('shareTopNavButton');
+    }
+    const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
+    await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
+    await this.testSubjects.waitForDeleted(menuPanel);
   }
 
-  async openPdfReportingPanel() {
-    this.log.debug('openPdfReportingPanel');
-    await this.share.openShareMenuItem('PDF Reports');
-  }
-
-  async openPngReportingPanel() {
-    this.log.debug('openPngReportingPanel');
-    await this.share.openShareMenuItem('PNG Reports');
-  }
-
-  async clearToastNotifications() {
-    const toasts = await this.testSubjects.findAll('toastCloseButton');
-    await Promise.all(toasts.map(async (t) => await t.click()));
+  async openExportTab() {
+    this.log.debug('open export modal');
+    await this.share.clickTab('Export');
   }
 
   async getQueueReportError() {
@@ -190,6 +193,19 @@ export class ReportingPageObject extends FtrService {
         };
       })
     );
+  }
+
+  async openReportFlyout(reportTitle: string) {
+    const table = await this.testSubjects.find(REPORT_TABLE_ID);
+    const allRows = await table.findAllByTestSubject(REPORT_TABLE_ROW_ID);
+    for (const row of allRows) {
+      const titleColumn = await row.findByTestSubject('reportingListItemObjectTitle');
+      const title = await titleColumn.getVisibleText();
+      if (title === reportTitle) {
+        await titleColumn.click();
+        return;
+      }
+    }
   }
 
   async writeSessionReport(name: string, reportExt: string, rawPdf: Buffer, folder: string) {

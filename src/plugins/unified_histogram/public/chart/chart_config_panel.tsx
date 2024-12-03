@@ -1,58 +1,97 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { Observable } from 'rxjs';
+
+import React, { ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isEqual } from 'lodash';
+import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import { deriveLensSuggestionFromLensAttributes } from '../utils/external_vis_context';
 
-import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../types';
-import type { LensAttributesContext } from './utils/get_lens_attributes';
+import {
+  UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramServices,
+  UnifiedHistogramSuggestionContext,
+  UnifiedHistogramSuggestionType,
+  UnifiedHistogramVisContext,
+} from '../types';
 
 export function ChartConfigPanel({
   services,
-  lensAttributesContext,
+  visContext,
   lensAdapters,
-  lensEmbeddableOutput$,
-  currentSuggestion,
+  dataLoading$,
+  currentSuggestionContext,
   isFlyoutVisible,
   setIsFlyoutVisible,
   isPlainRecord,
   query,
-  onSuggestionChange,
+  onSuggestionContextEdit,
 }: {
   services: UnifiedHistogramServices;
-  lensAttributesContext: LensAttributesContext;
+  visContext: UnifiedHistogramVisContext;
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
-  currentSuggestion?: Suggestion;
+  dataLoading$?: LensEmbeddableOutput['dataLoading'];
+  currentSuggestionContext: UnifiedHistogramSuggestionContext;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onSuggestionContextEdit: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousSuggestion = useRef<Suggestion | undefined>(undefined);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
-  const updateSuggestion = useCallback(
-    (datasourceState, visualizationState) => {
-      const updatedSuggestion = {
-        ...currentSuggestion,
-        ...(datasourceState && { datasourceState }),
-        ...(visualizationState && { visualizationState }),
-      } as Suggestion;
-      onSuggestionChange?.(updatedSuggestion);
+
+  const updatePanelState = useCallback<
+    ComponentProps<EditLensConfigPanelComponent>['updatePanelState']
+  >(
+    (datasourceState, visualizationState, visualizationId) => {
+      const updatedSuggestion: Suggestion = {
+        ...currentSuggestionContext.suggestion!,
+        visualizationId:
+          visualizationId ?? currentSuggestionContext.suggestion?.visualizationId ?? '',
+        ...(isObject(datasourceState) && { datasourceState }),
+        ...(isObject(visualizationState) && { visualizationState }),
+      };
+      onSuggestionContextEdit({
+        ...currentSuggestionContext,
+        suggestion: updatedSuggestion,
+      });
     },
-    [currentSuggestion, onSuggestionChange]
+    [currentSuggestionContext, onSuggestionContextEdit]
   );
+
+  const updateSuggestion = useCallback<
+    NonNullable<ComponentProps<EditLensConfigPanelComponent>['updateSuggestion']>
+  >(
+    (attributes) => {
+      const updatedSuggestion = deriveLensSuggestionFromLensAttributes({
+        externalVisContext: {
+          ...visContext,
+          attributes,
+        },
+        queryParams: null, // skip validation for matching query
+      });
+      onSuggestionContextEdit({
+        type: UnifiedHistogramSuggestionType.lensSuggestion,
+        suggestion: updatedSuggestion,
+      });
+    },
+    [onSuggestionContextEdit, visContext]
+  );
+
+  const currentSuggestion = currentSuggestionContext.suggestion;
+  const currentSuggestionType = currentSuggestionContext.type;
 
   useEffect(() => {
     const tablesAdapters = lensAdapters?.tables?.tables;
@@ -64,16 +103,18 @@ export function ChartConfigPanel({
       const Component = await services.lens.EditLensConfigPanelApi();
       const panel = (
         <Component
-          attributes={lensAttributesContext.attributes}
-          updatePanelState={updateSuggestion}
+          attributes={visContext.attributes}
+          updateSuggestion={updateSuggestion}
+          updatePanelState={updatePanelState}
           lensAdapters={lensAdapters}
-          output$={lensEmbeddableOutput$}
+          dataLoading$={dataLoading$}
           displayFlyoutHeader
           closeFlyout={() => {
             setIsFlyoutVisible(false);
           }}
           wrapInFlyout
           datasourceId="textBased"
+          hidesSuggestions={currentSuggestionType !== UnifiedHistogramSuggestionType.lensSuggestion}
         />
       );
       setEditLensConfigPanel(panel);
@@ -84,14 +125,14 @@ export function ChartConfigPanel({
       }
     }
     const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
-    // rerender the component if the data has changed or the suggestion
-    // as I can have different suggestions for the same data
+    // rerender the component if the data has changed
     if (isPlainRecord && (dataHasChanged || suggestionHasChanged || !isFlyoutVisible)) {
       fetchLensConfigComponent();
     }
   }, [
-    lensAttributesContext.attributes,
+    visContext.attributes,
     services.lens,
+    updatePanelState,
     updateSuggestion,
     isPlainRecord,
     currentSuggestion,
@@ -99,8 +140,17 @@ export function ChartConfigPanel({
     isFlyoutVisible,
     setIsFlyoutVisible,
     lensAdapters,
-    lensEmbeddableOutput$,
+    dataLoading$,
+    currentSuggestionType,
   ]);
 
-  return isPlainRecord ? editLensConfigPanel : null;
+  const flyoutElement = isPlainRecord ? editLensConfigPanel : null;
+
+  useEffect(() => {
+    if (flyoutElement) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.lensEdit);
+    }
+  }, [flyoutElement]);
+
+  return flyoutElement;
 }

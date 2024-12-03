@@ -9,14 +9,13 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import '../../common/mock/match_media';
 import type { GetCasesColumn } from './use_cases_columns';
 import { ExternalServiceColumn, useCasesColumns } from './use_cases_columns';
 import { useGetCasesMockState } from '../../containers/mock';
 import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -43,7 +42,7 @@ const DEFAULT_SELECTED_COLUMNS = [
 describe('useCasesColumns ', () => {
   let appMockRender: AppMockRenderer;
   const useCasesColumnsProps: GetCasesColumn = {
-    filterStatus: CaseStatuses.open,
+    filterStatus: [CaseStatuses.open],
     userProfiles: userProfilesMap,
     isSelectorView: false,
     selectedColumns: DEFAULT_SELECTED_COLUMNS,
@@ -84,68 +83,73 @@ describe('useCasesColumns ', () => {
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "20%",
+            "width": "17%",
           },
           Object {
             "field": "assignees",
             "name": "Assignees",
             "render": [Function],
-            "width": "180px",
+            "width": "10%",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "width": "15%",
+            "width": "12%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
-            "width": "80px",
+            "width": "70px",
           },
           Object {
             "align": "right",
             "field": "totalComment",
             "name": "Comments",
             "render": [Function],
+            "width": "75px",
           },
           Object {
             "field": "category",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "12%",
           },
           Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "field": "updatedAt",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "field": "closedAt",
             "name": "Closed on",
             "render": [Function],
             "sortable": true,
+            "width": "10%",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": undefined,
+            "width": "10%",
           },
           Object {
             "field": "status",
             "name": "Status",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "severity",
@@ -158,9 +162,11 @@ describe('useCasesColumns ', () => {
             "align": "right",
             "name": "Actions",
             "render": [Function],
+            "width": "100px",
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -184,62 +190,66 @@ describe('useCasesColumns ', () => {
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "20%",
+            "width": "17%",
           },
           Object {
             "field": "assignees",
             "name": "Assignees",
             "render": [Function],
-            "width": "180px",
+            "width": "10%",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "width": "15%",
+            "width": "12%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
-            "width": "80px",
+            "width": "70px",
           },
           Object {
             "align": "right",
             "field": "totalComment",
             "name": "Comments",
             "render": [Function],
+            "width": "75px",
           },
           Object {
             "field": "category",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "12%",
           },
           Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "field": "updatedAt",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": undefined,
+            "width": "10%",
           },
           Object {
             "field": "status",
             "name": "Status",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "severity",
@@ -252,9 +262,11 @@ describe('useCasesColumns ', () => {
             "align": "right",
             "name": "Actions",
             "render": [Function],
+            "width": "100px",
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -288,13 +300,14 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "12%",
           },
           Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "field": "severity",
@@ -306,9 +319,11 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
+            "width": "70px",
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -336,13 +351,14 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "12%",
           },
           Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "field": "severity",
@@ -354,9 +370,11 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
+            "width": "70px",
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -384,13 +402,14 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "12%",
           },
           Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "field": "severity",
@@ -402,9 +421,11 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
+            "width": "70px",
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -424,56 +445,60 @@ describe('useCasesColumns ', () => {
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "20%",
+            "width": "17%",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "width": "15%",
+            "width": "12%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
-            "width": "80px",
+            "width": "70px",
           },
           Object {
             "align": "right",
             "field": "totalComment",
             "name": "Comments",
             "render": [Function],
+            "width": "75px",
           },
           Object {
             "field": "category",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "12%",
           },
           Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "field": "updatedAt",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": undefined,
+            "width": "10%",
           },
           Object {
             "field": "status",
             "name": "Status",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "severity",
@@ -484,6 +509,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -530,56 +556,60 @@ describe('useCasesColumns ', () => {
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "20%",
+            "width": "17%",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "width": "15%",
+            "width": "12%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
-            "width": "80px",
+            "width": "70px",
           },
           Object {
             "align": "right",
             "field": "totalComment",
             "name": "Comments",
             "render": [Function],
+            "width": "75px",
           },
           Object {
             "field": "category",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "12%",
           },
           Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "field": "updatedAt",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
+            "width": "15%",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": undefined,
+            "width": "10%",
           },
           Object {
             "field": "status",
             "name": "Status",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "severity",
@@ -602,6 +632,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });

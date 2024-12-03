@@ -13,8 +13,9 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
-import { RuleNotifyWhen } from '../../../common';
+import { RuleNotifyWhen, SanitizedRule, RuleSystemAction } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -30,6 +31,7 @@ beforeEach(() => {
 });
 
 describe('updateAlertRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
   const mockedResponse = {
     id: '1',
     alertTypeId: '1',
@@ -53,17 +55,27 @@ describe('updateAlertRoute', () => {
     notifyWhen: RuleNotifyWhen.CHANGE,
   };
 
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+  };
+
   it('updates an alert with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateAlertRoute(router, licenseState);
+    updateAlertRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.put.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+    expect(config.options?.access).toBe('public');
 
-    rulesClient.update.mockResolvedValueOnce(mockedResponse);
+    rulesClient.update.mockResolvedValueOnce(mockedResponse as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -131,15 +143,27 @@ describe('updateAlertRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateAlertRoute(router, licenseState, docLinks, undefined, true);
+
+    const [config] = router.put.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+    expect(config.options?.access).toBe('internal');
+  });
+
   it('ensures the license allows updating alerts', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateAlertRoute(router, licenseState);
+    updateAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockResolvedValueOnce(mockedResponse);
+    rulesClient.update.mockResolvedValueOnce(mockedResponse as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -182,11 +206,11 @@ describe('updateAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    updateAlertRoute(router, licenseState);
+    updateAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockResolvedValueOnce(mockedResponse);
+    rulesClient.update.mockResolvedValueOnce(mockedResponse as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -216,7 +240,7 @@ describe('updateAlertRoute', () => {
       ['ok']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
@@ -225,7 +249,7 @@ describe('updateAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateAlertRoute(router, licenseState);
+    updateAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.put.mock.calls[0];
 
@@ -247,12 +271,120 @@ describe('updateAlertRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    updateAlertRoute(router, licenseState, mockUsageCounter);
+    updateAlertRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.put.mock.calls[0];
+    rulesClient.update.mockResolvedValueOnce(mockedResponse as unknown as SanitizedRule);
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('update', mockUsageCounter);
+  });
+
+  it('does not return system actions', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateAlertRoute(router, licenseState, docLinks);
+
+    const [config, handler] = router.put.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+
+    rulesClient.update.mockResolvedValueOnce({
+      ...mockedResponse,
+      systemActions: [systemAction],
+    } as unknown as SanitizedRule);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: {
+          id: '1',
+        },
+        body: {
+          throttle: null,
+          name: 'abc',
+          tags: ['bar'],
+          schedule: { interval: '12s' },
+          params: {
+            otherField: false,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '2',
+              params: {
+                baz: true,
+              },
+            },
+          ],
+          notifyWhen: 'onActionGroupChange',
+        },
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toEqual({ body: mockedResponse });
+
+    expect(rulesClient.update).toHaveBeenCalledTimes(1);
+    expect(rulesClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "2",
+                "params": Object {
+                  "baz": true,
+                },
+              },
+            ],
+            "name": "abc",
+            "notifyWhen": "onActionGroupChange",
+            "params": Object {
+              "otherField": false,
+            },
+            "schedule": Object {
+              "interval": "12s",
+            },
+            "tags": Array [
+              "bar",
+            ],
+            "throttle": null,
+          },
+          "id": "1",
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalled();
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateAlertRoute(router, licenseState, docLinks);
+
+    const [config] = router.put.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "PUT",
+          "newApiPath": "/api/alerting/rule/rule/{id}",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

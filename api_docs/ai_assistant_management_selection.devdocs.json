@@ -1,0 +1,86 @@
+{
+  "id": "aiAssistantManagementSelection",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "aiAssistantManagementSelection",
+        "id": "def-public.AIAssistantType",
+        "type": "Enum",
+        "tags": [],
+        "label": "AIAssistantType",
+        "description": [],
+        "path": "src/plugins/ai_assistant_management/selection/common/ai_assistant_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "aiAssistantManagementSelection",
+      "id": "def-public.AIAssistantManagementSelectionPluginPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AIAssistantManagementSelectionPluginPublicSetup",
+      "description": [],
+      "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "aiAssistantManagementSelection",
+      "id": "def-public.AIAssistantManagementSelectionPluginPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AIAssistantManagementSelectionPluginPublicStart",
+      "description": [],
+      "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "aiAssistantManagementSelection",
+          "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.aiAssistantType$",
+          "type": "Object",
+          "tags": [],
+          "label": "aiAssistantType$",
+          "description": [],
+          "signature": [
+            "Observable",
+            "<",
+            "AIAssistantType",
+            ">"
+          ],
+          "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

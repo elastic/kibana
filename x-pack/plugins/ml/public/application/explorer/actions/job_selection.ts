@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
-import { mlFieldFormatService } from '../../services/field_format_service';
-import { mlJobService } from '../../services/job_service';
+import type { MlFieldFormatService } from '../../services/field_format_service';
+import type { MlJobService } from '../../services/job_service';
 
 import { EXPLORER_ACTION } from '../explorer_constants';
-import { createJobs } from '../explorer_utils';
+import { createJobs, getInfluencers } from '../explorer_utils';
+import type { ExplorerActions } from '../explorer_dashboard_service';
 
-export function jobSelectionActionCreator(selectedJobIds: string[]) {
+export function jobSelectionActionCreator(
+  mlJobService: MlJobService,
+  mlFieldFormatService: MlFieldFormatService,
+  selectedJobIds: string[]
+): Observable<ExplorerActions | null> {
   return from(mlFieldFormatService.populateFormats(selectedJobIds)).pipe(
     map((resp) => {
       if (resp.error) {
@@ -27,12 +33,14 @@ export function jobSelectionActionCreator(selectedJobIds: string[]) {
       });
 
       const selectedJobs = jobs.filter((job) => job.selected);
+      const noInfluencersConfigured = getInfluencers(mlJobService, selectedJobs).length === 0;
 
       return {
         type: EXPLORER_ACTION.JOB_SELECTION_CHANGE,
         payload: {
           loading: false,
           selectedJobs,
+          noInfluencersConfigured,
         },
       };
     })

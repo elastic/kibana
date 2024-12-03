@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/formatters",
+  "owner": "@elastic/obs-ux-logs-team"
+}

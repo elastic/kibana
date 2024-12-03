@@ -19,10 +19,10 @@ import { renderToString } from 'react-dom/server';
 
 import type { IBasePath } from '@kbn/core/server';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { IStaticAssets } from '@kbn/core-http-server';
 import { Fonts } from '@kbn/core-rendering-server-internal';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
 // Preload the warning icon used by `EuiEmptyPrompt` to ensure that it's loaded
@@ -35,7 +35,7 @@ appendIconComponentCache({
 const emotionCache = createCache({ key: 'eui', stylisPlugins: [euiStylisPrefixer] });
 
 interface Props {
-  buildNumber: number;
+  staticAssets: IStaticAssets;
   basePath: IBasePath;
   scriptPaths?: string[];
   title: ReactNode;
@@ -46,7 +46,7 @@ interface Props {
 
 export function PromptPage({
   basePath,
-  buildNumber,
+  staticAssets,
   scriptPaths = [],
   title,
   body,
@@ -74,11 +74,10 @@ export function PromptPage({
   const chunks = extractCriticalToChunks(renderToString(content));
   const emotionStyles = constructStyleTagsFromChunks(chunks);
 
-  const uiPublicURL = `${basePath.serverBasePath}/ui`;
-  const regularBundlePath = `${basePath.serverBasePath}/${buildNumber}/bundles`;
+  const uiPublicURL = staticAssets.prependPublicUrl('/ui');
+  const regularBundlePath = staticAssets.prependPublicUrl('/bundles');
   const styleSheetPaths = [
     `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-    `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename('v8')}`,
   ];
 
   return (

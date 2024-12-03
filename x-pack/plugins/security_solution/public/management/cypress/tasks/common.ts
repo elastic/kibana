@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { closeKibanaBrowserSecurityToastIfNecessary } from './toasts';
+
 export const API_AUTH = Object.freeze({
   user: Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME'),
   pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
@@ -13,7 +15,7 @@ export const API_AUTH = Object.freeze({
 export const COMMON_API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress',
   'x-elastic-internal-origin': 'security-solution',
-  'Elastic-Api-Version': '2023-10-31',
+  'elastic-api-version': '2023-10-31',
 });
 
 export const waitForPageToBeLoaded = () => {
@@ -24,6 +26,7 @@ export const waitForPageToBeLoaded = () => {
 export const loadPage = (url: string, options: Partial<Cypress.VisitOptions> = {}) => {
   cy.visit(url, options);
   waitForPageToBeLoaded();
+  closeKibanaBrowserSecurityToastIfNecessary();
 };
 
 export const request = <T = unknown>({
@@ -45,13 +48,3 @@ export const rootRequest = <T = unknown>(
     headers: API_HEADERS,
     ...options,
   });
-
-export const disableExpandableFlyoutAdvancedSettings = () => {
-  const body = { changes: { 'securitySolution:enableExpandableFlyout': false } };
-  rootRequest({
-    method: 'POST',
-    url: 'internal/kibana/settings',
-    body,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-  });
-};

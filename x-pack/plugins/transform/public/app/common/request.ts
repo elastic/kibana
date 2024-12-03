@@ -5,11 +5,22 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import {
+  buildBaseFilterCriteria,
+  isDefaultQuery,
+  type SearchQueryVariant,
+  type SavedSearchQuery,
+} from '@kbn/ml-query-utils';
 
+import type {
+  PivotTransformPreviewRequestSchema,
+  PostTransformsPreviewRequestSchema,
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+  PutTransformsRequestSchema,
+} from '../../../server/routes/api_schemas/transforms';
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
   DEFAULT_TRANSFORM_FREQUENCY,
@@ -17,43 +28,24 @@ import {
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
 } from '../../../common/constants';
 import type {
-  PivotTransformPreviewRequestSchema,
-  PostTransformsPreviewRequestSchema,
-  PutTransformsLatestRequestSchema,
-  PutTransformsPivotRequestSchema,
-  PutTransformsRequestSchema,
-} from '../../../common/api_schemas/transforms';
-import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
+  DateHistogramAgg,
+  HistogramAgg,
+  TermsAgg,
+} from '../../../common/types/pivot_group_by';
 
-import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
+import type { GroupByConfigWithUiSupport, PivotAggsConfig, PivotGroupByConfig } from '.';
 import {
   getEsAggFromAggConfig,
   getEsAggFromGroupByConfig,
   isGroupByDateHistogram,
   isGroupByHistogram,
   isGroupByTerms,
-  GroupByConfigWithUiSupport,
-  PivotAggsConfig,
-  PivotGroupByConfig,
 } from '.';
 
-export interface SimpleQuery {
-  query_string: {
-    query: string;
-    default_operator?: estypes.QueryDslOperator;
-  };
-}
-
-export interface FilterBasedSimpleQuery {
-  bool: {
-    filter: [SimpleQuery];
-  };
-}
-
-export type TransformConfigQuery = FilterBasedSimpleQuery | SimpleQuery | SavedSearchQuery;
+export type TransformConfigQuery = SearchQueryVariant;
 
 export function getTransformConfigQuery(search: string | SavedSearchQuery): TransformConfigQuery {
   if (typeof search === 'string') {
@@ -66,40 +58,6 @@ export function getTransformConfigQuery(search: string | SavedSearchQuery): Tran
   }
 
   return search;
-}
-
-export function isSimpleQuery(arg: unknown): arg is SimpleQuery {
-  return isPopulatedObject(arg, ['query_string']);
-}
-
-export function isFilterBasedSimpleQuery(arg: unknown): arg is FilterBasedSimpleQuery {
-  return (
-    isPopulatedObject(arg, ['bool']) &&
-    isPopulatedObject(arg.bool, ['filter']) &&
-    Array.isArray(arg.bool.filter) &&
-    arg.bool.filter.length === 1 &&
-    isSimpleQuery(arg.bool.filter[0])
-  );
-}
-
-export const matchAllQuery = { match_all: {} };
-export function isMatchAllQuery(query: unknown): boolean {
-  return (
-    isPopulatedObject(query, ['match_all']) &&
-    typeof query.match_all === 'object' &&
-    query.match_all !== null &&
-    Object.keys(query.match_all).length === 0
-  );
-}
-
-export const defaultQuery: TransformConfigQuery = { query_string: { query: '*' } };
-export function isDefaultQuery(query: TransformConfigQuery): boolean {
-  return (
-    isMatchAllQuery(query) ||
-    (isSimpleQuery(query) && query.query_string.query === '*') ||
-    (isFilterBasedSimpleQuery(query) &&
-      (query.bool.filter[0].query_string.query === '*' || isMatchAllQuery(query.bool.filter[0])))
-  );
 }
 
 export const getMissingBucketConfig = (
@@ -179,7 +137,7 @@ export function getPreviewTransformRequestBody(
     dataView.timeFieldName,
     timeRangeMs?.from,
     timeRangeMs?.to,
-    isDefaultQuery(transformConfigQuery) ? undefined : transformConfigQuery
+    transformConfigQuery
   );
 
   const queryWithBaseFilterCriteria = {
@@ -271,7 +229,9 @@ export const getCreateTransformRequestBody = (
       }
     : {}),
   // conditionally add retention policy settings
-  ...(transformDetailsState.isRetentionPolicyEnabled
+  ...(transformDetailsState.isRetentionPolicyEnabled &&
+  transformDetailsState.retentionPolicyDateField !== '' &&
+  transformDetailsState.retentionPolicyMaxAge !== ''
     ? {
         retention_policy: {
           time: {

@@ -7,26 +7,29 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ExportExceptionListRequestQuery } from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import { exportExceptionListRequestQuery } from '../../common/api';
 
-import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
+import { buildSiemResponse, getExceptionListClient } from './utils';
 
 export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
-      },
       path: `${EXCEPTION_LIST_URL}/_export`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
+      },
     })
     .addVersion(
       {
         validate: {
           request: {
-            query: buildRouteValidation(exportExceptionListRequestQuery),
+            query: buildRouteValidationWithZod(ExportExceptionListRequestQuery),
           },
         },
         version: '2023-10-31',

@@ -11,6 +11,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -26,6 +27,9 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';
 import { fromKueryExpression } from '@kbn/es-query';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -60,8 +64,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -75,7 +83,7 @@ const RuleIntervalSeconds = 1;
 
 const BaseRuleSavedObject: SavedObject<RawRule> = {
   id: '1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     enabled: true,
     name: 'rule-name',
@@ -338,12 +346,14 @@ const aggregateResults = {
         ],
       },
       executionUuidCardinality: {
-        executionUuidCardinality: {
-          value: 374,
-        },
+        value: 374,
       },
     },
   },
+  hits: {
+    total: { value: 875, relation: 'eq' },
+    hits: [],
+  } as estypes.SearchHitsMetadata<unknown>,
 };
 
 function getRuleSavedObject(attributes: Partial<RawRule> = {}): SavedObject<RawRule> {
@@ -444,7 +454,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -470,7 +480,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -496,7 +506,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -522,7 +532,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -543,7 +553,7 @@ describe('getExecutionLogForRule()', () => {
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
     const dateStart = 'ain"t no way this will get parsed as a date';
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ dateStart }))
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
@@ -555,7 +565,7 @@ describe('getExecutionLogForRule()', () => {
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
     const dateEnd = 'ain"t no way this will get parsed as a date';
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ dateEnd }))
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateEnd: "ain"t no way this will get parsed as a date"]`
@@ -566,7 +576,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ page: -3 }))
     ).rejects.toMatchInlineSnapshot(`[Error: Invalid page field "-3" - must be greater than 0]`);
   });
@@ -575,7 +585,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ perPage: -3 }))
     ).rejects.toMatchInlineSnapshot(`[Error: Invalid perPage field "-3" - must be greater than 0]`);
   });
@@ -584,7 +594,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(
         getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
       )
@@ -597,7 +607,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams())
     ).rejects.toMatchInlineSnapshot(`[Error: OMG!]`);
   });
@@ -606,7 +616,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams())
     ).rejects.toMatchInlineSnapshot(`[Error: OMG 2!]`);
   });
@@ -662,7 +672,7 @@ describe('getExecutionLogForRule()', () => {
             action: 'rule_get_execution_log',
             outcome: 'success',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'rule-name' } },
         })
       );
     });
@@ -684,7 +694,8 @@ describe('getExecutionLogForRule()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
+              name: 'rule-name',
             },
           },
           error: {

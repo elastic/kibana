@@ -12,27 +12,31 @@ import { RiskScorePreviewSection } from '../components/risk_score_preview_sectio
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { BETA } from '../../common/translations';
+import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 
 export const EntityAnalyticsManagementPage = () => {
+  const privileges = useMissingRiskEnginePrivileges();
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="baseline">
-        <EuiFlexItem grow={false}>
-          <EuiPageHeader
-            data-test-subj="entityAnalyticsManagementPageTitle"
-            pageTitle={ENTITY_ANALYTICS_RISK_SCORE}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} />
-        <EuiBetaBadge label={BETA} size="s" />
-      </EuiFlexGroup>
+      <RiskEnginePrivilegesCallOut privileges={privileges} />
+      <EuiPageHeader
+        pageTitle={
+          <EuiFlexGroup>
+            <EuiFlexItem data-test-subj="entityAnalyticsManagementPageTitle" grow={false}>
+              {ENTITY_ANALYTICS_RISK_SCORE}
+            </EuiFlexItem>
+            <EuiBetaBadge label={BETA} size="s" />
+          </EuiFlexGroup>
+        }
+      />
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={2}>
-          <RiskScoreEnableSection />
+          <RiskScoreEnableSection privileges={privileges} />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <RiskScorePreviewSection />
+          <RiskScorePreviewSection privileges={privileges} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

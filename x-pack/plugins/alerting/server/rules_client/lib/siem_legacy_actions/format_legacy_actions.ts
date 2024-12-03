@@ -8,6 +8,7 @@
 import { chunk } from 'lodash';
 import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RuleAction, Rule } from '../../../types';
 import type { RuleExecutorServices } from '../../..';
 import { injectReferencesIntoActions } from '../../common';
@@ -49,7 +50,7 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
 }: LegacyGetBulkRuleActionsSavedObject): Promise<Record<string, LegacyActionsObj>> => {
   const references = alertIds.map<SavedObjectsFindOptionsReference>((alertId) => ({
     id: alertId,
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
   }));
   const errors: unknown[] = [];
   const results = await pMap(
@@ -82,7 +83,7 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
   return actionSavedObjects.reduce((acc: { [key: string]: LegacyActionsObj }, savedObject) => {
     const ruleAlertId = savedObject.references.find((reference) => {
       // Find the first rule alert and assume that is the one we want since we should only ever have 1.
-      return reference.type === 'alert';
+      return reference.type === RULE_SAVED_OBJECT_TYPE;
     });
     // We check to ensure we have found a "ruleAlertId" and hopefully we have.
     const ruleAlertIdKey = ruleAlertId != null ? ruleAlertId.id : undefined;
@@ -98,7 +99,9 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
           legacyRawActions,
           savedObject.references
         ) // remove uuid from action, as this uuid is not persistent
-          .map(({ uuid, ...action }) => action),
+          .map(({ uuid, ...action }) => ({
+            ...action,
+          })) as RuleAction[],
       };
     } else {
       logger.error(

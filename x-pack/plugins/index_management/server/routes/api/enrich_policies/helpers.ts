@@ -23,6 +23,7 @@ const normalizedFieldTypes: { [key: string]: string } = {
   float: 'number',
   half_float: 'number',
   scaled_float: 'number',
+  unsigned_long: 'number',
 };
 
 interface FieldItem {
@@ -143,4 +144,16 @@ export async function getIndices(dataClient: IScopedClusterClient, pattern: stri
   const indices = response.body.aggregations.indices;
 
   return indices.buckets ? indices.buckets.map((bucket) => bucket.key) : [];
+}
+export async function getDataStreams(
+  dataClient: IScopedClusterClient,
+  pattern: string,
+  limit = 10
+) {
+  const response = await dataClient.asCurrentUser.indices.getDataStream({
+    name: pattern,
+    expand_wildcards: 'open',
+  });
+
+  return response.data_streams ? response.data_streams.map((dataStream) => dataStream.name) : [];
 }

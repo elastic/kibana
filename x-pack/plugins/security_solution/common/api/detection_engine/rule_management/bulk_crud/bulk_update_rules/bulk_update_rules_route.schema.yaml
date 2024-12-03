@@ -1,14 +1,19 @@
 openapi: 3.0.0
 info:
   title: Bulk Update API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/rules/_bulk_update:
     put:
-      operationId: BulkUpdateRules
+      x-labels: [ess]
       x-codegen-enabled: true
+      operationId: BulkUpdateRules
       deprecated: true
-      description: Updates multiple rules using the `PUT` method.
+      summary: Update multiple detection rules
+      description: |
+        Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
+        > info
+        > You cannot modify the `id` or `rule_id` values.
       tags:
         - Bulk API
       requestBody:

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -35,6 +36,7 @@ interface ConnectorConfigurationForm {
   isLoading: boolean;
   isNative: boolean;
   saveConfig: (config: Record<string, string | number | boolean | null>) => void;
+  saveAndSync?: (config: Record<string, string | number | boolean | null>) => void;
   stackManagementHref?: string;
   subscriptionLink?: string;
 }
@@ -59,6 +61,7 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
   isLoading,
   isNative,
   saveConfig,
+  saveAndSync,
 }) => {
   const [localConfig, setLocalConfig] = useState<ConnectorConfiguration>(configuration);
   const [configView, setConfigView] = useState<ConfigView>(
@@ -66,12 +69,12 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
   );
 
   useEffect(() => {
-    setConfigView(sortAndFilterConnectorConfiguration(localConfig, isNative));
-  }, [localConfig, isNative]);
+    setLocalConfig((localConf) => ({ ...configuration, ...localConf }));
+  }, [configuration]);
 
   useEffect(() => {
-    setLocalConfig(configuration);
-  }, [configuration]);
+    setConfigView(sortAndFilterConnectorConfiguration(localConfig, isNative));
+  }, [localConfig, isNative]);
 
   return (
     <EuiForm
@@ -108,6 +111,15 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
             items={category.configEntries}
             hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
             setConfigEntry={(key, value) => {
+              const entry = localConfig[key];
+              if (entry && !isCategoryEntry(entry)) {
+                const newConfiguration: ConnectorConfiguration = {
+                  ...localConfig,
+                  [key]: { ...entry, value },
+                };
+                setLocalConfig(newConfiguration);
+              }
+
               const categories = configView.categories;
               categories[index] = { ...categories[index], [key]: value };
               setConfigView({
@@ -135,9 +147,20 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               items={configView.advancedConfigurations}
               hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
               setConfigEntry={(key, value) => {
+                const entry = localConfig[key];
+                if (entry && !isCategoryEntry(entry)) {
+                  const newConfiguration: ConnectorConfiguration = {
+                    ...localConfig,
+                    [key]: { ...entry, value },
+                  };
+                  setLocalConfig(newConfiguration);
+                }
+
                 setConfigView({
                   ...configView,
-                  advancedConfigurations: { ...configView.advancedConfigurations, [key]: value },
+                  advancedConfigurations: configView.advancedConfigurations.map((config) =>
+                    config.key === key ? { ...config, value } : config
+                  ),
                 });
               }}
             />
@@ -146,19 +169,7 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
       )}
       <EuiSpacer />
       <EuiFormRow>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
-              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
-              type="submit"
-              isLoading={isLoading}
-            >
-              {i18n.translate('searchConnectors.configurationConnector.config.submitButton.title', {
-                defaultMessage: 'Save configuration',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-telemetry-id="entSearchContent-connector-configuration-cancelEdit"
@@ -175,6 +186,38 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
+              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
+              type="submit"
+              isLoading={isLoading}
+            >
+              {i18n.translate('searchConnectors.configurationConnector.config.submitButton.title', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          {saveAndSync && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
+                data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
+                isLoading={isLoading}
+                fill
+                onClick={() => {
+                  saveAndSync(configViewToConfigValues(configView));
+                }}
+              >
+                {i18n.translate(
+                  'searchConnectors.configurationConnector.config.submitButton.title',
+                  {
+                    defaultMessage: 'Save and sync',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFormRow>
     </EuiForm>

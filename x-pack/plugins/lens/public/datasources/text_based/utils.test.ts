@@ -52,22 +52,6 @@ jest.mock('./fetch_data_from_aggregate_query', () => ({
 
 describe('Text based languages utils', () => {
   describe('getIndexPatternFromTextBasedQuery', () => {
-    it('should return the index pattern for sql query', () => {
-      const indexPattern = getIndexPatternFromTextBasedQuery({
-        sql: 'SELECT bytes, memory from foo',
-      });
-
-      expect(indexPattern).toBe('foo');
-    });
-
-    it('should return empty index pattern for non sql query', () => {
-      const indexPattern = getIndexPatternFromTextBasedQuery({
-        lang1: 'SELECT bytes, memory from foo',
-      } as unknown as AggregateQuery);
-
-      expect(indexPattern).toBe('');
-    });
-
     it('should return the index pattern for es|ql query', () => {
       const indexPattern = getIndexPatternFromTextBasedQuery({
         esql: 'from foo | keep bytes, memory ',
@@ -181,17 +165,15 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
           },
         },
         indexPatternRefs: [],
-        fieldList: [],
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'from foo' },
           fieldName: '',
           dataViewSpec: {
             title: 'foo',
@@ -205,7 +187,7 @@ describe('Text based languages utils', () => {
       const expressionsMock = expressionsPluginMock.createStartContract();
       const updatedState = await getStateFromAggregateQuery(
         state,
-        { sql: 'SELECT * FROM my-fake-index-pattern' },
+        { esql: 'FROM my-fake-index-pattern' },
         {
           ...dataViewsMock,
           getIdsWithTitle: jest.fn().mockReturnValue(
@@ -239,7 +221,7 @@ describe('Text based languages utils', () => {
       expect(updatedState).toStrictEqual({
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'from foo' },
           fieldName: '',
           dataViewSpec: {
             title: 'foo',
@@ -247,29 +229,6 @@ describe('Text based languages utils', () => {
             name: 'Foo',
           },
         },
-        fieldList: [
-          {
-            name: 'timestamp',
-            id: 'timestamp',
-            meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
         indexPatternRefs: [
           {
             id: '3',
@@ -288,62 +247,37 @@ describe('Text based languages utils', () => {
           },
           {
             id: '4',
-            timeField: 'timeField',
+            timeField: undefined,
             title: 'my-adhoc-index-pattern',
           },
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: '4',
             query: {
-              sql: 'SELECT * FROM my-fake-index-pattern',
+              esql: 'FROM my-fake-index-pattern',
             },
-            timeField: 'timeField',
+            timeField: undefined,
           },
         },
       });
     });
 
-    it('should return the correct state for not existing dataview', async () => {
+    it('should return the correct state for query with named params', async () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
           },
         },
         indexPatternRefs: [],
-        fieldList: [],
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'from foo' },
           fieldName: '',
           dataViewSpec: {
             title: 'foo',
@@ -357,7 +291,111 @@ describe('Text based languages utils', () => {
       const expressionsMock = expressionsPluginMock.createStartContract();
       const updatedState = await getStateFromAggregateQuery(
         state,
-        { sql: 'SELECT * FROM my-fake-index-*' },
+        { esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend' },
+        {
+          ...dataViewsMock,
+          getIdsWithTitle: jest.fn().mockReturnValue(
+            Promise.resolve([
+              { id: '1', title: 'my-fake-index-pattern' },
+              { id: '2', title: 'my-fake-restricted-pattern' },
+              { id: '3', title: 'my-compatible-pattern' },
+            ])
+          ),
+          get: jest.fn().mockReturnValue(
+            Promise.resolve({
+              id: '1',
+              title: 'my-fake-index-pattern',
+              timeFieldName: 'timeField',
+            })
+          ),
+          create: jest.fn().mockReturnValue(
+            Promise.resolve({
+              id: '4',
+              title: 'my-adhoc-index-pattern',
+              name: 'my-adhoc-index-pattern',
+              timeFieldName: 'timeField',
+              isPersisted: () => false,
+            })
+          ),
+        },
+        dataMock,
+        expressionsMock
+      );
+
+      expect(updatedState).toStrictEqual({
+        initialContext: {
+          textBasedColumns: textBasedQueryColumns,
+          query: { esql: 'from foo' },
+          fieldName: '',
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+        indexPatternRefs: [
+          {
+            id: '3',
+            timeField: 'timeField',
+            title: 'my-compatible-pattern',
+          },
+          {
+            id: '1',
+            timeField: 'timeField',
+            title: 'my-fake-index-pattern',
+          },
+          {
+            id: '2',
+            timeField: 'timeField',
+            title: 'my-fake-restricted-pattern',
+          },
+          {
+            id: '4',
+            timeField: 'time',
+            title: 'my-adhoc-index-pattern',
+          },
+        ],
+        layers: {
+          first: {
+            columns: [],
+            errors: [],
+            index: '4',
+            query: {
+              esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend',
+            },
+            timeField: 'time',
+          },
+        },
+      });
+    });
+
+    it('should return the correct state for not existing dataview', async () => {
+      const state = {
+        layers: {
+          first: {
+            columns: [],
+            query: undefined,
+            index: '',
+          },
+        },
+        indexPatternRefs: [],
+        initialContext: {
+          textBasedColumns: textBasedQueryColumns,
+          query: { esql: 'from foo' },
+          fieldName: '',
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+      };
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const dataMock = dataPluginMock.createStartContract();
+      const expressionsMock = expressionsPluginMock.createStartContract();
+      const updatedState = await getStateFromAggregateQuery(
+        state,
+        { esql: 'FROM my-fake-index-*' },
         {
           ...dataViewsMock,
           getIdsWithTitle: jest.fn().mockReturnValue(
@@ -396,7 +434,7 @@ describe('Text based languages utils', () => {
       expect(updatedState).toStrictEqual({
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'from foo' },
           fieldName: '',
           dataViewSpec: {
             title: 'foo',
@@ -404,29 +442,6 @@ describe('Text based languages utils', () => {
             name: 'Foo',
           },
         },
-        fieldList: [
-          {
-            name: 'timestamp',
-            id: 'timestamp',
-            meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
         indexPatternRefs: [
           {
             id: '3',
@@ -451,34 +466,11 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: 'adHoc-id',
             query: {
-              sql: 'SELECT * FROM my-fake-index-*',
+              esql: 'FROM my-fake-index-*',
             },
             timeField: '@timestamp',
           },

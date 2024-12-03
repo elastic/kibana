@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/monitoring-collection-plugin",
-  "owner": "@elastic/obs-ux-infra_services-team",
+  "owner": "@elastic/stack-monitoring",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "monitoringCollection",
     "server": true,

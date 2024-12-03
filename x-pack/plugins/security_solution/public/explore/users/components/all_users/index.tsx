@@ -9,6 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiLink, EuiText } from '@elastic/eui';
+import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { UserDetailsLink } from '../../../../common/components/links';
 import {
@@ -16,7 +18,12 @@ import {
   getOrEmptyTagFromValue,
 } from '../../../../common/components/empty_value';
 
-import type { Columns, Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import type {
+  Columns,
+  Criteria,
+  ItemsPerRow,
+  SiemTables,
+} from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
@@ -27,9 +34,9 @@ import { usersActions, usersModel, usersSelectors } from '../../store';
 import type { User } from '../../../../../common/search_strategy/security_solution/users/all';
 import type { SortUsersField } from '../../../../../common/search_strategy/security_solution/users/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { VIEW_USERS_BY_SEVERITY } from '../user_risk_score_table/translations';
+import { VIEW_USERS_BY_SEVERITY } from '../../../../entity_analytics/components/user_risk_score_table/translations';
 import { SecurityPageName } from '../../../../app/types';
 import { UsersTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana';
@@ -53,7 +60,8 @@ export type UsersTableColumns = [
   Columns<User['name']>,
   Columns<User['lastSeen']>,
   Columns<User['domain']>,
-  Columns<RiskSeverity>?
+  Columns<RiskSeverity>?,
+  Columns<CriticalityLevelWithUnassigned>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -138,6 +146,23 @@ const getUsersColumns = (
     });
   }
 
+  columns.push({
+    field: 'criticality',
+    name: i18n.ASSET_CRITICALITY,
+    truncateText: false,
+    mobileOptions: { show: true },
+    sortable: false,
+    render: (assetCriticality: CriticalityLevelWithUnassigned) => {
+      if (!assetCriticality) return getEmptyTagValue();
+      return (
+        <AssetCriticalityBadge
+          criticalityLevel={assetCriticality}
+          css={{ verticalAlign: 'middle' }}
+        />
+      );
+    },
+  });
+
   return columns;
 };
 
@@ -159,7 +184,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const { navigateTo } = useNavigateTo();
 
-  const updateLimitPagination = useCallback(
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) => {
       dispatch(
         usersActions.updateTableLimit({
@@ -172,7 +197,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
     (newPage) => {
       dispatch(
         usersActions.updateTableActivePage({

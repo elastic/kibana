@@ -16,13 +16,12 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 describe('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    createRule(getNewRule());
-  });
-
   beforeEach(() => {
+    deleteAlertsAndRules();
+    createRule(getNewRule());
     login();
     visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();

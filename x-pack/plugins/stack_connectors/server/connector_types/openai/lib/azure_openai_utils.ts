@@ -48,6 +48,11 @@ export const getRequestWithStreamOption = (url: string, body: string, stream: bo
     const jsonBody = JSON.parse(body);
     if (jsonBody) {
       jsonBody.stream = stream;
+      if (stream) {
+        jsonBody.stream_options = {
+          include_usage: true,
+        };
+      }
     }
 
     return JSON.stringify(jsonBody);
@@ -61,10 +66,10 @@ export const getRequestWithStreamOption = (url: string, body: string, stream: bo
 export const transformApiUrlToRegex = (apiUrl: string): RegExp => {
   return new RegExp(
     apiUrl
-      .replaceAll(`/`, `\/`)
-      .replaceAll(`.`, `\.`)
-      .replace(`{your-resource-name}`, `[^.]+`)
-      .replace(`{deployment-id}`, `[^\/]+`)
+      .replaceAll(`/`, `\\/`)
+      .replaceAll(`.`, `\\.`)
+      .replace(`{your-resource-name}`, `[^\\.\\/]+`)
+      .replace(`{deployment-id}`, `[^\\/]+`)
       .replace(`?api-version={api-version}`, ``),
     'g'
   );

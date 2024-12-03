@@ -5,143 +5,106 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
 
-import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import * as i18n from './translations';
-import { useCreateTimelineButton } from './use_create_timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
 
-const NotesCountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-` as unknown as typeof EuiBadge;
-
-NotesCountBadge.displayName = 'NotesCountBadge';
-
-interface AddToFavoritesButtonProps {
-  timelineId: string;
-}
-
-const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ timelineId }) => {
-  const dispatch = useDispatch();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
-  const isFavorite = useShallowEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isFavorite
-  );
-
-  const status = useShallowEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).status
-  );
-
-  const disableFavoriteButton = status === TimelineStatus.immutable;
-
-  const handleClick = useCallback(
-    () => dispatch(timelineActions.updateIsFavorite({ id: timelineId, isFavorite: !isFavorite })),
-    [dispatch, timelineId, isFavorite]
-  );
-
-  return (
-    <EuiButton
-      isSelected={isFavorite}
-      fill={isFavorite}
-      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
-      onClick={handleClick}
-      data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
-      disabled={disableFavoriteButton}
-    >
-      {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
-    </EuiButton>
-  );
-};
-AddToFavoritesButtonComponent.displayName = 'AddToFavoritesButtonComponent';
-
-export const AddToFavoritesButton = React.memo(AddToFavoritesButtonComponent);
-
-export interface NewTimelineProps {
-  closeGearMenu?: () => void;
-  outline?: boolean;
-  timelineId: string;
-  title?: string;
-}
-
-export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
-    const { getButton } = useCreateTimelineButton({
-      timelineId,
-      timelineType: TimelineType.default,
-      closeGearMenu,
-    });
-    const button = getButton({ outline, title });
-
-    return button;
-  }
-);
-NewTimeline.displayName = 'NewTimeline';
-
-interface NotesButtonProps {
-  ariaLabel?: string;
-  isDisabled?: boolean;
-  showNotes: boolean;
-  toggleShowNotes: () => void;
-  toolTip?: string;
-  timelineType: TimelineTypeLiteral;
-}
+export const NotificationDot = styled.span`
+  position: absolute;
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.eui.euiColorDanger};
+  top: 17%;
+  left: 52%;
+`;
 
 interface SmallNotesButtonProps {
   ariaLabel?: string;
   isDisabled?: boolean;
-  toggleShowNotes: () => void;
-  timelineType: TimelineTypeLiteral;
+  toggleShowNotes?: (eventId?: string) => void;
+  timelineType: TimelineType;
+  eventId?: string;
+  /**
+   * Number of notes. If > 0, then a red dot is shown in the top right corner of the icon.
+   */
+  notesCount: number;
 }
 
 export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
 
+const NotesButtonContainer = styled(EuiFlexGroup)`
+  position: relative;
+`;
+
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType }) => {
-    const isTemplate = timelineType === TimelineType.template;
+  ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType, eventId, notesCount }) => {
+    const isTemplate = timelineType === TimelineTypeEnum.template;
+    const onClick = useCallback(() => {
+      if (eventId != null) {
+        toggleShowNotes?.(eventId);
+      } else {
+        toggleShowNotes?.();
+      }
+    }, [toggleShowNotes, eventId]);
 
     return (
-      <EuiButtonIcon
-        aria-label={ariaLabel}
-        className={NOTES_BUTTON_CLASS_NAME}
-        data-test-subj="timeline-notes-button-small"
-        disabled={isDisabled}
-        iconType="editorComment"
-        onClick={toggleShowNotes}
-        size="s"
-        isDisabled={isTemplate}
-      />
+      <NotesButtonContainer>
+        <EuiFlexItem grow={false}>
+          {notesCount > 0 ? (
+            <NotificationDot
+              className="timeline-notes-notification-dot"
+              data-test-subj="timeline-notes-notification-dot"
+            />
+          ) : null}
+          <EuiButtonIcon
+            aria-label={ariaLabel}
+            className={NOTES_BUTTON_CLASS_NAME}
+            data-test-subj="timeline-notes-button-small"
+            disabled={isDisabled}
+            iconType="editorComment"
+            onClick={onClick}
+            size="s"
+            isDisabled={isTemplate}
+          />
+        </EuiFlexItem>
+      </NotesButtonContainer>
     );
   }
 );
 SmallNotesButton.displayName = 'SmallNotesButton';
 
+interface NotesButtonProps {
+  ariaLabel?: string;
+  isDisabled?: boolean;
+  toggleShowNotes?: () => void | ((eventId: string) => void);
+  toolTip: string;
+  timelineType: TimelineType;
+  eventId?: string;
+  /**
+   * Number of notes. If > 0, then a red dot is shown in the top right corner of the icon.
+   */
+  notesCount?: number;
+}
+
 export const NotesButton = React.memo<NotesButtonProps>(
-  ({ ariaLabel, isDisabled, showNotes, timelineType, toggleShowNotes, toolTip }) =>
-    showNotes ? (
+  ({ ariaLabel, isDisabled, timelineType, toggleShowNotes, toolTip, eventId, notesCount }) => (
+    <EuiToolTip content={toolTip} data-test-subj="timeline-notes-tool-tip">
       <SmallNotesButton
         ariaLabel={ariaLabel}
         isDisabled={isDisabled}
         toggleShowNotes={toggleShowNotes}
         timelineType={timelineType}
+        eventId={eventId}
+        notesCount={notesCount ?? 0}
       />
-    ) : (
-      <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
-        <SmallNotesButton
-          ariaLabel={ariaLabel}
-          isDisabled={isDisabled}
-          toggleShowNotes={toggleShowNotes}
-          timelineType={timelineType}
-        />
-      </EuiToolTip>
-    )
+    </EuiToolTip>
+  )
 );
+
 NotesButton.displayName = 'NotesButton';

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
@@ -28,6 +29,7 @@ import {
   validatePointsRadiusForChartType,
   validateLinesVisibilityForChartType,
   validateAxes,
+  validateMinBarHeight,
 } from './validate';
 import { logDatatable } from '../utils';
 
@@ -111,6 +113,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateFillOpacity(args.fillOpacity, hasArea);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
+  validateMinBarHeight(args.minBarHeight);
 
   validateValueLabels(args.valueLabels, hasBar);
   validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
@@ -127,6 +130,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       args: {
         ...restArgs,
         layers,
+        minBarHeight: args.minBarHeight ?? 1,
         markSizeRatio:
           dataLayers[0].markSizeAccessor && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:

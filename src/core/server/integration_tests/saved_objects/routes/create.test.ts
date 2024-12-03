@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -19,7 +20,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -35,6 +36,7 @@ describe('POST /api/saved_objects/{type}', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   const clientResponse = {
     id: 'logstash-*',
@@ -57,8 +59,18 @@ describe('POST /api/saved_objects/{type}', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'post');
+
     const config = setupConfig();
-    registerCreateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+
+    registerCreateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
       return testTypes
@@ -76,6 +88,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('formats successful response and records usage stats', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Testing',
@@ -86,12 +99,14 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsCreate).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 
   it('requires attributes', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({})
       .expect(400);
 
@@ -104,6 +119,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('calls upon savedObjectClient.create', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Testing',
@@ -127,6 +143,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('can specify an id', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Testing',
@@ -147,6 +164,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('returns with status 400 if the type is hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/hidden-from-http')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           properties: {},
@@ -160,6 +178,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Logging test',
@@ -167,5 +186,20 @@ describe('POST /api/saved_objects/{type}', () => {
       })
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes deprecation configuration to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send({
+        attributes: {
+          title: 'Logging test',
+        },
+      })
+      .expect(200);
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

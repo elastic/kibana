@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import { ExecutionContextSearch } from '@kbn/es-query';
 import { Datatable, ExpressionType } from '../expression_types';
 import { TablesAdapter } from '../util/tables_adapter';
 import { ExpressionsInspectorAdapter } from '../util';
@@ -19,10 +20,7 @@ import { ExpressionsInspectorAdapter } from '../util';
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<
-  InspectorAdapters extends Adapters = Adapters,
-  ExecutionContextSearch extends SerializableRecord = SerializableRecord
-> {
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> {
   /**
    * Get search context of the expression.
    */
@@ -37,6 +35,11 @@ export interface ExecutionContext<
    * A map of available expression types.
    */
   types: Record<string, ExpressionType>;
+
+  /**
+   * Allow caching in the current execution.
+   */
+  allowCache?: boolean;
 
   /**
    * Adds ability to abort current execution.

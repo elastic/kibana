@@ -12,30 +12,21 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  tGridEnabled: true,
-  tGridEventRenderedViewEnabled: true,
-
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
-  kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
+  kubernetesEnabled: false,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
+
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
    * @see telemetry_detection_rules_preview_route.ts
-   * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
+   * @see test/security_solution_api_integration/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
-
-  /**
-   * Enables the insights module for related alerts by process ancestry
-   */
-  insightsRelatedAlertsByProcessAncestry: true,
 
   /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
@@ -52,42 +43,75 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the automated response actions in rule + alerts
-   */
-  responseActionsEnabled: true,
-
-  /**
-   * Enables the automated endpoint response action in rule + alerts
-   */
-  endpointResponseActionsEnabled: true,
-
-  /**
    * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: true,
 
   /**
-   * Enables top charts on Alerts Page
+   * Enables Automated Endpoint Process actions
    */
-  alertsPageChartsEnabled: true,
-  alertTypeEnabled: false,
+  automatedProcessActionsEnabled: true,
 
-  /*
-   * Enables new Set of filters on the Alerts page.
+  /**
+   * Enables the ability to send Response actions to SentinelOne and persist the results
+   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
+   * response actions in Response Console.
    *
-   **/
-  alertsPageFiltersEnabled: true,
+   * Release: v8.13.0
+   */
+  responseActionsSentinelOneV1Enabled: true,
+
+  /**
+   * Enables use of SentinelOne response actions that complete asynchronously
+   *
+   * Release: v8.14.0
+   */
+  responseActionsSentinelOneV2Enabled: true,
+
+  /** Enables the `get-file` response action for SentinelOne */
+  responseActionsSentinelOneGetFileEnabled: true,
+
+  /** Enables the `kill-process` response action for SentinelOne */
+  responseActionsSentinelOneKillProcessEnabled: true,
+
+  /** Enable the `processes` response actions for SentinelOne */
+  responseActionsSentinelOneProcessesEnabled: true,
+
+  /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+
+  /**
+   * Space awareness for Elastic Defend management.
+   * Feature depends on Fleet's corresponding features also being enabled:
+   * - `subfeaturePrivileges`
+   * - `useSpaceAwareness`
+   * and Fleet must set it runtime mode to spaces by calling the following API:
+   * - `POST /internal/fleet/enable_space_awareness`
+   */
+  endpointManagementSpaceAwarenessEnabled: false,
+
+  /**
+   * Disables new notes
+   */
+  securitySolutionNotesDisabled: false,
+
+  /**
+   * Disables entity and alert previews
+   */
+  entityAlertPreviewDisabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
 
-  /*
-   * Enables the new user details flyout displayed on the Alerts page and timeline.
-   *
-   **/
-  newUserDetailsFlyout: false,
+  /**
+   * Enables the Managed User section inside the new user details flyout.
+   */
+  newUserDetailsFlyoutManagedUser: false,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
@@ -108,6 +132,115 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
+
+  /**
+   * Disables the timeline save tour.
+   * This flag is used to disable the tour in cypress tests.
+   */
+  disableTimelineSaveTour: false,
+
+  /**
+   * Enables the risk engine privileges route
+   * and associated callout in the UI
+   */
+  riskEnginePrivilegesRouteEnabled: true,
+
+  /**
+   * Enables experimental Experimental S1 integration data to be available in Analyzer
+   */
+  sentinelOneDataInAnalyzerEnabled: true,
+
+  /**
+   * Enables SentinelOne manual host isolation response actions directly through the connector
+   * sub-actions framework.
+   * v8.12.0
+   */
+  sentinelOneManualHostActionsEnabled: true,
+
+  /**
+   * Enables experimental Crowdstrike integration data to be available in Analyzer
+   */
+  crowdstrikeDataInAnalyzerEnabled: true,
+
+  /**
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
+   */
+  responseActionsTelemetryEnabled: false,
+
+  /**
+   * Enables experimental JAMF integration data to be available in Analyzer
+   */
+  jamfDataInAnalyzerEnabled: true,
+
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
+
+  /*
+   * Disables date pickers and sourcerer in analyzer if needed.
+   *
+   */
+  analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables graph visualization in alerts flyout
+   */
+  graphVisualizationInFlyoutEnabled: false,
+
+  /**
+   * Enables an ability to customize Elastic prebuilt rules.
+   *
+   * Ticket: https://github.com/elastic/kibana/issues/174168
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   * Added: on Jun 24, 2024 in https://github.com/elastic/kibana/pull/186823
+   * Turned: TBD
+   * Expires: TBD
+   */
+  prebuiltRulesCustomizationEnabled: false,
+
+  /**
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
+   */
+  malwareOnWriteScanOptionAvailable: true,
+
+  /**
+   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
+   */
+  unifiedManifestEnabled: true,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: true,
+
+  /**
+   * Adds a new option to filter descendants of a process for Management / Event Filters
+   */
+  filterProcessDescendantsForEventFiltersEnabled: true,
+
+  /**
+   * Enables the new data ingestion hub
+   */
+  dataIngestionHubEnabled: false,
+
+  /**
+   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
+   * can be disabled if necessary in a given environment.
+   */
+  entityStoreDisabled: false,
+
+  /**
+   * Enables the siem migrations feature
+   */
+  siemMigrationsEnabled: false,
+
+  /**
+   * Enables the Defend Insights feature
+   */
+  defendInsights: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

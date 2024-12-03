@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
@@ -29,7 +30,7 @@ describe('OpsMetricsCollector', () => {
 
   beforeEach(() => {
     const hapiServer = httpServiceMock.createInternalSetupContract().server;
-    const agentManager = new AgentManager(loggerMock.create());
+    const agentManager = new AgentManager(loggerMock.create(), { dnsCacheTtlInSeconds: 0 });
     collector = new OpsMetricsCollector(hapiServer, agentManager, { logger: loggerMock.create() });
 
     mockOsCollector.collect.mockResolvedValue('osMetrics');

@@ -324,7 +324,7 @@ interface BaseOperationDefinitionProps<
     dateRange?: DateRange,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>,
     targetBars?: number
-  ) => FieldBasedOperationErrorMessage[] | undefined;
+  ) => FieldBasedOperationErrorMessage[];
 
   /*
    * Flag whether this operation can be scaled by time unit if a date histogram is available.
@@ -350,11 +350,6 @@ interface BaseOperationDefinitionProps<
    * Operations can be used as middleware for other operations, hence not shown in the panel UI
    */
   hidden?: boolean;
-  documentation?: {
-    signature: string;
-    description: string;
-    section: 'elasticsearch' | 'calculation' | 'constants';
-  };
   quickFunctionDocumentation?: string;
   /**
    * React component for operation field specific behaviour
@@ -468,21 +463,20 @@ interface FilterParams {
   lucene?: string;
 }
 
-export type FieldBasedOperationErrorMessage =
-  | {
-      message: string | React.ReactNode;
-      displayLocations?: UserMessage['displayLocations'];
-      fixAction?: {
-        label: string;
-        newState: (
-          data: DataPublicPluginStart,
-          core: CoreStart,
-          frame: FramePublicAPI,
-          layerId: string
-        ) => Promise<FormBasedLayer>;
-      };
-    }
-  | string;
+export interface FieldBasedOperationErrorMessage {
+  uniqueId: string;
+  message: string | React.ReactNode;
+  displayLocations?: UserMessage['displayLocations'];
+  fixAction?: {
+    label: string;
+    newState: (
+      data: DataPublicPluginStart,
+      core: CoreStart,
+      frame: FramePublicAPI,
+      layerId: string
+    ) => Promise<FormBasedLayer>;
+  };
+}
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
   input: 'none';
 
@@ -586,7 +580,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
     columnId: string,
     indexPattern: IndexPattern,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
-  ) => FieldBasedOperationErrorMessage[] | undefined;
+  ) => FieldBasedOperationErrorMessage[];
 }
 
 export interface RequiredReference {
@@ -736,11 +730,13 @@ export type OperationType = string;
  * This is an operation definition of an unspecified column out of all possible
  * column types.
  */
-export type GenericOperationDefinition =
-  | OperationDefinition<BaseIndexPatternColumn, 'field'>
-  | OperationDefinition<BaseIndexPatternColumn, 'none'>
-  | OperationDefinition<BaseIndexPatternColumn, 'fullReference'>
-  | OperationDefinition<BaseIndexPatternColumn, 'managedReference'>;
+export type GenericOperationDefinition<
+  ColumnType extends BaseIndexPatternColumn = BaseIndexPatternColumn
+> =
+  | OperationDefinition<ColumnType, 'field'>
+  | OperationDefinition<ColumnType, 'none'>
+  | OperationDefinition<ColumnType, 'fullReference'>
+  | OperationDefinition<ColumnType, 'managedReference'>;
 
 /**
  * List of all available operation definitions

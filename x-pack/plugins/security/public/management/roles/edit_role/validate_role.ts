@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import { i18n } from '@kbn/i18n';
 
-import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
-import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../../common/model';
+import type {
+  Role,
+  RoleIndexPrivilege,
+  RoleRemoteClusterPrivilege,
+  RoleRemoteIndexPrivilege,
+} from '../../../../common';
+import { MAX_NAME_LENGTH, NAME_REGEX, SERVERLESS_NAME_REGEX } from '../../../../common/constants';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;
+  buildFlavor?: BuildFlavor;
 }
 
 export interface RoleValidationResult {
@@ -21,9 +28,11 @@ export interface RoleValidationResult {
 
 export class RoleValidator {
   private shouldValidate?: boolean;
+  private buildFlavor?: BuildFlavor;
 
   constructor(options: RoleValidatorOptions = {}) {
     this.shouldValidate = options.shouldValidate;
+    this.buildFlavor = options.buildFlavor;
   }
 
   public enableValidation() {
@@ -67,7 +76,17 @@ export class RoleValidator {
         )
       );
     }
-    if (!role.name.match(NAME_REGEX)) {
+    if (this.buildFlavor === 'serverless' && !role.name.match(SERVERLESS_NAME_REGEX)) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.serverlessNameAllowedCharactersWarningMessage',
+          {
+            defaultMessage:
+              'Name must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.',
+          }
+        )
+      );
+    } else if (this.buildFlavor !== 'serverless' && !role.name.match(NAME_REGEX)) {
       return invalid(
         i18n.translate(
           'xpack.security.management.editRole.validateRole.nameAllowedCharactersWarningMessage',
@@ -78,6 +97,27 @@ export class RoleValidator {
         )
       );
     }
+
+    return valid();
+  }
+  public validateRemoteClusterPrivileges(role: Role): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    const areRemoteClustersInvalid = role.elasticsearch.remote_cluster?.some(
+      (remoteClusterPrivilege) => {
+        return (
+          this.validateRemoteClusterPrivilegeClusterField(remoteClusterPrivilege).isInvalid ||
+          this.validateRemoteClusterPrivilegePrivilegesField(remoteClusterPrivilege).isInvalid
+        );
+      }
+    );
+
+    if (areRemoteClustersInvalid) {
+      return invalid();
+    }
+
     return valid();
   }
 
@@ -239,6 +279,58 @@ export class RoleValidator {
     return valid();
   }
 
+  public validateRemoteClusterPrivilegeClusterField(
+    remoteClusterPrivilege: RoleRemoteClusterPrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (!remoteClusterPrivilege.privileges.length) {
+      return valid();
+    }
+
+    if (!remoteClusterPrivilege.clusters.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.oneClusterRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one cluster',
+          }
+        )
+      );
+    }
+
+    return valid();
+  }
+
+  public validateRemoteClusterPrivilegePrivilegesField(
+    remoteClusterPrivilege: RoleRemoteClusterPrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (!remoteClusterPrivilege.clusters.length) {
+      return valid();
+    }
+
+    if (!remoteClusterPrivilege.privileges.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.oneRemoteClusterPrivilegeRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one privilege',
+          }
+        )
+      );
+    }
+
+    return valid();
+  }
+
   public validateSelectedSpaces(
     spaceIds: string[],
     privilege: string | null
@@ -313,12 +405,15 @@ export class RoleValidator {
     const { isInvalid: areIndicesInvalid } = this.validateIndexPrivileges(role);
     const { isInvalid: areRemoteIndicesInvalid } = this.validateRemoteIndexPrivileges(role);
     const { isInvalid: areSpacePrivilegesInvalid } = this.validateSpacePrivileges(role);
+    const { isInvalid: areRemoteClusterPrivilegesInvalid } =
+      this.validateRemoteClusterPrivileges(role);
 
     if (
       isNameInvalid ||
       areIndicesInvalid ||
       areRemoteIndicesInvalid ||
-      areSpacePrivilegesInvalid
+      areSpacePrivilegesInvalid ||
+      areRemoteClusterPrivilegesInvalid
     ) {
       return invalid();
     }

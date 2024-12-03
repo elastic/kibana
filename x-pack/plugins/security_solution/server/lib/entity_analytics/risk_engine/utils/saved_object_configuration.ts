@@ -7,7 +7,7 @@
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { getAlertsIndex } from '../../../../../common/utils/risk_score_modules';
-import type { RiskEngineConfiguration } from '../types';
+import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
 
 export interface SavedObjectsClientArg {
@@ -35,18 +35,6 @@ const getConfigurationSavedObject = async ({
     type: riskEngineConfigurationTypeName,
   });
   return savedObjectsResponse.saved_objects?.[0];
-};
-
-export const getEnabledRiskEngineAmount = async ({
-  savedObjectsClient,
-}: SavedObjectsClientArg): Promise<number> => {
-  const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
-    type: riskEngineConfigurationTypeName,
-    namespaces: ['*'],
-  });
-
-  return savedObjectsResponse.saved_objects?.filter((config) => config?.attributes?.enabled)
-    ?.length;
 };
 
 export const updateSavedObjectAttribute = async ({
@@ -93,6 +81,15 @@ export const initSavedObjects = async ({
     {}
   );
   return result;
+};
+
+export const deleteSavedObjects = async ({
+  savedObjectsClient,
+}: SavedObjectsClientArg): Promise<void> => {
+  const configuration = await getConfigurationSavedObject({ savedObjectsClient });
+  if (configuration) {
+    await savedObjectsClient.delete(riskEngineConfigurationTypeName, configuration.id);
+  }
 };
 
 export const getConfiguration = async ({

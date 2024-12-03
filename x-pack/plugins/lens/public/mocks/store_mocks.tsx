@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
-import { ReactWrapper } from 'enzyme';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import React, { PropsWithChildren, ReactElement } from 'react';
+import { ReactWrapper, mount } from 'enzyme';
 import { Provider } from 'react-redux';
-import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { RenderOptions, render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,17 +19,25 @@ import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
 
-export const mockStoreDeps = (deps?: {
-  lensServices?: LensAppServices;
-  datasourceMap?: DatasourceMap;
-  visualizationMap?: VisualizationMap;
-}) => {
-  return {
-    datasourceMap: deps?.datasourceMap || mockDatasourceMap(),
-    visualizationMap: deps?.visualizationMap || mockVisualizationMap(),
-    lensServices: deps?.lensServices || makeDefaultServices(),
-  };
-};
+export const mockStoreDeps = (
+  {
+    lensServices = makeDefaultServices(),
+    datasourceMap = mockDatasourceMap(),
+    visualizationMap = mockVisualizationMap(),
+  }: {
+    lensServices?: LensAppServices;
+    datasourceMap?: DatasourceMap;
+    visualizationMap?: VisualizationMap;
+  } = {
+    lensServices: makeDefaultServices(),
+    datasourceMap: mockDatasourceMap(),
+    visualizationMap: mockVisualizationMap(),
+  }
+) => ({
+  datasourceMap,
+  visualizationMap,
+  lensServices,
+});
 
 export function mockDatasourceStates() {
   return {
@@ -46,7 +52,7 @@ export const defaultState = {
   searchSessionId: 'sessionId-1',
   filters: [],
   query: { language: 'lucene', query: '' },
-  resolvedDateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
+  resolvedDateRange: { fromDate: 'now-7d', toDate: 'now' },
   isFullscreenDatasource: false,
   isSaveable: false,
   isLoading: false,
@@ -65,25 +71,30 @@ export const defaultState = {
 
 export const renderWithReduxStore = (
   ui: ReactElement,
-  options?: RenderOptions,
+  renderOptions?: RenderOptions,
   {
     preloadedState,
     storeDeps,
-  }: { preloadedState: Partial<LensAppState>; storeDeps?: LensStoreDeps } = {
+  }: { preloadedState?: Partial<LensAppState>; storeDeps?: LensStoreDeps } = {
     preloadedState: {},
     storeDeps: mockStoreDeps(),
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
   const { store } = makeLensStore({ preloadedState, storeDeps });
+  const { wrapper, ...options } = renderOptions || {};
 
-  const Wrapper: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => (
-    <Provider store={store}>
-      <I18nProvider>{children}</I18nProvider>
-    </Provider>
-  );
+  const CustomWrapper = wrapper as React.ComponentType<React.PropsWithChildren<{}>>;
+
+  const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => {
+    return (
+      <Provider store={store}>
+        <I18nProvider>
+          {wrapper ? <CustomWrapper>{children}</CustomWrapper> : children}
+        </I18nProvider>
+      </Provider>
+    );
+  };
 
   const rtlRender = render(ui, { wrapper: Wrapper, ...options });
 
@@ -128,20 +139,13 @@ export const mountWithProvider = async (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
-    wrappingComponent?: React.FC<{
-      children: React.ReactNode;
-    }>;
+    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
     wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }
 ) => {
   const { mountArgs, lensStore, deps } = getMountWithProviderParams(component, store, options);
-
-  let instance: ReactWrapper = {} as ReactWrapper;
-
-  await act(async () => {
-    instance = mount(mountArgs.component, mountArgs.options);
-  });
+  const instance = mount(mountArgs.component, mountArgs.options);
   return { instance, lensStore, deps };
 };
 
@@ -149,18 +153,18 @@ const getMountWithProviderParams = (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
-    wrappingComponent?: React.FC<{
-      children: React.ReactNode;
-    }>;
+    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
     wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }
 ) => {
   const { store: lensStore, deps } = makeLensStore(store || {});
 
-  let wrappingComponent: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => <Provider store={lensStore}>{children}</Provider>;
+  let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
+    <I18nProvider>
+      <Provider store={lensStore}>{children}</Provider>
+    </I18nProvider>
+  );
 
   let restOptions: {
     attachTo?: HTMLElement | undefined;

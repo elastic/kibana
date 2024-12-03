@@ -29,28 +29,10 @@ import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_
 import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
 import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
-import {
-  createTimelinesRoute,
-  deleteTimelinesRoute,
-  exportTimelinesRoute,
-  getTimelineRoute,
-  getTimelinesRoute,
-  importTimelinesRoute,
-  patchTimelinesRoute,
-  persistFavoriteRoute,
-  resolveTimelineRoute,
-} from '../lib/timeline/routes/timelines';
-import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
-import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
-
-import { persistNoteRoute, deleteNoteRoute } from '../lib/timeline/routes/notes';
-
-import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
 import type { SetupPlugins, StartPlugins } from '../plugin';
 import type { ConfigType } from '../config';
 import type { ITelemetryEventsSender } from '../lib/telemetry/sender';
-import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
@@ -74,14 +56,12 @@ import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_r
 import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
-import {
-  riskScorePreviewRoute,
-  riskEngineDisableRoute,
-  riskEngineInitRoute,
-  riskEngineEnableRoute,
-  riskEngineStatusRoute,
-} from '../lib/entity_analytics/risk_engine/routes';
-import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_engine/routes/risk_score_calculation_route';
+import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
+import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
+import { registerTimelineRoutes } from '../lib/timeline/routes';
+import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
+import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
+import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -97,11 +77,12 @@ export const initRoutes = (
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  previewTelemetryReceiver: ITelemetryReceiver
+  previewTelemetryReceiver: ITelemetryReceiver,
+  isServerless: boolean
 ) => {
-  registerFleetIntegrationsRoutes(router, logger);
+  registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router, security);
+  registerPrebuiltRulesRoutes(router, config);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
@@ -115,40 +96,26 @@ export const initRoutes = (
     securityRuleTypeOptions,
     previewRuleDataClient,
     getStartServices,
-    logger
+    logger,
+    isServerless
   );
 
   registerResolverRoutes(router, getStartServices, config);
 
-  createTimelinesRoute(router, config, security);
-  patchTimelinesRoute(router, config, security);
-
-  importTimelinesRoute(router, config, security);
-  exportTimelinesRoute(router, config, security);
-  getDraftTimelinesRoute(router, config, security);
-  getTimelineRoute(router, config, security);
-  resolveTimelineRoute(router, config, security);
-  getTimelinesRoute(router, config, security);
-  cleanDraftTimelinesRoute(router, config, security);
-  deleteTimelinesRoute(router, config, security);
-  persistFavoriteRoute(router, config, security);
-
-  installPrepackedTimelinesRoute(router, config, security);
-
-  persistNoteRoute(router, config, security);
-  deleteNoteRoute(router, config, security);
-  persistPinnedEventRoute(router, config, security);
+  registerTimelineRoutes(router, config, getStartServices);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(router, logger, security, telemetrySender);
+  setSignalsStatusRoute(router, logger, telemetrySender);
   setAlertTagsRoute(router);
+  setAlertAssigneesRoute(router);
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
-  createSignalsMigrationRoute(router, security);
-  finalizeSignalsMigrationRoute(router, ruleDataService, security);
-  deleteSignalsMigrationRoute(router, security);
+  createSignalsMigrationRoute(router);
+  finalizeSignalsMigrationRoute(router, ruleDataService);
+  deleteSignalsMigrationRoute(router);
+  suggestUserProfilesRoute(router, getStartServices);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
@@ -166,26 +133,25 @@ export const initRoutes = (
   createStoredScriptRoute(router, logger);
   deleteStoredScriptRoute(router);
   readPrebuiltDevToolContentRoute(router);
-  createPrebuiltSavedObjectsRoute(router, logger, security);
-  deletePrebuiltSavedObjectsRoute(router, security);
+  createPrebuiltSavedObjectsRoute(router, logger);
+  deletePrebuiltSavedObjectsRoute(router);
   getRiskScoreIndexStatusRoute(router);
-  installRiskScoresRoute(router, logger, security);
+  installRiskScoresRoute(router, logger);
 
   // Dashboards
-  registerDashboardsRoutes(router, logger, security);
-  registerTagsRoutes(router, logger, security);
+  registerDashboardsRoutes(router, logger);
+  registerTagsRoutes(router, logger);
+
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  if (config.experimentalFeatures.riskScoringRoutesEnabled) {
-    riskScorePreviewRoute(router, logger);
-    riskScoreCalculationRoute(router, logger);
-    riskEngineStatusRoute(router);
-    riskEngineInitRoute(router, getStartServices);
-    riskEngineEnableRoute(router, getStartServices);
-    riskEngineDisableRoute(router, getStartServices);
-  }
+  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
+  registerSiemMigrationsRoutes(router, config, logger);
+
+  // Security Integrations
+  getFleetManagedIndexTemplatesRoute(router);
 };

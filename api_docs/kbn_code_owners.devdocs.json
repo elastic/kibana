@@ -1,0 +1,194 @@
+{
+  "id": "@kbn/code-owners",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.getCodeOwnersForFile",
+        "type": "Function",
+        "tags": [],
+        "label": "getCodeOwnersForFile",
+        "description": [
+          "\nGet the GitHub CODEOWNERS for a file in the repository"
+        ],
+        "signature": [
+          "(filePath: string, reversedCodeowners: ",
+          {
+            "pluginId": "@kbn/code-owners",
+            "scope": "common",
+            "docId": "kibKbnCodeOwnersPluginApi",
+            "section": "def-common.PathWithOwners",
+            "text": "PathWithOwners"
+          },
+          "[] | undefined) => string | undefined"
+        ],
+        "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.getCodeOwnersForFile.$1",
+            "type": "string",
+            "tags": [],
+            "label": "filePath",
+            "description": [
+              "the file to get code owners for"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.getCodeOwnersForFile.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "reversedCodeowners",
+            "description": [
+              "a cached reversed code owners list, use to speed up multiple requests"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/code-owners",
+                "scope": "common",
+                "docId": "kibKbnCodeOwnersPluginApi",
+                "section": "def-common.PathWithOwners",
+                "text": "PathWithOwners"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.getPathsWithOwnersReversed",
+        "type": "Function",
+        "tags": [],
+        "label": "getPathsWithOwnersReversed",
+        "description": [
+          "\nGet the .github/CODEOWNERS entries, prepared for path matching.\nThe last matching CODEOWNERS entry has highest precedence:\nhttps://help.github.com/articles/about-codeowners/\nso entries are returned in reversed order to later search for the first match."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/code-owners",
+            "scope": "common",
+            "docId": "kibKbnCodeOwnersPluginApi",
+            "section": "def-common.PathWithOwners",
+            "text": "PathWithOwners"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.runGetOwnersForFileCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runGetOwnersForFileCli",
+        "description": [
+          "\nRun the getCodeOwnersForFile() method above.\nReport back to the cli with either success and the owner(s), or a failure.\n\nThis function depends on a --file param being passed on the cli, like this:\n$ node scripts/get_owners_for_file.js --file SOME-FILE"
+        ],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.PathWithOwners",
+        "type": "Interface",
+        "tags": [],
+        "label": "PathWithOwners",
+        "description": [],
+        "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.PathWithOwners.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.PathWithOwners.teams",
+            "type": "string",
+            "tags": [],
+            "label": "teams",
+            "description": [],
+            "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.PathWithOwners.ignorePattern",
+            "type": "Object",
+            "tags": [],
+            "label": "ignorePattern",
+            "description": [],
+            "signature": [
+              "Ignore"
+            ],
+            "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -5,42 +5,39 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
-import type { TelemetryEventTypes } from '../../constants';
+import type { RootSchema } from '@kbn/core/public';
 
-export interface ReportAlertsGroupingChangedParams {
+export enum AlertsEventTypes {
+  AlertsGroupingChanged = 'Alerts Grouping Changed',
+  AlertsGroupingToggled = 'Alerts Grouping Toggled',
+  AlertsGroupingTakeAction = 'Alerts Grouping Take Action',
+}
+
+interface ReportAlertsGroupingChangedParams {
   tableId: string;
   groupByField: string;
 }
 
-export interface ReportAlertsGroupingToggledParams {
+interface ReportAlertsGroupingToggledParams {
   isOpen: boolean;
   tableId: string;
   groupNumber: number;
 }
 
-export interface ReportAlertsTakeActionParams {
+interface ReportAlertsTakeActionParams {
   tableId: string;
   groupNumber: number;
   status: 'open' | 'closed' | 'acknowledged';
   groupByField: string;
 }
 
-export type ReportAlertsGroupingTelemetryEventParams =
-  | ReportAlertsGroupingChangedParams
-  | ReportAlertsGroupingToggledParams
-  | ReportAlertsTakeActionParams;
+export interface AlertsGroupingTelemetryEventsMap {
+  [AlertsEventTypes.AlertsGroupingChanged]: ReportAlertsGroupingChangedParams;
+  [AlertsEventTypes.AlertsGroupingToggled]: ReportAlertsGroupingToggledParams;
+  [AlertsEventTypes.AlertsGroupingTakeAction]: ReportAlertsTakeActionParams;
+}
 
-export type AlertsGroupingTelemetryEvent =
-  | {
-      eventType: TelemetryEventTypes.AlertsGroupingToggled;
-      schema: RootSchema<ReportAlertsGroupingToggledParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AlertsGroupingChanged;
-      schema: RootSchema<ReportAlertsGroupingChangedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AlertsGroupingTakeAction;
-      schema: RootSchema<ReportAlertsTakeActionParams>;
-    };
+export interface AlertsGroupingTelemetryEvent {
+  eventType: AlertsEventTypes;
+  schema: RootSchema<AlertsGroupingTelemetryEventsMap[AlertsEventTypes]>;
+}

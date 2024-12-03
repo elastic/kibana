@@ -28,6 +28,7 @@ export const bulkDeleteRulesRoute = ({
   router.patch(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_delete`,
+      options: { access: 'internal' },
       validate: {
         body: bulkDeleteRulesRequestBodySchemaV1,
       },
@@ -35,7 +36,8 @@ export const bulkDeleteRulesRoute = ({
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async (context, req, res) => {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
 
           const body: BulkDeleteRulesRequestBodyV1 = req.body;
           const { filter, ids } = body;

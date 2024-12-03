@@ -5,35 +5,38 @@ Kibana configuration entries providing developers with a fully typed model of th
 
 ## Table of Contents
 
-- [Why `@kbn/config-schema`?](#why-kbnconfig-schema)
-- [Schema building blocks](#schema-building-blocks)
-  - [Basic types](#basic-types)
-    - [`schema.string()`](#schemastring)
-    - [`schema.number()`](#schemanumber)
-    - [`schema.boolean()`](#schemaboolean)
-    - [`schema.literal()`](#schemaliteral)
-    - [`schema.buffer()`](#schemabuffer)
-    - [`schema.stream()`](#schemastream)
-  - [Composite types](#composite-types)
-    - [`schema.arrayOf()`](#schemaarrayof)
-    - [`schema.object()`](#schemaobject)
-    - [`schema.recordOf()`](#schemarecordof)
-    - [`schema.mapOf()`](#schemamapof)
-  - [Advanced types](#advanced-types)
-    - [`schema.oneOf()`](#schemaoneof)
-    - [`schema.any()`](#schemaany)
-    - [`schema.maybe()`](#schemamaybe)
-    - [`schema.nullable()`](#schemanullable)
-    - [`schema.never()`](#schemanever)
-    - [`schema.uri()`](#schemauri)
-    - [`schema.byteSize()`](#schemabytesize)
-    - [`schema.duration()`](#schemaduration)
-    - [`schema.conditional()`](#schemaconditional)
-  - [References](#references)
-    - [`schema.contextRef()`](#schemacontextref)
-    - [`schema.siblingRef()`](#schemasiblingref)
-- [Custom validation](#custom-validation)
-- [Default values](#default-values)
+* [Why `@kbn/config-schema`?](#why-kbnconfig-schema)
+* [Base concepts](#base-concepts)
+* [Basic types](#basic-types)
+  * [`schema.string()`](#schemastring)
+  * [`schema.number()`](#schemanumber)
+  * [`schema.boolean()`](#schemaboolean)
+  * [`schema.literal()`](#schemaliteral)
+  * [`schema.buffer()`](#schemabuffer)
+  * [`schema.stream()`](#schemastream)
+* [Composite types](#composite-types)
+  * [`schema.arrayOf()`](#schemaarrayof)
+  * [`schema.object()`](#schemaobject)
+  * [`schema.recordOf()`](#schemarecordof)
+  * [`schema.mapOf()`](#schemamapof)
+  * [`schema.intersection()` / `schema.allOf()`](#schemaintersection--schemaallof)
+* [Advanced types](#advanced-types)
+  * [`schema.oneOf()`](#schemaoneof)
+  * [`schema.any()`](#schemaany)
+  * [`schema.maybe()`](#schemamaybe)
+  * [`schema.nullable()`](#schemanullable)
+  * [`schema.never()`](#schemanever)
+  * [`schema.uri()`](#schemauri)
+  * [`schema.byteSize()`](#schemabytesize)
+  * [`schema.duration()`](#schemaduration)
+  * [`schema.conditional()`](#schemaconditional)
+  * [`schema.lazy()`](#schemalazy)
+* [References](#references)
+  * [`schema.contextRef()`](#schemacontextref)
+  * [`schema.siblingRef()`](#schemasiblingref)
+* [Custom validation](#custom-validation)
+* [Default values](#default-values)
+* [Extending object schemas](#extending-object-schemas)
 
 ## Why `@kbn/config-schema`?
 
@@ -44,9 +47,9 @@ There are a number of reasons why we decided to roll our own solution for the co
 * **Limited API surface** - having a future rich library is awesome, but it's a really hard task to audit such library and make sure everything is sane and secure enough. As everyone knows complexity is the enemy of security and hence we'd like to have a full control over what exactly we expose and commit to maintain.
 * **Custom error messages** - detailed validation error messages are a great help to developers, but at the same time they can contain information that's way too sensitive to expose to everyone. We'd like to control these messages and make them only as detailed as really needed. For example, we don't want validation error messages to contain the passwords for internal users to show-up in the logs. These logs are commonly ingested into Elasticsearch, and accessible to a large number of users which shouldn't have access to the internal user's password.
 * **Type information** - having run-time guarantees is great, but additionally having compile-time guarantees is even better. We'd like to provide developers with a fully typed model of the validated data so that it's harder to misuse it _after_ validation.
-* **Upgradability** - no matter how well a validation library is implemented, it will have bugs and may need to be improved at some point anyway. Some external libraries are very well supported, some aren't or won't be in the future. It's always a risk to depend on an external party with their own release cadence when you need to quickly fix a security vulnerability in a patch version. We'd like to have a better control over lifecycle of such an important piece of our codebase. 
+* **Upgradability** - no matter how well a validation library is implemented, it will have bugs and may need to be improved at some point anyway. Some external libraries are very well supported, some aren't or won't be in the future. It's always a risk to depend on an external party with their own release cadence when you need to quickly fix a security vulnerability in a patch version. We'd like to have a better control over lifecycle of such an important piece of our codebase.
 
-## Schema building blocks
+## Base concepts
 
 The schema is composed of one or more primitives depending on the shape of the data you'd like to validate.
 
@@ -60,6 +63,8 @@ Every schema instance has a `validate` method that is used to perform a validati
 * `data: any` - **required**, data to be validated with the schema
 * `context: Record<string, any>` - **optional**, object whose properties can be referenced by the [context references](#schemacontextref)
 * `namespace: string` - **optional**, arbitrary string that is used to prefix every error message thrown during validation
+* `validationOptions: SchemaValidationOptions` - **optional**, global options to modify the default validation behavior
+  * `stripUnknownKeys: boolean` - **optional**, when `true`, it changes the default `unknowns: 'forbid'` to behave like `unknowns: 'ignore'`. This change of behavior only occurs in schemas without an explicit `unknowns` option. Refer to [`schema.object()`](#schemaobject) for more information about the `unknowns` option.
 
 ```typescript
 const valueSchema = schema.object({
@@ -97,9 +102,9 @@ __Notes:__
 * `validate` method throws as soon as the first schema violation is encountered, no further validation is performed.
 * when you retrieve configuration within a Kibana plugin `validate` function is called by the Core automatically providing appropriate namespace and context variables (environment name, package info etc.).
 
-### Basic types
+## Basic types
 
-#### `schema.string()`
+### `schema.string()`
 
 Validates input data as a string.
 
@@ -121,7 +126,7 @@ __Notes:__
 * By default `schema.string()` allows empty strings, to prevent that use non-zero value for `minLength` option.
 * To validate a string using a regular expression use a custom validator function, see [Custom validation](#custom-validation) section for more details.
 
-#### `schema.number()`
+### `schema.number()`
 
 Validates input data as a number.
 
@@ -132,6 +137,7 @@ __Options:__
   * `validate: (value: number) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
   * `min: number` - defines a minimum value the number should have.
   * `max: number` - defines a maximum value the number should have.
+  * `unsafe: boolean` - if true, will accept unsafe numbers (integers > 2^53).
 
 __Usage:__
 ```typescript
@@ -141,7 +147,7 @@ const valueSchema = schema.number({ max: 10 });
 __Notes:__
 * The `schema.number()` also supports a string as input if it can be safely coerced into number.
 
-#### `schema.boolean()`
+### `schema.boolean()`
 
 Validates input data as a boolean.
 
@@ -159,7 +165,7 @@ const valueSchema = schema.boolean({ defaultValue: false });
 __Notes:__
 * The `schema.boolean()` also supports a string as input if it equals `'true'` or `'false'` (case-insensitive).
 
-#### `schema.literal()`
+### `schema.literal()`
 
 Validates input data as a [string](https://www.typescriptlang.org/docs/handbook/advanced-types.html#string-literal-types), [numeric](https://www.typescriptlang.org/docs/handbook/advanced-types.html#numeric-literal-types) or boolean literal.
 
@@ -178,7 +184,7 @@ const valueSchema = [
 ];
 ```
 
-#### `schema.buffer()`
+### `schema.buffer()`
 
 Validates input data as a NodeJS `Buffer`.
 
@@ -193,7 +199,7 @@ __Usage:__
 const valueSchema = schema.buffer({ defaultValue: Buffer.from('Hi, there!') });
 ```
 
-#### `schema.stream()`
+### `schema.stream()`
 
 Validates input data as a NodeJS `stream`.
 
@@ -208,9 +214,9 @@ __Usage:__
 const valueSchema = schema.stream({ defaultValue: new Stream() });
 ```
 
-### Composite types
+## Composite types
 
-#### `schema.arrayOf()`
+### `schema.arrayOf()`
 
 Validates input data as a homogeneous array with the values being validated against predefined schema.
 
@@ -230,7 +236,7 @@ const valueSchema = schema.arrayOf(schema.number());
 __Notes:__
 * The `schema.arrayOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is an array.
 
-#### `schema.object()`
+### `schema.object()`
 
 Validates input data as an object with a predefined set of properties.
 
@@ -239,22 +245,26 @@ __Output type:__ `{ [K in keyof TProps]: TypeOf<TProps[K]> } as TObject`
 __Options:__
   * `defaultValue: TObject | Reference<TObject> | (() => TObject)` - defines a default value, see [Default values](#default-values) section for more details.
   * `validate: (value: TObject) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
-  * `unknowns: 'allow' | 'ignore' | 'forbid'` - indicates whether unknown object properties should be allowed, ignored, or forbidden. It's `forbid` by default.
+  * `unknowns: 'allow' | 'ignore' | 'forbid'` - indicates whether unknown object properties and sub-properties should be allowed, ignored, or forbidden. It is `forbid` by default unless the global validation option `stripUnknownKeys` is set to `true` when calling `validate()`. Refer to [the `validate()` API options](#schema-building-blocks) to learn about `stripUnknownKeys`.
 
 __Usage:__
 ```typescript
-const valueSchema = schema.object({ 
+const valueSchema = schema.object({
   isEnabled: schema.boolean({ defaultValue: false }),
   name: schema.string({ minLength: 10 }),
 });
 ```
 
+__Specific methods:__
+* `extends` - allows to extend an existing object schema, see [extending object schemas](#extending-object-schemas)
+
 __Notes:__
 * Using `unknowns: 'allow'` is discouraged and should only be used in exceptional circumstances. Consider using `schema.recordOf()` instead.
+* Bear in mind that specifying `unknowns: 'allow' | 'ignore' | 'forbid'` applies to the entire tree of sub-objects. If you want this option to apply only to the properties in first level, make sure to override this option by setting a new `unknowns` option in the child `schema.object()`s.
 * Currently `schema.object()` always has a default value of `{}`, but this may change in the near future. Try to not rely on this behaviour and specify default value explicitly or use `schema.maybe()` if the value is optional.
 * `schema.object()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
-#### `schema.recordOf()`
+### `schema.recordOf()`
 
 Validates input data as an object with the keys and values being validated against predefined schema.
 
@@ -273,7 +283,7 @@ __Notes:__
 * You can use a union of literal types as a record's key schema to restrict record to a specific set of keys, e.g. `schema.oneOf([schema.literal('isEnabled'), schema.literal('name')])`.
 * `schema.recordOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
-#### `schema.mapOf()`
+### `schema.mapOf()`
 
 Validates input data as a map with the keys and values being validated against the predefined schema.
 
@@ -292,9 +302,33 @@ __Notes:__
 * You can use a union of literal types as a record's key schema to restrict record to a specific set of keys, e.g. `schema.oneOf([schema.literal('isEnabled'), schema.literal('name')])`.
 * `schema.mapOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
-### Advanced types
+### `schema.intersection()` / `schema.allOf()`
 
-#### `schema.oneOf()`
+Creates an `object` schema being the intersection of the provided `object` schemas. 
+Note that schema construction will throw an error if some of the intersection schema share the same key(s).
+
+See the documentation for [schema.object](#schemaobject).
+
+__Options:__
+* `defaultValue: TObject | Reference<TObject> | (() => TObject)` - defines a default value, see [Default values](#default-values) section for more details.
+* `validate: (value: TObject) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+* `unknowns: 'allow' | 'ignore' | 'forbid'` - indicates whether unknown object properties should be allowed, ignored, or forbidden. It's `forbid` by default.
+
+__Usage:__
+```typescript
+const mySchema = schema.intersection([
+  schema.object({
+    someKey: schema.string(),
+  }),
+  schema.object({
+    anotherKey: schema.string(),
+  })
+]);
+```
+
+## Advanced types
+
+### `schema.oneOf()`
 
 Allows a list of alternative schemas to validate input data against.
 
@@ -312,7 +346,7 @@ const valueSchema = schema.oneOf([schema.literal('∞'), schema.number()]);
 __Notes:__
 * Since the result data type is a type union you should use various TypeScript type guards to get the exact type.
 
-#### `schema.any()`
+### `schema.any()`
 
 Indicates that input data shouldn't be validated and returned as is.
 
@@ -330,7 +364,7 @@ const valueSchema = schema.any();
 __Notes:__
 * `schema.any()` is essentially an escape hatch for the case when your data can __really__ have any type and should be avoided at all costs.
 
-#### `schema.maybe()`
+### `schema.maybe()`
 
 Indicates that input data is optional and may not be present.
 
@@ -344,7 +378,7 @@ const valueSchema = schema.maybe(schema.string());
 __Notes:__
 * Don't use `schema.maybe()` if a nested type defines a default value.
 
-#### `schema.nullable()`
+### `schema.nullable()`
 
 Indicates that input data is optional and defaults to `null` if it's not present.
 
@@ -358,7 +392,7 @@ const valueSchema = schema.nullable(schema.string());
 __Notes:__
 * `schema.nullable()` also treats explicitly specified `null` as a valid input.
 
-#### `schema.never()`
+### `schema.never()`
 
 Indicates that input data is forbidden.
 
@@ -372,7 +406,7 @@ const valueSchema = schema.never();
 __Notes:__
 * `schema.never()` has a very limited application and usually used within [conditional schemas](#schemaconditional) to fully or partially forbid input data.
 
-#### `schema.uri()`
+### `schema.uri()`
 
 Validates input data as a proper URI string (per [RFC 3986](https://tools.ietf.org/html/rfc3986)).
 
@@ -391,7 +425,7 @@ const valueSchema = schema.uri({ scheme: 'https' });
 __Notes:__
 * Prefer using `schema.uri()` for all URI validations even though it may be possible to replicate it with a custom validator for `schema.string()`.
 
-#### `schema.byteSize()`
+### `schema.byteSize()`
 
 Validates input data as a proper digital data size.
 
@@ -413,7 +447,7 @@ __Notes:__
 * The number value is treated as a number of bytes and hence should be a positive integer, e.g. `100` is equal to `'100b'`.
 * Currently you cannot specify zero bytes with a string format and should use number `0` instead.
 
-#### `schema.duration()`
+### `schema.duration()`
 
 Validates input data as a proper [duration](https://momentjs.com/docs/#/durations/).
 
@@ -429,10 +463,14 @@ const valueSchema = schema.duration({ defaultValue: '70ms' });
 ```
 
 __Notes:__
-* The string value for `schema.duration()` supports the following optional suffixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`. The default suffix is `ms`.
+* The string value for `schema.duration()` supports the following optional suffixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `y`. The default suffix is `ms`.
 * The number value is treated as a number of milliseconds and hence should be a positive integer, e.g. `100` is equal to `'100ms'`.
+* Multi-unit duration strings are supported (`1m30s`).
+  * Spaces are not allowed.
+  * It allows any order in the units (`1m30s1d`).
+  * It allows the same unit to be specified multiple times (`1m30s50m` is the same as `51m30s`).
 
-#### `schema.conditional()`
+### `schema.conditional()`
 
 Allows a specified condition that is evaluated _at the validation time_ and results in either one or another input validation schema.
 
@@ -461,9 +499,49 @@ const valueSchema = schema.object({
 __Notes:__
 * Conditional schemas may be hard to read and understand and hence should be used only sparingly.
 
-### References
+### `schema.lazy()`
 
-#### `schema.contextRef()`
+Allows recursive runtime types to be defined.
+
+Takes a required generic type argument and a required string that represents the id of the schema.
+
+It is recommended to pick a globally unique ID for your schema. Consider creating only IDs that are prefixed with your
+domain, e.g. `myPlugin_myRecursiveType`.
+
+IDs must be unique within a _schema ancestry_. You can use the same ID in multiple, separate schemas as long as they do not
+share a common ancestor object. However, if you want to generate OAS from your schema you must ensure a globally
+unique ID in order to avoid overriding schemas with the same ID.
+
+Note: use of `meta.id` is required to associate the schema with the ID used in the `schema.lazy()` call in order to
+create a recursive type (see usage).
+
+__Output type:__ `T`
+
+__Usage:__
+```typescript
+interface RecursiveType {
+  name: string;
+  self: undefined | RecursiveType;
+}
+
+// Do not assign this ID to any other schema to avoid collisions.
+const id = 'myPlugin_myRecursiveType';
+const object = schema.object(
+  {
+    name: schema.string(),
+    self: schema.lazy<RecursiveType>(id),
+  },
+  { meta: { id } }
+);
+```
+
+__Notes:__
+* Preferably use this sparingly and only to create recursive types.
+* Intended to be used only as properties within `schema.object()` types.
+
+## References
+
+### `schema.contextRef()`
 
 Defines a reference to the value specified through the validation context. Context reference is only used as part of a [conditional schema](#schemaconditional) or as a default value for any other schema.
 
@@ -471,7 +549,7 @@ __Output type:__ `TReferenceValue`
 
 __Usage:__
 ```typescript
-const valueSchema = schema.object({ 
+const valueSchema = schema.object({
   env: schema.string({ defaultValue: schema.contextRef('envName') }),
 });
 valueSchema.validate({}, { envName: 'dev' });
@@ -479,9 +557,9 @@ valueSchema.validate({}, { envName: 'dev' });
 
 __Notes:__
 * The `@kbn/config-schema` neither validates nor coerces the "dereferenced" value and the developer is responsible for making sure that it has the appropriate type.
-* The root context that Kibana provides during config validation includes lots of useful properties like `environment name` that can be used to provide a strict schema for production and more relaxed one for development. 
+* The root context that Kibana provides during config validation includes lots of useful properties like `environment name` that can be used to provide a strict schema for production and more relaxed one for development.
 
-#### `schema.siblingRef()`
+### `schema.siblingRef()`
 
 Defines a reference to the value of the sibling key. Sibling references are only used a part of [conditional schema](#schemaconditional) or as a default value for any other schema.
 
@@ -529,7 +607,7 @@ to denote the failed validation or not return anything at all (`void`) otherwise
 Another use case for custom validation functions is when the schema depends on some run-time data:
 
 ```typescript
-const gesSchema = randomRunTimeSeed => schema.string({ 
+const gesSchema = randomRunTimeSeed => schema.string({
   validate: value => value !== randomRunTimeSeed ? 'value is not allowed' : undefined
 });
 
@@ -553,3 +631,45 @@ const valueSchemaWithFunctionEvaluatedDefault = schema.string({ defaultValue: ()
 
 __Notes:__
 * `@kbn/config-schema` neither validates nor coerces default value and developer is responsible for making sure that it has the appropriate type.
+
+## Extending object schemas
+
+It is possible to re-use / extend an existing `object` schema using the `extends` API.
+The API returns a new instance of `schema.object`, with a merge of the additional properties
+on top of the source object's existing props.
+
+Note that `extends` only supports extending first-level properties. It's currently not possible to perform deep/nested extensions with a single call.
+
+__Example:__ how to add a new key to an existing object schema
+```typescript
+const origin = schema.object({
+  initial: schema.string(),
+});
+
+const extended = origin.extends({
+  added: schema.number(),
+});
+```
+
+__Example:__ How to remove an existing key from an object schema
+```typescript
+const origin = schema.object({
+  initial: schema.string(),
+  toRemove: schema.number(),
+});
+
+const extended = origin.extends({
+  toRemove: undefined,
+});
+```
+
+__Example:__ How to override the schema's options
+```typescript
+const origin = schema.object({
+  initial: schema.string(),
+}, { defaultValue: { initial: 'foo' }});
+
+const extended = origin.extends({
+  added: schema.number(),
+}, { defaultValue: { initial: 'foo', added: 'bar' }});
+```

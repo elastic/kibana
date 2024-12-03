@@ -19,6 +19,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n-react"
   ]
 }

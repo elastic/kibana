@@ -18,6 +18,7 @@
 export type {
   CasesBulkGetResponse,
   CasePostRequest,
+  CasePatchRequest,
   GetRelatedCasesByAlertResponse,
   UserActionFindResponse,
 } from './types/api';
@@ -29,13 +30,15 @@ export type {
   Ecs,
   CaseViewRefreshPropInterface,
   CasesPermissions,
-  CasesStatus,
+  CasesCapabilities,
 } from './ui/types';
 
 export { CaseSeverity } from './types/domain';
 
 export {
   APP_ID,
+  FEATURE_ID,
+  FEATURE_ID_V2,
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
   OBSERVABILITY_OWNER,
@@ -52,12 +55,14 @@ export {
   CASE_COMMENT_SAVED_OBJECT,
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
+  CASES_SETTINGS_CAPABILITY,
+  CREATE_COMMENT_CAPABILITY,
+  CASES_REOPEN_CAPABILITY,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
 export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
 export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
-export { StatusAll } from './ui/types';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';

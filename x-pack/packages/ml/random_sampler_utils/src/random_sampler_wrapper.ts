@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getSampleProbability } from './get_sample_probability';
 
@@ -69,7 +69,6 @@ export const createRandomSamplerWrapper = (options: RandomSamplerOptions) => {
 
     return {
       [aggName]: {
-        // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
         random_sampler: {
           probability,
           ...(options.seed ? { seed: options.seed } : {}),

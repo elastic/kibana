@@ -32,9 +32,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.NodeDefinition",
+            "section": "def-public.NodeDefinition",
             "text": "NodeDefinition"
           },
           "<",
@@ -64,9 +64,9 @@
           "> & { children: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.NodeDefinition",
+            "section": "def-public.NodeDefinition",
             "text": "NodeDefinition"
           },
           "<",
@@ -186,7 +186,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "({ link: \"monitoring\"; } | { id: \"integration_management\"; title: string; renderAs: \"accordion\"; children: ({ link: \"integrations\"; } | { link: \"fleet\"; } | { link: \"osquery\"; })[]; } | { id: \"stack_management\"; title: string; renderAs: \"accordion\"; children: ({ id: \"ingest\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:ingest_pipelines\"; } | { link: \"management:pipelines\"; })[]; } | { id: \"data\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:index_management\"; } | { link: \"management:transform\"; })[]; } | { id: \"alerts_and_insights\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:triggersActions\"; } | { link: \"management:cases\"; } | { link: \"management:triggersActionsConnectors\"; } | { link: \"management:jobsListLink\"; })[]; } | { id: \"kibana\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:dataViews\"; } | { link: \"management:objects\"; } | { link: \"management:tags\"; } | { link: \"management:spaces\"; } | { link: \"management:settings\"; })[]; })[]; })[]"
+              "({ link: \"monitoring\"; } | { id: \"integration_management\"; title: string; renderAs: \"accordion\"; children: ({ link: \"integrations\"; } | { link: \"fleet\"; } | { link: \"osquery\"; })[]; } | { id: \"stack_management\"; title: string; renderAs: \"accordion\"; children: ({ id: \"ingest\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:ingest_pipelines\"; } | { link: \"management:pipelines\"; })[]; } | { id: \"data\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:index_management\"; } | { link: \"management:transform\"; })[]; } | { id: \"alerts_and_insights\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:triggersActions\"; } | { link: \"management:cases\"; } | { link: \"management:triggersActionsConnectors\"; } | { link: \"management:jobsListLink\"; })[]; } | { id: \"kibana\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:dataViews\"; } | { link: \"management:aiAssistantManagementSelection\"; } | { link: \"management:objects\"; } | { link: \"management:tags\"; } | { link: \"management:spaces\"; } | { link: \"management:settings\"; })[]; })[]; })[]"
             ],
             "path": "packages/default-nav/management/default_navigation.ts",
             "deprecated": false,

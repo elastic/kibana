@@ -10,7 +10,6 @@ import { DocLinks } from '@kbn/doc-links';
 class ESDocLinks {
   public apiIntro: string = '';
   public beats: string = '';
-  public connectors: string = '';
   public integrations: string = '';
   public kibanaFeedback: string = '';
   public kibanaRunApiInConsole: string = '';
@@ -18,6 +17,13 @@ class ESDocLinks {
   public metadata: string = '';
   public roleDescriptors: string = '';
   public securityApis: string = '';
+  public ingestionPipelines: string = '';
+  public dataStreams: string = '';
+  // Connectors links
+  public connectors: string = '';
+  public connectorClientAvailableConnectors: string = '';
+  public connectorsRunFromSource: string = '';
+  public connectorsRunWithDocker: string = '';
   // Client links
   public elasticsearchClients: string = '';
   // go
@@ -46,6 +52,14 @@ class ESDocLinks {
   public gettingStartedSearch: string = '';
   public gettingStartedExplore: string = '';
 
+  // Ingest processor
+  public dataEnrichment: string = '';
+  public dataFiltering: string = '';
+  public arrayOrJson: string = '';
+  public dataTransformation: string = '';
+  public pipelineHandling: string = '';
+  public pipelines: string = '';
+
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
@@ -53,12 +67,22 @@ class ESDocLinks {
     this.integrations = newDocLinks.serverlessSearch.integrations;
     this.logstash = newDocLinks.serverlessSearch.integrationsLogstash;
     this.beats = newDocLinks.serverlessSearch.integrationsBeats;
-    this.connectors = newDocLinks.serverlessSearch.integrationsConnectorClient;
     this.kibanaFeedback = newDocLinks.kibana.feedback;
     this.kibanaRunApiInConsole = newDocLinks.console.serverlessGuide;
     this.metadata = newDocLinks.security.mappingRoles;
     this.roleDescriptors = newDocLinks.serverlessSecurity.apiKeyPrivileges;
     this.securityApis = newDocLinks.apis.securityApis;
+    this.ingestionPipelines = newDocLinks.ingest.pipelines;
+    this.dataStreams = newDocLinks.elasticsearch.dataStreams;
+
+    // Connectors links
+    this.connectors = newDocLinks.serverlessSearch.integrationsConnectorClient;
+    this.connectorClientAvailableConnectors =
+      newDocLinks.serverlessSearch.integrationsConnectorClientAvailableConnectors;
+    this.connectorsRunFromSource =
+      newDocLinks.serverlessSearch.integrationsConnectorClientRunFromSource;
+    this.connectorsRunWithDocker =
+      newDocLinks.serverlessSearch.integrationsConnectorClientRunWithDocker;
 
     // Client links
     this.elasticsearchClients = newDocLinks.serverlessClients.clientLib;
@@ -78,7 +102,7 @@ class ESDocLinks {
     this.pythonApiReference = newDocLinks.serverlessClients.pythonGettingStarted;
     this.pythonBasicConfig = newDocLinks.serverlessClients.pythonGettingStarted;
     this.pythonClient = newDocLinks.serverlessClients.pythonGettingStarted;
-    // Python
+    // Ruby
     this.rubyBasicConfig = newDocLinks.serverlessClients.rubyGettingStarted;
     this.rubyExamples = newDocLinks.serverlessClients.rubyApiReference;
     this.rubyClient = newDocLinks.serverlessClients.rubyGettingStarted;
@@ -87,6 +111,14 @@ class ESDocLinks {
     this.gettingStartedIngest = newDocLinks.serverlessSearch.gettingStartedIngest;
     this.gettingStartedSearch = newDocLinks.serverlessSearch.gettingStartedSearch;
     this.gettingStartedExplore = newDocLinks.serverlessSearch.gettingStartedExplore;
+
+    // Ingest processor
+    this.dataEnrichment = newDocLinks.ingest.dataEnrichment;
+    this.dataFiltering = newDocLinks.ingest.dataFiltering;
+    this.arrayOrJson = newDocLinks.ingest.arrayOrJson;
+    this.dataTransformation = newDocLinks.ingest.dataTransformation;
+    this.pipelineHandling = newDocLinks.ingest.pipelineHandling;
+    this.pipelines = newDocLinks.ingest.pipelines;
   }
 }
 

@@ -769,6 +769,9 @@ Object {
     "version": "0.5.3",
   },
   "policy_id": "some-agent-policy-id",
+  "policy_ids": Array [
+    "some-agent-policy-id",
+  ],
   "vars": Object {
     "access_key_id": Object {
       "type": "text",

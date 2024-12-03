@@ -7,53 +7,79 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTitle } from '@elastic/eui';
-
 import {
-  getMlModelTypesForModelConfig,
-  parseModelStateFromStats,
-  parseModelStateReasonFromStats,
-} from '../../../../../../../common/ml_inference_pipeline';
-import { TrainedModel } from '../../../../api/ml_models/ml_trained_models_logic';
-import { getMLType, getModelDisplayTitle } from '../../../shared/ml_inference/utils';
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelectableOption,
+  EuiText,
+  EuiTextColor,
+  EuiTextTruncate,
+  EuiTitle,
+  useIsWithinMaxBreakpoint,
+} from '@elastic/eui';
 
+import { MlModel } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
-import { MLModelTypeBadge } from '../ml_model_type_badge';
 
-export interface MlModelSelectOptionProps {
-  model: TrainedModel;
-}
-export const MlModelSelectOption: React.FC<MlModelSelectOptionProps> = ({ model }) => {
-  const type = getMLType(getMlModelTypesForModelConfig(model));
-  const title = getModelDisplayTitle(type);
+import { LicenseBadge } from './license_badge';
+
+export const ModelSelectOption: React.FC<EuiSelectableOption<MlModel>> = ({
+  modelId,
+  title,
+  description,
+  isPlaceholder,
+  licenseType,
+  deploymentState,
+  deploymentStateReason,
+}) => {
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h4>{title ?? model.model_id}</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
-          {title && (
+    <EuiFlexGroup alignItems="center" gutterSize={useIsWithinMaxBreakpoint('s') ? 'xs' : 'l'}>
+      <EuiFlexItem style={{ overflow: 'hidden' }}>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h4>
+                <EuiTextTruncate text={title} />
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTextColor color="subdued">
+              <EuiTextTruncate text={modelId} />
+            </EuiTextColor>
+          </EuiFlexItem>
+          {(licenseType || description) && (
             <EuiFlexItem>
-              <EuiTextColor color="subdued">{model.model_id}</EuiTextColor>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                {licenseType && (
+                  <EuiFlexItem grow={false}>
+                    {/* Wrap in a span to prevent the badge from growing to a whole row on mobile */}
+                    <span>
+                      <LicenseBadge licenseType={licenseType} />
+                    </span>
+                  </EuiFlexItem>
+                )}
+                {description && (
+                  <EuiFlexItem style={{ overflow: 'hidden' }}>
+                    <EuiText size="xs">
+                      <EuiTextTruncate text={description} />
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <TrainedModelHealth
-              modelState={parseModelStateFromStats(model)}
-              modelStateReason={parseModelStateReasonFromStats(model)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem>
-                <MLModelTypeBadge type={type} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+        {/* Wrap in a span to prevent the badge from growing to a whole row on mobile */}
+        <span>
+          <TrainedModelHealth
+            modelState={deploymentState}
+            modelStateReason={deploymentStateReason}
+            isDownloadable={isPlaceholder}
+          />
+        </span>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

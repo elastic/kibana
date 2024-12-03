@@ -184,7 +184,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [
-              "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys directory."
+              "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys_e2e directory."
             ],
             "signature": [
               "any"
@@ -663,6 +663,38 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getSynthtraceConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getSynthtraceConfig",
+            "description": [],
+            "signature": [
+              "() => JourneySynthtrace<CtxExt, any> | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.takeScreenshotOnSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "takeScreenshotOnSuccess",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

@@ -866,19 +866,11 @@
           },
           "<",
           {
-            "pluginId": "inspector",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DefaultInspectorAdapters",
+            "text": "DefaultInspectorAdapters"
           },
           ">>"
         ],

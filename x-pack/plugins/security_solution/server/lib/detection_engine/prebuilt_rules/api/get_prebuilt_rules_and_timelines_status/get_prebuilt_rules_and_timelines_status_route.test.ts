@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { securityServiceMock } from '@kbn/core/server/mocks';
 import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status_route';
 
 import {
@@ -13,7 +14,6 @@ import {
   getPrepackagedRulesStatusRequest,
 } from '../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../../../routes/__mocks__';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
 import {
   mockCheckTimelinesStatusBeforeInstallResult,
@@ -56,6 +56,7 @@ jest.mock('../../../../timeline/utils/check_timelines_status', () => {
 });
 
 describe('get_prepackaged_rule_status_route', () => {
+  const securityCore = securityServiceMock.createStart();
   const mockGetCurrentUser = {
     user: {
       username: 'mockUser',
@@ -64,19 +65,13 @@ describe('get_prepackaged_rule_status_route', () => {
 
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let securitySetup: SecurityPluginSetup;
 
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
+    jest.spyOn(securityCore.authc, 'getCurrentUser').mockReturnValue(mockGetCurrentUser);
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
@@ -86,7 +81,7 @@ describe('get_prepackaged_rule_status_route', () => {
       prepackagedTimelines: [],
     });
 
-    getPrebuiltRulesAndTimelinesStatusRoute(server.router, securitySetup);
+    getPrebuiltRulesAndTimelinesStatusRoute(server.router);
   });
 
   describe('status codes', () => {

@@ -5,27 +5,64 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import type { ActionResult } from '@kbn/actions-plugin/server';
+import { Client, Example } from 'langsmith';
+import type { Logger } from '@kbn/core/server';
+import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
 
 /**
- * Returns the LangChain `llmType` for the given connectorId/connectors
+ * Fetches a dataset from LangSmith. Note that `client` will use env vars unless langSmithApiKey is specified
  *
- * @param connectorId
- * @param connectors
+ * @param datasetName
+ * @param logger
+ * @param langSmithApiKey
  */
-export const getLlmType = (connectorId: string, connectors: ActionResult[]): string | undefined => {
-  const connector = connectors.find((c) => c.id === connectorId);
-  // Note: Pre-configured connectors do not have an accessible `apiProvider` field
-  const apiProvider = (connector?.config?.apiProvider as string) ?? undefined;
-
-  if (apiProvider === OpenAiProviderType.OpenAi) {
-    // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/agents/openai/index.ts#L185
-    return 'openai';
+export const fetchLangSmithDataset = async (
+  datasetName: string | undefined,
+  logger: Logger,
+  langSmithApiKey?: string
+): Promise<Example[]> => {
+  if (datasetName === undefined || (langSmithApiKey == null && !isLangSmithEnabled())) {
+    throw new Error('LangSmith dataset name not provided or LangSmith not enabled');
   }
-  // TODO: Add support for Amazon Bedrock Connector once merged
-  // Note: Doesn't appear to be a difference between Azure and OpenAI LLM types, so TBD for functions agent on Azure
-  // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/llms/openai.ts#L539
 
-  return undefined;
+  try {
+    const client = new Client({ apiKey: langSmithApiKey });
+
+    const examples = [];
+    for await (const example of client.listExamples({ datasetName })) {
+      examples.push(example);
+    }
+
+    return examples;
+  } catch (e) {
+    logger.error(`Error fetching dataset from LangSmith: ${e.message}`);
+    return [];
+  }
+};
+
+/**
+ * Fetches all LangSmith datasets.  Note that `client` will use env vars unless langSmithApiKey is specified
+ *
+ * @param logger
+ * @param langSmithApiKey
+ */
+export const fetchLangSmithDatasets = async ({
+  logger,
+  langSmithApiKey,
+}: {
+  logger: Logger;
+  langSmithApiKey?: string;
+}): Promise<string[]> => {
+  try {
+    const client = new Client({ apiKey: langSmithApiKey });
+    const datasets = [];
+    for await (const dataset of client.listDatasets()) {
+      datasets.push(dataset);
+    }
+
+    return datasets.map((d) => d.name).sort();
+  } catch (e) {
+    logger.error(`Error fetching datasets from LangSmith: ${e.message}`);
+    return [];
+  }
 };

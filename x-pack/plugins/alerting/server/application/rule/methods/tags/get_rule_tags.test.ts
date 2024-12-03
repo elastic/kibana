@@ -10,6 +10,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -22,6 +23,9 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 import { RegistryRuleType } from '../../../../rule_type_registry';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -54,27 +58,34 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
-const listedTypes = new Set<RegistryRuleType>([
-  {
-    actionGroups: [],
-    actionVariables: undefined,
-    defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    recoveryActionGroup: RecoveredActionGroup,
-    id: 'myType',
-    name: 'myType',
-    category: 'test',
-    producer: 'myApp',
-    enabledInLicense: true,
-    hasAlertsMappings: false,
-    hasFieldsForAAD: false,
-    validLegacyConsumers: [],
-  },
+const listedTypes = new Map<string, RegistryRuleType>([
+  [
+    'myType',
+    {
+      actionGroups: [],
+      actionVariables: undefined,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      recoveryActionGroup: RecoveredActionGroup,
+      id: 'myType',
+      name: 'myType',
+      category: 'test',
+      producer: 'myApp',
+      enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
+      validLegacyConsumers: [],
+    },
+  ],
 ]);
 
 beforeEach(() => {
@@ -110,26 +121,16 @@ describe('getTags()', () => {
     unsecuredSavedObjectsClient.find.mockResolvedValue(getMockAggregationResult(['a', 'b', 'c']));
 
     ruleTypeRegistry.list.mockReturnValue(listedTypes);
-    authorization.filterByRuleTypeAuthorization.mockResolvedValue(
-      new Set([
-        {
-          id: 'myType',
-          name: 'Test',
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          defaultActionGroupId: 'default',
-          minimumLicenseRequired: 'basic',
-          isExportable: true,
-          recoveryActionGroup: RecoveredActionGroup,
-          category: 'test',
-          producer: 'alerts',
-          authorizedConsumers: {
-            myApp: { read: true, all: true },
+    authorization.getAuthorizedRuleTypes.mockResolvedValue(
+      new Map([
+        [
+          'myType',
+          {
+            authorizedConsumers: {
+              myApp: { read: true, all: true },
+            },
           },
-          enabledInLicense: true,
-          hasAlertsMappings: false,
-          hasFieldsForAAD: false,
-          validLegacyConsumers: [],
-        },
+        ],
       ])
     );
   });
@@ -147,7 +148,7 @@ describe('getTags()', () => {
         tags: { terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 10000 } },
       },
       filter: undefined,
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
     });
 
     expect(result.data).toEqual(['a', 'b', 'c']);

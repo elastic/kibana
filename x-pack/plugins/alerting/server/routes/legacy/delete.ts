@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -20,13 +21,29 @@ const paramSchema = schema.object({
 export const deleteAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  docLinks: DocLinksServiceSetup,
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.delete(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
       validate: {
         params: paramSchema,
+      },
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Delete an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'DELETE',
+            newApiPath: '/api/alerting/rule/{id}',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
@@ -35,7 +52,8 @@ export const deleteAlertRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       trackLegacyRouteUsage('delete', usageCounter);
-      const rulesClient = (await context.alerting).getRulesClient();
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
       const { id } = req.params;
       await rulesClient.delete({ id });
       return res.noContent();

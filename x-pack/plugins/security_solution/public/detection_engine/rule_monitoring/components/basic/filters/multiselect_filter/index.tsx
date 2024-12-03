@@ -22,6 +22,9 @@ export interface MultiselectFilterProps<T = unknown> {
 }
 /* eslint-enable react/no-unused-prop-types */
 
+/**
+ * @deprecated Please use [MultiselectFilter](../../../../../../common/components/multiselect_filter/index.tsx) instead.
+ */
 const MultiselectFilterComponent = <T extends unknown>(props: MultiselectFilterProps<T>) => {
   const { dataTestSubj, title, items, selectedItems, onSelectionChange, renderItem, renderLabel } =
     initializeProps(props);

@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { deepFreeze } from '@kbn/std';
-import {
+import { schema } from '@kbn/config-schema';
+import type {
   CoreSetup,
   PluginInitializer,
+  SavedObject,
   SavedObjectsNamespaceType,
   SavedObjectUnsanitizedDoc,
-  SavedObject,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import {
+import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { deepFreeze } from '@kbn/std';
+
 import { registerHiddenSORoutes } from './hidden_saved_object_routes';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
@@ -28,6 +29,11 @@ const SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE =
 const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
 
 const SAVED_OBJECT_WITH_MIGRATION_TYPE = 'saved-object-with-migration';
+
+const SAVED_OBJECT_MV_TYPE = 'saved-object-mv';
+
+const TYPE_WITH_PREDICTABLE_ID = 'type-with-predictable-ids';
+
 interface MigratedTypePre790 {
   nonEncryptedAttribute: string;
   encryptedAttribute: string;
@@ -75,9 +81,33 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
           'privateProperty',
           { key: 'publicPropertyStoredEncrypted', dangerouslyExposeValue: true },
         ]),
-        attributesToExcludeFromAAD: new Set(['publicPropertyExcludedFromAAD']),
+        attributesToIncludeInAAD: new Set(['publicProperty']),
       });
     }
+
+    core.savedObjects.registerType({
+      name: TYPE_WITH_PREDICTABLE_ID,
+      hidden: false,
+      namespaceType: 'single',
+      mappings: deepFreeze({
+        properties: {
+          publicProperty: { type: 'keyword' },
+          publicPropertyExcludedFromAAD: { type: 'keyword' },
+          publicPropertyStoredEncrypted: { type: 'binary' },
+          privateProperty: { type: 'binary' },
+        },
+      }),
+    });
+
+    deps.encryptedSavedObjects.registerType({
+      type: TYPE_WITH_PREDICTABLE_ID,
+      attributesToEncrypt: new Set([
+        'privateProperty',
+        { key: 'publicPropertyStoredEncrypted', dangerouslyExposeValue: true },
+      ]),
+      attributesToIncludeInAAD: new Set(['publicProperty']),
+      enforceRandomId: false,
+    });
 
     core.savedObjects.registerType({
       name: SAVED_OBJECT_WITHOUT_SECRET_TYPE,
@@ -87,6 +117,8 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
     });
 
     defineTypeWithMigration(core, deps);
+
+    defineModelVersionWithMigration(core, deps);
 
     const router = core.http.createRouter();
     router.get(
@@ -107,7 +139,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
           });
         } catch (err) {
           if (encryptedSavedObjects.isEncryptionError(err)) {
-            return response.badRequest({ body: 'Failed to encrypt attributes' });
+            return response.badRequest({ body: 'Failed to decrypt attributes' });
           }
 
           return response.customError({ body: err, statusCode: 500 });
@@ -159,12 +191,14 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
   const typePriorTo790 = {
     type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']), // No attributes were excluded previously, so we have to add this
   };
 
   // current type is registered
   deps.encryptedSavedObjects.registerType({
     type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']), // No attributes were excluded previously, so we have to add this
   });
 
   core.savedObjects.registerType({
@@ -247,6 +281,80 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
       '8.0.0': deps.encryptedSavedObjects.createMigration<MigratedType, MigratedType>({
         isMigrationNeededPredicate: (doc): doc is SavedObjectUnsanitizedDoc<MigratedType> => true,
         migration: (doc) => doc, // no-op
+      }),
+    },
+  });
+}
+
+function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSetup) {
+  const typePriorTo810 = {
+    type: SAVED_OBJECT_MV_TYPE,
+    attributesToEncrypt: new Set(['encryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']),
+  };
+
+  const latestType = {
+    type: SAVED_OBJECT_MV_TYPE,
+    attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']),
+  };
+  deps.encryptedSavedObjects.registerType(latestType);
+
+  core.savedObjects.registerType({
+    name: SAVED_OBJECT_MV_TYPE,
+    hidden: false,
+    management: { importableAndExportable: true },
+    namespaceType: 'multiple-isolated',
+    switchToModelVersionAt: '8.10.0',
+    mappings: {
+      properties: {
+        nonEncryptedAttribute: {
+          type: 'keyword',
+        },
+        encryptedAttribute: {
+          type: 'binary',
+        },
+        additionalEncryptedAttribute: {
+          type: 'keyword',
+        },
+      },
+    },
+    modelVersions: {
+      '1': deps.encryptedSavedObjects.createModelVersion({
+        modelVersion: {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (document) => {
+                const {
+                  attributes: { nonEncryptedAttribute },
+                } = document;
+                document.attributes.nonEncryptedAttribute = `${nonEncryptedAttribute}-migrated`;
+                return { document };
+              },
+            },
+          ],
+        },
+        inputType: typePriorTo810,
+        outputType: typePriorTo810,
+        shouldTransformIfDecryptionFails: true,
+      }),
+      '2': deps.encryptedSavedObjects.createModelVersion({
+        modelVersion: {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (document) => {
+                // clone and modify the non encrypted field
+                document.attributes.additionalEncryptedAttribute = `${document.attributes.nonEncryptedAttribute}-encrypted`;
+                return { document };
+              },
+            },
+          ],
+        },
+        inputType: typePriorTo810,
+        outputType: latestType,
+        shouldTransformIfDecryptionFails: true,
       }),
     },
   });

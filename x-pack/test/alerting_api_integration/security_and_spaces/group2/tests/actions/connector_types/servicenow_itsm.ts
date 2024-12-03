@@ -10,15 +10,20 @@ import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
 import http from 'http';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/servicenow/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const retry = getService('retry');
 
   const mockServiceNowCommon = {
     params: {
@@ -447,7 +452,13 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+              expect(Object.keys(resp.body).sort()).to.eql([
+                'connector_id',
+                'errorSource',
+                'message',
+                'retry',
+                'status',
+              ]);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
             });
@@ -465,8 +476,9 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
+                errorSource: TaskErrorSource.USER,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [getChoices]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [getChoices]\n- [5.subAction]: expected value to equal [closeIncident]',
               });
             });
         });
@@ -483,8 +495,9 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
+                errorSource: TaskErrorSource.USER,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]\n- [5.subAction]: expected value to equal [closeIncident]',
               });
             });
         });
@@ -506,8 +519,9 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
+                errorSource: TaskErrorSource.USER,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]\n- [5.subAction]: expected value to equal [closeIncident]',
               });
             });
         });
@@ -533,8 +547,9 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
+                errorSource: TaskErrorSource.USER,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]\n- [5.subAction]: expected value to equal [closeIncident]',
               });
             });
         });
@@ -560,10 +575,86 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
+                errorSource: TaskErrorSource.USER,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]\n- [5.subAction]: expected value to equal [closeIncident]',
               });
             });
+        });
+
+        it('throws when trying to create an incident with too many "additional_fields"', async () => {
+          const additionalFields = new Array(MAX_ADDITIONAL_FIELDS_LENGTH + 1)
+            .fill('foobar')
+            .reduce((acc, curr, idx) => {
+              acc[idx] = curr;
+              return acc;
+            }, {});
+
+          const res = await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNowBasic.params,
+                subActionParams: {
+                  ...mockServiceNowBasic.params.subActionParams,
+                  incident: {
+                    ...mockServiceNowBasic.params.subActionParams.incident,
+                    additional_fields: additionalFields,
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(res.body.status).to.eql('error');
+        });
+
+        it('throws when trying to create an incident with "additional_fields" keys that are not allowed', async () => {
+          const res = await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNowBasic.params,
+                subActionParams: {
+                  ...mockServiceNowBasic.params.subActionParams,
+                  incident: {
+                    ...mockServiceNowBasic.params.subActionParams.incident,
+                    additional_fields: {
+                      short_description: 'foo',
+                    },
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(res.body.status).to.eql('error');
+        });
+
+        it('does not throw when "additional_fields" is a valid JSON object send as string', async () => {
+          const res = await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNowBasic.params,
+                subActionParams: {
+                  ...mockServiceNowBasic.params.subActionParams,
+                  incident: {
+                    ...mockServiceNowBasic.params.subActionParams.incident,
+                    otherFields: '{ "foo": "bar" }',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(res.body.status).to.eql('error');
         });
 
         describe('getChoices', () => {
@@ -582,8 +673,9 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                   connector_id: simulatedActionId,
                   status: 'error',
                   retry: false,
+                  errorSource: TaskErrorSource.USER,
                   message:
-                    'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subActionParams.fields]: expected value of type [array] but got [undefined]',
+                    'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subActionParams.fields]: expected value of type [array] but got [undefined]\n- [5.subAction]: expected value to equal [closeIncident]',
                 });
               });
           });
@@ -619,6 +711,23 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(261);
           });
         });
 
@@ -666,6 +775,23 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(239);
           });
         });
 
@@ -714,6 +840,65 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 },
               ],
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 2 }],
+                  ['execute', { gte: 2 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[3];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
+          });
+        });
+
+        describe('closeIncident', () => {
+          it('should close the incident', async () => {
+            const { body: result } = await supertest
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'closeIncident',
+                  subActionParams: {
+                    incident: {
+                      correlation_id: 'custom_correlation_id',
+                    },
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(proxyHaveBeenCalled).to.equal(true);
+            expect(result).to.eql({
+              status: 'ok',
+              connector_id: simulatedActionId,
+              data: {},
+            });
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 3 }],
+                  ['execute', { gte: 3 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[5];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });
       });

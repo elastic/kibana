@@ -10,28 +10,40 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import type { UserItem } from '../../../../common/search_strategy';
+import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
-import type {
-  ManagedUserData,
-  ObservedUserData,
-} from '../../../timelines/components/side_panel/new_user_detail/types';
+import type { ManagedUserData } from './types';
 
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 interface UserPanelHeaderProps {
   userName: string;
-  observedUser: ObservedUserData;
+  observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
 }
 
+const linkTitleCSS = { width: 'fit-content' };
+
 export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPanelHeaderProps) => {
+  const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
+    '@timestamp'
+  ][0] as string | undefined;
+  const entraTimestamp = managedUser.data?.[ManagedUserDatasetKey.ENTRA]?.fields?.[
+    '@timestamp'
+  ][0] as string | undefined;
+
+  const isManaged = !!oktaTimestamp || !!entraTimestamp;
   const lastSeenDate = useMemo(
     () =>
-      max([observedUser.lastSeen, managedUser.lastSeen].map((el) => el.date && new Date(el.date))),
-    [managedUser.lastSeen, observedUser.lastSeen]
+      max(
+        [observedUser.lastSeen.date, entraTimestamp, oktaTimestamp].map((el) => el && new Date(el))
+      ),
+    [oktaTimestamp, entraTimestamp, observedUser.lastSeen]
   );
 
   return (
@@ -49,6 +61,7 @@ export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPan
             path={getUsersDetailsUrl(userName)}
             target={'_blank'}
             external={false}
+            css={linkTitleCSS}
           >
             <FlyoutTitle title={userName} iconType={'user'} isLink />
           </SecuritySolutionLinkAnchor>
@@ -66,7 +79,7 @@ export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPan
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {managedUser.lastSeen.date && (
+              {isManaged && (
                 <EuiBadge data-test-subj="user-panel-header-managed-badge" color="hollow">
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.entityDetails.user.managedBadge"

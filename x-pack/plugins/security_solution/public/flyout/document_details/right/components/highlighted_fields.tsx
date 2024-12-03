@@ -10,18 +10,13 @@ import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getSourcererScopeId } from '../../../../helpers';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { CellActions } from '../../shared/components/cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 
 export interface HighlightedFieldsTableRow {
@@ -35,6 +30,10 @@ export interface HighlightedFieldsTableRow {
      */
     field: string;
     /**
+     * Highlighted field's original name, when the field is overridden
+     */
+    originalField?: string;
+    /**
      * Highlighted field value
      */
     values: string[] | null | undefined;
@@ -42,6 +41,10 @@ export interface HighlightedFieldsTableRow {
      * Maintain backwards compatibility // TODO remove when possible
      */
     scopeId: string;
+    /**
+     * Boolean to indicate this field is shown in a preview
+     */
+    isPreview: boolean;
   };
 }
 
@@ -55,7 +58,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       />
     ),
     'data-test-subj': 'fieldCell',
-    width: '50%',
+    width: '30%',
   },
   {
     field: 'description',
@@ -66,25 +69,21 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       />
     ),
     'data-test-subj': 'valueCell',
-    width: '50%',
+    width: '70%',
     render: (description: {
       field: string;
+      originalField?: string;
       values: string[] | null | undefined;
       scopeId: string;
+      isPreview: boolean;
     }) => (
-      <SecurityCellActions
-        data={{
-          field: description.field,
-          value: description.values,
-        }}
-        mode={CellActionsMode.HOVER_RIGHT}
-        triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-        visibleCellActions={6}
-        sourcererScopeId={getSourcererScopeId(description.scopeId)}
-        metadata={{ scopeId: description.scopeId }}
-      >
-        <HighlightedFieldsCell values={description.values} field={description.field} />
-      </SecurityCellActions>
+      <CellActions field={description.field} value={description.values}>
+        <HighlightedFieldsCell
+          values={description.values}
+          field={description.field}
+          originalField={description.originalField}
+        />
+      </CellActions>
     ),
   },
 ];
@@ -93,7 +92,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
  * Component that displays the highlighted fields in the right panel under the Investigation section.
  */
 export const HighlightedFields: FC = () => {
-  const { dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useDocumentDetailsContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { loading, rule: maybeRule } = useRuleWithFallback(ruleId);
 
@@ -102,8 +101,8 @@ export const HighlightedFields: FC = () => {
     investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
   });
   const items = useMemo(
-    () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId),
-    [highlightedFields, scopeId]
+    () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview),
+    [highlightedFields, scopeId, isPreview]
   );
 
   return (

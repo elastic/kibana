@@ -10,24 +10,21 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { PREBUILT_SAVED_OBJECTS_BULK_DELETE } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import type { SetupPlugins } from '../../../../plugin';
-
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { bulkDeleteSavedObjects } from '../helpers/bulk_delete_saved_objects';
-import { deletePrebuiltSavedObjectsRequestBody } from '../../../../../common/api/risk_score';
+import { deletePrebuiltSavedObjectsRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
-export const deletePrebuiltSavedObjectsRoute = (
-  router: SecuritySolutionPluginRouter,
-  security: SetupPlugins['security']
-) => {
+export const deletePrebuiltSavedObjectsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       access: 'internal',
       path: PREBUILT_SAVED_OBJECTS_BULK_DELETE,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -42,7 +39,7 @@ export const deletePrebuiltSavedObjectsRoute = (
 
           const spaceId = securitySolution?.getSpaceId();
 
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
 
           const res = await bulkDeleteSavedObjects({

@@ -18,7 +18,41 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ui-theme",
+        "id": "def-common._setDarkMode",
+        "type": "Function",
+        "tags": [],
+        "label": "_setDarkMode",
+        "description": [],
+        "signature": [
+          "(mode: boolean) => void"
+        ],
+        "path": "packages/kbn-ui-theme/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-theme",
+            "id": "def-common._setDarkMode.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-ui-theme/src/theme.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
@@ -26,24 +60,79 @@
         "parentPluginId": "@kbn/ui-theme",
         "id": "def-common.darkMode",
         "type": "boolean",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "darkMode",
         "description": [],
         "path": "packages/kbn-ui-theme/src/theme.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/console/theme.ts"
+          },
+          {
+            "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/console/theme.ts"
+          },
+          {
+            "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/console/theme.ts"
+          },
+          {
+            "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/console/theme.ts"
+          },
+          {
+            "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/console/theme.ts"
+          },
+          {
+            "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/console/theme.ts"
+          },
+          {
+            "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/console/theme.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ui-theme",
         "id": "def-common.tag",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "tag",
         "description": [],
         "path": "packages/kbn-ui-theme/src/theme.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -65,15 +154,18 @@
         "parentPluginId": "@kbn/ui-theme",
         "id": "def-common.version",
         "type": "number",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "version",
         "description": [],
         "signature": [
           "8"
         ],
         "path": "packages/kbn-ui-theme/src/theme.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "initialIsOpen": false
       }
     ],

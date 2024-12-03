@@ -1,14 +1,15 @@
 openapi: 3.0.0
 info:
   title: Bulk Actions API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/rules/_bulk_action:
     post:
-      operationId: PerformBulkAction
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      summary: Applies a bulk action to multiple rules
-      description: The bulk action is applied to all rules that match the filter or to the list of rules by their IDs.
+      operationId: PerformRulesBulkAction
+      summary: Apply a bulk action to detection rules
+      description: Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
       tags:
         - Bulk API
       parameters:
@@ -28,6 +29,7 @@ paths:
                 - $ref: '#/components/schemas/BulkEnableRules'
                 - $ref: '#/components/schemas/BulkExportRules'
                 - $ref: '#/components/schemas/BulkDuplicateRules'
+                - $ref: '#/components/schemas/BulkManualRuleRun'
                 - $ref: '#/components/schemas/BulkEditRules'
       responses:
         200:
@@ -76,6 +78,8 @@ components:
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
+        - MANUAL_RULE_RUN_FEATURE
+        - MANUAL_RULE_RUN_DISABLED_RULE
 
     NormalizedRuleError:
       type: object
@@ -169,6 +173,7 @@ components:
       type: string
 
     BulkActionBase:
+      x-inline: true
       type: object
       properties:
         query:
@@ -248,6 +253,29 @@ components:
           required:
             - action
 
+    BulkManualRuleRun:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [run]
+            run:
+              type: object
+              properties:
+                start_date:
+                  type: string
+                  description: Start date of the manual rule run
+                end_date:
+                  type: string
+                  description: End date of the manual rule run
+              required:
+                - start_date
+          required:
+            - action
+            - run
+
     ThrottleForBulkActions:
       type: string
       description: "The condition for throttling the notification: 'rule', 'no_actions', or time duration"
@@ -266,6 +294,7 @@ components:
         - delete
         - duplicate
         - edit
+        - run
 
     BulkActionEditType:
       type: string
@@ -280,6 +309,9 @@ components:
         - add_rule_actions
         - set_rule_actions
         - set_schedule
+        - add_investigation_fields
+        - delete_investigation_fields
+        - set_investigation_fields
 
     # Per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts) normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
     NormalizedRuleAction:
@@ -296,7 +328,6 @@ components:
         alerts_filter:
           $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleActionAlertsFilter'
       required:
-        - group
         - id
         - params
       additionalProperties: false
@@ -333,7 +364,7 @@ components:
           properties:
             interval:
               type: string
-              description: Interval in which the rule is executed
+              description: Interval in which the rule runs. For example, `"1h"` means the rule runs every hour.
               pattern: '^[1-9]\d*[smh]$' # any number except zero followed by one of the suffixes 's', 'm', 'h'
               example: '1h'
             lookback:
@@ -380,6 +411,21 @@ components:
         - type
         - value
 
+    BulkActionEditPayloadInvestigationFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - add_investigation_fields
+            - delete_investigation_fields
+            - set_investigation_fields
+        value:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/InvestigationFields'
+      required:
+        - type
+        - value
+
     BulkActionEditPayloadTimeline:
       type: object
       properties:
@@ -405,6 +451,7 @@ components:
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
         - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
+        - $ref: '#/components/schemas/BulkActionEditPayloadInvestigationFields'
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'

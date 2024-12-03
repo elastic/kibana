@@ -160,6 +160,22 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.DataRequest.getError",
+            "type": "Function",
+            "tags": [],
+            "label": "getError",
+            "description": [],
+            "signature": [
+              "() => Error | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.DataRequest.renderError",
             "type": "Function",
             "tags": [],
@@ -176,1226 +192,50 @@
           }
         ],
         "initialIsOpen": false
-      },
+      }
+    ],
+    "functions": [
       {
         "parentPluginId": "maps",
-        "id": "def-public.MapEmbeddable",
-        "type": "Class",
+        "id": "def-public.isMapApi",
+        "type": "Function",
         "tags": [],
-        "label": "MapEmbeddable",
+        "label": "isMapApi",
         "description": [],
         "signature": [
+          "(api: unknown) => api is ",
           {
             "pluginId": "maps",
             "scope": "public",
             "docId": "kibMapsPluginApi",
-            "section": "def-public.MapEmbeddable",
-            "text": "MapEmbeddable"
-          },
-          " extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.Embeddable",
-            "text": "Embeddable"
-          },
-          "<",
-          {
-            "pluginId": "maps",
-            "scope": "public",
-            "docId": "kibMapsPluginApi",
-            "section": "def-public.MapEmbeddableInput",
-            "text": "MapEmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "maps",
-            "scope": "public",
-            "docId": "kibMapsPluginApi",
-            "section": "def-public.MapEmbeddableOutput",
-            "text": "MapEmbeddableOutput"
-          },
-          ", any> implements ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ReferenceOrValueEmbeddable",
-            "text": "ReferenceOrValueEmbeddable"
-          },
-          "<",
-          "MapByValueInput",
-          ", ",
-          "MapByReferenceInput",
-          ">,",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.FilterableEmbeddable",
-            "text": "FilterableEmbeddable"
+            "section": "def-public.MapApi",
+            "text": "MapApi"
           }
         ],
-        "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+        "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.type",
-            "type": "string",
+            "id": "def-public.isMapApi.$1",
+            "type": "Unknown",
             "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.deferEmbeddableLoad",
-            "type": "boolean",
-            "tags": [],
-            "label": "deferEmbeddableLoad",
-            "description": [],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
+            "label": "api",
             "description": [],
             "signature": [
-              "any"
+              "unknown"
             ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "config",
-                "description": [],
-                "signature": [
-                  "MapEmbeddableConfig"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.Unnamed.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "initialInput",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "public",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-public.MapEmbeddableInput",
-                    "text": "MapEmbeddableInput"
-                  }
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.Unnamed.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "parent",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.IContainer",
-                    "text": "IContainer"
-                  },
-                  "<{}, ",
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.ContainerInput",
-                    "text": "ContainerInput"
-                  },
-                  "<{}>, ",
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.ContainerOutput",
-                    "text": "ContainerOutput"
-                  },
-                  "> | undefined"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getOnRenderComplete$",
-            "type": "Function",
-            "tags": [],
-            "label": "getOnRenderComplete$",
-            "description": [],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<void>"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.reportsEmbeddableLoad",
-            "type": "Function",
-            "tags": [],
-            "label": "reportsEmbeddableLoad",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.inputIsRefType",
-            "type": "Function",
-            "tags": [],
-            "label": "inputIsRefType",
-            "description": [],
-            "signature": [
-              "(input: ",
-              "MapByValueInput",
-              " | ",
-              "MapByReferenceInput",
-              ") => input is ",
-              "MapByReferenceInput"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.inputIsRefType.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "input",
-                "description": [],
-                "signature": [
-                  "MapByValueInput",
-                  " | ",
-                  "MapByReferenceInput"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getInputAsRefType",
-            "type": "Function",
-            "tags": [],
-            "label": "getInputAsRefType",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              "MapByReferenceInput",
-              ">"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getExplicitInputIsEqual",
-            "type": "Function",
-            "tags": [],
-            "label": "getExplicitInputIsEqual",
-            "description": [],
-            "signature": [
-              "(lastExplicitInput: Partial<",
-              "MapByValueInput",
-              " | ",
-              "MapByReferenceInput",
-              ">) => Promise<boolean>"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.getExplicitInputIsEqual.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "lastExplicitInput",
-                "description": [],
-                "signature": [
-                  "Partial<",
-                  "MapByValueInput",
-                  " | ",
-                  "MapByReferenceInput",
-                  ">"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getInputAsValueType",
-            "type": "Function",
-            "tags": [],
-            "label": "getInputAsValueType",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              "MapByValueInput",
-              ">"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getLayerList",
-            "type": "Function",
-            "tags": [],
-            "label": "getLayerList",
-            "description": [],
-            "signature": [
-              "() => ",
-              "ILayer",
-              "[]"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getFilters",
-            "type": "Function",
-            "tags": [],
-            "label": "getFilters",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]>"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getQuery",
-            "type": "Function",
-            "tags": [],
-            "label": "getQuery",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | undefined>"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.supportedTriggers",
-            "type": "Function",
-            "tags": [],
-            "label": "supportedTriggers",
-            "description": [],
-            "signature": [
-              "() => string[]"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.setRenderTooltipContent",
-            "type": "Function",
-            "tags": [],
-            "label": "setRenderTooltipContent",
-            "description": [],
-            "signature": [
-              "(renderTooltipContent: ",
-              "RenderToolTipContent",
-              ") => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.setRenderTooltipContent.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "renderTooltipContent",
-                "description": [],
-                "signature": [
-                  "RenderToolTipContent"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.setEventHandlers",
-            "type": "Function",
-            "tags": [],
-            "label": "setEventHandlers",
-            "description": [],
-            "signature": [
-              "(eventHandlers: ",
-              "EventHandlers",
-              ") => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.setEventHandlers.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "eventHandlers",
-                "description": [],
-                "signature": [
-                  "EventHandlers"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.setIsSharable",
-            "type": "Function",
-            "tags": [],
-            "label": "setIsSharable",
-            "description": [],
-            "signature": [
-              "(isSharable: boolean) => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.setIsSharable.$1",
-                "type": "boolean",
-                "tags": [],
-                "label": "isSharable",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getInspectorAdapters",
-            "type": "Function",
-            "tags": [],
-            "label": "getInspectorAdapters",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              }
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.onUpdate",
-            "type": "Function",
-            "tags": [],
-            "label": "onUpdate",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._getIsMovementSynchronized",
-            "type": "Function",
-            "tags": [],
-            "label": "_getIsMovementSynchronized",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._getIsFilterByMapExtent",
-            "type": "Function",
-            "tags": [],
-            "label": "_getIsFilterByMapExtent",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._gotoSynchronizedLocation",
-            "type": "Function",
-            "tags": [],
-            "label": "_gotoSynchronizedLocation",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._propogateMapMovement",
-            "type": "Function",
-            "tags": [],
-            "label": "_propogateMapMovement",
-            "description": [],
-            "signature": [
-              "(lat: number, lon: number, zoom: number) => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._propogateMapMovement.$1",
-                "type": "number",
-                "tags": [],
-                "label": "lat",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._propogateMapMovement.$2",
-                "type": "number",
-                "tags": [],
-                "label": "lon",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._propogateMapMovement.$3",
-                "type": "number",
-                "tags": [],
-                "label": "zoom",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._getInputFilters",
-            "type": "Function",
-            "tags": [],
-            "label": "_getInputFilters",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._getSearchSessionId",
-            "type": "Function",
-            "tags": [],
-            "label": "_getSearchSessionId",
-            "description": [],
-            "signature": [
-              "() => string | undefined"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._dispatchSetQuery",
-            "type": "Function",
-            "tags": [],
-            "label": "_dispatchSetQuery",
-            "description": [],
-            "signature": [
-              "({ forceRefresh }: { forceRefresh: boolean; }) => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._dispatchSetQuery.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ forceRefresh }",
-                "description": [],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "maps",
-                    "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "forceRefresh",
-                    "description": [],
-                    "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._dispatchSetChartsPaletteServiceGetColor",
-            "type": "Function",
-            "tags": [],
-            "label": "_dispatchSetChartsPaletteServiceGetColor",
-            "description": [],
-            "signature": [
-              "(syncColors?: boolean | undefined) => Promise<void>"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._dispatchSetChartsPaletteServiceGetColor.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "syncColors",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.render",
-            "type": "Function",
-            "tags": [],
-            "label": "render",
-            "description": [
-              "\n"
-            ],
-            "signature": [
-              "(domNode: HTMLElement) => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.render.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "domNode",
-                "description": [],
-                "signature": [
-                  "HTMLElement"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.setLayerList",
-            "type": "Function",
-            "tags": [],
-            "label": "setLayerList",
-            "description": [],
-            "signature": [
-              "(layerList: ",
-              {
-                "pluginId": "maps",
-                "scope": "common",
-                "docId": "kibMapsPluginApi",
-                "section": "def-common.LayerDescriptor",
-                "text": "LayerDescriptor"
-              },
-              "[]) => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.setLayerList.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "layerList",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "common",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-common.LayerDescriptor",
-                    "text": "LayerDescriptor"
-                  },
-                  "[]"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.updateLayerById",
-            "type": "Function",
-            "tags": [],
-            "label": "updateLayerById",
-            "description": [],
-            "signature": [
-              "(layerDescriptor: ",
-              {
-                "pluginId": "maps",
-                "scope": "common",
-                "docId": "kibMapsPluginApi",
-                "section": "def-common.LayerDescriptor",
-                "text": "LayerDescriptor"
-              },
-              ") => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.updateLayerById.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "layerDescriptor",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "common",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-common.LayerDescriptor",
-                    "text": "LayerDescriptor"
-                  }
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.onSingleValueTrigger",
-            "type": "Function",
-            "tags": [],
-            "label": "onSingleValueTrigger",
-            "description": [],
-            "signature": [
-              "(actionId: string, key: string, value: ",
-              "RawValue",
-              ") => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$1",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$2",
-                "type": "string",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$3",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "RawValue"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.addFilters",
-            "type": "Function",
-            "tags": [],
-            "label": "addFilters",
-            "description": [],
-            "signature": [
-              "(filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[], actionId?: string) => Promise<void>"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.addFilters.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "filters",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.addFilters.$2",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getFilterActions",
-            "type": "Function",
-            "tags": [],
-            "label": "getFilterActions",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<object>[]>"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getActionContext",
-            "type": "Function",
-            "tags": [],
-            "label": "getActionContext",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionExecutionContext",
-                "text": "ActionExecutionContext"
-              },
-              "<object>"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._setMapExtentFilter",
-            "type": "Function",
-            "tags": [],
-            "label": "_setMapExtentFilter",
-            "description": [],
-            "signature": [
-              "(() => void) & ",
-              "Cancelable"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._clearMapExtentFilter",
-            "type": "Function",
-            "tags": [],
-            "label": "_clearMapExtentFilter",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.destroy",
-            "type": "Function",
-            "tags": [],
-            "label": "destroy",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.reload",
-            "type": "Function",
-            "tags": [],
-            "label": "reload",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._mapSyncHandler",
-            "type": "Function",
-            "tags": [],
-            "label": "_mapSyncHandler",
-            "description": [],
-            "signature": [
-              "(lat: number, lon: number, zoom: number) => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._mapSyncHandler.$1",
-                "type": "number",
-                "tags": [],
-                "label": "lat",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._mapSyncHandler.$2",
-                "type": "number",
-                "tags": [],
-                "label": "lon",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._mapSyncHandler.$3",
-                "type": "number",
-                "tags": [],
-                "label": "zoom",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._handleStoreChanges",
-            "type": "Function",
-            "tags": [],
-            "label": "_handleStoreChanges",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "isRequired": true
           }
         ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "maps",
@@ -1603,6 +443,83 @@
               " | undefined; }"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.CreateLayerDescriptorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateLayerDescriptorParams",
+        "description": [],
+        "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.indexPatternId",
+            "type": "string",
+            "tags": [],
+            "label": "indexPatternId",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.geoFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "geoFieldName",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.geoFieldType",
+            "type": "Enum",
+            "tags": [],
+            "label": "geoFieldType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.ES_GEO_FIELD_TYPE",
+                "text": "ES_GEO_FIELD_TYPE"
+              }
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3370,6 +2287,76 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.getInspectorRequestIds",
+            "type": "Function",
+            "tags": [],
+            "label": "getInspectorRequestIds",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.hasLegendDetails",
+            "type": "Function",
+            "tags": [],
+            "label": "hasLegendDetails",
+            "description": [
+              "\nspecifies if a source provides its own legend details or if the default vector_style is used if the source has this method it must also implement renderLegendDetails"
+            ],
+            "signature": [
+              "(() => Promise<boolean>) | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.renderLegendDetails",
+            "type": "Function",
+            "tags": [],
+            "label": "renderLegendDetails",
+            "description": [
+              "\nspecifies if a source provides its own legend details or if the default vector_style is used"
+            ],
+            "signature": [
+              "((vectorStyle: ",
+              "IVectorStyle",
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IVectorSource.renderLegendDetails.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "vectorStyle",
+                "description": [],
+                "signature": [
+                  "IVectorStyle"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3913,47 +2900,188 @@
       },
       {
         "parentPluginId": "maps",
-        "id": "def-public.MapEmbeddableInput",
+        "id": "def-public.MapApi",
         "type": "Type",
         "tags": [],
-        "label": "MapEmbeddableInput",
-        "description": [],
-        "signature": [
-          "MapByValueInput",
-          " | ",
-          "MapByReferenceInput"
-        ],
-        "path": "x-pack/plugins/maps/public/embeddable/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "maps",
-        "id": "def-public.MapEmbeddableOutput",
-        "type": "Type",
-        "tags": [],
-        "label": "MapEmbeddableOutput",
+        "label": "MapApi",
         "description": [],
         "signature": [
           {
             "pluginId": "embeddable",
             "scope": "public",
             "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
           },
-          " & { indexPatterns: ",
+          "<",
           {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapSerializedState",
+            "text": "MapSerializedState"
           },
-          "[]; }"
+          ", ",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapSerializedState",
+            "text": "MapSerializedState"
+          },
+          "> & Partial<{ enhancements: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "public",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-public.DynamicActionManager",
+            "text": "DynamicActionManager"
+          },
+          "; }; setDynamicActions: (newState: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined) => void; dynamicActionsState$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<{ dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined>; }> & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasEditCapabilities",
+            "text": "HasEditCapabilities"
+          },
+          "> & ",
+          {
+            "pluginId": "inspector",
+            "scope": "public",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-public.HasInspectorAdapters",
+            "text": "HasInspectorAdapters"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasSupportedTriggers",
+            "text": "HasSupportedTriggers"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataLoading",
+            "text": "PublishesDataLoading"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataViews",
+            "text": "PublishesDataViews"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTimeRange",
+            "text": "PublishesTimeRange"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesFilters",
+            "text": "PublishesFilters"
+          },
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasLibraryTransforms",
+            "text": "HasLibraryTransforms"
+          },
+          "<",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapSerializedState",
+            "text": "MapSerializedState"
+          },
+          "> & { getLayerList: () => ",
+          "ILayer",
+          "[]; reload: () => void; setEventHandlers: (eventHandlers: ",
+          "EventHandlers",
+          ") => void; setLayerList: (layerList: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LayerDescriptor",
+            "text": "LayerDescriptor"
+          },
+          "[]) => void; updateLayerById: (layerDescriptor: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LayerDescriptor",
+            "text": "LayerDescriptor"
+          },
+          ") => void; onRenderComplete$: ",
+          "Observable",
+          "<void>; }"
         ],
-        "path": "x-pack/plugins/maps/public/embeddable/types.ts",
+        "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3975,6 +3103,46 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-public.MapSerializedState",
+        "type": "Type",
+        "tags": [],
+        "label": "MapSerializedState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          " & Partial<",
+          "DynamicActionsSerializedState",
+          "> & { attributes?: ",
+          "MapAttributes",
+          " | undefined; savedObjectId?: string | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; mapCenter?: ",
+          "MapCenterAndZoom",
+          " | undefined; mapBuffer?: ",
+          "MapExtent",
+          " | undefined; mapSettings?: Partial<",
+          "MapSettings",
+          "> | undefined; hiddenLayers?: string[] | undefined; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
+        ],
+        "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-public.RenderWizardArguments",
         "type": "Type",
         "tags": [],
@@ -3989,7 +3157,7 @@
             "section": "def-common.LayerDescriptor",
             "text": "LayerDescriptor"
           },
-          "[]) => void; mapColors: string[]; currentStepId: string | null; isOnFinalStep: boolean; enableNextBtn: () => void; disableNextBtn: () => void; startStepLoading: () => void; stopStepLoading: () => void; advanceToNextStep: () => void; }"
+          "[]) => void; mapColors: string[]; mostCommonDataViewId?: string | undefined; currentStepId: string | null; isOnFinalStep: boolean; enableNextBtn: () => void; disableNextBtn: () => void; startStepLoading: () => void; stopStepLoading: () => void; advanceToNextStep: () => void; }"
         ],
         "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
@@ -4150,7 +3318,13 @@
               "text": "LayerDescriptor"
             },
             " | null>; createESSearchSourceLayerDescriptor: (params: ",
-            "CreateLayerDescriptorParams",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.CreateLayerDescriptorParams",
+              "text": "CreateLayerDescriptorParams"
+            },
             ") => Promise<",
             {
               "pluginId": "maps",
@@ -4164,6 +3338,100 @@
           "path": "x-pack/plugins/maps/public/api/start_api.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "maps",
+          "id": "def-public.MapsStartApi.Map",
+          "type": "Function",
+          "tags": [],
+          "label": "Map",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<",
+            "Props",
+            ">"
+          ],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.Map.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P"
+              ],
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.Map.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "maps",
+          "id": "def-public.MapsStartApi.PassiveMap",
+          "type": "Function",
+          "tags": [],
+          "label": "PassiveMap",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<",
+            "Props",
+            ">"
+          ],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.PassiveMap.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P"
+              ],
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.PassiveMap.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
         },
         {
           "parentPluginId": "maps",

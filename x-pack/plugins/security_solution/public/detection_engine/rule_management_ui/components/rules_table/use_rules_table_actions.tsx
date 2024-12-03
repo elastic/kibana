@@ -23,20 +23,31 @@ import {
 } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
+import type { TimeRange } from '../../../rule_gaps/types';
+import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_run';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
+  showManualRuleRunConfirmation,
   confirmDeletion,
 }: {
   showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
 }): Array<DefaultItemAction<Rule>> => {
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
+  const { scheduleRuleRun } = useScheduleRuleRun();
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
 
   return [
     {
@@ -107,7 +118,29 @@ export const useRulesTableActions = ({
           await downloadExportedRules(response);
         }
       },
-      enabled: (rule: Rule) => !rule.immutable,
+      enabled: (rule: Rule) => isPrebuiltRulesCustomizationEnabled || !rule.immutable,
+    },
+    {
+      type: 'icon',
+      'data-test-subj': 'manualRuleRunAction',
+      description: (rule) => (!rule.enabled ? i18n.MANUAL_RULE_RUN_TOOLTIP : i18n.MANUAL_RULE_RUN),
+      icon: 'play',
+      name: i18n.MANUAL_RULE_RUN,
+      onClick: async (rule: Rule) => {
+        startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
+        const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
+        telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunOpenModal, {
+          type: 'single',
+        });
+        if (modalManualRuleRunConfirmationResult === null) {
+          return;
+        }
+        await scheduleRuleRun({
+          ruleIds: [rule.id],
+          timeRange: modalManualRuleRunConfirmationResult,
+        });
+      },
+      enabled: (rule: Rule) => rule.enabled,
     },
     {
       type: 'icon',

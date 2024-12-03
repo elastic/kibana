@@ -19,7 +19,7 @@ import {
 import { metricSets } from './metric_set_node';
 import { MonitoringCore } from '../../../../types';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { getLogstashDataset } from '../../../../lib/cluster/get_index_patterns';
+import { getLogstashDataset } from '../../../../../common/get_index_patterns';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
@@ -33,6 +33,9 @@ export function logstashNodeRoute(server: MonitoringCore) {
     validate: {
       params: validateParams,
       body: validateBody,
+    },
+    options: {
+      access: 'internal',
     },
     async handler(req) {
       const config = server.config;

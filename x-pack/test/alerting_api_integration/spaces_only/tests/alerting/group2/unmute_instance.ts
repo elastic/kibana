@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -20,7 +21,8 @@ import {
 export default function createUnmuteInstanceTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('unmute_instance', () => {
+  describe('unmute_instance', function () {
+    this.tags('skipFIPS');
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
     const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
@@ -47,7 +49,7 @@ export default function createUnmuteInstanceTests({ getService }: FtrProviderCon
       await checkAAD({
         supertest: supertestWithoutAuth,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdAlert.id,
       });
     });
@@ -88,7 +90,7 @@ export default function createUnmuteInstanceTests({ getService }: FtrProviderCon
         await checkAAD({
           supertest: supertestWithoutAuth,
           spaceId: Spaces.space1.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: createdAlert.id,
         });
       });

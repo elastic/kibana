@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { useMlApi } from '../../../../../../../contexts/kibana';
 import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../../../../common/constants/new_job';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../../common/job_creator';
-import { Results } from '../../../../../common/results_loader';
-import { ml } from '../../../../../../../services/ml_api_service';
+import type { CategorizationJobCreator } from '../../../../../common/job_creator';
+import type { Results } from '../../../../../common/results_loader';
 import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export const TopCategories: FC = () => {
+  const mlApi = useMlApi();
+
   const { displayErrorToast } = useToastNotificationService();
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
@@ -30,7 +33,7 @@ export const TopCategories: FC = () => {
 
   async function loadTopCats() {
     try {
-      const results = await ml.jobs.topCategories(jobCreator.jobId, NUMBER_OF_CATEGORY_EXAMPLES);
+      const results = await mlApi.jobs.topCategories(jobCreator.jobId, NUMBER_OF_CATEGORY_EXAMPLES);
       setTableRow(
         results.categories.map((c) => ({
           count: c.count,

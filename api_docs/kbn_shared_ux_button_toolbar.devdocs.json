@@ -37,7 +37,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
         "deprecated": false,
@@ -78,7 +78,7 @@
           "\nA group of buttons each performing an action, represented by an icon."
         ],
         "signature": [
-          "({ buttons, legend, buttonSize }: ",
+          "({ buttons, legend, buttonSize, \"data-test-subj\": dataTestSubj, }: ",
           {
             "pluginId": "@kbn/shared-ux-button-toolbar",
             "scope": "common",
@@ -86,7 +86,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
         "deprecated": false,
@@ -97,7 +97,7 @@
             "id": "def-common.IconButtonGroup.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ buttons, legend, buttonSize = 'm' }",
+            "label": "{\n  buttons,\n  legend,\n  buttonSize = 'm',\n  'data-test-subj': dataTestSubj,\n}",
             "description": [],
             "signature": [
               {
@@ -135,7 +135,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
         "deprecated": false,
@@ -184,7 +184,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          "<T>) => JSX.Element"
+          "<T>) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
@@ -234,7 +234,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
         "deprecated": false,
@@ -358,6 +358,54 @@
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.IconButton.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [
+              "To disable the action"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.IconButton.ariaexpanded",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "'aria-expanded'",
+            "description": [
+              "A11y for button"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.IconButton.ariacontrols",
+            "type": "string",
+            "tags": [],
+            "label": "'aria-controls'",
+            "description": [
+              "A11y for button"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -421,7 +469,23 @@
               "Button size"
             ],
             "signature": [
-              "\"m\" | \"compressed\" | \"s\" | undefined"
+              "\"m\" | \"s\" | \"compressed\" | undefined"
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.Props.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Test subject for button group"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
@@ -471,7 +535,7 @@
         "label": "Props",
         "description": [],
         "signature": [
-          "{ fullWidth?: boolean | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; size?: \"m\" | \"s\" | undefined; as?: \"standard\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; iconSide?: ",
+          "{ \"aria-label\"?: string | undefined; 'data-test-subj'?: string | undefined; onBlur?: React.FocusEventHandler<HTMLButtonElement> | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; size?: \"m\" | \"s\" | undefined; isLoading?: boolean | undefined; isDisabled?: boolean | undefined; as?: \"standard\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; fullWidth?: boolean | undefined; iconSide?: ",
           "ButtonContentIconSide",
           "; groupPosition?: ButtonPositions | undefined; hasArrow?: boolean | undefined; }"
         ],
@@ -507,7 +571,7 @@
           "\nProps for `ToolbarPopover`."
         ],
         "signature": [
-          "AllowedButtonProps & AllowedPopoverProps & { children: (arg: { closePopover: () => void; }) => React.ReactNode; label: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal; }"
+          "AllowedButtonProps & Omit<AllowedPopoverProps, \"children\"> & { children: (arg: { closePopover: () => void; }) => React.ReactNode; label: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal; }"
         ],
         "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
         "deprecated": false,
@@ -532,7 +596,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          "<T>) => JSX.Element) | (({ type, label, iconType, size, children, isDisabled, ...popover }: ",
+          "<T>) => React.JSX.Element) | (({ type, label, iconType, size, children, isDisabled, ...popover }: ",
           {
             "pluginId": "@kbn/shared-ux-button-toolbar",
             "scope": "common",
@@ -540,7 +604,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          ") => JSX.Element)"
+          ") => React.JSX.Element)"
         ],
         "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
         "deprecated": false,

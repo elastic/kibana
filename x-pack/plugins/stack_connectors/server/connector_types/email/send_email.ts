@@ -17,7 +17,11 @@ import {
   getNodeSSLOptions,
   getSSLSettingsFromConfig,
 } from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
-import { ConnectorTokenClientContract, ProxySettings } from '@kbn/actions-plugin/server/types';
+import {
+  ConnectorUsageCollector,
+  ConnectorTokenClientContract,
+  ProxySettings,
+} from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
@@ -25,8 +29,6 @@ import { sendEmailGraphApi } from './send_email_graph_api';
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
 // The value is the resource identifier (Application ID URI) of the resource you want, affixed with the .default suffix. For Microsoft Graph, the value is https://graph.microsoft.com/.default. This value informs the Microsoft identity platform endpoint that of all the application permissions you have configured for your app in the app registration portal, it should issue a token for the ones associated with the resource you want to use.
-export const GRAPH_API_OAUTH_SCOPE = 'https://graph.microsoft.com/.default';
-export const EXCHANGE_ONLINE_SERVER_HOST = 'https://login.microsoftonline.com';
 
 export interface SendEmailOptions {
   connectorId: string;
@@ -68,7 +70,8 @@ export interface Content {
 export async function sendEmail(
   logger: Logger,
   options: SendEmailOptions,
-  connectorTokenClient: ConnectorTokenClientContract
+  connectorTokenClient: ConnectorTokenClientContract,
+  connectorUsageCollector: ConnectorUsageCollector
 ): Promise<unknown> {
   const { transport, content } = options;
   const { message, messageHTML } = content;
@@ -76,9 +79,15 @@ export async function sendEmail(
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
 
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
-    return await sendEmailWithExchange(logger, options, renderedMessage, connectorTokenClient);
+    return await sendEmailWithExchange(
+      logger,
+      options,
+      renderedMessage,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage);
+    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorUsageCollector);
   }
 }
 
@@ -87,10 +96,17 @@ export async function sendEmailWithExchange(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorTokenClient: ConnectorTokenClientContract
+  connectorTokenClient: ConnectorTokenClientContract,
+  connectorUsageCollector: ConnectorUsageCollector
 ): Promise<unknown> {
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
+
+  let tokenUrl = oauthTokenUrl;
+  if (!tokenUrl) {
+    const exchangeUrl = configurationUtilities.getMicrosoftExchangeUrl();
+    tokenUrl = `${exchangeUrl}/${tenantId}/oauth2/v2.0/token`;
+  }
 
   const accessToken = await getOAuthClientCredentialsAccessToken({
     connectorId,
@@ -105,8 +121,8 @@ export async function sendEmailWithExchange(
         clientSecret: clientSecret as string,
       },
     },
-    oAuthScope: GRAPH_API_OAUTH_SCOPE,
-    tokenUrl: oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
+    oAuthScope: configurationUtilities.getMicrosoftGraphApiScope(),
+    tokenUrl,
     connectorTokenClient,
   });
 
@@ -148,10 +164,10 @@ export async function sendEmailWithExchange(
       options,
       headers,
       messageHTML,
-      graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
     },
     logger,
     configurationUtilities,
+    connectorUsageCollector,
     axiosInstance
   );
 }
@@ -160,7 +176,8 @@ export async function sendEmailWithExchange(
 async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
-  messageHTML: string
+  messageHTML: string,
+  connectorUsageCollector: ConnectorUsageCollector
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
@@ -183,6 +200,7 @@ async function sendEmailWithNodemailer(
   // some deep properties, so need to use any here.
   const transportConfig = getTransportConfig(configurationUtilities, logger, transport, hasAuth);
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
+  connectorUsageCollector.addRequestBodyBytes(undefined, email);
   const result = await nodemailerTransport.sendMail(email);
 
   if (service === JSON_TRANSPORT_SERVICE) {
@@ -271,10 +289,7 @@ function getTransportConfig(
         tlsConfig.ca = sslSettings?.certificateAuthoritiesData;
       }
 
-      const sslSettingsFromConfig = getSSLSettingsFromConfig(
-        sslSettings?.verificationMode,
-        sslSettings?.rejectUnauthorized
-      );
+      const sslSettingsFromConfig = getSSLSettingsFromConfig(sslSettings?.verificationMode);
       const nodeTLSOptions = getNodeSSLOptions(logger, sslSettingsFromConfig.verificationMode);
       if (!transportConfig.tls) {
         transportConfig.tls = { ...tlsConfig, ...nodeTLSOptions };

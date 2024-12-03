@@ -3,11 +3,13 @@ info:
   title: Get Suggestions Schema
   version: '2023-10-31'
 paths:
-  /api/endpoint/suggestions/{suggestion_type}:
+  /internal/api/endpoint/suggestions/{suggestion_type}:
     post:
       summary: Get suggestions
       operationId: GetEndpointSuggestions
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      x-internal: true
       requestBody:
         required: true
         content:
@@ -24,16 +26,14 @@ paths:
                 filters: {}
                 fieldMeta: {}
       parameters:
-        - name: query
+        - name: suggestion_type
           in: path
           required: true
           schema:
-            type: object
-            properties:
-              suggestion_type:
-                type: string
-                enum:
-                  - eventFilters
+            type: string
+            enum:
+              - eventFilters
+
       responses:
         '200':
           description: OK

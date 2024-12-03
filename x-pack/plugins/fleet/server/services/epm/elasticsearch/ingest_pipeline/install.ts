@@ -15,14 +15,17 @@ import type {
   InstallablePackage,
   PackageInfo,
 } from '../../../../types';
-import { getAsset, getPathParts } from '../../archive';
-import type { ArchiveEntry } from '../../archive';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   FLEET_FINAL_PIPELINE_CONTENT,
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
+  FLEET_EVENT_INGESTED_PIPELINE_ID,
+  FLEET_EVENT_INGESTED_PIPELINE_VERSION,
+  FLEET_EVENT_INGESTED_PIPELINE_CONTENT,
 } from '../../../../constants';
 import { getPipelineNameForDatastream } from '../../../../../common/services';
+import type { ArchiveEntry, PackageInstallContext } from '../../../../../common/types';
 
 import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -36,18 +39,18 @@ import {
 import type { PipelineInstall, RewriteSubstitution } from './types';
 
 export const prepareToInstallPipelines = (
-  installablePackage: InstallablePackage | PackageInfo,
-  paths: string[],
+  packageInstallContext: PackageInstallContext,
   onlyForDataStreams?: RegistryDataStream[]
 ): {
   assetsToAdd: EsAssetReference[];
   install: (esClient: ElasticsearchClient, logger: Logger) => Promise<void>;
 } => {
+  const { packageInfo, paths } = packageInstallContext;
   // unlike other ES assets, pipeline names are versioned so after a template is updated
   // it can be created pointing to the new template, without removing the old one and effecting data
   // so do not remove the currently installed pipelines here
-  const dataStreams = onlyForDataStreams || installablePackage.data_streams;
-  const { version: pkgVersion } = installablePackage;
+  const dataStreams = onlyForDataStreams || packageInfo.data_streams;
+  const { version: pkgVersion } = packageInfo;
   const pipelinePaths = paths.filter((path) => isPipeline(path));
   const topLevelPipelinePaths = paths.filter((path) => isTopLevelPipeline(path));
 
@@ -108,7 +111,7 @@ export const prepareToInstallPipelines = (
                 esClient,
                 logger,
                 paths: pipelinePaths,
-                installablePackage,
+                packageInstallContext,
               })
             );
 
@@ -123,7 +126,7 @@ export const prepareToInstallPipelines = (
             esClient,
             logger,
             paths: topLevelPipelinePaths,
-            installablePackage,
+            packageInstallContext,
           })
         );
       }
@@ -138,13 +141,13 @@ export async function installAllPipelines({
   logger,
   paths,
   dataStream,
-  installablePackage,
+  packageInstallContext,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   paths: string[];
   dataStream?: RegistryDataStream;
-  installablePackage: InstallablePackage | PackageInfo;
+  packageInstallContext: PackageInstallContext;
 }): Promise<EsAssetReference[]> {
   const pipelinePaths = dataStream
     ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
@@ -164,9 +167,9 @@ export async function installAllPipelines({
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       dataStream,
-      packageVersion: installablePackage.version,
+      packageVersion: packageInstallContext.packageInfo.version,
     });
-    const content = getAsset(path).toString('utf-8');
+    const content = getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf-8');
     pipelinesInfos.push({
       nameForInstallation,
       shouldInstallCustomPipelines: dataStream && isMainPipeline,
@@ -191,7 +194,7 @@ export async function installAllPipelines({
   if (!datastreamPipelineCreated && dataStream) {
     const nameForInstallation = getPipelineNameForDatastream({
       dataStream,
-      packageVersion: installablePackage.version,
+      packageVersion: packageInstallContext.packageInfo.version,
     });
 
     pipelinesToInstall.push({
@@ -204,7 +207,12 @@ export async function installAllPipelines({
   }
 
   const installationPromises = pipelinesToInstall.map(async (pipeline) => {
-    return installPipeline({ esClient, pipeline, installablePackage, logger });
+    return installPipeline({
+      esClient,
+      pipeline,
+      packageInfo: packageInstallContext.packageInfo,
+      logger,
+    });
   });
 
   return Promise.all(installationPromises);
@@ -214,18 +222,18 @@ async function installPipeline({
   esClient,
   logger,
   pipeline,
-  installablePackage,
+  packageInfo,
   shouldAddCustomPipelineProcessor = true,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   pipeline: PipelineInstall;
-  installablePackage?: InstallablePackage | PackageInfo;
+  packageInfo?: InstallablePackage | PackageInfo;
   shouldAddCustomPipelineProcessor?: boolean;
 }): Promise<EsAssetReference> {
   let pipelineToInstall = appendMetadataToIngestPipeline({
     pipeline,
-    packageName: installablePackage?.name,
+    packageName: packageInfo?.name,
   });
 
   if (shouldAddCustomPipelineProcessor) {
@@ -288,6 +296,39 @@ export async function ensureFleetFinalPipelineIsInstalled(
       pipeline: {
         nameForInstallation: FLEET_FINAL_PIPELINE_ID,
         contentForInstallation: FLEET_FINAL_PIPELINE_CONTENT,
+        extension: 'yml',
+      },
+    });
+    return { isCreated: true };
+  }
+
+  return { isCreated: false };
+}
+
+export async function ensureFleetEventIngestedPipelineIsInstalled(
+  esClient: ElasticsearchClient,
+  logger: Logger
+) {
+  const esClientRequestOptions: TransportRequestOptions = {
+    ignore: [404],
+  };
+  const res = await esClient.ingest.getPipeline(
+    { id: FLEET_EVENT_INGESTED_PIPELINE_ID },
+    { ...esClientRequestOptions, meta: true }
+  );
+
+  const installedVersion = res?.body[FLEET_EVENT_INGESTED_PIPELINE_ID]?.version;
+  if (
+    res.statusCode === 404 ||
+    !installedVersion ||
+    installedVersion < FLEET_EVENT_INGESTED_PIPELINE_VERSION
+  ) {
+    await installPipeline({
+      esClient,
+      logger,
+      pipeline: {
+        nameForInstallation: FLEET_EVENT_INGESTED_PIPELINE_ID,
+        contentForInstallation: FLEET_EVENT_INGESTED_PIPELINE_CONTENT,
         extension: 'yml',
       },
     });

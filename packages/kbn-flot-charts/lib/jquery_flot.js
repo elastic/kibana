@@ -2711,110 +2711,135 @@ Licensed under the MIT license.
 
         function insertLegend() {
 
-            if (options.legend.container != null) {
-                $(options.legend.container).html("");
-            } else {
-                placeholder.find(".legend").remove();
-            }
+          if (options.legend.container != null) {
+              $.find(options.legend.container).html("");
+          } else {
+              placeholder.find(".legend").remove();
+          }
 
-            if (!options.legend.show) {
-                return;
-            }
+          if (!options.legend.show) {
+              return;
+          }
 
-            var fragments = [], entries = [], rowStarted = false,
-                lf = options.legend.labelFormatter, s, label;
+          var entries = [], lf = options.legend.labelFormatter, s, label, i;
 
-            // Build a list of legend entries, with each having a label and a color
+          // Build a list of legend entries, with each having a label and a color
+          for (i = 0; i < series.length; ++i) {
+              s = series[i];
+              if (s.label) {
+                  label = lf ? lf(s.label, s) : s.label;
+                  if (label) {
+                      entries.push({
+                          label: label,
+                          color: s.color
+                      });
+                  }
+              }
+          }
 
-            for (var i = 0; i < series.length; ++i) {
-                s = series[i];
-                if (s.label) {
-                    label = lf ? lf(s.label, s) : s.label;
-                    if (label) {
-                        entries.push({
-                            label: label,
-                            color: s.color
-                        });
-                    }
-                }
-            }
+          // No entries implies no legend
+          if (entries.length === 0) {
+              return;
+          }
 
-            // Sort the legend using either the default or a custom comparator
+          // Sort the legend using either the default or a custom comparator
+          if (options.legend.sorted) {
+              if ($.isFunction(options.legend.sorted)) {
+                  entries.sort(options.legend.sorted);
+              } else if (options.legend.sorted === "reverse") {
+                  entries.reverse();
+              } else {
+                  var ascending = options.legend.sorted !== "descending";
+                  entries.sort(function(a, b) {
+                      return a.label === b.label ? 0 : (
+                          (a.label < b.label) !== ascending ? 1 : -1   // Logical XOR
+                      );
+                  });
+              }
+          }
 
-            if (options.legend.sorted) {
-                if ($.isFunction(options.legend.sorted)) {
-                    entries.sort(options.legend.sorted);
-                } else if (options.legend.sorted == "reverse") {
-                	entries.reverse();
-                } else {
-                    var ascending = options.legend.sorted != "descending";
-                    entries.sort(function(a, b) {
-                        return a.label == b.label ? 0 : (
-                            (a.label < b.label) != ascending ? 1 : -1   // Logical XOR
-                        );
-                    });
-                }
-            }
+          // Generate markup for the list of entries, in their final order
+          var table = $("<table></table>").css({
+              "font-size": "smaller",
+              "color": options.grid.color
+          }), rowBuffer = null;
 
-            // Generate markup for the list of entries, in their final order
+          for (i = 0; i < entries.length; ++i) {
 
-            for (var i = 0; i < entries.length; ++i) {
+              var entry = entries[i];
 
-                var entry = entries[i];
+              if (i % options.legend.noColumns === 0) {
+                  if (rowBuffer !== null) {
+                      table.append(rowBuffer);
+                  }
+                  rowBuffer = $("<tr></tr>");
+              }
 
-                if (i % options.legend.noColumns == 0) {
-                    if (rowStarted)
-                        fragments.push('</tr>');
-                    fragments.push('<tr>');
-                    rowStarted = true;
-                }
+              var colorbox = $("<div></div>").css({
+                  "width": "4px",
+                  "height": 0,
+                  "border": "5px solid " + entry.color,
+                  "overflow": "hidden"
+              }),
 
-                fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
-                    '<td class="legendLabel" data-test-subj="flotLegendLabel">' + entry.label + '</td>'
-                );
-            }
+              borderbox = $("<div></div>").css({
+                  "border": "1px solid " + options.legend.labelBoxBorderColor,
+                  "padding": "1px"
+              });
 
-            if (rowStarted)
-                fragments.push('</tr>');
+              rowBuffer.append(
+                  $("<td></td>").addClass("legendColorBox").append(borderbox.append(colorbox)),
+                  $("<td></td>").addClass("legendLabel").html(entry.label)
+              );
+          }
 
-            if (fragments.length == 0)
-                return;
+          table.append(rowBuffer);
 
-            var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
-            if (options.legend.container != null)
-                $(options.legend.container).html(table);
-            else {
-                var pos = "",
-                    p = options.legend.position,
-                    m = options.legend.margin;
-                if (m[0] == null)
-                    m = [m, m];
-                if (p.charAt(0) == "n")
-                    pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
-                else if (p.charAt(0) == "s")
-                    pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
-                if (p.charAt(1) == "e")
-                    pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
-                else if (p.charAt(1) == "w")
-                    pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
-                var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos +';') + '</div>').appendTo(placeholder);
-                if (options.legend.backgroundOpacity != 0.0) {
-                    // put in the transparent background
-                    // separately to avoid blended labels and
-                    // label boxes
-                    var c = options.legend.backgroundColor;
-                    if (c == null) {
-                        c = options.grid.backgroundColor;
-                        if (c && typeof c == "string")
-                            c = $.color.parse(c);
-                        else
-                            c = $.color.extract(legend, 'background-color');
-                        c.a = 1;
-                        c = c.toString();
-                    }
-                    var div = legend.children();
-                    $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
+          if (options.legend.container != null) {
+              $(options.legend.container).html(table);
+          } else {
+              var pos = { "position": "absolute" },
+                  p = options.legend.position,
+                  m = options.legend.margin;
+              if (m[0] == null) {
+                  m = [m, m];
+              }
+              if (p.charAt(0) === "n") {
+                  pos.top = (m[1] + plotOffset.top) + "px";
+              } else if (p.charAt(0) === "s") {
+                  pos.bottom = (m[1] + plotOffset.bottom) + "px";
+              }
+              if (p.charAt(1) === "e") {
+                  pos.right = (m[0] + plotOffset.right) + "px";
+              } else if (p.charAt(1) === "w") {
+                  pos.left = (m[0] + plotOffset.left) + "px";
+              }
+              var legend = $("<div></div>").addClass("legend").append(table.css(pos)).appendTo(placeholder);
+              if (options.legend.backgroundOpacity !== 0.0) {
+
+                  // put in the transparent background
+                  // separately to avoid blended labels and
+                  // label boxes
+                  var c = options.legend.backgroundColor;
+                  if (c == null) {
+                      c = options.grid.backgroundColor;
+                      if (c && typeof c === "string") {
+                          c = $.color.parse(c);
+                      } else {
+                          c = $.color.extract(legend, "background-color");
+                      }
+                      c.a = 1;
+                      c = c.toString();
+                  }
+                  var div = legend.children();
+
+                  // Position also applies to this
+                  $("<div></div>").css(pos).css({
+                      "width": div.width() + "px",
+                      "height": div.height() + "px",
+                      "background-color": c,
+                      "opacity": options.legend.backgroundOpacity
+                  }).prependTo(legend);
                 }
             }
         }

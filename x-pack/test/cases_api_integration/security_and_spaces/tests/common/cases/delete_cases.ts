@@ -64,10 +64,10 @@ import {
 } from '../../../../common/lib/constants';
 import { User } from '../../../../common/lib/authentication/types';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../detection_engine_api_integration/utils';
+} from '../../../../../common/utils/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -79,6 +79,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('delete_cases', () => {
     afterEach(async () => {
+      await deleteAllFiles({
+        supertest,
+      });
       await deleteAllCaseItems(es);
     });
 
@@ -260,9 +263,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest, log);
+          await createAlertsIndex(supertest, log);
           const signals = await createSecuritySolutionAlerts(supertest, log, 2);
-          alerts = [signals.hits.hits[0], signals.hits.hits[1]];
+          alerts = [signals.hits.hits[0] as Alerts[number], signals.hits.hits[1] as Alerts[number]];
         });
 
         afterEach(async () => {
@@ -700,7 +703,7 @@ const createCaseWithFiles = async ({
   owner,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   fileKind: string;
   owner: string;
   auth?: { user: User; space: string | null };

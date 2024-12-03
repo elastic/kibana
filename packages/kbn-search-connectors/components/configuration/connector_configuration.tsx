@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useRef, useState, FC, PropsWithChildren } from 'react';
 
 import {
   EuiButton,
@@ -20,8 +21,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { isDeepEqual } from 'react-use/lib/util';
 import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
-import { Connector, ConnectorConfigProperties, ConnectorStatus, FeatureName } from '../..';
+import {
+  Connector,
+  ConnectorConfigProperties,
+  ConnectorConfiguration,
+  ConnectorStatus,
+  FeatureName,
+} from '../..';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
 
@@ -35,10 +43,13 @@ function entryToDisplaylistItem(entry: ConfigEntryView): { description: string; 
 interface ConnectorConfigurationProps {
   connector: Connector;
   hasPlatinumLicense: boolean;
+  isDisabled?: boolean;
   isLoading: boolean;
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
+  saveAndSync?: (configuration: Record<string, string | number | boolean | null>) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
+  children?: React.ReactNode;
 }
 
 interface ConfigEntry extends ConnectorConfigProperties {
@@ -73,15 +84,20 @@ export const LicenseContext = createContext<{
   stackManagementLink: undefined,
 });
 
-export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationProps> = ({
+export const ConnectorConfigurationComponent: FC<
+  PropsWithChildren<ConnectorConfigurationProps>
+> = ({
   children,
   connector,
   hasPlatinumLicense,
+  isDisabled,
   isLoading,
   saveConfig,
+  saveAndSync,
   subscriptionLink,
   stackManagementLink,
 }) => {
+  const configurationRef = useRef<ConnectorConfiguration>({});
   const {
     configuration,
     error,
@@ -95,7 +111,10 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    setIsEditing(false);
+    if (!isDeepEqual(configuration, configurationRef.current)) {
+      configurationRef.current = configuration;
+      setIsEditing(false);
+    }
   }, [configuration]);
 
   useEffect(() => {
@@ -118,6 +137,27 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
     <LicenseContext.Provider value={{ hasPlatinumLicense, stackManagementLink, subscriptionLink }}>
       <EuiFlexGroup direction="column">
         {children && <EuiFlexItem>{children}</EuiFlexItem>}
+        {!uncategorizedDisplayList.length && (
+          <EuiFlexItem>
+            <EuiCallOut
+              color="warning"
+              title={i18n.translate(
+                'searchConnectors.configurationConnector.config.noConfigCallout.title',
+                {
+                  defaultMessage: 'No configuration fields',
+                }
+              )}
+            >
+              {i18n.translate(
+                'searchConnectors.configurationConnector.config.noConfigCallout.description',
+                {
+                  defaultMessage:
+                    'This connector has no configuration fields. Has your connector connected successfully to Elasticsearch and set its configuration?',
+                }
+              )}
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           {isEditing ? (
             <ConnectorConfigurationForm
@@ -130,6 +170,12 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
                 saveConfig(config);
                 setIsEditing(false);
               }}
+              {...(saveAndSync && {
+                saveAndSync: (config) => {
+                  saveAndSync(config);
+                  setIsEditing(false);
+                },
+              })}
             />
           ) : (
             uncategorizedDisplayList.length > 0 && (
@@ -163,6 +209,7 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
                         data-test-subj="entSearchContent-connector-configuration-editConfiguration"
                         data-telemetry-id="entSearchContent-connector-overview-configuration-editConfiguration"
                         onClick={() => setIsEditing(!isEditing)}
+                        isDisabled={isDisabled}
                       >
                         {i18n.translate(
                           'searchConnectors.configurationConnector.config.editButton.title',

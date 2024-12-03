@@ -6,7 +6,7 @@
  */
 
 import { RoleValidator } from './validate_role';
-import type { Role } from '../../../../common/model';
+import type { Role } from '../../../../common';
 
 let validator: RoleValidator;
 
@@ -95,6 +95,106 @@ describe('validateRoleName', () => {
 
       expect(validator.validateRoleName(role)).toEqual({ isInvalid: false });
     });
+  });
+});
+
+describe('validateRoleName for serverless', () => {
+  beforeEach(() => {
+    validator = new RoleValidator({ shouldValidate: true, buildFlavor: 'serverless' });
+  });
+
+  const charList = `!#%^&*()+=[]{}\|';:"/,<>?`.split('');
+  charList.forEach((element) => {
+    test(`it should not allow special characters ('${element}')`, () => {
+      const role = {
+        name: `role${element}name`,
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [],
+      };
+
+      expect(validator.validateRoleName(role)).toEqual({
+        isInvalid: true,
+        error: `Name must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.`,
+      });
+    });
+  });
+
+  test('should throw error for contained whitespace characters', () => {
+    const role = {
+      name: 'role name',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
+    expect(validator.validateRoleName(role)).toEqual({
+      isInvalid: true,
+      error: `Name must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.`,
+    });
+  });
+
+  test('should throw error for invalid leading characters', () => {
+    const invalidRoleNames = ['.rolename', '_rolename', '-rolename'];
+
+    for (const roleName of invalidRoleNames) {
+      const role = {
+        name: roleName,
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [],
+      };
+      expect(validator.validateRoleName(role)).toEqual({
+        isInvalid: true,
+        error: `Name must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.`,
+      });
+    }
+  });
+
+  test('should throw error for leading and trailing whitespace characters', () => {
+    const invalidRoleNames = [' rolename', 'rolename '];
+
+    for (const roleName of invalidRoleNames) {
+      const role = {
+        name: roleName,
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [],
+      };
+      expect(validator.validateRoleName(role)).toEqual({
+        isInvalid: true,
+        error: `Name must not contain leading or trailing spaces.`,
+      });
+    }
+  });
+
+  test('should allow valid names', () => {
+    const validRoleNames = ['rolename', 'role-name', 'role.name', 'role_name', 'role.123.role'];
+    for (const roleName of validRoleNames) {
+      const role = {
+        name: roleName,
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [],
+      };
+      expect(validator.validateRoleName(role)).toEqual({
+        isInvalid: false,
+      });
+    }
   });
 });
 

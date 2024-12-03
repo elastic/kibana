@@ -41,6 +41,7 @@ export type {
   Installation,
   EpmPackageInstallStatus,
   InstallationStatus,
+  InstallFailedAttempt,
   PackageInfo,
   ArchivePackage,
   RegistryVarsEntry,
@@ -95,6 +96,12 @@ export type {
   InstallationInfo,
   ActionStatusOptions,
   PackageSpecTags,
+  AssetsMap,
+  InstallResultStatus,
+  InstallLatestExecutedState,
+  TemplateAgentPolicyInput,
+  NewPackagePolicyInput,
+  OutputsForAgentPolicy,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';

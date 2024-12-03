@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiAccordion,
   euiPaletteComplementary,
   EuiFormRow,
   EuiTitle,
@@ -16,46 +17,106 @@ import {
   EuiComboBox,
   EuiButton,
   EuiComboBoxOptionOption,
-  EuiTextArea,
+  EuiComboBoxSingleSelectionShape,
+  EuiTextColor,
   EuiFieldText,
+  EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
   EuiLink,
+  EuiPanel,
 } from '@elastic/eui';
-
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  GetEvaluateResponse,
+  PostEvaluateRequestBodyInput,
+} from '@kbn/elastic-assistant-common';
+import { isEmpty } from 'lodash/fp';
+
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '../../../assistant_context/constants';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
-import { usePerformEvaluation } from './use_perform_evaluation';
+import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
+import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
 
-/**
- * See AGENT_EXECUTOR_MAP in `x-pack/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts`
- * for the agent name -> executor mapping
- */
-const DEFAULT_AGENTS = ['DefaultAgentExecutor', 'OpenAIFunctionsExecutor'];
-const DEFAULT_EVAL_TYPES_OPTIONS = [
-  { label: 'correctness' },
-  { label: 'esql-validator', disabled: true },
-  { label: 'custom', disabled: true },
-];
-
-interface Props {
-  onEvaluationSettingsChange?: () => void;
-}
+const AS_PLAIN_TEXT: EuiComboBoxSingleSelectionShape = { asPlainText: true };
 
 /**
  * Evaluation Settings -- development-only feature for evaluating models
  */
-export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
-  const { actionTypeRegistry, basePath, http } = useAssistantContext();
+export const EvaluationSettings: React.FC = React.memo(() => {
+  const { actionTypeRegistry, http, setTraceOptions, toasts, traceOptions } = useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
   const { mutate: performEvaluation, isLoading: isPerformingEvaluation } = usePerformEvaluation({
     http,
+    toasts,
   });
+  const { data: evalData } = useEvaluationData({ http });
+  const defaultGraphs = useMemo(() => (evalData as GetEvaluateResponse)?.graphs ?? [], [evalData]);
+  const datasets = useMemo(() => (evalData as GetEvaluateResponse)?.datasets ?? [], [evalData]);
 
+  // Run Details
+  // Run Name
+  const [runName, setRunName] = useState<string | undefined>();
+  const onRunNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setRunName(e.target.value);
+    },
+    [setRunName]
+  );
+  /** Trace Options **/
+  const [showTraceOptions, setShowTraceOptions] = useState(false);
+  const onApmUrlChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithProjectChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithApiKeyChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  /** Dataset **/
+  const [selectedDatasetOptions, setSelectedDatasetOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+  const datasetOptions = useMemo(() => {
+    return datasets.map((label) => ({ label }));
+  }, [datasets]);
+  const onDatasetOptionsChange = useCallback(
+    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedDatasetOptions(selectedOptions);
+    },
+    [setSelectedDatasetOptions]
+  );
+  const onDatasetCreateOption = useCallback(
+    (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+      if (!normalizedSearchValue) {
+        return;
+      }
+      const newOption = {
+        label: searchValue,
+      };
+
+      setSelectedDatasetOptions([newOption]);
+    },
+    [setSelectedDatasetOptions]
+  );
+
+  // Predictions
   // Connectors / Models
   const [selectedModelOptions, setSelectedModelOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
@@ -66,6 +127,18 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     },
     [setSelectedModelOptions]
   );
+
+  const [selectedEvaluatorModel, setSelectedEvaluatorModel] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+
+  const onSelectedEvaluatorModelChange = useCallback(
+    (selected: Array<EuiComboBoxOptionOption<string>>) => setSelectedEvaluatorModel(selected),
+    []
+  );
+
+  const [size, setSize] = useState<string>(`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`);
+
   const visColorsBehindText = euiPaletteComplementary(connectors?.length ?? 0);
   const modelOptions = useMemo(() => {
     return (
@@ -83,17 +156,17 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     );
   }, [actionTypeRegistry, connectors, visColorsBehindText]);
 
-  // Agents
-  const [selectedAgentOptions, setSelectedAgentOptions] = useState<
+  // Graphs
+  const [selectedGraphOptions, setSelectedGraphOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
-  const onAgentOptionsChange = useCallback(
-    (agentOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedAgentOptions(agentOptions);
+  const onGraphOptionsChange = useCallback(
+    (graphOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedGraphOptions(graphOptions);
     },
-    [setSelectedAgentOptions]
+    [setSelectedGraphOptions]
   );
-  const onAgentOptionsCreate = useCallback(
+  const onGraphOptionsCreate = useCallback(
     (searchValue: string) => {
       const normalizedSearchValue = searchValue.trim();
 
@@ -101,235 +174,251 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
         return;
       }
 
-      setSelectedAgentOptions([...selectedAgentOptions, { label: normalizedSearchValue }]);
+      setSelectedGraphOptions([...selectedGraphOptions, { label: normalizedSearchValue }]);
     },
-    [selectedAgentOptions]
+    [selectedGraphOptions]
   );
-  const agentOptions = useMemo(() => {
-    return DEFAULT_AGENTS.map((label) => ({ label }));
-  }, []);
+  const graphOptions = useMemo(() => {
+    return defaultGraphs.map((label) => ({ label }));
+  }, [defaultGraphs]);
 
-  // Evaluation Type
-  const [selectedEvaluationType, setSelectedEvaluationType] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
-  const onEvaluationTypeChange = useCallback(
-    (evaluationType: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedEvaluationType(evaluationType);
-    },
-    [setSelectedEvaluationType]
-  );
-  const onEvaluationTypeOptionsCreate = useCallback(
-    (searchValue: string) => {
-      const normalizedSearchValue = searchValue.trim();
-
-      if (!normalizedSearchValue) {
-        return;
-      }
-
-      setSelectedEvaluationType([{ label: normalizedSearchValue }]);
-    },
-    [setSelectedEvaluationType]
-  );
-  const evaluationTypeOptions = useMemo(() => {
-    return DEFAULT_EVAL_TYPES_OPTIONS;
-  }, []);
-
-  // Eval Model
-  const [selectedEvaluatorModelOptions, setSelectedEvaluatorModelOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
-  const onEvaluatorModelOptionsChange = useCallback(
-    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedEvaluatorModelOptions(selectedOptions);
-    },
-    [setSelectedEvaluatorModelOptions]
-  );
-
-  // Output Index
-  const [outputIndex, setOutputIndex] = useState('.kibana-elastic-ai-assistant-evaluation-results');
-  const onOutputIndexChange = useCallback(
-    (e) => {
-      setOutputIndex(e.target.value);
-    },
-    [setOutputIndex]
-  );
-
-  // Eval Prompt
-  const sampleEvalPrompt: string = `For the below input: \n\n{{input}} \n\na prediction: \n\n{{prediction}} \n\nwas made. How's it stack up against this reference: \n\n{{reference}} \n\nReturn output in a succinct sentence ranking on a simple grading rubric focused on correctness.`;
-  const [evalPrompt, setEvalPrompt] = useState<string>(sampleEvalPrompt);
-  const onEvalPromptChange = useCallback(
-    (e) => {
-      setEvalPrompt(e.target.value);
-    },
-    [setEvalPrompt]
-  );
-
-  // Dataset
-  const sampleDataset = [
-    {
-      input:
-        'I want to see a query for metrics-apm*, filtering on metricset.name:transaction and metricset.interval:1m, showing the average duration (via transaction.duration.histogram), in 50 buckets. Only return the ESQL query, and do not wrap in a codeblock.',
-      reference:
-        'FROM metrics-apm*\n| WHERE metricset.name == ""transaction"" AND metricset.interval == ""1m""\n| EVAL bucket = AUTO_BUCKET(transaction.duration.histogram, 50, <start-date>, <end-date>)\n| STATS avg_duration = AVG(transaction.duration.histogram) BY bucket',
-    },
-  ];
-  const [datasetText, setDatasetText] = useState<string>(JSON.stringify(sampleDataset, null, 2));
-  const onDatasetTextChange = useCallback(
-    (e) => {
-      setDatasetText(e.target.value);
-    },
-    [setDatasetText]
-  );
-
+  // Required fields by eval API
   const isPerformEvaluationDisabled =
-    selectedModelOptions.length === 0 ||
-    selectedAgentOptions.length === 0 ||
-    selectedEvaluatorModelOptions.length === 0 ||
-    selectedEvaluationType.length === 0 ||
-    datasetText.length === 0 ||
-    outputIndex.length === 0;
+    selectedModelOptions.length === 0 || selectedGraphOptions.length === 0;
 
   // Perform Evaluation Button
-  const handlePerformEvaluation = useCallback(() => {
-    const evalParams = {
-      models: selectedModelOptions.flatMap((option) => option.key ?? []),
-      agents: selectedAgentOptions.map((option) => option.label),
-      dataset: datasetText,
-      evalModel: selectedEvaluatorModelOptions.flatMap((option) => option.key ?? []),
-      evalPrompt,
-      evaluationType: selectedEvaluationType.map((option) => option.label),
-      outputIndex,
+  const handlePerformEvaluation = useCallback(async () => {
+    const evaluatorConnectorId =
+      selectedEvaluatorModel[0]?.key != null
+        ? { evaluatorConnectorId: selectedEvaluatorModel[0].key }
+        : {};
+
+    const langSmithApiKey = isEmpty(traceOptions.langSmithApiKey)
+      ? undefined
+      : traceOptions.langSmithApiKey;
+
+    const langSmithProject = isEmpty(traceOptions.langSmithProject)
+      ? undefined
+      : traceOptions.langSmithProject;
+
+    const evalParams: PostEvaluateRequestBodyInput = {
+      connectorIds: selectedModelOptions.flatMap((option) => option.key ?? []).sort(),
+      graphs: selectedGraphOptions.map((option) => option.label).sort(),
+      datasetName: selectedDatasetOptions[0]?.label,
+      ...evaluatorConnectorId,
+      langSmithApiKey,
+      langSmithProject,
+      runName,
+      size: Number(size),
     };
     performEvaluation(evalParams);
   }, [
-    datasetText,
-    evalPrompt,
-    outputIndex,
     performEvaluation,
-    selectedAgentOptions,
-    selectedEvaluationType,
-    selectedEvaluatorModelOptions,
+    runName,
+    selectedDatasetOptions,
+    selectedEvaluatorModel,
+    selectedGraphOptions,
     selectedModelOptions,
+    size,
+    traceOptions.langSmithApiKey,
+    traceOptions.langSmithProject,
   ]);
 
-  const discoverLink = `${basePath}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-7d%2Fd,to:now))&_a=(columns:!('@timestamp',evaluationId,totalAgents,totalInput,totalRequests,input,reference,prediction,evaluation.value,evaluation.reasoning,predictionResponse.value.connector_id),filters:!(),grid:(columns:('@timestamp':(width:212),evaluationId:(width:285),totalAgents:(width:111),totalInput:(width:98),totalRequests:(width:121))),index:'6d9ba861-a76b-4d31-90f4-dfb8f01b78bd',interval:auto,query:(esql:'from%20.kibana-elastic-ai-assistant-evaluation-results%20%0A%7C%20keep%20@timestamp,%20evaluationId,%20totalAgents,%20totalInput,%20totalRequests,%20input,%20reference,%20prediction,%20evaluation.value,%20evaluation.reasoning,%20predictionResponse.value.connector_id%0A%7C%20sort%20@timestamp%20desc%0A%7C%20limit%20100%0A%0A%0A'),sort:!(!('@timestamp',desc)))`;
+  const getSection = (title: string, description: string) => (
+    <div>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiText size="s">
+        <p>
+          <EuiTextColor color="subdued">{description}</EuiTextColor>
+        </p>
+      </EuiText>
+    </div>
+  );
+
+  const runDetailsSection = useMemo(
+    () => getSection(i18n.RUN_DETAILS_TITLE, i18n.RUN_DETAILS_DESCRIPTION),
+    []
+  );
+  const predictionDetailsSection = useMemo(
+    () => getSection(i18n.PREDICTION_DETAILS_TITLE, i18n.PREDICTION_DETAILS_DESCRIPTION),
+    []
+  );
+
+  const buttonCss = css`
+    &:hover {
+      text-decoration: none;
+    }
+  `;
 
   return (
-    <>
-      <EuiTitle size={'s'}>
-        <h2>{i18n.SETTINGS_TITLE}</h2>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
+    <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+      <EuiText size={'m'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
       <EuiHorizontalRule margin={'s'} />
-
-      <EuiFormRow
-        display="rowCompressed"
-        label={i18n.CONNECTORS_LABEL}
-        helpText={i18n.CONNECTORS_DESCRIPTION}
+      {/* Run Details*/}
+      <EuiAccordion
+        id={i18n.RUN_DETAILS_TITLE}
+        arrowDisplay={'right'}
+        buttonContent={runDetailsSection}
+        buttonProps={{ paddingSize: 's', css: buttonCss }}
+        element="fieldset"
+        initialIsOpen={true}
+        paddingSize="s"
       >
-        <EuiComboBox
-          aria-label={'model-selector'}
-          compressed
-          options={modelOptions}
-          selectedOptions={selectedModelOptions}
-          onChange={onModelOptionsChange}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        display="rowCompressed"
-        label={i18n.AGENTS_LABEL}
-        helpText={i18n.AGENTS_DESCRIPTION}
-      >
-        <EuiComboBox
-          aria-label={'agent-selector'}
-          compressed
-          onCreateOption={onAgentOptionsCreate}
-          options={agentOptions}
-          selectedOptions={selectedAgentOptions}
-          onChange={onAgentOptionsChange}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        display="rowCompressed"
-        label={i18n.EVALUATOR_MODEL_LABEL}
-        helpText={i18n.EVALUATOR_MODEL_DESCRIPTION}
-      >
-        <EuiComboBox
-          aria-label={'evaluation-type-select'}
-          compressed
-          options={modelOptions}
-          selectedOptions={selectedEvaluatorModelOptions}
-          singleSelection={{ asPlainText: true }}
-          onChange={onEvaluatorModelOptionsChange}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        display="rowCompressed"
-        label={i18n.EVALUATION_TYPE_LABEL}
-        helpText={i18n.EVALUATION_TYPE_DESCRIPTION}
-      >
-        <EuiComboBox
-          aria-label={'evaluation-type-select'}
-          compressed
-          onChange={onEvaluationTypeChange}
-          onCreateOption={onEvaluationTypeOptionsCreate}
-          options={evaluationTypeOptions}
-          selectedOptions={selectedEvaluationType}
-          singleSelection={{ asPlainText: true }}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        display="rowCompressed"
-        label={i18n.EVALUATION_PROMPT_LABEL}
-        fullWidth
-        helpText={i18n.EVALUATION_PROMPT_DESCRIPTION}
-      >
-        <EuiTextArea
-          aria-label={'evaluation-prompt-textarea'}
-          compressed
-          disabled={selectedEvaluationType[0]?.label !== 'custom'}
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.RUN_NAME_LABEL}
+          helpText={i18n.RUN_NAME_DESCRIPTION}
+        >
+          <EuiFieldText
+            aria-label={i18n.RUN_NAME_LABEL}
+            compressed
+            onChange={onRunNameChange}
+            placeholder={i18n.RUN_NAME_PLACEHOLDER}
+            value={runName}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.EVALUATOR_DATASET_LABEL}
           fullWidth
-          onChange={onEvalPromptChange}
-          value={evalPrompt}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        display="rowCompressed"
-        label={i18n.EVALUATOR_DATASET_LABEL}
-        fullWidth
-        helpText={i18n.EVALUATOR_DATASET_DESCRIPTION}
+          helpText={i18n.LANGSMITH_DATASET_DESCRIPTION}
+        >
+          <EuiComboBox
+            aria-label={i18n.EVALUATOR_DATASET_LABEL}
+            placeholder={i18n.LANGSMITH_DATASET_PLACEHOLDER}
+            singleSelection={{ asPlainText: true }}
+            options={datasetOptions}
+            selectedOptions={selectedDatasetOptions}
+            onChange={onDatasetOptionsChange}
+            onCreateOption={onDatasetCreateOption}
+            compressed={true}
+          />
+        </EuiFormRow>
+        <EuiText
+          size={'xs'}
+          css={css`
+            margin-top: 16px;
+          `}
+        >
+          <EuiLink color={'primary'} onClick={() => setShowTraceOptions(!showTraceOptions)}>
+            {i18n.SHOW_TRACE_OPTIONS}
+          </EuiLink>
+        </EuiText>
+        {showTraceOptions && (
+          <>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.APM_URL_LABEL}
+              fullWidth
+              helpText={i18n.APM_URL_DESCRIPTION}
+              css={css`
+                margin-top: 16px;
+              `}
+            >
+              <EuiFieldText
+                value={traceOptions.apmUrl}
+                onChange={onApmUrlChange}
+                aria-label={i18n.APM_URL_LABEL}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.LANGSMITH_PROJECT_LABEL}
+              fullWidth
+              helpText={i18n.LANGSMITH_PROJECT_DESCRIPTION}
+            >
+              <EuiFieldText
+                value={traceOptions.langSmithProject}
+                onChange={onLangSmithProjectChange}
+                aria-label={i18n.LANGSMITH_PROJECT_LABEL}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.LANGSMITH_API_KEY_LABEL}
+              fullWidth
+              helpText={i18n.LANGSMITH_API_KEY_DESCRIPTION}
+            >
+              <EuiFieldText
+                value={traceOptions.langSmithApiKey}
+                onChange={onLangSmithApiKeyChange}
+                aria-label={i18n.LANGSMITH_API_KEY_LABEL}
+              />
+            </EuiFormRow>
+          </>
+        )}
+      </EuiAccordion>
+      <EuiHorizontalRule margin={'s'} />
+      {/* Prediction Details*/}
+      <EuiAccordion
+        id={i18n.PREDICTION_DETAILS_TITLE}
+        arrowDisplay={'right'}
+        buttonContent={predictionDetailsSection}
+        buttonProps={{ paddingSize: 's', css: buttonCss }}
+        element="fieldset"
+        initialIsOpen={true}
+        paddingSize="s"
       >
-        <EuiTextArea
-          aria-label={'evaluation-dataset-textarea'}
-          compressed
-          fullWidth
-          onChange={onDatasetTextChange}
-          value={datasetText}
-        />
-      </EuiFormRow>
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.CONNECTORS_LABEL}
+          helpText={i18n.CONNECTORS_DESCRIPTION}
+        >
+          <EuiComboBox
+            aria-label={i18n.CONNECTORS_LABEL}
+            compressed
+            options={modelOptions}
+            selectedOptions={selectedModelOptions}
+            onChange={onModelOptionsChange}
+          />
+        </EuiFormRow>
 
-      <EuiFormRow
-        display="rowCompressed"
-        label={i18n.EVALUATOR_OUTPUT_INDEX_LABEL}
-        fullWidth
-        helpText={i18n.EVALUATOR_OUTPUT_INDEX_DESCRIPTION}
-      >
-        <EuiFieldText
-          value={outputIndex}
-          onChange={onOutputIndexChange}
-          aria-label="evaluation-output-index-textfield"
-        />
-      </EuiFormRow>
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.GRAPHS_LABEL}
+          helpText={i18n.GRAPHS_DESCRIPTION}
+        >
+          <EuiComboBox
+            aria-label={i18n.GRAPHS_LABEL}
+            compressed
+            onCreateOption={onGraphOptionsCreate}
+            options={graphOptions}
+            selectedOptions={selectedGraphOptions}
+            onChange={onGraphOptionsChange}
+          />
+        </EuiFormRow>
 
-      <EuiHorizontalRule />
+        <EuiFormRow
+          display="rowCompressed"
+          helpText={i18n.EVALUATOR_MODEL_DESCRIPTION}
+          label={i18n.EVALUATOR_MODEL}
+        >
+          <EuiComboBox
+            aria-label={i18n.EVALUATOR_MODEL}
+            compressed
+            onChange={onSelectedEvaluatorModelChange}
+            options={modelOptions}
+            selectedOptions={selectedEvaluatorModel}
+            singleSelection={AS_PLAIN_TEXT}
+          />
+        </EuiFormRow>
 
+        <EuiFormRow
+          display="rowCompressed"
+          helpText={i18n.DEFAULT_MAX_ALERTS_DESCRIPTION}
+          label={i18n.DEFAULT_MAX_ALERTS}
+        >
+          <EuiFieldNumber onChange={(e) => setSize(e.target.value)} value={size} />
+        </EuiFormRow>
+      </EuiAccordion>
+      <EuiHorizontalRule margin={'s'} />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -346,22 +435,14 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
         <EuiFlexItem>
           <EuiText color={'subdued'} size={'xs'}>
             <FormattedMessage
-              defaultMessage="Fun Facts: Watch the Kibana server logs for progress, and {funFacts} to view the results in Discover once complete. Will take (many) minutes depending on dataset, and closing this dialog will cancel the evaluation!"
+              defaultMessage="Closing this dialog will cancel the evaluation. You can watch the Kibana server logs for progress. Can take many minutes for large datasets."
               id="xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactText"
-              values={{
-                funFacts: (
-                  <EuiLink external href={discoverLink} target="_blank">
-                    {i18n.EVALUATOR_FUN_FACT_DISCOVER_LINK}
-                  </EuiLink>
-                ),
-              }}
             />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="s" />
-    </>
+    </EuiPanel>
   );
 });
 

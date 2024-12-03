@@ -4,15 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import deepEqual from 'fast-deep-equal';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
+  MappingDynamicTemplate,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
+
+import {
+  FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+} from '../../../../constants/fleet_es_assets';
+import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../../../constants';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -24,7 +31,9 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import type { FleetConfigType } from '../../../../../common/types';
 import {
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
@@ -33,8 +42,10 @@ import {
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+import { isUserSettingsTemplate, fillConstantKeywordValues } from './utils';
 
 interface Properties {
   [key: string]: any;
@@ -55,6 +66,7 @@ export interface CurrentDataStream {
   dataStreamName: string;
   replicated: boolean;
   indexTemplate: IndexTemplate;
+  currentWriteIndex: string;
 }
 
 const DEFAULT_IGNORE_ABOVE = 1024;
@@ -102,19 +114,30 @@ export function getTemplate({
     isIndexModeTimeSeries,
   });
   if (template.template.settings.index.final_pipeline) {
-    throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
+    throw new PackageInvalidArchiveError(
+      `Error template for ${templateIndexPattern} contains a final_pipeline`
+    );
   }
 
   const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
 
+  const isEventIngestedEnabled = (config?: FleetConfigType): boolean =>
+    Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
+
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
+    STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
       : []),
+    ...(isEventIngestedEnabled(appContextService.getConfig())
+      ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
+      : []),
   ];
+
+  template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);
 
   return template;
 }
@@ -127,7 +150,7 @@ const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): stri
 
     return [STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS];
   } else if (type === 'logs') {
-    return [STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
+    return [STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS, STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
   }
 
   return [];
@@ -146,7 +169,7 @@ export function generateMappings(
   isIndexModeTimeSeries = false
 ): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
-  const dynamicTemplateNames = new Set<string>();
+  const dynamicTemplateNames: Record<string, number> = {};
   const runtimeFields: RuntimeFields = {};
 
   const { properties } = _generateMappings(
@@ -160,8 +183,16 @@ export function generateMappings(
         runtimeProperties?: Properties;
       }) => {
         const name = dynamicMapping.path;
-        if (dynamicTemplateNames.has(name)) {
-          return;
+        if (name in dynamicTemplateNames) {
+          if (name.includes('*') && dynamicMapping.properties?.type === 'object') {
+            // This is a conflicting intermediate object, use the last one so
+            // more specific templates are chosen before.
+            const index = dynamicTemplateNames[name];
+            delete dynamicTemplateNames[name];
+            dynamicTemplates.splice(index, 1);
+          } else {
+            return;
+          }
         }
 
         const dynamicTemplate: Properties = {};
@@ -179,8 +210,8 @@ export function generateMappings(
           dynamicTemplate.path_match = dynamicMapping.pathMatch;
         }
 
-        dynamicTemplateNames.add(name);
-        dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+        const size = dynamicTemplates.push({ [name]: dynamicTemplate });
+        dynamicTemplateNames[name] = size - 1;
       },
       addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
         runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
@@ -219,9 +250,11 @@ function _generateMappings(
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
   hasDynamicTemplateMappings: boolean;
+  subobjects?: boolean;
 } {
   let hasNonDynamicTemplateMappings = false;
   let hasDynamicTemplateMappings = false;
+  let subobjects: boolean | undefined;
   const props: Properties = {};
 
   function addParentObjectAsStaticProperty(field: Field) {
@@ -234,6 +267,7 @@ function _generateMappings(
     const fieldProps = {
       type: 'object',
       dynamic: true,
+      ...(field.subobjects !== undefined && { subobjects: field.subobjects }),
     };
 
     props[field.name] = fieldProps;
@@ -427,9 +461,24 @@ function _generateMappings(
             matchingType = field.object_type_mapping_type ?? 'object';
             break;
           default:
-            throw new Error(
-              `no dynamic mapping generated for field ${path} of type ${field.object_type}`
+            throw new PackageInvalidArchiveError(
+              `No dynamic mapping generated for field ${path} of type ${field.object_type}`
             );
+        }
+
+        if (field.dimension && isIndexModeTimeSeries) {
+          dynProperties.time_series_dimension = field.dimension;
+        }
+
+        // When a wildcard field specifies the subobjects setting,
+        // the parent intermediate object should set the subobjects
+        // setting.
+        //
+        // For example, if a wildcard field `foo.*` has subobjects,
+        // we should set subobjects on the intermediate object `foo`.
+        //
+        if (field.subobjects !== undefined && path.includes('*')) {
+          subobjects = field.subobjects;
         }
 
         if (dynProperties && matchingType) {
@@ -473,10 +522,15 @@ function _generateMappings(
             } else {
               return;
             }
+            if (mappings.subobjects !== undefined) {
+              fieldProps.subobjects = mappings.subobjects;
+            }
             break;
+          case 'nested':
           case 'group-nested':
-            fieldProps = {
-              properties: _generateMappings(
+            fieldProps = { ...generateNestedProps(field), type: 'nested' };
+            if (field.fields) {
+              fieldProps.properties = _generateMappings(
                 field.fields!,
                 {
                   ...ctx,
@@ -485,10 +539,8 @@ function _generateMappings(
                     : field.name,
                 },
                 isIndexModeTimeSeries
-              ).properties,
-              ...generateNestedProps(field),
-              type: 'nested',
-            };
+              ).properties;
+            }
             break;
           case 'integer':
             fieldProps.type = 'long';
@@ -524,9 +576,6 @@ function _generateMappings(
             if (field.value) {
               fieldProps.value = field.value;
             }
-            break;
-          case 'nested':
-            fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
             break;
           case 'array':
             // this assumes array fields were validated in an earlier step
@@ -580,6 +629,10 @@ function _generateMappings(
           fieldProps.time_series_dimension = field.dimension;
         }
 
+        if (field.subobjects !== undefined) {
+          fieldProps.subobjects = field.subobjects;
+        }
+
         // Even if we don't add the property because it has a wildcard, notify
         // the parent that there is some kind of property, so the intermediate object
         // is still created.
@@ -598,15 +651,20 @@ function _generateMappings(
     });
   }
 
-  return { properties: props, hasNonDynamicTemplateMappings, hasDynamicTemplateMappings };
+  return {
+    properties: props,
+    hasNonDynamicTemplateMappings,
+    hasDynamicTemplateMappings,
+    subobjects,
+  };
 }
 
 function generateDynamicAndEnabled(field: Field) {
   const props: Properties = {};
-  if (field.hasOwnProperty('enabled')) {
+  if (Object.hasOwn(field, 'enabled')) {
     props.enabled = field.enabled;
   }
-  if (field.hasOwnProperty('dynamic')) {
+  if (Object.hasOwn(field, 'dynamic')) {
     props.dynamic = field.dynamic;
   }
   return props;
@@ -615,10 +673,10 @@ function generateDynamicAndEnabled(field: Field) {
 function generateNestedProps(field: Field) {
   const props = generateDynamicAndEnabled(field);
 
-  if (field.hasOwnProperty('include_in_parent')) {
+  if (Object.hasOwn(field, 'include_in_parent')) {
     props.include_in_parent = field.include_in_parent;
   }
-  if (field.hasOwnProperty('include_in_root')) {
+  if (Object.hasOwn(field, 'include_in_root')) {
     props.include_in_root = field.include_in_root;
   }
   return props;
@@ -874,10 +932,15 @@ const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
   templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
-  const dataStreamPromises = templates.map((template) => {
-    return getDataStreams(esClient, template);
-  });
-  const dataStreamObjects = await Promise.all(dataStreamPromises);
+  const dataStreamObjects = await pMap(
+    templates,
+    (template) => {
+      return getDataStreams(esClient, template);
+    },
+    {
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+    }
+  );
   return dataStreamObjects.filter(isCurrentDataStream).flat();
 };
 
@@ -898,17 +961,24 @@ const getDataStreams = async (
     dataStreamName: dataStream.name,
     replicated: dataStream.replicated,
     indexTemplate,
+    currentWriteIndex: dataStream.indices?.at(-1)?.index_name,
   }));
 };
 
 const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
   try {
     // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    return esClient.indices.rollover({
-      alias: dataStreamName,
+    return esClient.transport.request({
+      method: 'POST',
+      path: `/${dataStreamName}/_rollover`,
+      querystring: {
+        lazy: true,
+      },
     });
   } catch (error) {
-    throw new Error(`cannot rollover data stream [${dataStreamName}] due to error: ${error}`);
+    throw new PackageESError(
+      `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
+    );
   }
 };
 
@@ -927,24 +997,26 @@ const updateAllDataStreams = async (
       return updateExistingDataStream({
         esClient,
         logger,
+        currentWriteIndex: templateEntry.currentWriteIndex,
         dataStreamName: templateEntry.dataStreamName,
         options,
       });
     },
     {
-      // Limit concurrent putMapping/rollover requests to avoid overhwhelming ES cluster
-      concurrency: 20,
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
     }
   );
 };
 
 const updateExistingDataStream = async ({
   dataStreamName,
+  currentWriteIndex,
   esClient,
   logger,
   options,
 }: {
   dataStreamName: string;
+  currentWriteIndex: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   options?: {
@@ -953,30 +1025,39 @@ const updateExistingDataStream = async ({
   };
 }) => {
   const existingDs = await esClient.indices.get({
-    index: dataStreamName,
+    index: currentWriteIndex,
   });
 
   const existingDsConfig = Object.values(existingDs);
   const currentBackingIndexConfig = existingDsConfig.at(-1);
-
   const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
-  // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
-  const currentSourceType = currentBackingIndexConfig.mappings?._source?.mode;
+  // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
+  const currentSourceType = currentBackingIndexConfig?.settings?.index?.mapping?.source?.mode;
 
   let settings: IndicesIndexSettings;
-  let mappings: MappingTypeMapping;
+  let mappings: MappingTypeMapping = {};
   let lifecycle: any;
-
+  let subobjectsFieldChanged: boolean = false;
+  let simulateResult: any = {};
   try {
-    const simulateResult = await retryTransientEsErrors(async () =>
+    simulateResult = await retryTransientEsErrors(async () =>
       esClient.indices.simulateTemplate({
         name: await getIndexTemplate(esClient, dataStreamName),
       })
     );
 
     settings = simulateResult.template.settings;
-    mappings = simulateResult.template.mappings;
-    // @ts-expect-error template is not yet typed with DLM
+
+    try {
+      mappings = fillConstantKeywordValues(
+        currentBackingIndexConfig?.mappings || {},
+        simulateResult.template.mappings || {}
+      );
+    } catch (err) {
+      logger.error(`Error filling constant keyword values: ${err}`);
+      mappings = simulateResult.template.mappings;
+    }
+
     lifecycle = simulateResult.template.lifecycle;
 
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
@@ -985,6 +1066,9 @@ const updateExistingDataStream = async ({
     if (mappings && mappings.properties) {
       delete mappings.properties.stream;
       delete mappings.properties.data_stream;
+    }
+    if (currentBackingIndexConfig?.mappings?.subobjects !== mappings.subobjects) {
+      subobjectsFieldChanged = true;
     }
 
     logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
@@ -1000,12 +1084,19 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
+    subobjectsFieldChanged =
+      subobjectsFieldChanged ||
+      (err.body?.error?.type === 'mapper_exception' &&
+        err.body?.error?.reason?.includes('subobjects'));
     if (
-      isResponseError(err) &&
-      err.statusCode === 400 &&
-      err.body?.error?.type === 'illegal_argument_exception'
+      (isResponseError(err) &&
+        err.statusCode === 400 &&
+        err.body?.error?.type === 'illegal_argument_exception') ||
+      // handling the case when subobjects field changed, it should also trigger a rollover
+      subobjectsFieldChanged
     ) {
       logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
+      logger.trace(`Attempted mappings: ${mappings}`);
       if (options?.skipDataStreamRollover === true) {
         logger.info(
           `Skipping rollover for ${dataStreamName} as "skipDataStreamRollover" is enabled`
@@ -1018,6 +1109,7 @@ const updateExistingDataStream = async ({
       }
     }
     logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
+    logger.trace(`Attempted mappings: ${mappings}`);
     if (options?.ignoreMappingUpdateErrors === true) {
       logger.info(`Ignore mapping update errors as "ignoreMappingUpdateErrors" is enabled`);
       return;
@@ -1026,16 +1118,42 @@ const updateExistingDataStream = async ({
     }
   }
 
+  const filterDimensionMappings = (templates?: Array<Record<string, MappingDynamicTemplate>>) =>
+    templates?.filter(
+      (template) => (Object.values(template)[0].mapping as any)?.time_series_dimension
+    ) ?? [];
+
+  const currentDynamicDimensionMappings = filterDimensionMappings(
+    currentBackingIndexConfig?.mappings?.dynamic_templates
+  );
+  const updatedDynamicDimensionMappings = filterDimensionMappings(mappings.dynamic_templates);
+
+  const sortMappings = (
+    a: Record<string, MappingDynamicTemplate>,
+    b: Record<string, MappingDynamicTemplate>
+  ) => Object.keys(a)[0].localeCompare(Object.keys(b)[0]);
+
+  const dynamicDimensionMappingsChanged = !deepEqual(
+    currentDynamicDimensionMappings.sort(sortMappings),
+    updatedDynamicDimensionMappings.sort(sortMappings)
+  );
+
   // Trigger a rollover if the index mode or source type has changed
-  if (currentIndexMode !== settings?.index?.mode || currentSourceType !== mappings?._source?.mode) {
+  if (
+    currentIndexMode !== settings?.index?.mode ||
+    currentSourceType !== settings?.index?.source?.mode ||
+    dynamicDimensionMappingsChanged
+  ) {
     if (options?.skipDataStreamRollover === true) {
       logger.info(
-        `Index mode or source type has changed for ${dataStreamName}, skipping rollover as "skipDataStreamRollover" is enabled`
+        `Index mode or source type or dynamic dimension mappings have changed for ${dataStreamName}, skipping rollover as "skipDataStreamRollover" is enabled`
       );
       return;
     } else {
       logger.info(
-        `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
+        dynamicDimensionMappingsChanged
+          ? `Dynamic dimension mappings changed for ${dataStreamName}, triggering a rollover`
+          : `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
       );
       await rolloverDataStream(dataStreamName, esClient);
     }
@@ -1055,7 +1173,11 @@ const updateExistingDataStream = async ({
         { logger }
       );
     } catch (err) {
-      throw new Error(`could not update lifecycle settings for ${dataStreamName}: ${err.message}`);
+      // Check if this error can happen because of invalid settings;
+      // We are returning a 500 but in that case it should be a 400 instead
+      throw new PackageESError(
+        `Could not update lifecycle settings for ${dataStreamName}: ${err.message}`
+      );
     }
   }
 
@@ -1078,6 +1200,8 @@ const updateExistingDataStream = async ({
       { logger }
     );
   } catch (err) {
-    throw new Error(`could not update index template settings for ${dataStreamName}`);
+    // Same as above - Check if this error can happen because of invalid settings;
+    // We are returning a 500 but in that case it should be a 400 instead
+    throw new PackageESError(`Could not update index template settings for ${dataStreamName}`);
   }
 };

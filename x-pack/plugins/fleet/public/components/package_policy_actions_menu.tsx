@@ -10,8 +10,8 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
+import { policyHasFleetServer } from '../services';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -19,28 +19,38 @@ import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
-  agentPolicy?: AgentPolicy;
+  agentPolicies: AgentPolicy[];
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
+  from?: 'fleet-policy-list' | undefined;
 }> = ({
-  agentPolicy,
+  agentPolicies,
   packagePolicy,
   showAddAgent,
   upgradePackagePolicyHref,
   defaultIsOpen = false,
+  from,
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const authz = useAuthz();
+
+  const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined;
+  const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
+  const isFleetServerPolicy = agentPolicy && policyHasFleetServer(agentPolicy);
+
+  const canAddAgents = isFleetServerPolicy ? authz.fleet.addFleetServers : authz.fleet.addAgents;
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
   const isManaged = Boolean(packagePolicy.is_managed);
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
+  const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
 
-  const isAddAgentVisible = showAddAgent && agentPolicy && !agentPolicyIsManaged;
+  const isAddAgentVisible =
+    showAddAgent && agentPolicy && !agentPolicyIsManaged && !agentPolicy?.supports_agentless;
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -68,6 +78,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               setIsEnrollmentFlyoutOpen(true);
             }}
             key="addAgent"
+            disabled={!canAddAgents}
           >
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
@@ -78,11 +89,18 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       : []),
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsEditItem"
-      disabled={!canWriteIntegrationPolicies || !agentPolicy}
+      disabled={!canWriteIntegrationPolicies || (!agentPolicy && !isOrphanedPolicy)}
       icon="pencil"
-      href={getHref('integration_policy_edit', {
-        packagePolicyId: packagePolicy.id,
-      })}
+      href={`${
+        isOrphanedPolicy
+          ? getHref('integration_policy_edit', {
+              packagePolicyId: packagePolicy.id,
+            })
+          : getHref('edit_integration', {
+              policyId: agentPolicy?.id ?? '',
+              packagePolicyId: packagePolicy.id,
+            })
+      }${from ? `?from=${from}` : ''}`}
       key="packagePolicyEdit"
     >
       <FormattedMessage
@@ -90,20 +108,27 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         defaultMessage="Edit integration"
       />
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      data-test-subj="PackagePolicyActionsUpgradeItem"
-      disabled={
-        !packagePolicy.hasUpgrade || !canWriteIntegrationPolicies || !upgradePackagePolicyHref
-      }
-      icon="refresh"
-      href={upgradePackagePolicyHref}
-      key="packagePolicyUpgrade"
-    >
-      <FormattedMessage
-        id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
-        defaultMessage="Upgrade integration policy"
-      />
-    </EuiContextMenuItem>,
+    ...(packagePolicy.hasUpgrade
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsUpgradeItem"
+            disabled={
+              !canWriteIntegrationPolicies ||
+              !upgradePackagePolicyHref ||
+              agentPolicy?.supports_agentless === true
+            }
+            icon="refresh"
+            href={upgradePackagePolicyHref}
+            key="packagePolicyUpgrade"
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
+              data-test-subj="UpgradeIntegrationPolicy"
+              defaultMessage="Upgrade integration policy"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
     // FIXME: implement Copy package policy action
     // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packagePolicyCopy">
     //   <FormattedMessage
@@ -113,12 +138,15 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     // </EuiContextMenuItem>,
   ];
 
-  if (!agentPolicy || !agentPolicyIsManaged) {
+  if (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless) {
+    const ContextMenuItem = canWriteIntegrationPolicies
+      ? DangerEuiContextMenuItem
+      : EuiContextMenuItem;
     menuItems.push(
-      <PackagePolicyDeleteProvider agentPolicy={agentPolicy} key="packagePolicyDelete">
+      <PackagePolicyDeleteProvider agentPolicies={agentPolicies} key="packagePolicyDelete">
         {(deletePackagePoliciesPrompt) => {
           return (
-            <DangerEuiContextMenuItem
+            <ContextMenuItem
               data-test-subj="PackagePolicyActionsDeleteItem"
               disabled={!canWriteIntegrationPolicies}
               icon="trash"
@@ -133,7 +161,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
                 id="xpack.fleet.policyDetails.packagePoliciesTable.deleteActionTitle"
                 defaultMessage="Delete integration"
               />
-            </DangerEuiContextMenuItem>
+            </ContextMenuItem>
           );
         }}
       </PackagePolicyDeleteProvider>
@@ -144,7 +172,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       {isEnrollmentFlyoutOpen && (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicy={agentPolicy}
+            agentPolicy={agentPolicies.length === 1 ? agentPolicies[0] : undefined} // in case of multiple policies, show the selector in the flyout
+            selectedAgentPolicies={agentPolicies}
             onClose={onEnrollmentFlyoutClose}
             isIntegrationFlow={true}
             installedPackagePolicy={{

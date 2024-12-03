@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Location } from 'history';
@@ -105,6 +106,12 @@ export type TypeAsArgs<TObject> = keyof TObject extends never
   ? [TObject] | []
   : [TObject];
 
+export type TypeAsParams<TObject> = keyof TObject extends never
+  ? {}
+  : RequiredKeys<TObject> extends never
+  ? never
+  : { params: TObject };
+
 export type FlattenRoutesOf<TRoutes extends RouteMap> = Array<
   ValuesType<{
     [key in keyof MapRoutes<TRoutes>]: ValuesType<MapRoutes<TRoutes>[key]>;
@@ -190,204 +197,3 @@ type MapRoutes<TRouteMap extends RouteMap, TParents extends RouteWithPath[] = []
 > extends Record<string, Route[]>
   ? FromRouteMap<TRouteMap, TParents>
   : never;
-
-// const element = null as any;
-
-// const routes = {
-//   '/link-to/transaction/{transactionId}': {
-//     element,
-//   },
-//   '/link-to/trace/{traceId}': {
-//     element,
-//   },
-//   '/': {
-//     element,
-//     children: {
-//       '/settings': {
-//         element,
-//         children: {
-//           '/settings/agent-configuration': {
-//             element,
-//           },
-//           '/settings/agent-configuration/create': {
-//             element,
-//             params: t.partial({
-//               query: t.partial({
-//                 pageStep: t.string,
-//               }),
-//             }),
-//           },
-//           '/settings/agent-configuration/edit': {
-//             element,
-//             params: t.partial({
-//               query: t.partial({
-//                 pageStep: t.string,
-//               }),
-//             }),
-//           },
-//           '/settings/apm-indices': {
-//             element,
-//           },
-//           '/settings/custom-links': {
-//             element,
-//           },
-//           '/settings/schema': {
-//             element,
-//           },
-//           '/settings/anomaly-detection': {
-//             element,
-//           },
-//           '/settings/agent-keys': {
-//             element,
-//           },
-//           '/settings': {
-//             element,
-//           },
-//         },
-//       },
-//       '/services/:serviceName': {
-//         element,
-//         params: t.intersection([
-//           t.type({
-//             path: t.type({
-//               serviceName: t.string,
-//             }),
-//           }),
-//           t.partial({
-//             query: t.partial({
-//               environment: t.string,
-//               rangeFrom: t.string,
-//               rangeTo: t.string,
-//               comparisonEnabled: t.string,
-//               comparisonType: t.string,
-//               latencyAggregationType: t.string,
-//               transactionType: t.string,
-//               kuery: t.string,
-//             }),
-//           }),
-//         ]),
-//         children: {
-//           '/services/:serviceName/overview': {
-//             element,
-//           },
-//           '/services/:serviceName/transactions': {
-//             element,
-//           },
-//           '/services/:serviceName/transactions/view': {
-//             element,
-//           },
-//           '/services/:serviceName/dependencies': {
-//             element,
-//           },
-//           '/services/:serviceName/errors': {
-//             element,
-//             children: {
-//               '/services/:serviceName/errors/:groupId': {
-//                 element,
-//                 params: t.type({
-//                   path: t.type({
-//                     groupId: t.string,
-//                   }),
-//                 }),
-//               },
-//               '/services/:serviceName/errors': {
-//                 element,
-//                 params: t.partial({
-//                   query: t.partial({
-//                     sortDirection: t.string,
-//                     sortField: t.string,
-//                     pageSize: t.string,
-//                     page: t.string,
-//                   }),
-//                 }),
-//               },
-//             },
-//           },
-//           '/services/:serviceName/metrics': {
-//             element,
-//           },
-//           '/services/:serviceName/nodes': {
-//             element,
-//             children: {
-//               '/services/{serviceName}/nodes/{serviceNodeName}/metrics': {
-//                 element,
-//               },
-//               '/services/:serviceName/nodes': {
-//                 element,
-//               },
-//             },
-//           },
-//           '/services/:serviceName/service-map': {
-//             element,
-//           },
-//           '/services/:serviceName/logs': {
-//             element,
-//           },
-//           '/services/:serviceName/profiling': {
-//             element,
-//           },
-//           '/services/:serviceName': {
-//             element,
-//           },
-//         },
-//       },
-//       '/': {
-//         element,
-//         params: t.partial({
-//           query: t.partial({
-//             rangeFrom: t.string,
-//             rangeTo: t.string,
-//           }),
-//         }),
-//         children: {
-//           '/services': {
-//             element,
-//           },
-//           '/traces': {
-//             element,
-//           },
-//           '/service-map': {
-//             element,
-//           },
-//           '/backends': {
-//             element,
-//             children: {
-//               '/backends/{backendName}/overview': {
-//                 element,
-//               },
-//               '/backends/overview': {
-//                 element,
-//               },
-//               '/backends': {
-//                 element,
-//               },
-//             },
-//           },
-//           '/': {
-//             element,
-//           },
-//         },
-//       },
-//     },
-//   },
-// };
-
-// type Routes = typeof routes;
-
-// type Mapped = MapRoutes<Routes>;
-// type Paths = PathsOf<Routes>;
-
-// type Bar = Match<Routes, '/*'>;
-// type Foo = OutputOf<Routes, '/*'>;
-// type Baz = OutputOf<Routes, '/services/:serviceName/errors'>;
-
-// const { path }: Foo = {} as any;
-
-// function _useApmParams<TPath extends PathsOf<Routes>>(p: TPath): OutputOf<Routes, TPath> {
-//   return {} as any;
-// }
-
-// const {
-//   path: { serviceName },
-//   query: { comparisonType },
-// } = _useApmParams('/services/:serviceName/nodes/*');

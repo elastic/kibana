@@ -5,13 +5,57 @@
     "functions": [
       {
         "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.ChartSwitchTrigger",
+        "type": "Function",
+        "tags": [],
+        "label": "ChartSwitchTrigger",
+        "description": [],
+        "signature": [
+          "({ label, icon, onClick, dataTestSubj, }: { label: string; icon?: ",
+          "IconType",
+          " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ChartSwitchTrigger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ label: string; icon?: ",
+              "IconType",
+              " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
         "id": "def-public.ColorPicker",
         "type": "Function",
         "tags": [],
         "label": "ColorPicker",
         "description": [],
         "signature": [
-          "({ overwriteColor, defaultColor, isClearable, setConfig, label, disableHelpTooltip, disabledMessage, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; isClearable?: boolean | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabledMessage?: string | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
+          "({ overwriteColor, defaultColor, isClearable, setConfig, label, disableHelpTooltip, disabledMessage, showAlpha, }: ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.ColorPickerProps",
+            "text": "ColorPickerProps"
+          },
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
         "deprecated": false,
@@ -24,153 +68,19 @@
             "tags": [],
             "label": "{\n  overwriteColor,\n  defaultColor,\n  isClearable,\n  setConfig,\n  label,\n  disableHelpTooltip,\n  disabledMessage,\n  showAlpha,\n}",
             "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/visualization-ui-components",
+                "scope": "public",
+                "docId": "kibKbnVisualizationUiComponentsPluginApi",
+                "section": "def-public.ColorPickerProps",
+                "text": "ColorPickerProps"
+              }
+            ],
             "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.ColorPicker.$1.overwriteColor",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "overwriteColor",
-                "description": [],
-                "signature": [
-                  "string | null | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.ColorPicker.$1.defaultColor",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "defaultColor",
-                "description": [],
-                "signature": [
-                  "string | null | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.ColorPicker.$1.isClearable",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "isClearable",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.ColorPicker.$1.setConfig",
-                "type": "Function",
-                "tags": [],
-                "label": "setConfig",
-                "description": [],
-                "signature": [
-                  "(config: { color?: string | undefined; }) => void"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/visualization-ui-components",
-                    "id": "def-public.ColorPicker.$1.setConfig.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "config",
-                    "description": [],
-                    "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/visualization-ui-components",
-                        "id": "def-public.ColorPicker.$1.setConfig.$1.color",
-                        "type": "string",
-                        "tags": [],
-                        "label": "color",
-                        "description": [],
-                        "signature": [
-                          "string | undefined"
-                        ],
-                        "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.ColorPicker.$1.label",
-                "type": "string",
-                "tags": [],
-                "label": "label",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.ColorPicker.$1.disableHelpTooltip",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "disableHelpTooltip",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.ColorPicker.$1.disabledMessage",
-                "type": "string",
-                "tags": [],
-                "label": "disabledMessage",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.ColorPicker.$1.showAlpha",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "showAlpha",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -186,7 +96,7 @@
           "\nWhen testing this component, mock the \"debounce\" function in lodash (see this module test for an example)"
         ],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "(props: Props) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/debounced_input.tsx",
         "deprecated": false,
@@ -219,31 +129,32 @@
         "label": "DimensionButton",
         "description": [],
         "signature": [
-          "({\n  groupLabel,\n  children,\n  onClick,\n  onRemoveClick,\n  accessorConfig,\n  label,\n  message,\n  ...otherProps // from Drag&Drop integration\n}: ",
+          "React.NamedExoticComponent<",
           "DimensionButtonProps",
-          ") => JSX.Element"
+          "> & { readonly type: ({ groupLabel, children, onClick, onRemoveClick, accessorConfig, label, message, ...otherProps }: ",
+          "DimensionButtonProps",
+          ") => React.JSX.Element; }"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/visualization-ui-components",
             "id": "def-public.DimensionButton.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  groupLabel,\n  children,\n  onClick,\n  onRemoveClick,\n  accessorConfig,\n  label,\n  message,\n  ...otherProps // from Drag&Drop integration\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "DimensionButtonProps"
+              "P"
             ],
-            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -254,7 +165,7 @@
         "label": "DimensionEditorSection",
         "description": [],
         "signature": [
-          "({ children, title, }: { title?: string | undefined; children?: React.ReactNode | React.ReactNode[]; }) => JSX.Element"
+          "({ children, title, }: { title?: string | undefined; children?: React.ReactNode | React.ReactNode[]; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
         "deprecated": false,
@@ -313,9 +224,9 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
           "Property",
-          ".Color | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+          ".Color | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
         "deprecated": false,
@@ -340,7 +251,7 @@
                 "label": "label",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
                 "deprecated": false,
@@ -368,7 +279,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+                  "\"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],
@@ -404,7 +315,7 @@
         "label": "DragDropBuckets",
         "description": [],
         "signature": [
-          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined; }) => JSX.Element"
+          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"transparent\" | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
         "deprecated": false,
@@ -516,7 +427,7 @@
                 "label": "bgColor",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined"
+                  "\"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"transparent\" | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                 "deprecated": false,
@@ -560,7 +471,7 @@
           "BucketContainerProps",
           "> | undefined; }, Omit<",
           "BucketContainerProps",
-          ", \"draggableProvided\">>>) => JSX.Element"
+          ", \"draggableProvided\">>>) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
         "deprecated": false,
@@ -616,7 +527,7 @@
         "label": "EmptyDimensionButton",
         "description": [],
         "signature": [
-          "({ label, ariaLabel, onClick, dataTestSubj, iconType, ...otherProps }: { label: React.ReactNode; ariaLabel: string; onClick: () => void; dataTestSubj?: string | undefined; iconType?: string | undefined; }) => JSX.Element"
+          "({ label, ariaLabel, onClick, dataTestSubj, iconType, ...otherProps }: { label: React.ReactNode; ariaLabel: string; onClick: () => void; dataTestSubj?: string | undefined; iconType?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
         "deprecated": false,
@@ -641,7 +552,7 @@
                 "label": "label",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
                 "deprecated": false,
@@ -716,9 +627,9 @@
         "label": "FieldPicker",
         "description": [],
         "signature": [
-          "({\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}: ",
+          "(props: ",
           "FieldPickerProps",
-          "<T>) => JSX.Element"
+          "<T>) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/field_picker/field_picker.tsx",
         "deprecated": false,
@@ -729,7 +640,7 @@
             "id": "def-public.FieldPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "FieldPickerProps",
@@ -754,7 +665,7 @@
         "signature": [
           "({ idx, onRemoveClick, removeTitle, children, draggableProvided, isNotRemovable, isNotDraggable, isDragging, \"data-test-subj\": dataTestSubj, }: ",
           "BucketContainerProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/fields_bucket_container.tsx",
         "deprecated": false,
@@ -787,39 +698,9 @@
         "label": "FilterQueryInput",
         "description": [],
         "signature": [
-          "({\n  inputFilter,\n  onChange,\n  dataView,\n  helpMessage,\n  label = filterByLabel,\n  initiallyOpen,\n  ['data-test-subj']: dataTestSubj,\n  queryInputServices,\n  appName,\n}: { inputFilter: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | undefined; onChange: (query: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          ") => void; dataView: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewBase",
-            "text": "DataViewBase"
-          },
-          "; helpMessage?: string | null | undefined; label?: string | undefined; initiallyOpen?: boolean | undefined; \"data-test-subj\"?: string | undefined; queryInputServices: ",
-          {
-            "pluginId": "@kbn/visualization-ui-components",
-            "scope": "public",
-            "docId": "kibKbnVisualizationUiComponentsPluginApi",
-            "section": "def-public.QueryInputServices",
-            "text": "QueryInputServices"
-          },
-          "; appName: string; }) => JSX.Element"
+          "({\n  inputFilter,\n  onChange,\n  dataView,\n  helpMessage,\n  label = filterByLabel,\n  initiallyOpen,\n  ['data-test-subj']: dataTestSubj,\n  queryInputServices,\n  appName,\n}: ",
+          "FilterQueryInputProps",
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
         "deprecated": false,
@@ -832,187 +713,48 @@
             "tags": [],
             "label": "{\n  inputFilter,\n  onChange,\n  dataView,\n  helpMessage,\n  label = filterByLabel,\n  initiallyOpen,\n  ['data-test-subj']: dataTestSubj,\n  queryInputServices,\n  appName,\n}",
             "description": [],
+            "signature": [
+              "FilterQueryInputProps"
+            ],
             "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.FilterQueryInput.$1.inputFilter",
-                "type": "Object",
-                "tags": [],
-                "label": "inputFilter",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Query",
-                    "text": "Query"
-                  },
-                  " | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.FilterQueryInput.$1.onChange",
-                "type": "Function",
-                "tags": [],
-                "label": "onChange",
-                "description": [],
-                "signature": [
-                  "(query: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Query",
-                    "text": "Query"
-                  },
-                  ") => void"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/visualization-ui-components",
-                    "id": "def-public.FilterQueryInput.$1.onChange.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "query",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "@kbn/es-query",
-                        "scope": "common",
-                        "docId": "kibKbnEsQueryPluginApi",
-                        "section": "def-common.Query",
-                        "text": "Query"
-                      }
-                    ],
-                    "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.FilterQueryInput.$1.dataView",
-                "type": "Object",
-                "tags": [],
-                "label": "dataView",
-                "description": [],
-                "signature": [
-                  "{ fields: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.DataViewFieldBase",
-                    "text": "DataViewFieldBase"
-                  },
-                  "[]; id?: string | undefined; title: string; }"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.FilterQueryInput.$1.helpMessage",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "helpMessage",
-                "description": [],
-                "signature": [
-                  "string | null | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.FilterQueryInput.$1.label",
-                "type": "string",
-                "tags": [],
-                "label": "label",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.FilterQueryInput.$1.initiallyOpen",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "initiallyOpen",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.FilterQueryInput.$1.datatestsubj",
-                "type": "string",
-                "tags": [],
-                "label": "['data-test-subj']",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.FilterQueryInput.$1.queryInputServices",
-                "type": "Object",
-                "tags": [],
-                "label": "queryInputServices",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/visualization-ui-components",
-                    "scope": "public",
-                    "docId": "kibKbnVisualizationUiComponentsPluginApi",
-                    "section": "def-public.QueryInputServices",
-                    "text": "QueryInputServices"
-                  }
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.FilterQueryInput.$1.appName",
-                "type": "string",
-                "tags": [],
-                "label": "appName",
-                "description": [],
-                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.hasIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "hasIcon",
+        "description": [
+          "\nIcon checking logic. It makes sure an icon has actual content."
+        ],
+        "signature": [
+          "(icon: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-visualization-ui-components/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.hasIcon.$1",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1034,7 +776,7 @@
             "section": "def-public.IconSet",
             "text": "IconSet"
           },
-          "<Icon>; defaultIcon?: string | undefined; }) => JSX.Element"
+          "<Icon>; defaultIcon?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
         "deprecated": false,
@@ -1149,7 +891,7 @@
             "section": "def-public.IconSet",
             "text": "IconSet"
           },
-          "<Icon>; defaultIcon?: string | undefined; }) => JSX.Element"
+          "<Icon>; defaultIcon?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
         "deprecated": false,
@@ -1243,6 +985,64 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.iconSortCriteria",
+        "type": "Function",
+        "tags": [],
+        "label": "iconSortCriteria",
+        "description": [
+          "\nSorting criteria for icons sets. It makes sure empty icon is always on top."
+        ],
+        "signature": [
+          "(a: { value: T; label: string; icon?: ",
+          "IconType",
+          " | T | undefined; shouldRotate?: boolean | undefined; }, b: { value: T; label: string; icon?: ",
+          "IconType",
+          " | T | undefined; shouldRotate?: boolean | undefined; }) => number"
+        ],
+        "path": "packages/kbn-visualization-ui-components/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.iconSortCriteria.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "a",
+            "description": [],
+            "signature": [
+              "{ value: T; label: string; icon?: ",
+              "IconType",
+              " | T | undefined; shouldRotate?: boolean | undefined; }"
+            ],
+            "path": "packages/kbn-visualization-ui-components/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.iconSortCriteria.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "b",
+            "description": [],
+            "signature": [
+              "{ value: T; label: string; icon?: ",
+              "IconType",
+              " | T | undefined; shouldRotate?: boolean | undefined; }"
+            ],
+            "path": "packages/kbn-visualization-ui-components/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1379,7 +1179,7 @@
         "label": "LineStyleSettings",
         "description": [],
         "signature": [
-          "({ currentConfig, setConfig, idPrefix, }: { currentConfig?: LineStyleConfig | undefined; setConfig: (config: LineStyleConfig) => void; idPrefix: string; }) => JSX.Element"
+          "({ currentConfig, setConfig, idPrefix, }: { currentConfig?: LineStyleConfig | undefined; setConfig: (config: LineStyleConfig) => void; idPrefix: string; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
         "deprecated": false,
@@ -1467,7 +1267,7 @@
         "label": "NameInput",
         "description": [],
         "signature": [
-          "({ value, onChange, defaultValue, }: { value: string; onChange: (value: string) => void; defaultValue?: string | undefined; }) => JSX.Element"
+          "({ value, onChange, defaultValue, }: { value: string; onChange: (value: string) => void; defaultValue?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
         "deprecated": false,
@@ -1555,7 +1355,7 @@
         "label": "NewBucketButton",
         "description": [],
         "signature": [
-          "({ label, onClick, isDisabled, className, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => JSX.Element"
+          "({ label, onClick, isDisabled, className, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/new_bucket_button.tsx",
         "deprecated": false,
@@ -1612,7 +1412,7 @@
             "section": "def-public.QueryInputServices",
             "text": "QueryInputServices"
           },
-          "; }) => JSX.Element"
+          "; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
         "deprecated": false,
@@ -1817,7 +1617,7 @@
         "label": "TextDecorationSetting",
         "description": [],
         "signature": [
-          "({\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}: { idPrefix: string; currentConfig?: TextDecorationConfig | undefined; setConfig: (config: TextDecorationConfig) => void; isQueryBased?: boolean | undefined; children?: ((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined; }) => JSX.Element"
+          "({\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}: { idPrefix: string; currentConfig?: TextDecorationConfig | undefined; setConfig: (config: TextDecorationConfig) => void; isQueryBased?: boolean | undefined; children?: ((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
         "deprecated": false,
@@ -1947,159 +1747,6 @@
       },
       {
         "parentPluginId": "@kbn/visualization-ui-components",
-        "id": "def-public.TooltipWrapper",
-        "type": "Function",
-        "tags": [],
-        "label": "TooltipWrapper",
-        "description": [],
-        "signature": [
-          "({ children, condition, tooltipContent, ...tooltipProps }: React.PropsWithChildren<TooltipWrapperProps>) => JSX.Element"
-        ],
-        "path": "packages/kbn-visualization-ui-components/components/tooltip_wrapper.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.TooltipWrapper.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  children,\n  condition,\n  tooltipContent,\n  ...tooltipProps\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<TooltipWrapperProps>"
-            ],
-            "path": "packages/kbn-visualization-ui-components/components/tooltip_wrapper.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/visualization-ui-components",
-        "id": "def-public.useDebouncedValue",
-        "type": "Function",
-        "tags": [],
-        "label": "useDebouncedValue",
-        "description": [
-          "\nDebounces value changes and updates inputValue on root state changes if no debounced changes\nare in flight because the user is currently modifying the value.\n\n* allowFalsyValue: update upstream with all falsy values but null or undefined\n\nWhen testing this function mock the \"debounce\" function in lodash (see this module test for an example)"
-        ],
-        "signature": [
-          "<T>({ onChange, value, defaultValue, }: { onChange: (val: T) => void; value: T; defaultValue?: T | undefined; }, { allowFalsyValue }?: { allowFalsyValue?: boolean | undefined; }) => { inputValue: T; handleInputChange: (val: T) => void; initialValue: T; }"
-        ],
-        "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.useDebouncedValue.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n    onChange,\n    value,\n    defaultValue,\n  }",
-            "description": [],
-            "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.useDebouncedValue.$1.onChange",
-                "type": "Function",
-                "tags": [],
-                "label": "onChange",
-                "description": [],
-                "signature": [
-                  "(val: T) => void"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/visualization-ui-components",
-                    "id": "def-public.useDebouncedValue.$1.onChange.$1",
-                    "type": "Uncategorized",
-                    "tags": [],
-                    "label": "val",
-                    "description": [],
-                    "signature": [
-                      "T"
-                    ],
-                    "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.useDebouncedValue.$1.value",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.useDebouncedValue.$1.defaultValue",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "defaultValue",
-                "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.useDebouncedValue.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "{ allowFalsyValue }",
-            "description": [],
-            "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.useDebouncedValue.$2.allowFalsyValue",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "allowFalsyValue",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/visualization-ui-components",
         "id": "def-public.validateQuery",
         "type": "Function",
         "tags": [],
@@ -2207,7 +1854,7 @@
             "label": "triggerIconType",
             "description": [],
             "signature": [
-              "\"none\" | \"color\" | \"aggregate\" | \"disabled\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
+              "\"none\" | \"disabled\" | \"color\" | \"aggregate\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
             ],
             "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
             "deprecated": false,
@@ -2253,6 +1900,162 @@
               "string[] | { color: string; stop: number; }[] | undefined"
             ],
             "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.ColorPickerProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ColorPickerProps",
+        "description": [],
+        "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ColorPickerProps.overwriteColor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overwriteColor",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ColorPickerProps.defaultColor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultColor",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ColorPickerProps.isClearable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isClearable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ColorPickerProps.setConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "setConfig",
+            "description": [],
+            "signature": [
+              "(config: { color?: string | undefined; }) => void"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPickerProps.setConfig.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.ColorPickerProps.setConfig.$1.color",
+                    "type": "string",
+                    "tags": [],
+                    "label": "color",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ColorPickerProps.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ColorPickerProps.disableHelpTooltip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableHelpTooltip",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ColorPickerProps.disabledMessage",
+            "type": "string",
+            "tags": [],
+            "label": "disabledMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ColorPickerProps.showAlpha",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showAlpha",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2340,9 +2143,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -2421,9 +2224,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -2441,9 +2244,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsStart",
+                "section": "def-public.NotificationsStart",
                 "text": "NotificationsStart"
               }
             ],
@@ -2481,9 +2284,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-common.DocLinksStart",
+                "section": "def-public.DocLinksStart",
                 "text": "DocLinksStart"
               }
             ],
@@ -2636,7 +2439,47 @@
         "label": "LineStyle",
         "description": [],
         "signature": [
-          "\"solid\" | \"dashed\" | \"dotted\""
+          "\"dashed\" | \"solid\" | \"dotted\""
+        ],
+        "path": "packages/kbn-visualization-ui-components/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.sharedSetOfIcons",
+        "type": "Array",
+        "tags": [],
+        "label": "sharedSetOfIcons",
+        "description": [
+          "\nThis is the minimal icons set.\nSo far it is computed from Reference line and Metric chart icons.\nNeeds to consider annotation icons set too in the future."
+        ],
+        "signature": [
+          "{ value: ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.SharedSetOfIcons",
+            "text": "SharedSetOfIcons"
+          },
+          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
+        ],
+        "path": "packages/kbn-visualization-ui-components/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.SharedSetOfIcons",
+        "type": "Type",
+        "tags": [],
+        "label": "SharedSetOfIcons",
+        "description": [],
+        "signature": [
+          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\""
         ],
         "path": "packages/kbn-visualization-ui-components/types.ts",
         "deprecated": false,

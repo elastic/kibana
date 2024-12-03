@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
@@ -26,9 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const setAllowExpensiveQueries = async (value: boolean) => {
     await common.navigateToApp('console');
-    await console.closeHelpIfExists();
-    await console.clearTextArea();
-    await console.enterRequest(
+    await console.clearEditorText();
+    await console.enterText(
       '\nPUT _cluster/settings\n{"transient": {"search.allow_expensive_queries": ' + value + '}}'
     );
     await console.clickPlay();
@@ -69,9 +69,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('Can search options list for available options', async () => {
+    it('Can search options list for available options - exact match, case insensitive', async () => {
       await dashboardControls.optionsListOpenPopover(controlId);
-      await dashboardControls.optionsListPopoverSearchForOption('meo');
+      await dashboardControls.optionsListPopoverSearchForOption('mEOw');
       await dashboardControls.ensureAvailableOptionsEqual(
         controlId,
         {
@@ -84,9 +84,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
     });
 
-    it('Can search options list for available options - case sensitive', async () => {
+    it('Can search options list for available options - does not find partial match', async () => {
       await dashboardControls.optionsListOpenPopover(controlId);
-      await dashboardControls.optionsListPopoverSearchForOption('MEO');
+      await dashboardControls.optionsListPopoverSearchForOption('meo');
       const cardinality = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
       expect(cardinality).to.be(0);
       await dashboardControls.optionsListPopoverClearSearch();

@@ -49,6 +49,8 @@ import {
   ALERT_ORIGINAL_EVENT_MODULE,
 } from '../../../../common/field_maps/field_names';
 import { AGENT_ID } from './highlighted_fields_config';
+import { SUPPORTED_AGENT_ID_ALERT_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
+
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
@@ -1416,7 +1418,7 @@ describe('Exception helpers', () => {
       'execute',
       'upload_file',
     ];
-    const alertData = {
+    const alertData: AlertData = {
       'kibana.alert.rule.category': 'Custom Query Rule',
       'kibana.alert.rule.consumer': 'siem',
       'kibana.alert.rule.execution.uuid': '28b687e3-8e16-48aa-91b8-bf044d366c2d',
@@ -1471,6 +1473,7 @@ describe('Exception helpers', () => {
         port: 443,
       },
       source: {
+        // @ts-expect-error
         ports: [1, 2, 4],
       },
       flow: {
@@ -1775,6 +1778,11 @@ describe('Exception helpers', () => {
               label: 'Agent status',
             },
             {
+              id: 'observer.serial_number',
+              overrideField: 'agent.status',
+              label: 'Agent status',
+            },
+            {
               id: 'cloud.provider',
             },
             {
@@ -1789,11 +1797,14 @@ describe('Exception helpers', () => {
         {
           id: 'host.name',
         },
-        {
-          id: 'agent.id',
-          label: 'Agent status',
-          overrideField: 'agent.status',
-        },
+        // Fields used in support of Response Actions
+        ...SUPPORTED_AGENT_ID_ALERT_FIELDS.map((fieldPath) => {
+          return {
+            id: fieldPath,
+            overrideField: 'agent.status',
+            label: 'Agent status',
+          };
+        }),
         {
           id: 'user.name',
         },

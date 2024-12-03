@@ -290,6 +290,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
                 className={itemClassNames}
                 color="text"
                 size="s"
+                id={`solutionSideNavItemLink-${id}`}
                 data-test-subj={`solutionSideNavItemLink-${id}`}
               />
             </EuiListGroup>

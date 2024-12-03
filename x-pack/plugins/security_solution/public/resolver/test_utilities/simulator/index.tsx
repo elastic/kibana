@@ -12,7 +12,6 @@ import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { createMemoryHistory } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
-import { createStore } from '../../../common/store/store';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { MockResolver } from './mock_resolver';
@@ -21,12 +20,7 @@ import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_fac
 import { uiSetting } from '../../mocks/ui_setting';
 import { EMPTY_RESOLVER } from '../../store/helpers';
 import type { State } from '../../../common/store/types';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
+import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { createResolver } from '../../store/actions';
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
@@ -87,6 +81,8 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
+    isSplitPanel,
+    showPanelOnClick,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -107,22 +103,33 @@ export class Simulator {
     history?: HistoryPackageHistoryInterface<never>;
     filters: TimeFilters;
     shouldUpdate: boolean;
+    isSplitPanel?: boolean;
+    showPanelOnClick?: () => void;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
 
     // Create a redux store w/ the top level Resolver reducer and the enhancer that includes the Resolver middleware and the `spyMiddleware`
-    const { storage } = createSecuritySolutionStorageMock();
-    this.store = createStore(
+    this.store = createMockStore(
       {
         ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            analyzer: {
+              ...mockGlobalState.sourcerer.sourcererScopes.default,
+              selectedPatterns: indices,
+            },
+          },
+        },
         analyzer: {
           [resolverComponentInstanceID]: EMPTY_RESOLVER,
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage,
+      undefined,
+      undefined,
+      undefined,
       [resolverMiddlewareFactory(dataAccessLayer), this.spyMiddleware.middleware]
     );
 
@@ -149,6 +156,8 @@ export class Simulator {
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
+        isSplitPanel={isSplitPanel}
+        showPanelOnClick={showPanelOnClick}
       />
     );
   }
@@ -390,9 +399,9 @@ export class Simulator {
   /**
    * The titles and descriptions (as text) from the node detail panel.
    */
-  public nodeDetailDescriptionListEntries(): Array<[string, string]> {
+  public nodeDetailEntries(): Array<[string, string]> {
     /**
-     * The details of the selected node are shown in a description list. This returns the title elements of the description list.
+     * The details of the selected node are shown in a table. This returns the title elements of the node list.
      */
     const titles = this.domNodes('[data-test-subj="resolver:node-detail:entry-title"]');
     /**

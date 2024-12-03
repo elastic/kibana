@@ -1,24 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
-import {
-  HttpSetup,
-  NotificationsSetup,
-  I18nStart,
-  CoreTheme,
-  DocLinksStart,
-} from '@kbn/core/public';
+import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { KibanaThemeProvider } from '../shared_imports';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Redirect, RouteComponentProps, useLocation } from 'react-router-dom';
+import { Router, Route, Routes } from '@kbn/shared-ux-router';
+import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
 import {
   createStorage,
   createHistory,
@@ -27,43 +24,52 @@ import {
   setStorage,
 } from '../services';
 import { createUsageTracker } from '../services/tracker';
+import { loadActiveApi } from '../lib/kb';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { Main } from './containers';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { createApi, createEsHostService } from './lib';
+import { ConsoleStartServices } from '../types';
 
-export interface BootDependencies {
+const RedirectToShell = () => {
+  const location = useLocation();
+  return <Redirect to={`/console/shell${location.search}`} />;
+};
+
+export interface BootDependencies extends ConsoleStartServices {
   http: HttpSetup;
   docLinkVersion: string;
-  I18nContext: I18nStart['Context'];
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
-  theme$: Observable<CoreTheme>;
+  history: RouteComponentProps['history'];
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
+  isDevMode: boolean;
 }
 
-export function renderApp({
-  I18nContext,
+export async function renderApp({
   notifications,
   docLinkVersion,
   usageCollection,
   element,
+  history,
   http,
-  theme$,
   docLinks,
   autocompleteInfo,
+  isDevMode,
+  ...startServices
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
 
+  await loadActiveApi(http);
   const storage = createStorage({
     engine: window.localStorage,
     prefix: 'sense:',
   });
   setStorage(storage);
-  const history = createHistory({ storage });
+  const storageHistory = createHistory({ storage });
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
   const api = createApi({ http });
@@ -72,34 +78,51 @@ export function renderApp({
   autocompleteInfo.mapping.setup(http, settings);
 
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <ServicesContextProvider
-          value={{
-            docLinkVersion,
-            docLinks,
-            services: {
-              esHostService,
-              storage,
-              history,
-              settings,
-              notifications,
-              trackUiMetric,
-              objectStorageClient,
-              http,
-              autocompleteInfo,
-            },
-            theme$,
-          }}
-        >
-          <RequestContextProvider>
-            <EditorContextProvider settings={settings.toJSON()}>
+    <KibanaRenderContextProvider {...startServices}>
+      <ServicesContextProvider
+        value={{
+          ...startServices,
+          docLinkVersion,
+          docLinks,
+          services: {
+            esHostService,
+            storage,
+            history: storageHistory,
+            routeHistory: history,
+            settings,
+            notifications,
+            trackUiMetric,
+            objectStorageClient,
+            http,
+            autocompleteInfo,
+          },
+          config: {
+            isDevMode,
+          },
+        }}
+      >
+        <RequestContextProvider>
+          <EditorContextProvider settings={settings.toJSON()}>
+            {history ? (
+              <Router history={history}>
+                <Routes>
+                  {[SHELL_TAB_ID, HISTORY_TAB_ID, CONFIG_TAB_ID].map((tab) => (
+                    <Route key={tab} path={`/console/${tab}`}>
+                      <Main currentTabProp={tab} />
+                    </Route>
+                  ))}
+                  <Route key="redirect" path="/console">
+                    <RedirectToShell />
+                  </Route>
+                </Routes>
+              </Router>
+            ) : (
               <Main />
-            </EditorContextProvider>
-          </RequestContextProvider>
-        </ServicesContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+            )}
+          </EditorContextProvider>
+        </RequestContextProvider>
+      </ServicesContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -80,7 +81,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
                 title={drilldown.error}
                 aria-label={drilldown.error}
                 data-test-subj={`drilldownError-${drilldown.id}`}
-                style={{ marginLeft: '4px' }} /* a bit of spacing from text */
+                css={{ marginLeft: '4px' }} /* a bit of spacing from text */
               />
             </EuiToolTip>
           )}
@@ -147,8 +148,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
         items={drilldowns}
         itemId="id"
         columns={columns}
-        isSelectable={true}
-        responsive={false}
+        responsiveBreakpoint={false}
         selection={{
           onSelectionChange: (selection) => {
             setSelectedDrilldowns(selection.map((drilldown) => drilldown.id));
@@ -158,7 +158,6 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
         rowProps={{
           'data-test-subj': TEST_SUBJ_DRILLDOWN_ITEM,
         }}
-        hasActions={true}
         sorting={{
           sort: {
             field: 'drilldownName',

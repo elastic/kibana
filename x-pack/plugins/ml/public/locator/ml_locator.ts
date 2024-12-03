@@ -6,17 +6,20 @@
  */
 
 import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
+import { formatChangePointDetectionUrl } from './formatters/aiops';
 import { formatNotificationsUrl } from './formatters/notifications';
-import {
+import type {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,
   MlLocator,
+  ChangePointDetectionQueryState,
 } from '../../common/types/locator';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,
   formatAnomalyDetectionJobManagementUrl,
+  formatSuppliedConfigurationsManagementUrl,
   formatExplorerUrl,
   formatSingleMetricViewerUrl,
   formatDataFrameAnalyticsCreateJobUrl,
@@ -26,6 +29,7 @@ import {
   formatGenericMlUrl,
   formatEditCalendarUrl,
   formatEditFilterUrl,
+  formatEditCalendarDstUrl,
 } from './formatters';
 import {
   formatTrainedModelsManagementUrl,
@@ -43,6 +47,9 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
     switch (params.page) {
       case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
         path = formatAnomalyDetectionJobManagementUrl('', params.pageState);
+        break;
+      case ML_PAGES.SUPPLIED_CONFIGURATIONS:
+        path = formatSuppliedConfigurationsManagementUrl('', params.pageState);
         break;
       case ML_PAGES.ANOMALY_EXPLORER:
         path = formatExplorerUrl('', params.pageState);
@@ -77,6 +84,12 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.MEMORY_USAGE:
         path = formatMemoryUsageUrl('', params.pageState);
         break;
+      case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION:
+        path = formatChangePointDetectionUrl(
+          '',
+          params.pageState as ChangePointDetectionQueryState
+        );
+        break;
       case ML_PAGES.DATA_DRIFT_INDEX_SELECT:
       case ML_PAGES.DATA_DRIFT_CUSTOM:
       case ML_PAGES.DATA_DRIFT:
@@ -88,6 +101,7 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS:
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
+      case ML_PAGES.DATA_VISUALIZER_ESQL:
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
       case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
       case ML_PAGES.AIOPS:
@@ -95,14 +109,15 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT:
       case ML_PAGES.AIOPS_LOG_CATEGORIZATION:
       case ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT:
-      case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION:
       case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT:
       case ML_PAGES.OVERVIEW:
       case ML_PAGES.SETTINGS:
       case ML_PAGES.FILTER_LISTS_MANAGE:
       case ML_PAGES.FILTER_LISTS_NEW:
       case ML_PAGES.CALENDARS_MANAGE:
+      case ML_PAGES.CALENDARS_DST_MANAGE:
       case ML_PAGES.CALENDARS_NEW:
+      case ML_PAGES.CALENDARS_DST_NEW:
         path = formatGenericMlUrl('', params.page, params.pageState);
         break;
       case ML_PAGES.FILTER_LISTS_EDIT:
@@ -110,6 +125,9 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         break;
       case ML_PAGES.CALENDARS_EDIT:
         path = formatEditCalendarUrl('', params.pageState);
+        break;
+      case ML_PAGES.CALENDARS_DST_EDIT:
+        path = formatEditCalendarDstUrl('', params.pageState);
         break;
       case ML_PAGES.NOTIFICATIONS:
         path = formatNotificationsUrl('', params.pageState);

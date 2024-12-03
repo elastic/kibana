@@ -25,7 +25,7 @@ describe('ReadOnlyConnectorMessage', () => {
       { wrapper: I18nProvider }
     );
 
-    expect(getByText('This connector is readonly.')).toBeInTheDocument();
+    expect(getByText('This connector is read-only.')).toBeInTheDocument();
     expect(getByTestId('read-only-link')).toHaveProperty('href', 'https://example.com/');
     expect(queryByText('Extra Component')).toBeNull();
   });

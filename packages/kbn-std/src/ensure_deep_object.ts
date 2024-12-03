@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const FORBIDDEN_PATTERNS = ['__proto__', 'constructor.prototype'];
@@ -17,7 +18,7 @@ const separator = '.';
  * @returns Same object instance with expanded properties.
  */
 export function ensureDeepObject(obj: any, path: string[] = []): any {
-  assertValidPath(path);
+  ensureValidObjectPath(path);
 
   if (obj == null || typeof obj !== 'object') {
     return obj;
@@ -41,7 +42,7 @@ export function ensureDeepObject(obj: any, path: string[] = []): any {
 }
 
 function walk(obj: any, keys: string[], value: any, path: string[]) {
-  assertValidPath([...path, ...keys]);
+  ensureValidObjectPath([...path, ...keys]);
 
   const key = keys.shift()!;
   if (keys.length === 0) {
@@ -49,14 +50,14 @@ function walk(obj: any, keys: string[], value: any, path: string[]) {
     return;
   }
 
-  if (!obj.hasOwnProperty(key)) {
+  if (!Object.hasOwn(obj, key)) {
     obj[key] = {};
   }
 
   walk(obj[key], keys, ensureDeepObject(value, [...path, key, ...keys]), [...path, key]);
 }
 
-const assertValidPath = (path: string[]) => {
+export const ensureValidObjectPath = (path: string[]) => {
   const flat = path.join('.');
   FORBIDDEN_PATTERNS.forEach((pattern) => {
     if (flat.includes(pattern)) {

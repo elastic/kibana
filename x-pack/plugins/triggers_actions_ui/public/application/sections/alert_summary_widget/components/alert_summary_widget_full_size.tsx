@@ -21,33 +21,36 @@ import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
-import { Alert, ChartProps } from '../types';
+import { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetFullSizeProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
-  chartProps: ChartProps;
+  chartProps?: ChartProps;
   recoveredAlertCount: number;
+  timeZone: string;
   dateFormat?: string;
   hideChart?: boolean;
+  hideStats?: boolean;
+  dependencyProps: DependencyProps;
 }
 
 export const AlertSummaryWidgetFullSize = ({
   activeAlertCount,
   activeAlerts,
-  chartProps: { theme, baseTheme, onBrushEnd },
+  chartProps: { themeOverrides, onBrushEnd } = {},
   dateFormat,
   recoveredAlertCount,
+  timeZone,
   hideChart,
+  hideStats,
+  dependencyProps: { baseTheme },
 }: AlertSummaryWidgetFullSizeProps) => {
-  const chartTheme = [
-    theme,
-    {
-      chartPaddings: {
-        top: 7,
-      },
-    },
-  ];
+  const chartData = activeAlerts.map((alert) => alert.doc_count);
+  const domain = {
+    max: Math.max(...chartData) * 1.1, // add 10% headroom
+    min: Math.min(...chartData) * 0.9, // add 10% floor
+  };
 
   return (
     <EuiPanel
@@ -56,12 +59,14 @@ export const AlertSummaryWidgetFullSize = ({
       hasShadow={false}
       paddingSize="none"
     >
-      <EuiFlexItem>
-        <AlertCounts
-          activeAlertCount={activeAlertCount}
-          recoveredAlertCount={recoveredAlertCount}
-        />
-      </EuiFlexItem>
+      {!hideStats && (
+        <EuiFlexItem data-test-subj="alertSummaryWidgetFullSizeStats">
+          <AlertCounts
+            activeAlertCount={activeAlertCount}
+            recoveredAlertCount={recoveredAlertCount}
+          />
+        </EuiFlexItem>
+      )}
       {!hideChart && (
         <div data-test-subj="alertSummaryWidgetFullSizeChartContainer">
           <EuiSpacer size="l" />
@@ -73,7 +78,18 @@ export const AlertSummaryWidgetFullSize = ({
             />
             <Settings
               legendPosition={Position.Right}
-              theme={chartTheme}
+              theme={[
+                ...(themeOverrides
+                  ? Array.isArray(themeOverrides)
+                    ? themeOverrides
+                    : [themeOverrides]
+                  : []),
+                {
+                  chartPaddings: {
+                    top: 7,
+                  },
+                },
+              ]}
               baseTheme={baseTheme}
               onBrushEnd={onBrushEnd}
               locale={i18n.getLocale()}
@@ -86,7 +102,7 @@ export const AlertSummaryWidgetFullSize = ({
                 visible: true,
               }}
               style={{
-                tickLine: { size: 0.0001, padding: 4 },
+                tickLine: { size: 0, padding: 4 },
                 tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
               }}
             />
@@ -96,6 +112,7 @@ export const AlertSummaryWidgetFullSize = ({
               gridLine={{ visible: true }}
               integersOnly
               ticks={4}
+              domain={domain}
             />
             <Axis
               id="right"
@@ -116,9 +133,10 @@ export const AlertSummaryWidgetFullSize = ({
                 line: {
                   strokeWidth: 2,
                 },
-                point: { visible: false },
+                point: { visible: 'never' },
               }}
               curve={CurveType.CURVE_MONOTONE_X}
+              timeZone={timeZone}
             />
           </Chart>
         </div>

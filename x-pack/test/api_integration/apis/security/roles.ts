@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { Role } from '@kbn/security-plugin-types-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -389,6 +390,87 @@ export default function ({ getService }: FtrProviderContext) {
 
             _transform_error: [],
             _unrecognized_applications: ['logstash-default'],
+          });
+      });
+
+      it('should get roles by space id', async () => {
+        await es.security.putRole({
+          name: 'space_role_not_to_get',
+          body: {
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                allow_restricted_indices: false,
+              },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                resources: ['space:marketing', 'space:sales'],
+              },
+            ],
+            run_as: ['watcher_user'],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        });
+
+        await es.security.putRole({
+          name: 'space_role_to_get',
+          body: {
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                allow_restricted_indices: false,
+              },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                resources: ['space:engineering', 'space:sales'],
+              },
+            ],
+            run_as: ['watcher_user'],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        });
+
+        await supertest
+          .get('/internal/security/roles/engineering')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200)
+          .expect((res: { body: Role[] }) => {
+            const roles = res.body;
+            expect(roles).to.be.an('array');
+
+            const success = roles.every((role) => {
+              return (
+                role.name !== 'space_role_not_to_get' &&
+                role.kibana.some((privilege) => {
+                  return privilege.spaces.includes('*') || privilege.spaces.includes('engineering');
+                })
+              );
+            });
+
+            const expectedRole = roles.find((role) => role.name === 'space_role_to_get');
+
+            expect(success).to.be(true);
+            expect(expectedRole).to.be.an('object');
           });
       });
     });

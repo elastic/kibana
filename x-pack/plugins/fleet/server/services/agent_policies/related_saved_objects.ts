@@ -16,6 +16,7 @@ import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils'
 import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 import { appContextService } from '../app_context';
 import { bulkGetFleetProxies } from '../fleet_proxies';
+import { OutputNotFoundError } from '../../errors';
 
 export async function fetchRelatedSavedObjects(
   soClient: SavedObjectsClientContract,
@@ -27,18 +28,27 @@ export async function fetchRelatedSavedObjects(
   ]);
 
   if (!defaultDataOutputId) {
-    throw new Error('Default output is not setup');
+    throw new OutputNotFoundError('Default output is not setup');
   }
 
   const dataOutputId = agentPolicy.data_output_id || defaultDataOutputId;
   const monitoringOutputId =
     agentPolicy.monitoring_output_id || defaultMonitoringOutputId || dataOutputId;
 
+  const outputIds = uniq([
+    dataOutputId,
+    monitoringOutputId,
+    ...(agentPolicy.package_policies || []).reduce((acc: string[], packagePolicy) => {
+      if (packagePolicy.output_id) {
+        acc.push(packagePolicy.output_id);
+      }
+      return acc;
+    }, []),
+  ]);
+
   const [outputs, { host: downloadSourceUri, proxy_id: downloadSourceProxyId }, fleetServerHosts] =
     await Promise.all([
-      outputService.bulkGet(soClient, uniq([dataOutputId, monitoringOutputId]), {
-        ignoreNotFound: true,
-      }),
+      outputService.bulkGet(outputIds, { ignoreNotFound: true }),
       getSourceUriForAgentPolicy(soClient, agentPolicy),
       getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
         appContextService
@@ -51,11 +61,11 @@ export async function fetchRelatedSavedObjects(
 
   const dataOutput = outputs.find((output) => output.id === dataOutputId);
   if (!dataOutput) {
-    throw new Error(`Data output not found ${dataOutputId}`);
+    throw new OutputNotFoundError(`Data output not found ${dataOutputId}`);
   }
   const monitoringOutput = outputs.find((output) => output.id === monitoringOutputId);
   if (!monitoringOutput) {
-    throw new Error(`Monitoring output not found ${monitoringOutputId}`);
+    throw new OutputNotFoundError(`Monitoring output not found ${monitoringOutputId}`);
   }
 
   const proxyIds = uniq(

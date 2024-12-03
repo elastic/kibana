@@ -20,8 +20,8 @@ import { ProcessorsEditorWithDeps } from '../processors_editor';
 
 stubWebWorker();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -199,4 +199,10 @@ type TestSubject =
   | 'ignoreMissingPipelineSwitch.input'
   | 'destinationField.input'
   | 'datasetField.input'
-  | 'namespaceField.input';
+  | 'namespaceField.input'
+  | 'processorField'
+  | 'paramsField'
+  | 'scriptSource'
+  | 'inferenceModelId.input'
+  | 'inferenceConfig'
+  | 'fieldMap';

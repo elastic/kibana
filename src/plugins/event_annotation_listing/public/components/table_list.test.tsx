@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,10 +13,8 @@ import {
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
 } from './table_list';
-import {
-  TableListViewTable,
-  type UserContentCommonSchema,
-} from '@kbn/content-management-table-list-view-table';
+import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-components/types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -237,9 +236,9 @@ describe('annotation list view', () => {
 
     it('opens editor when title is clicked', async () => {
       act(() => {
-        wrapper.find(TableListViewTable).prop('onClickTitle')!({
+        wrapper.find(TableListViewTable).prop('getOnClickTitle')!({
           id: '1234',
-        } as UserContentCommonSchema);
+        } as UserContentCommonSchema)!();
       });
 
       await new Promise((resolve) => setTimeout(resolve, 0));

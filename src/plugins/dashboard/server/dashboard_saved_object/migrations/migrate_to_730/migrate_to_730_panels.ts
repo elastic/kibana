@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -12,7 +13,7 @@ import semverSatisfies from 'semver/functions/satisfies';
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import {
+import type {
   SavedDashboardPanel620,
   SavedDashboardPanel630,
   SavedDashboardPanel610,
@@ -24,7 +25,7 @@ import {
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
 } from './types';
-import { GridData } from '../../../../common/content_management';
+import type { GridData } from '../../../content_management';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;

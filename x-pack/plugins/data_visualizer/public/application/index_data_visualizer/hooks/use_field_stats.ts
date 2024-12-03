@@ -6,13 +6,15 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { combineLatest, from, Observable, Subject, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { combineLatest, from, Subject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { last, cloneDeep } from 'lodash';
-import { mergeMap, switchMap } from 'rxjs/operators';
+import { mergeMap, switchMap } from 'rxjs';
 import { Comparators } from '@elastic/eui';
-import type { ISearchOptions } from '@kbn/data-plugin/common';
-import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
+import type { ISearchOptions } from '@kbn/search-types';
+import { getSafeAggregationName } from '@kbn/ml-query-utils';
+import { buildFilterCriteria } from '../../../../common/utils/build_query_filters';
 import type {
   DataStatsFetchProgress,
   FieldStatsSearchStrategyReturnBase,
@@ -73,6 +75,7 @@ export function useFieldStatsSearchStrategy(
   } = useDataVisualizerKibana();
 
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
+
   const [fetchState, setFetchState] = useReducer(
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
@@ -85,7 +88,6 @@ export function useFieldStatsSearchStrategy(
   const startFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     retries$.current?.unsubscribe();
-
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
     setFetchState({
@@ -145,7 +147,7 @@ export function useFieldStatsSearchStrategy(
       return;
     }
 
-    const filterCriteria = buildBaseFilterCriteria(
+    const filterCriteria = buildFilterCriteria(
       searchStrategyParams.timeFieldName,
       searchStrategyParams.earliest,
       searchStrategyParams.latest,
@@ -154,7 +156,6 @@ export function useFieldStatsSearchStrategy(
 
     const params: FieldStatsCommonRequestParams = {
       index: searchStrategyParams.index,
-      samplerShardSize: searchStrategyParams.samplerShardSize,
       timeFieldName: searchStrategyParams.timeFieldName,
       earliestMs: searchStrategyParams.earliest,
       latestMs: searchStrategyParams.latest,
@@ -194,11 +195,13 @@ export function useFieldStatsSearchStrategy(
       .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>;
 
     const onError = (error: any) => {
-      toasts.addError(error, {
-        title: i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
+      // eslint-disable-next-line no-console
+      console.error(
+        i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
           defaultMessage: 'Error fetching field statistics',
         }),
-      });
+        error
+      );
       setFetchState({
         isRunning: false,
         error,
@@ -274,7 +277,12 @@ export function useFieldStatsSearchStrategy(
 
         if (Array.isArray(fieldBatches)) {
           fieldBatches.forEach((f) => {
-            if (Array.isArray(f) && f.length === 1) {
+            if (
+              Array.isArray(f) &&
+              f.length === 1 &&
+              Array.isArray(f[0].fields) &&
+              f[0].fields.length > 0
+            ) {
               statsMap.set(f[0].fields[0], f[0]);
             }
           });
@@ -316,8 +324,11 @@ export function useFieldStatsSearchStrategy(
   // auto-update
   useEffect(() => {
     startFetch();
+  }, [startFetch]);
+
+  useEffect(() => {
     return cancelFetch;
-  }, [startFetch, cancelFetch]);
+  }, [cancelFetch]);
 
   return {
     progress: fetchState,

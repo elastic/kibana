@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -118,7 +119,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     editor
   );
   if (includeAutoComplete) {
-    let autoCompleteSet = [];
+    let autoCompleteSet = new Map();
     _.each(walkStates, function (ws) {
       const contextForState = passThroughContext(context, ws.contextExtensionList);
       _.each(ws.components, function (component) {
@@ -126,11 +127,16 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
           if (!_.isObject(term)) {
             term = { name: term };
           }
-          autoCompleteSet.push(term);
+
+          // Add the term to the autoCompleteSet if it doesn't already exist
+          if (!autoCompleteSet.has(term.name)) {
+            autoCompleteSet.set(term.name, term);
+          }
         });
       });
     });
-    autoCompleteSet = _.uniq(autoCompleteSet);
+    // Convert Map values to an array of objects
+    autoCompleteSet = Array.from(autoCompleteSet.values());
     context.autoCompleteSet = autoCompleteSet;
   }
 

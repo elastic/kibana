@@ -34,14 +34,14 @@
 
   // SASSTODO: Dangerous EUI overwrite
   .scope-enable-checkbox {
-    .euiCheckbox__input[disabled] ~ .euiCheckbox__label {
+    .euiCheckbox__label {
       color: inherit;
     }
   }
 
   // SASSTODO: Dangerous EUI overwrite
   .scope-field-checkbox {
-    margin-right: $euiSizeXS / 2;
+    margin-right: calc($euiSizeXS / 2);
 
     .euiCheckbox {
       margin-top: $euiSizeXS;

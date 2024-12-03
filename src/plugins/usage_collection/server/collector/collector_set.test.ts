@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { noop } from 'lodash';
@@ -237,6 +238,16 @@ describe('CollectorSet', () => {
           },
           uptime_in_millis: 137844000,
         },
+        process: {
+          heap: {
+            total_in_bytes: 1,
+            used_in_bytes: 2,
+            size_limit: 3,
+          },
+          resident_set_size_in_bytes: 4,
+          array_buffers_in_bytes: 5,
+          external_in_bytes: 6,
+        },
         daysOfTheWeek: ['monday', 'tuesday', 'wednesday'],
       };
 
@@ -246,6 +257,16 @@ describe('CollectorSet', () => {
           load: { '15m': 2.3525390625, '1m': 2.22412109375, '5m': 2.4462890625 },
           memory: { free_bytes: 458280960, total_bytes: 17179869184, used_bytes: 16721588224 },
           uptime_ms: 137844000,
+        },
+        process: {
+          heap: {
+            total_bytes: 1,
+            used_bytes: 2,
+            size_limit: 3,
+          },
+          resident_set_size_bytes: 4,
+          array_buffers_bytes: 5,
+          external_bytes: 6,
         },
         days_of_the_week: ['monday', 'tuesday', 'wednesday'],
       });

@@ -17,12 +17,18 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CONFIGURATION_LABEL, OVERVIEW_LABEL } from '../../../../../common/i18n_string';
+import {
+  CONFIGURATION_LABEL,
+  OVERVIEW_LABEL,
+  SCHEDULING_LABEL,
+} from '../../../../../common/i18n_string';
 import { ConnectorLinkElasticsearch } from './connector_link';
 import { ConnectorConfigFields } from './connector_config_fields';
 import { ConnectorIndexName } from './connector_index_name';
 import { ConnectorConfigurationPanels } from './connector_config_panels';
 import { ConnectorOverview } from './connector_overview';
+import { ConnectorScheduling } from '../conector_scheduling_tab/connector_scheduling';
+import { useConnectors } from '../../../hooks/api/use_connectors';
 
 interface ConnectorConfigurationProps {
   connector: Connector;
@@ -31,18 +37,26 @@ interface ConnectorConfigurationProps {
 type ConnectorConfigurationStep = 'link' | 'configure' | 'connect' | 'connected';
 
 export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ connector }) => {
+  const { data } = useConnectors();
+  const { canManageConnectors } = data || { canManageConnectors: false };
   const [currentStep, setCurrentStep] = useState<ConnectorConfigurationStep>('link');
   useEffect(() => {
-    const step =
-      connector.status === ConnectorStatus.CREATED
-        ? 'link'
-        : connector.status === ConnectorStatus.NEEDS_CONFIGURATION
-        ? 'configure'
-        : connector.status === ConnectorStatus.CONFIGURED
-        ? 'connect'
-        : 'connected';
+    let step: ConnectorConfigurationStep = 'link';
+    switch (connector.status) {
+      case ConnectorStatus.CREATED:
+        step = 'link';
+        break;
+      case ConnectorStatus.NEEDS_CONFIGURATION:
+        step = Object.keys(connector.configuration || {}).length > 0 ? 'configure' : 'link';
+        break;
+      case ConnectorStatus.CONFIGURED:
+        step = 'connect';
+        break;
+      default:
+        step = 'connected';
+    }
     setCurrentStep(step);
-  }, [connector.status, setCurrentStep]);
+  }, [connector.status, setCurrentStep, connector.configuration]);
   const steps: EuiStepsHorizontalProps['steps'] = [
     {
       title: i18n.translate('xpack.serverlessSearch.connectors.config.linkToElasticTitle', {
@@ -88,7 +102,9 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
 
   const tabs: EuiTabbedContentTab[] = [
     {
-      content: <ConnectorOverview connector={connector} />,
+      content: (
+        <ConnectorOverview canManageConnectors={canManageConnectors} connector={connector} />
+      ),
       id: 'overview',
       name: OVERVIEW_LABEL,
     },
@@ -96,11 +112,24 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
       content: (
         <>
           <EuiSpacer />
-          <ConnectorConfigurationPanels connector={connector} />
+          <ConnectorConfigurationPanels
+            canManageConnectors={canManageConnectors}
+            connector={connector}
+          />
         </>
       ),
       id: 'configuration',
       name: CONFIGURATION_LABEL,
+    },
+    {
+      content: (
+        <>
+          <EuiSpacer />
+          <ConnectorScheduling canManageConnectors={canManageConnectors} connector={connector} />
+        </>
+      ),
+      id: 'scheduling',
+      name: SCHEDULING_LABEL,
     },
   ];
 
@@ -119,8 +148,12 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
             status={connector.status}
           />
         )}
-        {currentStep === 'configure' && <ConnectorConfigFields connector={connector} />}
-        {currentStep === 'connect' && <ConnectorIndexName connector={connector} />}
+        {currentStep === 'configure' && (
+          <ConnectorConfigFields connector={connector} isDisabled={!canManageConnectors} />
+        )}
+        {currentStep === 'connect' && (
+          <ConnectorIndexName isDisabled={!canManageConnectors} connector={connector} />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

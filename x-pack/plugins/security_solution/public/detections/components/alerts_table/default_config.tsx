@@ -9,11 +9,13 @@ import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_RULE_ID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
 import { tableDefaults } from '@kbn/securitysolution-data-table';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
+import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import {
   getColumns,
@@ -103,6 +105,7 @@ export const buildAlertsFilter = (ruleStaticId: string | null): Filter[] =>
           meta: {
             alias: null,
             negate: false,
+            index: 'security-solution-default',
             disabled: false,
             type: 'phrase',
             key: ALERT_RULE_RULE_ID,
@@ -119,6 +122,34 @@ export const buildAlertsFilter = (ruleStaticId: string | null): Filter[] =>
       ]
     : [];
 
+export const buildAlertsFilterByRuleIds = (ruleIds: string[] | null): Filter[] => {
+  if (ruleIds == null || ruleIds.length === 0) {
+    return [];
+  }
+
+  const combinedQuery = {
+    bool: {
+      should: ruleIds.map((ruleId) => ({
+        term: {
+          [ALERT_RULE_RULE_ID]: ruleId,
+        },
+      })),
+      minimum_should_match: 1,
+    },
+  };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+      },
+      query: combinedQuery,
+    },
+  ];
+};
+
 export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] =>
   showBuildingBlockAlerts
     ? []
@@ -131,6 +162,7 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             type: 'exists',
             key: ALERT_BUILDING_BLOCK_TYPE,
             value: 'exists',
+            index: 'security-solution-default',
           },
           query: { exists: { field: ALERT_BUILDING_BLOCK_TYPE } },
         },
@@ -146,11 +178,43 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             negate: false,
             key: 'kibana.alert.rule.type',
             type: 'term',
+            index: 'security-solution-default',
           },
           query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
         },
       ]
     : [];
+
+export const buildAlertAssigneesFilter = (assigneesIds: AssigneesIdsSelection[]): Filter[] => {
+  if (!assigneesIds.length) {
+    return [];
+  }
+  const combinedQuery = {
+    bool: {
+      should: assigneesIds.map((id) =>
+        id
+          ? {
+              term: {
+                [ALERT_WORKFLOW_ASSIGNEE_IDS]: id,
+              },
+            }
+          : { bool: { must_not: { exists: { field: ALERT_WORKFLOW_ASSIGNEE_IDS } } } }
+      ),
+    },
+  };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        index: 'security-solution-default',
+      },
+      query: combinedQuery,
+    },
+  ];
+};
 
 export const getAlertsDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...tableDefaults,
@@ -160,7 +224,7 @@ export const getAlertsDefaultModel = (license?: LicenseService): SubsetDataTable
 
 export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...getAlertsDefaultModel(license),
-  columns: getColumns(license),
+  columns: getRulePreviewColumns(license),
   defaultColumns: getRulePreviewColumns(license),
   sort: [
     {
@@ -177,6 +241,7 @@ export const requiredFieldsForActions = [
   '@timestamp',
   'kibana.alert.workflow_status',
   'kibana.alert.workflow_tags',
+  'kibana.alert.workflow_assignee_ids',
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.building_block_type',

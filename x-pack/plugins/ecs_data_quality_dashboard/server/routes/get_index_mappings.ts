@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 
 import { fetchMappings } from '../lib';
 import { buildResponse } from '../lib/build_response';
@@ -19,6 +19,11 @@ export const getIndexMappingsRoute = (router: IRouter, logger: Logger) => {
     .get({
       path: GET_INDEX_MAPPINGS,
       access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {

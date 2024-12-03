@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-import { map } from 'rxjs/operators';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { pick } from 'lodash';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { EuiSpacer } from '@elastic/eui';
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
@@ -22,10 +23,11 @@ import {
   mlTimefilterRefresh$,
 } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
-import { type Observable } from 'rxjs';
 import { DataSourceContext } from '../../hooks/use_data_source';
-import { AiopsAppContext, AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import type { AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
+import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { PageHeader } from '../page_header';
@@ -37,7 +39,7 @@ import {
 } from './change_point_detection_context';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { ReloadContextProvider } from '../../hooks/use_reload';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
+import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -49,8 +51,8 @@ export interface ChangePointDetectionAppStateProps {
   dataView: DataView;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
-  /** App dependencies */
-  appDependencies: AiopsAppDependencies;
+  /** App context value */
+  appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
 }
@@ -58,11 +60,11 @@ export interface ChangePointDetectionAppStateProps {
 export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps> = ({
   dataView,
   savedSearch,
-  appDependencies,
+  appContextValue,
   showFrozenDataTierChoice = true,
 }) => {
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
   };
@@ -77,39 +79,34 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     return <>{warning}</>;
   }
 
-  appDependencies.embeddingOrigin = AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE;
+  appContextValue.embeddingOrigin = AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS;
 
-  const PresentationContextProvider =
-    appDependencies.presentationUtil?.ContextProvider ?? React.Fragment;
-
-  const CasesContext = appDependencies.cases?.ui.getCasesContext() ?? React.Fragment;
-  const casesPermissions = appDependencies.cases?.helpers.canUseCases();
+  const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = appContextValue.cases?.helpers.canUseCases();
 
   return (
-    <PresentationContextProvider>
-      <StyledComponentsThemeProvider>
-        <CasesContext owner={[]} permissions={casesPermissions!}>
-          <AiopsAppContext.Provider value={appDependencies}>
-            <UrlStateProvider>
-              <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-                <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-                  <DatePickerContextProvider {...datePickerDeps}>
-                    <PageHeader />
-                    <EuiSpacer />
-                    <ReloadContextProvider reload$={reload$}>
-                      <ChangePointDetectionContextProvider>
-                        <ChangePointDetectionControlsContextProvider>
-                          <ChangePointDetectionPage />
-                        </ChangePointDetectionControlsContextProvider>
-                      </ChangePointDetectionContextProvider>
-                    </ReloadContextProvider>
-                  </DatePickerContextProvider>
-                </StorageContextProvider>
-              </DataSourceContext.Provider>
-            </UrlStateProvider>
-          </AiopsAppContext.Provider>
-        </CasesContext>
-      </StyledComponentsThemeProvider>
-    </PresentationContextProvider>
+    <CasesContext owner={[]} permissions={casesPermissions!}>
+      <AiopsAppContext.Provider value={appContextValue}>
+        <UrlStateProvider>
+          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <PageHeader />
+                <EuiSpacer />
+                <ReloadContextProvider reload$={reload$}>
+                  <FilterQueryContextProvider>
+                    <ChangePointDetectionContextProvider>
+                      <ChangePointDetectionControlsContextProvider>
+                        <ChangePointDetectionPage />
+                      </ChangePointDetectionControlsContextProvider>
+                    </ChangePointDetectionContextProvider>
+                  </FilterQueryContextProvider>
+                </ReloadContextProvider>
+              </DatePickerContextProvider>
+            </StorageContextProvider>
+          </DataSourceContext.Provider>
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    </CasesContext>
   );
 };

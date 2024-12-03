@@ -1,24 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
 
-import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
-import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { SearchRequest } from '@kbn/data-plugin/common';
 import { schema } from '@kbn/config-schema';
+import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
-import { getExpensiveSuggestionAggregationBuilder } from './options_list_expensive_suggestion_queries';
-import { getCheapSuggestionAggregationBuilder } from './options_list_cheap_suggestion_queries';
-import { OptionsListSuggestionAggregationBuilder } from './types';
+import { getSuggestionAggregationBuilder } from './suggestion_queries';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
@@ -50,7 +49,15 @@ export const setupOptionsListSuggestionsRoute = (
                 filters: schema.maybe(schema.any()),
                 fieldSpec: schema.maybe(schema.any()),
                 allowExpensiveQueries: schema.boolean(),
+                ignoreValidations: schema.maybe(schema.boolean()),
                 searchString: schema.maybe(schema.string()),
+                searchTechnique: schema.maybe(
+                  schema.oneOf([
+                    schema.literal('exact'),
+                    schema.literal('prefix'),
+                    schema.literal('wildcard'),
+                  ])
+                ),
                 selectedOptions: schema.maybe(
                   schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(schema.number())])
                 ),
@@ -97,27 +104,20 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, runtimeFieldMap, allowExpensiveQueries } = request;
+    const { runPastTimeout, filters, runtimeFieldMap, ignoreValidations } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
       : { timeout: `${timeout}ms`, terminate_after: terminateAfter };
 
-    let suggestionBuilder: OptionsListSuggestionAggregationBuilder;
-    if (allowExpensiveQueries) {
-      suggestionBuilder = getExpensiveSuggestionAggregationBuilder(request);
-    } else {
-      suggestionBuilder = getCheapSuggestionAggregationBuilder(request);
-    }
+    const suggestionBuilder = getSuggestionAggregationBuilder(request);
     const validationBuilder = getValidationAggregationBuilder();
 
     const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};
-    const builtValidationAggregation = validationBuilder.buildAggregation(request);
-    const validationAggregations = builtValidationAggregation
-      ? {
-          validation: builtValidationAggregation,
-        }
-      : {};
+    const validationAggregation: any = ignoreValidations
+      ? {}
+      : validationBuilder.buildAggregation(request);
+
     const body: SearchRequest['body'] = {
       size: 0,
       ...timeoutSettings,
@@ -128,12 +128,13 @@ export const setupOptionsListSuggestionsRoute = (
       },
       aggs: {
         ...suggestionAggregation,
-        ...validationAggregations,
+        ...validationAggregation,
       },
       runtime_mappings: {
         ...runtimeFieldMap,
       },
     };
+
     /**
      * Run ES query
      */
@@ -144,7 +145,10 @@ export const setupOptionsListSuggestionsRoute = (
      */
     const results = suggestionBuilder.parse(rawEsResult, request);
     const totalCardinality = results.totalCardinality;
-    const invalidSelections = validationBuilder.parse(rawEsResult);
+    const invalidSelections = ignoreValidations
+      ? []
+      : validationBuilder.parse(rawEsResult, request);
+
     return {
       suggestions: results.suggestions,
       totalCardinality,

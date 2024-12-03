@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Get Timeline API
+  version: '2023-10-31'
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/_get_timeline_or_timeline_template_by_savedobjectid.html
+  description: Documentation
+paths:
+  /api/timeline:
+    get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: GetTimeline
+      summary: Get Timeline or Timeline template details
+      description: Get the details of an existing saved Timeline or Timeline template.
+      tags:
+        - access:securitySolution
+      parameters:
+        - in: query
+          name: template_timeline_id
+          schema:
+            type: string
+          description: The ID of the template timeline to retrieve
+        - in: query
+          name: id
+          schema:
+            type: string
+          description: The ID of the Timeline to retrieve.
+      responses:
+        '200':
+          description: Indicates that the (template) Timeline was found and returned.
+          content:
+            application/json:
+              schema:
+                $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'

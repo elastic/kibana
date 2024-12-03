@@ -20,16 +20,16 @@ export function ForceRefreshCheckbox({ applyForceRefresh, setApplyForceRefresh }
   };
 
   return (
-    <EuiFormRow display="columnCompressedSwitch">
+    <EuiFormRow display="columnCompressed">
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.maps.filterEditor.applyForceRefreshTooltip', {
-          defaultMessage: `When enabled, layer re-fetches data when automatic refresh fires and when "Refresh" is clicked.`,
+          defaultMessage: `When on, layer re-fetches data when automatic refresh fires and when "Refresh" is clicked.`,
         })}
       >
         <EuiSwitch
           label={i18n.translate('xpack.maps.filterEditor.applyForceRefreshLabel', {
-            defaultMessage: `Apply global refresh to layer data`,
+            defaultMessage: `Re-fetch layer data on refresh`,
           })}
           checked={applyForceRefresh}
           onChange={onChange}

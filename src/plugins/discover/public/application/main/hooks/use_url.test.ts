@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { useUrl } from './use_url';
 import {
@@ -13,7 +15,6 @@ import {
   savedSearchMockWithTimeFieldNew,
 } from '../../../__mocks__/saved_search';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { addProfile } from '../../../../common/customizations';
 
 function prepareTest(savedSearch: SavedSearch, path: string) {
   const { history } = createSearchSessionMock();
@@ -42,10 +43,6 @@ describe('test useUrl when the url is changed to /', () => {
   });
   test('loadSavedSearch is triggered when a new saved search is pre-selected', () => {
     const { load } = prepareTest(savedSearchMockWithTimeFieldNew, '/');
-    expect(load).toHaveBeenCalledTimes(1);
-  });
-  test('loadSavedSearch is triggered when a new saved search is pre-selected with an active profile', () => {
-    const { load } = prepareTest(savedSearchMockWithTimeFieldNew, addProfile('', 'test'));
     expect(load).toHaveBeenCalledTimes(1);
   });
 });

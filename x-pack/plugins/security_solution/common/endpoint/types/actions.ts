@@ -6,23 +6,27 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { EcsError } from '@kbn/ecs';
-import type { FileJSON, BaseFileMetadata, FileCompression } from '@kbn/files-plugin/common';
-import type { ResponseActionBodySchema, UploadActionApiRequestBody } from '../../api/endpoint';
-import type { ActionStatusRequestSchema } from '../../api/endpoint/actions/action_status_route';
+import type { EcsError } from '@elastic/ecs';
+import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type {
-  KillOrSuspendProcessRequestSchema,
-  NoParametersRequestSchema,
-} from '../../api/endpoint/actions/common/base';
+  UploadActionApiRequestBody,
+  ActionStatusRequestSchema,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
+} from '../../api/endpoint';
+
 import type {
-  ResponseActionStatus,
+  ResponseActionAgentType,
   ResponseActionsApiCommandNames,
+  ResponseActionStatus,
 } from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 /** The output provided by some of the Endpoint responses */
-export interface ActionResponseOutput<TOutputContent extends object = object> {
+export interface ActionResponseOutput<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+> {
   type: 'json' | 'text';
   content: TOutputContent;
 }
@@ -35,6 +39,7 @@ export interface ProcessesEntry {
 }
 
 export interface GetProcessesActionOutputContent {
+  code: string;
   entries: ProcessesEntry[];
 }
 
@@ -50,6 +55,7 @@ export interface KillProcessActionOutputContent {
   command?: string;
   pid?: number;
   entity_id?: string;
+  process_name?: string;
 }
 
 export interface ResponseActionGetFileOutputContent {
@@ -86,6 +92,10 @@ export interface ResponseActionExecuteOutputContent {
   output_file_stderr_truncated: boolean;
 }
 
+export interface ResponseActionScanOutputContent {
+  code: string;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -95,7 +105,7 @@ export const ActivityLogItemTypes = {
 
 interface EndpointActionFields<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
-  TOutputContent extends object = object
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > {
   action_id: string;
   data: EndpointActionData<TParameters, TOutputContent>;
@@ -104,7 +114,7 @@ interface EndpointActionFields<
 interface ActionRequestFields {
   expiration: string;
   type: 'INPUT_ACTION';
-  input_type: 'endpoint';
+  input_type: ResponseActionAgentType;
 }
 
 interface ActionResponseFields {
@@ -116,12 +126,16 @@ interface ActionResponseFields {
  * An endpoint Action created in the Endpoint's `.logs-endpoint.actions-default` index.
  * @since v7.16
  */
-export interface LogsEndpointAction {
+export interface LogsEndpointAction<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
   '@timestamp': string;
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields & ActionRequestFields;
+  EndpointActions: EndpointActionFields<TParameters, TOutputContent> & ActionRequestFields;
   error?: EcsError;
   user: {
     id: string;
@@ -130,6 +144,8 @@ export interface LogsEndpointAction {
     id: string;
     name: string;
   };
+  /** Area to store any additional metadata  */
+  meta?: TMeta;
 }
 
 export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
@@ -145,7 +161,10 @@ export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
  */
-export interface LogsEndpointActionResponse<TOutputContent extends object = object> {
+export interface LogsEndpointActionResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
   '@timestamp': string;
   agent: {
     id: string | string[];
@@ -154,23 +173,35 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
     action_id: string;
     // Endpoint Response documents do not have `parameters` in the `data`
     data: Pick<EndpointActionData<never, TOutputContent>, 'comment' | 'command' | 'output'>;
+    input_type: ResponseActionAgentType;
   };
   error?: EcsError;
+  /** Area to store any other metadata for the action response */
+  meta?: TMeta;
 }
 
-interface ResponseActionParametersWithPid {
+export interface ResponseActionParametersWithPid {
   pid: number;
   entity_id?: never;
+  process_name?: never;
 }
 
-interface ResponseActionParametersWithEntityId {
+export interface ResponseActionParametersWithEntityId {
   pid?: never;
+  process_name?: never;
   entity_id: string;
 }
 
-export type ResponseActionParametersWithPidOrEntityId =
+export interface ResponseActionParametersWithProcessName {
+  pid?: never;
+  entity_id?: never;
+  process_name: string;
+}
+
+export type ResponseActionParametersWithProcessData =
   | ResponseActionParametersWithPid
-  | ResponseActionParametersWithEntityId;
+  | ResponseActionParametersWithEntityId
+  | ResponseActionParametersWithProcessName;
 
 export interface ResponseActionGetFileParameters {
   path: string;
@@ -181,21 +212,46 @@ export interface ResponseActionsExecuteParameters {
   timeout?: number;
 }
 
+export interface ResponseActionScanParameters {
+  path: string;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
-  | ResponseActionParametersWithPidOrEntityId
+  | ResponseActionParametersWithProcessData
   | ResponseActionsExecuteParameters
   | ResponseActionGetFileParameters
-  | ResponseActionUploadParameters;
+  | ResponseActionUploadParameters
+  | ResponseActionScanParameters;
 
+/** Output content of the different response actions */
+export type EndpointActionResponseDataOutput =
+  | Record<string, never> // Empty object
+  | ResponseActionExecuteOutputContent
+  | ResponseActionGetFileOutputContent
+  | ResponseActionUploadOutputContent
+  | GetProcessesActionOutputContent
+  | SuspendProcessActionOutputContent
+  | KillProcessActionOutputContent
+  | ResponseActionScanOutputContent;
+
+/**
+ * The data stored with each Response Action under `EndpointActions.data` property
+ */
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
-  TOutputContent extends object = object
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > {
   command: ResponseActionsApiCommandNames;
   comment?: string;
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
+  /**
+   * If `alert_id` is defined, then action request is of type `automated`
+   *
+   * **IMPORTANT**: should be used only when response actions are created from a Rule (automated response actions)
+   *                as this property is used to determine if an action is of type `automated`
+   */
   alert_id?: string[];
   hosts?: Record<string, { name: string }>;
 }
@@ -225,6 +281,10 @@ export interface EndpointAction extends ActionRequestFields {
   };
 }
 
+/**
+ * The action response created in Fleet's index after the action has been successfully delivered to
+ * the endpoint
+ */
 export interface EndpointActionResponse {
   '@timestamp': string;
   /** The id of the action for which this response is associated with */
@@ -249,11 +309,13 @@ export interface EndpointActivityLogAction {
   };
 }
 
-export interface EndpointActivityLogActionResponse {
+export interface EndpointActivityLogActionResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+> {
   type: typeof ActivityLogItemTypes.RESPONSE;
   item: {
     id: string;
-    data: LogsEndpointActionResponse;
+    data: LogsEndpointActionResponse<TOutputContent>;
   };
 }
 
@@ -266,6 +328,7 @@ export interface ActivityLogAction {
     data: EndpointAction;
   };
 }
+
 export interface ActivityLogActionResponse {
   type: typeof ActivityLogItemTypes.FLEET_RESPONSE;
   item: {
@@ -294,20 +357,18 @@ export interface ActivityLog {
   data: ActivityLogEntry[];
 }
 
-export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
-
-export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
-
-export type KillOrSuspendProcessRequestBody = TypeOf<typeof KillOrSuspendProcessRequestSchema.body>;
+/** Note: this type should almost never be used. Use instead the response action specific types above */
+export type KillOrSuspendProcessRequestBody = KillProcessRequestBody & SuspendProcessRequestBody;
 
 export interface HostIsolationResponse {
   action: string;
 }
 
-export type ProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
-export interface ResponseActionApiResponse<TOutput extends object = object> {
+export interface ResponseActionApiResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+> {
   action?: string;
-  data: ActionDetails<TOutput>;
+  data: ActionDetails<TOutputContent>;
 }
 
 export interface EndpointPendingActions {
@@ -333,11 +394,17 @@ export interface ActionDetailsAgentState {
 }
 
 export interface ActionDetails<
-  TOutputContent extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
-  /** The action id passed only if returnActionIdCommands contains the command */
+  /**
+   * The action ID. This is a legacy property action and should no longer be used. Only here for
+   * backwards compatibility
+   *
+   * @deprecated
+   */
   action?: string;
+
   /** The action id */
   id: string;
   /**
@@ -388,13 +455,15 @@ export interface ActionDetails<
   alertIds?: string[];
   ruleId?: string;
   ruleName?: string;
+  /** The agent type to where the response action was sent */
+  agentType: ResponseActionAgentType;
 }
 
 export interface ActionDetailsApiResponse<
-  TOutputType extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
-  data: ActionDetails<TOutputType, TParameters>;
+  data: ActionDetails<TOutputContent, TParameters>;
 }
 
 /** Action Details normally returned by Action List API response  */
@@ -404,6 +473,7 @@ export interface ActionListApiResponse {
   page: number | undefined;
   pageSize: number | undefined;
   startDate: string | undefined;
+  agentTypes: ResponseActionAgentType[] | undefined;
   elasticAgentIds: string[] | undefined;
   endDate: string | undefined;
   userIds: string[] | undefined; // users that requested the actions
@@ -474,6 +544,7 @@ export type UploadedFileInfo = Pick<
 > & {
   actionId: string;
   agentId: string;
+  agentType: ResponseActionAgentType;
 };
 
 export interface ActionFileInfoApiResponse {

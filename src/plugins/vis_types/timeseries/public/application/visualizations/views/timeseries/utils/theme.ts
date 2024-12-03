@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // @ts-ignore
 import colorJS from 'color';
-import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 function computeRelativeLuminosity(rgb: string) {
   return colorJS(rgb).luminosity();
@@ -96,11 +97,11 @@ export function getBaseTheme(baseTheme: Theme, bgColor?: string | null): Theme {
   }
 
   const bgLuminosity = computeRelativeLuminosity(bgColor);
-  const mainTheme = bgLuminosity <= 0.179 ? DARK_THEME : LIGHT_THEME;
+  const mainTheme = bgLuminosity <= 0.179 ? LEGACY_DARK_THEME : LEGACY_LIGHT_THEME;
   const color = findBestContrastColor(
     bgColor,
-    LIGHT_THEME.axes.axisTitle.fill,
-    DARK_THEME.axes.axisTitle.fill
+    LEGACY_LIGHT_THEME.axes.axisTitle.fill,
+    LEGACY_DARK_THEME.axes.axisTitle.fill
   );
   return {
     ...mainTheme,

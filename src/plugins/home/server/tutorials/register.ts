@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { activemqLogsSpecProvider } from './activemq_logs';
@@ -23,7 +24,6 @@ import { cefLogsSpecProvider } from './cef_logs';
 import { cephMetricsSpecProvider } from './ceph_metrics';
 import { checkpointLogsSpecProvider } from './checkpoint_logs';
 import { ciscoLogsSpecProvider } from './cisco_logs';
-import { cloudwatchLogsSpecProvider } from './cloudwatch_logs';
 import { cockroachdbMetricsSpecProvider } from './cockroachdb_metrics';
 import { consulMetricsSpecProvider } from './consul_metrics';
 import { corednsLogsSpecProvider } from './coredns_logs';
@@ -98,7 +98,6 @@ import { redisenterpriseMetricsSpecProvider } from './redisenterprise_metrics';
 import { santaLogsSpecProvider } from './santa_logs';
 import { sonicwallLogsSpecProvider } from './sonicwall_logs';
 import { sophosLogsSpecProvider } from './sophos_logs';
-import { squidLogsSpecProvider } from './squid_logs';
 import { stanMetricsSpecProvider } from './stan_metrics';
 import { statsdMetricsSpecProvider } from './statsd_metrics';
 import { suricataLogsSpecProvider } from './suricata_logs';
@@ -162,7 +161,6 @@ export const builtInTutorials = [
   prometheusMetricsSpecProvider,
   zookeeperMetricsSpecProvider,
   uptimeMonitorsSpecProvider,
-  cloudwatchLogsSpecProvider,
   awsMetricsSpecProvider,
   mssqlMetricsSpecProvider,
   natsMetricsSpecProvider,
@@ -223,7 +221,6 @@ export const builtInTutorials = [
   santaLogsSpecProvider,
   sonicwallLogsSpecProvider,
   sophosLogsSpecProvider,
-  squidLogsSpecProvider,
   tomcatLogsSpecProvider,
   zscalerLogsSpecProvider,
 ];

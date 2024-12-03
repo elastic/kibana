@@ -6,15 +6,17 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { checkTimelineStatusRt } from '../../../../../../common/api/timeline';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_PREPACKAGED_URL } from '../../../../../../common/constants';
 
-import type { SetupPlugins } from '../../../../../plugin';
 import type { ConfigType } from '../../../../../config';
-
+import {
+  InstallPrepackedTimelinesRequestBody,
+  type InstallPrepackedTimelinesResponse,
+} from '../../../../../../common/api/timeline';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { installPrepackagedTimelines } from './helpers';
@@ -27,14 +29,17 @@ export { installPrepackagedTimelines } from './helpers';
 
 export const installPrepackedTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
+  config: ConfigType
 ) => {
   router.versioned
     .post({
       path: `${TIMELINE_PREPACKAGED_URL}`,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         body: {
           maxBytes: config.maxTimelineImportPayloadBytes,
           output: 'stream',
@@ -47,23 +52,24 @@ export const installPrepackedTimelinesRoute = (
         validate: {},
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<InstallPrepackedTimelinesResponse>> => {
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const prepackagedTimelineStatus = await checkTimelinesStatus(frameworkRequest);
-          const [validatedprepackagedTimelineStatus, prepackagedTimelineStatusError] = validate(
-            prepackagedTimelineStatus,
-            checkTimelineStatusRt
-          );
 
-          if (prepackagedTimelineStatusError != null) {
-            throw prepackagedTimelineStatusError;
+          const installResult =
+            InstallPrepackedTimelinesRequestBody.safeParse(prepackagedTimelineStatus);
+
+          if (installResult.error) {
+            throw installResult.error;
           }
 
-          const timelinesToInstalled =
-            validatedprepackagedTimelineStatus?.timelinesToInstall.length ?? 0;
-          const timelinesNotUpdated =
-            validatedprepackagedTimelineStatus?.timelinesToUpdate.length ?? 0;
+          const timelinesToInstalled = installResult.data.timelinesToInstall.length ?? 0;
+          const timelinesNotUpdated = installResult.data.timelinesToUpdate.length ?? 0;
           let res = null;
 
           if (timelinesToInstalled > 0 || timelinesNotUpdated > 0) {

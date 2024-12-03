@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -18,10 +18,11 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
+  type ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
   isOnAggBasedEditor,
@@ -116,29 +117,39 @@ export const getPartitionVisRenderer: (
 
     const hasOpenedOnAggBasedEditor = isOnAggBasedEditor(handlers.getExecutionContext());
 
+    const chartSizeEvent: ChartSizeEvent = {
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          x: { value: 100, unit: 'percentage' },
+          y: { value: 100, unit: 'percentage' },
+        },
+      },
+    };
+
+    handlers.event(chartSizeEvent);
+
     render(
-      <I18nProvider>
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <div css={partitionVisRenderer}>
-            <PartitionVisComponent
-              chartsThemeService={plugins.charts.theme}
-              palettesRegistry={palettesRegistry}
-              visParams={visConfig}
-              visData={visData}
-              visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-              renderComplete={renderComplete}
-              fireEvent={handlers.event}
-              interactive={handlers.isInteractive()}
-              uiState={handlers.uiState as PersistedState}
-              services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
-              syncColors={syncColors}
-              columnCellValueActions={columnCellValueActions}
-              overrides={overrides}
-              hasOpenedOnAggBasedEditor={hasOpenedOnAggBasedEditor}
-            />
-          </div>
-        </KibanaThemeProvider>
-      </I18nProvider>,
+      <KibanaRenderContextProvider {...core}>
+        <div css={partitionVisRenderer}>
+          <PartitionVisComponent
+            chartsThemeService={plugins.charts.theme}
+            palettesRegistry={palettesRegistry}
+            visParams={visConfig}
+            visData={visData}
+            visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
+            renderComplete={renderComplete}
+            fireEvent={handlers.event}
+            interactive={handlers.isInteractive()}
+            uiState={handlers.uiState as PersistedState}
+            services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
+            syncColors={syncColors}
+            columnCellValueActions={columnCellValueActions}
+            overrides={overrides}
+            hasOpenedOnAggBasedEditor={hasOpenedOnAggBasedEditor}
+          />
+        </div>
+      </KibanaRenderContextProvider>,
       domNode
     );
   },

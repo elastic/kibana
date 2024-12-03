@@ -1,5 +1,9 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/expandable-flyout",
-  "owner": "@elastic/security-threat-hunting-investigations"
+  "owner": [
+    "@elastic/security-threat-hunting-investigations"
+  ],
+  "group": "security",
+  "visibility": "private"
 }

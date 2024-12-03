@@ -1,106 +1,127 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer, Plugin } from '@kbn/core-plugins-server';
+import { resolve } from 'path';
+
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
-
+import type { TypeOf } from '@kbn/config-schema';
+import type { Plugin, PluginInitializer } from '@kbn/core-plugins-server';
 import {
-  MOCK_IDP_LOGIN_PATH,
-  MOCK_IDP_LOGOUT_PATH,
-  createSAMLResponse,
-  parseSAMLAuthnRequest,
-} from '../common';
+  readRolesFromResource,
+  SERVERLESS_ROLES_ROOT_PATH,
+  STATEFUL_ROLES_ROOT_PATH,
+} from '@kbn/es';
+import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
 
-export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> => ({
-  setup(core) {
+export interface PluginSetupDependencies {
+  cloud: CloudSetup;
+}
+
+const createSAMLResponseSchema = schema.object({
+  username: schema.string(),
+  full_name: schema.maybe(schema.nullable(schema.string())),
+  email: schema.maybe(schema.nullable(schema.string())),
+  roles: schema.arrayOf(schema.string()),
+});
+
+const projectToAlias = new Map<string, string>([
+  ['observability', 'oblt'],
+  ['security', 'security'],
+  ['search', 'es'],
+]);
+
+const readServerlessRoles = (projectType: string) => {
+  if (projectToAlias.has(projectType)) {
+    const alias = projectToAlias.get(projectType)!;
+    const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
+    return readRolesFromResource(rolesResourcePath);
+  } else {
+    throw new Error(`Unsupported projectType: ${projectType}`);
+  }
+};
+
+const readStatefulRoles = () => {
+  const rolesResourcePath = resolve(STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
+  return readRolesFromResource(rolesResourcePath);
+};
+
+export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
+
+export const plugin: PluginInitializer<
+  void,
+  void,
+  PluginSetupDependencies
+> = async (): Promise<Plugin> => ({
+  setup(core, plugins: PluginSetupDependencies) {
+    const router = core.http.createRouter();
+
     core.http.resources.register(
       {
         path: MOCK_IDP_LOGIN_PATH,
-        validate: {
-          query: schema.object({
-            SAMLRequest: schema.string(),
-          }),
-        },
+        validate: false,
         options: { authRequired: false },
       },
       async (context, request, response) => {
-        let samlRequest: Awaited<ReturnType<typeof parseSAMLAuthnRequest>>;
-        try {
-          samlRequest = await parseSAMLAuthnRequest(request.query.SAMLRequest);
-        } catch (error) {
-          return response.badRequest({
-            body: '[request query.SAMLRequest]: value is not valid SAMLRequest.',
-          });
-        }
-
-        const userRoles: Array<[string, string]> = [
-          ['system_indices_superuser', 'system_indices_superuser'],
-          ['t1_analyst', 't1_analyst'],
-          ['t2_analyst', 't2_analyst'],
-          ['t3_analyst', 't3_analyst'],
-          ['threat_intelligence_analyst', 'threat_intelligence_analyst'],
-          ['rule_author', 'rule_author'],
-          ['soc_manager', 'soc_manager'],
-          ['detections_admin', 'detections_admin'],
-          ['platform_engineer', 'platform_engineer'],
-          ['endpoint_operations_analyst', 'endpoint_operations_analyst'],
-          ['endpoint_policy_manager', 'endpoint_policy_manager'],
-        ];
-
-        const samlResponses = await Promise.all(
-          userRoles.map(([username, role]) =>
-            createSAMLResponse({
-              authnRequestId: samlRequest.ID,
-              kibanaUrl: samlRequest.AssertionConsumerServiceURL,
-              username,
-              roles: [role],
-            })
-          )
-        );
-
-        return response.renderHtml({
-          body: `
-            <!DOCTYPE html>
-            <title>Mock Identity Provider</title>
-            <link rel="icon" href="data:,">
-            <body>
-              <h2>Mock Identity Provider</h2>
-              <form id="loginForm" method="post" action="${
-                samlRequest.AssertionConsumerServiceURL
-              }">
-                <h3>Pick a role:<h3>
-                <ul>
-                  ${userRoles
-                    .map(
-                      ([username], i) =>
-                        `
-                    <li>
-                      <button name="SAMLResponse" value="${samlResponses[i]}">${username}</button>
-                    </li>
-                    `
-                    )
-                    .join('')}
-                </ul>
-              </form>
-            </body>
-          `,
-        });
+        return response.renderAnonymousCoreApp();
       }
     );
 
-    core.http.resources.register(
+    // caching roles on the first call
+    const roles: string[] = [];
+
+    router.get(
       {
-        path: `${MOCK_IDP_LOGIN_PATH}/submit.js`,
+        path: '/mock_idp/supported_roles',
         validate: false,
         options: { authRequired: false },
       },
       (context, request, response) => {
-        return response.renderJs({ body: 'document.getElementById("loginForm").submit();' });
+        try {
+          if (roles.length === 0) {
+            const projectType = plugins.cloud?.serverless?.projectType;
+            roles.push(...(projectType ? readServerlessRoles(projectType) : readStatefulRoles()));
+          }
+          return response.ok({
+            body: {
+              roles,
+            },
+          });
+        } catch (err) {
+          return response.customError({ statusCode: 500, body: err.message });
+        }
+      }
+    );
+
+    router.post(
+      {
+        path: '/mock_idp/saml_response',
+        validate: {
+          body: createSAMLResponseSchema,
+        },
+        options: { authRequired: false },
+      },
+      async (context, request, response) => {
+        const { protocol, hostname, port } = core.http.getServerInfo();
+        const pathname = core.http.basePath.prepend('/api/security/saml/callback');
+
+        return response.ok({
+          body: {
+            SAMLResponse: await createSAMLResponse({
+              kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
+              username: request.body.username,
+              full_name: request.body.full_name ?? undefined,
+              email: request.body.email ?? undefined,
+              roles: request.body.roles,
+            }),
+          },
+        });
       }
     );
 

@@ -6,12 +6,12 @@
  */
 
 import { useMemo } from 'react';
-import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from './use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../../helpers';
 
 export interface UseFetchRelatedAlertsByAncestryParams {
   /**
-   * Value of the kibana.alert.ancestors.id field
+   * Id of the document
    */
   documentId: string;
   /**

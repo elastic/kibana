@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import deepMerge from 'deepmerge';
+import { set } from '@kbn/safer-lodash-set';
+
+import {
+  getDefaultPresetForEsOutput,
+  outputTypeSupportPresets,
+} from '../../../common/services/output_helpers';
 
 import type {
   FullAgentPolicy,
@@ -17,6 +25,7 @@ import type {
   FullAgentPolicyOutput,
   FleetProxy,
   FleetServerHost,
+  AgentPolicy,
 } from '../../types';
 import type {
   FullAgentPolicyMonitoring,
@@ -24,9 +33,13 @@ import type {
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
-import { dataTypes, kafkaCompressionType, outputType } from '../../../common/constants';
-import { DEFAULT_OUTPUT } from '../../constants';
-
+import {
+  dataTypes,
+  DEFAULT_OUTPUT,
+  kafkaCompressionType,
+  outputType,
+} from '../../../common/constants';
+import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
@@ -55,11 +68,17 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone: boolean }
+  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
 ): Promise<FullAgentPolicy | null> {
   const standalone = options?.standalone ?? false;
 
-  const agentPolicy = await fetchAgentPolicy(soClient, id);
+  let agentPolicy: AgentPolicy | null;
+  if (options?.agentPolicy?.package_policies) {
+    agentPolicy = options.agentPolicy;
+  } else {
+    agentPolicy = await fetchAgentPolicy(soClient, id);
+  }
+
   if (!agentPolicy) {
     return null;
   }
@@ -73,7 +92,6 @@ export async function getFullAgentPolicy(
     downloadSourceUri,
     downloadSourceProxyUri,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
-
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
   const packageInfoCache = new Map<string, PackageInfo>();
@@ -105,7 +123,9 @@ export async function getFullAgentPolicy(
   const inputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
-    getOutputIdForAgentPolicy(dataOutput)
+    getOutputIdForAgentPolicy(dataOutput),
+    agentPolicy.namespace,
+    agentPolicy.global_data_tags
   );
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
@@ -116,33 +136,6 @@ export async function getFullAgentPolicy(
   const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
-  const defaultMonitoringConfig: FullAgentPolicyMonitoring = {
-    enabled: false,
-    logs: false,
-    metrics: false,
-  };
-
-  let monitoring: FullAgentPolicyMonitoring = { ...defaultMonitoringConfig };
-
-  // If the agent policy has monitoring enabled for at least one of "logs" or "metrics", generate
-  // a monitoring config for the resulting compiled agent policy
-  if (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) {
-    monitoring = {
-      namespace: agentPolicy.namespace,
-      use_output: getOutputIdForAgentPolicy(monitoringOutput),
-      enabled: true,
-      logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
-      metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-    };
-    // If the `keep_monitoring_alive` flag is set, enable monitoring but don't enable logs or metrics.
-    // This allows cloud or other environments to keep the monitoring server alive without tearing it down.
-  } else if (agentPolicy.keep_monitoring_alive) {
-    monitoring = {
-      enabled: true,
-      logs: false,
-      metrics: false,
-    };
-  }
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
@@ -165,7 +158,7 @@ export async function getFullAgentPolicy(
         sourceURI: downloadSourceUri,
         ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
       },
-      monitoring,
+      monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
         enabled: agentPolicy.is_protected,
@@ -179,21 +172,57 @@ export async function getFullAgentPolicy(
     },
   };
 
-  const dataPermissions =
-    (await storedPackagePoliciesToAgentPermissions(
-      packageInfoCache,
-      agentPolicy.package_policies
-    )) || {};
+  if (agentPolicy.space_ids) {
+    fullAgentPolicy.namespaces = agentPolicy.space_ids;
+  }
 
-  dataPermissions._elastic_agent_checks = {
-    cluster: DEFAULT_CLUSTER_PERMISSIONS,
-  };
+  const packagePoliciesByOutputId = Object.keys(fullAgentPolicy.outputs).reduce(
+    (acc: Record<string, PackagePolicy[]>, outputId) => {
+      acc[outputId] = [];
+      return acc;
+    },
+    {}
+  );
+  (agentPolicy.package_policies || []).forEach((packagePolicy) => {
+    const packagePolicyDataOutput = packagePolicy.output_id
+      ? outputs.find((output) => output.id === packagePolicy.output_id)
+      : undefined;
+    if (packagePolicyDataOutput) {
+      packagePoliciesByOutputId[getOutputIdForAgentPolicy(packagePolicyDataOutput)].push(
+        packagePolicy
+      );
+    } else {
+      packagePoliciesByOutputId[getOutputIdForAgentPolicy(dataOutput)].push(packagePolicy);
+    }
+  });
+
+  const dataPermissionsByOutputId = Object.keys(fullAgentPolicy.outputs).reduce(
+    (acc: Record<string, FullAgentPolicyOutputPermissions>, outputId) => {
+      acc[outputId] = {};
+      return acc;
+    },
+    {}
+  );
+  for (const [outputId, packagePolicies] of Object.entries(packagePoliciesByOutputId)) {
+    const dataPermissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      agentPolicy.namespace,
+      packagePolicies
+    );
+    dataPermissionsByOutputId[outputId] = {
+      _elastic_agent_checks: {
+        cluster: DEFAULT_CLUSTER_PERMISSIONS,
+      },
+      ...(dataPermissions || {}),
+    };
+  }
 
   const monitoringPermissions = await getMonitoringPermissions(
     soClient,
     {
       logs: agentPolicy.monitoring_enabled?.includes(dataTypes.Logs) ?? false,
       metrics: agentPolicy.monitoring_enabled?.includes(dataTypes.Metrics) ?? false,
+      traces: agentPolicy.monitoring_enabled?.includes(dataTypes.Traces) ?? false,
     },
     agentPolicy.namespace
   );
@@ -215,8 +244,11 @@ export async function getFullAgentPolicy(
         Object.assign(permissions, monitoringPermissions);
       }
 
-      if (outputId === getOutputIdForAgentPolicy(dataOutput)) {
-        Object.assign(permissions, dataPermissions);
+      if (
+        outputId === getOutputIdForAgentPolicy(dataOutput) ||
+        packagePoliciesByOutputId[outputId].length > 0
+      ) {
+        Object.assign(permissions, dataPermissionsByOutputId[outputId]);
       }
 
       outputPermissions[outputId] = permissions;
@@ -228,6 +260,14 @@ export async function getFullAgentPolicy(
   if (!standalone && fleetServerHosts) {
     fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
   }
+
+  const settingsValues = getSettingsValuesForAgentPolicy(
+    'AGENT_POLICY_ADVANCED_SETTINGS',
+    agentPolicy
+  );
+  Object.entries(settingsValues).forEach(([settingsKey, settingValue]) => {
+    set(fullAgentPolicy, settingsKey, settingValue);
+  });
 
   // populate protection and signed properties
   const messageSigningService = appContextService.getMessageSigningService();
@@ -311,11 +351,19 @@ export function transformOutputToFullPolicyOutput(
   proxy?: FleetProxy,
   standalone = false
 ): FullAgentPolicyOutput {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl, shipper, secrets } =
-    output;
+  const {
+    config_yaml,
+    type,
+    hosts,
+    ca_sha256,
+    ca_trusted_fingerprint,
+    ssl,
+    shipper,
+    secrets,
+    preset,
+  } = output;
 
-  const configJs = config_yaml ? safeLoad(config_yaml) : {};
+  const configJs = config_yaml ? load(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -324,7 +372,6 @@ export function transformOutputToFullPolicyOutput(
   let kafkaData = {};
 
   if (type === outputType.Kafka) {
-    /* eslint-disable @typescript-eslint/naming-convention */
     const {
       client_id,
       version,
@@ -338,7 +385,7 @@ export function transformOutputToFullPolicyOutput(
       random,
       round_robin,
       hash,
-      topics,
+      topic,
       headers,
       timeout,
       broker_timeout,
@@ -381,26 +428,7 @@ export function transformOutputToFullPolicyOutput(
       ...(password ? { password } : {}),
       ...(sasl ? { sasl } : {}),
       partition: transformPartition(),
-      topics: (topics ?? []).map((topic) => {
-        const { topic: topicName, ...rest } = topic;
-        const whenKeys = Object.keys(rest);
-
-        if (whenKeys.length === 0) {
-          return { topic: topicName };
-        }
-        if (rest.when && rest.when.condition) {
-          const [keyName, value] = rest.when.condition.split(':');
-
-          return {
-            topic: topicName,
-            when: {
-              [rest.when.type as string]: {
-                [keyName.replace(/\s/g, '')]: value,
-              },
-            },
-          };
-        }
-      }),
+      topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,
@@ -474,26 +502,120 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (output.type === outputType.Elasticsearch && standalone) {
-    newOutput.username = '${ES_USERNAME}';
-    newOutput.password = '${ES_PASSWORD}';
+    // adding a place_holder as API_KEY
+    newOutput.api_key = '${API_KEY}';
   }
 
   if (output.type === outputType.RemoteElasticsearch) {
     newOutput.service_token = output.service_token;
   }
 
+  if (outputTypeSupportPresets(output.type)) {
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
+  }
+
   return newOutput;
+}
+
+export function getFullMonitoringSettings(
+  agentPolicy: Pick<
+    AgentPolicy,
+    | 'namespace'
+    | 'monitoring_enabled'
+    | 'keep_monitoring_alive'
+    | 'monitoring_pprof_enabled'
+    | 'monitoring_http'
+    | 'monitoring_diagnostics'
+  >,
+  monitoringOutput: Pick<Output, 'id' | 'is_default' | 'type'>
+): FullAgentPolicyMonitoring {
+  // Set base beats monitoring settings
+  const monitoring: FullAgentPolicyMonitoring = {
+    enabled: Boolean(
+      (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) ||
+        agentPolicy.monitoring_http?.enabled ||
+        agentPolicy.keep_monitoring_alive
+    ),
+    logs: false,
+    metrics: false,
+    traces: false,
+  };
+
+  // If the agent policy has monitoring enabled for at least one of "logs", "metrics", or "traces"
+  // generate a monitoring config for the resulting compiled agent policy
+  if (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) {
+    monitoring.namespace = agentPolicy.namespace;
+    monitoring.use_output = getOutputIdForAgentPolicy(monitoringOutput);
+    monitoring.logs = agentPolicy.monitoring_enabled.includes(dataTypes.Logs);
+    monitoring.metrics = agentPolicy.monitoring_enabled.includes(dataTypes.Metrics);
+    monitoring.traces = agentPolicy.monitoring_enabled.includes(dataTypes.Traces);
+  }
+
+  if (agentPolicy.monitoring_pprof_enabled !== undefined) {
+    monitoring.pprof = {
+      enabled: agentPolicy.monitoring_pprof_enabled,
+    };
+  }
+
+  // Conditionally set http monitoring settings
+  if (agentPolicy.monitoring_http?.enabled) {
+    monitoring.http = {
+      enabled: agentPolicy.monitoring_http.enabled,
+      ...(agentPolicy.monitoring_http.host && { host: agentPolicy.monitoring_http.host }),
+      ...(agentPolicy.monitoring_http.port && { port: agentPolicy.monitoring_http.port }),
+    };
+  }
+
+  // Conditionally set diagnostics monitoring settings
+  if (agentPolicy.monitoring_diagnostics?.limit || agentPolicy.monitoring_diagnostics?.uploader) {
+    monitoring.diagnostics = {};
+
+    if (
+      agentPolicy.monitoring_diagnostics.limit &&
+      (agentPolicy.monitoring_diagnostics.limit.interval ||
+        typeof agentPolicy.monitoring_diagnostics.limit.burst === 'number')
+    ) {
+      monitoring.diagnostics.limit = {
+        ...(agentPolicy.monitoring_diagnostics.limit.interval && {
+          interval: agentPolicy.monitoring_diagnostics.limit.interval,
+        }),
+        ...(typeof agentPolicy.monitoring_diagnostics.limit.burst === 'number' && {
+          burst: agentPolicy.monitoring_diagnostics.limit.burst,
+        }),
+      };
+    }
+
+    if (
+      agentPolicy.monitoring_diagnostics.uploader &&
+      (typeof agentPolicy.monitoring_diagnostics.uploader.max_retries === 'number' ||
+        agentPolicy.monitoring_diagnostics.uploader.init_dur ||
+        agentPolicy.monitoring_diagnostics.uploader.max_dur)
+    ) {
+      monitoring.diagnostics.uploader = {
+        ...(typeof agentPolicy.monitoring_diagnostics.uploader.max_retries === 'number' && {
+          max_retries: agentPolicy.monitoring_diagnostics.uploader.max_retries,
+        }),
+        ...(agentPolicy.monitoring_diagnostics.uploader.init_dur && {
+          init_dur: agentPolicy.monitoring_diagnostics.uploader.init_dur,
+        }),
+        ...(agentPolicy.monitoring_diagnostics.uploader.max_dur && {
+          max_dur: agentPolicy.monitoring_diagnostics.uploader.max_dur,
+        }),
+      };
+    }
+  }
+
+  return monitoring;
 }
 
 /**
  * Get id used in full agent policy (sent to the agents)
  * we use "default" for the default policy to avoid breaking changes
  */
-function getOutputIdForAgentPolicy(output: Output) {
-  if (output.is_default) {
+function getOutputIdForAgentPolicy(output: Pick<Output, 'id' | 'is_default' | 'type'>) {
+  if (output.is_default && output.type === outputType.Elasticsearch) {
     return DEFAULT_OUTPUT.name;
   }
-
   return output.id;
 }
 

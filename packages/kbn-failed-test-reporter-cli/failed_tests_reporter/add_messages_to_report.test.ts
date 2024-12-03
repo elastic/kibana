@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -53,15 +54,15 @@ it('rewrites ftr reports with minimal changes', async () => {
     reportPath: Path.resolve(__dirname, './__fixtures__/ftr_report.xml'),
   });
 
-  expect(createPatch('ftr.xml', FTR_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
+  expect(createPatch('ftr.xml', FTR_REPORT, xml)).toMatchInlineSnapshot(`
     Index: ftr.xml
     ===================================================================
-    --- ftr.xml	[object Object]
+    --- ftr.xml
     +++ ftr.xml
     @@ -1,53 +1,56 @@
      ‹?xml version="1.0" encoding="utf-8"?›
-     ‹testsuites›
-       ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71"›
+     ‹testsuites name="ftr" timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts"›
+       ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts"›
          ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378"›
     -      ‹system-out›
     -        ‹![CDATA[[00:00:00]       │
@@ -149,13 +150,13 @@ it('rewrites jest reports with minimal changes', async () => {
     reportPath: Path.resolve(__dirname, './__fixtures__/jest_report.xml'),
   });
 
-  expect(createPatch('jest.xml', JEST_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
+  expect(createPatch('jest.xml', JEST_REPORT, xml)).toMatchInlineSnapshot(`
     Index: jest.xml
     ===================================================================
-    --- jest.xml	[object Object]
+    --- jest.xml
     +++ jest.xml
     @@ -3,13 +3,17 @@
-       ‹testsuite name="x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts"›
+       ‹testsuite name="x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" command-line="node scripts/jest --config some/jest/config.ts"›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can start and end a process" time="1.316"/›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can force kill the process if langServer can not exit" time="3.182"/›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can reconnect if process died" time="7.060"›
@@ -196,15 +197,15 @@ it('rewrites mocha reports with minimal changes', async () => {
     reportPath: Path.resolve(__dirname, './__fixtures__/mocha_report.xml'),
   });
 
-  expect(createPatch('mocha.xml', MOCHA_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
+  expect(createPatch('mocha.xml', MOCHA_REPORT, xml)).toMatchInlineSnapshot(`
     Index: mocha.xml
     ===================================================================
-    --- mocha.xml	[object Object]
+    --- mocha.xml
     +++ mocha.xml
     @@ -1,13 +1,16 @@
      ‹?xml version="1.0" encoding="utf-8"?›
-     ‹testsuites›
-       ‹testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3"›
+     ‹testsuites command-line="node scripts/functional_tests --config super-mocha-test.config.js"›
+       ‹testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3" command-line="node scripts/functional_tests --config super-mocha-test.config.js"›
          ‹testcase name="code in multiple nodes &quot;before all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.121"›
     -      ‹system-out›
     -        ‹![CDATA[]]›
@@ -273,10 +274,10 @@ it('rewrites cypress reports with minimal changes', async () => {
     reportPath: Path.resolve(__dirname, './__fixtures__/cypress_report.xml'),
   });
 
-  expect(createPatch('cypress.xml', CYPRESS_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
+  expect(createPatch('cypress.xml', CYPRESS_REPORT, xml)).toMatchInlineSnapshot(`
     Index: cypress.xml
     ===================================================================
-    --- cypress.xml	[object Object]
+    --- cypress.xml
     +++ cypress.xml
     @@ -1,25 +1,16 @@
     -‹?xml version="1.0" encoding="UTF-8"?›

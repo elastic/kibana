@@ -10,10 +10,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-
 import { encodeIpv6 } from '../../lib/helpers';
-import { useUiSetting$ } from '../../lib/kibana';
-
 import {
   GoogleLink,
   HostDetailsLink,
@@ -26,16 +23,33 @@ import {
   DEFAULT_NUMBER_OF_LINK,
   ExternalLink,
   SecuritySolutionLinkButton,
+  CaseDetailsLink,
 } from '.';
 import { SecurityPageName } from '../../../app/types';
 import { mockGetAppUrl, mockNavigateTo } from '@kbn/security-solution-navigation/mocks/navigation';
+import { APP_UI_ID } from '../../../../common';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation');
 jest.mock('../navigation/use_url_state_query_params');
-
 jest.mock('../../../overview/components/events_by_dataset');
 
-jest.mock('../../lib/kibana');
+const mockNavigateToApp = jest.fn();
+const mockUseUiSetting$ = jest.fn();
+jest.mock('../../lib/kibana', () => {
+  const original = jest.requireActual('../../lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          navigateToApp: mockNavigateToApp,
+        },
+      },
+    }),
+    useUiSetting$: () => mockUseUiSetting$(),
+  };
+});
 
 mockGetAppUrl.mockImplementation(({ path }) => path);
 
@@ -64,17 +78,17 @@ describe('Custom Links', () => {
     test('can handle array of ips', () => {
       const wrapper = mount(<NetworkDetailsLink ip={[ipv4, ipv4a]} />);
       expect(wrapper.find('EuiLink').first().prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv4)}/source/flows`
+        `/ip/${encodeURIComponent(ipv4)}/source/events`
       );
       expect(wrapper.text()).toEqual(`${ipv4}${ipv4a}`);
       expect(wrapper.find('EuiLink').last().prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv4a)}/source/flows`
+        `/ip/${encodeURIComponent(ipv4a)}/source/events`
       );
     });
     test('should render valid link to IP Details with ipv4 as the display text', () => {
       const wrapper = mount(<NetworkDetailsLink ip={ipv4} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv4)}/source/flows`
+        `/ip/${encodeURIComponent(ipv4)}/source/events`
       );
       expect(wrapper.text()).toEqual(ipv4);
     });
@@ -82,7 +96,7 @@ describe('Custom Links', () => {
     test('should render valid link to IP Details with child text as the display text', () => {
       const wrapper = mount(<NetworkDetailsLink ip={ipv4}>{hostName}</NetworkDetailsLink>);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv4)}/source/flows`
+        `/ip/${encodeURIComponent(ipv4)}/source/events`
       );
       expect(wrapper.text()).toEqual(hostName);
     });
@@ -90,9 +104,58 @@ describe('Custom Links', () => {
     test('should render valid link to IP Details with ipv6 as the display text', () => {
       const wrapper = mount(<NetworkDetailsLink ip={ipv6} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv6Encoded)}/source/flows`
+        `/ip/${encodeURIComponent(ipv6Encoded)}/source/events`
       );
       expect(wrapper.text()).toEqual(ipv6);
+    });
+  });
+
+  describe('CaseDetailsLink', () => {
+    test('should render a link with detailName as displayed text', () => {
+      const wrapper = mountWithIntl(<CaseDetailsLink detailName="name" />);
+      expect(wrapper.text()).toEqual('name');
+      expect(wrapper.find('EuiLink').last().prop('aria-label')).toEqual(
+        'click to visit case with title name'
+      );
+      expect(wrapper.find('EuiLink').last().prop('href')).toEqual('/name');
+    });
+
+    test('should render a link with children instead of detailName', () => {
+      const wrapper = mountWithIntl(
+        <CaseDetailsLink detailName="name">
+          <div>{'children'}</div>
+        </CaseDetailsLink>
+      );
+      expect(wrapper.text()).toEqual('children');
+    });
+
+    test('should render a link with aria-label using title prop instead of detailName', () => {
+      const wrapper = mountWithIntl(<CaseDetailsLink detailName="name" title="title" />);
+      expect(wrapper.find('EuiLink').last().prop('aria-label')).toEqual(
+        'click to visit case with title title'
+      );
+    });
+
+    it('should call navigateToApp with correct values', () => {
+      const wrapper = mountWithIntl(<CaseDetailsLink detailName="name" />);
+      wrapper.find('a[href="/name"]').simulate('click');
+
+      expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
+        deepLinkId: SecurityPageName.case,
+        path: '/name',
+        openInNewTab: false,
+      });
+    });
+
+    it('should call navigateToApp with value of openInNewTab prop', () => {
+      const wrapper = mountWithIntl(<CaseDetailsLink detailName="name" openInNewTab={true} />);
+      wrapper.find('a[href="/name"]').simulate('click');
+
+      expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
+        deepLinkId: SecurityPageName.case,
+        path: '/name',
+        openInNewTab: true,
+      });
     });
   });
 
@@ -309,8 +372,7 @@ describe('Custom Links', () => {
 
     describe('links property', () => {
       beforeEach(() => {
-        (useUiSetting$ as jest.Mock).mockReset();
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockDefaultReputationLinks]);
+        mockUseUiSetting$.mockReturnValue([mockDefaultReputationLinks]);
       });
 
       test('it renders default link text', () => {
@@ -321,8 +383,7 @@ describe('Custom Links', () => {
       });
 
       test('it renders customized link text', () => {
-        (useUiSetting$ as jest.Mock).mockReset();
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+        mockUseUiSetting$.mockReturnValue([mockCustomizedReputationLinks]);
         const wrapper = shallow(<ReputationLink domain={'192.0.2.0'} />);
         wrapper.find('[data-test-subj="externalLink"]').forEach((node, idx) => {
           expect(node.at(idx).text()).toEqual(mockCustomizedReputationLinks[idx].name);
@@ -341,12 +402,7 @@ describe('Custom Links', () => {
 
     describe('number of links', () => {
       beforeAll(() => {
-        (useUiSetting$ as jest.Mock).mockReset();
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
-      });
-
-      afterEach(() => {
-        (useUiSetting$ as jest.Mock).mockClear();
+        mockUseUiSetting$.mockReturnValue([mockCustomizedReputationLinks]);
       });
 
       test('it renders correct number of links by default', () => {
@@ -364,8 +420,7 @@ describe('Custom Links', () => {
       });
 
       test('it renders correct number of visible link', () => {
-        (useUiSetting$ as jest.Mock).mockReset();
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+        mockUseUiSetting$.mockReturnValue([mockCustomizedReputationLinks]);
 
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
@@ -374,8 +429,7 @@ describe('Custom Links', () => {
       });
 
       test('it renders correct number of tooltips for visible links', () => {
-        (useUiSetting$ as jest.Mock).mockReset();
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+        mockUseUiSetting$.mockReturnValue([mockCustomizedReputationLinks]);
 
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
@@ -391,12 +445,9 @@ describe('Custom Links', () => {
       ];
       const mockInvalidLinksNoUrl = [{ name: 'Link 1' }];
       const mockInvalidUrl = [{ name: 'Link 1', url_template: "<script>alert('XSS')</script>" }];
-      afterEach(() => {
-        (useUiSetting$ as jest.Mock).mockReset();
-      });
 
       test('it filters empty object', () => {
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksEmptyObj]);
+        mockUseUiSetting$.mockReturnValue([mockInvalidLinksEmptyObj]);
 
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
@@ -405,7 +456,7 @@ describe('Custom Links', () => {
       });
 
       test('it filters object without name property', () => {
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksNoName]);
+        mockUseUiSetting$.mockReturnValue([mockInvalidLinksNoName]);
 
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
@@ -414,7 +465,7 @@ describe('Custom Links', () => {
       });
 
       test('it filters object without url_template property', () => {
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksNoUrl]);
+        mockUseUiSetting$.mockReturnValue([mockInvalidLinksNoUrl]);
 
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
@@ -423,7 +474,7 @@ describe('Custom Links', () => {
       });
 
       test('it filters object with invalid url', () => {
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidUrl]);
+        mockUseUiSetting$.mockReturnValue([mockInvalidUrl]);
 
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
@@ -434,12 +485,7 @@ describe('Custom Links', () => {
 
     describe('external icon', () => {
       beforeAll(() => {
-        (useUiSetting$ as jest.Mock).mockReset();
-        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
-      });
-
-      afterEach(() => {
-        (useUiSetting$ as jest.Mock).mockClear();
+        mockUseUiSetting$.mockReturnValue([mockCustomizedReputationLinks]);
       });
 
       test('it renders correct number of external icons by default', () => {

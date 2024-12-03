@@ -5,11 +5,34 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { JobId, ReportOutput, ReportSource, TaskRunResult } from '@kbn/reporting-common/types';
+import { ReportingPublicPluginStartDependencies } from './plugin';
 
-/* Notifier Toasts */
+/*
+ * Required services for mounting React components
+ */
+export type StartServices = [
+  Pick<
+    CoreStart,
+    // required for modules that render React
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
+    // used extensively in Reporting plugin
+    | 'application'
+    | 'notifications'
+    | 'uiSettings'
+  >,
+  ReportingPublicPluginStartDependencies,
+  unknown
+];
+
+/*
+ * Notifier Toasts
+ * @internal
+ */
 export interface JobSummary {
   id: JobId;
   status: JOB_STATUS;
@@ -20,14 +43,11 @@ export interface JobSummary {
   csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
 }
 
+/*
+ * Notifier Toasts
+ * @internal
+ */
 export interface JobSummarySet {
-  completed: JobSummary[];
-  failed: JobSummary[];
-}
-
-export interface KibanaContext {
-  http: CoreSetup['http'];
-  application: CoreStart['application'];
-  uiSettings: CoreStart['uiSettings'];
-  docLinks: CoreStart['docLinks'];
+  completed?: JobSummary[];
+  failed?: JobSummary[];
 }

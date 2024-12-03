@@ -8,19 +8,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { AlertDetailsRedirect } from './alert_details_redirect';
-import {
-  createSecuritySolutionStorageMock,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../common/mock';
-import { createStore } from '../../../common/store';
-import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
+import { TestProviders } from '../../../common/mock';
 import { ALERTS_PATH, ALERT_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
 import { mockHistory } from '../../../common/utils/route/mocks';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-
-jest.mock('../../../common/hooks/use_experimental_features');
 
 jest.mock('../../../common/lib/kibana');
 
@@ -37,8 +27,6 @@ const testTimestamp = '2023-04-20T12:00:00.000Z';
 const mockPathname = `${ALERT_DETAILS_REDIRECT_PATH}/${testAlertId}`;
 
 describe('AlertDetailsRedirect', () => {
-  const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   afterEach(() => {
     mockHistory.replace.mockClear();
   });
@@ -56,17 +44,27 @@ describe('AlertDetailsRedirect', () => {
         },
       };
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <Router history={historyMock}>
             <AlertDetailsRedirect />
           </Router>
         </TestProviders>
       );
 
+      const expectedSearch = new URLSearchParams({
+        query: "(language:kuery,query:'_id: test-alert-id')",
+        timerange:
+          "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2023-04-20T12:00:00.000Z',kind:absolute,to:'2023-04-20T12:05:00.000Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
+        pageFilters:
+          '!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,hideActionBar:!f,selectedOptions:!(),title:Status))',
+        flyout:
+          '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.someTestIndex,scopeId:alerts-page)))',
+      });
+
       expect(historyMock.replace).toHaveBeenCalledWith({
         hash: '',
         pathname: ALERTS_PATH,
-        search: `?query=%28language%3Akuery%2Cquery%3A%27_id%3A+test-alert-id%27%29&timerange=%28global%3A%28linkTo%3A%21%28timeline%2CsocTrends%29%2Ctimerange%3A%28from%3A%272023-04-20T12%3A00%3A00.000Z%27%2Ckind%3Aabsolute%2Cto%3A%272023-04-20T12%3A05%3A00.000Z%27%29%29%2Ctimeline%3A%28linkTo%3A%21%28global%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2CfromStr%3Anow%2Fd%2Ckind%3Arelative%2Cto%3A%272020-07-08T08%3A20%3A18.966Z%27%2CtoStr%3Anow%2Fd%29%29%29&pageFilters=%21%28%28exclude%3A%21f%2CexistsSelected%3A%21f%2CfieldName%3Akibana.alert.workflow_status%2CselectedOptions%3A%21%28%29%2Ctitle%3AStatus%29%29&eventFlyout=%28panelView%3AeventDetail%2Cparams%3A%28eventId%3Atest-alert-id%2CindexName%3A.someTestIndex%29%29`,
+        search: `?${expectedSearch.toString()}`,
         state: undefined,
       });
     });
@@ -85,17 +83,27 @@ describe('AlertDetailsRedirect', () => {
         },
       };
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <Router history={historyMock}>
             <AlertDetailsRedirect />
           </Router>
         </TestProviders>
       );
 
+      const expectedSearchParam = new URLSearchParams({
+        query: "(language:kuery,query:'_id: test-alert-id')",
+        timerange:
+          "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
+        pageFilters:
+          '!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,hideActionBar:!f,selectedOptions:!(),title:Status))',
+        flyout:
+          '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.someTestIndex,scopeId:alerts-page)))',
+      });
+
       expect(historyMock.replace).toHaveBeenCalledWith({
         hash: '',
         pathname: ALERTS_PATH,
-        search: `?query=%28language%3Akuery%2Cquery%3A%27_id%3A+test-alert-id%27%29&timerange=%28global%3A%28linkTo%3A%21%28timeline%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2Ckind%3Aabsolute%2Cto%3A%272020-07-08T08%3A25%3A18.966Z%27%29%29%2Ctimeline%3A%28linkTo%3A%21%28global%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2CfromStr%3Anow%2Fd%2Ckind%3Arelative%2Cto%3A%272020-07-08T08%3A20%3A18.966Z%27%2CtoStr%3Anow%2Fd%29%29%29&pageFilters=%21%28%28exclude%3A%21f%2CexistsSelected%3A%21f%2CfieldName%3Akibana.alert.workflow_status%2CselectedOptions%3A%21%28%29%2Ctitle%3AStatus%29%29&eventFlyout=%28panelView%3AeventDetail%2Cparams%3A%28eventId%3Atest-alert-id%2CindexName%3A.someTestIndex%29%29`,
+        search: `?${expectedSearchParam.toString()}`,
         state: undefined,
       });
     });
@@ -113,51 +121,28 @@ describe('AlertDetailsRedirect', () => {
         },
       };
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <Router history={historyMock}>
             <AlertDetailsRedirect />
           </Router>
         </TestProviders>
       );
 
+      const expectedSearchParam = new URLSearchParams({
+        query: "(language:kuery,query:'_id: test-alert-id')",
+        timerange:
+          "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
+        pageFilters:
+          '!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,hideActionBar:!f,selectedOptions:!(),title:Status))',
+        flyout:
+          '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.internal.alerts-security.alerts-default,scopeId:alerts-page)))',
+      });
+
       expect(historyMock.replace).toHaveBeenCalledWith({
         hash: '',
         pathname: ALERTS_PATH,
-        search: `?query=%28language%3Akuery%2Cquery%3A%27_id%3A+test-alert-id%27%29&timerange=%28global%3A%28linkTo%3A%21%28timeline%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2Ckind%3Aabsolute%2Cto%3A%272020-07-08T08%3A25%3A18.966Z%27%29%29%2Ctimeline%3A%28linkTo%3A%21%28global%2CsocTrends%29%2Ctimerange%3A%28from%3A%272020-07-07T08%3A20%3A18.966Z%27%2CfromStr%3Anow%2Fd%2Ckind%3Arelative%2Cto%3A%272020-07-08T08%3A20%3A18.966Z%27%2CtoStr%3Anow%2Fd%29%29%29&pageFilters=%21%28%28exclude%3A%21f%2CexistsSelected%3A%21f%2CfieldName%3Akibana.alert.workflow_status%2CselectedOptions%3A%21%28%29%2Ctitle%3AStatus%29%29&eventFlyout=%28panelView%3AeventDetail%2Cparams%3A%28eventId%3Atest-alert-id%2CindexName%3A.internal.alerts-security.alerts-default%29%29`,
+        search: `?${expectedSearchParam.toString()}`,
         state: undefined,
-      });
-    });
-  });
-
-  describe('When expandable flyout is enabled', () => {
-    beforeEach(() => {
-      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
-    });
-
-    describe('when eventFlyout is not in the query', () => {
-      it('redirects to the expected path with the correct query parameters', () => {
-        const testSearch = `?index=${testIndex}&timestamp=${testTimestamp}`;
-        const historyMock = {
-          ...mockHistory,
-          location: {
-            hash: '',
-            pathname: mockPathname,
-            search: testSearch,
-            state: '',
-          },
-        };
-        render(
-          <TestProviders store={store}>
-            <Router history={historyMock}>
-              <AlertDetailsRedirect />
-            </Router>
-          </TestProviders>
-        );
-
-        const [{ search, pathname }] = historyMock.replace.mock.lastCall;
-
-        expect(search as string).toMatch(/eventFlyout.*/);
-        expect(pathname).toEqual(ALERTS_PATH);
       });
     });
   });

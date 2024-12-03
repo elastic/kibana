@@ -14,7 +14,9 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core-application-browser",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/cloud",
+    "@kbn/analytics",
   ],
   "exclude": [
     "target/**/*",

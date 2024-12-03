@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useToasts, useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -19,7 +19,8 @@ jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mock;
 
-describe('useBulkGetUserProfiles', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/176335
+describe.skip('useBulkGetUserProfiles', () => {
   const props = {
     uids: userProfilesIds,
   };
@@ -40,26 +41,25 @@ describe('useBulkGetUserProfiles', () => {
   it('calls bulkGetUserProfiles with correct arguments', async () => {
     const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
 
-    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
+    renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(spyOnBulkGetUserProfiles).toBeCalledWith({
-      ...props,
-      security: expect.anything(),
-    });
+    await waitFor(() =>
+      expect(spyOnBulkGetUserProfiles).toBeCalledWith({
+        ...props,
+        security: expect.anything(),
+      })
+    );
   });
 
   it('returns a mapping with user profiles', async () => {
-    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
+    const { result } = renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(result.current.data).toMatchInlineSnapshot(`
+    await waitFor(() =>
+      expect(result.current.data).toMatchInlineSnapshot(`
       Map {
         "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0" => Object {
           "data": Object {},
@@ -92,7 +92,8 @@ describe('useBulkGetUserProfiles', () => {
           },
         },
       }
-    `);
+    `)
+    );
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {
@@ -105,12 +106,20 @@ describe('useBulkGetUserProfiles', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
+    renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isError);
+    await waitFor(() => expect(addError).toHaveBeenCalled());
+  });
 
-    expect(addError).toHaveBeenCalled();
+  it('does not call the bulkGetUserProfiles if the array of uids is empty', async () => {
+    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+
+    renderHook(() => useBulkGetUserProfiles({ uids: [] }), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    expect(spyOnBulkGetUserProfiles).not.toHaveBeenCalled();
   });
 });

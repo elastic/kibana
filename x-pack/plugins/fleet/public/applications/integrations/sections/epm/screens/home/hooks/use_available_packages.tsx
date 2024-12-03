@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 import { uniq } from 'lodash';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
+import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import {
+  useGetPackagesQuery,
+  useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
   useGetReplacementCustomIntegrationsQuery,
 } from '../../../../../hooks';
@@ -26,7 +28,13 @@ import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../
 import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
+  filterPolicyTemplatesTiles,
 } from '../../../../../../../../common/services';
+
+import {
+  isOnlyAgentlessPolicyTemplate,
+  isOnlyAgentlessIntegration,
+} from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { IntegrationCardItem } from '..';
 
@@ -76,39 +84,64 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       categories: getAllCategoriesFromIntegrations(pkg),
     };
 
-    return [
-      ...acc,
-      topPackage,
-      ...(doesPackageHaveIntegrations(pkg)
-        ? policyTemplates.map((policyTemplate) => {
-            const { name, title, description, icons } = policyTemplate;
+    const integrationsPolicyTemplates = doesPackageHaveIntegrations(pkg)
+      ? policyTemplates.map((policyTemplate) => {
+          const { name, title, description, icons } = policyTemplate;
 
-            const categories =
-              isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
-                ? policyTemplate.categories
-                : [];
-            const allCategories = [...topCategories, ...categories];
-            return {
-              ...restOfPackage,
-              id: `${restOfPackage.id}-${name}`,
-              integration: name,
-              title,
-              description,
-              icons: icons || restOfPackage.icons,
-              categories: uniq(allCategories),
-            };
-          })
-        : []),
-    ];
+          const categories =
+            isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
+              ? policyTemplate.categories
+              : [];
+          const allCategories = [...topCategories, ...categories];
+          return {
+            ...restOfPackage,
+            id: `${restOfPackage.id}-${name}`,
+            integration: name,
+            title,
+            description,
+            icons: icons || restOfPackage.icons,
+            categories: uniq(allCategories),
+          };
+        })
+      : [];
+
+    const tiles = filterPolicyTemplatesTiles<PackageListItem>(
+      pkg.policy_templates_behavior,
+      topPackage,
+      integrationsPolicyTemplates
+    );
+    return [...acc, ...tiles];
   }, []);
 };
 
-export const useAvailablePackages = () => {
+// Return filtered packages based on deployment mode,
+// Currently filters out agentless only packages and policy templates if agentless is not available
+const filterPackageListDeploymentModes = (packages: PackageList, isAgentlessEnabled: boolean) => {
+  return isAgentlessEnabled
+    ? packages
+    : packages
+        .filter((pkg) => {
+          return !isOnlyAgentlessIntegration(pkg);
+        })
+        .map((pkg) => {
+          pkg.policy_templates = (pkg.policy_templates || []).filter((policyTemplate) => {
+            return !isOnlyAgentlessPolicyTemplate(policyTemplate);
+          });
+          return pkg;
+        });
+};
+
+export type AvailablePackagesHookType = typeof useAvailablePackages;
+
+export const useAvailablePackages = ({
+  prereleaseIntegrationsEnabled,
+}: {
+  prereleaseIntegrationsEnabled: boolean;
+}) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
-  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
-    boolean | undefined
-  >(undefined);
+
   const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
+  const { isAgentlessEnabled } = useAgentless();
 
   const {
     initialSelectedCategory,
@@ -142,10 +175,13 @@ export const useAvailablePackages = () => {
     });
   }
 
-  const eprIntegrationList = useMemo(
-    () => packageListToIntegrationsList(eprPackages?.items || []),
-    [eprPackages]
-  );
+  const eprIntegrationList = useMemo(() => {
+    const filteredPackageList =
+      filterPackageListDeploymentModes(eprPackages?.items || [], isAgentlessEnabled) || [];
+    const integrations = packageListToIntegrationsList(filteredPackageList);
+    return integrations;
+  }, [eprPackages?.items, isAgentlessEnabled]);
+
   const {
     data: replacementCustomIntegrations,
     isInitialLoading: isLoadingReplacmentCustomIntegrations,
@@ -245,6 +281,5 @@ export const useAvailablePackages = () => {
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
-    setPrereleaseIntegrationsEnabled,
   };
 };

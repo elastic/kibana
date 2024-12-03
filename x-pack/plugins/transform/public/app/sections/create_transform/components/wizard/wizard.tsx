@@ -8,10 +8,11 @@
 import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
 import { pick } from 'lodash';
 
-import { EuiSteps, EuiStepStatus } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { EuiSteps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
@@ -19,18 +20,19 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
 
+import type { StepDefineExposedState } from '../step_define';
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
-  StepDefineExposedState,
   StepDefineForm,
   StepDefineSummary,
 } from '../step_define';
@@ -109,13 +111,7 @@ export const CreateTransformWizardContext = createContext<{
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
   const { showNodeInfo } = useEnabledFeatures();
   const appDependencies = useAppDependencies();
-  const {
-    ml: { FieldStatsFlyoutProvider },
-    uiSettings,
-    data,
-    fieldFormats,
-    charts,
-  } = appDependencies;
+  const { uiSettings, data, fieldFormats, charts, theme } = appDependencies;
   const { dataView } = searchItems;
 
   // The current WIZARD_STEP
@@ -251,6 +247,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={stepDefineState.timeRangeMs}
       dslQuery={transformConfig.source.query}
+      theme={theme}
     >
       <CreateTransformWizardContext.Provider
         value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}

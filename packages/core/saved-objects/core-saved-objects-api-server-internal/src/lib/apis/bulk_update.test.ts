@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -60,7 +61,7 @@ interface ExpectedErrorResult {
   error: Record<string, any>;
 }
 
-describe('SavedObjectsRepository', () => {
+describe('#bulkUpdate', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -73,6 +74,17 @@ describe('SavedObjectsRepository', () => {
   const expectSuccess = ({ type, id }: { type: string; id: string }) => {
     // @ts-expect-error TS is not aware of the extension
     return expect.toBeDocumentWithoutError(type, id);
+  };
+
+  const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
+    const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
+    expect(migrator.migrateDocument).toHaveBeenNthCalledWith(
+      n,
+      obj,
+      expect.objectContaining({
+        allowDowngrade: expect.any(Boolean),
+      })
+    );
   };
 
   beforeEach(() => {
@@ -106,7 +118,7 @@ describe('SavedObjectsRepository', () => {
     mockGetSearchDsl.mockClear();
   });
 
-  describe('#bulkUpdate', () => {
+  describe('performBulkUpdate', () => {
     const obj1: SavedObjectsBulkUpdateObject = {
       type: 'config',
       id: '6.0.0-alpha1',
@@ -121,7 +133,23 @@ describe('SavedObjectsRepository', () => {
     const originId = 'some-origin-id';
     const namespace = 'foo-namespace';
 
-    // bulk create calls have two objects for each source -- the action, and the source
+    const getBulkIndexEntry = (
+      method: string,
+      { type, id }: TypeIdTuple,
+      _index = expect.any(String),
+      getId: (type: string, id: string) => string = () => expect.any(String),
+      overrides: Record<string, unknown> = {}
+    ) => {
+      return {
+        [method]: {
+          _index,
+          _id: getId(type, id),
+          ...overrides,
+        },
+      };
+    };
+
+    // bulk index calls have two objects for each source -- the action, and the source
     const expectClientCallArgsAction = (
       objects: TypeIdTuple[],
       {
@@ -137,14 +165,8 @@ describe('SavedObjectsRepository', () => {
       }
     ) => {
       const body = [];
-      for (const { type, id } of objects) {
-        body.push({
-          [method]: {
-            _index,
-            _id: getId(type, id),
-            ...overrides,
-          },
-        });
+      for (const object of objects) {
+        body.push(getBulkIndexEntry(method, object, _index, getId, overrides));
         body.push(expect.any(Object));
       }
       expect(client.bulk).toHaveBeenCalledWith(
@@ -153,14 +175,26 @@ describe('SavedObjectsRepository', () => {
       );
     };
 
-    const expectObjArgs = ({ type, attributes }: { type: string; attributes: unknown }) => [
-      expect.any(Object),
+    const expectObjArgs = (
       {
-        doc: expect.objectContaining({
-          [type]: attributes,
-          ...mockTimestampFields,
-        }),
+        type,
+        attributes,
+        references,
+      }: {
+        type: string;
+        attributes: unknown;
+        references?: SavedObjectReference[];
       },
+      overrides: Record<string, unknown> = {}
+    ) => [
+      expect.any(Object),
+      expect.objectContaining({
+        [type]: attributes,
+        references,
+        type,
+        ...overrides,
+        ...mockTimestampFields,
+      }),
     ];
 
     describe('client calls', () => {
@@ -169,13 +203,14 @@ describe('SavedObjectsRepository', () => {
         expect(client.bulk).toHaveBeenCalled();
       });
 
-      it(`should use the ES mget action before bulk action for any types that are multi-namespace`, async () => {
+      it(`should use the ES mget action before bulk action for any types that are valid`, async () => {
         const objects = [obj1, { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE }];
         await bulkUpdateSuccess(client, repository, registry, objects);
         expect(client.bulk).toHaveBeenCalled();
         expect(client.mget).toHaveBeenCalled();
 
         const docs = [
+          expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
           expect.objectContaining({ _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj2.id}` }),
         ];
         expect(client.mget).toHaveBeenCalledWith(
@@ -186,20 +221,62 @@ describe('SavedObjectsRepository', () => {
 
       it(`formats the ES request`, async () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
-        const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
+        // expect client.bulk call args should include the whole doc
+        expectClientCallArgsAction([obj1, obj2], { method: 'index' });
       });
 
       it(`formats the ES request for any types that are multi-namespace`, async () => {
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
         await bulkUpdateSuccess(client, repository, registry, [obj1, _obj2]);
-        const body = [...expectObjArgs(obj1), ...expectObjArgs(_obj2)];
+        expectClientCallArgsAction([obj1, _obj2], { method: 'index' });
+      });
+
+      it('should use the ES bulk action with the merged attributes when mergeAttributes is not false', async () => {
+        const _obj1 = { ...obj1, attributes: { foo: 'bar' } };
+        const _obj2 = { ...obj2, attributes: { hello: 'dolly' }, mergeAttributes: true };
+        await bulkUpdateSuccess(client, repository, registry, [_obj1, _obj2]);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
+          expect.objectContaining({
+            body: [
+              getBulkIndexEntry('index', _obj1),
+              expect.objectContaining({
+                [obj1.type]: {
+                  title: 'Testing',
+                  foo: 'bar',
+                },
+              }),
+              getBulkIndexEntry('index', _obj2),
+              expect.objectContaining({
+                [obj2.type]: {
+                  title: 'Testing',
+                  hello: 'dolly',
+                },
+              }),
+            ],
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it('should use the ES bulk action only with the provided attributes when mergeAttributes is false', async () => {
+        const _obj1 = { ...obj1, attributes: { hello: 'dolly' }, mergeAttributes: false };
+        await bulkUpdateSuccess(client, repository, registry, [_obj1]);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: [
+              getBulkIndexEntry('index', _obj1),
+              expect.objectContaining({
+                [obj1.type]: {
+                  hello: 'dolly',
+                },
+              }),
+            ],
+          }),
+          expect.any(Object)
         );
       });
 
@@ -211,8 +288,10 @@ describe('SavedObjectsRepository', () => {
 
       it(`defaults to no references`, async () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
-        const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
-        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        const body = [
+          ...expectObjArgs({ ...obj1, references: [] }),
+          ...expectObjArgs({ ...obj2, references: [] }),
+        ];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
           expect.anything()
@@ -223,13 +302,16 @@ describe('SavedObjectsRepository', () => {
         const test = async (references: SavedObjectReference[]) => {
           const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
           await bulkUpdateSuccess(client, repository, registry, objects);
-          const expected = { doc: expect.objectContaining({ references }) };
-          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          const body = [
+            ...expectObjArgs({ ...obj1, references }),
+            ...expectObjArgs({ ...obj2, references }),
+          ];
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({ body }),
             expect.anything()
           );
           client.bulk.mockClear();
+          client.mget.mockClear();
         };
         await test(references);
         await test([{ type: 'type', id: 'id', name: 'some ref' }]);
@@ -238,15 +320,18 @@ describe('SavedObjectsRepository', () => {
 
       it(`doesn't accept custom references if not an array`, async () => {
         const test = async (references: unknown) => {
-          const objects = [obj1, obj2]; // .map((obj) => ({ ...obj }));
+          const objects = [obj1, obj2];
           await bulkUpdateSuccess(client, repository, registry, objects);
-          const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
-          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          const body = [
+            ...expectObjArgs({ ...obj1, references: expect.not.arrayContaining([references]) }),
+            ...expectObjArgs({ ...obj2, references: expect.not.arrayContaining([references]) }),
+          ];
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({ body }),
             expect.anything()
           );
           client.bulk.mockClear();
+          client.mget.mockClear();
         };
         await test('string');
         await test(123);
@@ -265,7 +350,7 @@ describe('SavedObjectsRepository', () => {
       it(`defaults to no version for types that are not multi-namespace`, async () => {
         const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
         await bulkUpdateSuccess(client, repository, registry, objects);
-        expectClientCallArgsAction(objects, { method: 'update' });
+        expectClientCallArgsAction(objects, { method: 'index' });
       });
 
       it(`accepts version`, async () => {
@@ -277,13 +362,13 @@ describe('SavedObjectsRepository', () => {
         ];
         await bulkUpdateSuccess(client, repository, registry, objects);
         const overrides = { if_seq_no: 100, if_primary_term: 200 };
-        expectClientCallArgsAction(objects, { method: 'update', overrides });
+        expectClientCallArgsAction(objects, { method: 'index', overrides });
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], { namespace });
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
@@ -291,13 +376,13 @@ describe('SavedObjectsRepository', () => {
           { ...obj1, namespace },
           { ...obj2, namespace },
         ]);
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
@@ -311,7 +396,7 @@ describe('SavedObjectsRepository', () => {
           ],
           { namespace }
         );
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
@@ -319,7 +404,7 @@ describe('SavedObjectsRepository', () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
           namespace: 'default',
         });
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
@@ -328,18 +413,20 @@ describe('SavedObjectsRepository', () => {
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
 
         await bulkUpdateSuccess(client, repository, registry, [_obj1], { namespace });
-        expectClientCallArgsAction([_obj1], { method: 'update', getId });
+        expectClientCallArgsAction([_obj1], { method: 'index', getId });
         client.bulk.mockClear();
+        client.mget.mockClear();
         await bulkUpdateSuccess(client, repository, registry, [_obj2], { namespace });
-        expectClientCallArgsAction([_obj2], { method: 'update', getId });
+        expectClientCallArgsAction([_obj2], { method: 'index', getId });
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
         await bulkUpdateSuccess(client, repository, registry, [{ ..._obj1, namespace }]);
-        expectClientCallArgsAction([_obj1], { method: 'update', getId });
+        expectClientCallArgsAction([_obj1], { method: 'index', getId });
         client.bulk.mockClear();
+        client.mget.mockClear();
         await bulkUpdateSuccess(client, repository, registry, [{ ..._obj2, namespace }]);
-        expectClientCallArgsAction([_obj2], { method: 'update', getId });
+        expectClientCallArgsAction([_obj2], { method: 'index', getId });
       });
     });
 
@@ -359,51 +446,71 @@ describe('SavedObjectsRepository', () => {
         isBulkError: boolean,
         expectedErrorResult: ExpectedErrorResult
       ) => {
-        const objects = [obj1, obj, obj2];
-        const mockResponse = getMockBulkUpdateResponse(registry, objects);
+        const objects = [obj1, obj2, obj];
+
+        const mockedMgetResponse = getMockMgetResponse(registry, [obj1, obj2, obj]);
+        client.bulk.mockClear();
+        client.mget.mockClear();
+        client.mget.mockResponseOnce(mockedMgetResponse);
+
+        const mockBulkIndexResponse = getMockBulkUpdateResponse(registry, objects);
         if (isBulkError) {
-          // mock the bulk error for only the second object
+          // mock the bulk error for only the third object
+          mockGetBulkOperationError.mockReturnValueOnce(undefined);
           mockGetBulkOperationError.mockReturnValueOnce(undefined);
           mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error as Payload);
         }
-        client.bulk.mockResponseOnce(mockResponse);
+        client.bulk.mockResponseOnce(mockBulkIndexResponse);
 
         const result = await repository.bulkUpdate(objects);
+
+        expect(client.mget).toHaveBeenCalled();
         expect(client.bulk).toHaveBeenCalled();
-        const objCall = isBulkError ? expectObjArgs(obj) : [];
-        const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
+
+        const expectClientCallObjects = isBulkError ? [obj1, obj2, obj] : [obj1, obj2];
+        expectClientCallArgsAction(expectClientCallObjects, { method: 'index' });
+
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectedErrorResult, expectSuccess(obj2)],
+          saved_objects: [expectSuccess(obj1), expectSuccess(obj2), expectedErrorResult],
         });
       };
 
       const bulkUpdateMultiError = async (
-        [obj1, _obj, obj2]: SavedObjectsBulkUpdateObject[],
+        [obj1, obj2, _obj]: SavedObjectsBulkUpdateObject[],
         options: SavedObjectsBulkUpdateOptions | undefined,
         mgetResponse: estypes.MgetResponse,
         mgetOptions?: { statusCode?: number }
       ) => {
+        client.bulk.mockClear();
+        client.mget.mockClear();
+        // we only need to mock the response once. A 404 status code will apply to the response for all
         client.mget.mockResponseOnce(mgetResponse, { statusCode: mgetOptions?.statusCode });
 
-        const bulkResponse = getMockBulkUpdateResponse(registry, [obj1, obj2], { namespace });
-        client.bulk.mockResponseOnce(bulkResponse);
-
-        const result = await repository.bulkUpdate([obj1, _obj, obj2], options);
-        expect(client.bulk).toHaveBeenCalled();
-        expect(client.mget).toHaveBeenCalled();
-        const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
-
-        expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectErrorNotFound(_obj), expectSuccess(obj2)],
+        const mockBulkIndexResponse = getMockBulkUpdateResponse(registry, [obj1, obj2], {
+          namespace,
         });
+        client.bulk.mockResponseOnce(mockBulkIndexResponse);
+
+        const result = await repository.bulkUpdate([obj1, obj2, _obj], options);
+
+        expect(client.mget).toHaveBeenCalled();
+        if (mgetOptions?.statusCode === 404) {
+          expect(client.bulk).not.toHaveBeenCalled();
+          expect(result).toEqual({
+            saved_objects: [
+              expectErrorNotFound(obj1),
+              expectErrorNotFound(obj2),
+              expectErrorNotFound(_obj),
+            ],
+          });
+        } else {
+          expect(client.bulk).toHaveBeenCalled();
+          expectClientCallArgsAction([obj1, obj2], { method: 'index' });
+
+          expect(result).toEqual({
+            saved_objects: [expectSuccess(obj1), expectSuccess(obj2), expectErrorNotFound(_obj)],
+          });
+        }
       };
 
       it(`throws when options.namespace is '*'`, async () => {
@@ -433,22 +540,22 @@ describe('SavedObjectsRepository', () => {
 
       it(`returns error when ES is unable to find the document (mget)`, async () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE, found: false };
-        const mgetResponse = getMockMgetResponse(registry, [_obj]);
-        await bulkUpdateMultiError([obj1, _obj, obj2], undefined, mgetResponse);
+        const mgetResponse = getMockMgetResponse(registry, [obj1, obj2, _obj]);
+        await bulkUpdateMultiError([obj1, obj2, _obj], undefined, mgetResponse);
       });
 
       it(`returns error when ES is unable to find the index (mget)`, async () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE };
-        const mgetResponse = getMockMgetResponse(registry, [_obj]);
-        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, mgetResponse, {
+        const mgetResponse = getMockMgetResponse(registry, [obj1, obj2, _obj]);
+        await bulkUpdateMultiError([obj1, obj2, _obj], { namespace }, mgetResponse, {
           statusCode: 404,
         });
       });
 
       it(`returns error when there is a conflict with an existing multi-namespace saved object (mget)`, async () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE };
-        const mgetResponse = getMockMgetResponse(registry, [_obj], 'bar-namespace');
-        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, mgetResponse);
+        const mgetResponse = getMockMgetResponse(registry, [obj1, obj2, _obj], 'bar-namespace');
+        await bulkUpdateMultiError([obj1, obj2, _obj], { namespace }, mgetResponse);
       });
 
       it(`returns bulk error`, async () => {
@@ -458,6 +565,53 @@ describe('SavedObjectsRepository', () => {
           error: { message: 'Oh no, a bulk error!' },
         };
         await bulkUpdateError(obj, true, expectedErrorResult);
+      });
+    });
+
+    describe('migration', () => {
+      it('migrates the fetched documents from Mget', async () => {
+        const modifiedObj2 = { ...obj2, coreMigrationVersion: '8.0.0' };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs({
+          id: modifiedObj2.id,
+          type: modifiedObj2.type,
+        });
+      });
+
+      it('migrates namespace agnostic and multinamespace object documents', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          coreMigrationVersion: '8.0.0',
+          type: MULTI_NAMESPACE_ISOLATED_TYPE,
+          namespace: 'default',
+        };
+        const modifiedObj1 = { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE };
+        const objects = [modifiedObj2, modifiedObj1];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects, { namespace });
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(4);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            type: modifiedObj2.type,
+          },
+          true,
+          1
+        );
+        expectMigrationArgs(
+          {
+            id: modifiedObj1.id,
+            type: modifiedObj1.type,
+          },
+          true,
+          2
+        );
       });
     });
 
@@ -483,14 +637,24 @@ describe('SavedObjectsRepository', () => {
           id: 'three',
           attributes: {},
         };
-        const objects = [obj1, obj, obj2];
-        const mockResponse = getMockBulkUpdateResponse(registry, objects);
-        client.bulk.mockResponseOnce(mockResponse);
+        const objects = [obj1, obj2, obj];
+        const mockedMgetResponse = getMockMgetResponse(registry, [obj1, obj2, obj]);
+        client.bulk.mockClear();
+        client.mget.mockClear();
+        client.mget.mockResponseOnce(mockedMgetResponse);
 
+        const mockBulkIndexResponse = getMockBulkUpdateResponse(registry, objects);
+        client.bulk.mockResponseOnce(mockBulkIndexResponse);
         const result = await repository.bulkUpdate(objects);
-        expect(client.bulk).toHaveBeenCalledTimes(1);
+
+        expect(client.mget).toHaveBeenCalled();
+        expect(client.bulk).toHaveBeenCalled();
+
+        const expectClientCallObjects = [obj1, obj2];
+        expectClientCallArgsAction(expectClientCallObjects, { method: 'index' });
+
         expect(result).toEqual({
-          saved_objects: [expectUpdateResult(obj1), expectError(obj), expectUpdateResult(obj2)],
+          saved_objects: [expectUpdateResult(obj1), expectUpdateResult(obj2), expectError(obj)],
         });
       });
 
@@ -515,14 +679,25 @@ describe('SavedObjectsRepository', () => {
           id: 'three',
           attributes: {},
         };
-        const result = await bulkUpdateSuccess(
-          client,
-          repository,
-          registry,
-          [obj1, obj],
-          {},
-          originId
-        );
+        client.bulk.mockClear();
+        client.mget.mockClear();
+        const objects = [
+          { ...obj1, originId },
+          { ...obj, originId },
+        ];
+        const mockedMgetResponse = getMockMgetResponse(registry, objects);
+
+        client.mget.mockResponseOnce(mockedMgetResponse);
+
+        const mockBulkIndexResponse = getMockBulkUpdateResponse(registry, objects, {}, originId);
+        client.bulk.mockResponseOnce(mockBulkIndexResponse);
+        const result = await repository.bulkUpdate(objects);
+
+        expect(client.mget).toHaveBeenCalled();
+        expect(client.bulk).toHaveBeenCalled();
+
+        const expectClientCallObjects = objects;
+        expectClientCallArgsAction(expectClientCallObjects, { method: 'index' });
         expect(result).toEqual({
           saved_objects: [
             expect.objectContaining({ originId }),

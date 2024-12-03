@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface CreateTest {
   statusCode: number;
@@ -19,6 +21,7 @@ interface CreateTests {
   newSpace: CreateTest;
   alreadyExists: CreateTest;
   reservedSpecified: CreateTest;
+  solutionSpecified: CreateTest;
 }
 
 interface CreateTestDefinition {
@@ -61,6 +64,36 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       color: '#5c5959',
       disabledFeatures: [],
     });
+  };
+
+  const expectSolutionSpecifiedResult = (resp: Record<string, any>) => {
+    const disabledFeatures = resp.body.disabledFeatures.sort();
+
+    const expected = {
+      id: 'solution',
+      name: 'space with solution',
+      description: 'a description',
+      color: '#5c5959',
+      disabledFeatures: [
+        // Disabled features are automatically added to the space when a solution is set
+        'apm',
+        'infrastructure',
+        'inventory',
+        'logs',
+        'observabilityCases',
+        'observabilityCasesV2',
+        'securitySolutionAssistant',
+        'securitySolutionAttackDiscovery',
+        'securitySolutionCases',
+        'securitySolutionCasesV2',
+        'siem',
+        'slo',
+        'uptime',
+      ],
+      solution: 'es',
+    };
+
+    expect({ ...resp.body, disabledFeatures }).to.eql(expected);
   };
 
   const makeCreateTest =
@@ -128,6 +161,24 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
                 .then(tests.reservedSpecified.response);
             });
           });
+
+          describe('when solution is specified', () => {
+            it(`should return ${tests.solutionSpecified.statusCode}`, async () => {
+              return supertest
+                .post(`${urlPrefix}/api/spaces/space`)
+                .auth(user.username, user.password)
+                .send({
+                  name: 'space with solution',
+                  id: 'solution',
+                  description: 'a description',
+                  color: '#5c5959',
+                  solution: 'es',
+                  disabledFeatures: [],
+                })
+                .expect(tests.solutionSpecified.statusCode)
+                .then(tests.solutionSpecified.response);
+            });
+          });
         });
       });
     };
@@ -142,5 +193,6 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expectNewSpaceResult,
     expectRbacForbiddenResponse,
     expectReservedSpecifiedResult,
+    expectSolutionSpecifiedResult,
   };
 }

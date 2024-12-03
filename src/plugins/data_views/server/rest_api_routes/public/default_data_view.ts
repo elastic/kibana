@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -21,6 +22,8 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  GET_DEFAULT_DATA_VIEW_DESCRIPTION,
+  SET_DEFAULT_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
 interface GetDefaultArgs {
@@ -58,7 +61,7 @@ export const setDefault = async ({
 };
 
 const manageDefaultIndexPatternRoutesFactory =
-  (path: string, serviceKey: string) =>
+  (path: string, serviceKey: string, getDescription?: string, postDescription?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -67,14 +70,20 @@ const manageDefaultIndexPatternRoutesFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public' }).addVersion(
+    router.versioned.get({ path, access: 'public', description: getDescription }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Authorization provided by saved objects client',
+          },
+        },
         validate: {
           request: {},
           response: {
             200: {
-              body: schema.object({ [`${serviceKey}_id`]: schema.string() }),
+              body: () => schema.object({ [`${serviceKey}_id`]: schema.string() }),
             },
           },
         },
@@ -104,9 +113,14 @@ const manageDefaultIndexPatternRoutesFactory =
       })
     );
 
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description: postDescription }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            requiredPrivileges: ['indexPatterns:manage'],
+          },
+        },
         validate: {
           request: {
             body: schema.object({
@@ -121,7 +135,7 @@ const manageDefaultIndexPatternRoutesFactory =
           },
           response: {
             200: {
-              body: schema.object({ acknowledged: schema.boolean() }),
+              body: () => schema.object({ acknowledged: schema.boolean() }),
             },
           },
         },
@@ -159,7 +173,9 @@ const manageDefaultIndexPatternRoutesFactory =
 
 export const registerManageDefaultDataViewRoute = manageDefaultIndexPatternRoutesFactory(
   `${SERVICE_PATH}/default`,
-  SERVICE_KEY
+  SERVICE_KEY,
+  GET_DEFAULT_DATA_VIEW_DESCRIPTION,
+  SET_DEFAULT_DATA_VIEW_DESCRIPTION
 );
 
 export const registerManageDefaultDataViewRouteLegacy = manageDefaultIndexPatternRoutesFactory(

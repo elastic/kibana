@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { type ChangeEvent, FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { type ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -28,7 +29,7 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { debounce } from 'lodash';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../common/util/es_utils';
 import { createKibanaDataView, checkIndexExists } from '../retry_create_data_view';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
@@ -57,13 +58,13 @@ const destIndexInvalid = i18n.translate(
 
 interface Props {
   pipelineName: string;
-  sourceIndex: string;
+  sourceIndex?: string;
 }
 
 export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) => {
-  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([
-    { label: sourceIndex },
-  ]);
+  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>(
+    sourceIndex ? [{ label: sourceIndex }] : []
+  );
   const [options, setOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [destinationIndex, setDestinationIndex] = useState<string>('');
   const [destinationIndexExists, setDestinationIndexExists] = useState<boolean>(false);
@@ -81,12 +82,11 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
       application: { capabilities },
       share,
       data,
-      mlServices: {
-        mlApiServices: { getIndices, reindexWithPipeline, hasPrivileges },
-      },
       docLinks: { links },
     },
   } = useMlKibana();
+  const mlApi = useMlApi();
+  const { getIndices, reindexWithPipeline, hasPrivileges } = mlApi;
 
   const { displayErrorToast } = useToastNotificationService();
 
@@ -123,7 +123,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
   );
 
   const debouncedIndexCheck = debounce(async () => {
-    const checkResp = await checkIndexExists(destinationIndex);
+    const checkResp = await checkIndexExists(destinationIndex, mlApi);
     if (checkResp.errorMessage !== undefined) {
       displayErrorToast(
         checkResp.errorMessage,
@@ -205,7 +205,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
           setCanReindexError(errorMessage);
         }
       }
-      if (hasPrivileges !== undefined) {
+      if (hasPrivileges !== undefined && selectedIndex.length) {
         checkPrivileges();
       }
     },
@@ -236,7 +236,11 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
   useEffect(
     function createDiscoverLink() {
       async function createDataView() {
-        const dataViewCreationResult = await createKibanaDataView(destinationIndex, data.dataViews);
+        const dataViewCreationResult = await createKibanaDataView(
+          destinationIndex,
+          data.dataViews,
+          mlApi
+        );
         if (
           dataViewCreationResult?.success === true &&
           dataViewCreationResult?.dataViewId &&
@@ -250,6 +254,8 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
         createDataView();
       }
     },
+    // Skip ml API services from deps check
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       reindexingTaskId,
       destinationIndex,
@@ -264,6 +270,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
     <EuiButton
       onClick={onReindex}
       disabled={
+        selectedIndex.length === 0 ||
         (destinationIndexInvalidMessage !== undefined && selectedIndex.length > 0) ||
         !canReindex ||
         destinationIndexExists
@@ -395,7 +402,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
             'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexStartedMessage',
             {
               defaultMessage: 'Reindexing of {sourceIndex} to {destinationIndex} has started.',
-              values: { sourceIndex, destinationIndex },
+              values: { sourceIndex: selectedIndex[0].label, destinationIndex },
             }
           )}
           color="success"

@@ -15,30 +15,41 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { stubBroadcastChannel } from '@kbn/test-jest-helpers';
 
+import { UserProfileAPIClient } from './account_management';
 import { ManagementService } from './management';
 import type { PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
 
 stubBroadcastChannel();
 
+const getCoreSetupMock = () => {
+  const coreSetup = coreMock.createSetup({
+    basePath: '/some-base-path',
+  });
+  coreSetup.http.get.mockResolvedValue({});
+  return coreSetup;
+};
+
 describe('Security Plugin', () => {
   describe('#setup', () => {
     it('should be able to setup if optional plugins are not available', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
       expect(
-        plugin.setup(
-          coreMock.createSetup({
-            basePath: '/some-base-path',
-          }) as CoreSetup<PluginStartDependencies>,
-          {
-            licensing: licensingMock.createSetup(),
-          }
-        )
+        plugin.setup(getCoreSetupMock(), {
+          licensing: licensingMock.createSetup(),
+        })
       ).toEqual({
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
+        authz: {
+          isRoleManagementEnabled: expect.any(Function),
+          roles: expect.any(Object),
+          privileges: expect.any(Object),
+        },
         license: {
           isLicenseAvailable: expect.any(Function),
+          getLicenseType: expect.any(Function),
           isEnabled: expect.any(Function),
+          getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
           hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
@@ -47,7 +58,7 @@ describe('Security Plugin', () => {
     });
 
     it('setups Management Service if `management` plugin is available', () => {
-      const coreSetupMock = coreMock.createSetup({ basePath: '/some-base-path' });
+      const coreSetupMock = getCoreSetupMock();
       const setupManagementServiceMock = jest
         .spyOn(ManagementService.prototype, 'setup')
         .mockImplementation(() => {});
@@ -65,7 +76,9 @@ describe('Security Plugin', () => {
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isLicenseAvailable: expect.any(Function),
+          getLicenseType: expect.any(Function),
           isEnabled: expect.any(Function),
+          getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
           hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
@@ -73,17 +86,39 @@ describe('Security Plugin', () => {
         management: managementSetupMock,
         fatalErrors: coreSetupMock.fatalErrors,
         getStartServices: coreSetupMock.getStartServices,
+        buildFlavor: expect.stringMatching(new RegExp('^serverless|traditional$')),
       });
+    });
+
+    it('calls core.security.registerSecurityDelegate', () => {
+      const coreSetupMock = getCoreSetupMock();
+
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+
+      plugin.setup(coreSetupMock, {
+        licensing: licensingMock.createSetup(),
+      });
+
+      expect(coreSetupMock.security.registerSecurityDelegate).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls core.userProfile.registerUserProfileDelegate', () => {
+      const coreSetupMock = getCoreSetupMock();
+
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+
+      plugin.setup(coreSetupMock, {
+        licensing: licensingMock.createSetup(),
+      });
+
+      expect(coreSetupMock.userProfile.registerUserProfileDelegate).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('#start', () => {
     it('should be able to setup if optional plugins are not available', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
-      plugin.setup(
-        coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        { licensing: licensingMock.createSetup() }
-      );
+      plugin.setup(getCoreSetupMock(), { licensing: licensingMock.createSetup() });
 
       expect(
         plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
@@ -95,6 +130,19 @@ describe('Security Plugin', () => {
           "authc": Object {
             "areAPIKeysEnabled": [Function],
             "getCurrentUser": [Function],
+          },
+          "authz": Object {
+            "isRoleManagementEnabled": [Function],
+            "privileges": Object {
+              "getAll": [Function],
+            },
+            "roles": Object {
+              "bulkUpdateRoles": [Function],
+              "deleteRole": [Function],
+              "getRole": [Function],
+              "getRoles": [Function],
+              "saveRole": [Function],
+            },
           },
           "navControlService": Object {
             "addUserMenuLinks": [Function],
@@ -108,7 +156,31 @@ describe('Security Plugin', () => {
           },
           "userProfiles": Object {
             "bulkGet": [Function],
+            "enabled$": Observable {
+              "operator": [Function],
+              "source": Observable {
+                "operator": [Function],
+                "source": Observable {
+                  "operator": [Function],
+                  "source": Observable {
+                    "operator": [Function],
+                    "source": Observable {
+                      "source": BehaviorSubject {
+                        "_value": false,
+                        "closed": false,
+                        "currentObservers": null,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [],
+                        "thrownError": null,
+                      },
+                    },
+                  },
+                },
+              },
+            },
             "getCurrent": [Function],
+            "partialUpdate": [Function],
             "suggest": [Function],
             "update": [Function],
             "userProfile$": Observable {
@@ -120,6 +192,20 @@ describe('Security Plugin', () => {
                 "isStopped": false,
                 "observers": Array [],
                 "thrownError": null,
+              },
+            },
+            "userProfileLoaded$": Observable {
+              "operator": [Function],
+              "source": Observable {
+                "source": BehaviorSubject {
+                  "_value": false,
+                  "closed": false,
+                  "currentObservers": null,
+                  "hasError": false,
+                  "isStopped": false,
+                  "observers": Array [],
+                  "thrownError": null,
+                },
               },
             },
           },
@@ -137,13 +223,10 @@ describe('Security Plugin', () => {
 
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
 
-      plugin.setup(
-        coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        {
-          licensing: licensingMock.createSetup(),
-          management: managementSetupMock,
-        }
-      );
+      plugin.setup(getCoreSetupMock(), {
+        licensing: licensingMock.createSetup(),
+        management: managementSetupMock,
+      });
 
       const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
       plugin.start(coreStart, {
@@ -154,15 +237,28 @@ describe('Security Plugin', () => {
 
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
     });
+
+    it('calls UserProfileAPIClient start() to fetch the user profile', () => {
+      const startUserProfileAPIClient = jest
+        .spyOn(UserProfileAPIClient.prototype, 'start')
+        .mockImplementation(() => {});
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+      plugin.setup(getCoreSetupMock(), { licensing: licensingMock.createSetup() });
+
+      const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
+      plugin.start(coreStart, {
+        dataViews: {} as DataViewsPublicPluginStart,
+        features: {} as FeaturesPluginStart,
+      });
+
+      expect(startUserProfileAPIClient).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('#stop', () => {
     it('does not fail if called before `start`.', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
-      plugin.setup(
-        coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        { licensing: licensingMock.createSetup() }
-      );
+      plugin.setup(getCoreSetupMock(), { licensing: licensingMock.createSetup() });
 
       expect(() => plugin.stop()).not.toThrow();
     });
@@ -170,10 +266,7 @@ describe('Security Plugin', () => {
     it('does not fail if called during normal plugin life cycle.', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
 
-      plugin.setup(
-        coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        { licensing: licensingMock.createSetup() }
-      );
+      plugin.setup(getCoreSetupMock(), { licensing: licensingMock.createSetup() });
 
       plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
         dataViews: {} as DataViewsPublicPluginStart,

@@ -8,7 +8,8 @@
 import { useCallback, useMemo, useEffect, useRef } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
-import { PLUGIN_ID } from '../../../../constants';
+import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
+import { pkgKeyFromPackageInfo } from '../../../../services';
 import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
 import type {
   CreatePackagePolicyRouteState,
@@ -35,7 +36,7 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
   const { getHref } = useLink();
 
   const cancelClickHandler = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       if (routeState?.onCancelNavigateTo) {
         ev.preventDefault();
         navigateToApp(...routeState.onCancelNavigateTo);
@@ -86,8 +87,14 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       if (!doOnSaveNavigation.current) {
         return;
       }
-      const packagePolicyPath = getPath('policy_details', { policyId: packagePolicy.policy_id });
-
+      const hasNoAgentPolicies = packagePolicy.policy_ids.length === 0;
+      const packagePolicyPath = hasNoAgentPolicies
+        ? getPath('integration_details_policies', {
+            pkgkey: pkgKeyFromPackageInfo(packagePolicy.package!),
+          })
+        : getPath('policy_details', {
+            policyId: packagePolicy.policy_ids[0], // TODO navigates to first policy
+          });
       const [onSaveNavigateTo, onSaveQueryParams]: [
         Parameters<ApplicationStart['navigateToApp']>,
         CreatePackagePolicyRouteState['onSaveQueryParams']
@@ -95,7 +102,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
         ? [routeState.onSaveNavigateTo, routeState?.onSaveQueryParams]
         : [
             [
-              PLUGIN_ID,
+              hasNoAgentPolicies ? INTEGRATIONS_PLUGIN_ID : PLUGIN_ID,
               {
                 path: packagePolicyPath,
               },
@@ -121,7 +128,15 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
         navigateToApp(...onSaveNavigateTo);
       }
     },
-    [packagePolicy.policy_id, getPath, navigateToApp, routeState, queryParamsPolicyId]
+    [
+      packagePolicy.policy_ids,
+      packagePolicy.package,
+      getPath,
+      routeState?.onSaveNavigateTo,
+      routeState?.onSaveQueryParams,
+      queryParamsPolicyId,
+      navigateToApp,
+    ]
   );
 
   return onSaveNavigate;

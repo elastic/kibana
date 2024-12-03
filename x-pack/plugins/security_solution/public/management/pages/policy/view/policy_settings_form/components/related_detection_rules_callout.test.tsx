@@ -10,17 +10,14 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import React from 'react';
 import { RelatedDetectionRulesCallout } from './related_detection_rules_callout';
 import { exactMatchText } from '../mocks';
-import userEvent from '@testing-library/user-event';
 
 describe('Policy form RelatedDetectionRulesCallout component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-  let history: AppContextTestRender['history'];
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
-    history = mockedContext.history;
     render = () => {
       renderResult = mockedContext.render(<RelatedDetectionRulesCallout data-test-subj="test" />);
       return renderResult;
@@ -32,15 +29,15 @@ describe('Policy form RelatedDetectionRulesCallout component', () => {
 
     expect(renderResult.getByTestId('test')).toHaveTextContent(
       exactMatchText(
-        'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+        'The Endpoint Security detection rule is enabled automatically with Elastic Defend. This rule must remain enabled to receive Endpoint alerts. Learn More(external, opens in a new tab or window).'
       )
     );
   });
 
-  it('should navigate to Detection Rules when link is clicked', () => {
+  it('should contain a link to the detection engine overview docs', () => {
     render();
-    userEvent.click(renderResult.getByTestId('test-link'));
+    const anchor: HTMLAnchorElement = renderResult.getByTestId('test-link') as HTMLAnchorElement;
 
-    expect(history.location.pathname).toEqual('/rules');
+    expect(anchor.href).toContain('detection-engine-overview.html');
   });
 });

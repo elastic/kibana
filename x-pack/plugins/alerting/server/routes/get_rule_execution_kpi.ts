@@ -38,6 +38,9 @@ export const getRuleExecutionKPIRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_execution_kpi`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         params: paramSchema,
         query: querySchema,
@@ -45,7 +48,8 @@ export const getRuleExecutionKPIRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const { id } = req.params;
         return res.ok({
           body: await rulesClient.getRuleExecutionKPI(rewriteReq({ id, ...req.query })),

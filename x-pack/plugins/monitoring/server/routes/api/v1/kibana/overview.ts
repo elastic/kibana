@@ -16,7 +16,7 @@ import {
 } from '../../../../../common/http_api/kibana';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { MonitoringCore } from '../../../../types';
-import { getKibanaDataset } from '../../../../lib/cluster/get_index_patterns';
+import { getKibanaDataset } from '../../../../../common/get_index_patterns';
 
 export function kibanaOverviewRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postKibanaOverviewRequestParamsRT);
@@ -28,6 +28,9 @@ export function kibanaOverviewRoute(server: MonitoringCore) {
     validate: {
       params: validateParams,
       body: validateBody,
+    },
+    options: {
+      access: 'internal',
     },
     async handler(req) {
       const clusterUuid = req.params.clusterUuid;

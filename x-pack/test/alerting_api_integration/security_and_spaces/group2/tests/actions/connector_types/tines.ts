@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import {
   TinesSimulator,
@@ -14,7 +15,9 @@ import {
   tinesAgentWebhook,
   tinesWebhookSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/tines_simulation';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 const connectorTypeId = '.tines';
 const name = 'A tines action';
@@ -34,6 +37,7 @@ const webhook = {
 export default function tinesTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const retry = getService('retry');
 
   const createConnector = async (url: string) => {
     const { body } = await supertest
@@ -184,7 +188,13 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             });
           expect(200);
 
-          expect(Object.keys(body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+          expect(Object.keys(body).sort()).to.eql([
+            'connector_id',
+            'errorSource',
+            'message',
+            'retry',
+            'status',
+          ]);
           expect(body.connector_id).to.eql(tinesActionId);
           expect(body.status).to.eql('error');
         });
@@ -203,6 +213,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${tinesActionId}. Connector name: Tines. Connector type: .tines`,
           });
         });
@@ -221,6 +232,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [storyId]: expected value of type [number] but got [undefined])',
           });
@@ -240,6 +252,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message:
               'Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none',
           });
@@ -263,6 +276,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.storyId]: expected value of type [number] but got [undefined])',
           });
@@ -286,6 +300,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.name]: expected value of type [string] but got [undefined])',
           });
@@ -309,6 +324,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.path]: expected value of type [string] but got [undefined])',
           });
@@ -332,6 +348,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.secret]: expected value of type [string] but got [undefined])',
           });
@@ -378,6 +395,23 @@ export default function tinesTest({ getService }: FtrProviderContext) {
                 incompleteResponse: false,
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: tinesActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(2);
           });
 
           it('should get webhooks', async () => {
@@ -408,6 +442,22 @@ export default function tinesTest({ getService }: FtrProviderContext) {
                 incompleteResponse: false,
               },
             });
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: tinesActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 2 }],
+                  ['execute', { gte: 2 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[3];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(2);
           });
 
           it('should run the webhook', async () => {
@@ -426,6 +476,22 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               connector_id: tinesActionId,
               data: tinesWebhookSuccessResponse,
             });
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: tinesActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 3 }],
+                  ['execute', { gte: 3 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[5];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(8);
           });
 
           it('should run the webhook url', async () => {
@@ -450,6 +516,22 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               connector_id: tinesActionId,
               data: tinesWebhookSuccessResponse,
             });
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: tinesActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 3 }],
+                  ['execute', { gte: 3 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[5];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(8);
           });
         });
 
@@ -489,8 +571,25 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: tinesActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 1 }],
+                  ['execute', { gte: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(2);
           });
 
           it('should return a failure when attempting to get webhooks', async () => {
@@ -510,6 +609,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });
@@ -529,6 +629,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });

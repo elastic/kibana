@@ -7,15 +7,16 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import { ProgressControls } from '@kbn/aiops-components';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
+import type { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { kbnTypeToSupportedType } from '../common/util/field_types_utils';
 import {
   getDataComparisonType,
@@ -24,6 +25,7 @@ import {
 } from './use_data_drift_result';
 import type { DataDriftField, Feature, TimeRange } from './types';
 import { DataDriftOverviewTable } from './data_drift_overview_table';
+import { DataDriftPromptHint } from './data_drift_hint';
 
 const showOnlyDriftedFieldsOptionLabel = i18n.translate(
   'xpack.dataVisualizer.dataDrift.showOnlyDriftedFieldsOptionLabel',
@@ -41,6 +43,7 @@ interface DataDriftViewProps {
   lastRefresh: number;
   onRefresh: () => void;
   initialSettings: InitialSettings;
+  hasValidTimeField: boolean;
 }
 // Data drift view
 export const DataDriftView = ({
@@ -53,12 +56,25 @@ export const DataDriftView = ({
   lastRefresh,
   onRefresh,
   initialSettings,
+  hasValidTimeField,
 }: DataDriftViewProps) => {
   const [showDataComparisonOnly, setShowDataComparisonOnly] = useState(false);
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >(windowParameters);
+
+  const canAnalyzeDataDrift = useMemo(() => {
+    return (
+      !hasValidTimeField ||
+      isPopulatedObject(windowParameters, [
+        'baselineMin',
+        'baselineMax',
+        'deviationMin',
+        'deviationMax',
+      ])
+    );
+  }, [windowParameters, hasValidTimeField]);
 
   const [fetchInfo, setFetchIno] = useState<
     | {
@@ -153,32 +169,40 @@ export const DataDriftView = ({
 
   const requiresWindowParameters = dataView?.isTimeBased() && windowParameters === undefined;
 
-  return requiresWindowParameters ? (
-    <EuiEmptyPrompt
-      color="subdued"
-      hasShadow={false}
-      hasBorder={false}
-      css={{ minWidth: '100%' }}
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.dataVisualizer.dataDrift.emptyPromptTitle"
-            defaultMessage="Select a time range for reference and comparison data in the histogram chart to compare data distribution."
-          />
-        </h2>
-      }
-      titleSize="xs"
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.dataVisualizer.dataDrift.emptyPromptBody"
-            defaultMessage="The Data Drift Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues."
-          />
-        </p>
-      }
-      data-test-subj="dataDriftNoWindowParametersEmptyPrompt"
-    />
-  ) : (
+  const showRunAnalysisHint = result.status === 'not_initiated';
+
+  if (requiresWindowParameters) {
+    return (
+      <EuiEmptyPrompt
+        color="subdued"
+        hasShadow={false}
+        hasBorder={false}
+        css={{ minWidth: '100%' }}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.dataVisualizer.dataDrift.emptyPromptTitle"
+              defaultMessage="Click and select a time range for Reference and Comparison data in the histogram chart to compare data distribution."
+            />
+          </h2>
+        }
+        titleSize="xs"
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.dataVisualizer.dataDrift.emptyPromptBody"
+              defaultMessage="The Data Drift Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues."
+            />
+          </p>
+        }
+        data-test-subj="dataDriftNoWindowParametersEmptyPrompt"
+      />
+    );
+  }
+  if (showRunAnalysisHint) {
+    return <DataDriftPromptHint refresh={refresh} canAnalyzeDataDrift={canAnalyzeDataDrift} />;
+  }
+  return (
     <div>
       <ProgressControls
         isBrushCleared={isBrushCleared}
@@ -192,7 +216,7 @@ export const DataDriftView = ({
         runAnalysisDisabled={!dataView || requiresWindowParameters}
       >
         <EuiFlexItem grow={false}>
-          <EuiFormRow display="columnCompressedSwitch">
+          <EuiFormRow display="columnCompressed">
             <EuiSwitch
               label={showOnlyDriftedFieldsOptionLabel}
               aria-label={showOnlyDriftedFieldsOptionLabel}

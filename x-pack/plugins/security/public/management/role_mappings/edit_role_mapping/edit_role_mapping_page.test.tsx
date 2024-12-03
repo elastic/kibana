@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-// brace/ace uses the Worker class, which is not currently provided by JSDOM.
-// This is not required for the tests to pass, but it rather suppresses lengthy
-// warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/web-worker-stub';
-
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { EditRoleMappingPage } from './edit_role_mapping_page';
 import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
 import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
-import type { Role } from '../../../../common/model';
+import type { Role } from '../../../../common';
 import { RoleComboBox } from '../../role_combo_box';
 import type { RolesAPIClient } from '../../roles';
 import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
+import { securityFeaturesAPIClientMock } from '../../security_features/security_features_api_client.mock';
 import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 
@@ -33,6 +30,7 @@ describe('EditRoleMappingPage', () => {
 
   const renderView = (
     roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
+    securityFeaturesAPI: ReturnType<typeof securityFeaturesAPIClientMock.create>,
     name?: string,
     readOnly: boolean = false
   ) => {
@@ -50,6 +48,7 @@ describe('EditRoleMappingPage', () => {
           action="edit"
           name={name}
           roleMappingsAPI={roleMappingsAPI}
+          securityFeaturesAPI={securityFeaturesAPI}
           rolesAPIClient={rolesAPI}
           notifications={coreStart.notifications}
           docLinks={coreStart.docLinks}
@@ -71,15 +70,16 @@ describe('EditRoleMappingPage', () => {
 
   it('allows a role mapping to be created', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.saveRoleMapping.mockResolvedValue(null);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
       canUseInlineScripts: true,
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
@@ -107,6 +107,7 @@ describe('EditRoleMappingPage', () => {
 
   it('allows a role mapping to be updated', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.saveRoleMapping.mockResolvedValue(null);
     roleMappingsAPI.getRoleMapping.mockResolvedValue({
       name: 'foo',
@@ -124,14 +125,14 @@ describe('EditRoleMappingPage', () => {
         bar: 'baz',
       },
     });
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
       canUseInlineScripts: true,
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     await nextTick();
     wrapper.update();
 
@@ -164,12 +165,13 @@ describe('EditRoleMappingPage', () => {
 
   it('renders a permission denied message when unauthorized to manage role mappings', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: false,
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: false,
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
@@ -183,12 +185,13 @@ describe('EditRoleMappingPage', () => {
 
   it('renders a warning when there are no compatible realms enabled', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: false,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
 
@@ -201,6 +204,7 @@ describe('EditRoleMappingPage', () => {
 
   it('renders a message when editing a mapping with deprecated roles assigned', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMapping.mockResolvedValue({
       name: 'foo',
       roles: ['some-deprecated-role'],
@@ -209,14 +213,14 @@ describe('EditRoleMappingPage', () => {
         field: { username: '*' },
       },
     });
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
       canUseInlineScripts: true,
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     expect(findTestSubject(wrapper, 'deprecatedRolesAssigned')).toHaveLength(0);
 
     await nextTick();
@@ -227,6 +231,7 @@ describe('EditRoleMappingPage', () => {
 
   it('renders a warning when editing a mapping with a stored role template, when stored scripts are disabled', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMapping.mockResolvedValue({
       name: 'foo',
       role_templates: [
@@ -239,14 +244,14 @@ describe('EditRoleMappingPage', () => {
         field: { username: '*' },
       },
     });
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
       canUseInlineScripts: true,
       canUseStoredScripts: false,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     expect(findTestSubject(wrapper, 'roleMappingInlineScriptsDisabled')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'roleMappingStoredScriptsDisabled')).toHaveLength(0);
 
@@ -259,6 +264,7 @@ describe('EditRoleMappingPage', () => {
 
   it('renders a warning when editing a mapping with an inline role template, when inline scripts are disabled', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMapping.mockResolvedValue({
       name: 'foo',
       role_templates: [
@@ -271,14 +277,14 @@ describe('EditRoleMappingPage', () => {
         field: { username: '*' },
       },
     });
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
       canUseInlineScripts: false,
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     expect(findTestSubject(wrapper, 'roleMappingInlineScriptsDisabled')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'roleMappingStoredScriptsDisabled')).toHaveLength(0);
 
@@ -291,6 +297,7 @@ describe('EditRoleMappingPage', () => {
 
   it('renders the visual editor by default for simple rule sets', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMapping.mockResolvedValue({
       name: 'foo',
       roles: ['superuser'],
@@ -315,14 +322,14 @@ describe('EditRoleMappingPage', () => {
         ],
       },
     });
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
       canUseInlineScripts: true,
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     await nextTick();
     wrapper.update();
 
@@ -354,20 +361,21 @@ describe('EditRoleMappingPage', () => {
     };
 
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMapping.mockResolvedValue({
       name: 'foo',
       roles: ['superuser'],
       enabled: true,
       rules: createRule(10),
     });
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
       canUseInlineScripts: true,
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     await nextTick();
     wrapper.update();
 
@@ -377,6 +385,7 @@ describe('EditRoleMappingPage', () => {
 
   it('renders a readonly view when not enough privileges', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.saveRoleMapping.mockResolvedValue(null);
     roleMappingsAPI.getRoleMapping.mockResolvedValue({
       name: 'foo',
@@ -394,14 +403,14 @@ describe('EditRoleMappingPage', () => {
         bar: 'baz',
       },
     });
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
       canUseInlineScripts: true,
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo', true);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo', true);
     await nextTick();
     wrapper.update();
 
@@ -426,5 +435,44 @@ describe('EditRoleMappingPage', () => {
     const rulePanels = wrapper.find('RuleEditorPanel[data-test-subj="roleMappingRulePanel"]');
     expect(rulePanels).toHaveLength(1);
     expect(rulePanels.at(0).props().readOnly).toBeTruthy();
+  });
+
+  it('renders a warning when empty any or all rules are present', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
+    roleMappingsAPI.saveRoleMapping.mockResolvedValue(null);
+    roleMappingsAPI.getRoleMapping.mockResolvedValue({
+      name: 'foo',
+      role_templates: [
+        {
+          template: { id: 'foo' },
+        },
+      ],
+      enabled: true,
+      rules: {
+        all: [
+          {
+            field: {
+              username: '*',
+            },
+          },
+          {
+            all: [],
+          },
+        ],
+      },
+    });
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
+      hasCompatibleRealms: true,
+      canUseInlineScripts: true,
+      canUseStoredScripts: true,
+    });
+
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
+    await nextTick();
+    wrapper.update();
+
+    expect(findTestSubject(wrapper, 'emptyAnyOrAllRulesWarning')).toHaveLength(1);
   });
 });

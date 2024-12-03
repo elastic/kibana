@@ -6,12 +6,12 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, FC } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { XJsonModeType } from './runtime_mappings';
 
 interface Props {
   convertToJson: (data: string) => string;
@@ -19,13 +19,11 @@ interface Props {
   setIsRuntimeMappingsEditorApplyButtonEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   advancedEditorRuntimeMappingsLastApplied: string | undefined;
   advancedRuntimeMappingsConfig: string;
-  xJsonMode: XJsonModeType;
 }
 
 export const RuntimeMappingsEditor: FC<Props> = memo(
   ({
     convertToJson,
-    xJsonMode,
     setAdvancedRuntimeMappingsConfig,
     setIsRuntimeMappingsEditorApplyButtonEnabled,
     advancedEditorRuntimeMappingsLastApplied,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useCallback } from 'react';
@@ -34,6 +35,8 @@ import { FlyoutPanels } from './flyout_panels';
 
 import { removeSpaces } from '../lib';
 
+import { noTimeFieldLabel, noTimeFieldValue } from '../lib/extract_time_fields';
+
 import {
   DataViewEditorContext,
   RollupIndicesCapsResponse,
@@ -51,7 +54,7 @@ import {
   SubmittingType,
   AdvancedParamsContent,
   PreviewPanel,
-  RollupBetaWarning,
+  RollupDeprecatedWarning,
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
 import { DataViewEditorService } from '../data_view_editor_service';
@@ -90,7 +93,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   dataViewEditorService,
 }: Props) => {
   const {
-    services: { application, dataViews, uiSettings, overlays },
+    services: { application, dataViews, uiSettings, overlays, docLinks },
   } = useKibana<DataViewEditorContext>();
 
   const canSave = dataViews.getCanSaveSync();
@@ -98,7 +101,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
     defaultValue: {
-      type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      type:
+        defaultTypeIsRollup || editData?.type === INDEX_PATTERN_TYPE.ROLLUP
+          ? INDEX_PATTERN_TYPE.ROLLUP
+          : INDEX_PATTERN_TYPE.DEFAULT,
       isAdHoc: false,
       ...(editData
         ? {
@@ -106,7 +112,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
             id: editData.id,
             name: editData.name,
             allowHidden: editData.getAllowHidden(),
-            ...(editData.timeFieldName
+            ...(editData.timeFieldName === noTimeFieldValue
+              ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
+              : editData.timeFieldName
               ? {
                   timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
                 }
@@ -189,7 +197,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
   const onTypeChange = useCallback(
-    (newType) => {
+    (newType: INDEX_PATTERN_TYPE) => {
       form.setFieldValue('title', '');
       form.setFieldValue('name', '');
       form.setFieldValue('timestampField', '');
@@ -220,7 +228,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       {type === INDEX_PATTERN_TYPE.ROLLUP ? (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <RollupBetaWarning />
+            <RollupDeprecatedWarning docLinksService={docLinks} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
@@ -257,6 +265,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
           className="indexPatternEditor__form"
           error={form.getErrors()}
           isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
+          data-validation-error={form.getErrors().length ? '1' : '0'}
+          data-test-subj="indexPatternEditorForm"
         >
           <UseField path="isAdHoc" />
           {indexPatternTypeSelect}

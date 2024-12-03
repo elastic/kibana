@@ -29,6 +29,7 @@ import type { LinkItem } from '../common/links';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
 import { IconDashboards } from '../common/icons/dashboards';
+import { siemMigrationsLinks } from '../siem_migrations/links';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -65,7 +66,7 @@ export const links: LinkItem = {
           title: CREATE_NEW_RULE,
           path: RULES_CREATE_PATH,
           skipUrlState: true,
-          hideTimeline: true,
+          hideTimeline: false,
         },
       ],
     },
@@ -106,6 +107,7 @@ export const links: LinkItem = {
         }),
       ],
     },
+    siemMigrationsLinks,
   ],
   categories: [
     {
@@ -116,6 +118,7 @@ export const links: LinkItem = {
         SecurityPageName.rules,
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
+        SecurityPageName.siemMigrationsRules,
       ],
     },
     {

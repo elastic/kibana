@@ -8,13 +8,15 @@ Retrieves license data from Elasticsearch and becomes a source of license data f
 ## API: 
 ### Server-side
  The licensing plugin retrieves license data from **Elasticsearch** at regular configurable intervals.
-- `license$: Observable<ILicense>` Provides a steam of license data [ILicense](./common/types.ts). Plugin emits new value whenever it detects changes in license info. If the plugin cannot retrieve a license from **Elasticsearch**, it will emit `an empty license` object. 
-- `refresh: () => Promise<ILicense>` allows a plugin to enforce license retrieval.
+- `license$: Observable<ILicense>` Provides a steam of license data [ILicense](./common/types.ts). Plugin emits new value whenever it detects changes in license info. If the plugin cannot retrieve a license from **Elasticsearch**, it will emit `an empty license` object.
+- `getLicense(): Promise<ILicense>` returns the latest license data retrieved or waits for it to be resolved.
+- `refresh: () => Promise<ILicense>` triggers the licensing information re-fetch.
 
 ### Client-side
  The licensing plugin retrieves license data from **licensing Kibana plugin** and does not communicate with Elasticsearch directly.
 - `license$: Observable<ILicense>` Provides a steam of license data [ILicense](./common/types.ts). Plugin emits new value whenever it detects changes in license info. If the plugin cannot retrieve a license from **Kibana**, it will emit `an empty license` object. 
-- `refresh: () => Promise<ILicense>` allows a plugin to enforce license retrieval.
+- `getLicense(): Promise<ILicense>` returns the latest license data retrieved or waits for it to be resolved.  
+- `refresh: () => Promise<ILicense>` triggers the licensing information re-fetch.
 
 ## Migration example
 The new platform licensing plugin became stateless now. It means that instead of storing all your data from `checkLicense` within the plugin, you should react on license data change on both the client and server sides.
@@ -96,7 +98,7 @@ class MyPlugin {
       const showLinks = hasRequiredLicense && license.getFeature('name').isAvailable;
 
       appUpdater$.next(() => {
-        navLinkStatus: showLinks ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden
+        status: showLinks ? AppStatus.accessible : AppStatus.inaccessible,
       });
     })
   }

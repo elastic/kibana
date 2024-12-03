@@ -5,31 +5,47 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiCode,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Connector, ConnectorStatus } from '@kbn/search-connectors';
 import React, { useState } from 'react';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidIndexName } from '../../../../utils/validate_index_name';
 import { SAVE_LABEL } from '../../../../../common/i18n_string';
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useKibanaServices } from '../../../hooks/use_kibana';
 import { ApiKeyPanel } from './api_key_panel';
 import { ConnectorIndexNameForm } from './connector_index_name_form';
-import { useShowErrorToast } from '../../../hooks/use_error_toast';
 import { SyncScheduledCallOut } from './sync_scheduled_callout';
-
+import { docLinks } from '../../../../../common/doc_links';
+import { DEFAULT_INGESTION_PIPELINE } from '../../../../../common';
 interface ConnectorIndexNameProps {
   connector: Connector;
+  isDisabled?: boolean;
 }
 
-export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connector }) => {
+export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({
+  connector,
+  isDisabled,
+}) => {
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
-  const showErrorToast = useShowErrorToast();
-  const { data, isLoading, isSuccess, mutate } = useMutation({
+  const [showSyncCallOut, setShowSyncCallOut] = useState(false);
+  const { data, isLoading, mutate } = useMutation({
     mutationFn: async ({ inputName, sync }: { inputName: string | null; sync?: boolean }) => {
+      setShowSyncCallOut(false);
       if (inputName && inputName !== connector.index_name) {
         const body = { index_name: inputName };
         await http.post(`/internal/serverless_search/connectors/${connector.id}/index_name`, {
@@ -38,16 +54,10 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
       }
       if (sync) {
         await http.post(`/internal/serverless_search/connectors/${connector.id}/sync`);
+        setShowSyncCallOut(true);
       }
       return inputName;
     },
-    onError: (error) =>
-      showErrorToast(
-        error,
-        i18n.translate('xpack.serverlessSearch.connectors.config.connectorIndexNameError', {
-          defaultMessage: 'Error updating index name',
-        })
-      ),
     onSuccess: () => {
       queryClient.setQueryData(queryKey, { connector: { ...connector, index_name: data } });
       queryClient.invalidateQueries(queryKey);
@@ -82,9 +92,55 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
       </EuiFlexGroup>
       <EuiSpacer />
       <ConnectorIndexNameForm
+        isDisabled={isDisabled}
         indexName={newIndexName || ''}
         onChange={(name) => setNewIndexname(name)}
       />
+      <EuiSpacer />
+      <EuiPanel hasBorder>
+        <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate('xpack.serverlessSearch.connectors.config.preprocessData.title', {
+                  defaultMessage: 'Preprocess your data',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.serverlessSearch.connectors.config.preprocessData.description"
+                  defaultMessage="Use ingest pipelines to preprocess data before indexing into Elasticsearch. Note that self-managed connectors use the {clientIngestionPipeline} pipeline for preprocessing."
+                  values={{
+                    clientIngestionPipeline: <EuiCode>{DEFAULT_INGESTION_PIPELINE}</EuiCode>,
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <EuiLink
+                  data-test-subj="serverlessSearchConnectorIndexNameLearnMoreLink"
+                  href={docLinks.pipelines}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.serverlessSearch.connectors.config.preprocessDataTitle.learnMore',
+                    {
+                      defaultMessage: 'Learn More',
+                    }
+                  )}
+                </EuiLink>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
       <EuiSpacer />
       <ApiKeyPanel connector={connector} />
       <EuiSpacer />
@@ -94,7 +150,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
             <EuiButton
               data-test-subj="serverlessSearchConnectorIndexNameButton"
               color="primary"
-              isDisabled={!isValidIndexName(newIndexName)}
+              isDisabled={!isValidIndexName(newIndexName) || isDisabled}
               isLoading={isLoading}
               onClick={() => mutate({ inputName: newIndexName, sync: false })}
             >
@@ -111,7 +167,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
                 !(
                   isValidIndexName(newIndexName) &&
                   [ConnectorStatus.CONFIGURED, ConnectorStatus.CONNECTED].includes(connector.status)
-                )
+                ) || isDisabled
               }
               fill
               isLoading={isLoading}
@@ -124,7 +180,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isSuccess && (
+      {showSyncCallOut && (
         <>
           <EuiSpacer />
           <SyncScheduledCallOut />

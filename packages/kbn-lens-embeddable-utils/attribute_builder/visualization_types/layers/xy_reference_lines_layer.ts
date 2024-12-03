@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -15,10 +16,12 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { ChartLayer, StaticValueConfig, StaticChartColumn } from '../../types';
 import { getDefaultReferences } from '../../utils';
+import { XY_REFERENCE_LINE_ID } from '../constants';
 import { StaticColumn } from './columns/static';
 
 export interface XYReferenceLinesLayerConfig {
   data: StaticValueConfig[];
+  layerType?: typeof XY_REFERENCE_LINE_ID;
   /**
    * It is possible to define a specific dataView for the layer. It will override the global chart one
    **/
@@ -27,8 +30,13 @@ export interface XYReferenceLinesLayerConfig {
 
 export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerConfig> {
   private column: StaticChartColumn[];
-  constructor(private layerConfig: XYReferenceLinesLayerConfig) {
+  private layerConfig: XYReferenceLinesLayerConfig;
+  constructor(layerConfig: XYReferenceLinesLayerConfig) {
     this.column = layerConfig.data.map((p) => new StaticColumn(p));
+    this.layerConfig = {
+      ...layerConfig,
+      layerType: layerConfig.layerType ?? 'referenceLine',
+    };
   }
 
   getName(): string | undefined {

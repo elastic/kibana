@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createStubDataView, stubFieldSpecMap } from '@kbn/data-plugin/public/stubs';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -93,7 +94,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       };
     });
 
-    const hookFetcher = renderHook(useExistingFieldsFetcher, {
+    renderHook(useExistingFieldsFetcher, {
       initialProps: {
         dataViews: [dataView],
         services: mockedServices,
@@ -106,7 +107,7 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     const hookReader = renderHook(useExistingFieldsReader);
 
-    await hookFetcher.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -125,6 +126,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(hookReader.result.current.getFieldsExistenceStatus(dataViewId)).toBe(
       ExistenceFetchStatus.succeeded
     );
+    expect(hookReader.result.current.getNewFields(dataViewId)).toStrictEqual([]);
 
     // does not have existence info => works less restrictive
     const anotherDataViewId = 'test-id';
@@ -140,6 +142,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(hookReader.result.current.getFieldsExistenceStatus(anotherDataViewId)).toBe(
       ExistenceFetchStatus.unknown
     );
+    expect(hookReader.result.current.getNewFields(dataViewId)).toStrictEqual([]);
   });
 
   it('should work correctly with multiple readers', async () => {
@@ -164,7 +167,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     const hookReader1 = renderHook(useExistingFieldsReader);
     const hookReader2 = renderHook(useExistingFieldsReader);
 
-    await hookFetcher.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalled();
 
@@ -196,7 +199,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       throw new Error('test');
     });
 
-    const hookFetcher = renderHook(useExistingFieldsFetcher, {
+    renderHook(useExistingFieldsFetcher, {
       initialProps: {
         dataViews: [dataView],
         services: mockedServices,
@@ -209,7 +212,7 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     const hookReader = renderHook(useExistingFieldsReader);
 
-    await hookFetcher.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalled();
 
@@ -217,6 +220,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(currentResult.isFieldsExistenceInfoUnavailable(dataViewId)).toBe(true);
     expect(currentResult.hasFieldData(dataViewId, dataView.fields[0].name)).toBe(true);
     expect(currentResult.getFieldsExistenceStatus(dataViewId)).toBe(ExistenceFetchStatus.failed);
+    expect(currentResult.getNewFields(dataViewId)).toStrictEqual([]);
   });
 
   it('should work correctly for multiple data views', async () => {
@@ -228,7 +232,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       }
     );
 
-    const hookFetcher = renderHook(useExistingFieldsFetcher, {
+    renderHook(useExistingFieldsFetcher, {
       initialProps: {
         dataViews: [dataView, anotherDataView, dataViewWithRestrictions],
         services: mockedServices,
@@ -240,7 +244,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await hookFetcher.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const currentResult = hookReader.result.current;
 
@@ -306,8 +310,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await hookFetcher.waitForNextUpdate();
-    await hookFetcher.waitFor(() => !hookFetcher.result.current.isProcessing);
+    await waitFor(() => () => !hookFetcher.result.current.isProcessing);
 
     expect(dataViewWithRestrictions.getAggregationRestrictions).toHaveBeenCalled();
     expect(ExistingFieldsServiceApi.loadFieldExisting).not.toHaveBeenCalled();
@@ -342,7 +345,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await hookFetcher.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -366,7 +369,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       dataViews: [dataView, anotherDataView],
     });
 
-    await hookFetcher.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
       2,
@@ -420,7 +423,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await hookFetcher.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -443,32 +446,32 @@ describe('UnifiedFieldList useExistingFields', () => {
       query: { query: 'test', language: 'kuery' },
     });
 
-    await hookFetcher.waitForNextUpdate();
-
-    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        fromDate: '2021-01-01',
-        toDate: '2022-01-01',
-        dslQuery: {
-          bool: {
-            filter: [
-              {
-                multi_match: {
-                  lenient: true,
-                  query: 'test',
-                  type: 'best_fields',
+    await waitFor(() =>
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          fromDate: '2021-01-01',
+          toDate: '2022-01-01',
+          dslQuery: {
+            bool: {
+              filter: [
+                {
+                  multi_match: {
+                    lenient: true,
+                    query: 'test',
+                    type: 'best_fields',
+                  },
                 },
-              },
-            ],
-            must: [],
-            must_not: [],
-            should: [],
+              ],
+              must: [],
+              must_not: [],
+              should: [],
+            },
           },
-        },
-        dataView,
-        timeFieldName: dataView.timeFieldName,
-      })
+          dataView,
+          timeFieldName: dataView.timeFieldName,
+        })
+      )
     );
   });
 
@@ -493,7 +496,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await hookFetcher.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -518,7 +521,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       toDate: '2022-01-01',
     });
 
-    await hookFetcher.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
       2,
@@ -532,5 +535,50 @@ describe('UnifiedFieldList useExistingFields', () => {
     );
 
     expect(params.onNoData).toHaveBeenCalledTimes(1); // still 1 time
+  });
+
+  it('should include newFields', async () => {
+    const newFields = [{ name: 'test', type: 'keyword', searchable: true, aggregatable: true }];
+
+    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(
+      async ({ dataView: currentDataView }) => {
+        return {
+          existingFieldNames: [currentDataView.fields[0].name],
+          newFields,
+        };
+      }
+    );
+
+    const params: ExistingFieldsFetcherParams = {
+      dataViews: [dataView],
+      services: mockedServices,
+      fromDate: '2019-01-01',
+      toDate: '2020-01-01',
+      query: { query: '', language: 'lucene' },
+      filters: [],
+    };
+    renderHook(useExistingFieldsFetcher, {
+      initialProps: params,
+    });
+
+    const hookReader = renderHook(useExistingFieldsReader);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fromDate: '2019-01-01',
+        toDate: '2020-01-01',
+        dslQuery,
+        dataView,
+        timeFieldName: dataView.timeFieldName,
+      })
+    );
+
+    expect(hookReader.result.current.getFieldsExistenceStatus(dataView.id!)).toBe(
+      ExistenceFetchStatus.succeeded
+    );
+
+    expect(hookReader.result.current.getNewFields(dataView.id!)).toBe(newFields);
+    expect(hookReader.result.current.getNewFields('another-id')).toStrictEqual([]);
   });
 });

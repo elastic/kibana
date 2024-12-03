@@ -7,7 +7,9 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   EuiSpacer,
@@ -15,17 +17,22 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFieldText,
+  EuiButtonGroup,
+  EuiLink,
 } from '@elastic/eui';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
+  PostBlockkitParams,
   PostMessageParams,
   SlackApiConfig,
   ValidChannelIdSubActionParams,
   ValidChannelResponse,
 } from '../../../common/slack_api/types';
 
-const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessageParams>> = ({
+const SlackParamsFields: React.FunctionComponent<
+  ActionParamsProps<PostMessageParams | PostBlockkitParams>
+> = ({
   actionConnector,
   actionParams,
   editAction,
@@ -45,6 +52,8 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
       ? channelIds[0]
       : ''
   );
+  const [messageType, setMessageType] = useState('text');
+  const [textValue, setTextValue] = useState<string | undefined>(text);
   const [validChannelId, setValidChannelId] = useState('');
   const { toasts } = useKibana().notifications;
   const allowedChannelsConfig =
@@ -74,6 +83,16 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
     },
     disabled: validChannelId.length === 0 && allowedChannelsConfig.length === 0,
   });
+
+  const onToggleInput = useCallback(
+    (id: string) => {
+      // clear the text when toggled
+      setTextValue('');
+      editAction('subAction', id === 'text' ? 'postMessage' : 'postBlockkit', index);
+      setMessageType(id);
+    },
+    [setMessageType, editAction, index, setTextValue]
+  );
 
   useEffect(() => {
     if (useDefaultMessage || !text) {
@@ -127,6 +146,12 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
       });
     }
   }, [toasts, channelValidErrorResp, validChannelId, editAction, text, index]);
+
+  useEffect(() => {
+    if (subAction) {
+      setMessageType(subAction === 'postMessage' ? 'text' : 'blockkit');
+    }
+  }, [subAction]);
 
   useEffect(() => {
     // Reset channel id input when we changes connector
@@ -200,7 +225,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
   }, [editAction, index, tempChannelId, text]);
 
   const onChangeTextField = useCallback(
-    (evt) => {
+    (evt: React.ChangeEvent<HTMLInputElement>) => {
       editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
       setTempChannelId(evt.target.value);
     },
@@ -258,8 +283,8 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
               })
         }
         fullWidth
-        error={channelValidError.length > 0 ? channelValidError : errors.channels}
-        isInvalid={errors.channels?.length > 0 || channelValidError.length > 0}
+        error={channelValidError.length > 0 ? channelValidError : (errors.channels as string[])}
+        isInvalid={Number(errors.channels?.length) > 0 || channelValidError.length > 0}
         helpText={
           channelIds.length > 0 && channelValidInfo
             ? `${channelValidInfo.id} - ${channelValidInfo.name}`
@@ -269,19 +294,86 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
         {channelInput}
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={(key: string, value: any) =>
-          editAction('subActionParams', { channels, channelIds, text: value }, index)
-        }
-        messageVariables={messageVariables}
-        paramsProperty="webApi"
-        inputTargetValue={text}
-        label={i18n.translate('xpack.stackConnectors.components.slack.messageTextAreaFieldLabel', {
-          defaultMessage: 'Message',
-        })}
-        errors={(errors.text ?? []) as string[]}
-      />
+      {actionConnector?.actionTypeId === '.slack_api' && (
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="m"
+          color="primary"
+          legend=""
+          options={[
+            {
+              id: 'text',
+              label: i18n.translate('xpack.stackConnectors.slack.params.textLabel', {
+                defaultMessage: 'Text',
+              }),
+            },
+            {
+              id: 'blockkit',
+              label: i18n.translate('xpack.stackConnectors.slack.params.blockkitLabel', {
+                defaultMessage: 'Block Kit',
+              }),
+            },
+          ]}
+          idSelected={messageType}
+          onChange={onToggleInput}
+          data-test-subj="slackMessageTypeChangeButton"
+        />
+      )}
+      <EuiSpacer size="m" />
+      {messageType === 'text' ? (
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={(_: string, value: string) => {
+            setTextValue(value);
+            editAction('subActionParams', { channels, channelIds, text: value }, index);
+          }}
+          messageVariables={messageVariables}
+          paramsProperty="webApiText"
+          inputTargetValue={textValue}
+          label={i18n.translate(
+            'xpack.stackConnectors.components.slack.messageTextAreaFieldLabel',
+            {
+              defaultMessage: 'Message',
+            }
+          )}
+          errors={(errors.text ?? []) as string[]}
+        />
+      ) : (
+        <>
+          <JsonEditorWithMessageVariables
+            onDocumentsChange={(json: string) => {
+              setTextValue(json);
+              editAction('subActionParams', { channels, channelIds, text: json }, index);
+            }}
+            messageVariables={messageVariables}
+            paramsProperty="webApiBlock"
+            inputTargetValue={textValue}
+            label={i18n.translate(
+              'xpack.stackConnectors.components.slack.messageJsonAreaFieldLabel',
+              {
+                defaultMessage: 'Block Kit',
+              }
+            )}
+            dataTestSubj="webApiBlock"
+            errors={(errors.text ?? []) as string[]}
+          />
+          {text && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiLink
+                target="_blank"
+                href={`https://app.slack.com/block-kit-builder/#${encodeURIComponent(text)}`}
+                external
+              >
+                <FormattedMessage
+                  id="xpack.stackConnectors.components.slack.viewInBlockkitBuilder"
+                  defaultMessage="View in Slack Block Kit Builder"
+                />
+              </EuiLink>
+            </>
+          )}
+        </>
+      )}
     </>
   );
 };

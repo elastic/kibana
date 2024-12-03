@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { dataViewMock } from '../__mocks__';
@@ -100,6 +101,36 @@ describe('formatHit', () => {
     expect(formatted).toEqual([
       ['message', 'formatted:foobar', 'message'],
       ['object.value', 'formatted:42,13', 'object.value'],
+      ['_index', 'formatted:logs', '_index'],
+      ['_score', undefined, '_score'],
+    ]);
+  });
+
+  it('should highlight a subfield even shouldShowFieldHandler determines it should not be shown ', () => {
+    const highlightHit = buildDataTableRecord(
+      {
+        _id: '2',
+        _index: 'logs',
+        fields: {
+          object: ['object'],
+          'object.value': [42, 13],
+        },
+        highlight: { 'object.value': ['%%'] },
+      },
+      dataViewMock
+    );
+
+    const formatted = formatHit(
+      highlightHit,
+      dataViewMock,
+      (fieldName) => ['object'].includes(fieldName),
+      220,
+      fieldFormatsMock
+    );
+
+    expect(formatted).toEqual([
+      ['object.value', 'formatted:42,13', 'object.value'],
+      ['object', ['object'], 'object'],
       ['_index', 'formatted:logs', '_index'],
       ['_score', undefined, '_score'],
     ]);

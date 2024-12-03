@@ -10,26 +10,17 @@ import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 
 import type { Filter } from '@kbn/es-query';
-import '../../../common/mock/match_media';
-import {
-  TestProviders,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../common/mock';
+import { TestProviders, createMockStore } from '../../../common/mock';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { inputsActions } from '../../../common/store/inputs';
-import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
-jest.mock('../../../common/containers/sourcerer');
-jest.mock('../../../common/components/landing_page');
+jest.mock('../../../sourcerer/containers');
+jest.mock('../../../common/components/empty_prompt');
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../common/components/search_bar', () => ({
@@ -85,9 +76,7 @@ const mockHistory = {
   listen: jest.fn(),
 };
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
-const myState: State = mockGlobalState;
-const { storage } = createSecuritySolutionStorageMock();
-const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const myStore = createMockStore();
 
 describe('Hosts - rendering', () => {
   beforeEach(() => {
@@ -106,7 +95,7 @@ describe('Hosts - rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="siem-landing-page"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="empty-prompt"]').exists()).toBe(true);
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {

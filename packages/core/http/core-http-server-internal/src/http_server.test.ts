@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { setTlsConfigMock } from './http_server.test.mocks';
@@ -30,10 +31,14 @@ import { Readable } from 'stream';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
 import { of, Observable, BehaviorSubject } from 'rxjs';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 
 const routerOptions: RouterOptions = {
   isDev: false,
-  versionedRouteResolution: 'oldest',
+  versionedRouterOptions: {
+    defaultHandlerResolutionStrategy: 'oldest',
+    useVersionResolutionStrategyForInternalPaths: [],
+  },
 };
 
 const cookieOptions = {
@@ -51,8 +56,9 @@ let config$: Observable<HttpConfig>;
 let configWithSSL: HttpConfig;
 let configWithSSL$: Observable<HttpConfig>;
 
-const loggingService = loggingSystemMock.create();
-const logger = loggingService.get();
+const coreContext = mockCoreContext.create();
+const loggingService = coreContext.logger;
+const logger = coreContext.logger.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 let certificate: string;
@@ -78,6 +84,9 @@ beforeEach(() => {
     cors: {
       enabled: false,
     },
+    csp: {
+      disableEmbedding: true,
+    },
     cdn: {},
     shutdownTimeout: moment.duration(500, 'ms'),
   } as any;
@@ -96,7 +105,7 @@ beforeEach(() => {
   } as HttpConfig;
   configWithSSL$ = of(configWithSSL);
 
-  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
+  server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
 });
 
 afterEach(async () => {
@@ -897,6 +906,7 @@ test('exposes route details of incoming request to a route handler', async () =>
     .expect(200, {
       method: 'get',
       path: '/',
+      routePath: '/',
       options: {
         authRequired: true,
         xsrfRequired: false,
@@ -1079,6 +1089,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
     .expect(200, {
       method: 'post',
       path: '/',
+      routePath: '/',
       options: {
         authRequired: true,
         xsrfRequired: true,
@@ -1617,7 +1628,7 @@ describe('setup contract', () => {
         .get('/static/some_json.json')
         .expect(200);
 
-      const etag = response.get('etag');
+      const etag = response.get('etag')!;
       expect(etag).not.toBeUndefined();
 
       await supertest(innerServer.listener)

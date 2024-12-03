@@ -1,0 +1,698 @@
+{
+  "id": "@kbn/ipynb",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ipynb",
+        "id": "def-common.NotebookRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "NotebookRenderer",
+        "description": [],
+        "signature": [
+          "({ notebook }: ",
+          {
+            "pluginId": "@kbn/ipynb",
+            "scope": "common",
+            "docId": "kibKbnIpynbPluginApi",
+            "section": "def-common.NotebookRendererProps",
+            "text": "NotebookRendererProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "packages/kbn-ipynb/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ notebook }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ipynb",
+                "scope": "common",
+                "docId": "kibKbnIpynbPluginApi",
+                "section": "def-common.NotebookRendererProps",
+                "text": "NotebookRendererProps"
+              }
+            ],
+            "path": "packages/kbn-ipynb/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ipynb",
+        "id": "def-common.NotebookCellType",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotebookCellType",
+        "description": [],
+        "path": "packages/kbn-ipynb/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookCellType.auto_number",
+            "type": "number",
+            "tags": [],
+            "label": "auto_number",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookCellType.cell_type",
+            "type": "string",
+            "tags": [],
+            "label": "cell_type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookCellType.execution_count",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "execution_count",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookCellType.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookCellType.input",
+            "type": "Array",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookCellType.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookCellType.outputs",
+            "type": "Array",
+            "tags": [],
+            "label": "outputs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ipynb",
+                "scope": "common",
+                "docId": "kibKbnIpynbPluginApi",
+                "section": "def-common.NotebookOutputType",
+                "text": "NotebookOutputType"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookCellType.prompt_number",
+            "type": "number",
+            "tags": [],
+            "label": "prompt_number",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookCellType.source",
+            "type": "Array",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ipynb",
+        "id": "def-common.NotebookDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotebookDefinition",
+        "description": [],
+        "path": "packages/kbn-ipynb/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookDefinition.cells",
+            "type": "Array",
+            "tags": [],
+            "label": "cells",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ipynb",
+                "scope": "common",
+                "docId": "kibKbnIpynbPluginApi",
+                "section": "def-common.NotebookCellType",
+                "text": "NotebookCellType"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookDefinition.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ipynb",
+                "scope": "common",
+                "docId": "kibKbnIpynbPluginApi",
+                "section": "def-common.NotebookMetadataType",
+                "text": "NotebookMetadataType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookDefinition.nbformat",
+            "type": "number",
+            "tags": [],
+            "label": "nbformat",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookDefinition.nbformat_minor",
+            "type": "number",
+            "tags": [],
+            "label": "nbformat_minor",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ipynb",
+        "id": "def-common.NotebookMetadataType",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotebookMetadataType",
+        "description": [],
+        "path": "packages/kbn-ipynb/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookMetadataType.kernelspec",
+            "type": "Object",
+            "tags": [],
+            "label": "kernelspec",
+            "description": [],
+            "signature": [
+              "{ display_name?: string | undefined; language?: string | undefined; name?: string | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookMetadataType.language_info",
+            "type": "Object",
+            "tags": [],
+            "label": "language_info",
+            "description": [],
+            "signature": [
+              "{ mimetype?: string | undefined; name?: string | undefined; version?: string | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ipynb",
+        "id": "def-common.NotebookOutputData",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotebookOutputData",
+        "description": [],
+        "path": "packages/kbn-ipynb/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputData.textplain",
+            "type": "Array",
+            "tags": [],
+            "label": "'text/plain'",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputData.texthtml",
+            "type": "Array",
+            "tags": [],
+            "label": "'text/html'",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputData.textlatex",
+            "type": "Array",
+            "tags": [],
+            "label": "'text/latex'",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputData.imagepng",
+            "type": "string",
+            "tags": [],
+            "label": "'image/png'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputData.imagejpeg",
+            "type": "string",
+            "tags": [],
+            "label": "'image/jpeg'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputData.imagegif",
+            "type": "string",
+            "tags": [],
+            "label": "'image/gif'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputData.imagesvgxml",
+            "type": "string",
+            "tags": [],
+            "label": "'image/svg+xml'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputData.applicationjavascript",
+            "type": "Array",
+            "tags": [],
+            "label": "'application/javascript'",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ipynb",
+        "id": "def-common.NotebookOutputType",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotebookOutputType",
+        "description": [],
+        "path": "packages/kbn-ipynb/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.ename",
+            "type": "string",
+            "tags": [],
+            "label": "ename",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.evalue",
+            "type": "string",
+            "tags": [],
+            "label": "evalue",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.traceback",
+            "type": "Array",
+            "tags": [],
+            "label": "traceback",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ipynb",
+                "scope": "common",
+                "docId": "kibKbnIpynbPluginApi",
+                "section": "def-common.NotebookOutputData",
+                "text": "NotebookOutputData"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.output_type",
+            "type": "string",
+            "tags": [],
+            "label": "output_type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.png",
+            "type": "string",
+            "tags": [],
+            "label": "png",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.jpeg",
+            "type": "string",
+            "tags": [],
+            "label": "jpeg",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.gif",
+            "type": "string",
+            "tags": [],
+            "label": "gif",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.svg",
+            "type": "string",
+            "tags": [],
+            "label": "svg",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.text",
+            "type": "Array",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookOutputType.execution_count",
+            "type": "number",
+            "tags": [],
+            "label": "execution_count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ipynb/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ipynb",
+        "id": "def-common.NotebookRendererProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotebookRendererProps",
+        "description": [],
+        "path": "packages/kbn-ipynb/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ipynb",
+            "id": "def-common.NotebookRendererProps.notebook",
+            "type": "Object",
+            "tags": [],
+            "label": "notebook",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ipynb",
+                "scope": "common",
+                "docId": "kibKbnIpynbPluginApi",
+                "section": "def-common.NotebookDefinition",
+                "text": "NotebookDefinition"
+              }
+            ],
+            "path": "packages/kbn-ipynb/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

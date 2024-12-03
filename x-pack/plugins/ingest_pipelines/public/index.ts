@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
 import { IngestPipelinesPlugin } from './plugin';
 
-export function plugin() {
-  return new IngestPipelinesPlugin();
+export function plugin(context: PluginInitializerContext) {
+  return new IngestPipelinesPlugin(context);
 }
+
+export { INGEST_PIPELINES_APP_LOCATOR, INGEST_PIPELINES_PAGES } from './locator';
+export type { IngestPipelinesListParams } from './locator';

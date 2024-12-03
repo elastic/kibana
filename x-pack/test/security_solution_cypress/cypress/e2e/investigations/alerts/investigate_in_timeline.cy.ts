@@ -5,99 +5,123 @@
  * 2.0.
  */
 
-import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewRule } from '../../../objects/rule';
-import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../../screens/timeline';
-import { FILTER_BADGE } from '../../../screens/alerts';
-
-import { expandFirstAlert, investigateFirstAlertInTimeline } from '../../../tasks/alerts';
+import {
+  ANALYZER_GRAPH_TAB_BUTTON,
+  PROVIDER_BADGE,
+  QUERY_TAB_BUTTON,
+  TIMELINE_TITLE,
+} from '../../../screens/timeline';
+import { closeTimeline } from '../../../tasks/timeline';
+import { investigateFirstAlertInTimeline } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
-
 import { ALERTS_URL } from '../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../tasks/expandable_flyout/common';
 import {
-  ALERT_FLYOUT,
-  INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON,
-  INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON,
-  INSIGHTS_RELATED_ALERTS_BY_ANCESTRY,
-  INSIGHTS_RELATED_ALERTS_BY_SESSION,
-  SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON,
-} from '../../../screens/alerts_details';
-import { verifyInsightCount } from '../../../tasks/alerts_details';
+  clickAnalyzerPreviewTitleToOpenTimeline,
+  toggleOverviewTabAboutSection,
+  toggleOverviewTabInvestigationSection,
+  toggleOverviewTabVisualizationsSection,
+} from '../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
+import {
+  expandDocumentDetailsExpandableFlyoutLeftSection,
+  openTakeActionButton,
+  selectTakeActionItem,
+} from '../../../tasks/expandable_flyout/alert_details_right_panel';
+import { DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE } from '../../../screens/expandable_flyout/alert_details_right_panel';
+import {
+  openTimelineFromPrevalenceTableCell,
+  openPrevalenceTab,
+} from '../../../tasks/expandable_flyout/alert_details_left_panel_prevalence_tab';
+import {
+  openCorrelationsTab,
+  openTimelineFromRelatedByAncestry,
+  openTimelineFromRelatedBySession,
+  openTimelineFromRelatedSourceEvent,
+} from '../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
 
-describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    createRule(getNewRule());
-  });
-
-  describe('From alerts table', () => {
+describe(
+  'Investigate in timeline',
+  {
+    tags: ['@ess', '@serverless'],
+  },
+  () => {
     beforeEach(() => {
+      deleteAlertsAndRules();
+      createRule(getNewRule());
       login();
       visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
-    it('should open new timeline from alerts table', () => {
-      investigateFirstAlertInTimeline();
-      cy.get(PROVIDER_BADGE)
-        .first()
-        .invoke('text')
-        .then((eventId) => {
-          cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', eventId);
-        });
-    });
-  });
-
-  describe('From alerts details flyout', () => {
-    beforeEach(() => {
-      login();
-      disableExpandableFlyout();
-      visitWithTimeRange(ALERTS_URL);
-      waitForAlertsToPopulate();
-      expandFirstAlert();
-    });
-
-    it('should open a new timeline from a prevalence field', () => {
-      // Only one alert matches the exact process args in this case
-      const alertCount = 1;
-
-      // Click on the last button that lets us investigate in timeline.
-      // We expect this to be the `process.args` row.
-      cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).eq(5).scrollIntoView();
-      cy.get(ALERT_FLYOUT)
-        .find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON)
-        .eq(5)
-        .should('be.visible')
-        .and('have.text', alertCount)
-        .click();
-
-      // Make sure a new timeline is created and opened
-      cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
-
-      // The alert count in this timeline should match the count shown on the alert flyout
-      cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
-
-      // The correct filter is applied to the timeline query
-      cy.get(FILTER_BADGE).should(
-        'have.text',
-        ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}'
-      );
-    });
-
-    it('should open a new timeline from an insights module', () => {
-      verifyInsightCount({
-        tableSelector: INSIGHTS_RELATED_ALERTS_BY_SESSION,
-        investigateSelector: INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON,
+    describe('From alerts table', () => {
+      it('should open new timeline from alerts table', () => {
+        investigateFirstAlertInTimeline();
+        cy.get(PROVIDER_BADGE)
+          .first()
+          .invoke('text')
+          .then((eventId) => {
+            cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', eventId);
+          });
       });
     });
 
-    it('should open a new timeline with alert ids from the process ancestry', () => {
-      verifyInsightCount({
-        tableSelector: INSIGHTS_RELATED_ALERTS_BY_ANCESTRY,
-        investigateSelector: INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON,
+    describe('From alerts details flyout', () => {
+      beforeEach(() => {
+        expandAlertAtIndexExpandableFlyout();
+      });
+
+      it('should open a new timeline from take action button', () => {
+        openTakeActionButton();
+        selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
+
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
+      });
+
+      it('should open a new timeline from analyzer graph preview', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInvestigationSection();
+        toggleOverviewTabVisualizationsSection();
+        clickAnalyzerPreviewTitleToOpenTimeline();
+
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(ANALYZER_GRAPH_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
+      });
+
+      it('should open a new timeline from the prevalence detail table', () => {
+        expandDocumentDetailsExpandableFlyoutLeftSection();
+        openPrevalenceTab();
+        openTimelineFromPrevalenceTableCell();
+
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
+      });
+
+      it('should open a new timeline from the correlations tab', () => {
+        expandDocumentDetailsExpandableFlyoutLeftSection();
+        openCorrelationsTab();
+        openTimelineFromRelatedSourceEvent();
+
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
+
+        closeTimeline();
+        openTimelineFromRelatedBySession();
+
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
+
+        closeTimeline();
+        openTimelineFromRelatedByAncestry();
+
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
       });
     });
-  });
-});
+  }
+);

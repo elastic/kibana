@@ -1,92 +1,138 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
+import { I18nProvider } from '@kbn/i18n-react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { FilterableEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { BehaviorSubject } from 'rxjs';
+import { FiltersNotificationActionApi } from './filters_notification_action';
+import { FiltersNotificationPopover } from './filters_notification_popover';
+import { ViewMode } from '@kbn/presentation-publishing';
 
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { buildMockDashboard } from '../mocks';
-import { EuiPopover } from '@elastic/eui';
-import {
-  FiltersNotificationPopover,
-  FiltersNotificationProps,
-} from './filters_notification_popover';
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { act } from 'react-dom/test-utils';
-import { pluginServices } from '../services/plugin_services';
+const canEditUnifiedSearch = jest.fn().mockReturnValue(true);
+
+const getMockPhraseFilter = (key: string, value: string): Filter => {
+  return {
+    meta: {
+      type: 'phrase',
+      key,
+      params: {
+        query: value,
+      },
+    },
+    query: {
+      match_phrase: {
+        [key]: value,
+      },
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+  };
+};
+
+const mockedEditPanelAction = {
+  execute: jest.fn(),
+  isCompatible: jest.fn().mockResolvedValue(true),
+};
+jest.mock('@kbn/presentation-panel-plugin/public', () => ({
+  getEditPanelAction: () => mockedEditPanelAction,
+}));
 
 describe('filters notification popover', () => {
-  const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-    .fn()
-    .mockReturnValue(mockEmbeddableFactory);
-
-  let container: DashboardContainer;
-  let embeddable: ContactCardEmbeddable & FilterableEmbeddable;
-  let defaultProps: FiltersNotificationProps;
+  let api: FiltersNotificationActionApi;
+  let updateFilters: (filters: Filter[]) => void;
+  let updateQuery: (query: Query | AggregateQuery | undefined) => void;
+  let updateViewMode: (viewMode: ViewMode) => void;
 
   beforeEach(async () => {
-    container = buildMockDashboard();
-    const contactCardEmbeddable = await container.addNewEmbeddable<
-      ContactCardEmbeddableInput,
-      ContactCardEmbeddableOutput,
-      ContactCardEmbeddable
-    >(CONTACT_CARD_EMBEDDABLE, {
-      firstName: 'Kibanana',
-    });
-    if (isErrorEmbeddable(contactCardEmbeddable)) {
-      throw new Error('Failed to create embeddable');
-    }
-    embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
-      getFilters: jest.fn(),
-      getQuery: jest.fn(),
-    });
+    const filtersSubject = new BehaviorSubject<Filter[] | undefined>(undefined);
+    updateFilters = (filters) => filtersSubject.next(filters);
+    const querySubject = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
+    updateQuery = (query) => querySubject.next(query);
+    const viewModeSubject = new BehaviorSubject<ViewMode>('view');
+    updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
 
-    defaultProps = {
-      icon: 'test',
-      context: { embeddable: contactCardEmbeddable },
-      displayName: 'test display',
-      id: 'testId',
-      editPanelAction: {
-        execute: jest.fn(),
-      } as unknown as FiltersNotificationProps['editPanelAction'],
+    api = {
+      uuid: 'testId',
+      filters$: filtersSubject,
+      query$: querySubject,
+      parentApi: {
+        viewMode: viewModeSubject,
+      },
+      canEditUnifiedSearch,
     };
   });
 
-  function mountComponent(props?: Partial<FiltersNotificationProps>) {
-    return mountWithIntl(<FiltersNotificationPopover {...{ ...defaultProps, ...props }} />);
-  }
+  const renderAndOpenPopover = async () => {
+    render(
+      <I18nProvider>
+        <FiltersNotificationPopover api={api} />
+      </I18nProvider>
+    );
+    await userEvent.click(await screen.findByTestId(`embeddablePanelNotification-${api.uuid}`));
+    await waitForEuiPopoverOpen();
+  };
 
-  test('clicking edit button executes edit panel action', async () => {
-    embeddable.updateInput({ viewMode: ViewMode.EDIT });
-    const component = mountComponent();
+  it('renders the filter section when given filters', async () => {
+    updateFilters([getMockPhraseFilter('ay', 'oh')]);
+    await renderAndOpenPopover();
+    expect(await screen.findByTestId('filtersNotificationModal__filterItems')).toBeInTheDocument();
+  });
 
-    await act(async () => {
-      findTestSubject(component, `embeddablePanelNotification-${defaultProps.id}`).simulate(
-        'click'
-      );
-    });
-    await act(async () => {
-      component.update();
-    });
+  it('renders the query section when given a query', async () => {
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
+    await renderAndOpenPopover();
+    expect(await screen.findByTestId('filtersNotificationModal__query')).toBeInTheDocument();
+  });
 
-    const popover = component.find(EuiPopover);
-    const editButton = findTestSubject(popover, 'filtersNotificationModal__editButton');
-    editButton.simulate('click');
-    expect(defaultProps.editPanelAction.execute).toHaveBeenCalled();
+  it('does not render an edit button when not in edit mode', async () => {
+    await renderAndOpenPopover();
+    expect(
+      await screen.queryByTestId('filtersNotificationModal__editButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render an edit button when canEditUnifiedSearch returns false', async () => {
+    await renderAndOpenPopover();
+    canEditUnifiedSearch.mockReturnValueOnce(false);
+    expect(
+      await screen.queryByTestId('filtersNotificationModal__editButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders an edit button when the edit panel action is compatible', async () => {
+    updateViewMode('edit');
+    updateFilters([getMockPhraseFilter('ay', 'oh')]);
+    await renderAndOpenPopover();
+    expect(await screen.findByTestId('filtersNotificationModal__editButton')).toBeInTheDocument();
+  });
+
+  it('does not render an edit button when the query is ESQL', async () => {
+    updateFilters([getMockPhraseFilter('ay', 'oh')]);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
+    updateFilters([getMockPhraseFilter('ay', 'oh')]);
+    await renderAndOpenPopover();
+    expect(
+      await screen.queryByTestId('filtersNotificationModal__editButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('calls edit action execute when edit button is clicked', async () => {
+    updateViewMode('edit');
+    updateFilters([getMockPhraseFilter('ay', 'oh')]);
+    await renderAndOpenPopover();
+    const editButton = await screen.findByTestId('filtersNotificationModal__editButton');
+    await userEvent.click(editButton);
+    expect(mockedEditPanelAction.execute).toHaveBeenCalled();
   });
 });

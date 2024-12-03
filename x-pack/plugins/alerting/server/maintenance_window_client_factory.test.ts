@@ -13,9 +13,10 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   loggingSystemMock,
+  uiSettingsServiceMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
 
@@ -23,12 +24,14 @@ jest.mock('./maintenance_window_client');
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
-
-const securityPluginStart = securityMock.createStart();
+const securityService = securityServiceMock.createStart();
+const uiSettings = uiSettingsServiceMock.createStartContract();
 
 const maintenanceWindowClientFactoryParams: jest.Mocked<MaintenanceWindowClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
   savedObjectsService,
+  securityService,
+  uiSettings,
 };
 
 beforeEach(() => {
@@ -37,10 +40,7 @@ beforeEach(() => {
 
 test('creates a maintenance window client with proper constructor arguments when security is enabled', async () => {
   const factory = new MaintenanceWindowClientFactory();
-  factory.initialize({
-    securityPluginStart,
-    ...maintenanceWindowClientFactoryParams,
-  });
+  factory.initialize(maintenanceWindowClientFactoryParams);
   const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
@@ -84,10 +84,7 @@ test('creates a maintenance window client with proper constructor arguments', as
 
 test('creates an unauthorized maintenance window client', async () => {
   const factory = new MaintenanceWindowClientFactory();
-  factory.initialize({
-    securityPluginStart,
-    ...maintenanceWindowClientFactoryParams,
-  });
+  factory.initialize(maintenanceWindowClientFactoryParams);
   const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
@@ -123,10 +120,7 @@ test('getUserName() returns null when security is disabled', async () => {
 
 test('getUserName() returns a name when security is enabled', async () => {
   const factory = new MaintenanceWindowClientFactory();
-  factory.initialize({
-    securityPluginStart,
-    ...maintenanceWindowClientFactoryParams,
-  });
+  factory.initialize(maintenanceWindowClientFactoryParams);
   const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
@@ -134,7 +128,7 @@ test('getUserName() returns a name when security is enabled', async () => {
   const constructorCall = jest.requireMock('./maintenance_window_client').MaintenanceWindowClient
     .mock.calls[0][0];
 
-  securityPluginStart.authc.getCurrentUser.mockReturnValueOnce({
+  securityService.authc.getCurrentUser.mockReturnValueOnce({
     username: 'testname',
   } as unknown as AuthenticatedUser);
   const userNameResult = await constructorCall.getUserName();

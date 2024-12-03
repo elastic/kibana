@@ -29,11 +29,11 @@
       "explain": "__flag__",
       "ignore_throttled": "__flag__",
       "ignore_unavailable": "__flag__",
+      "include_named_queries_score": "__flag__",
       "lenient": "__flag__",
       "max_concurrent_shard_requests": [
         "5"
       ],
-      "min_compatible_shard_node": "",
       "preference": "",
       "pre_filter_shard_size": "",
       "request_cache": "__flag__",
@@ -79,7 +79,8 @@
         "10"
       ],
       "from": "",
-      "sort": []
+      "sort": [],
+      "force_synthetic_source": "__flag__"
     },
     "methods": [
       "GET",

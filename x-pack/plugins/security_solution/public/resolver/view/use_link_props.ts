@@ -13,8 +13,6 @@ import * as selectors from '../store/selectors';
 import type { PanelViewAndParameters } from '../types';
 import type { State } from '../../common/store/types';
 
-type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
-
 /**
  * Get an `onClick` function and an `href` string. Use these as props for `<a />` elements.
  * `onClick` will use navigate to the `panelViewAndParameters` using `history.push`.
@@ -26,7 +24,7 @@ export function useLinkProps(
   panelViewAndParameters: PanelViewAndParameters
 ): {
   href: string;
-  onClick: EventHandlerCallback;
+  onClick: MouseEventHandler;
 } {
   const search = useSelector((state: State) =>
     selectors.relativeHref(state.analyzer[id])(panelViewAndParameters)

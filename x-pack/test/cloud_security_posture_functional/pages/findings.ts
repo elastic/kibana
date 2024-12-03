@@ -7,15 +7,21 @@
 
 import expect from '@kbn/expect';
 import Chance from 'chance';
+import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const queryBar = getService('queryBar');
-  const filterBar = getService('filterBar');
-  const comboBox = getService('comboBox');
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'findings', 'header']);
+  const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
+  const pageObjects = getPageObjects(['common', 'cspSecurity', 'findings', 'header']);
   const chance = new Chance();
   const timeFiveHoursAgo = (Date.now() - 18000000).toString();
 
@@ -38,6 +44,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': timeFiveHoursAgo,
@@ -55,6 +64,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Another Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': timeFiveHoursAgo,
@@ -72,6 +84,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': timeFiveHoursAgo,
@@ -89,31 +104,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'another lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
   ];
 
-  const ruleName1 = data[0].rule.name;
-  const ruleName2 = data[1].rule.name;
+  const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
+    const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
+      type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+    });
+    const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
+      (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
+    );
+    expect(requestedBenchmarkRules.length).greaterThan(0);
 
-  const resourceId1 = data[0].resource.id;
-  const ruleSection1 = data[0].rule.section;
+    return requestedBenchmarkRules.map((item) => item.attributes);
+  };
 
-  const benchMarkName = data[0].rule.benchmark.name;
-
-  describe('Findings Page', function () {
+  describe('Findings Page - DataTable', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
-    let findingsByResourceTable: typeof findings.findingsByResourceTable;
-    let resourceFindingsTable: typeof findings.resourceFindingsTable;
     let distributionBar: typeof findings.distributionBar;
+    let cspSecurity = pageObjects.cspSecurity;
 
-    before(async () => {
+    beforeEach(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['cloud-security-posture-settings'],
+      });
+
       findings = pageObjects.findings;
       latestFindingsTable = findings.latestFindingsTable;
-      findingsByResourceTable = findings.findingsByResourceTable;
-      resourceFindingsTable = findings.resourceFindingsTable;
       distributionBar = findings.distributionBar;
+      cspSecurity = pageObjects.cspSecurity;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
       await findings.waitForPluginInitialized();
@@ -127,45 +151,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    after(async () => {
+    afterEach(async () => {
       await findings.index.remove();
     });
 
-    describe('SearchBar', () => {
-      it('add filter', async () => {
-        // Filter bar uses the field's customLabel in the DataView
-        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
-      });
-
-      it('remove filter', async () => {
-        await filterBar.removeFilter('rule.name');
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(false);
-        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
-      });
-
-      it('set search query', async () => {
-        await queryBar.setQuery(ruleName1);
-        await queryBar.submitQuery();
-
-        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName2)).to.be(false);
-
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
-
-        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
-      });
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/152913
-    describe.skip('Table Sort', () => {
+    describe('Table Sort', () => {
       type SortingMethod = (a: string, b: string) => number;
       type SortDirection = 'asc' | 'desc';
       // Sort by lexical order will sort by the first character of the string (case-sensitive)
@@ -191,7 +184,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
           /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-          pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.header.waitUntilLoadingHasFinished();
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const sorted = values
@@ -207,30 +200,176 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('DistributionBar', () => {
-      (['passed', 'failed'] as const).forEach((type) => {
-        it(`filters by ${type} findings`, async () => {
-          await distributionBar.filterBy(type);
+    describe('Findings - Fields selector', () => {
+      const CSP_FIELDS_SELECTOR_MODAL = 'cloudSecurityFieldsSelectorModal';
+      const CSP_FIELDS_SELECTOR_OPEN_BUTTON = 'cloudSecurityFieldsSelectorOpenButton';
+      const CSP_FIELDS_SELECTOR_RESET_BUTTON = 'cloudSecurityFieldsSelectorResetButton';
+      const CSP_FIELDS_SELECTOR_CLOSE_BUTTON = 'cloudSecurityFieldsSelectorCloseButton';
 
-          const items = data.filter(({ result }) => result.evaluation === type);
-          expect(await latestFindingsTable.getFindingsCount(type)).to.eql(items.length);
+      it('Add fields to the Findings DataTable', async () => {
+        const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+        await fieldsButton.click();
+        await testSubjects.existOrFail(CSP_FIELDS_SELECTOR_MODAL);
 
-          await filterBar.removeFilter('result.evaluation');
-        });
+        const agentIdCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.id'
+        );
+        await agentIdCheckbox.click();
+
+        const agentNameCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.name'
+        );
+        await agentNameCheckbox.click();
+
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
+
+        const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+        await closeFieldsButton.click();
+        await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
+      });
+
+      it('Remove fields from the Findings DataTable', async () => {
+        const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+        await fieldsButton.click();
+
+        const agentIdCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.id'
+        );
+        await agentIdCheckbox.click();
+
+        const agentNameCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.name'
+        );
+        await agentNameCheckbox.click();
+
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.name');
+
+        const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+        await closeFieldsButton.click();
+        await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
+      });
+      it('Reset fields to default', async () => {
+        const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+        await fieldsButton.click();
+
+        const agentIdCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.id'
+        );
+        await agentIdCheckbox.click();
+
+        const agentNameCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.name'
+        );
+        await agentNameCheckbox.click();
+
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
+
+        const resetFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_RESET_BUTTON);
+        await resetFieldsButton.click();
+
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.name');
+
+        const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+        await closeFieldsButton.click();
+        await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
       });
     });
 
-    describe('GroupBy', () => {
-      it('groups findings by resource', async () => {
-        await comboBox.set('findings_group_by_selector', 'Resource');
-        expect(
-          await findingsByResourceTable.hasColumnValue('Applicable Benchmark', benchMarkName)
-        ).to.be(true);
+    describe('Findings Page - support muting rules', () => {
+      it(`verify only enabled rules appears`, async () => {
+        const passedFindings = data.filter(({ result }) => result.evaluation === 'passed');
+        const passedFindingsCount = passedFindings.length;
+
+        const rule = (await getCspBenchmarkRules('cis_k8s'))[0];
+        const modifiedFinding = {
+          ...passedFindings[0],
+          rule: {
+            name: 'Upper case rule name1',
+            id: rule.metadata.id,
+            section: 'Upper case section1',
+            benchmark: {
+              id: rule.metadata.benchmark.id,
+              posture_type: rule.metadata.benchmark.posture_type,
+              name: rule.metadata.benchmark.name,
+              version: rule.metadata.benchmark.version,
+              rule_number: rule.metadata.benchmark.rule_number,
+            },
+            type: 'process',
+          },
+        };
+
+        await findings.index.add([modifiedFinding]);
+
+        await findings.navigateToLatestFindingsPage();
+        await retry.waitFor(
+          'Findings table to be loaded',
+          async () => (await latestFindingsTable.getRowsCount()) === data.length + 1
+        );
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await distributionBar.filterBy('passed');
+
+        expect(await latestFindingsTable.getFindingsCount('passed')).to.eql(
+          passedFindingsCount + 1
+        );
+
+        await supertest
+          .post(`/internal/cloud_security_posture/rules/_bulk_action`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            action: 'mute',
+            rules: [
+              {
+                benchmark_id: modifiedFinding.rule.benchmark.id,
+                benchmark_version: modifiedFinding.rule.benchmark.version,
+                rule_number: modifiedFinding.rule.benchmark.rule_number || '',
+                rule_id: modifiedFinding.rule.id,
+              },
+            ],
+          })
+          .expect(200);
+
+        await findings.navigateToLatestFindingsPage();
+        await retry.waitFor(
+          'Findings table to be loaded',
+          async () => (await latestFindingsTable.getRowsCount()) === data.length
+        );
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await distributionBar.filterBy('passed');
+
+        expect(await latestFindingsTable.getFindingsCount('passed')).to.eql(passedFindingsCount);
+      });
+    });
+
+    describe('Access with custom roles', async () => {
+      this.afterEach(async () => {
+        // force logout to prevent the next test from failing
+        await cspSecurity.logout();
       });
 
-      it('navigates to resource findings page from resource id link', async () => {
-        await findingsByResourceTable.clickResourceIdLink(resourceId1, ruleSection1);
-        expect(await resourceFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+      it('Access with valid user role', async () => {
+        await cspSecurity.logout();
+        await cspSecurity.login('csp_read_user');
+        await findings.navigateToLatestFindingsPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect(await latestFindingsTable.getRowsCount()).to.be.greaterThan(0);
+      });
+
+      it('Access with invalid user role', async () => {
+        await cspSecurity.logout();
+        await cspSecurity.login('csp_missing_latest_findings_access_user');
+
+        await findings.navigateToLatestFindingsPage();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect(await findings.getUnprivilegedPrompt());
       });
     });
   });

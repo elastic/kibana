@@ -1,28 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
 import { populateContext } from '../autocomplete/engine';
 
-import '../../application/models/sense_editor/sense_editor.test.mocks';
 import * as kb from '.';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../services';
 
 describe('Knowledge base', () => {
   let autocompleteInfo;
   beforeEach(() => {
-    kb.setActiveApi(kb._test.loadApisFromJson({}));
+    kb._test.setActiveApi(kb._test.loadApisFromJson({}));
     autocompleteInfo = new AutocompleteInfo();
     setAutocompleteInfo(autocompleteInfo);
     autocompleteInfo.mapping.clearMappings();
   });
   afterEach(() => {
-    kb.setActiveApi(kb._test.loadApisFromJson({}));
+    kb._test.setActiveApi(kb._test.loadApisFromJson({}));
     autocompleteInfo = null;
     setAutocompleteInfo(null);
   });
@@ -113,7 +113,7 @@ describe('Knowledge base', () => {
         kb._test.globalUrlComponentFactories
       );
 
-      kb.setActiveApi(testApi);
+      kb._test.setActiveApi(testApi);
 
       autocompleteInfo.mapping.loadMappings(MAPPING);
       testUrlContext(tokenPath, otherTokenValues, expectedContext);
@@ -133,12 +133,12 @@ describe('Knowledge base', () => {
   );
 
   indexTest('Index integration 2', ['index1'], [], {
-    index: ['index1'],
+    indices: ['index1'],
     autoCompleteSet: ['_multi_indices', '_single_index'],
   });
 
   indexTest('Index integration 2', [['index1', 'index2']], [], {
-    index: ['index1', 'index2'],
+    indices: ['index1', 'index2'],
     autoCompleteSet: ['_multi_indices', '_single_index'],
   });
 });

@@ -6,13 +6,20 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  shareReplay,
+  tap,
+} from 'rxjs';
 
 import type { Logger, StatusServiceSetup } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 
-import type { SecurityLicense } from '../../common/licensing';
+import type { SecurityLicense } from '../../common';
 
 export interface ElasticsearchServiceSetupParams {
   readonly status: StatusServiceSetup;

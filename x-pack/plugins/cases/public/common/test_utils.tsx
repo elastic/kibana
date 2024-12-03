@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import type { MatcherFunction } from '@testing-library/react';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiButton } from '@elastic/eui';
 
@@ -16,7 +18,7 @@ import { EuiButton } from '@elastic/eui';
  * Convenience utility to remove text appended to links by EUI
  */
 export const removeExternalLinkText = (str: string | null) =>
-  str?.replace(/\(opens in a new tab or window\)/g, '');
+  str?.replace(/\(external[^)]*\)/g, '');
 
 export async function waitForComponentToPaint<P = {}>(wrapper: ReactWrapper<P>, amount = 0) {
   await act(async () => {
@@ -46,20 +48,25 @@ export const createQueryWithMarkup =
 interface FormTestComponentProps {
   formDefaultValue?: Record<string, unknown>;
   onSubmit?: jest.Mock;
+  schema?: FormSchema<Record<string, unknown>>;
+  children: React.ReactNode;
 }
 
 // eslint-disable-next-line react/display-name
-export const FormTestComponent: React.FC<FormTestComponentProps> = ({
+export const FormTestComponent: FC<PropsWithChildren<FormTestComponentProps>> = ({
   children,
   onSubmit,
   formDefaultValue,
+  schema,
 }) => {
-  const { form } = useForm({ onSubmit, defaultValue: formDefaultValue });
+  const { form } = useForm({ onSubmit, defaultValue: formDefaultValue, schema });
 
   return (
     <Form form={form}>
       {children}
-      <EuiButton onClick={() => form.submit()}>{'Submit'}</EuiButton>
+      <EuiButton onClick={() => form.submit()} data-test-subj="form-test-component-submit-button">
+        {'Submit'}
+      </EuiButton>
     </Form>
   );
 };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -22,7 +23,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 /**
  * Runtime field types
  */
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export type RuntimeType = (typeof RUNTIME_FIELD_TYPES)[number];
 
 /**
  * Runtime field primitive types - excluding composite
@@ -79,6 +80,10 @@ export interface FieldConfiguration {
    * Custom label
    */
   customLabel?: string;
+  /**
+   * Custom description
+   */
+  customDescription?: string;
   /**
    * Popularity - used for discover
    */
@@ -168,10 +173,7 @@ export interface DataViewAttributes {
  * @public
  * Storage of field attributes. Necessary since the field list isn't saved.
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FieldAttrs = {
-  [key: string]: FieldAttrSet;
-};
+export type FieldAttrs = Map<string, FieldAttrSet>;
 
 /**
  * Field attributes that are stored on the data view
@@ -184,10 +186,16 @@ export type FieldAttrSet = {
    */
   customLabel?: string;
   /**
+   * Custom field description
+   */
+  customDescription?: string;
+  /**
    * Popularity count - used for discover
    */
   count?: number;
 };
+
+export type FieldAttrsAsObject = Record<string, FieldAttrSet>;
 
 /**
  * Handler for data view notifications
@@ -306,7 +314,6 @@ export interface PersistenceAPI {
 export interface GetFieldsOptions {
   pattern: string;
   type?: string;
-  lookBack?: boolean;
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
@@ -314,14 +321,18 @@ export interface GetFieldsOptions {
   includeUnmapped?: boolean;
   fields?: string[];
   allowHidden?: boolean;
+  forceRefresh?: boolean;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
  * FieldsForWildcard response
  */
 export interface FieldsForWildcardResponse {
-  fields: FieldSpec[];
+  fields: FieldsForWildcardSpec[];
   indices: string[];
+  etag?: string;
 }
 
 /**
@@ -376,6 +387,12 @@ export enum DataViewType {
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
 
+// omit items saved DataView
+type FieldsForWildcardSpec = Omit<
+  FieldSpec,
+  'format' | 'customLabel' | 'runtimeField' | 'count' | 'customDescription'
+>;
+
 /**
  * Serialized version of DataViewField
  * @public
@@ -406,6 +423,10 @@ export type FieldSpec = DataViewFieldBase & {
    */
   aggregatable: boolean;
   /**
+   * True if field is empty
+   */
+  isNull?: boolean;
+  /**
    * True if can be read from doc values
    */
   readFromDocValues?: boolean;
@@ -417,6 +438,10 @@ export type FieldSpec = DataViewFieldBase & {
    * Custom label for field, used for display in kibana
    */
   customLabel?: string;
+  /**
+   * Custom description for field, used for display in kibana
+   */
+  customDescription?: string;
   /**
    * Runtime field definition
    */
@@ -456,6 +481,8 @@ export type FieldSpec = DataViewFieldBase & {
    * Name of parent field for composite runtime field subfields.
    */
   parentName?: string;
+
+  defaultFormatter?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
@@ -509,7 +536,7 @@ export type DataViewSpec = {
   /**
    * Map of field attributes by field name, currently customName and count
    */
-  fieldAttrs?: FieldAttrs;
+  fieldAttrs?: FieldAttrsAsObject;
   /**
    * Determines whether failure to load field list should be reported as error
    */
@@ -542,4 +569,7 @@ export interface HasDataService {
 
 export interface ClientConfigType {
   scriptedFieldsEnabled?: boolean;
+  dataTiersExcludedForFields?: string;
+  fieldListCachingEnabled?: boolean;
+  hasEsDataTimeout: number;
 }

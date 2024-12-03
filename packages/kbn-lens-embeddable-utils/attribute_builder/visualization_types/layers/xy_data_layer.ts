@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -12,7 +13,7 @@ import type {
   FormulaPublicApi,
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
-  XYDataLayerConfig,
+  XYDataLayerConfig as LensXYDataLayerConfig,
   SeriesType,
   TermsIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -26,6 +27,7 @@ import {
   type TopValuesColumnParams,
   type DateHistogramColumnParams,
 } from '../../utils';
+import { XY_DATA_ID } from '../constants';
 import { FormulaColumn } from './columns/formula';
 
 const BREAKDOWN_COLUMN_NAME = 'aggs_breakdown';
@@ -50,22 +52,25 @@ export interface XYLayerOptions {
   seriesType?: SeriesType;
 }
 
-export interface XYLayerConfig {
+export interface XYDataLayerConfig {
   data: FormulaValueConfig[];
   options?: XYLayerOptions;
+  layerType?: typeof XY_DATA_ID;
+
   /**
    * It is possible to define a specific dataView for the layer. It will override the global chart one
    **/
   dataView?: DataView;
 }
 
-export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
+export class XYDataLayer implements ChartLayer<LensXYDataLayerConfig> {
   private column: ChartColumn[];
-  private layerConfig: XYLayerConfig;
-  constructor(layerConfig: XYLayerConfig) {
+  private layerConfig: XYDataLayerConfig;
+  constructor(layerConfig: XYDataLayerConfig) {
     this.column = layerConfig.data.map((dataItem) => new FormulaColumn(dataItem));
     this.layerConfig = {
       ...layerConfig,
+      layerType: layerConfig.layerType ?? 'data',
       options: {
         ...layerConfig.options,
         buckets: {
@@ -151,7 +156,7 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
     return getDefaultReferences(this.layerConfig.dataView ?? chartDataView, layerId);
   }
 
-  getLayerConfig(layerId: string, accessorId: string): XYDataLayerConfig {
+  getLayerConfig(layerId: string, accessorId: string): LensXYDataLayerConfig {
     return {
       layerId,
       seriesType: this.layerConfig.options?.seriesType ?? 'line',

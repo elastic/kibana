@@ -23,11 +23,12 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import type { State } from '../../../common/store';
-import { RowRendererId } from '../../../../common/api/timeline';
+import { RowRendererValues } from '../../../../common/api/timeline';
+import type { RowRendererId } from '../../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/timeline/actions';
-import { timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/actions';
+import { timelineSelectors } from '../../store';
+import { timelineDefaults } from '../../store/defaults';
 import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 
@@ -79,7 +80,7 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
   const [show, setShow] = useState(false);
 
   const setExcludedRowRendererIds = useCallback(
-    (payload) =>
+    (payload: RowRendererId[]) =>
       dispatch(
         dispatchSetExcludedRowRendererIds({
           id: timelineId,
@@ -94,7 +95,7 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
   const hideFieldBrowser = useCallback(() => setShow(false), []);
 
   const handleDisableAll = useCallback(() => {
-    setExcludedRowRendererIds(Object.values(RowRendererId));
+    setExcludedRowRendererIds(RowRendererValues);
   }, [setExcludedRowRendererIds]);
 
   const handleEnableAll = useCallback(() => {

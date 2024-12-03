@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -52,32 +52,7 @@
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "devTools",
-                "id": "def-public.DevToolsPlugin.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "initializerContext",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
-                  "<",
-                  "ConfigSchema",
-                  ">"
-                ],
-                "path": "src/plugins/dev_tools/public/plugin.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
+            "children": [],
             "returnComment": []
           },
           {
@@ -91,9 +66,9 @@
               "(coreSetup: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
@@ -116,9 +91,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -197,7 +172,42 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "devTools",
+        "id": "def-public.DEV_TOOLS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEV_TOOLS_FEATURE_ID",
+        "description": [
+          "\nThe UI Setting prefix and category for dev tools UI Settings"
+        ],
+        "signature": [
+          "\"devTools\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "devTools",
+        "id": "def-public.ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
+        "description": [
+          "\nUI Setting ID for enabling / disabling the persistent console in Kibana"
+        ],
+        "signature": [
+          "\"devTools:enablePersistentConsole\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "devTools",
@@ -267,7 +277,42 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "devTools",
+        "id": "def-common.DEV_TOOLS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEV_TOOLS_FEATURE_ID",
+        "description": [
+          "\nThe UI Setting prefix and category for dev tools UI Settings"
+        ],
+        "signature": [
+          "\"devTools\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "devTools",
+        "id": "def-common.ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
+        "description": [
+          "\nUI Setting ID for enabling / disabling the persistent console in Kibana"
+        ],
+        "signature": [
+          "\"devTools:enablePersistentConsole\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

@@ -11,25 +11,51 @@ import { useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { Logger } from '@kbn/logging';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type {
+  PrivilegesAPIClientPublicContract,
+  RolesAPIClient,
+  SecurityLicense,
+} from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';
+import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 
-interface CreateParams {
+export interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
   config: ConfigType;
+  logger: Logger;
+  getIsRoleManagementEnabled: () => Promise<() => boolean | undefined>;
+  getRolesAPIClient: () => Promise<RolesAPIClient>;
+  eventTracker: EventTracker;
+  getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
+  isServerless: boolean;
+  getSecurityLicense: () => Promise<SecurityLicense>;
 }
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager, config }: CreateParams) {
+  create({
+    getStartServices,
+    spacesManager,
+    config,
+    logger,
+    eventTracker,
+    getIsRoleManagementEnabled,
+    getRolesAPIClient,
+    getPrivilegesAPIClient,
+    isServerless,
+    getSecurityLicense,
+  }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
     });
@@ -39,15 +65,24 @@ export const spacesManagementApp = Object.freeze({
       order: 2,
       title,
 
-      async mount({ element, theme$, setBreadcrumbs, history }) {
-        const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
-          await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
+      async mount({ element, setBreadcrumbs, history }) {
+        const [
+          [coreStart, { features }],
+          { SpacesGridPage },
+          { CreateSpacePage },
+          { EditSpacePage },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./spaces_grid'),
+          import('./create_space'),
+          import('./edit_space'),
+        ]);
 
         const spacesFirstBreadcrumb = {
           text: title,
           href: `/`,
         };
-        const { notifications, i18n: i18nStart, application, chrome } = coreStart;
+        const { notifications, application, chrome, http, overlays, theme } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -59,9 +94,12 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              serverBasePath={http.basePath.serverBasePath}
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              isServerless={isServerless}
             />
           );
         };
@@ -77,65 +115,88 @@ export const spacesManagementApp = Object.freeze({
           ]);
 
           return (
-            <ManageSpacePage
+            <CreateSpacePage
               capabilities={application.capabilities}
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              eventTracker={eventTracker}
             />
           );
         };
 
         const EditSpacePageWithBreadcrumbs = () => {
-          const { spaceId } = useParams<{ spaceId: string }>();
+          const { spaceId, selectedTabId } = useParams<{
+            spaceId: string;
+            selectedTabId?: string;
+          }>();
+
+          const breadcrumbText = (space: Space) =>
+            i18n.translate('xpack.spaces.management.editSpaceBreadcrumb', {
+              defaultMessage: 'Edit "{space}"',
+              values: { space: space.name },
+            });
 
           const onLoadSpace = (space: Space) => {
             setBreadcrumbs([
               spacesFirstBreadcrumb,
               {
-                text: space.name,
+                text: breadcrumbText(space),
               },
             ]);
           };
 
           return (
-            <ManageSpacePage
+            <EditSpacePage
               capabilities={application.capabilities}
+              getUrlForApp={application.getUrlForApp}
+              navigateToUrl={application.navigateToUrl}
+              getSecurityLicense={getSecurityLicense}
+              serverBasePath={http.basePath.serverBasePath}
               getFeatures={features.getFeatures}
+              http={http}
+              overlays={overlays}
               notifications={notifications}
+              theme={theme}
+              i18n={coreStart.i18n}
+              logger={logger}
               spacesManager={spacesManager}
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
               history={history}
+              selectedTabId={selectedTabId}
+              getIsRoleManagementEnabled={getIsRoleManagementEnabled}
+              getRolesAPIClient={getRolesAPIClient}
               allowFeatureVisibility={config.allowFeatureVisibility}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              getPrivilegesAPIClient={getPrivilegesAPIClient}
             />
           );
         };
 
         render(
-          <KibanaContextProvider services={coreStart}>
-            <i18nStart.Context>
-              <KibanaThemeProvider theme$={theme$}>
-                <RedirectAppLinks coreStart={coreStart}>
-                  <Router history={history}>
-                    <Routes>
-                      <Route path={['', '/']} exact>
-                        <SpacesGridPageWithBreadcrumbs />
-                      </Route>
-                      <Route path="/create">
-                        <CreateSpacePageWithBreadcrumbs />
-                      </Route>
-                      <Route path="/edit/:spaceId">
-                        <EditSpacePageWithBreadcrumbs />
-                      </Route>
-                    </Routes>
-                  </Router>
-                </RedirectAppLinks>
-              </KibanaThemeProvider>
-            </i18nStart.Context>
-          </KibanaContextProvider>,
+          <KibanaRenderContextProvider {...coreStart}>
+            <KibanaContextProvider services={coreStart}>
+              <RedirectAppLinks coreStart={coreStart}>
+                <Router history={history}>
+                  <Routes>
+                    <Route path={['', '/']} exact>
+                      <SpacesGridPageWithBreadcrumbs />
+                    </Route>
+                    <Route path="/create">
+                      <CreateSpacePageWithBreadcrumbs />
+                    </Route>
+                    <Route path={['/edit/:spaceId', '/edit/:spaceId/:selectedTabId']} exact>
+                      <EditSpacePageWithBreadcrumbs />
+                    </Route>
+                  </Routes>
+                </Router>
+              </RedirectAppLinks>
+            </KibanaContextProvider>
+          </KibanaRenderContextProvider>,
           element
         );
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -19,12 +20,11 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
@@ -42,10 +42,12 @@ export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
+  cloud: CloudStart;
+  share: SharePluginStart;
 }
 
 export interface HomePluginSetupDependencies {
-  cloud?: CloudSetup;
+  cloud: CloudSetup;
   share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
@@ -75,13 +77,22 @@ export class HomePublicPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [coreStart, { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding }] =
-          await core.getStartServices();
+        const [
+          coreStart,
+          {
+            dataViews,
+            urlForwarding: urlForwardingStart,
+            guidedOnboarding,
+            share: shareStart,
+            cloud: cloudStart,
+          },
+        ] = await core.getStartServices();
+
         setServices({
           share,
           trackUiMetric,
@@ -106,12 +117,17 @@ export class HomePublicPlugin
           welcomeService: this.welcomeService,
           guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
+          cloudStart,
+          overlays: coreStart.overlays,
+          theme: core.theme,
+          i18nStart: coreStart.i18n,
+          shareStart,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
         const { renderApp } = await import('./application');
-        return await renderApp(params.element, params.theme$, coreStart, params.history);
+        return await renderApp(params.element, coreStart, params.history);
       },
     });
     urlForwarding.forwardApp('home', 'home');
@@ -135,6 +151,7 @@ export class HomePublicPlugin
 
     const environment = { ...this.environmentService.setup() };
     const tutorials = { ...this.tutorialService.setup() };
+
     if (cloud) {
       environment.update({ cloud: cloud.isCloudEnabled });
       if (cloud.isCloudEnabled) {

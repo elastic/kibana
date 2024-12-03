@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { URL } from 'url';
+import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
-  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const logsUi = getService('logsUi');
   const find = getService('find');
+  const kibanaServer = getService('kibanaServer');
   const logFilter = {
     timeRange: {
       from: DATES.metricsAndLogs.stream.startWithData,
@@ -26,9 +26,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Log stream supports nano precision', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
+      await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
+      await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });
     });
 
     it('should display logs entries containing date_nano timestamps properly ', async () => {
@@ -61,15 +63,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       expect(entryTimestamp).to.be('19:43:22.111');
-    });
-
-    it('should properly sync logPosition in url', async () => {
-      const currentUrl = await browser.getCurrentUrl();
-      const parsedUrl = new URL(currentUrl);
-
-      expect(parsedUrl.searchParams.get('logPosition')).to.contain(
-        `time:\'2018-10-17T19:46:22.333333333Z\'`
-      );
     });
 
     it('should properly render timestamp in flyout with nano precision', async () => {

@@ -12,7 +12,7 @@ import {
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { getInstallationInfo } from './helper';
 
 const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
   expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
@@ -24,6 +24,8 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
+
   function withTestPackage(name: string, version: string) {
     const pkgRoute = `/api/fleet/epm/packages/${name}/${version}`;
     before(async function () {
@@ -34,11 +36,6 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.delete(pkgRoute).set('kbn-xsrf', 'xxxx').send({ force: true }).expect(200);
     });
   }
-
-  const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
-    return res.body.item.savedObject.attributes;
-  };
 
   const getComponentTemplate = async (name: string) => {
     try {
@@ -54,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  describe('Package Policy - upgrade', async function () {
+  describe('Package Policy - upgrade', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;
@@ -62,6 +59,7 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
 
     after(async () => {
@@ -70,8 +68,6 @@ export default function (providerContext: FtrProviderContext) {
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
     });
-
-    setupFleetAndAgents(providerContext);
 
     describe('when package version is not installed', function () {
       beforeEach(async function () {
@@ -1317,6 +1313,8 @@ export default function (providerContext: FtrProviderContext) {
         for (let i = 0; i < POLICY_COUNT; i++) {
           await createPackagePolicy(i.toString());
         }
+
+        expectedAssets.push({ id: 'logs@custom', type: 'component_template' });
       });
 
       afterEach(async function () {
@@ -1356,14 +1354,21 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          const installation = await getInstallationSavedObject('integration_to_input', '3.0.0');
+          const installation = await getInstallationInfo(
+            supertest,
+            'integration_to_input',
+            '3.0.0'
+          );
           expectIdArraysEqual(installation.installed_es, expectedAssets);
 
-          for (const expectedAsset of expectedAssets) {
-            if (expectedAsset.type === 'component_template') {
-              const componentTemplate = await getComponentTemplate(expectedAsset.id);
-              expect(componentTemplate).not.to.be(null);
-            }
+          const expectedComponentTemplates = expectedAssets.filter(
+            (expectedAsset) =>
+              expectedAsset.type === 'component_template' && !expectedAsset.id.endsWith('@custom')
+          );
+
+          for (const expectedAsset of expectedComponentTemplates) {
+            const componentTemplate = await getComponentTemplate(expectedAsset.id);
+            expect(componentTemplate).not.to.be(null);
           }
         });
       });

@@ -16,6 +16,8 @@ import { AppInfo, Choice, RESTApiError } from './types';
 
 export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
 
+export const ACTION_GROUP_RECOVERED = 'recovered';
+
 export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
   choices.map((choice) => ({ value: choice.value, text: choice.label }));
 
@@ -26,7 +28,7 @@ export const isRESTApiError = (res: AppInfo | RESTApiError | undefined): res is 
 export const isFieldInvalid = (
   field: string | undefined | null,
   error: string | IErrorObject | string[]
-): boolean => error !== undefined && error.length > 0 && field !== undefined;
+): boolean => error !== undefined && Number(error.length) > 0 && field !== undefined;
 
 export const getConnectorDescriptiveTitle = (connector: ActionConnector) => {
   let title = connector.name;

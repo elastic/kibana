@@ -15,6 +15,7 @@ import { rulesClientMock } from '../../rules_client.mock';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryAlertTypeWithAuth } from '../../authorization';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 
@@ -31,17 +32,19 @@ beforeEach(() => {
 });
 
 describe('listAlertTypesRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
   it('lists alert types with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listAlertTypesRoute(router, licenseState);
+    listAlertTypesRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/list_alert_types"`);
+    expect(config.options?.access).toBe('public');
 
-    const listTypes = [
+    const listTypes: RegistryAlertTypeWithAuth[] = [
       {
         id: '1',
         name: 'name',
@@ -66,9 +69,10 @@ describe('listAlertTypesRoute', () => {
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
         validLegacyConsumers: [],
-      } as RegistryAlertTypeWithAuth,
+      },
     ];
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
+
+    rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
 
@@ -114,11 +118,23 @@ describe('listAlertTypesRoute', () => {
     });
   });
 
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    listAlertTypesRoute(router, licenseState, docLinks, undefined, true);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/list_alert_types"`);
+    expect(config.options?.access).toBe('internal');
+  });
+
   it('ensures the license allows listing alert types', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listAlertTypesRoute(router, licenseState);
+    listAlertTypesRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -152,7 +168,7 @@ describe('listAlertTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -175,7 +191,7 @@ describe('listAlertTypesRoute', () => {
       throw new Error('OMG');
     });
 
-    listAlertTypesRoute(router, licenseState);
+    listAlertTypesRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -209,7 +225,7 @@ describe('listAlertTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -219,7 +235,7 @@ describe('listAlertTypesRoute', () => {
       ['ok']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
@@ -230,9 +246,9 @@ describe('listAlertTypesRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set([]));
+    rulesClient.listRuleTypes.mockResolvedValueOnce([]);
 
-    listAlertTypesRoute(router, licenseState, mockUsageCounter);
+    listAlertTypesRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -241,5 +257,31 @@ describe('listAlertTypesRoute', () => {
     );
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('listAlertTypes', mockUsageCounter);
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    listAlertTypesRoute(router, licenseState, docLinks);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "GET",
+          "newApiPath": "/api/alerting/rule_types",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

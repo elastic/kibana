@@ -39,6 +39,7 @@ export function packageHasNoPolicyTemplates(packageInfo: PackageInfo): boolean {
     )
   );
 }
+
 export function isInputOnlyPolicyTemplate(
   policyTemplate: RegistryPolicyTemplate
 ): policyTemplate is RegistryPolicyInputOnlyTemplate {
@@ -80,13 +81,15 @@ export const getNormalizedDataStreams = (
   }
 
   return policyTemplates.map((policyTemplate) => {
+    const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
+
     const dataStream: RegistryDataStream = {
       type: policyTemplate.type,
-      dataset: datasetName || createDefaultDatasetName(packageInfo, policyTemplate),
+      dataset,
       title: policyTemplate.title + ' Dataset',
       release: packageInfo.release || 'ga',
       package: packageInfo.name,
-      path: packageInfo.name,
+      path: dataset,
       elasticsearch: packageInfo.elasticsearch || {},
       streams: [
         {
@@ -140,3 +143,27 @@ const createDefaultDatasetName = (
   packageInfo: { name: string },
   policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;
+
+export function filterPolicyTemplatesTiles<T>(
+  templatesBehavior: string | undefined,
+  packagePolicy: T,
+  packagePolicyTemplates: T[]
+): T[] {
+  switch (templatesBehavior || 'all') {
+    case 'combined_policy':
+      return [packagePolicy];
+    case 'individual_policies':
+      return [
+        ...(packagePolicyTemplates && packagePolicyTemplates.length > 1
+          ? packagePolicyTemplates
+          : []),
+      ];
+    default:
+      return [
+        packagePolicy,
+        ...(packagePolicyTemplates && packagePolicyTemplates.length > 1
+          ? packagePolicyTemplates
+          : []),
+      ];
+  }
+}

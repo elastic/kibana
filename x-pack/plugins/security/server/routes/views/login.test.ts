@@ -18,7 +18,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { defineLoginRoutes } from './login';
-import type { SecurityLicense } from '../../../common/licensing';
+import type { SecurityLicense } from '../../../common';
 import type { LoginSelectorProvider } from '../../../common/login_state';
 import type { ConfigType } from '../../config';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
@@ -52,7 +52,7 @@ describe('Login view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: 'optional' });
+      expect(routeConfig.options).toEqual({ authRequired: 'optional', excludeFromOAS: true });
 
       expect(routeConfig.validate).toEqual({
         body: undefined,
@@ -167,6 +167,7 @@ describe('Login view routes', () => {
         allowRoleDocumentLevelSecurity: true,
         allowRoleFieldLevelSecurity: false,
         allowRoleRemoteIndexPrivileges: false,
+        allowRemoteClusterPrivileges: false,
         layout: 'error-es-unavailable',
         showLinks: false,
         showRoleMappingsManagement: true,
@@ -174,6 +175,7 @@ describe('Login view routes', () => {
         allowAuditLogging: true,
         showLogin: true,
         allowUserProfileCollaboration: true,
+        allowFips: false,
       });
 
       const request = httpServerMock.createKibanaRequest();

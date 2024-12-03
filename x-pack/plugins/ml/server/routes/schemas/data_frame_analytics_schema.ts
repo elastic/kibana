@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { CreateDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_create_response_schema';
+
 import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const dataFrameAnalyticsJobConfigSchema = schema.object({
@@ -64,26 +66,18 @@ export const dataFrameAnalyticsExplainSchema = schema.object({
 });
 
 export const dataFrameAnalyticsIdSchema = schema.object({
-  /**
-   * Analytics ID
-   */
-  analyticsId: schema.string(),
+  analyticsId: schema.string({ meta: { description: 'Analytics ID' } }),
 });
 
 export const dataFrameAnalyticsQuerySchema = schema.object({
-  /**
-   * Analytics Query
-   */
   excludeGenerated: schema.maybe(schema.boolean()),
   size: schema.maybe(schema.number()),
 });
 
 export const deleteDataFrameAnalyticsJobSchema = schema.object({
-  /**
-   * Analytics Destination Index
-   */
   deleteDestIndex: schema.maybe(schema.boolean()),
   deleteDestDataView: schema.maybe(schema.boolean()),
+  force: schema.maybe(schema.boolean()),
 });
 
 export const dataFrameAnalyticsJobUpdateSchema = schema.object({
@@ -114,3 +108,16 @@ export const dataFrameAnalyticsNewJobCapsParamsSchema = schema.object({
 export const dataFrameAnalyticsNewJobCapsQuerySchema = schema.maybe(
   schema.object({ rollup: schema.maybe(schema.string()) })
 );
+
+interface DataFrameAnalyticsJobsCreated {
+  id: string;
+}
+interface CreatedError {
+  id: string;
+  error: any;
+}
+
+export interface PutDataFrameAnalyticsResponseSchema extends CreateDataViewApiResponseSchema {
+  dataFrameAnalyticsJobsCreated: DataFrameAnalyticsJobsCreated[];
+  dataFrameAnalyticsJobsErrors: CreatedError[];
+}

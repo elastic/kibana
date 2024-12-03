@@ -13,15 +13,17 @@ import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
-import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
+import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
 
 export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       access: 'internal',
       path: GET_PREBUILT_RULES_STATUS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -35,7 +37,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
         try {
           const ctx = await context.resolve(['core', 'alerting']);
           const soClient = ctx.core.savedObjects.client;
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
@@ -44,7 +46,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
             ruleObjectsClient,
           });
           const { currentRules, installableRules, upgradeableRules, totalAvailableRules } =
-            getVersionBuckets(ruleVersionsMap);
+            getRuleGroups(ruleVersionsMap);
 
           const body: GetPrebuiltRulesStatusResponseBody = {
             stats: {

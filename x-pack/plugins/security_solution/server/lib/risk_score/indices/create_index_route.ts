@@ -12,15 +12,17 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_SCORE_CREATE_INDEX } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { createIndex } from './lib/create_index';
-import { createEsIndexRequestBody } from '../../../../common/api/risk_score';
+import { createEsIndexRequestBody } from '../../../../common/api/entity_analytics/risk_score';
 
 export const createEsIndexRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .put({
       access: 'internal',
       path: RISK_SCORE_CREATE_INDEX,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

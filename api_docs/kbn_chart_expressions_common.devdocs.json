@@ -133,7 +133,7 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[], accessor: string | undefined) => (string | string[])[]"
+          "[], accessor: string | undefined, isTransposed: boolean | undefined, exclude: any[] | undefined) => (string | string[])[]"
         ],
         "path": "src/plugins/chart_expressions/common/color_categories.ts",
         "deprecated": false,
@@ -170,6 +170,36 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTransposed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$4",
+            "type": "Array",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "any[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/common/color_categories.ts",
             "deprecated": false,
@@ -238,6 +268,53 @@
       },
       {
         "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.isChartSizeEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isChartSizeEvent",
+        "description": [],
+        "signature": [
+          "(event: ",
+          {
+            "pluginId": "expressions",
+            "scope": "public",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-public.ExpressionRendererEvent",
+            "text": "ExpressionRendererEvent"
+          },
+          ") => boolean"
+        ],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.isChartSizeEvent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionRendererEvent",
+                "text": "ExpressionRendererEvent"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
         "id": "def-common.isOnAggBasedEditor",
         "type": "Function",
         "tags": [],
@@ -285,7 +362,129 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.ChartSizeEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChartSizeEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ChartSizeEvent",
+            "text": "ChartSizeEvent"
+          },
+          " extends ",
+          {
+            "pluginId": "expressions",
+            "scope": "public",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-public.ExpressionRendererEvent",
+            "text": "ExpressionRendererEvent"
+          }
+        ],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeEvent.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"chartSize\""
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeEvent.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ChartSizeSpec",
+                "text": "ChartSizeSpec"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.ChartSizeSpec",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChartSizeSpec",
+        "description": [],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeSpec.maxDimensions",
+            "type": "Object",
+            "tags": [],
+            "label": "maxDimensions",
+            "description": [],
+            "signature": [
+              "ChartSizeDimensions | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeSpec.minDimensions",
+            "type": "Object",
+            "tags": [],
+            "label": "minDimensions",
+            "description": [],
+            "signature": [
+              "ChartSizeDimensions | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeSpec.aspectRatio",
+            "type": "Object",
+            "tags": [],
+            "label": "aspectRatio",
+            "description": [],
+            "signature": [
+              "{ x: number; y: number; } | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

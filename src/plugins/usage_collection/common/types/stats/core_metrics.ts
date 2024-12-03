@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -89,8 +90,12 @@ export interface OpsProcessMetrics {
     };
     /** node rss */
     resident_set_size_in_bytes: number;
+    /** memory usage of C++ objects bound to JavaScript objects managed by V8 */
+    external_in_bytes: number;
+    /** memory allocated for array buffers. This is also included in the external value*/
+    array_buffers_in_bytes: number;
   };
-  /** mean event loop delay since last collection*/
+  /** max event loop delay since last collection */
   event_loop_delay: number;
   /** node event loop delay histogram since last collection */
   event_loop_delay_histogram: IntervalHistogram;
@@ -158,6 +163,14 @@ export interface OpsOsMetrics {
       /** total amount of time the cgroup has been throttled for */
       time_throttled_nanos: number;
     };
+  };
+
+  /** memory cgroup metrics, undefined when not running in cgroup v2 */
+  cgroup_memory?: {
+    /** The total amount of memory currently being used by the cgroup and its descendants. */
+    current_in_bytes: number;
+    /** The total amount of swap currently being used by the cgroup and its descendants. */
+    swap_current_in_bytes: number;
   };
 }
 

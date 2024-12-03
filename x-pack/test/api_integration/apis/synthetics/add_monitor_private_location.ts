@@ -10,16 +10,15 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   ConfigKey,
   HTTPFields,
-  LocationStatus,
   PrivateLocation,
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { omit } from 'lodash';
-import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
+import { getDevLocation } from '@kbn/synthetics-plugin/server/synthetics_service/get_service_locations';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
@@ -27,6 +26,8 @@ import {
   INSTALLED_VERSION,
   PrivateLocationTestService,
 } from './services/private_location_test_service';
+import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './add_monitor';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('PrivateLocationAddMonitor', function () {
@@ -36,12 +37,26 @@ export default function ({ getService }: FtrProviderContext) {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
 
     let testFleetPolicyID: string;
+    let pvtLoc: PrivateLocation;
+    const testPolicyName = 'Fleet test server policy' + Date.now();
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
-
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const security = getService('security');
+
+    const addMonitorAPI = async (monitor: any, statusCode = 200) => {
+      return addMonitorAPIHelper(supertestAPI, monitor, statusCode);
+    };
+
+    const deleteMonitor = async (
+      monitorId?: string | string[],
+      statusCode = 200,
+      spaceId?: string
+    ) => {
+      return monitorTestService.deleteMonitor(monitorId, statusCode, spaceId);
+    };
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -54,40 +69,15 @@ export default function ({ getService }: FtrProviderContext) {
       httpMonitorJson = _httpMonitorJson;
     });
 
-    const testPolicyName = 'Fleet test server policy' + Date.now();
-
-    it('adds a test fleet policy', async () => {
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testFleetPolicyID = apiResponse.body.item.id;
-    });
-
     it('add a test private location', async () => {
-      await testPrivateLocations.setTestLocations([testFleetPolicyID]);
+      pvtLoc = await testPrivateLocations.addPrivateLocation();
+      testFleetPolicyID = pvtLoc.id;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
       const testResponse: Array<PrivateLocation | ServiceLocation> = [
-        {
-          id: 'localhost',
-          label: 'Local Synthetics Service',
-          geo: { lat: 0, lon: 0 },
-          url: 'mockDevUrl',
-          isServiceManaged: true,
-          status: LocationStatus.EXPERIMENTAL,
-          isInvalid: false,
-        },
-        {
-          id: testFleetPolicyID,
-          isServiceManaged: false,
-          isInvalid: false,
-          label: 'Test private location 0',
-          geo: {
-            lat: 0,
-            lon: 0,
-          },
-          agentPolicyId: testFleetPolicyID,
-          namespace: 'default',
-        },
+        ...getDevLocation('mockDevUrl'),
+        { ...pvtLoc, isInvalid: false },
       ];
 
       expect(apiResponse.body.locations).eql(testResponse);
@@ -95,14 +85,16 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('does not add a monitor if there is an error in creating integration', async () => {
       const newMonitor = { ...httpMonitorJson };
-
-      const invalidLocation = testFleetPolicyID + '1';
       const invalidName = 'invalid name';
 
       const location = {
-        id: invalidLocation,
+        id: 'invalidLocation',
         label: 'Test private location 0',
         isServiceManaged: false,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
       };
 
       newMonitor.name = invalidName;
@@ -110,13 +102,14 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertestAPI
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
-        .send({ ...newMonitor, locations: [location, ...newMonitor.locations] })
-        .expect(500);
+        .send({ ...newMonitor, locations: [location] });
+
+      expect(apiResponse.status).eql(400);
 
       expect(apiResponse.body).eql({
-        statusCode: 500,
-        message: `Unable to find Synthetics private location for agentId ${invalidLocation}`,
-        error: 'Internal Server Error',
+        statusCode: 400,
+        error: 'Bad Request',
+        message: `Invalid locations specified. Private Location(s) 'invalidLocation' not found. Available private locations are 'Test private location 0'`,
       });
 
       const apiGetResponse = await supertestAPI
@@ -131,34 +124,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('adds a monitor in private location', async () => {
       const newMonitor = httpMonitorJson;
 
-      newMonitor.locations.push({
-        id: testFleetPolicyID,
-        label: 'Test private location 0',
-        isServiceManaged: false,
-      });
+      newMonitor.locations.push(pvtLoc);
 
-      const apiResponse = await supertestAPI
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor)
-        .expect(200);
+      const { body, rawBody } = await addMonitorAPI(newMonitor);
 
-      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
-      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
-
-      expect(apiResponse.body).eql(
-        omit(
-          {
-            ...newMonitor,
-            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-            created_at: createdAt,
-            updated_at: updatedAt,
-          },
-          secretKeys
-        )
-      );
-      newMonitorId = apiResponse.body.id;
+      expect(body).eql(omitMonitorKeys(newMonitor));
+      newMonitorId = rawBody.id;
     });
 
     it('added an integration for previously added monitor', async () => {
@@ -171,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
           pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
       );
 
-      expect(packagePolicy.policy_id).eql(testFleetPolicyID);
+      expect(packagePolicy?.policy_id).eql(testFleetPolicyID);
 
       comparePolicies(
         packagePolicy,
@@ -189,13 +160,12 @@ export default function ({ getService }: FtrProviderContext) {
       const resPolicy = await testPrivateLocations.addFleetPolicy(testPolicyName + 1);
       testFleetPolicyID2 = resPolicy.body.item.id;
 
-      await testPrivateLocations.setTestLocations([testFleetPolicyID, testFleetPolicyID2]);
-
-      httpMonitorJson.locations.push({
-        id: testFleetPolicyID2,
-        label: 'Test private location ' + 1,
-        isServiceManaged: false,
+      const pvtLoc2 = await testPrivateLocations.addPrivateLocation({
+        policyId: testFleetPolicyID2,
+        label: 'Test private location 1',
       });
+
+      httpMonitorJson.locations.push(pvtLoc2);
 
       const apiResponse = await supertestAPI
         .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
@@ -205,17 +175,13 @@ export default function ({ getService }: FtrProviderContext) {
       const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
-      expect(apiResponse.body).eql(
-        omit(
-          {
-            ...httpMonitorJson,
-            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-            updated_at: updatedAt,
-            revision: 2,
-          },
-          secretKeys
-        )
+      expect(omit(apiResponse.body, keyToOmitList)).eql(
+        omitMonitorKeys({
+          ...omit(httpMonitorJson, ['urls']),
+          url: httpMonitorJson.urls,
+          updated_at: updatedAt,
+          revision: 2,
+        })
       );
     });
 
@@ -265,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await supertestAPI
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId + '?internal=true')
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson)
         .expect(200);
@@ -299,11 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes integration for a deleted monitor', async () => {
-      await supertestAPI
-        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
-        .set('kbn-xsrf', 'true')
-        .send(httpMonitorJson)
-        .expect(200);
+      await deleteMonitor(newMonitorId);
 
       const apiResponsePolicy = await supertestAPI.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
@@ -318,65 +280,33 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles spaces', async () => {
-      const username = 'admin';
-      const password = `${username}-password`;
-      const roleName = 'uptime-role';
-      const SPACE_ID = `test-space-${uuidv4()}`;
-      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      const { username, password, SPACE_ID, roleName } = await monitorTestService.addsNewSpace();
+
       let monitorId = '';
       const monitor = {
         ...httpMonitorJson,
         name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
-        locations: [
-          {
-            id: testFleetPolicyID,
-            label: 'Test private location 0',
-            isServiceManaged: false,
-          },
-        ],
+        locations: [pvtLoc],
       };
 
       try {
-        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-                actions: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
         const apiResponse = await supertestWithoutAuth
           .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
-          .send(monitor)
-          .expect(200);
+          .send(monitor);
+        expect(apiResponse.status).eql(200, JSON.stringify(apiResponse.body));
 
         const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
         expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
-        expect(apiResponse.body).eql(
-          omit(
-            {
-              ...monitor,
-              [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-              [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-              [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
-              created_at: createdAt,
-              updated_at: updatedAt,
-            },
-            secretKeys
-          )
+        expect(omit(apiResponse.body, keyToOmitList)).eql(
+          omitMonitorKeys({
+            ...monitor,
+            [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
+            url: apiResponse.body.url,
+          })
         );
         monitorId = apiResponse.body.id;
 
@@ -402,10 +332,10 @@ export default function ({ getService }: FtrProviderContext) {
           })
         );
         await supertestWithoutAuth
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
-          .send()
+          .send({ ids: [monitorId] })
           .expect(200);
       } finally {
         await security.user.delete(username);
@@ -457,11 +387,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
         );
       } finally {
-        await supertestAPI
-          .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+        await deleteMonitor(monitorId);
       }
     });
 
@@ -508,11 +434,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
         );
       } finally {
-        await supertestAPI
-          .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+        await deleteMonitor(monitorId);
       }
     });
 
@@ -561,11 +483,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(semver.gte(packagePolicyAfterUpgrade.package.version, INSTALLED_VERSION)).eql(true);
       } finally {
-        await supertestAPI
-          .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+        await deleteMonitor(monitorId);
       }
     });
   });

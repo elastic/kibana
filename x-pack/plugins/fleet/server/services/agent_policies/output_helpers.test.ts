@@ -13,6 +13,7 @@ import { appContextService } from '..';
 import { outputService } from '../output';
 
 import { validateOutputForPolicy } from '.';
+import { validateAgentPolicyOutputForIntegration } from './outputs_helpers';
 
 jest.mock('../app_context');
 jest.mock('../output');
@@ -250,5 +251,124 @@ describe('validateOutputForPolicy', () => {
         ['logstash', 'elasticsearch']
       );
     });
+  });
+});
+
+describe('validateAgentPolicyOutputForIntegration', () => {
+  it('should not allow fleet_server integration to be added or edited to a policy using a logstash output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'logstash',
+    } as any);
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'Agent policy',
+          data_output_id: 'test1',
+          monitoring_output_id: 'test1',
+        } as any,
+        'fleet_server'
+      )
+    ).rejects.toThrow(
+      'Integration "fleet_server" cannot be added to agent policy "Agent policy" because it uses output type "logstash".'
+    );
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'Agent policy',
+          data_output_id: 'test1',
+          monitoring_output_id: 'test1',
+        } as any,
+        'fleet_server',
+        false
+      )
+    ).rejects.toThrow(
+      'Agent policy "Agent policy" uses output type "logstash" which cannot be used for integration "fleet_server".'
+    );
+  });
+
+  it('should not allow apm integration to be added or edited to a policy using a kafka output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'kafka',
+    } as any);
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'Agent policy',
+          data_output_id: 'test1',
+          monitoring_output_id: 'test1',
+        } as any,
+        'apm'
+      )
+    ).rejects.toThrow(
+      'Integration "apm" cannot be added to agent policy "Agent policy" because it uses output type "kafka".'
+    );
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'Agent policy',
+          data_output_id: 'test1',
+          monitoring_output_id: 'test1',
+        } as any,
+        'apm',
+        false
+      )
+    ).rejects.toThrow(
+      'Agent policy "Agent policy" uses output type "kafka" which cannot be used for integration "apm".'
+    );
+  });
+
+  it('should not allow synthetics integration to be added to a policy using a default logstash output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'logstash',
+    } as any);
+    mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default');
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'Agent policy',
+        } as any,
+        'synthetics'
+      )
+    ).rejects.toThrow(
+      'Integration "synthetics" cannot be added to agent policy "Agent policy" because it uses output type "logstash".'
+    );
+  });
+
+  it('should allow other integration to be added to a policy using logstash output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'logstash',
+    } as any);
+
+    await validateAgentPolicyOutputForIntegration(
+      savedObjectsClientMock.create(),
+      {
+        name: 'Agent policy',
+      } as any,
+      'nginx'
+    );
+  });
+
+  it('should allow fleet_server integration to be added to a policy using elasticsearch output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'elasticsearch',
+    } as any);
+
+    await validateAgentPolicyOutputForIntegration(
+      savedObjectsClientMock.create(),
+      {
+        name: 'Agent policy',
+      } as any,
+      'fleet_server'
+    );
   });
 });

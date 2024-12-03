@@ -177,7 +177,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
@@ -192,110 +192,6 @@
     "functions": [
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.CodeEditor",
-        "type": "Function",
-        "tags": [
-          "see"
-        ],
-        "label": "CodeEditor",
-        "description": [
-          "\nRenders a Monaco code editor with EUI color theme.\n"
-        ],
-        "signature": [
-          "(props: React.PropsWithChildren<",
-          {
-            "pluginId": "@kbn/code-editor",
-            "scope": "common",
-            "docId": "kibKbnCodeEditorPluginApi",
-            "section": "def-common.CodeEditorProps",
-            "text": "CodeEditorProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.CodeEditor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "@kbn/code-editor",
-                "scope": "common",
-                "docId": "kibKbnCodeEditorPluginApi",
-                "section": "def-common.CodeEditorProps",
-                "text": "CodeEditorProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.CodeEditorField",
-        "type": "Function",
-        "tags": [],
-        "label": "CodeEditorField",
-        "description": [
-          "\nRenders a Monaco code editor in the same style as other EUI form fields."
-        ],
-        "signature": [
-          "(props: React.PropsWithChildren<",
-          {
-            "pluginId": "@kbn/code-editor",
-            "scope": "common",
-            "docId": "kibKbnCodeEditorPluginApi",
-            "section": "def-common.CodeEditorProps",
-            "text": "CodeEditorProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.CodeEditorField.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "@kbn/code-editor",
-                "scope": "common",
-                "docId": "kibKbnCodeEditorPluginApi",
-                "section": "def-common.CodeEditorProps",
-                "text": "CodeEditorProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.createKibanaReactContext",
         "type": "Function",
         "tags": [],
@@ -305,9 +201,9 @@
           "<Services extends Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">>(services: Services) => ",
@@ -354,9 +250,9 @@
           "(services: Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">) => ",
@@ -383,9 +279,9 @@
               "Partial<",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ">"
@@ -410,9 +306,9 @@
           "(services: Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">) => ",
@@ -439,9 +335,9 @@
               "Partial<",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ">"
@@ -465,7 +361,7 @@
           "\nApplies extra styling to a typical EuiAvatar"
         ],
         "signature": [
-          "({ solution, recommended, title, href, button, layout, category, ...cardRest }: React.PropsWithChildren<",
+          "({ solution, recommended, title, href, button, layout, category, ...cardRest }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -473,7 +369,7 @@
             "section": "def-public.ElasticAgentCardProps",
             "text": "ElasticAgentCardProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
         "deprecated": false,
@@ -487,15 +383,13 @@
             "label": "{\n  solution,\n  recommended,\n  title,\n  href,\n  button,\n  layout,\n  category,\n  ...cardRest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "kibanaReact",
                 "scope": "public",
                 "docId": "kibKibanaReactPluginApi",
                 "section": "def-public.ElasticAgentCardProps",
                 "text": "ElasticAgentCardProps"
-              },
-              ">"
+              }
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
             "deprecated": false,
@@ -514,7 +408,7 @@
         "label": "KibanaContextProvider",
         "description": [],
         "signature": [
-          "React.FunctionComponent<{ services?: {} | undefined; }>"
+          "React.FunctionComponent<React.PropsWithChildren<{ services?: {} | undefined; }>>"
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
@@ -524,14 +418,14 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.KibanaContextProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -545,7 +439,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -562,9 +456,9 @@
           "\nApplies extra styling to a typical EuiAvatar"
         ],
         "signature": [
-          "({ className, size, ...rest }: React.PropsWithChildren<",
+          "({ className, size, ...rest }: ",
           "KibanaPageTemplateSolutionNavAvatarProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
         "deprecated": false,
@@ -578,9 +472,7 @@
             "label": "{ className, size, ...rest }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "KibanaPageTemplateSolutionNavAvatarProps",
-              ">"
+              "KibanaPageTemplateSolutionNavAvatarProps"
             ],
             "path": "src/plugins/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
             "deprecated": false,
@@ -609,1493 +501,12 @@
             "section": "def-public.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/theme.tsx",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
-          },
-          {
-            "plugin": "guidedOnboarding",
-            "path": "src/plugins/guided_onboarding/public/plugin.tsx"
-          },
-          {
-            "plugin": "guidedOnboarding",
-            "path": "src/plugins/guided_onboarding/public/plugin.tsx"
-          },
-          {
-            "plugin": "guidedOnboarding",
-            "path": "src/plugins/guided_onboarding/public/plugin.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/nav_control/nav_control.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/nav_control/nav_control.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/nav_control/nav_control.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/shared_imports.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/utils/use/use_visualize_app_state.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/utils/use/use_visualize_app_state.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/utils/use/use_visualize_app_state.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/show_new_vis.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/show_new_vis.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/show_new_vis.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/components/visualize_no_match.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/components/visualize_no_match.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/components/visualize_no_match.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
-          },
-          {
-            "plugin": "expressionXY",
-            "path": "src/plugins/chart_expressions/expression_xy/public/expression_renderers/xy_chart_renderer.tsx"
-          },
-          {
-            "plugin": "expressionXY",
-            "path": "src/plugins/chart_expressions/expression_xy/public/expression_renderers/xy_chart_renderer.tsx"
-          },
-          {
-            "plugin": "expressionXY",
-            "path": "src/plugins/chart_expressions/expression_xy/public/expression_renderers/xy_chart_renderer.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/help_popover.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/help_popover.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/help_popover.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/datatable/expression.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/datatable/expression.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/datatable/expression.tsx"
-          },
-          {
-            "plugin": "expressionMetricVis",
-            "path": "src/plugins/chart_expressions/expression_metric/public/expression_renderers/metric_vis_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetricVis",
-            "path": "src/plugins/chart_expressions/expression_metric/public/expression_renderers/metric_vis_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetricVis",
-            "path": "src/plugins/chart_expressions/expression_metric/public/expression_renderers/metric_vis_renderer.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
-          },
-          {
-            "plugin": "expressionGauge",
-            "path": "src/plugins/chart_expressions/expression_gauge/public/expression_renderers/gauge_renderer.tsx"
-          },
-          {
-            "plugin": "expressionGauge",
-            "path": "src/plugins/chart_expressions/expression_gauge/public/expression_renderers/gauge_renderer.tsx"
-          },
-          {
-            "plugin": "expressionGauge",
-            "path": "src/plugins/chart_expressions/expression_gauge/public/expression_renderers/gauge_renderer.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/settings_menu.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/settings_menu.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/settings_menu.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "licenseManagement",
-            "path": "x-pack/plugins/license_management/public/shared_imports.ts"
-          },
-          {
-            "plugin": "licenseManagement",
-            "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "licenseManagement",
-            "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "licenseManagement",
-            "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/app.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/app.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/app.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/application/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/application/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/application/index.tsx"
-          },
-          {
-            "plugin": "expressionImage",
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionImage",
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionImage",
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetric",
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetric",
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetric",
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRevealImage",
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRevealImage",
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRevealImage",
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRepeatImage",
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRepeatImage",
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRepeatImage",
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/shared_imports.ts"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/index.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/index.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/index.tsx"
-          },
-          {
-            "plugin": "globalSearchBar",
-            "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
-          },
-          {
-            "plugin": "globalSearchBar",
-            "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
-          },
-          {
-            "plugin": "globalSearchBar",
-            "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "grokdebugger",
-            "path": "x-pack/plugins/grokdebugger/public/shared_imports.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/shared_imports.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/shared_imports.ts"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/index.tsx"
-          },
-          {
-            "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_imports.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_results.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_results.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_results.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/services_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/services_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/services_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/application.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/application.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/application.tsx"
-          },
-          {
-            "plugin": "devTools",
-            "path": "src/plugins/dev_tools/public/application.tsx"
-          },
-          {
-            "plugin": "devTools",
-            "path": "src/plugins/dev_tools/public/application.tsx"
-          },
-          {
-            "plugin": "devTools",
-            "path": "src/plugins/dev_tools/public/application.tsx"
-          },
-          {
-            "plugin": "painlessLab",
-            "path": "x-pack/plugins/painless_lab/public/shared_imports.ts"
-          },
-          {
-            "plugin": "painlessLab",
-            "path": "x-pack/plugins/painless_lab/public/application/index.tsx"
-          },
-          {
-            "plugin": "painlessLab",
-            "path": "x-pack/plugins/painless_lab/public/application/index.tsx"
-          },
-          {
-            "plugin": "painlessLab",
-            "path": "x-pack/plugins/painless_lab/public/application/index.tsx"
-          },
-          {
-            "plugin": "remoteClusters",
-            "path": "x-pack/plugins/remote_clusters/public/shared_imports.ts"
-          },
-          {
-            "plugin": "rollup",
-            "path": "x-pack/plugins/rollup/public/shared_imports.ts"
-          },
-          {
-            "plugin": "rollup",
-            "path": "x-pack/plugins/rollup/public/application.tsx"
-          },
-          {
-            "plugin": "rollup",
-            "path": "x-pack/plugins/rollup/public/application.tsx"
-          },
-          {
-            "plugin": "rollup",
-            "path": "x-pack/plugins/rollup/public/application.tsx"
-          },
-          {
-            "plugin": "searchprofiler",
-            "path": "x-pack/plugins/searchprofiler/public/shared_imports.ts"
-          },
-          {
-            "plugin": "searchprofiler",
-            "path": "x-pack/plugins/searchprofiler/public/application/index.tsx"
-          },
-          {
-            "plugin": "searchprofiler",
-            "path": "x-pack/plugins/searchprofiler/public/application/index.tsx"
-          },
-          {
-            "plugin": "searchprofiler",
-            "path": "x-pack/plugins/searchprofiler/public/application/index.tsx"
-          },
-          {
-            "plugin": "newsfeed",
-            "path": "src/plugins/newsfeed/public/plugin.tsx"
-          },
-          {
-            "plugin": "newsfeed",
-            "path": "src/plugins/newsfeed/public/plugin.tsx"
-          },
-          {
-            "plugin": "newsfeed",
-            "path": "src/plugins/newsfeed/public/plugin.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "snapshotRestore",
-            "path": "x-pack/plugins/snapshot_restore/public/shared_imports.ts"
-          },
-          {
-            "plugin": "snapshotRestore",
-            "path": "x-pack/plugins/snapshot_restore/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "snapshotRestore",
-            "path": "x-pack/plugins/snapshot_restore/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "snapshotRestore",
-            "path": "x-pack/plugins/snapshot_restore/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/app.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/app.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/app.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/shared_imports.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/plugins/watcher/public/application/shared_imports.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/plugins/watcher/public/application/index.tsx"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/plugins/watcher/public/application/index.tsx"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/plugins/watcher/public/application/index.tsx"
-          },
-          {
-            "plugin": "cloudDataMigration",
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
-          },
-          {
-            "plugin": "cloudDataMigration",
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
-          },
-          {
-            "plugin": "cloudDataMigration",
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/test_utils.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/test_utils.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/test_utils.tsx"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/shared_imports.ts"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/index.tsx"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/index.tsx"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/index.tsx"
-          },
-          {
-            "plugin": "filesManagement",
-            "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "filesManagement",
-            "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "filesManagement",
-            "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/application.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/application.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/application.tsx"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx"
-          },
-          {
-            "plugin": "expressionHeatmap",
-            "path": "src/plugins/chart_expressions/expression_heatmap/public/expression_renderers/heatmap_renderer.tsx"
-          },
-          {
-            "plugin": "expressionHeatmap",
-            "path": "src/plugins/chart_expressions/expression_heatmap/public/expression_renderers/heatmap_renderer.tsx"
-          },
-          {
-            "plugin": "expressionHeatmap",
-            "path": "src/plugins/chart_expressions/expression_heatmap/public/expression_renderers/heatmap_renderer.tsx"
-          },
-          {
-            "plugin": "expressionLegacyMetricVis",
-            "path": "src/plugins/chart_expressions/expression_legacy_metric/public/expression_renderers/metric_vis_renderer.tsx"
-          },
-          {
-            "plugin": "expressionLegacyMetricVis",
-            "path": "src/plugins/chart_expressions/expression_legacy_metric/public/expression_renderers/metric_vis_renderer.tsx"
-          },
-          {
-            "plugin": "expressionLegacyMetricVis",
-            "path": "src/plugins/chart_expressions/expression_legacy_metric/public/expression_renderers/metric_vis_renderer.tsx"
-          },
-          {
-            "plugin": "expressionPartitionVis",
-            "path": "src/plugins/chart_expressions/expression_partition_vis/public/expression_renderers/partition_vis_renderer.tsx"
-          },
-          {
-            "plugin": "expressionPartitionVis",
-            "path": "src/plugins/chart_expressions/expression_partition_vis/public/expression_renderers/partition_vis_renderer.tsx"
-          },
-          {
-            "plugin": "expressionPartitionVis",
-            "path": "src/plugins/chart_expressions/expression_partition_vis/public/expression_renderers/partition_vis_renderer.tsx"
-          },
-          {
-            "plugin": "expressionTagcloud",
-            "path": "src/plugins/chart_expressions/expression_tagcloud/public/expression_renderers/tagcloud_renderer.tsx"
-          },
-          {
-            "plugin": "expressionTagcloud",
-            "path": "src/plugins/chart_expressions/expression_tagcloud/public/expression_renderers/tagcloud_renderer.tsx"
-          },
-          {
-            "plugin": "expressionTagcloud",
-            "path": "src/plugins/chart_expressions/expression_tagcloud/public/expression_renderers/tagcloud_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeTable",
-            "path": "src/plugins/vis_types/table/public/table_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeTable",
-            "path": "src/plugins/vis_types/table/public/table_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeTable",
-            "path": "src/plugins/vis_types/table/public/table_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_types/timelion/public/timelion_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_types/timelion/public/timelion_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_types/timelion/public/timelion_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/application/editor_controller.tsx"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/application/editor_controller.tsx"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/application/editor_controller.tsx"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/timeseries_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/timeseries_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/timeseries_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeVega",
-            "path": "src/plugins/vis_types/vega/public/vega_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeVega",
-            "path": "src/plugins/vis_types/vega/public/vega_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeVega",
-            "path": "src/plugins/vis_types/vega/public/vega_vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeVislib",
-            "path": "src/plugins/vis_types/vislib/public/vislib/partials/touchdown_template.tsx"
-          },
-          {
-            "plugin": "visTypeVislib",
-            "path": "src/plugins/vis_types/vislib/public/vislib/partials/touchdown_template.tsx"
-          },
-          {
-            "plugin": "visTypeVislib",
-            "path": "src/plugins/vis_types/vislib/public/vislib/partials/touchdown_template.tsx"
-          },
-          {
-            "plugin": "visTypeVislib",
-            "path": "src/plugins/vis_types/vislib/public/vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeVislib",
-            "path": "src/plugins/vis_types/vislib/public/vis_renderer.tsx"
-          },
-          {
-            "plugin": "visTypeVislib",
-            "path": "src/plugins/vis_types/vislib/public/vis_renderer.tsx"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2132,7 +543,7 @@
         "signature": [
           "(props: ",
           "MarkdownProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
@@ -2167,7 +578,7 @@
         "signature": [
           "(props: ",
           "MarkdownSimpleProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
@@ -2200,7 +611,7 @@
         "label": "NoDataCard",
         "description": [],
         "signature": [
-          "({ recommended, title, button, layout, ...cardRest }: React.PropsWithChildren<",
+          "({ recommended, title, button, layout, ...cardRest }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -2208,7 +619,7 @@
             "section": "def-public.NoDataPageActions",
             "text": "NoDataPageActions"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
         "deprecated": false,
@@ -2222,15 +633,13 @@
             "label": "{\n  recommended,\n  title,\n  button,\n  layout,\n  ...cardRest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "kibanaReact",
                 "scope": "public",
                 "docId": "kibKibanaReactPluginApi",
                 "section": "def-public.NoDataPageActions",
                 "text": "NoDataPageActions"
-              },
-              ">"
+              }
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
             "deprecated": false,
@@ -2249,7 +658,7 @@
         "label": "NoDataPage",
         "description": [],
         "signature": [
-          "({ solution, logo, actions, docsLink, pageTitle, ...rest }: React.PropsWithChildren<",
+          "({ solution, logo, actions, docsLink, pageTitle, ...rest }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -2257,7 +666,7 @@
             "section": "def-public.NoDataPageProps",
             "text": "NoDataPageProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
@@ -2266,20 +675,18 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.NoDataPage.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  solution,\n  logo,\n  actions,\n  docsLink,\n  pageTitle,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "kibanaReact",
                 "scope": "public",
                 "docId": "kibKibanaReactPluginApi",
                 "section": "def-public.NoDataPageProps",
                 "text": "NoDataPageProps"
-              },
-              ">"
+              }
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
@@ -2298,7 +705,7 @@
         "label": "overviewPageActions",
         "description": [],
         "signature": [
-          "({ addDataHref, application, devToolsHref, hidden, managementHref, showDevToolsLink, showManagementLink, }: Props) => (JSX.Element | null)[]"
+          "({ addDataHref, application, devToolsHref, hidden, managementHref, showDevToolsLink, showManagementLink, }: Props) => (React.JSX.Element | null)[]"
         ],
         "path": "src/plugins/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
         "deprecated": false,
@@ -2331,7 +738,7 @@
         "label": "OverviewPageFooter",
         "description": [],
         "signature": [
-          "({ addBasePath, path, onSetDefaultRoute, onChangeDefaultRoute, }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ addBasePath, path, onSetDefaultRoute, onChangeDefaultRoute, }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
         "deprecated": false,
@@ -2340,12 +747,12 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.OverviewPageFooter.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  addBasePath,\n  path,\n  onSetDefaultRoute,\n  onChangeDefaultRoute,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
             "deprecated": false,
@@ -2367,9 +774,9 @@
           "(history: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ScopedHistory",
+            "section": "def-public.ScopedHistory",
             "text": "ScopedHistory"
           },
           "<unknown> | ",
@@ -2390,9 +797,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
+                "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
               "<unknown> | ",
@@ -2449,9 +856,9 @@
           "(history: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ScopedHistory",
+            "section": "def-public.ScopedHistory",
             "text": "ScopedHistory"
           },
           "<unknown> | ",
@@ -2472,9 +879,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
+                "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
               "<unknown> | ",
@@ -2541,9 +948,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.MountPoint",
+            "section": "def-public.MountPoint",
             "text": "MountPoint"
           },
           "<HTMLElement>"
@@ -2553,948 +960,12 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "inspector",
-            "path": "src/plugins/inspector/public/plugin.tsx"
-          },
-          {
-            "plugin": "inspector",
-            "path": "src/plugins/inspector/public/plugin.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/delete_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/delete_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/extend_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/extend_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/inspect_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/inspect_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/rename_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/rename_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/search_service.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/search_service.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/confirm_modal_promise.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/confirm_modal_promise.tsx"
-          },
-          {
-            "plugin": "runtimeFields",
-            "path": "x-pack/plugins/runtime_fields/public/shared_imports.ts"
-          },
-          {
-            "plugin": "runtimeFields",
-            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
-          },
-          {
-            "plugin": "runtimeFields",
-            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_edit/component_template_edit.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_edit/component_template_edit.tsx"
-          },
-          {
-            "plugin": "dataViewEditor",
-            "path": "src/plugins/data_view_editor/public/shared_imports.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/confirm_modal_promise.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/confirm_modal_promise.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/utils/use/use_visualize_app_state.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/utils/use/use_visualize_app_state.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/components/visualize_no_match.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/components/visualize_no_match.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "licensing",
-            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
-          },
-          {
-            "plugin": "licensing",
-            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/edition_modal/open_modal.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/edition_modal/open_modal.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/edition_modal/open_modal.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/assign_flyout/open_assign_flyout.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/assign_flyout/open_assign_flyout.tsx"
-          },
-          {
-            "plugin": "dataViewFieldEditor",
-            "path": "src/plugins/data_view_field_editor/public/shared_imports.ts"
-          },
-          {
-            "plugin": "dataViewFieldEditor",
-            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx"
-          },
-          {
-            "plugin": "dataViewFieldEditor",
-            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/confirm_modal_promise.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/confirm_modal_promise.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/config_panel/layer_actions/remove_layer_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/config_panel/layer_actions/remove_layer_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/revert_changes_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/revert_changes_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/helpers.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_add.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_add.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_edit.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_edit.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rules_list.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rules_list.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_dropdown.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_dropdown.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_existing_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_existing_case.tsx"
+            "plugin": "observabilityShared",
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
           {
             "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_open_unverified.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_open_unverified.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_force_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_force_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/devtools_request_flyout/devtools_request_flyout.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/devtools_request_flyout/devtools_request_flyout.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
-          },
-          {
-            "plugin": "telemetry",
-            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
-          },
-          {
-            "plugin": "telemetry",
-            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "banners",
-            "path": "x-pack/plugins/banners/public/plugin.tsx"
-          },
-          {
-            "plugin": "banners",
-            "path": "x-pack/plugins/banners/public/plugin.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_failure.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_failure.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_failure.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/general_error.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/general_error.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_success.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_success.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_success.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_warning_formulas.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_warning_formulas.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_warning_formulas.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_warning_max_size.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_warning_max_size.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_warning_max_size.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_warning.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_warning.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/notifier/job_warning.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/share_context_menu/reporting_panel_content/reporting_panel_content.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/share_context_menu/reporting_panel_content/reporting_panel_content.tsx"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/take_action.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/take_action.tsx"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_create_drilldown/flyout_create_drilldown.tsx"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_create_drilldown/flyout_create_drilldown.tsx"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_edit_drilldown/flyout_edit_drilldown.tsx"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_edit_drilldown/flyout_edit_drilldown.tsx"
-          },
-          {
-            "plugin": "imageEmbeddable",
-            "path": "src/plugins/image_embeddable/public/image_editor/configure_image.tsx"
-          },
-          {
-            "plugin": "imageEmbeddable",
-            "path": "src/plugins/image_embeddable/public/image_editor/configure_image.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/confirm_modal_promise.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/confirm_modal_promise.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/hooks/use_request_error_handler.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/hooks/use_request_error_handler.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/hooks/use_request_error_handler.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/lib/alerts_toast.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/lib/alerts_toast.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/cluster/listing/listing.js"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/cluster/listing/listing.js"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/cluster/listing/listing.js"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/sourcerer/use_update_data_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/sourcerer/use_update_data_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/sourcerer/use_update_data_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/ingest_pipelines.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/ingest_pipelines.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/ingest_pipelines.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/stored_scripts.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/stored_scripts.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/stored_scripts.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/saved_objects.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/saved_objects.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/shared_imports.ts"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/hooks/use_send_current_request/use_send_current_request.ts"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/hooks/use_send_current_request/use_send_current_request.ts"
-          },
-          {
-            "plugin": "dataViewManagement",
-            "path": "src/plugins/data_view_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
-          },
-          {
-            "plugin": "dataViewManagement",
-            "path": "src/plugins/data_view_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
-          },
-          {
-            "plugin": "dataViewManagement",
-            "path": "src/plugins/data_view_management/public/components/edit_index_pattern/remove_data_view.tsx"
-          },
-          {
-            "plugin": "dataViewManagement",
-            "path": "src/plugins/data_view_management/public/components/edit_index_pattern/remove_data_view.tsx"
-          },
-          {
-            "plugin": "eventAnnotationListing",
-            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "eventAnnotationListing",
-            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "filesManagement",
-            "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "filesManagement",
-            "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/actions/send_message_action.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/actions/send_message_action.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/actions/send_message_action.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/embeddables/contact_card/contact_card_exportable_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/embeddables/contact_card/contact_card_exportable_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/tests/test_samples/hello_world_action.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/tests/test_samples/hello_world_action.tsx"
-          },
-          {
-            "plugin": "visTypeVislib",
-            "path": "src/plugins/vis_types/vislib/public/vis_controller.tsx"
-          },
-          {
-            "plugin": "visTypeVislib",
-            "path": "src/plugins/vis_types/vislib/public/vis_controller.tsx"
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           }
         ],
         "children": [
@@ -3546,7 +1017,7 @@
         "label": "UrlTemplateEditor",
         "description": [],
         "signature": [
-          "({ height, value, variables, onChange, placeholder, onEditor, Editor, }: React.PropsWithChildren<",
+          "({ height, fitToContent, value, variables, onChange, placeholder, onEditor, Editor, }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -3554,7 +1025,7 @@
             "section": "def-public.UrlTemplateEditorProps",
             "text": "UrlTemplateEditorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
         "deprecated": false,
@@ -3563,25 +1034,56 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.UrlTemplateEditor.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  height = 105,\n  value,\n  variables,\n  onChange,\n  placeholder,\n  onEditor,\n  Editor = CodeEditor,\n}",
+            "label": "{\n  height = 105,\n  fitToContent,\n  value,\n  variables,\n  onChange,\n  placeholder,\n  onEditor,\n  Editor = CodeEditor,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "kibanaReact",
                 "scope": "public",
                 "docId": "kibKibanaReactPluginApi",
                 "section": "def-public.UrlTemplateEditorProps",
                 "text": "UrlTemplateEditorProps"
-              },
-              ">"
+              }
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.useDarkMode",
+        "type": "Function",
+        "tags": [],
+        "label": "useDarkMode",
+        "description": [],
+        "signature": [
+          "(defaultValue?: boolean | undefined) => boolean"
+        ],
+        "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useDarkMode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -3600,9 +1102,9 @@
           "(executionContext: ",
           {
             "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-common.ExecutionContextSetup",
+            "section": "def-public.ExecutionContextSetup",
             "text": "ExecutionContextSetup"
           },
           " | undefined, context: ",
@@ -3629,9 +1131,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               },
               " | undefined"
@@ -3785,9 +1287,9 @@
           "<Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           "> & Extra>"
@@ -3958,7 +1460,7 @@
             "section": "def-common.KibanaTheme",
             "text": "KibanaTheme"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/theme.tsx",
         "deprecated": false,
@@ -4059,7 +1561,7 @@
             "label": "Provider",
             "description": [],
             "signature": [
-              "React.FunctionComponent<{ services?: T | undefined; }>"
+              "React.FunctionComponent<React.PropsWithChildren<{ services?: T | undefined; }>>"
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
             "deprecated": false,
@@ -4069,14 +1571,14 @@
               {
                 "parentPluginId": "kibanaReact",
                 "id": "def-public.KibanaReactContext.Provider.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -4090,7 +1592,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4129,7 +1631,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4298,17 +1800,17 @@
               "(node: React.ReactNode, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayFlyoutOpenOptions",
+                "section": "def-public.OverlayFlyoutOpenOptions",
                 "text": "OverlayFlyoutOpenOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               }
             ],
@@ -4341,9 +1843,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayFlyoutOpenOptions",
+                    "section": "def-public.OverlayFlyoutOpenOptions",
                     "text": "OverlayFlyoutOpenOptions"
                   },
                   " | undefined"
@@ -4367,17 +1869,17 @@
               "(node: React.ReactNode, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayModalOpenOptions",
+                "section": "def-public.OverlayModalOpenOptions",
                 "text": "OverlayModalOpenOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               }
             ],
@@ -4410,9 +1912,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayModalOpenOptions",
+                    "section": "def-public.OverlayModalOpenOptions",
                     "text": "OverlayModalOpenOptions"
                   },
                   " | undefined"
@@ -4554,7 +2056,7 @@
             "label": "title",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
             "deprecated": false,
@@ -4568,7 +2070,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
             "deprecated": false,
@@ -4658,9 +2160,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceStart",
+                "section": "def-public.AnalyticsServiceStart",
                 "text": "AnalyticsServiceStart"
               },
               " | undefined"
@@ -4681,9 +2183,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               "> | undefined"
@@ -4726,6 +2228,20 @@
             "description": [],
             "signature": [
               "string | number | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.UrlTemplateEditorProps.fitToContent",
+            "type": "Object",
+            "tags": [],
+            "label": "fitToContent",
+            "description": [],
+            "signature": [
+              "{ minLines?: number | undefined; maxLines?: number | undefined; } | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
@@ -4929,18 +2445,6 @@
     "misc": [
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.CodeEditorProps",
-        "type": "Type",
-        "tags": [],
-        "label": "CodeEditorProps",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.ElasticAgentCardProps",
         "type": "Type",
         "tags": [],
@@ -4972,138 +2476,162 @@
           "{ analytics?: ",
           {
             "pluginId": "@kbn/core-analytics-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-common.AnalyticsServiceStart",
+            "section": "def-public.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
           " | undefined; application?: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ApplicationStart",
+            "section": "def-public.ApplicationStart",
             "text": "ApplicationStart"
           },
           " | undefined; chrome?: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.ChromeStart",
+            "section": "def-public.ChromeStart",
             "text": "ChromeStart"
           },
           " | undefined; customBranding?: ",
           {
             "pluginId": "@kbn/core-custom-branding-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-            "section": "def-common.CustomBrandingStart",
+            "section": "def-public.CustomBrandingStart",
             "text": "CustomBrandingStart"
           },
           " | undefined; docLinks?: ",
           {
             "pluginId": "@kbn/core-doc-links-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-            "section": "def-common.DocLinksStart",
+            "section": "def-public.DocLinksStart",
             "text": "DocLinksStart"
           },
           " | undefined; executionContext?: ",
           {
             "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-common.ExecutionContextSetup",
+            "section": "def-public.ExecutionContextSetup",
             "text": "ExecutionContextSetup"
+          },
+          " | undefined; featureFlags?: ",
+          {
+            "pluginId": "@kbn/core-feature-flags-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+            "section": "def-public.FeatureFlagsStart",
+            "text": "FeatureFlagsStart"
           },
           " | undefined; http?: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           " | undefined; savedObjects?: ",
           {
             "pluginId": "@kbn/core-saved-objects-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-            "section": "def-common.SavedObjectsStart",
+            "section": "def-public.SavedObjectsStart",
             "text": "SavedObjectsStart"
           },
           " | undefined; i18n?: ",
           {
             "pluginId": "@kbn/core-i18n-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-common.I18nStart",
+            "section": "def-public.I18nStart",
             "text": "I18nStart"
           },
           " | undefined; notifications?: ",
           {
             "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.NotificationsStart",
+            "section": "def-public.NotificationsStart",
             "text": "NotificationsStart"
           },
           " | undefined; overlays?: ",
           {
             "pluginId": "@kbn/core-overlays-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-            "section": "def-common.OverlayStart",
+            "section": "def-public.OverlayStart",
             "text": "OverlayStart"
           },
           " | undefined; uiSettings?: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.IUiSettingsClient",
+            "section": "def-public.IUiSettingsClient",
             "text": "IUiSettingsClient"
           },
           " | undefined; settings?: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.SettingsStart",
+            "section": "def-public.SettingsStart",
             "text": "SettingsStart"
           },
           " | undefined; fatalErrors?: ",
           {
             "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-common.FatalErrorsSetup",
+            "section": "def-public.FatalErrorsSetup",
             "text": "FatalErrorsSetup"
           },
           " | undefined; deprecations?: ",
           {
             "pluginId": "@kbn/core-deprecations-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-            "section": "def-common.DeprecationsServiceStart",
+            "section": "def-public.DeprecationsServiceStart",
             "text": "DeprecationsServiceStart"
           },
           " | undefined; theme?: ",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
+            "section": "def-public.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
           },
           " | undefined; plugins?: ",
           {
             "pluginId": "@kbn/core-plugins-contracts-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-            "section": "def-common.PluginsServiceStart",
+            "section": "def-public.PluginsServiceStart",
             "text": "PluginsServiceStart"
+          },
+          " | undefined; security?: ",
+          {
+            "pluginId": "@kbn/core-security-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreSecurityBrowserPluginApi",
+            "section": "def-public.SecurityServiceStart",
+            "text": "SecurityServiceStart"
+          },
+          " | undefined; userProfile?: ",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
           },
           " | undefined; }"
         ],
@@ -5143,96 +2671,6 @@
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"css\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/css/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"markdown\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/markdown/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"yaml\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/yaml/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"handlebars\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/handlebars/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"hjson\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/hjson/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"grok\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/grok/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5323,9 +2761,9 @@
           "<Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">>>"
@@ -5572,7 +3010,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => JSX.Element"
+          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
@@ -5631,7 +3069,7 @@
           "StoryFnReactReturnType",
           ">, ",
           "Args",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": true,

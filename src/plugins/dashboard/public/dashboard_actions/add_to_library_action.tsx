@@ -1,115 +1,154 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+
+import { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  ViewMode,
-  type PanelState,
-  type IEmbeddable,
-  isErrorEmbeddable,
-  PanelNotFoundError,
-  type EmbeddableInput,
-  isReferenceOrValueEmbeddable,
-  isFilterableEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  HasInPlaceLibraryTransforms,
+  HasLibraryTransforms,
+  HasParentApi,
+  HasType,
+  HasTypeDisplayName,
+  HasUniqueId,
+  PublishesPanelTitle,
+  apiCanAccessViewMode,
+  apiHasInPlaceLibraryTransforms,
+  apiHasLibraryTransforms,
+  apiHasParentApi,
+  apiHasType,
+  apiHasUniqueId,
+  getInheritedViewMode,
+  getPanelTitle,
+} from '@kbn/presentation-publishing';
+import {
+  OnSaveProps,
+  SaveResult,
+  SavedObjectSaveModal,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { type AggregateQuery } from '@kbn/es-query';
-import { DashboardPanelState } from '../../common';
-import { pluginServices } from '../services/plugin_services';
+
+import { coreServices } from '../services/kibana_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
-import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../dashboard_container';
+import { DASHBOARD_ACTION_GROUP } from '.';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
-export interface AddToLibraryActionContext {
-  embeddable: IEmbeddable;
-}
+export type AddPanelToLibraryActionApi = CanAccessViewMode &
+  HasType &
+  HasUniqueId &
+  (HasLibraryTransforms | HasInPlaceLibraryTransforms) &
+  HasParentApi<Pick<PresentationContainer, 'replacePanel'>> &
+  Partial<PublishesPanelTitle & HasTypeDisplayName>;
 
-export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
+const isApiCompatible = (api: unknown | null): api is AddPanelToLibraryActionApi =>
+  Boolean(
+    apiCanAccessViewMode(api) &&
+      (apiHasLibraryTransforms(api) || apiHasInPlaceLibraryTransforms(api)) &&
+      apiHasType(api) &&
+      apiHasUniqueId(api) &&
+      apiHasParentApi(api) &&
+      typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function'
+  );
+
+export class AddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_TO_LIBRARY;
   public readonly id = ACTION_ADD_TO_LIBRARY;
-  public order = 15;
+  public order = 8;
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
-  private applicationCapabilities;
-  private toastsService;
-
-  constructor() {
-    ({
-      application: { capabilities: this.applicationCapabilities },
-      notifications: { toasts: this.toastsService },
-    } = pluginServices.getServices());
-  }
-
-  public getDisplayName({ embeddable }: AddToLibraryActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardAddToLibraryActionStrings.getDisplayName();
   }
 
-  public getIconType({ embeddable }: AddToLibraryActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return 'folderCheck';
   }
 
-  public async isCompatible({ embeddable }: AddToLibraryActionContext) {
-    // TODO: Fix this, potentially by adding a 'canSave' function to embeddable interface
-    const { maps, visualize } = this.applicationCapabilities;
-    const canSave = embeddable.type === 'map' ? maps.save : visualize.save;
-    const { isOfAggregateQueryType } = await import('@kbn/es-query');
-    const query = isFilterableEmbeddable(embeddable) && (await embeddable.getQuery());
-    // Textbased panels (i.e. ES|QL, SQL) should not save to library
-    const isTextBasedEmbeddable = isOfAggregateQueryType(query as AggregateQuery);
-    return Boolean(
-      canSave &&
-        !isErrorEmbeddable(embeddable) &&
-        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-        embeddable.getRoot() &&
-        embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
-        isReferenceOrValueEmbeddable(embeddable) &&
-        !embeddable.inputIsRefType(embeddable.getInput()) &&
-        !isTextBasedEmbeddable
-    );
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) return false;
+    return getInheritedViewMode(embeddable) === 'edit' && (await this.canLinkToLibrary(embeddable));
   }
 
-  public async execute({ embeddable }: AddToLibraryActionContext) {
-    if (!isReferenceOrValueEmbeddable(embeddable)) {
-      throw new IncompatibleActionError();
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    const title = getPanelTitle(embeddable);
+
+    try {
+      const byRefState = await new Promise<object | undefined>((resolve, reject) => {
+        const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
+          await embeddable.checkForDuplicateTitle(
+            props.newTitle,
+            props.isTitleDuplicateConfirmed,
+            props.onTitleDuplicate
+          );
+          try {
+            const libraryId = await embeddable.saveToLibrary(props.newTitle);
+            if (apiHasLibraryTransforms(embeddable)) {
+              resolve({ ...embeddable.getByReferenceState(libraryId), title: props.newTitle });
+            }
+            resolve(undefined);
+            return { id: libraryId };
+          } catch (error) {
+            reject(error);
+            return { error };
+          }
+        };
+        showSaveModal(
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title={title ?? ''}
+            showCopyOnSave={false}
+            objectType={
+              typeof embeddable.getTypeDisplayName === 'function'
+                ? embeddable.getTypeDisplayName()
+                : embeddable.type
+            }
+            showDescription={false}
+          />
+        );
+      });
+      /**
+       * If byRefState is defined, this embeddable type must be re-initialized with the
+       * newly provided state.
+       */
+      if (byRefState) {
+        await embeddable.parentApi.replacePanel(embeddable.uuid, {
+          panelType: embeddable.type,
+          initialState: byRefState,
+        });
+      }
+      coreServices.notifications.toasts.addSuccess({
+        title: dashboardAddToLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
+        'data-test-subj': 'addPanelToLibrarySuccess',
+      });
+    } catch (e) {
+      coreServices.notifications.toasts.addDanger({
+        title: dashboardAddToLibraryActionStrings.getErrorMessage(title),
+        'data-test-subj': 'addPanelToLibraryError',
+      });
     }
-    const newInput = await embeddable.getInputAsRefType();
+  }
 
-    embeddable.updateInput(newInput);
-
-    const dashboard = embeddable.getRoot() as DashboardContainer;
-    const panelToReplace = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
-    if (!panelToReplace) {
-      throw new PanelNotFoundError();
+  private async canLinkToLibrary(api: AddPanelToLibraryActionApi) {
+    if (apiHasLibraryTransforms(api)) {
+      return api.canLinkToLibrary?.();
+    } else if (apiHasInPlaceLibraryTransforms(api)) {
+      const canLink = api.canLinkToLibrary ? await api.canLinkToLibrary() : true;
+      return api.libraryId$.value === undefined && canLink;
     }
-
-    const newPanel: PanelState<EmbeddableInput> = {
-      type: embeddable.type,
-      explicitInput: { ...newInput },
-    };
-    const replacedPanelId = await dashboard.replacePanel(panelToReplace, newPanel, true);
-
-    const title = dashboardAddToLibraryActionStrings.getSuccessMessage(
-      embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
-    );
-
-    if (dashboard.getExpandedPanelId() !== undefined) {
-      dashboard.setExpandedPanelId(replacedPanelId);
-    }
-
-    this.toastsService.addSuccess({
-      title,
-      'data-test-subj': 'addPanelToLibrarySuccess',
-    });
+    throw new IncompatibleActionError();
   }
 }

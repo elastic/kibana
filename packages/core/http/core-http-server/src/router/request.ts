@@ -1,25 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { URL } from 'url';
 import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
-import type { RouteMethod, RouteConfigOptions } from './route';
+import type { RouteMethod, RouteConfigOptions, RouteSecurity, RouteDeprecationInfo } from './route';
 import type { Headers } from './headers';
+
+export type RouteSecurityGetter = (request: {
+  headers: KibanaRequest['headers'];
+  query?: KibanaRequest['query'];
+}) => RouteSecurity | undefined;
+export type InternalRouteSecurity = RouteSecurity | RouteSecurityGetter;
 
 /**
  * @public
  */
 export interface KibanaRouteOptions extends RouteOptionsApp {
+  deprecated?: RouteDeprecationInfo;
   xsrfRequired: boolean;
   access: 'internal' | 'public';
+  security?: InternalRouteSecurity;
 }
 
 /**
@@ -30,6 +40,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  authzResult?: Record<string, boolean>;
   measureElu?: () => void;
 }
 
@@ -37,9 +48,11 @@ export interface KibanaRequestState extends RequestApplicationState {
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
  */
-export type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options'
+export type KibanaRequestRouteOptions<Method extends RouteMethod> = (Method extends
+  | 'get'
+  | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
-  : Required<RouteConfigOptions<Method>>;
+  : Required<RouteConfigOptions<Method>>) & { security?: RouteSecurity };
 
 /**
  * Request specific route information exposed to a handler.
@@ -49,6 +62,7 @@ export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
   method: Method;
   options: KibanaRequestRouteOptions<Method>;
+  routePath?: string;
 }
 
 /**
@@ -136,10 +150,26 @@ export interface KibanaRequest<
   readonly isFakeRequest: boolean;
 
   /**
+   * Authorization check result, passed to the route handler.
+   * Indicates whether the specific privilege was granted or denied.
+   */
+  readonly authzResult?: Record<string, boolean>;
+
+  /**
    * An internal request has access to internal routes.
    * @note See the {@link KibanaRequestRouteOptions#access} route option.
    */
   readonly isInternalApiRequest: boolean;
+
+  /**
+   * The HTTP version sent by the client.
+   */
+  readonly httpVersion: string;
+
+  /**
+   * The protocol used by the client, inferred from the httpVersion.
+   */
+  readonly protocol: HttpProtocol;
 
   /**
    * The socket associated with this request.
@@ -163,6 +193,11 @@ export interface KibanaRequest<
    * URL rewritten in onPreRouting request interceptor.
    */
   readonly rewrittenUrl?: URL;
+
+  /**
+   * The versioned route API version of this request.
+   */
+  readonly apiVersion: string | undefined;
 
   /**
    * The path parameter of this request.

@@ -1,26 +1,10 @@
 {
   "id": "@kbn/shared-ux-prompt-no-data-views-mocks",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-        "id": "def-common.StorybookMock",
+        "id": "def-public.StorybookMock",
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
@@ -28,9 +12,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxPromptNoDataViewsMocksPluginApi",
-            "section": "def-common.StorybookMock",
+            "section": "def-public.StorybookMock",
             "text": "StorybookMock"
           },
           " extends ",
@@ -53,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-            "id": "def-common.StorybookMock.propArguments",
+            "id": "def-public.StorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
@@ -65,7 +49,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-            "id": "def-common.StorybookMock.serviceArguments",
+            "id": "def-public.StorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
@@ -76,7 +60,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                "id": "def-common.StorybookMock.serviceArguments.canCreateNewDataView",
+                "id": "def-public.StorybookMock.serviceArguments.canCreateNewDataView",
                 "type": "Object",
                 "tags": [],
                 "label": "canCreateNewDataView",
@@ -87,7 +71,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                    "id": "def-common.StorybookMock.serviceArguments.canCreateNewDataView.control",
+                    "id": "def-public.StorybookMock.serviceArguments.canCreateNewDataView.control",
                     "type": "string",
                     "tags": [],
                     "label": "control",
@@ -98,7 +82,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                    "id": "def-common.StorybookMock.serviceArguments.canCreateNewDataView.defaultValue",
+                    "id": "def-public.StorybookMock.serviceArguments.canCreateNewDataView.defaultValue",
                     "type": "boolean",
                     "tags": [],
                     "label": "defaultValue",
@@ -111,7 +95,7 @@
               },
               {
                 "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                "id": "def-common.StorybookMock.serviceArguments.dataViewsDocLink",
+                "id": "def-public.StorybookMock.serviceArguments.dataViewsDocLink",
                 "type": "Object",
                 "tags": [],
                 "label": "dataViewsDocLink",
@@ -122,7 +106,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                    "id": "def-common.StorybookMock.serviceArguments.dataViewsDocLink.options",
+                    "id": "def-public.StorybookMock.serviceArguments.dataViewsDocLink.options",
                     "type": "Array",
                     "tags": [],
                     "label": "options",
@@ -136,7 +120,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                    "id": "def-common.StorybookMock.serviceArguments.dataViewsDocLink.control",
+                    "id": "def-public.StorybookMock.serviceArguments.dataViewsDocLink.control",
                     "type": "Object",
                     "tags": [],
                     "label": "control",
@@ -147,7 +131,7 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                        "id": "def-common.StorybookMock.serviceArguments.dataViewsDocLink.control.type",
+                        "id": "def-public.StorybookMock.serviceArguments.dataViewsDocLink.control.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -157,6 +141,114 @@
                         "trackAdoption": false
                       }
                     ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.dataViewsDocLink.defaultValue",
+                    "type": "string",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                "id": "def-public.StorybookMock.serviceArguments.canTryEsql",
+                "type": "Object",
+                "tags": [],
+                "label": "canTryEsql",
+                "description": [],
+                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.canTryEsql.control",
+                    "type": "string",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.canTryEsql.defaultValue",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                "id": "def-public.StorybookMock.serviceArguments.esqlDocLink",
+                "type": "Object",
+                "tags": [],
+                "label": "esqlDocLink",
+                "description": [],
+                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.options",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      "(string | undefined)[]"
+                    ],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.control",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                        "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.control.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.defaultValue",
+                    "type": "string",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -164,7 +256,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-            "id": "def-common.StorybookMock.dependencies",
+            "id": "def-public.StorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -178,7 +270,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-            "id": "def-common.StorybookMock.getProps",
+            "id": "def-public.StorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -196,7 +288,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-            "id": "def-common.StorybookMock.getServices",
+            "id": "def-public.StorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -205,9 +297,9 @@
               "(params: ",
               {
                 "pluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPromptNoDataViewsMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               ") => ",
@@ -219,7 +311,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                "id": "def-common.StorybookMock.getServices.$1",
+                "id": "def-public.StorybookMock.getServices.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -227,9 +319,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxPromptNoDataViewsMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   }
                 ],
@@ -248,7 +340,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-        "id": "def-common.getNoDataViewsPromptServicesMock",
+        "id": "def-public.getNoDataViewsPromptServicesMock",
         "type": "Function",
         "tags": [],
         "label": "getNoDataViewsPromptServicesMock",
@@ -267,7 +359,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-            "id": "def-common.getNoDataViewsPromptServicesMock.$1",
+            "id": "def-public.getNoDataViewsPromptServicesMock.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -292,13 +384,13 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-        "id": "def-common.Params",
+        "id": "def-public.Params",
         "type": "Type",
         "tags": [],
         "label": "Params",
         "description": [],
         "signature": [
-          "{ canCreateNewDataView: any; dataViewsDocLink: any; }"
+          "{ canCreateNewDataView: any; dataViewsDocLink: any; esqlDocLink: any; canTryEsql: any; }"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
         "deprecated": false,
@@ -306,6 +398,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

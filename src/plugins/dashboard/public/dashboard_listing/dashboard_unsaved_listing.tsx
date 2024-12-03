@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -15,15 +16,18 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { pluginServices } from '../services/plugin_services';
-import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { DashboardAttributes } from '../../common/content_management';
+import type { DashboardAttributes } from '../../server/content_management';
+import {
+  DASHBOARD_PANELS_UNSAVED_ID,
+  getDashboardBackupService,
+} from '../services/dashboard_backup_service';
+import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
+import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 
 const DashboardUnsavedItem = ({
   id,
@@ -115,12 +119,8 @@ export const DashboardUnsavedListing = ({
   unsavedDashboardIds,
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
-  const {
-    dashboardBackup,
-    dashboardContentManagement: { findDashboards },
-  } = pluginServices.getServices();
-
   const [items, setItems] = useState<UnsavedItemMap>({});
+  const dashboardBackupService = useMemo(() => getDashboardBackupService(), []);
 
   const onOpen = useCallback(
     (id?: string) => {
@@ -132,11 +132,11 @@ export const DashboardUnsavedListing = ({
   const onDiscard = useCallback(
     (id?: string) => {
       confirmDiscardUnsavedChanges(() => {
-        dashboardBackup.clearState(id);
+        dashboardBackupService.clearState(id);
         refreshUnsavedDashboards();
       });
     },
-    [refreshUnsavedDashboards, dashboardBackup]
+    [dashboardBackupService, refreshUnsavedDashboards]
   );
 
   useEffect(() => {
@@ -147,37 +147,39 @@ export const DashboardUnsavedListing = ({
     const existingDashboardsWithUnsavedChanges = unsavedDashboardIds.filter(
       (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
     );
-    findDashboards.findByIds(existingDashboardsWithUnsavedChanges).then((results) => {
-      const dashboardMap = {};
-      if (canceled) {
-        return;
-      }
-      let hasError = false;
-      const newItems = results.reduce((map, result) => {
-        if (result.status === 'error') {
-          hasError = true;
-          if (result.error.statusCode === 404) {
-            // Save object not found error
-            dashboardBackup.clearState(result.id);
-          }
-          return map;
+    getDashboardContentManagementService()
+      .findDashboards.findByIds(existingDashboardsWithUnsavedChanges)
+      .then((results) => {
+        const dashboardMap = {};
+        if (canceled) {
+          return;
         }
-        return {
-          ...map,
-          [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
-        };
-      }, dashboardMap);
-      if (hasError) {
-        refreshUnsavedDashboards();
-        return;
-      }
-      setItems(newItems);
-    });
+        let hasError = false;
+        const newItems = results.reduce((map, result) => {
+          if (result.status === 'error') {
+            hasError = true;
+            if (result.error.statusCode === 404) {
+              // Save object not found error
+              dashboardBackupService.clearState(result.id);
+            }
+            return map;
+          }
+          return {
+            ...map,
+            [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
+          };
+        }, dashboardMap);
+        if (hasError) {
+          refreshUnsavedDashboards();
+          return;
+        }
+        setItems(newItems);
+      });
 
     return () => {
       canceled = true;
     };
-  }, [refreshUnsavedDashboards, dashboardBackup, unsavedDashboardIds, findDashboards]);
+  }, [dashboardBackupService, refreshUnsavedDashboards, unsavedDashboardIds]);
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>

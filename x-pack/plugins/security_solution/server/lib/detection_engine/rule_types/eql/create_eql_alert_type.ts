@@ -11,13 +11,17 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
+import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { version } = createOptions;
+  const { experimentalFeatures, version, licensing, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
@@ -38,6 +42,9 @@ export const createEqlAlertType = (
           return mutatedRuleParams;
         },
       },
+    },
+    schemas: {
+      params: { type: 'zod', schema: EqlRuleParams },
     },
     actionGroups: [
       {
@@ -68,11 +75,40 @@ export const createEqlAlertType = (
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
+          mergeStrategy,
+          alertTimestampOverride,
+          publicBaseUrl,
+          alertWithSuppression,
+          intendedTimestamp,
         },
         services,
         state,
+        spaceId,
       } = execOptions;
-      const result = await eqlExecutor({
+
+      const wrapSuppressedHits = (
+        events: SignalSourceHit[],
+        buildReasonMessage: BuildReasonMessage
+      ) =>
+        wrapSuppressedAlerts({
+          events,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          indicesToQuery: inputIndex,
+          buildReasonMessage,
+          alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl,
+          primaryTimestamp,
+          secondaryTimestamp,
+          intendedTimestamp,
+        });
+      const isNonSeqAlertSuppressionActive = await getIsAlertSuppressionActive({
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+        licensing,
+      });
+      const { result, loggedRequests } = await eqlExecutor({
         completeRule,
         tuple,
         inputIndex,
@@ -87,8 +123,15 @@ export const createEqlAlertType = (
         secondaryTimestamp,
         exceptionFilter,
         unprocessedExceptions,
+        wrapSuppressedHits,
+        alertTimestampOverride,
+        alertWithSuppression,
+        isAlertSuppressionActive: isNonSeqAlertSuppressionActive,
+        experimentalFeatures,
+        state,
+        scheduleNotificationResponseActionsService,
       });
-      return { ...result, state };
+      return { ...result, state, ...(loggedRequests ? { loggedRequests } : {}) };
     },
   };
 };

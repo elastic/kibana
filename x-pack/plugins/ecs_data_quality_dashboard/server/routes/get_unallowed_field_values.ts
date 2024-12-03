@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 
 import { getUnallowedFieldValues } from '../lib';
 import { buildResponse } from '../lib/build_response';
@@ -19,6 +19,11 @@ export const getUnallowedFieldValuesRoute = (router: IRouter, logger: Logger) =>
     .post({
       path: GET_UNALLOWED_FIELD_VALUES,
       access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {

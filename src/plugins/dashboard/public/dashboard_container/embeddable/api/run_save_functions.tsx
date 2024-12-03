@@ -1,44 +1,139 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
+
+import type { Reference } from '@kbn/content-management-utils';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import {
+  EmbeddableInput,
+  isReferenceOrValueEmbeddable,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import {
+  DashboardContainerInput,
+  DashboardPanelMap,
+  prefixReferencesFromPanel,
+} from '../../../../common';
+import type { DashboardAttributes } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
+import {
+  SaveDashboardReturn,
+  SavedDashboardInput,
+} from '../../../services/dashboard_content_management_service/types';
+import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  savedObjectsTaggingService,
+} from '../../../services/kibana_services';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
-import { DashboardSaveModal } from './overlays/save_modal';
 import { DashboardContainer } from '../dashboard_container';
-import { pluginServices } from '../../../services/plugin_services';
-import { DashboardContainerInput } from '../../../../common';
-import { SaveDashboardReturn } from '../../../services/dashboard_content_management/types';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
+import { DashboardSaveModal } from './overlays/save_modal';
 
-export function runSaveAs(this: DashboardContainer) {
-  const {
-    data: {
-      query: {
-        timefilter: { timefilter },
-      },
-    },
-    savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
-    dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
-  } = pluginServices.getServices();
+const serializeAllPanelState = async (
+  dashboard: DashboardContainer
+): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
+  const references: Reference[] = [];
+  const panels = cloneDeep(dashboard.getInput().panels);
 
-  const {
-    explicitInput: currentState,
-    componentState: { lastSavedId, managed },
-  } = this.getState();
+  const serializePromises: Array<
+    Promise<{ uuid: string; serialized: SerializedPanelState<object> }>
+  > = [];
+  for (const [uuid, panel] of Object.entries(panels)) {
+    if (!embeddableService.reactEmbeddableRegistryHasKey(panel.type)) continue;
+    const api = dashboard.children$.value[uuid];
 
-  return new Promise<SaveDashboardReturn | undefined>((resolve) => {
-    if (managed) resolve(undefined);
-    const onSave = async ({
+    if (api && apiHasSerializableState(api)) {
+      serializePromises.push(
+        (async () => {
+          const serialized = await api.serializeState();
+          return { uuid, serialized };
+        })()
+      );
+    }
+  }
+
+  const serializeResults = await Promise.all(serializePromises);
+  for (const result of serializeResults) {
+    panels[result.uuid].explicitInput = { ...result.serialized.rawState, id: result.uuid };
+    references.push(...prefixReferencesFromPanel(result.uuid, result.serialized.references ?? []));
+  }
+
+  return { panels, references };
+};
+
+/**
+ * Save the current state of this dashboard to a saved object without showing any save modal.
+ */
+export async function runQuickSave(this: DashboardContainer) {
+  const { explicitInput: currentState } = this.getState();
+
+  const lastSavedId = this.savedObjectId.value;
+
+  if (this.managed$.value) return;
+
+  const { panels: nextPanels, references } = await serializeAllPanelState(this);
+  const dashboardStateToSave: DashboardContainerInput = { ...currentState, panels: nextPanels };
+  let stateToSave: SavedDashboardInput = dashboardStateToSave;
+  const controlGroupApi = this.controlGroupApi$.value;
+  let controlGroupReferences: Reference[] | undefined;
+  if (controlGroupApi) {
+    const { rawState: controlGroupSerializedState, references: extractedReferences } =
+      await controlGroupApi.serializeState();
+    controlGroupReferences = extractedReferences;
+    stateToSave = {
+      ...stateToSave,
+      controlGroupInput:
+        controlGroupSerializedState as unknown as DashboardAttributes['controlGroupInput'],
+    };
+  }
+
+  const saveResult = await getDashboardContentManagementService().saveDashboardState({
+    controlGroupReferences,
+    panelReferences: references,
+    currentState: stateToSave,
+    saveOptions: {},
+    lastSavedId,
+  });
+
+  this.savedObjectReferences = saveResult.references ?? [];
+  this.setLastSavedInput(dashboardStateToSave);
+  this.saveNotification$.next();
+
+  return saveResult;
+}
+
+/**
+ * @description exclusively for user directed dashboard save actions, also
+ * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
+ */
+export async function runInteractiveSave(this: DashboardContainer, interactionMode: ViewMode) {
+  const { explicitInput: currentState } = this.getState();
+  const dashboardContentManagementService = getDashboardContentManagementService();
+  const lastSavedId = this.savedObjectId.value;
+  const managed = this.managed$.value;
+
+  return new Promise<SaveDashboardReturn | undefined>((resolve, reject) => {
+    if (interactionMode === ViewMode.EDIT && managed) {
+      resolve(undefined);
+    }
+
+    const onSaveAttempt = async ({
       newTags,
       newTitle,
       newDescription,
@@ -51,145 +146,189 @@ export function runSaveAs(this: DashboardContainer) {
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-        saveAsCopy: newCopyOnSave,
+        saveAsCopy: lastSavedId ? true : newCopyOnSave,
       };
-      const stateFromSaveModal: DashboardStateFromSaveModal = {
-        title: newTitle,
-        tags: [] as string[],
-        description: newDescription,
-        timeRestore: newTimeRestore,
-        timeRange: newTimeRestore ? timefilter.getTime() : undefined,
-        refreshInterval: newTimeRestore ? timefilter.getRefreshInterval() : undefined,
-      };
-      if (hasSavedObjectsTagging && newTags) {
-        // remove `hasSavedObjectsTagging` once the savedObjectsTagging service is optional
-        stateFromSaveModal.tags = newTags;
-      }
-      if (
-        !(await checkForDuplicateDashboardTitle({
-          title: newTitle,
-          onTitleDuplicate,
-          lastSavedTitle: currentState.title,
-          copyOnSave: newCopyOnSave,
-          isTitleDuplicateConfirmed,
-        }))
-      ) {
-        // do not save if title is duplicate and is unconfirmed
-        return {};
-      }
-      const stateToSave: DashboardContainerInput = {
-        ...currentState,
-        ...stateFromSaveModal,
-      };
-      const beforeAddTime = window.performance.now();
-      const saveResult = await saveDashboardState({
-        currentState: stateToSave,
-        saveOptions,
-        lastSavedId,
-      });
-      const addDuration = window.performance.now() - beforeAddTime;
-      reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
-        eventName: SAVED_OBJECT_POST_TIME,
-        duration: addDuration,
-        meta: {
-          saved_object_type: DASHBOARD_CONTENT_ID,
-        },
-      });
 
-      stateFromSaveModal.lastSavedId = saveResult.id;
-      if (saveResult.id) {
-        batch(() => {
-          this.dispatch.setStateFromSaveModal(stateFromSaveModal);
-          this.dispatch.setLastSavedInput(stateToSave);
+      try {
+        if (
+          !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
+            title: newTitle,
+            onTitleDuplicate,
+            lastSavedTitle: currentState.title,
+            copyOnSave: saveOptions.saveAsCopy,
+            isTitleDuplicateConfirmed,
+          }))
+        ) {
+          return {};
+        }
+
+        const stateFromSaveModal: DashboardStateFromSaveModal = {
+          title: newTitle,
+          tags: [] as string[],
+          description: newDescription,
+          timeRestore: newTimeRestore,
+          timeRange: newTimeRestore ? dataService.query.timefilter.timefilter.getTime() : undefined,
+          refreshInterval: newTimeRestore
+            ? dataService.query.timefilter.timefilter.getRefreshInterval()
+            : undefined,
+        };
+
+        if (savedObjectsTaggingService && newTags) {
+          // remove `hasSavedObjectsTagging` once the savedObjectsTagging service is optional
+          stateFromSaveModal.tags = newTags;
+        }
+
+        let dashboardStateToSave: SavedDashboardInput = {
+          ...currentState,
+          ...stateFromSaveModal,
+        };
+
+        const controlGroupApi = this.controlGroupApi$.value;
+        let controlGroupReferences: Reference[] | undefined;
+        if (controlGroupApi) {
+          const { rawState: controlGroupSerializedState, references } =
+            await controlGroupApi.serializeState();
+          controlGroupReferences = references;
+          dashboardStateToSave = {
+            ...dashboardStateToSave,
+            controlGroupInput:
+              controlGroupSerializedState as unknown as DashboardAttributes['controlGroupInput'],
+          };
+        }
+
+        const { panels: nextPanels, references } = await serializeAllPanelState(this);
+
+        const newPanels = await (async () => {
+          if (!managed) return nextPanels;
+
+          // this is a managed dashboard - unlink all by reference embeddables on clone
+          const unlinkedPanels: DashboardPanelMap = {};
+          for (const [panelId, panel] of Object.entries(nextPanels)) {
+            const child = this.getChild(panelId);
+            if (
+              child &&
+              isReferenceOrValueEmbeddable(child) &&
+              child.inputIsRefType(child.getInput() as EmbeddableInput)
+            ) {
+              const valueTypeInput = await child.getInputAsValueType();
+              unlinkedPanels[panelId] = {
+                ...panel,
+                explicitInput: valueTypeInput,
+              };
+              continue;
+            }
+            unlinkedPanels[panelId] = panel;
+          }
+          return unlinkedPanels;
+        })();
+
+        const beforeAddTime = window.performance.now();
+
+        const saveResult = await dashboardContentManagementService.saveDashboardState({
+          controlGroupReferences,
+          panelReferences: references,
+          saveOptions,
+          currentState: {
+            ...dashboardStateToSave,
+            panels: newPanels,
+            title: newTitle,
+          },
+          lastSavedId,
         });
+
+        const addDuration = window.performance.now() - beforeAddTime;
+
+        reportPerformanceMetricEvent(coreServices.analytics, {
+          eventName: SAVED_OBJECT_POST_TIME,
+          duration: addDuration,
+          meta: {
+            saved_object_type: DASHBOARD_CONTENT_ID,
+          },
+        });
+
+        if (saveResult.id) {
+          batch(() => {
+            this.dispatch.setStateFromSaveModal(stateFromSaveModal);
+            this.setSavedObjectId(saveResult.id);
+            this.setLastSavedInput(dashboardStateToSave);
+          });
+        }
+
+        this.savedObjectReferences = saveResult.references ?? [];
+        this.saveNotification$.next();
+
+        resolve(saveResult);
+
+        return saveResult;
+      } catch (error) {
+        reject(error);
+        return error;
       }
-      resolve(saveResult);
-      return saveResult;
     };
 
-    const dashboardSaveModal = (
-      <DashboardSaveModal
-        tags={currentState.tags}
-        title={currentState.title}
-        onClose={() => resolve(undefined)}
-        timeRestore={currentState.timeRestore}
-        description={currentState.description ?? ''}
-        showCopyOnSave={lastSavedId ? true : false}
-        onSave={onSave}
-      />
-    );
-    this.clearOverlays();
-    showSaveModal(dashboardSaveModal);
-  });
-}
+    (async () => {
+      try {
+        let customModalTitle;
+        let newTitle = currentState.title;
 
-/**
- * Save the current state of this dashboard to a saved object without showing any save modal.
- */
-export async function runQuickSave(this: DashboardContainer) {
-  const {
-    dashboardContentManagement: { saveDashboardState },
-  } = pluginServices.getServices();
+        if (lastSavedId) {
+          const [baseTitle, baseCount] = extractTitleAndCount(newTitle);
 
-  const {
-    explicitInput: currentState,
-    componentState: { lastSavedId, managed },
-  } = this.getState();
+          newTitle = `${baseTitle} (${baseCount + 1})`;
 
-  if (managed) return;
+          await dashboardContentManagementService.checkForDuplicateDashboardTitle({
+            title: newTitle,
+            lastSavedTitle: currentState.title,
+            copyOnSave: true,
+            isTitleDuplicateConfirmed: false,
+            onTitleDuplicate(speculativeSuggestion) {
+              newTitle = speculativeSuggestion;
+            },
+          });
 
-  const saveResult = await saveDashboardState({
-    lastSavedId,
-    currentState,
-    saveOptions: {},
-  });
-  this.dispatch.setLastSavedInput(currentState);
-
-  return saveResult;
-}
-
-export async function runClone(this: DashboardContainer) {
-  const {
-    dashboardContentManagement: { saveDashboardState, checkForDuplicateDashboardTitle },
-  } = pluginServices.getServices();
-
-  const { explicitInput: currentState } = this.getState();
-
-  return new Promise<SaveDashboardReturn | undefined>(async (resolve, reject) => {
-    try {
-      const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
-      let copyCount = baseCount;
-      let newTitle = `${baseTitle} (${copyCount})`;
-      while (
-        !(await checkForDuplicateDashboardTitle({
-          title: newTitle,
-          lastSavedTitle: currentState.title,
-          copyOnSave: true,
-          isTitleDuplicateConfirmed: false,
-        }))
-      ) {
-        copyCount++;
-        newTitle = `${baseTitle} (${copyCount})`;
-      }
-      const saveResult = await saveDashboardState({
-        saveOptions: {
-          saveAsCopy: true,
-        },
-        currentState: {
-          ...currentState,
-          title: newTitle,
-        },
-      });
-      resolve(saveResult);
-      return saveResult.id
-        ? {
-            id: saveResult.id,
+          switch (interactionMode) {
+            case ViewMode.EDIT: {
+              customModalTitle = i18n.translate(
+                'dashboard.topNav.editModeInteractiveSave.modalTitle',
+                {
+                  defaultMessage: 'Save as new dashboard',
+                }
+              );
+              break;
+            }
+            case ViewMode.VIEW: {
+              customModalTitle = i18n.translate(
+                'dashboard.topNav.viewModeInteractiveSave.modalTitle',
+                {
+                  defaultMessage: 'Duplicate dashboard',
+                }
+              );
+              break;
+            }
+            default: {
+              customModalTitle = undefined;
+            }
           }
-        : {
-            error: saveResult.error,
-          };
-    } catch (error) {
-      reject(error);
-    }
+        }
+
+        const dashboardDuplicateModal = (
+          <DashboardSaveModal
+            tags={currentState.tags}
+            title={newTitle}
+            onClose={() => resolve(undefined)}
+            timeRestore={currentState.timeRestore}
+            showStoreTimeOnSave={!lastSavedId}
+            description={currentState.description ?? ''}
+            showCopyOnSave={false}
+            onSave={onSaveAttempt}
+            customModalTitle={customModalTitle}
+          />
+        );
+        this.clearOverlays();
+        showSaveModal(dashboardDuplicateModal);
+      } catch (error) {
+        reject(error);
+      }
+    })();
   });
 }

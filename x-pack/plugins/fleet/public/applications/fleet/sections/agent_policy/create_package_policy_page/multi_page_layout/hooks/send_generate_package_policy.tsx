@@ -29,8 +29,9 @@ export const sendGeneratePackagePolicy = async (
   const defaultPolicy: NewPackagePolicy = {
     name: incrementedName,
     description: '',
-    namespace: 'default',
+    namespace: '',
     policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
     enabled: true,
     inputs: [],
   };

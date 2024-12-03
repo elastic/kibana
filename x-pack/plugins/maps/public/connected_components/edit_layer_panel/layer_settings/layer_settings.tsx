@@ -26,7 +26,7 @@ import { Attribution } from '../../../../common/descriptor_types';
 import { AUTOSELECT_EMS_LOCALE, NO_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
-import { isVectorLayer, IVectorLayer } from '../../../classes/layers/vector_layer';
+import { isVectorLayer } from '../../../classes/layers/vector_layer';
 import { AttributionFormRow } from './attribution_form_row';
 import { isLayerGroup } from '../../../classes/layers/layer_group';
 
@@ -94,7 +94,7 @@ export function LayerSettings(props: Props) {
       return null;
     }
     return (
-      <EuiFormRow display="columnCompressedSwitch">
+      <EuiFormRow display="columnCompressed">
         <EuiToolTip
           position="top"
           content={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlagTooltip', {
@@ -157,7 +157,7 @@ export function LayerSettings(props: Props) {
     }
 
     return (
-      <EuiFormRow display="columnCompressedSwitch">
+      <EuiFormRow display="columnCompressed">
         <EuiSwitch
           label={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelsOnTop', {
             defaultMessage: `Show labels on top`,
@@ -172,24 +172,19 @@ export function LayerSettings(props: Props) {
   };
 
   const renderDisableTooltips = () => {
-    if (!isVectorLayer(props.layer)) {
-      return null;
-    } else {
-      const layer = props.layer as unknown as IVectorLayer;
-      return (
-        <EuiFormRow display="columnCompressedSwitch">
-          <EuiSwitch
-            label={i18n.translate('xpack.maps.layerPanel.settingsPanel.DisableTooltips', {
-              defaultMessage: `Show tooltips`,
-            })}
-            disabled={!layer.canShowTooltip()}
-            checked={!layer.areTooltipsDisabled()}
-            onChange={onShowTooltipsChange}
-            compressed
-          />
-        </EuiFormRow>
-      );
-    }
+    return !isVectorLayer(props.layer) ? null : (
+      <EuiFormRow display="columnCompressed">
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.layerPanel.settingsPanel.DisableTooltips', {
+            defaultMessage: `Show tooltips`,
+          })}
+          disabled={!props.layer.canShowTooltip()}
+          checked={!props.layer.areTooltipsDisabled()}
+          onChange={onShowTooltipsChange}
+          compressed
+        />
+      </EuiFormRow>
+    );
   };
 
   const renderShowLocaleSelector = () => {

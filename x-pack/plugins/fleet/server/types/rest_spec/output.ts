@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { OutputSchema, UpdateOutputSchema } from '../models';
+import { ListResponseSchema } from '../../routes/schema/utils';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
@@ -21,7 +22,21 @@ export const DeleteOutputRequestSchema = {
   }),
 };
 
+export const DeleteOutputResponseSchema = schema.object({
+  id: schema.string(),
+});
+
+export const GenerateLogstashApiKeyResponseSchema = schema.object({
+  api_key: schema.string(),
+});
+
 export const GetOutputsRequestSchema = {};
+
+export const GetOutputsResponseSchema = ListResponseSchema(
+  OutputSchema.extendsDeep({
+    unknowns: 'allow',
+  })
+);
 
 export const PostOutputRequestSchema = {
   body: OutputSchema,
@@ -33,3 +48,27 @@ export const PutOutputRequestSchema = {
   }),
   body: UpdateOutputSchema,
 };
+
+export const GetLatestOutputHealthRequestSchema = {
+  params: schema.object({
+    outputId: schema.string(),
+  }),
+};
+
+export const GetLatestOutputHealthResponseSchema = schema.object({
+  state: schema.string({
+    meta: {
+      description: 'state of output, HEALTHY or DEGRADED',
+    },
+  }),
+  message: schema.string({
+    meta: {
+      description: 'long message if unhealthy',
+    },
+  }),
+  timestamp: schema.string({
+    meta: {
+      description: 'timestamp of reported state',
+    },
+  }),
+});

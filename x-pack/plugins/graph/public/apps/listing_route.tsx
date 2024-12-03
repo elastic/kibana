@@ -7,12 +7,12 @@
 
 import React, { Fragment, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TableListView } from '@kbn/content-management-table-list-view';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { deleteSavedWorkspace, findSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
 import { GraphWorkspaceSavedObject } from '../types';
@@ -89,34 +89,32 @@ export function ListingRoute({
   );
 
   return (
-    <I18nProvider>
-      <TableListView<GraphUserContent>
-        id="graph"
-        headingId="graphListingHeading"
-        createItem={capabilities.graph.save ? createItem : undefined}
-        findItems={findItems}
-        deleteItems={capabilities.graph.delete ? deleteItems : undefined}
-        editItem={capabilities.graph.save ? editItem : undefined}
-        listingLimit={listingLimit}
-        initialFilter={initialFilter}
-        initialPageSize={initialPageSize}
-        emptyPrompt={getNoItemsMessage(
-          capabilities.graph.save === false,
-          createItem,
-          coreStart.application
-        )}
-        entityName={i18n.translate('xpack.graph.listing.table.entityName', {
-          defaultMessage: 'graph',
-        })}
-        entityNamePlural={i18n.translate('xpack.graph.listing.table.entityNamePlural', {
-          defaultMessage: 'graphs',
-        })}
-        title={i18n.translate('xpack.graph.listing.graphsTitle', {
-          defaultMessage: 'Graphs',
-        })}
-        getDetailViewLink={({ id }) => getEditUrl(addBasePath, { id })}
-      />
-    </I18nProvider>
+    <TableListView<GraphUserContent>
+      id="graph"
+      headingId="graphListingHeading"
+      createItem={capabilities.graph.save ? createItem : undefined}
+      findItems={findItems}
+      deleteItems={capabilities.graph.delete ? deleteItems : undefined}
+      editItem={capabilities.graph.save ? editItem : undefined}
+      listingLimit={listingLimit}
+      initialFilter={initialFilter}
+      initialPageSize={initialPageSize}
+      emptyPrompt={getNoItemsMessage(
+        capabilities.graph.save === false,
+        createItem,
+        coreStart.application
+      )}
+      entityName={i18n.translate('xpack.graph.listing.table.entityName', {
+        defaultMessage: 'graph',
+      })}
+      entityNamePlural={i18n.translate('xpack.graph.listing.table.entityNamePlural', {
+        defaultMessage: 'graphs',
+      })}
+      title={i18n.translate('xpack.graph.listing.graphsTitle', {
+        defaultMessage: 'Graphs',
+      })}
+      getDetailViewLink={({ id }) => getEditUrl(addBasePath, { id })}
+    />
   );
 }
 

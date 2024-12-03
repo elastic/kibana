@@ -27,40 +27,10 @@ import type { OnChangePage } from '../events';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
 import * as i18n from './translations';
-import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
-
-export const isCompactFooter = (width: number): boolean => width < 600;
-
-interface FixedWidthLastUpdatedContainerProps {
-  updatedAt: number;
-}
-
-const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainerProps>(
-  ({ updatedAt }) => {
-    const { timelines } = useKibana().services;
-    const width = useEventDetailsWidthContext();
-    const compact = useMemo(() => isCompactFooter(width), [width]);
-
-    return updatedAt > 0 ? (
-      <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
-        {timelines.getLastUpdated({ updatedAt, compact })}
-      </FixedWidthLastUpdated>
-    ) : null;
-  }
-);
-
-FixedWidthLastUpdatedContainer.displayName = 'FixedWidthLastUpdatedContainer';
-
-const FixedWidthLastUpdated = styled.div<{ compact?: boolean }>`
-  width: ${({ compact }) => (!compact ? 200 : 25)}px;
-  overflow: hidden;
-  text-align: end;
-`;
-
-FixedWidthLastUpdated.displayName = 'FixedWidthLastUpdated';
+import { LastUpdatedContainer } from './last_updated';
 
 interface HeightProp {
   height: number;
@@ -280,7 +250,7 @@ export const FooterComponent = ({
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   const onChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) =>
+    (itemsChangedPerPage: number) =>
       dispatch(timelineActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage })),
     [dispatch, id]
   );
@@ -365,10 +335,10 @@ export const FooterComponent = ({
         </EuiFlexItem>
 
         <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-          <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
+          <LastUpdatedContainer updatedAt={updatedAt} />
         </EuiFlexItem>
 
-        <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
+        <EuiFlexItem grow={false}>
           {isLive ? (
             <EuiText size="s" data-test-subj="is-live-on-message">
               <b>
@@ -390,7 +360,6 @@ export const FooterComponent = ({
             </EuiText>
           ) : (
             <PagingControl
-              data-test-subj="paging-control"
               totalCount={totalCount}
               totalPages={totalPages}
               activePage={activePage}

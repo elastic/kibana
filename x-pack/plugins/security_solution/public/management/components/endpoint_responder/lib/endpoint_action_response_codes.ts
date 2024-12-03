@@ -269,6 +269,36 @@ const CODES = Object.freeze({
     'xpack.securitySolution.endpointActionResponseCodes.upload.fileCorruption',
     { defaultMessage: 'Failed to save file to disk or validate its integrity' }
   ),
+
+  // -----------------------------------------------------------------
+  // SCAN CODES
+  // -----------------------------------------------------------------
+
+  'ra_scan_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.invalidInput',
+    { defaultMessage: 'Invalid absolute file path provided' }
+  ),
+
+  // Dev:
+  // file path not found failure (404)
+  'ra_scan_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.notFound',
+    { defaultMessage: 'File path or folder was not found (404)' }
+  ),
+
+  // Dev:
+  // scan quota exceeded failure
+  'ra_scan_error_queue-quota': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.queueQuota',
+    { defaultMessage: 'Too many scans are queued' }
+  ),
+
+  // Dev:
+  // scan success/competed
+  ra_scan_success_done: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.success',
+    { defaultMessage: 'Scan complete' }
+  ),
 });
 
 /**

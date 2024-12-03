@@ -15,6 +15,12 @@ export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/role_mapping/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -47,6 +53,7 @@ export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
         const esClient = (await context.core).elasticsearch.client;
         const saveResponse = await esClient.asCurrentUser.security.putRoleMapping({
           name: request.params.name,
+          // @ts-expect-error type mismatch on role_templates
           body: request.body,
         });
         return response.ok({ body: saveResponse });

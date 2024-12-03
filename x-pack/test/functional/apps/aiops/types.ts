@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
+import type { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
 
 interface TestDataTableActionLogPatternAnalysis {
   type: 'LogPatternAnalysis';
@@ -21,8 +21,11 @@ interface TestDataTableActionLogPatternAnalysis {
 
 interface TestDataExpectedWithSampleProbability {
   totalDocCountFormatted: string;
+  globalState: object;
+  appState: object;
   sampleProbabilityFormatted: string;
   fieldSelectorPopover: string[];
+  prompt: 'empty' | 'change-point';
 }
 
 export function isTestDataExpectedWithSampleProbability(
@@ -33,21 +36,26 @@ export function isTestDataExpectedWithSampleProbability(
 
 interface TestDataExpectedWithoutSampleProbability {
   totalDocCountFormatted: string;
+  globalState: object;
+  appState: object;
   analysisGroupsTable: Array<{ group: string; docCount: string }>;
   filteredAnalysisGroupsTable?: Array<{ group: string; docCount: string }>;
   analysisTable: Array<{
     fieldName: string;
     fieldValue: string;
     logRate: string;
-    pValue: string;
+    pValue?: string;
     impact: string;
   }>;
+  columnSelectorPopover: string[];
   fieldSelectorPopover: string[];
+  prompt: 'empty' | 'change-point';
 }
 
 export interface TestData {
   suiteTitle: string;
   analysisType: LogRateAnalysisType;
+  autoRun: boolean;
   dataGenerator: LogRateAnalysisDataGenerator;
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;
@@ -56,9 +64,11 @@ export interface TestData {
   brushDeviationTargetTimestamp?: number;
   brushIntervalFactor: number;
   chartClickCoordinates: [number, number];
+  columnSelectorSearch: string;
   fieldSelectorSearch: string;
   fieldSelectorApplyAvailable: boolean;
   query?: string;
+  editedQuery?: string;
   action?: TestDataTableActionLogPatternAnalysis;
   expected: TestDataExpectedWithSampleProbability | TestDataExpectedWithoutSampleProbability;
 }

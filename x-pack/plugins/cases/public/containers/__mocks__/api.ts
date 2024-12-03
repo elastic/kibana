@@ -10,9 +10,9 @@ import type {
   CasesFindResponseUI,
   CaseUI,
   CasesUI,
-  CasesStatus,
   FetchCasesProps,
   FindCaseUserActions,
+  CaseUICustomField,
 } from '../types';
 import { SortFieldCase } from '../types';
 import {
@@ -23,13 +23,13 @@ import {
   basicCaseCommentPatch,
   basicCasePost,
   basicResolvedCase,
-  casesStatus,
   pushedCase,
   tags,
   categories,
   findCaseUserActionsResponse,
   getCaseUserActionsStatsResponse,
   getCaseUsersMockResponse,
+  customFieldsMock,
 } from '../mock';
 import type {
   CaseConnectors,
@@ -38,7 +38,6 @@ import type {
   ResolvedCase,
   CaseUserActionsStats,
 } from '../../../common/ui/types';
-import { SeverityAll } from '../../../common/ui/types';
 import type {
   SingleCaseMetricsResponse,
   CasePostRequest,
@@ -68,9 +67,6 @@ export const getSingleCaseMetrics = async (
   signal: AbortSignal
 ): Promise<SingleCaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
 
-export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
-  Promise.resolve(casesStatus);
-
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
 
 export const findAssignees = async (): Promise<UserProfile[]> => userProfiles;
@@ -87,15 +83,16 @@ export const getCaseUserActionsStats = async (
 
 export const getCases = async ({
   filterOptions = {
-    severity: SeverityAll,
+    severity: [],
     search: '',
     searchFields: [],
     assignees: [],
     reporters: [],
-    status: CaseStatuses.open,
+    status: [CaseStatuses.open],
     tags: [],
     owner: [],
     category: [],
+    customFields: {},
   },
   queryParams = {
     page: 1,
@@ -178,3 +175,15 @@ export const deleteFileAttachments = async ({
 
 export const getCategories = async (signal: AbortSignal): Promise<string[]> =>
   Promise.resolve(categories);
+
+export const replaceCustomField = async ({
+  caseId,
+  customFieldId,
+  customFieldValue,
+  caseVersion,
+}: {
+  caseId: string;
+  customFieldId: string;
+  customFieldValue: string | boolean | null;
+  caseVersion: string;
+}): Promise<CaseUICustomField> => Promise.resolve(customFieldsMock[0]);

@@ -1,26 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type {
-  EmbeddableComponentProps,
-  LensEmbeddableInput,
-  LensEmbeddableOutput,
-} from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -30,14 +28,15 @@ import {
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramInputMessage,
+  UnifiedHistogramVisContext,
 } from '../types';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { useTimeRange } from './hooks/use_time_range';
-import { useStableCallback } from './hooks/use_stable_callback';
+import { useStableCallback } from '../hooks/use_stable_callback';
 import { useLensProps } from './hooks/use_lens_props';
-import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export interface HistogramProps {
+  abortController?: AbortController;
   services: UnifiedHistogramServices;
   dataView: DataView;
   request?: UnifiedHistogramRequestContext;
@@ -47,7 +46,7 @@ export interface HistogramProps {
   hasLensSuggestions: boolean;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  lensAttributesContext: LensAttributesContext;
+  visContext: UnifiedHistogramVisContext;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
@@ -70,9 +69,13 @@ const computeTotalHits = (
     return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
   } else if (isPlainRecord && !hasLensSuggestions) {
     // ES|QL histogram case
+    const rows = Object.values(adapterTables ?? {})?.[0]?.rows;
+    if (!rows) {
+      return undefined;
+    }
     let rowsCount = 0;
-    Object.values(adapterTables ?? {})?.[0]?.rows.forEach((r) => {
-      rowsCount += r.rows;
+    rows.forEach((r) => {
+      rowsCount += r.results;
     });
     return rowsCount;
   } else {
@@ -90,7 +93,7 @@ export function Histogram({
   hasLensSuggestions,
   getTimeRange,
   refetch$,
-  lensAttributesContext: attributesContext,
+  visContext,
   disableTriggers,
   disabledActions,
   onTotalHitsChange,
@@ -98,9 +101,9 @@ export function Histogram({
   onFilter,
   onBrushEnd,
   withDefaultActions,
+  abortController,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
-  const [chartSize, setChartSize] = useState('100%');
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
@@ -109,24 +112,13 @@ export function Histogram({
     isPlainRecord,
     timeField: dataView.timeFieldName,
   });
-  const chartRef = useRef<HTMLDivElement | null>(null);
-  const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
-  const { attributes } = attributesContext;
-
-  useEffect(() => {
-    if (attributes.visualizationType === 'lnsMetric') {
-      const size = containerHeight < containerWidth ? containerHeight : containerWidth;
-      setChartSize(`${size}px`);
-    } else {
-      setChartSize('100%');
-    }
-  }, [attributes, containerHeight, containerWidth]);
+  const { attributes } = visContext;
 
   const onLoad = useStableCallback(
     (
       isLoading: boolean,
       adapters: Partial<DefaultInspectorAdapters> | undefined,
-      lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
+      dataLoading$?: PublishingSubject<boolean | undefined>
     ) => {
       const lensRequest = adapters?.requests?.getRequests()[0];
       const requestFailed = lensRequest?.status === RequestStatus.ERROR;
@@ -134,9 +126,6 @@ export function Histogram({
         | IKibanaSearchResponse<estypes.SearchResponse>
         | undefined;
       const response = json?.rawResponse;
-
-      // The response can have `response?._shards.failed` but we should still be able to show hits number
-      // TODO: show shards warnings as a badge next to the total hits number
 
       if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
@@ -147,10 +136,14 @@ export function Histogram({
       const adapterTables = adapters?.tables?.tables;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
 
-      onTotalHitsChange?.(
-        isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
-        totalHits ?? hits?.total
-      );
+      if (response?._shards?.failed || response?.timed_out) {
+        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
+      } else {
+        onTotalHitsChange?.(
+          isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
+          totalHits ?? hits?.total
+        );
+      }
 
       if (response) {
         const newBucketInterval = buildBucketInterval({
@@ -164,7 +157,7 @@ export function Histogram({
         setBucketInterval(newBucketInterval);
       }
 
-      onChartLoad?.({ adapters: adapters ?? {}, embeddableOutput$: lensEmbeddableOutput$ });
+      onChartLoad?.({ adapters: adapters ?? {}, dataLoading$ });
     }
   );
 
@@ -172,11 +165,13 @@ export function Histogram({
     request,
     getTimeRange,
     refetch$,
-    attributesContext,
+    visContext,
     onLoad,
   });
 
   const { euiTheme } = useEuiTheme();
+  const boxShadow = `0 2px 2px -1px ${euiTheme.colors.mediumShade},
+  0 1px 5px -2px ${euiTheme.colors.mediumShade}`;
   const chartCss = css`
     position: relative;
     flex-grow: 1;
@@ -189,8 +184,9 @@ export function Histogram({
     }
 
     & .lnsExpressionRenderer {
-      width: ${chartSize};
+      width: ${attributes.visualizationType === 'lnsMetric' ? '90%' : '100%'};
       margin: auto;
+      box-shadow: ${attributes.visualizationType === 'lnsMetric' ? boxShadow : 'none'};
     }
 
     & .echLegend .echLegendList {
@@ -211,11 +207,12 @@ export function Histogram({
         data-test-subj="unifiedHistogramChart"
         data-time-range={timeRangeText}
         data-request-data={requestData}
+        data-suggestion-type={visContext.suggestionType}
         css={chartCss}
-        ref={chartRef}
       >
         <lens.EmbeddableComponent
           {...lensProps}
+          abortController={abortController}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           onFilter={onFilter}

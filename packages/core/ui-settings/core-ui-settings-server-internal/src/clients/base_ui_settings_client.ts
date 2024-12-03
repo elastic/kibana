@@ -1,14 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type {
+  GetUiSettingsContext,
+  UiSettingsParams,
+  UserProvidedValues,
+} from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { ValidationBadValueError, ValidationSettingNotFoundError } from '../ui_settings_errors';
 
@@ -23,7 +28,6 @@ export interface BaseUiSettingsDefaultsClientOptions {
  */
 export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   private readonly defaults: Record<string, UiSettingsParams>;
-  private readonly defaultValues: Record<string, unknown>;
   protected readonly overrides: Record<string, any>;
   protected readonly log: Logger;
 
@@ -33,9 +37,6 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
     this.overrides = overrides;
 
     this.defaults = defaults;
-    this.defaultValues = Object.fromEntries(
-      Object.entries(this.defaults).map(([key, { value }]) => [key, value])
-    );
   }
 
   getRegistered() {
@@ -46,13 +47,14 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
     return copiedDefaults;
   }
 
-  async get<T = any>(key: string): Promise<T> {
-    const all = await this.getAll();
+  async get<T = any>(key: string, context?: GetUiSettingsContext): Promise<T> {
+    const all = await this.getAll(context);
     return all[key] as T;
   }
 
-  async getAll<T = any>() {
-    const result = { ...this.defaultValues };
+  async getAll<T = any>(context?: GetUiSettingsContext) {
+    const defaultValues = await this.getDefaultValues(context);
+    const result = { ...defaultValues };
 
     const userProvided = await this.getUserProvided();
     Object.keys(userProvided).forEach((key) => {
@@ -65,7 +67,7 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   isOverridden(key: string) {
-    return this.overrides.hasOwnProperty(key);
+    return Object.hasOwn(this.overrides, key);
   }
 
   isSensitive(key: string): boolean {
@@ -74,7 +76,7 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   async validate(key: string, value: unknown) {
-    if (!value) {
+    if (value == null) {
       throw new ValidationBadValueError();
     }
     const definition = this.defaults[key];
@@ -97,6 +99,35 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
     if (definition.schema) {
       definition.schema.validate(value, {}, `validation [${key}]`);
     }
+  }
+
+  private async getDefaultValues(context?: GetUiSettingsContext) {
+    const values: { [key: string]: unknown } = {};
+    const promises: Array<[string, Promise<unknown>]> = [];
+
+    for (const [key, definition] of Object.entries(this.defaults)) {
+      if (definition.getValue) {
+        promises.push([key, definition.getValue(context)]);
+      } else {
+        values[key] = definition.value;
+      }
+    }
+
+    await Promise.all(
+      promises.map(([key, promise]) =>
+        promise
+          .then((value) => {
+            values[key] = value;
+          })
+          .catch((error) => {
+            this.log.error(`[UiSettingsClient] Failed to get value for key "${key}": ${error}`);
+            // Fallback to `value` prop if `getValue()` fails
+            values[key] = this.defaults[key].value;
+          })
+      )
+    );
+
+    return values;
   }
 
   abstract getUserProvided<T = any>(): Promise<Record<string, UserProvidedValues<T>>>;

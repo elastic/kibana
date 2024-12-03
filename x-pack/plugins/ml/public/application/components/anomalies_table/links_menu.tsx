@@ -8,8 +8,10 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison from '@kbn/rison';
-import React, { FC, useEffect, useMemo, useState } from 'react';
-import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -18,40 +20,52 @@ import {
   EuiProgress,
   EuiToolTip,
 } from '@elastic/eui';
+
+import type { SerializableRecord } from '@kbn/utility-types';
+import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import {
   isCategorizationAnomaly,
   isRuleSupported,
   type MlCustomUrlAnomalyRecordDoc,
   type MlKibanaUrlConfig,
   type MlAnomaliesTableRecord,
+  MLCATEGORY,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { mlJobService } from '../../services/job_service';
-import { getDataViewIdFromName } from '../../util/index_utils';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
+import { isDefined } from '@kbn/ml-is-defined';
+import { escapeQuotes } from '@kbn/es-query';
+import { isQuery } from '@kbn/data-plugin/public';
+
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import { parseInterval } from '@kbn/ml-parse-interval';
+import { PLUGIN_ID } from '../../../../common/constants/app';
+import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
-import { parseInterval } from '../../../../common/util/parse_interval';
-import { ml } from '../../services/ml_api_service';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
+import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
+
+import { useMlJobService } from '../../services/job_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-// @ts-ignore
-import {
-  escapeDoubleQuotes,
-  getDateFormatTz,
-  SourceIndicesWithGeoFields,
-} from '../../explorer/explorer_utils';
+import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
+import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import type { TimeRangeBounds } from '../../util/time_buckets';
-import { useMlKibana } from '../../contexts/kibana';
-// @ts-ignore
-import { getFieldTypeFromMapping } from '../../services/mapping_service';
+import { useMlApi, useMlKibana } from '../../contexts/kibana';
+import { useMlIndexUtils } from '../../util/index_service';
+
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
-import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
+
+const LOG_RATE_ANALYSIS_MARGIN_FACTOR = 20;
+const LOG_RATE_ANALYSIS_BASELINE_FACTOR = 15;
+
 interface LinksMenuProps {
   anomaly: MlAnomaliesTableRecord;
   bounds: TimeRangeBounds;
@@ -62,11 +76,23 @@ interface LinksMenuProps {
   showRuleEditorFlyout: (anomaly: MlAnomaliesTableRecord) => void;
   onItemClick: () => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
+  selectedJob?: MlJob;
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
+  const isMounted = useMountedState();
+
+  const [dataViewId, setDataViewId] = useState<string | null>(null);
+  const [dataViewIdWithTemporary, setDataViewIdWithTemporary] = useState<string | null>(null);
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
-  const [discoverUrlError, setDiscoverUrlError] = useState<string | undefined>();
+  const [openInDiscoverUrlError, setOpenInDiscoverUrlError] = useState<string | undefined>();
+  const [viewExamplesUrlError, setViewExamplesUrlError] = useState<string | undefined>();
+  const [openInLogRateAnalysisUrl, setOpenInLogRateAnalysisUrl] = useState<string | undefined>();
+
+  const [messageField, setMessageField] = useState<{
+    dataView: DataView;
+    field: DataViewField;
+  } | null>(null);
 
   const isCategorizationAnomalyRecord = isCategorizationAnomaly(props.anomaly);
 
@@ -74,19 +100,64 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const kibana = useMlKibana();
   const {
-    services: { data, share, application },
+    services: {
+      data,
+      share,
+      application,
+      uiActions,
+      uiSettings,
+      notifications: { toasts },
+    },
   } = kibana;
+  const { getDataViewById, getDataViewIdFromName } = useMlIndexUtils();
+  const mlApi = useMlApi();
+  const mlJobService = useMlJobService();
 
   const job = useMemo(() => {
+    if (props.selectedJob !== undefined) return props.selectedJob;
     return mlJobService.getJob(props.anomaly.jobId);
-  }, [props.anomaly.jobId]);
+    // skip mlJobService from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.anomaly.jobId, props.selectedJob]);
+
+  const categorizationFieldName = job.analysis_config.categorization_field_name;
+  const datafeedIndices = job.datafeed_config!.indices;
+  const indexPattern = datafeedIndices.join(',');
+  const autoGeneratedDiscoverLinkError = i18n.translate(
+    'xpack.ml.anomaliesTable.linksMenu.autoGeneratedDiscoverLinkErrorMessage',
+    {
+      defaultMessage: `Unable to link to Discover; no data view exists for index pattern ''{index}''`,
+      values: { index: indexPattern },
+    }
+  );
+
+  useEffect(
+    () => {
+      async function initDataViewId() {
+        const newDataViewId = await getDataViewIdFromName(indexPattern);
+        setDataViewId(newDataViewId);
+        if (newDataViewId === null) {
+          setViewExamplesUrlError(autoGeneratedDiscoverLinkError);
+        }
+
+        const newDataViewIdWithTemporary = await getDataViewIdFromName(indexPattern, job);
+        setDataViewIdWithTemporary(newDataViewIdWithTemporary);
+        if (newDataViewIdWithTemporary === null) {
+          setOpenInDiscoverUrlError(autoGeneratedDiscoverLinkError);
+        }
+      }
+
+      initDataViewId();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
-    const index = job.datafeed_config.indices[0];
-    const dataViewId = await getDataViewIdFromName(index);
-
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
-    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
+      getDateFormatTz(uiSettings)
+    );
     const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
     const anomalyBucketEnd = anomalyBucketStartMoment
       .add(anomaly.source.bucket_span, 'seconds')
@@ -113,7 +184,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       filters:
         dataViewId === null
           ? []
-          : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
+          : getFiltersForDSLQuery(job.datafeed_config!.query, dataViewId, job.job_id),
     });
     return location;
   };
@@ -122,15 +193,14 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     anomaly: MlAnomaliesTableRecord,
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
-    const index = job.datafeed_config.indices[0];
-    const dataViewId = await getDataViewIdFromName(index);
-
     // Create a layer for each of the geoFields
     const initialLayers = getInitialSourceIndexFieldLayers(
       sourceIndicesWithGeoFields[anomaly.jobId]
     );
     // Widen the timerange by one bucket span on start/end to increase chances of always having data on the map
-    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
+      getDateFormatTz(uiSettings)
+    );
     const anomalyBucketStart = anomalyBucketStartMoment
       .subtract(anomaly.source.bucket_span, 'seconds')
       .toISOString();
@@ -154,7 +224,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const filtersFromDatafeedQuery =
       dataViewId === null
         ? []
-        : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id);
+        : getFiltersForDSLQuery(job.datafeed_config!.query, dataViewId, job.job_id);
     const location = await locator?.getLocation({
       initialLayers,
       timeRange,
@@ -177,8 +247,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   useEffect(() => {
-    let unmounted = false;
     const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+
+    if (dataViewIdWithTemporary === null) return;
 
     if (!discoverLocator) {
       const discoverLocatorMissing = i18n.translate(
@@ -188,46 +259,58 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         }
       );
 
-      if (!unmounted) {
-        setDiscoverUrlError(discoverLocatorMissing);
+      if (isMounted()) {
+        setOpenInDiscoverUrlError(discoverLocatorMissing);
+        setViewExamplesUrlError(discoverLocatorMissing);
       }
       return;
     }
 
-    const getDataViewId = async () => {
-      const index = job.datafeed_config.indices[0];
+    (async () => {
+      const dataView = dataViewId ? await getDataViewById(dataViewId) : null;
 
-      const dataViewId = await getDataViewIdFromName(index, job);
-
-      // If data view doesn't exist for some reasons
-      if (!dataViewId && !unmounted) {
-        const autoGeneratedDiscoverLinkError = i18n.translate(
-          'xpack.ml.anomaliesTable.linksMenu.autoGeneratedDiscoverLinkErrorMessage',
-          {
-            defaultMessage: `Unable to link to Discover; no data view exists for index '{index}'`,
-            values: { index },
-          }
-        );
-
-        setDiscoverUrlError(autoGeneratedDiscoverLinkError);
+      if (dataView === null) {
+        return;
       }
-      return dataViewId;
-    };
+      dataView.getIndexPattern();
+      const field = findMessageField(dataView);
+      if (field !== null) {
+        setMessageField(field);
+      }
+    })();
 
-    const generateDiscoverUrl = async () => {
+    // withWindowParameters is used to generate the url state
+    // for Log Rate Analysis to create a baseline and deviation
+    // selection based on the anomaly record timestamp and bucket span.
+    const generateRedirectUrlPageState = async (
+      withWindowParameters = false,
+      timeAttribute = 'timeRange'
+    ): Promise<SerializableRecord> => {
       const interval = props.interval;
 
-      const dataViewId = await getDataViewId();
       const record = props.anomaly.source;
 
-      const earliestMoment = moment(record.timestamp).startOf(interval);
-      if (interval === 'hour') {
+      // Use the exact timestamp for Log Rate Analysis,
+      // in all other cases snap it to the provided interval.
+      const earliestMoment = withWindowParameters
+        ? moment(record.timestamp)
+        : moment(record.timestamp).startOf(interval);
+
+      // For Log Rate Analysis, look back further to
+      // provide enough room for the baseline time range.
+      // In all other cases look back 1 hour.
+      if (withWindowParameters) {
+        earliestMoment.subtract(record.bucket_span * LOG_RATE_ANALYSIS_MARGIN_FACTOR, 's');
+      } else if (interval === 'hour') {
         // Start from the previous hour.
         earliestMoment.subtract(1, 'h');
       }
 
       const latestMoment = moment(record.timestamp).add(record.bucket_span, 's');
-      if (props.isAggregatedData === true) {
+
+      if (withWindowParameters) {
+        latestMoment.add(record.bucket_span * LOG_RATE_ANALYSIS_MARGIN_FACTOR, 's');
+      } else if (props.isAggregatedData === true) {
         if (interval === 'hour') {
           // Show to the end of the next hour.
           latestMoment.add(1, 'h');
@@ -238,22 +321,50 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       const from = timeFormatter(earliestMoment.unix() * 1000); // e.g. 2016-02-08T16:00:00.000Z
       const to = timeFormatter(latestMoment.unix() * 1000); // e.g. 2016-02-08T18:59:59.000Z
 
+      // The window parameters for Log Rate Analysis.
+      // The deviation time range will span the current anomaly's bucket.
+      const dMin = record.timestamp;
+      const dMax = record.timestamp + record.bucket_span * 1000;
+      const bMax = dMin - record.bucket_span * 1000;
+      const bMin = bMax - record.bucket_span * 1000 * LOG_RATE_ANALYSIS_BASELINE_FACTOR;
+
       let kqlQuery = '';
 
-      if (record.influencers) {
+      if (record.influencers && !withWindowParameters) {
         kqlQuery = record.influencers
-          .map(
-            (influencer) =>
-              `"${influencer.influencer_field_name}":"${
-                influencer.influencer_field_values[0] ?? ''
-              }"`
-          )
+          .filter((influencer) => isDefined(influencer))
+          .map((influencer) => {
+            const values = influencer.influencer_field_values;
+
+            if (values.length > 0) {
+              const fieldName = escapeQuotes(influencer.influencer_field_name);
+              const escapedVals = values
+                .filter((value) => isDefined(value))
+                .map((value) => `"${fieldName}":"${escapeQuotes(value)}"`);
+              // Ensure there's enclosing () if there are multiple field values,
+              return escapedVals.length > 1 ? `(${escapedVals.join(' OR ')})` : escapedVals[0];
+            }
+          })
           .join(' AND ');
       }
 
-      const url = await discoverLocator.getRedirectUrl({
-        indexPatternId: dataViewId,
-        timeRange: {
+      // For multi-metric or population jobs, we add the selected entity for links to
+      // Log Rate Analysis, so they can be restored as part of the search filter.
+      if (withWindowParameters && props.anomaly.entityName && props.anomaly.entityValue) {
+        if (kqlQuery !== '') {
+          kqlQuery += ' AND ';
+        }
+
+        kqlQuery = `"${escapeQuotes(props.anomaly.entityName)}":"${escapeQuotes(
+          props.anomaly.entityValue + ''
+        )}"`;
+      }
+
+      const indexPatternId = dataViewIdWithTemporary;
+
+      return {
+        indexPatternId,
+        [timeAttribute]: {
           from,
           to,
           mode: 'absolute',
@@ -263,27 +374,83 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           query: kqlQuery,
         },
         filters:
-          dataViewId === null
+          indexPatternId === null
             ? []
-            : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
+            : getFiltersForDSLQuery(job.datafeed_config!.query, indexPatternId, job.job_id),
+        ...(withWindowParameters
+          ? {
+              wp: { bMin, bMax, dMin, dMax },
+            }
+          : {}),
+      };
+    };
+
+    const generateDiscoverUrl = async () => {
+      const pageState = await generateRedirectUrlPageState();
+      const url = await discoverLocator.getRedirectUrl(pageState);
+
+      if (isMounted()) {
+        setOpenInDiscoverUrl(url);
+      }
+    };
+
+    const generateLogRateAnalysisUrl = async () => {
+      if (
+        props.anomaly.source.function_description !== 'count' ||
+        // Disable link for datafeeds that use aggregations
+        // and define a non-standard summary count field name
+        (job.analysis_config.summary_count_field_name !== undefined &&
+          job.analysis_config.summary_count_field_name !== 'doc_count')
+      ) {
+        if (isMounted()) {
+          setOpenInLogRateAnalysisUrl(undefined);
+        }
+        return;
+      }
+
+      const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
+
+      if (!mlLocator) {
+        // eslint-disable-next-line no-console
+        console.error('Unable to detect locator for ML or bounds');
+        return;
+      }
+      const pageState = await generateRedirectUrlPageState(true, 'time');
+
+      const { indexPatternId, wp, query, filters, ...globalState } = pageState;
+
+      const url = await mlLocator.getRedirectUrl({
+        page: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS,
+        pageState: {
+          index: indexPatternId,
+          globalState,
+          appState: {
+            logRateAnalysis: {
+              wp,
+              ...(isQuery(query)
+                ? {
+                    filters,
+                    searchString: query.query,
+                    searchQueryLanguage: query.language,
+                  }
+                : {}),
+            },
+          },
+        },
       });
 
-      if (!unmounted) {
-        setOpenInDiscoverUrl(url);
+      if (isMounted()) {
+        setOpenInLogRateAnalysisUrl(url);
       }
     };
 
     if (!isCategorizationAnomalyRecord) {
       generateDiscoverUrl();
-    } else {
-      getDataViewId();
+      generateLogRateAnalysisUrl();
     }
 
-    return () => {
-      unmounted = true;
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(props.anomaly)]);
+  }, [dataViewId, dataViewIdWithTemporary, JSON.stringify(props.anomaly)]);
 
   const openCustomUrl = (customUrl: MlKibanaUrlConfig) => {
     const { anomaly, interval, isAggregatedData } = props;
@@ -343,7 +510,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       // - use first value (will only ever be more than one if influenced by category other than by/partition/over).
       const categoryId = record.mlcategory[0];
 
-      ml.results
+      mlApi.results
         .getCategoryDefinition(jobId, categoryId)
         .then((resp) => {
           // Prefix each of the terms with '+' so that the Elasticsearch Query String query
@@ -360,7 +527,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         .catch((resp) => {
           // eslint-disable-next-line no-console
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
-          const { toasts } = kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToOpenLinkErrorMessage', {
               defaultMessage:
@@ -455,14 +621,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     window.open(singleMetricViewerLink, '_blank');
   };
 
-  const viewExamples = () => {
+  const viewExamples = async () => {
     const categoryId = props.anomaly.entityValue;
     const record = props.anomaly.source;
 
     if (job === undefined) {
       // eslint-disable-next-line no-console
       console.log(`viewExamples(): no job found with ID: ${props.anomaly.jobId}`);
-      const { toasts } = kibana.services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToViewExamplesErrorMessage', {
           defaultMessage: 'Unable to view examples as no details could be found for job ID {jobId}',
@@ -473,49 +638,18 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
       return;
     }
-    const categorizationFieldName = job.analysis_config.categorization_field_name;
-    const datafeedIndices = job.datafeed_config.indices;
 
-    // Find the type of the categorization field i.e. text (preferred) or keyword.
-    // Uses the first matching field found in the list of indices in the datafeed_config.
-    // attempt to load the field type using each index. we have to do it this way as _field_caps
-    // doesn't specify which index a field came from unless there is a clash.
-    let i = 0;
-    findFieldType(datafeedIndices[i]);
-
-    const error = () => {
-      // eslint-disable-next-line no-console
-      console.log(
-        `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
-        datafeedIndices
-      );
-      const { toasts } = kibana.services.notifications;
-      toasts.addDanger(
-        i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
-          defaultMessage:
-            'Unable to view examples of documents with mlcategory {categoryId} ' +
-            'as no mapping could be found for the categorization field {categorizationFieldName}',
-          values: {
-            categoryId,
-            categorizationFieldName,
-          },
-        })
-      );
-    };
+    if (!categorizationFieldName) {
+      return;
+    }
 
     const createAndOpenUrl = (index: string, categorizationFieldType: string) => {
       // Get the definition of the category and use the terms or regex to view the
       // matching events in the Kibana Discover tab depending on whether the
       // categorization field is of mapping type text (preferred) or keyword.
-      ml.results
+      mlApi.results
         .getCategoryDefinition(record.job_id, categoryId)
         .then(async (resp) => {
-          // Find the ID of the data view with a title attribute which matches the
-          // index configured in the datafeed. If a Kibana data view has not been created
-          // for this index, then the user will see a warning message on the Discover tab advising
-          // them that no matching data view has been configured.
-          const dataViewId = await getDataViewIdFromName(index);
-
           // We should not redirect to Discover if data view doesn't exist
           if (!dataViewId) return;
 
@@ -563,7 +697,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
           const appStateProps = {
             index: dataViewId,
-            filters: getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
+            filters: getFiltersForDSLQuery(job.datafeed_config!.query, dataViewId, job.job_id),
             ...(query !== null
               ? {
                   query,
@@ -574,16 +708,12 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
           const { basePath } = kibana.services.http;
-          let path = basePath.get();
-          path += '/app/discover#/';
-          path += '?_g=' + _g;
-          path += '&_a=' + encodeURIComponent(_a);
+          const path = `${basePath.get()}/app/discover#/?_g=${_g}&_a=${encodeURIComponent(_a)}`;
           window.open(path, '_blank');
         })
         .catch((resp) => {
           // eslint-disable-next-line no-console
           console.log('viewExamples(): error loading categoryDefinition:', resp);
-          const { toasts } = kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.loadingDetailsErrorMessage', {
               defaultMessage:
@@ -596,23 +726,38 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         });
     };
 
-    function findFieldType(index: string) {
-      getFieldTypeFromMapping(index, categorizationFieldName)
-        .then((resp: string) => {
-          if (resp !== '') {
-            createAndOpenUrl(datafeedIndices.join(), resp);
-          } else {
-            i++;
-            if (i < datafeedIndices.length) {
-              findFieldType(datafeedIndices[i]);
-            } else {
-              error();
-            }
-          }
+    // Find the type of the categorization field i.e. text (preferred) or keyword.
+    // Uses the first matching field found in the list of indices in the datafeed_config.
+    let fieldType;
+
+    const dataView = dataViewIdWithTemporary
+      ? await getDataViewById(dataViewIdWithTemporary)
+      : null;
+
+    const field = dataView?.getFieldByName(categorizationFieldName);
+    if (field && Array.isArray(field.esTypes) && field.esTypes.length > 0) {
+      fieldType = field.esTypes[0];
+    }
+
+    if (fieldType) {
+      createAndOpenUrl(datafeedIndices.join(), fieldType);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(
+        `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
+        datafeedIndices
+      );
+      toasts.addDanger(
+        i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
+          defaultMessage:
+            'Unable to view examples of documents with mlcategory {categoryId} ' +
+            'as no mapping could be found for the categorization field {categorizationFieldName}',
+          values: {
+            categoryId,
+            categorizationFieldName,
+          },
         })
-        .catch(() => {
-          error();
-        });
+      );
     }
   };
 
@@ -642,18 +787,18 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
     if (application.capabilities.discover?.show && !isCategorizationAnomalyRecord) {
       // Add item from the start, but disable it during the URL generation.
-      const isLoading = discoverUrlError === undefined && openInDiscoverUrl === undefined;
+      const isLoading = openInDiscoverUrlError === undefined && openInDiscoverUrl === undefined;
 
       items.push(
         <EuiContextMenuItem
           key={`auto_raw_data_url`}
           icon="discoverApp"
-          disabled={discoverUrlError !== undefined || isLoading}
+          disabled={openInDiscoverUrlError !== undefined || isLoading}
           href={openInDiscoverUrl}
           data-test-subj={`mlAnomaliesListRowAction_viewInDiscoverButton`}
         >
-          {discoverUrlError ? (
-            <EuiToolTip content={discoverUrlError}>
+          {openInDiscoverUrlError ? (
+            <EuiToolTip content={openInDiscoverUrlError}>
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.linksMenu.viewInDiscover"
                 defaultMessage="View in Discover"
@@ -674,7 +819,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         items.push(
           <EuiContextMenuItem
             key="view_series"
-            icon="visLine"
+            icon="singleMetricViewer"
             onClick={() => {
               closePopover();
               viewSeries();
@@ -743,10 +888,10 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             viewExamples();
           }}
           data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
-          disabled={discoverUrlError !== undefined}
+          disabled={viewExamplesUrlError !== undefined}
         >
-          {discoverUrlError !== undefined ? (
-            <EuiToolTip content={discoverUrlError}>
+          {viewExamplesUrlError !== undefined ? (
+            <EuiToolTip content={viewExamplesUrlError}>
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
                 defaultMessage="View examples"
@@ -780,11 +925,67 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         </EuiContextMenuItem>
       );
     }
+
+    if (openInLogRateAnalysisUrl) {
+      items.push(
+        <EuiContextMenuItem
+          key="log_rate_analysis"
+          icon="logRateAnalysis"
+          href={openInLogRateAnalysisUrl}
+          data-test-subj="mlAnomaliesListRowAction_runLogRateAnalysisButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.runLogRateAnalysis"
+            defaultMessage="Run log rate analysis"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (messageField !== null) {
+      items.push(
+        <EuiContextMenuItem
+          key="run_pattern_analysis"
+          icon="logPatternAnalysis"
+          onClick={() => {
+            closePopover();
+            const additionalField = getAdditionalField(anomaly);
+            uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec({
+              dataView: messageField.dataView,
+              field: messageField.field,
+              originatingApp: PLUGIN_ID,
+              additionalFilter: {
+                from: anomaly.source.timestamp,
+                to: anomaly.source.timestamp + anomaly.source.bucket_span * 1000,
+                ...(additionalField !== null
+                  ? {
+                      field: {
+                        name: additionalField.name,
+                        value: additionalField.value,
+                      },
+                    }
+                  : {}),
+              },
+            });
+          }}
+          data-test-subj="mlAnomaliesListRowActionPatternAnalysisButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.patternAnalysisLabel"
+            defaultMessage="Run pattern analysis"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
     return items;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    dataViewId,
+    dataViewIdWithTemporary,
     openInDiscoverUrl,
-    discoverUrlError,
+    openInDiscoverUrlError,
+    viewExamplesUrlError,
     viewExamples,
     viewSeries,
     canConfigureRules,
@@ -830,3 +1031,23 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
     </div>
   );
 };
+
+function getAdditionalField(anomaly: MlAnomaliesTableRecord) {
+  if (anomaly.entityName === undefined || anomaly.entityValue === undefined) {
+    return null;
+  }
+
+  if (anomaly.entityName === MLCATEGORY) {
+    if (
+      anomaly.source.partition_field_name === undefined ||
+      anomaly.source.partition_field_value === undefined
+    ) {
+      return null;
+    }
+    return {
+      name: anomaly.source.partition_field_name,
+      value: anomaly.source.partition_field_value,
+    };
+  }
+  return { name: anomaly.entityName, value: anomaly.entityValue };
+}

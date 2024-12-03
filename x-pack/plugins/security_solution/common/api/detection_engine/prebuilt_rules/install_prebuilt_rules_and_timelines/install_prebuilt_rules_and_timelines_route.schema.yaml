@@ -1,13 +1,15 @@
 openapi: 3.0.0
 info:
   title: Install Prebuilt Rules API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/rules/prepackaged:
     put:
-      operationId: InstallPrebuiltRulesAndTimelines
+      x-labels: [ess]
       x-codegen-enabled: true
-      summary: Installs all Elastic prebuilt rules and timelines
+      operationId: InstallPrebuiltRulesAndTimelines
+      summary: Install prebuilt detection rules and Timelines
+      description: Install and update all Elastic prebuilt detection rules and Timelines.
       tags:
         - Prebuilt Rules API
       responses:

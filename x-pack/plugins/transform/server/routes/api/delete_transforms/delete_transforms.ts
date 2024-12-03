@@ -7,25 +7,18 @@
 
 import type { KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
+import type { DeleteDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_delete_response_schema';
 
+import type { ResponseStatus } from '../../api_schemas/common';
 import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 import { TRANSFORM_STATE } from '../../../../common/constants';
-import type { ResponseStatus } from '../../../../common/api_schemas/common';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
-} from '../../../../common/api_schemas/delete_transforms';
+} from '../../api_schemas/delete_transforms';
 
 import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
-
-async function getDataViewId(indexName: string, dataViewsService: DataViewsService) {
-  const dv = (await dataViewsService.find(indexName)).find(({ title }) => title === indexName);
-  return dv?.id;
-}
-
-async function deleteDestDataViewById(dataViewId: string, dataViewsService: DataViewsService) {
-  return await dataViewsService.delete(dataViewId);
-}
 
 export async function deleteTransforms(
   reqBody: DeleteTransformsRequestSchema,
@@ -50,7 +43,7 @@ export async function deleteTransforms(
 
     const transformDeleted: ResponseStatus = { success: false };
     const destIndexDeleted: ResponseStatus = { success: false };
-    const destDataViewDeleted: ResponseStatus = {
+    let destDataViewDeleted: DeleteDataViewApiResponseSchema = {
       success: false,
     };
     const transformId = transformInfo.id;
@@ -84,22 +77,16 @@ export async function deleteTransforms(
 
       // Delete the data view if there's a data view that matches the name of dest index
       if (destinationIndex && deleteDestDataView) {
-        try {
-          const dataViewId = await getDataViewId(destinationIndex, dataViewsService);
-          if (dataViewId) {
-            await deleteDestDataViewById(dataViewId, dataViewsService);
-            destDataViewDeleted.success = true;
-          }
-        } catch (deleteDestDataViewError) {
-          destDataViewDeleted.error = deleteDestDataViewError.meta.body.error;
-        }
+        destDataViewDeleted = await deleteDataViewFn({
+          dataViewsService,
+          dataViewName: destinationIndex,
+        });
       }
 
       try {
         await esClient.asCurrentUser.transform.deleteTransform({
           transform_id: transformId,
           force: shouldForceDelete && needToForceDelete,
-          // @ts-expect-error ES type needs to be updated
           delete_dest_index: deleteDestIndex,
         });
         transformDeleted.success = true;

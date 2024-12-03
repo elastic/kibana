@@ -8,6 +8,7 @@
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFieldText } from '@elastic/eui';
+import { SINGLE_SELECTION_AS_TEXT_PROPS } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
 
 interface Props {
@@ -132,7 +133,7 @@ export class StopInput extends Component<Props, State> {
       <EuiComboBox
         options={suggestionOptions}
         selectedOptions={selectedOptions}
-        singleSelection={{ asPlainText: true }}
+        singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
         onChange={this._onChange}
         onSearchChange={this._onSearchChange}
         onCreateOption={this._onCreateOption}

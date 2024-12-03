@@ -14,24 +14,27 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
 import React, { type FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { PanelHeaderItems } from './panel_header_items';
 import { useCurrentThemeVars } from '../../contexts/kibana';
 
 export interface CollapsiblePanelProps {
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
-
   header: React.ReactElement;
   headerItems?: React.ReactElement[];
+  ariaLabel: string;
 }
 
-export const CollapsiblePanel: FC<CollapsiblePanelProps> = ({
+export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
   isOpen,
   onToggle,
   children,
   header,
   headerItems,
+  ariaLabel,
 }) => {
   const { euiTheme } = useCurrentThemeVars();
 
@@ -51,6 +54,17 @@ export const CollapsiblePanel: FC<CollapsiblePanelProps> = ({
             <EuiFlexGroup gutterSize={'s'}>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
+                  aria-label={
+                    isOpen
+                      ? i18n.translate('xpack.ml.collapsiblePanel.toggleClose', {
+                          defaultMessage: 'Close {ariaLabel}',
+                          values: { ariaLabel },
+                        })
+                      : i18n.translate('xpack.ml.collapsiblePanel.toggleOpen', {
+                          defaultMessage: 'Open {ariaLabel}',
+                          values: { ariaLabel },
+                        })
+                  }
                   color={'text'}
                   iconType={isOpen ? 'arrowDown' : 'arrowRight'}
                   onClick={() => {

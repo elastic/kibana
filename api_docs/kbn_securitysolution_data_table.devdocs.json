@@ -45,7 +45,7 @@
           },
           ", setCellProps: (props: ",
           "EuiDataGridSetCellProps",
-          ") => void, defaultStyles?: React.CSSProperties | undefined) => void"
+          ") => void) => void"
         ],
         "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
         "deprecated": false,
@@ -109,21 +109,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "defaultStyles",
-            "description": [],
-            "signature": [
-              "React.CSSProperties | undefined"
-            ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -156,7 +141,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -471,15 +456,15 @@
         "label": "getTableByIdSelector",
         "description": [],
         "signature": [
-          "() => ((state: { dataTable: ",
+          "() => ((state: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
             "scope": "common",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableState",
-            "text": "TableState"
+            "section": "def-common.DataTableState",
+            "text": "DataTableState"
           },
-          "; }, params_0: string) => ",
+          ", tableId: string) => ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
             "scope": "common",
@@ -505,7 +490,7 @@
             "section": "def-common.DataTableModel",
             "text": "DataTableModel"
           },
-          " & { clearCache: () => void; }> & { clearCache: () => void; }"
+          ", { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/selectors.ts",
         "deprecated": false,
@@ -601,7 +586,23 @@
               "EuiDataGridColumn",
               ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
               "ColumnHeaderType",
-              "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+              "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -642,24 +643,6 @@
             ],
             "signature": [
               "string[]"
-            ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.expandedDetail",
-            "type": "Object",
-            "tags": [],
-            "label": "expandedDetail",
-            "description": [
-              "This holds the view information for the flyout when viewing data in a consuming view (i.e. hosts page) or the side panel in the primary data view"
-            ],
-            "signature": [
-              "{ [x: string]: ",
-              "ExpandedDetailType",
-              " | undefined; }"
             ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
@@ -1227,21 +1210,29 @@
             "section": "def-common.SortColumnTable",
             "text": "SortColumnTable"
           },
-          "[]; readonly title: string; readonly isLoading: boolean; readonly filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined; readonly columns: (Pick<",
+          "[]; readonly title: string; readonly columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
-          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1257,13 +1248,37 @@
             "section": "def-common.ViewSelection",
             "text": "ViewSelection"
           },
-          "; readonly dataViewId: string | null; readonly initialized?: boolean | undefined; readonly defaultColumns: (Pick<",
+          "; readonly filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly dataViewId: string | null; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
-          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1271,9 +1286,9 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; type?: string | undefined; })[]; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
-          "ExpandedDetailType",
-          ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPage: number; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
+          " | undefined; type?: string | undefined; })[]; readonly additionalFilters: Record<",
+          "AlertPageFilterType",
+          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1283,9 +1298,7 @@
           },
           "[]>; readonly sessionViewConfig: ",
           "SessionViewConfig",
-          " | null; readonly totalCount: number; readonly additionalFilters: Record<",
-          "AlertPageFilterType",
-          ", boolean>; }"
+          " | null; readonly totalCount: number; }"
         ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
         "deprecated": false,
@@ -1464,18 +1477,6 @@
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.expandedDetail",
-            "type": "Object",
-            "tags": [],
-            "label": "expandedDetail",
-            "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": []
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",

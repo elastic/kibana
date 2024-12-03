@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
@@ -42,20 +44,30 @@ export interface TaskRunResult {
   error_code?: string;
 }
 
+export interface ExecutionError {
+  name: string;
+  message: string;
+  stack: string;
+  cause: string;
+}
+
 export interface ReportOutput extends TaskRunResult {
   content: string | null;
   size: number;
 }
 
 /**
- * @deprecated
+ * @see also {@link packages/kbn-reporting/common/types.ts}
  */
+export type CsvPagingStrategy = 'pit' | 'scroll';
+
 export interface BaseParams {
-  layout?: LayoutParams;
+  browserTimezone: string; // to format dates in the user's time zone
   objectType: string;
   title: string;
-  browserTimezone: string; // to format dates in the user's time zone
   version: string; // to handle any state migrations
+  layout?: LayoutParams; // png & pdf only
+  pagingStrategy?: CsvPagingStrategy; // csv only
 }
 
 /**
@@ -66,14 +78,16 @@ export type BaseParamsV2 = BaseParams & {
   locatorParams: LocatorParams[];
 };
 
-/**
- * @deprecated
- */
 export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
 }
+
+/**
+ * Timestamp metrics about the task lifecycle
+ */
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'>;
 
 export type JobId = string;
 
@@ -130,12 +144,17 @@ export interface ReportSource {
   migration_version: string; // for reminding the user to update their POST URL
   attempts: number; // initially populated as 0
   created_at: string; // timestamp in UTC
+  '@timestamp'?: string; // creation timestamp, only used for data streams compatibility
   status: JOB_STATUS;
 
   /*
    * `output` is only populated if the report job is completed or failed.
    */
   output: ReportOutput | null;
+  /**
+   * Execution error during one of the execute task runs.
+   */
+  error?: ExecutionError | unknown;
 
   /*
    * Optional fields: populated when the job is claimed to execute, and after

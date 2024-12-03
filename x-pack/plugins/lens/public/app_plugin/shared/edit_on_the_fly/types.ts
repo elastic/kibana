@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { DatasourceMap, VisualizationMap, FramePublicAPI } from '../../../types';
-import type { LensEmbeddableOutput } from '../../../embeddable';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  FramePublicAPI,
+  UserMessagesGetter,
+} from '../../../types';
 import type { LensInspector } from '../../../lens_inspector_service';
-import type { Document } from '../../../persistence';
+import type { LensDocument } from '../../../persistence';
 
 export interface FlyoutWrapperProps {
   children: JSX.Element;
@@ -19,7 +23,8 @@ export interface FlyoutWrapperProps {
   isScrollable: boolean;
   displayFlyoutHeader?: boolean;
   language?: string;
-  attributesChanged?: boolean;
+  isNewPanel?: boolean;
+  isSaveable?: boolean;
   onCancel?: () => void;
   onApply?: () => void;
   navigateToLensEditor?: () => void;
@@ -31,22 +36,22 @@ export interface EditConfigPanelProps {
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
   /** The attributes of the Lens embeddable */
-  attributes: TypedLensByValueInput['attributes'];
+  attributes: TypedLensSerializedState['attributes'];
   /** Callback for updating the visualization and datasources state.*/
   updatePanelState: (
     datasourceState: unknown,
     visualizationState: unknown,
-    visualizationType?: string
+    visualizationId?: string
   ) => void;
-  updateSuggestion?: (attrs: TypedLensByValueInput['attributes']) => void;
+  updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
-  setCurrentAttributes?: (attrs: TypedLensByValueInput['attributes']) => void;
+  setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
   datasourceId: 'formBased' | 'textBased';
   /** Embeddable output observable, useful for dashboard flyout  */
-  output$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: PublishingSubject<boolean | undefined>;
   /** Contains the active data, necessary for some panel configuration such as coloring */
-  lensAdapters?: LensInspector['adapters'];
+  lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   /** Optional callback called when updating the by reference embeddable */
   updateByRefInput?: (soId: string) => void;
   /** Callback for closing the edit flyout */
@@ -63,17 +68,28 @@ export interface EditConfigPanelProps {
    */
   savedObjectId?: string;
   /** Callback for saving the embeddable as a SO */
-  saveByRef?: (attrs: Document) => void;
+  saveByRef?: (attrs: LensDocument) => void;
   /** Optional callback for navigation from the header of the flyout */
   navigateToLensEditor?: () => void;
   /** If set to true it displays a header on the flyout */
   displayFlyoutHeader?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   canEditTextBasedQuery?: boolean;
+  /** The flyout is used for adding a new panel by scratch */
+  isNewPanel?: boolean;
+  /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
+  hidesSuggestions?: boolean;
+  /** Apply button handler */
+  onApply?: (attrs: TypedLensSerializedState['attributes']) => void;
+  /** Cancel button handler */
+  onCancel?: () => void;
+  // in cases where the embeddable is not filtered by time
+  // (e.g. through unified search) set this property to true
+  hideTimeFilterInfo?: boolean;
 }
 
 export interface LayerConfigurationProps {
-  attributes: TypedLensByValueInput['attributes'];
+  attributes: TypedLensSerializedState['attributes'];
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
   visualizationMap: VisualizationMap;
@@ -82,4 +98,6 @@ export interface LayerConfigurationProps {
   framePublicAPI: FramePublicAPI;
   hasPadding?: boolean;
   setIsInlineFlyoutVisible: (flag: boolean) => void;
+  getUserMessages: UserMessagesGetter;
+  onlyAllowSwitchToSubtypes?: boolean;
 }

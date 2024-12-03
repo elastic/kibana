@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const getNotificationsQuerySchema = schema.object({
-  /**
-   * Search string for the message content
-   */
-  queryString: schema.maybe(schema.string()),
-  /**
-   * Sort field
-   */
+  queryString: schema.maybe(
+    schema.string({ meta: { description: 'Search string for the message content' } })
+  ),
   sortField: schema.oneOf(
     [
       schema.literal('timestamp'),
@@ -24,13 +21,12 @@ export const getNotificationsQuerySchema = schema.object({
     ],
     {
       defaultValue: 'timestamp',
+      meta: { description: 'Sort field' },
     }
   ),
-  /**
-   * Sort direction
-   */
   sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
     defaultValue: 'desc',
+    meta: { description: 'Sort direction' },
   }),
   earliest: schema.maybe(schema.string()),
   latest: schema.maybe(schema.string()),

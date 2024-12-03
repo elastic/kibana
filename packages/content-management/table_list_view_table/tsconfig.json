@@ -8,12 +8,14 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/i18n",
@@ -22,11 +24,24 @@
     "@kbn/core-http-browser",
     "@kbn/core-mount-utils-browser",
     "@kbn/core-overlays-browser",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/test-jest-helpers",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/user-profile-components",
+    "@kbn/core-user-profile-browser",
+    "@kbn/react-kibana-mount",
+    "@kbn/content-management-user-profiles",
+    "@kbn/recently-accessed",
+    "@kbn/content-management-content-insights-public",
+    "@kbn/content-management-favorites-public",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-table-persist"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

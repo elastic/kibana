@@ -6,13 +6,11 @@
  */
 
 import { createPromiseFromStreams } from '@kbn/utils';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { FrameworkRequest } from '../../../../framework';
 import {
   createMockConfig,
   requestContextMock,
-  mockGetCurrentUser,
 } from '../../../../detection_engine/routes/__mocks__';
 import {
   addPrepackagedRulesRequest,
@@ -22,12 +20,10 @@ import {
 import * as helpers from './helpers';
 import { importTimelines } from '../../timelines/import_timelines/helpers';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
 
 jest.mock('../../timelines/import_timelines/helpers');
 
 describe('installPrepackagedTimelines', () => {
-  let securitySetup: SecurityPluginSetup;
   let frameworkRequest: FrameworkRequest;
   const spyInstallPrepackagedTimelines = jest.spyOn(helpers, 'installPrepackagedTimelines');
 
@@ -37,13 +33,6 @@ describe('installPrepackagedTimelines', () => {
   const mockFileName = 'prepackaged_timelines.ndjson';
 
   beforeEach(async () => {
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
-
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     jest.doMock('./helpers', () => {
@@ -56,7 +45,6 @@ describe('installPrepackagedTimelines', () => {
     const request = addPrepackagedRulesRequest();
     frameworkRequest = await buildFrameworkRequest(
       requestContextMock.convertContext(context),
-      securitySetup,
       request
     );
   });
@@ -242,9 +230,8 @@ describe('installPrepackagedTimelines', () => {
     );
 
     expect(
-      (result as ImportTimelineResultSchema).errors[0].error.message.includes(
-        'read prepackaged timelines error:'
-      )
+      'errors' in result &&
+        result.errors?.[0].error?.message?.includes('read prepackaged timelines error:')
     ).toBeTruthy();
   });
 });

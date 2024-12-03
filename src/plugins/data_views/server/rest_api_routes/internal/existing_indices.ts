@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { IRouter, RequestHandler } from '@kbn/core/server';
@@ -41,7 +42,7 @@ export const handler: RequestHandler<{}, { indices: string | string[] }, string[
     const indexArray = parseIndices(indices);
     const core = await ctx.core;
     const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-    const indexPatterns = new IndexPatternsFetcher(elasticsearchClient, true);
+    const indexPatterns = new IndexPatternsFetcher(elasticsearchClient);
 
     const response: string[] = await indexPatterns.getExistingIndices(indexArray);
     return res.ok({ body: response });
@@ -59,6 +60,12 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
     .addVersion(
       {
         version,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             query: schema.object({
@@ -67,7 +74,7 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
           },
           response: {
             200: {
-              body: schema.arrayOf(schema.string()),
+              body: () => schema.arrayOf(schema.string()),
             },
           },
         },

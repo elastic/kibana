@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-import { EuiText, htmlIdGenerator } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
-  VectorLayerDescriptor,
 } from '@kbn/maps-plugin/common';
-import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
+import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
-import { EmbeddedMapComponent } from '../../../embedded_map';
-import { FieldVisStats } from '../../../../../../../common/types';
+import type { FieldVisStats } from '../../../../../../../common/types';
 import { ExpandedRowPanel } from './expanded_row_panel';
 
 export const getChoroplethTopValuesLayer = (
@@ -30,7 +30,7 @@ export const getChoroplethTopValuesLayer = (
   { layerId, field }: EMSTermJoinConfig
 ): VectorLayerDescriptor => {
   return {
-    id: htmlIdGenerator()(),
+    id: 'choroplethLayer',
     label: i18n.translate('xpack.dataVisualizer.choroplethMap.topValuesCount', {
       defaultMessage: 'Top values count for {fieldName}',
       values: { fieldName },
@@ -40,7 +40,7 @@ export const getChoroplethTopValuesLayer = (
         // Left join is the id from the type of field (e.g. world_countries)
         leftField: field,
         right: {
-          id: 'anomaly_count',
+          id: 'doc_count',
           type: SOURCE_TYPES.TABLE_SOURCE,
           __rows: topValues,
           __columns: [
@@ -94,7 +94,7 @@ export const getChoroplethTopValuesLayer = (
 };
 
 interface Props {
-  stats: FieldVisStats | undefined;
+  stats: FieldVisStats;
   suggestion: EMSTermJoinConfig;
 }
 
@@ -102,17 +102,16 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   const {
     services: {
       data: { fieldFormats },
+      maps: mapsService,
     },
   } = useDataVisualizerKibana();
 
-  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats!;
+  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats;
 
-  const layerList: VectorLayerDescriptor[] = useMemo(
-    () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion)],
+  const choroplethLayer: VectorLayerDescriptor = useMemo(
+    () => getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion),
     [suggestion, fieldName, topValues]
   );
-
-  if (!stats) return null;
 
   const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
 
@@ -158,9 +157,11 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
       className={'dvPanel__wrapper'}
       grow={true}
     >
-      <div className={'dvMap__wrapper'}>
-        <EmbeddedMapComponent layerList={layerList} />
-      </div>
+      {mapsService && (
+        <div className={'dvMap__wrapper'}>
+          <mapsService.PassiveMap passiveLayer={choroplethLayer} />
+        </div>
+      )}
 
       {countsElement}
     </ExpandedRowPanel>

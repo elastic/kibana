@@ -19,9 +19,11 @@ import {
   Visualization,
 } from '../../types';
 import { GROUP_ID } from './constants';
-import { getMetricVisualization, MetricVisualizationState } from './visualization';
+import { getMetricVisualization } from './visualization';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { Ast } from '@kbn/interpreter';
+import { LayoutDirection } from '@elastic/charts';
+import { MetricVisualizationState } from './types';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 const theme = themeServiceMock.createStartContract();
@@ -75,6 +77,10 @@ describe('metric visualization', () => {
     color: 'static-color',
     palette,
     showBar: false,
+    titlesTextAlign: 'left',
+    valuesTextAlign: 'right',
+    iconAlign: 'left',
+    valueFontMode: 'default',
   };
 
   const fullStateWTrend: Required<MetricVisualizationState> = {
@@ -142,7 +148,7 @@ describe('metric visualization', () => {
         ).toMatchInlineSnapshot(`
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "columnId": "metric-col-id",
               "triggerIconType": "color",
             },
@@ -271,7 +277,7 @@ describe('metric visualization', () => {
     const maxPossibleNumValues = 7;
     let datasourceLayers: DatasourceLayers;
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
       mockDatasource.publicAPIMock.getMaxPossibleNumValues.mockReturnValue(maxPossibleNumValues);
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         isStaticValue: false,
@@ -312,11 +318,14 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
-                "icon": Array [
-                  "empty",
+                "iconAlign": Array [
+                  "left",
                 ],
                 "inspectorTableId": Array [
                   "first",
+                ],
+                "max": Array [
+                  "max-metric-col-id",
                 ],
                 "maxCols": Array [
                   5,
@@ -340,9 +349,6 @@ describe('metric visualization', () => {
                     "type": "expression",
                   },
                 ],
-                "progressDirection": Array [
-                  "vertical",
-                ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
@@ -352,7 +358,16 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
+                "titlesTextAlign": Array [
+                  "left",
+                ],
                 "trendline": Array [],
+                "valueFontSize": Array [
+                  "default",
+                ],
+                "valuesTextAlign": Array [
+                  "right",
+                ],
               },
               "function": "metricVis",
               "type": "function",
@@ -376,11 +391,14 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
-                "icon": Array [
-                  "empty",
+                "iconAlign": Array [
+                  "left",
                 ],
                 "inspectorTableId": Array [
                   "first",
+                ],
+                "max": Array [
+                  "max-metric-col-id",
                 ],
                 "maxCols": Array [
                   5,
@@ -407,9 +425,6 @@ describe('metric visualization', () => {
                     "type": "expression",
                   },
                 ],
-                "progressDirection": Array [
-                  "vertical",
-                ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
@@ -419,7 +434,16 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
+                "titlesTextAlign": Array [
+                  "left",
+                ],
                 "trendline": Array [],
+                "valueFontSize": Array [
+                  "default",
+                ],
+                "valuesTextAlign": Array [
+                  "right",
+                ],
               },
               "function": "metricVis",
               "type": "function",
@@ -726,7 +750,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorLightestShade);
+        ).toBe(euiLightVars.euiColorEmptyShade);
 
         expect(
           (
@@ -740,7 +764,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorLightestShade);
+        ).toBe(euiLightVars.euiColorEmptyShade);
 
         // this case isn't currently relevant because other parts of the code don't allow showBar to be
         // set when there isn't a max dimension but this test covers the branch anyhow
@@ -756,8 +780,20 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toEqual(euiThemeVars.euiColorLightestShade);
+        ).toEqual(euiThemeVars.euiColorEmptyShade);
       });
+    });
+
+    it('defaults progress direction to vertical', () => {
+      const AST = visualization.toExpression(
+        {
+          ...fullState,
+          progressDirection: undefined,
+          showBar: true,
+        },
+        datasourceLayers
+      ) as ExpressionAstExpression;
+      expect(AST.chain[1].arguments.progressDirection[0]).toBe(LayoutDirection.Vertical);
     });
   });
 
@@ -765,8 +801,12 @@ describe('metric visualization', () => {
     expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
         "icon": "empty",
+        "iconAlign": "left",
         "layerId": "first",
         "layerType": "data",
+        "titlesTextAlign": "left",
+        "valueFontMode": "default",
+        "valuesTextAlign": "right",
       }
     `);
   });
@@ -975,7 +1015,7 @@ describe('metric visualization', () => {
     const columnId = 'col-id';
 
     const cases: Array<{
-      groupId: typeof GROUP_ID[keyof typeof GROUP_ID];
+      groupId: (typeof GROUP_ID)[keyof typeof GROUP_ID];
       accessor: keyof MetricVisualizationState;
     }> = [
       { groupId: GROUP_ID.METRIC, accessor: 'metricAccessor' },

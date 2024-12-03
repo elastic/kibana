@@ -15,6 +15,7 @@ import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isAnyActionSupportIncidents } from './7.11';
+import { RULE_SAVED_OBJECT_TYPE } from '..';
 
 const migrationContext = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -1811,7 +1812,7 @@ describe('successful migrations', () => {
           {
             name: 'param:alert_0',
             id: '123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
         ],
       });
@@ -1867,7 +1868,7 @@ describe('successful migrations', () => {
           {
             name: 'param:alert_0',
             id: '123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
         ],
       };
@@ -1882,7 +1883,7 @@ describe('successful migrations', () => {
           {
             name: 'param:alert_0',
             id: '123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
         ],
       });
@@ -1923,7 +1924,7 @@ describe('successful migrations', () => {
           {
             name: 'param:alert_0',
             id: '123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
         ],
       });
@@ -1944,7 +1945,7 @@ describe('successful migrations', () => {
           {
             name: 'param:alert_0',
             id: '123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
         ],
       };
@@ -1959,7 +1960,7 @@ describe('successful migrations', () => {
           {
             name: 'param:alert_0',
             id: '123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
         ],
       });
@@ -2002,7 +2003,7 @@ describe('successful migrations', () => {
           {
             name: 'param:alert_0',
             id: '123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
         ],
       };
@@ -2017,7 +2018,7 @@ describe('successful migrations', () => {
           {
             name: 'param:alert_0',
             id: '123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
         ],
       });
@@ -3208,6 +3209,6 @@ function getMockData(
     references: [],
     updated_at: withSavedObjectUpdatedAt ? getUpdatedAt() : undefined,
     id: uuidv4(),
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
   };
 }

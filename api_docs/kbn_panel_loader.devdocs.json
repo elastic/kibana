@@ -1,0 +1,101 @@
+{
+  "id": "@kbn/panel-loader",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/panel-loader",
+        "id": "def-public.PanelLoader",
+        "type": "Function",
+        "tags": [],
+        "label": "PanelLoader",
+        "description": [],
+        "signature": [
+          "(props: { showShadow?: boolean | undefined; showBorder?: boolean | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "packages/kbn-panel-loader/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/panel-loader",
+            "id": "def-public.PanelLoader.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "path": "packages/kbn-panel-loader/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/panel-loader",
+                "id": "def-public.PanelLoader.$1.showShadow",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "showShadow",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-panel-loader/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/panel-loader",
+                "id": "def-public.PanelLoader.$1.showBorder",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "showBorder",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-panel-loader/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/panel-loader",
+                "id": "def-public.PanelLoader.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-panel-loader/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

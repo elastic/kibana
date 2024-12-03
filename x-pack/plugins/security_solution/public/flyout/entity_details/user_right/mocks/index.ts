@@ -5,47 +5,89 @@
  * 2.0.
  */
 
-import type { RiskScoreState } from '../../../../explore/containers/risk_score';
-import type { RiskScoreEntity, UserRiskScore } from '../../../../../common/search_strategy';
-import { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskCategories } from '../../../../../common/risk_engine';
+import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
+import {
+  ManagedUserDatasetKey,
+  type ManagedUserHits,
+} from '../../../../../common/search_strategy/security_solution/users/managed_details';
+import type { ManagedUserData } from '../types';
+import { mockAnomalies } from '../../../../common/components/ml/mock';
+import type { UserItem } from '../../../../../common/search_strategy';
+import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 
-const userRiskScore: UserRiskScore = {
-  '@timestamp': '626569200000',
+const anomaly = mockAnomalies.anomalies[0];
+
+const observedUserDetails = {
   user: {
-    name: 'test',
-    risk: {
-      rule_risks: [],
-      calculated_score_norm: 70,
-      multipliers: [],
-      calculated_level: RiskSeverity.high,
-      inputs: [
-        {
-          id: '_id',
-          index: '_index',
-          category: RiskCategories.category_1,
-          description: 'Alert from Rule: My rule',
-          risk_score: 30,
-          timestamp: '2021-08-19T18:55:59.000Z',
-        },
-      ],
+    id: ['1234', '321'],
+    domain: ['test domain', 'another test domain'],
+  },
+  host: {
+    ip: ['10.0.0.1', '127.0.0.1'],
+    os: {
+      name: ['testOs'],
+      family: ['testFamily'],
     },
   },
-  alertsCount: 0,
-  oldestAlertTimestamp: '626569200000',
 };
 
-export const mockRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
-  data: [userRiskScore],
-  inspect: {
-    dsl: [],
-    response: [],
+export const mockObservedUser: ObservedEntityData<UserItem> = {
+  details: observedUserDetails,
+  isLoading: false,
+  firstSeen: {
+    isLoading: false,
+    date: '2023-02-23T20:03:17.489Z',
   },
-  isInspected: false,
-  refetch: () => {},
-  totalCount: 0,
-  isModuleEnabled: true,
-  isAuthorized: true,
-  isDeprecated: false,
-  loading: false,
+  lastSeen: {
+    isLoading: false,
+    date: '2023-02-23T20:03:17.489Z',
+  },
+  anomalies: {
+    isLoading: false,
+    anomalies: {
+      anomalies: [anomaly],
+      interval: '',
+    },
+    jobNameById: { [anomaly.jobId]: 'job_name' },
+  },
+};
+
+export const mockOktaUserFields: ManagedUserFields = {
+  '@timestamp': ['2023-11-16T13:42:23.074Z'],
+  'event.dataset': [ManagedUserDatasetKey.OKTA],
+  'user.profile.last_name': ['Okta last name'],
+  'user.profile.first_name': ['Okta first name'],
+  'user.profile.mobile_phone': ['1234567'],
+  'user.profile.job_title': ['Okta Unit tester'],
+  'user.geo.city_name': ["A'dam"],
+  'user.geo.country_iso_code': ['NL'],
+  'user.id': ['00ud9ohoh9ww644Px5d7'],
+  'user.email': ['okta.test.user@elastic.co'],
+  'user.name': ['okta.test.user@elastic.co'],
+};
+
+export const mockEntraUserFields: ManagedUserFields = {
+  '@timestamp': ['2023-11-16T13:42:23.074Z'],
+  'event.dataset': [ManagedUserDatasetKey.ENTRA],
+  'user.id': ['12345'],
+  'user.first_name': ['Entra first name'],
+  'user.last_name': ['Entra last name'],
+  'user.full_name': ['Entra full name'],
+  'user.phone': ['123456'],
+  'user.job_title': ['Entra Unit tester'],
+  'user.work.location_name': ['USA, CA'],
+};
+
+export const managedUserDetails: ManagedUserHits = {
+  [ManagedUserDatasetKey.ENTRA]: {
+    fields: mockEntraUserFields,
+    _index: 'test-index',
+    _id: '123-test',
+  },
+};
+
+export const mockManagedUserData: ManagedUserData = {
+  data: managedUserDetails,
+  isLoading: false,
+  isIntegrationEnabled: true,
 };

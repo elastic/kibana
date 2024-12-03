@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { withTimeout, isPromise } from '@kbn/std';
@@ -34,6 +35,7 @@ export class PluginsSystem<T extends PluginType> {
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
+  private sortedPluginNames?: Set<string>;
 
   constructor(private readonly coreContext: CoreContext, public readonly type: T) {
     this.log = coreContext.logger.get('plugins-system', this.type);
@@ -47,6 +49,9 @@ export class PluginsSystem<T extends PluginType> {
     }
 
     this.plugins.set(plugin.name, plugin);
+
+    // clear sorted plugin name cache on addition
+    this.sortedPluginNames = undefined;
   }
 
   public getPlugins() {
@@ -54,32 +59,31 @@ export class PluginsSystem<T extends PluginType> {
   }
 
   /**
-   * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
+   * @returns a Map of each plugin and an Array of its available dependencies
    * @internal
    */
   public getPluginDependencies(): PluginDependencies {
-    const asNames = new Map(
-      [...this.plugins].map(([name, plugin]) => [
+    const asNames = new Map<string, string[]>();
+    const asOpaqueIds = new Map<symbol, symbol[]>();
+
+    for (const pluginName of this.getTopologicallySortedPluginNames()) {
+      const plugin = this.plugins.get(pluginName)!;
+      const dependencies = [
+        ...new Set([
+          ...plugin.requiredPlugins,
+          ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
+        ]),
+      ];
+
+      asNames.set(
         plugin.name,
-        [
-          ...new Set([
-            ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
-          ]),
-        ].map((depId) => this.plugins.get(depId)!.name),
-      ])
-    );
-    const asOpaqueIds = new Map(
-      [...this.plugins].map(([name, plugin]) => [
+        dependencies.map((depId) => this.plugins.get(depId)!.name)
+      );
+      asOpaqueIds.set(
         plugin.opaqueId,
-        [
-          ...new Set([
-            ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
-          ]),
-        ].map((depId) => this.plugins.get(depId)!.opaqueId),
-      ])
-    );
+        dependencies.map((depId) => this.plugins.get(depId)!.opaqueId)
+      );
+    }
 
     return { asNames, asOpaqueIds };
   }
@@ -250,10 +254,10 @@ export class PluginsSystem<T extends PluginType> {
         try {
           const resultMaybe = await withTimeout({
             promise: plugin.stop(),
-            timeoutMs: 30 * Sec,
+            timeoutMs: 15 * Sec,
           });
           if (resultMaybe?.timedout) {
-            this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+            this.log.warn(`"${pluginName}" plugin didn't stop in 15sec., move on to the next.`);
           }
         } catch (e) {
           this.log.warn(`"${pluginName}" thrown during stop: ${e}`);
@@ -298,67 +302,74 @@ export class PluginsSystem<T extends PluginType> {
     return publicPlugins;
   }
 
-  /**
-   * Gets topologically sorted plugin names that are registered with the plugin system.
-   * Ordering is possible if and only if the plugins graph has no directed cycles,
-   * that is, if it is a directed acyclic graph (DAG). If plugins cannot be ordered
-   * an error is thrown.
-   *
-   * Uses Kahn's Algorithm to sort the graph.
-   */
   private getTopologicallySortedPluginNames() {
-    // We clone plugins so we can remove handled nodes while we perform the
-    // topological ordering. If the cloned graph is _not_ empty at the end, we
-    // know we were not able to topologically order the graph. We exclude optional
-    // dependencies that are not present in the plugins graph.
-    const pluginsDependenciesGraph = new Map(
-      [...this.plugins.entries()].map(([pluginName, plugin]) => {
-        return [
-          pluginName,
-          new Set([
-            ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter((dependency) => this.plugins.has(dependency)),
-          ]),
-        ] as [PluginName, Set<PluginName>];
-      })
-    );
-
-    // First, find a list of "start nodes" which have no outgoing edges. At least
-    // one such node must exist in a non-empty acyclic graph.
-    const pluginsWithAllDependenciesSorted = [...pluginsDependenciesGraph.keys()].filter(
-      (pluginName) => pluginsDependenciesGraph.get(pluginName)!.size === 0
-    );
-
-    const sortedPluginNames = new Set<PluginName>();
-    while (pluginsWithAllDependenciesSorted.length > 0) {
-      const sortedPluginName = pluginsWithAllDependenciesSorted.pop()!;
-
-      // We know this plugin has all its dependencies sorted, so we can remove it
-      // and include into the final result.
-      pluginsDependenciesGraph.delete(sortedPluginName);
-      sortedPluginNames.add(sortedPluginName);
-
-      // Go through the rest of the plugins and remove `sortedPluginName` from their
-      // unsorted dependencies.
-      for (const [pluginName, dependencies] of pluginsDependenciesGraph) {
-        // If we managed delete `sortedPluginName` from dependencies let's check
-        // whether it was the last one and we can mark plugin as sorted.
-        if (dependencies.delete(sortedPluginName) && dependencies.size === 0) {
-          pluginsWithAllDependenciesSorted.push(pluginName);
-        }
-      }
+    if (!this.sortedPluginNames) {
+      this.sortedPluginNames = getTopologicallySortedPluginNames(this.plugins);
     }
-
-    if (pluginsDependenciesGraph.size > 0) {
-      const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.keys()]);
-      throw new Error(
-        `Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ${edgesLeft}`
-      );
-    }
-
-    return sortedPluginNames;
+    return this.sortedPluginNames;
   }
 }
+
+/**
+ * Gets topologically sorted plugin names that are registered with the plugin system.
+ * Ordering is possible if and only if the plugins graph has no directed cycles,
+ * that is, if it is a directed acyclic graph (DAG). If plugins cannot be ordered
+ * an error is thrown.
+ *
+ * Uses Kahn's Algorithm to sort the graph.
+ */
+const getTopologicallySortedPluginNames = (plugins: Map<PluginName, PluginWrapper>) => {
+  // We clone plugins so we can remove handled nodes while we perform the
+  // topological ordering. If the cloned graph is _not_ empty at the end, we
+  // know we were not able to topologically order the graph. We exclude optional
+  // dependencies that are not present in the plugins graph.
+  const pluginsDependenciesGraph = new Map(
+    [...plugins.entries()].map(([pluginName, plugin]) => {
+      return [
+        pluginName,
+        new Set([
+          ...plugin.requiredPlugins,
+          ...plugin.optionalPlugins.filter((dependency) => plugins.has(dependency)),
+        ]),
+      ] as [PluginName, Set<PluginName>];
+    })
+  );
+
+  // First, find a list of "start nodes" which have no outgoing edges. At least
+  // one such node must exist in a non-empty acyclic graph.
+  const pluginsWithAllDependenciesSorted = [...pluginsDependenciesGraph.keys()].filter(
+    (pluginName) => pluginsDependenciesGraph.get(pluginName)!.size === 0
+  );
+
+  const sortedPluginNames = new Set<PluginName>();
+  while (pluginsWithAllDependenciesSorted.length > 0) {
+    const sortedPluginName = pluginsWithAllDependenciesSorted.pop()!;
+
+    // We know this plugin has all its dependencies sorted, so we can remove it
+    // and include into the final result.
+    pluginsDependenciesGraph.delete(sortedPluginName);
+    sortedPluginNames.add(sortedPluginName);
+
+    // Go through the rest of the plugins and remove `sortedPluginName` from their
+    // unsorted dependencies.
+    for (const [pluginName, dependencies] of pluginsDependenciesGraph) {
+      // If we managed delete `sortedPluginName` from dependencies let's check
+      // whether it was the last one and we can mark plugin as sorted.
+      if (dependencies.delete(sortedPluginName) && dependencies.size === 0) {
+        pluginsWithAllDependenciesSorted.push(pluginName);
+      }
+    }
+  }
+
+  if (pluginsDependenciesGraph.size > 0) {
+    const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.keys()]);
+    throw new Error(
+      `Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ${edgesLeft}`
+    );
+  }
+
+  return sortedPluginNames;
+};
 
 const buildReverseDependencyMap = (
   pluginMap: Map<PluginName, PluginWrapper>

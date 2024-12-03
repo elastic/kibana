@@ -1,12 +1,12 @@
 {
   "groups": [
     {
-      "key": "cypress/security_solution",
-      "name": "Security Solution - Cypress"
+      "key": "cypress/security_solution_entity_analytics",
+      "name": "Security Solution Entity Analytics - Cypress"
     },
     {
-      "key": "cypress/security_serverless",
-      "name": "[Serverless] Security Solution - Cypress"
+      "key": "cypress/security_serverless_entity_analytics",
+      "name": "[Serverless] Security Solution Entity Analytics - Cypress"
     },
     {
       "key": "cypress/security_solution_investigations",
@@ -23,6 +23,46 @@
     {
       "key": "cypress/security_serverless_explore",
       "name": "[Serverless] Security Solution Explore - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management",
+      "name": "Security Solution Rule Management - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management",
+      "name": "[Serverless] Security Solution Rule Management - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management_prebuilt_rules",
+      "name": "Security Solution Rule Management - Prebuilt Rules - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management_prebuilt_rules",
+      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_detection_engine",
+      "name": "Security Solution Detection Engine - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_detection_engine",
+      "name": "[Serverless] Security Solution Detection Engine - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_detection_engine_exceptions",
+      "name": "Security Solution Detection Engine - Exceptions - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_detection_engine_exceptions",
+      "name": "[Serverless] Security Solution Detection Engine - Exceptions - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_ai_assistant",
+      "name": "Security Solution AI Assistant - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_ai_assistant",
+      "name": "[Serverless] Security Solution AI Assistant - Cypress"
     },
     {
       "key": "cypress/defend_workflows",
@@ -47,6 +87,18 @@
     {
       "key": "cypress/apm_cypress",
       "name": "APM - Cypress"
+    },
+    {
+      "key": "cypress/inventory_cypress",
+      "name": "Inventory - Cypress"
+    },
+    {
+      "key": "cypress/cloud_security_posture",
+      "name": "Cloud Security Posture - Cypress"
+    },
+    {
+      "key": "cypress/cloud_security_posture_serverless",
+      "name": "[Serverless] Cloud Security Posture - Cypress"
     }
   ]
 }

@@ -41,13 +41,11 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { ConfigureFields } from './configure_fields';
 import { ConfigurePipeline } from './configure_pipeline';
 import { MLInferenceLogic } from './ml_inference_logic';
-import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
 
 import './add_inference_pipeline_flyout.scss';
-import { UpdateMappings } from './update_mappings';
 
 export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;
@@ -55,9 +53,15 @@ export interface AddInferencePipelineFlyoutProps {
 
 export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProps) => {
   const { indexName } = useValues(IndexNameLogic);
-  const { setIndexName } = useActions(MLInferenceLogic);
+  const { setIndexName, makeMlInferencePipelinesRequest, startPollingModels, makeMappingRequest } =
+    useActions(MLInferenceLogic);
   useEffect(() => {
     setIndexName(indexName);
+
+    // Trigger fetching of initial data: existing ML pipelines, available models, index mapping
+    makeMlInferencePipelinesRequest(undefined);
+    startPollingModels();
+    makeMappingRequest({ indexName });
   }, [indexName]);
 
   return (
@@ -83,7 +87,6 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     createErrors,
-    supportedMLModels,
     isLoading,
     addInferencePipelineModal: { step },
   } = useValues(MLInferenceLogic);
@@ -103,9 +106,6 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
         <EuiLoadingSpinner size="xl" />
       </EuiFlyoutBody>
     );
-  }
-  if (supportedMLModels.length === 0) {
-    return <NoModelsPanel />;
   }
 
   return (
@@ -132,7 +132,6 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
         <EuiSpacer size="m" />
         {step === AddInferencePipelineSteps.Configuration && <ConfigurePipeline />}
         {step === AddInferencePipelineSteps.Fields && <ConfigureFields />}
-        {step === AddInferencePipelineSteps.Mappings && <UpdateMappings />}
         {step === AddInferencePipelineSteps.Test && <TestPipeline />}
         {step === AddInferencePipelineSteps.Review && <ReviewPipeline />}
       </EuiFlyoutBody>
@@ -188,22 +187,6 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.fields.title',
         {
           defaultMessage: 'Fields',
-        }
-      ),
-    },
-    {
-      // Mappings
-      onClick: () => {
-        if (!isPipelineDataValid) return;
-        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Mappings);
-      },
-      status: isPipelineDataValid
-        ? getStepStatus(step, AddInferencePipelineSteps.Mappings)
-        : 'disabled',
-      title: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.updateMappings.title',
-        {
-          defaultMessage: 'Mappings',
         }
       ),
     },
@@ -265,18 +248,13 @@ export const AddInferencePipelineFooter: React.FC<
       isContinueButtonEnabled = isConfigureStepValid;
       break;
     case AddInferencePipelineSteps.Fields:
-      nextStep = AddInferencePipelineSteps.Mappings;
+      nextStep = AddInferencePipelineSteps.Test;
       previousStep = AddInferencePipelineSteps.Configuration;
       isContinueButtonEnabled = isPipelineDataValid;
       break;
-    case AddInferencePipelineSteps.Mappings:
-      nextStep = AddInferencePipelineSteps.Test;
-      previousStep = AddInferencePipelineSteps.Fields;
-      isContinueButtonEnabled = true;
-      break;
     case AddInferencePipelineSteps.Test:
       nextStep = AddInferencePipelineSteps.Review;
-      previousStep = AddInferencePipelineSteps.Mappings;
+      previousStep = AddInferencePipelineSteps.Fields;
       isContinueButtonEnabled = true;
       break;
     case AddInferencePipelineSteps.Review:

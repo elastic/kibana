@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import {
-  postTransformsPreviewRequestSchema,
-  PostTransformsPreviewRequestSchema,
-} from '../../../../common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '../../api_schemas/transforms';
+import { postTransformsPreviewRequestSchema } from '../../api_schemas/transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *
@@ -33,12 +31,24 @@ export function registerRoute({ router, license }: RouteDependencies) {
     .addVersion<undefined, undefined, PostTransformsPreviewRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             body: postTransformsPreviewRequestSchema,
           },
         },
       },
-      license.guardApiRoute<undefined, undefined, PostTransformsPreviewRequestSchema>(routeHandler)
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<undefined, undefined, PostTransformsPreviewRequestSchema>(
+          routeHandler
+        )(ctx, request, response);
+      }
     );
 }

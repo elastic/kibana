@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import { closeToastIfVisible, generateRandomStringName } from '../../tasks/integrations';
+import {
+  LIVE_QUERY_EDITOR,
+  RESULTS_TABLE_BUTTON,
+  RESULTS_TABLE_COLUMNS_BUTTON,
+} from '../../screens/live_query';
 import {
   ADD_QUERY_BUTTON,
   customActionEditSavedQuerySelector,
@@ -16,15 +21,17 @@ import {
 import { preparePack } from '../../tasks/packs';
 import {
   addToCase,
+  BIG_QUERY,
   checkResults,
   deleteAndConfirm,
+  fillInQueryTimeout,
   inputQuery,
   selectAllAgents,
   submitQuery,
+  verifyQueryTimeout,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import {
   loadCase,
   cleanupCase,
@@ -34,6 +41,7 @@ import {
   cleanupSavedQuery,
 } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
+import { getAdvancedButton } from '../../screens/integrations';
 
 describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
@@ -53,12 +61,129 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     cleanupCase(caseId);
   });
 
-  getSavedQueriesComplexTest();
+  it(
+    'should create a new query and verify: \n ' +
+      '- hidden columns, full screen and sorting \n' +
+      '- pagination \n' +
+      '- query can viewed (status), edited and deleted ',
+    () => {
+      const timeout = '601';
+      const suffix = generateRandomStringName(1)[0];
+      const savedQueryId = `Saved-Query-Id-${suffix}`;
+      const savedQueryDescription = `Test saved query description ${suffix}`;
+      cy.contains('New live query').click();
+      selectAllAgents();
+      inputQuery(BIG_QUERY);
+      getAdvancedButton().click();
+      fillInQueryTimeout(timeout);
+      submitQuery();
+      checkResults();
+      // enter fullscreen
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.contains(/Enter fullscreen$/).should('exist');
+      cy.contains('Exit fullscreen').should('not.exist');
+      cy.getBySel(RESULTS_TABLE_BUTTON).click();
 
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.contains(/Enter Fullscreen$/).should('not.exist');
+      cy.contains('Exit fullscreen').should('exist');
+
+      // hidden columns
+      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
+      cy.getBySel('dataGridColumnSelectorButton').click();
+      cy.get('[data-popover-open="true"]').should('be.visible');
+      cy.getBySel('dataGridColumnSelectorColumnItem-osquery.cmdline').click();
+      cy.getBySel('dataGridColumnSelectorColumnItem-osquery.cwd').click();
+      cy.getBySel('dataGridColumnSelectorColumnItem-osquery.disk_bytes_written.number').click();
+      cy.getBySel('dataGridColumnSelectorButton').click();
+      cy.get('[data-popover-open="true"]').should('not.exist');
+      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
+
+      // change pagination
+      cy.getBySel('pagination-button-next').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel('pagination-button-next').click();
+      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
+
+      // enter fullscreen
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.contains(/Enter fullscreen$/).should('not.exist');
+      cy.contains('Exit fullscreen').should('exist');
+      cy.getBySel(RESULTS_TABLE_BUTTON).click();
+
+      // sorting
+      cy.getBySel('dataGridHeaderCellActionButton-osquery.egid').click({ force: true });
+      cy.contains(/Sort A-Z$/).click();
+      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.contains(/Enter fullscreen$/).should('exist');
+
+      // visit Status results
+      cy.getBySel('osquery-status-tab').click();
+      cy.get('tbody > tr.euiTableRow').should('have.lengthOf', 2);
+
+      // save new query
+      cy.contains('Exit full screen').should('not.exist');
+      cy.contains('Save for later').click();
+      cy.contains('Save query');
+      cy.get('input[name="id"]').type(`${savedQueryId}{downArrow}{enter}`);
+      cy.get('input[name="description"]').type(`${savedQueryDescription}{downArrow}{enter}`);
+      cy.getBySel('savedQueryFlyoutSaveButton').click();
+      cy.contains('Successfully saved');
+      closeToastIfVisible();
+
+      // play saved query
+      navigateTo('/app/osquery/saved_queries');
+      cy.contains(savedQueryId);
+      cy.get(`[aria-label="Run ${savedQueryId}"]`).click();
+      selectAllAgents();
+      verifyQueryTimeout(timeout);
+      submitQuery();
+
+      // edit saved query
+      cy.contains('Saved queries').click();
+      cy.contains(savedQueryId);
+
+      cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+      cy.get('input[name="description"]').type(` Edited{downArrow}{enter}`);
+
+      // Run in test configuration
+      cy.contains('Test configuration').click();
+      selectAllAgents();
+      verifyQueryTimeout(timeout);
+      submitQuery();
+      checkResults();
+
+      // Disabled submit button in test configuration
+      cy.contains('Submit').should('not.be.disabled');
+      cy.getBySel('osquery-save-query-flyout').within(() => {
+        cy.contains('Query is a required field').should('not.exist');
+        // this clears the input
+        inputQuery('{selectall}{backspace}{selectall}{backspace}');
+        cy.contains('Query is a required field');
+        inputQuery(BIG_QUERY);
+        cy.contains('Query is a required field').should('not.exist');
+      });
+
+      // Save edited
+      cy.getBySel('euiFlyoutCloseButton').click();
+      cy.getBySel('update-query-button').click();
+      cy.contains(`${savedQueryDescription} Edited`);
+
+      // delete saved query
+      cy.contains(savedQueryId);
+      cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+
+      deleteAndConfirm('query');
+      cy.contains(savedQueryId).should('exist');
+      cy.contains(savedQueryId).should('not.exist');
+    }
+  );
+
+  // Failing: See https://github.com/elastic/kibana/issues/187388
   it.skip('checks that user cant add a saved query with an ID that already exists', () => {
     cy.contains('Saved queries').click();
     cy.contains('Add saved query').click();
-
     cy.get('input[name="id"]').type(`users_elastic{downArrow}{enter}`);
 
     cy.contains('ID must be unique').should('not.exist');
@@ -76,7 +201,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('prebuilt', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169787
+  describe.skip('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;

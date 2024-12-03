@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -19,6 +20,7 @@ import {
   SPECIFIC_DATA_VIEW_PATH,
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
   INITIAL_REST_VERSION,
+  DELETE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
 interface DeleteDataViewArgs {
@@ -39,7 +41,7 @@ export const deleteDataView = async ({
 };
 
 const deleteIndexPatternRouteFactory =
-  (path: string) =>
+  (path: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -48,9 +50,14 @@ const deleteIndexPatternRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.delete({ path, access: 'public' }).addVersion(
+    router.versioned.delete({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            requiredPrivileges: ['indexPatterns:manage'],
+          },
+        },
         validate: {
           request: {
             params: schema.object(
@@ -91,7 +98,10 @@ const deleteIndexPatternRouteFactory =
     );
   };
 
-export const registerDeleteDataViewRoute = deleteIndexPatternRouteFactory(SPECIFIC_DATA_VIEW_PATH);
+export const registerDeleteDataViewRoute = deleteIndexPatternRouteFactory(
+  SPECIFIC_DATA_VIEW_PATH,
+  DELETE_DATA_VIEW_DESCRIPTION
+);
 
 export const registerDeleteDataViewRouteLegacy = deleteIndexPatternRouteFactory(
   SPECIFIC_DATA_VIEW_PATH_LEGACY

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -22,9 +23,20 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { GuideFilterValues, GuideId, GuideState } from '@kbn/guided-onboarding';
-
-import { GuideCards, GuideFilters } from '@kbn/guided-onboarding';
+import {
+  GuideFilterValues,
+  GuideCards,
+  GuideFilters,
+  GuideCardConstants,
+  guideCards,
+} from '@kbn/guided-onboarding/guide';
+import {
+  GuideCardsClassic,
+  GuideFiltersClassic,
+  guideCardsClassic,
+  type GuideFilterValuesClassic,
+} from '@kbn/guided-onboarding/classic';
+import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -36,7 +48,7 @@ const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelect
   defaultMessage: 'What would you like to do first?',
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage: `Select a guide to help you make the most of your data.`,
+  defaultMessage: `Filter by solution to see related use cases`,
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
   defaultMessage: `I’d like to explore on my own.`,
@@ -48,26 +60,16 @@ export const GettingStarted = () => {
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+  const [filteredCards, setFilteredCards] = useState<GuideCardConstants[]>();
   const { search } = useLocation();
   const query = parse(search);
-
-  const isTypeOfGuideFilterValue = (useCase: string | string[] | null) => {
-    const filterValues: string[] = ['search', 'observability', 'security', 'all']; // list of GuideFilterValues types
-
-    if (!useCase) {
-      return false;
-    }
-
-    if (useCase instanceof Array) {
-      return filterValues.includes(useCase[0]);
-    }
-
-    return filterValues.includes(useCase);
-  };
-
-  const [filter, setFilter] = useState<GuideFilterValues>(
-    isTypeOfGuideFilterValue(query.useCase) ? (query.useCase as GuideFilterValues) : 'all'
+  // using for A/B testing
+  const [classicGuide] = useState<boolean>(false);
+  const useCase = query.useCase as GuideFilterValues;
+  const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
+    classicGuide ? useCase ?? 'all' : useCase ?? 'search'
   );
+
   const history = useHistory();
 
   useEffect(() => {
@@ -142,6 +144,13 @@ export const GettingStarted = () => {
     [guidedOnboardingService]
   );
 
+  // filter cards for solution and based on classic or new format
+  const guide = classicGuide ? guideCardsClassic : guideCards;
+  useEffect(() => {
+    const tempFiltered = guide.filter(({ solution }) => solution === filter);
+    setFilteredCards(tempFiltered);
+  }, [filter, guide]);
+
   if (isLoading) {
     return (
       <KibanaPageTemplate.EmptyPrompt
@@ -195,31 +204,55 @@ export const GettingStarted = () => {
     );
   }
 
+  const setGuideFilters = classicGuide ? (
+    <GuideFiltersClassic
+      application={application}
+      activeFilter={filter}
+      setActiveFilter={setFilter}
+      data-test-subj="onboarding--guideFilters"
+    />
+  ) : (
+    <GuideFilters
+      application={application}
+      activeFilter={filter as GuideFilterValues}
+      setActiveFilter={setFilter}
+      data-test-subj="onboarding--guideFilters"
+      trackUiMetric={trackUiMetric}
+    />
+  );
+
+  const setGuideCards = classicGuide ? (
+    <GuideCardsClassic
+      activateGuide={activateGuide}
+      navigateToApp={application.navigateToApp}
+      activeFilter={filter as GuideFilterValues}
+      guidesState={guidesState}
+    />
+  ) : (
+    <GuideCards
+      activateGuide={activateGuide}
+      navigateToApp={application.navigateToApp}
+      activeFilter={filter as GuideFilterValues}
+      guidesState={guidesState}
+      filteredCards={filteredCards}
+    />
+  );
+
   return (
-    <KibanaPageTemplate panelled={false} grow>
-      <EuiPageTemplate.Section alignment="center" data-test-subj="guided-onboarding--landing-page">
+    <KibanaPageTemplate panelled={false}>
+      <EuiPageTemplate.Section data-test-subj="guided-onboarding--landing-page">
         <EuiTitle size="l" className="eui-textCenter">
           <h1>{title}</h1>
         </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="l" />
         <EuiText size="m" textAlign="center">
           <p>{subtitle}</p>
         </EuiText>
+        <EuiSpacer size="l" />
+        {setGuideFilters}
         <EuiSpacer size="xxl" />
-        <GuideFilters
-          application={application}
-          activeFilter={filter}
-          setActiveFilter={setFilter}
-          data-test-subj="onboarding--guideFilters"
-        />
+        {setGuideCards}
         <EuiSpacer size="xxl" />
-        <GuideCards
-          activateGuide={activateGuide}
-          navigateToApp={application.navigateToApp}
-          activeFilter={filter}
-          guidesState={guidesState}
-        />
-        <EuiSpacer />
         <div className="eui-textCenter">
           {/* data-test-subj used for FS tracking */}
           <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">

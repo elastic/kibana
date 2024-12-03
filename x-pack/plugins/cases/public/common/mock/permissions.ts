@@ -16,7 +16,11 @@ export const noCasesPermissions = () =>
     delete: false,
     push: false,
     connectors: false,
+    settings: false,
+    createComment: false,
+    reopenCase: false,
   });
+
 export const readCasesPermissions = () =>
   buildCasesPermissions({
     read: true,
@@ -25,15 +29,53 @@ export const readCasesPermissions = () =>
     delete: false,
     push: false,
     connectors: true,
+    settings: false,
+    createComment: false,
+    reopenCase: false,
   });
 export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
-export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: false });
+export const noCreateCommentCasesPermissions = () =>
+  buildCasesPermissions({ createComment: false });
+export const noUpdateCasesPermissions = () =>
+  buildCasesPermissions({ update: false, reopenCase: false });
 export const noPushCasesPermissions = () => buildCasesPermissions({ push: false });
 export const noDeleteCasesPermissions = () => buildCasesPermissions({ delete: false });
+export const noReopenCasesPermissions = () => buildCasesPermissions({ reopenCase: false });
 export const writeCasesPermissions = () => buildCasesPermissions({ read: false });
+export const onlyCreateCommentPermissions = () =>
+  buildCasesPermissions({
+    read: false,
+    create: false,
+    update: false,
+    delete: true,
+    push: false,
+    createComment: true,
+    reopenCase: false,
+  });
 export const onlyDeleteCasesPermission = () =>
-  buildCasesPermissions({ read: false, create: false, update: false, delete: true, push: false });
+  buildCasesPermissions({
+    read: false,
+    create: false,
+    update: false,
+    delete: true,
+    push: false,
+    createComment: false,
+    reopenCase: false,
+  });
+// In practice, a real life user should never have this configuration, but testing for thoroughness
+export const onlyReopenCasesPermission = () =>
+  buildCasesPermissions({
+    read: false,
+    create: false,
+    update: false,
+    delete: false,
+    push: false,
+    createComment: false,
+    reopenCase: true,
+  });
 export const noConnectorsCasePermission = () => buildCasesPermissions({ connectors: false });
+export const noCasesSettingsPermission = () => buildCasesPermissions({ settings: false });
+export const disabledReopenCasePermission = () => buildCasesPermissions({ reopenCase: false });
 
 export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 'all'>> = {}) => {
   const create = overrides.create ?? true;
@@ -42,7 +84,19 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
   const deletePermissions = overrides.delete ?? true;
   const push = overrides.push ?? true;
   const connectors = overrides.connectors ?? true;
-  const all = create && read && update && deletePermissions && push;
+  const settings = overrides.settings ?? true;
+  const reopenCase = overrides.reopenCase ?? true;
+  const createComment = overrides.createComment ?? true;
+  const all =
+    create &&
+    read &&
+    update &&
+    deletePermissions &&
+    push &&
+    settings &&
+    connectors &&
+    reopenCase &&
+    createComment;
 
   return {
     all,
@@ -52,6 +106,9 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
     delete: deletePermissions,
     push,
     connectors,
+    settings,
+    reopenCase,
+    createComment,
   };
 };
 
@@ -64,6 +121,9 @@ export const noCasesCapabilities = () =>
     delete_cases: false,
     push_cases: false,
     cases_connectors: false,
+    cases_settings: false,
+    create_comment: false,
+    case_reopen: false,
   });
 export const readCasesCapabilities = () =>
   buildCasesCapabilities({
@@ -71,6 +131,9 @@ export const readCasesCapabilities = () =>
     update_cases: false,
     delete_cases: false,
     push_cases: false,
+    cases_settings: false,
+    create_comment: false,
+    case_reopen: false,
   });
 export const writeCasesCapabilities = () => {
   return buildCasesCapabilities({
@@ -86,5 +149,8 @@ export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) =
     delete_cases: overrides?.delete_cases ?? true,
     push_cases: overrides?.push_cases ?? true,
     cases_connectors: overrides?.cases_connectors ?? true,
+    cases_settings: overrides?.cases_settings ?? true,
+    create_comment: overrides?.create_comment ?? true,
+    case_reopen: overrides?.case_reopen ?? true,
   };
 };

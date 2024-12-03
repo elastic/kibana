@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from '@kbn/ml-ui-actions';
-import { AiopsPluginStartDeps } from '../../types';
-import { showCategorizeFlyout } from './show_flyout';
+import type { AiopsPluginStartDeps } from '../../types';
 
 export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
   createAction<CategorizeFieldContext>({
@@ -24,7 +23,8 @@ export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: Aiops
       return field.esTypes?.includes('text') === true;
     },
     execute: async (context: CategorizeFieldContext) => {
-      const { field, dataView, originatingApp } = context;
-      showCategorizeFlyout(field, dataView, coreStart, plugins, originatingApp);
+      const { field, dataView, originatingApp, additionalFilter } = context;
+      const { showCategorizeFlyout } = await import('./show_flyout');
+      showCategorizeFlyout(field, dataView, coreStart, plugins, originatingApp, additionalFilter);
     },
   });

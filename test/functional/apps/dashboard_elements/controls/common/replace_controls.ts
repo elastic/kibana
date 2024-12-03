@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -26,27 +27,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Replace Controls';
 
-  const changeFieldType = async (controlId: string, newField: string, expectedType?: string) => {
+  const changeFieldType = async (controlId: string, newField: string, type: string) => {
     await dashboardControls.editExistingControl(controlId);
-    await dashboardControls.controlsEditorSetfield(newField, expectedType);
+    await dashboardControls.controlsEditorSetfield(newField);
+    await dashboardControls.controlsEditorSetControlType(type);
     await dashboardControls.controlEditorSave();
   };
 
   const replaceWithOptionsList = async (controlId: string, field: string) => {
     await changeFieldType(controlId, field, OPTIONS_LIST_CONTROL);
-    await testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
-    await dashboardControls.verifyControlType(controlId, 'optionsList-control');
+    const newControlId: string = (await dashboardControls.getAllControlIds())[0];
+    await testSubjects.waitForEnabled(`optionsList-control-${newControlId}`);
+    await dashboardControls.verifyControlType(newControlId, 'optionsList-control');
   };
 
   const replaceWithRangeSlider = async (controlId: string, field: string) => {
     await changeFieldType(controlId, field, RANGE_SLIDER_CONTROL);
     await retry.try(async () => {
-      await dashboardControls.rangeSliderWaitForLoading(controlId);
-      await dashboardControls.verifyControlType(controlId, 'range-slider-control');
+      const newControlId: string = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.rangeSliderWaitForLoading(newControlId);
+      await dashboardControls.verifyControlType(newControlId, 'range-slider-control');
     });
   };
 
-  describe('Replacing controls', async () => {
+  describe('Replacing controls', () => {
     let controlId: string;
 
     before(async () => {
@@ -55,16 +59,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
-      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
+      await dashboard.saveDashboard(DASHBOARD_NAME, {
+        exitFromEditMode: false,
+        saveAsNew: true,
+      });
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
     });
 
-    describe('Replace options list', async () => {
+    describe('Replace options list', () => {
       beforeEach(async () => {
-        await dashboardControls.clearAllControls();
         await dashboardControls.createControl({
           controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
@@ -74,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await dashboard.clearUnsavedChanges();
+        await dashboardControls.clearAllControls();
       });
 
       it('with range slider - default title', async () => {
@@ -94,9 +100,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Replace range slider', async () => {
+    describe('Replace range slider', () => {
       beforeEach(async () => {
-        await dashboardControls.clearAllControls();
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'animals-*',
@@ -107,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await dashboard.clearUnsavedChanges();
+        await dashboardControls.clearAllControls();
       });
 
       it('with options list - default title', async () => {

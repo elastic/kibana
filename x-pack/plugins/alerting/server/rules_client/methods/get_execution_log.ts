@@ -21,7 +21,8 @@ import {
 import { IExecutionLogResult } from '../../../common';
 import { parseDate } from '../common';
 import { RulesClientContext } from '../types';
-import { get } from './get';
+import { getRule } from '../../application/rule/methods/get/get_rule';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetExecutionLogByIdParams {
   id: string;
@@ -48,7 +49,7 @@ export async function getExecutionLogForRule(
   { id, dateStart, dateEnd, filter, page, perPage, sort }: GetExecutionLogByIdParams
 ): Promise<IExecutionLogResult> {
   context.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
-  const rule = (await get(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
   try {
     // Make sure user has access to this rule
@@ -62,7 +63,7 @@ export async function getExecutionLogForRule(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_EXECUTION_LOG,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
         error,
       })
     );
@@ -72,7 +73,7 @@ export async function getExecutionLogForRule(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_EXECUTION_LOG,
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
     })
   );
 
@@ -85,7 +86,7 @@ export async function getExecutionLogForRule(
 
   try {
     const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       [id],
       {
         start: parsedDateStart.toISOString(),
@@ -117,16 +118,16 @@ export async function getGlobalExecutionLogWithAuth(
 
   let authorizationTuple;
   try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Alert,
-      {
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Alert,
+      filterOpts: {
         type: AlertingAuthorizationFilterType.KQL,
         fieldNames: {
           ruleTypeId: 'kibana.alert.rule.rule_type_id',
           consumer: 'kibana.alert.rule.consumer',
         },
-      }
-    );
+      },
+    });
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -151,7 +152,7 @@ export async function getGlobalExecutionLogWithAuth(
 
   try {
     const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       authorizationTuple.filter as KueryNode,
       {
         start: parsedDateStart.toISOString(),

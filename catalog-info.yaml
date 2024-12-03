@@ -10,6 +10,7 @@ metadata:
     github.com/project-slug: elastic/kibana
     github.com/team-slug: elastic/kibana-tech-leads
     buildkite.com/project-slug: elastic/kibana
+    sonarqube.org/project-key: elastic_kibana_AYvOkAHeQZlFqhqWIr9
 
   tags:
     - typescript
@@ -29,39 +30,14 @@ spec:
   lifecycle: production
 
 ---
-
 apiVersion: backstage.io/v1alpha1
-kind: Resource
+kind: Location
 metadata:
-  name: kibana-tests-pipeline
-  description: Definition of the kibana pipeline
-  links:
-    - title: Pipeline
-      url: https://buildkite.com/elastic/kibana-tests
+  name: kibana-buildkite-pipelines
+  description: A location re-routing file, pointing to individual buildkite pipeline definition files
 spec:
-  type: buildkite-pipeline
-  owner: group:kibana-tech-leads
-  system: buildkite
-  implementation:
-    apiVersion: buildkite.elastic.dev/v1
-    kind: Pipeline
-    metadata:
-      name: kibana-tests
-      description: Pipeline that tests the service integration in various environments
-    spec:
-      repository: elastic/kibana
-      pipeline_file: ./.buildkite/pipelines/quality-gates/pipeline.kibana-tests.yaml
-      provider_settings:
-        trigger_mode: none
-      teams:
-        kibana-operations:
-          access_level: MANAGE_BUILD_AND_READ
-        kibana-release-operators:
-          access_level: BUILD_AND_READ
-        cloud-tooling:
-          access_level: BUILD_AND_READ
-        everyone:
-          access_level: READ_ONLY
+  type: url
+  target: https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/locations.yml
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -118,15 +94,15 @@ spec:
   system: control-plane
 
 ---
-
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: kibana-serverless-release
-  description: Definition of the kibana release pipeline
+  name: buildkite-pipeline-kibana-sonarqube
+  description: Run a SonarQube scan
   links:
     - title: Pipeline
-      url: https://buildkite.com/elastic/kibana-serverless-release
+      url: https://buildkite.com/elastic/kibana-sonarqube
 spec:
   type: buildkite-pipeline
   owner: group:kibana-operations
@@ -135,22 +111,20 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana-serverless-release
-      description: Pipeline that releases kibana by triggering the release flow through qa, staging, and production
+      name: kibana / sonarqube
     spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       repository: elastic/kibana
-      pipeline_file: ./.buildkite/pipelines/pipeline.kibana-serverless-release.yaml
       provider_settings:
-        build_branches: false
-        build_pull_request_forks: false
-        build_tags: true
-        # https://regex101.com/r/tY52jo/1
-        filter_condition: 'build.tag =~ /^deploy@\d+$/'
-        filter_enabled: true
+        trigger_mode: none
+      pipeline_file: ".buildkite/pipelines/sonarqube.yml"
       teams:
         kibana-operations:
-          access_level: MANAGE_BUILD_AND_READ
-        kibana-tech-leads:
-          access_level: MANAGE_BUILD_AND_READ
+         access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
+
+# Please avoid creating new kibana pipelines in this file to avoid bloating.
+# Instead, create a new file in the pipeline-resource-definitions directory, and wire it in through the locations.yml file.

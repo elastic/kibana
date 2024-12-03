@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ScopedHistory } from '@kbn/core/public';
 import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { getScopedHistory } from '../../kibana_services';
 import { useDataView } from '../../hooks/use_data_view';
 import type { ContextHistoryLocationState } from './services/locator';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useRootProfile } from '../../context_awareness';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -22,9 +24,10 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
+  const scopedHistory = useDiscoverServices().getScopedHistory<ContextHistoryLocationState>();
   const locationState = useMemo(
-    () => getScopedHistory().location.state as ContextHistoryLocationState | undefined,
-    []
+    () => scopedHistory?.location.state as ContextHistoryLocationState | undefined,
+    [scopedHistory?.location.state]
   );
 
   /**
@@ -32,24 +35,21 @@ export function ContextAppRoute() {
    * Should be removed once url state will be deleted from context page.
    */
   useEffect(() => {
-    const scopedHistory = getScopedHistory() as ScopedHistory<
-      ContextHistoryLocationState | undefined
-    >;
-    const unlisten = scopedHistory.listen((location) => {
+    const unlisten = scopedHistory?.listen((location) => {
       const currentState = location.state;
       if (!currentState?.referrer && locationState) {
         const newLocation = { ...location, state: { ...currentState, ...locationState } };
         scopedHistory.replace(newLocation);
       }
     });
-    return () => unlisten();
-  }, [locationState]);
+    return () => unlisten?.();
+  }, [locationState, scopedHistory]);
 
   const { dataViewId: encodedDataViewId, id } = useParams<ContextUrlParams>();
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
-
   const { dataView, error } = useDataView({ index: locationState?.dataViewSpec || dataViewId });
+  const rootProfileState = useRootProfile();
 
   if (error) {
     return (
@@ -73,9 +73,13 @@ export function ContextAppRoute() {
     );
   }
 
-  if (!dataView) {
+  if (!dataView || rootProfileState.rootProfileLoading) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />;
+  return (
+    <rootProfileState.AppWrapper>
+      <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />
+    </rootProfileState.AppWrapper>
+  );
 }

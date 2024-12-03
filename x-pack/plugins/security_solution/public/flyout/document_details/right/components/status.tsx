@@ -8,19 +8,16 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { CellActionsMode } from '@kbn/cell-actions';
-import { getSourcererScopeId } from '../../../../helpers';
-import { SecurityCellActions } from '../../../../common/components/cell_actions';
-import type {
-  EnrichedFieldInfo,
-  EnrichedFieldInfoWithValues,
-} from '../../../../common/components/event_details/types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertHeaderBlock } from './alert_header_block';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { StatusPopoverButton } from '../../../../common/components/event_details/overview/status_popover_button';
-import { useRightPanelContext } from '../context';
-import { getEnrichedFieldInfo } from '../../../../common/components/event_details/helpers';
-import { SecurityCellActionsTrigger } from '../../../../actions/constants';
+import { StatusPopoverButton } from './status_popover_button';
+import { useDocumentDetailsContext } from '../../shared/context';
+import type { EnrichedFieldInfo, EnrichedFieldInfoWithValues } from '../utils/enriched_field_info';
+import { getEnrichedFieldInfo } from '../utils/enriched_field_info';
+import { CellActions } from '../../shared/components/cell_actions';
+import { STATUS_TITLE_TEST_ID } from './test_ids';
 
 /**
  * Checks if the field info has data to convert EnrichedFieldInfo into EnrichedFieldInfoWithValues
@@ -33,8 +30,8 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
  * Document details status displayed in flyout right section header
  */
 export const DocumentStatus: FC = () => {
-  const { closeFlyout } = useExpandableFlyoutContext();
-  const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
+  const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isPreview } =
+    useDocumentDetailsContext();
 
   const statusData = useMemo(() => {
     const item = find(
@@ -53,28 +50,29 @@ export const DocumentStatus: FC = () => {
     );
   }, [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]);
 
-  if (!statusData || !hasData(statusData)) return null;
-
   return (
-    <SecurityCellActions
-      data={{
-        field: SIGNAL_STATUS_FIELD_NAME,
-        value: statusData.values[0],
-      }}
-      mode={CellActionsMode.HOVER_RIGHT}
-      triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-      visibleCellActions={6}
-      sourcererScopeId={getSourcererScopeId(scopeId)}
-      metadata={{ scopeId }}
+    <AlertHeaderBlock
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.header.statusTitle"
+          defaultMessage="Status"
+        />
+      }
+      data-test-subj={STATUS_TITLE_TEST_ID}
     >
-      <StatusPopoverButton
-        eventId={eventId}
-        contextId={scopeId}
-        enrichedFieldInfo={statusData}
-        scopeId={scopeId}
-        handleOnEventClosed={closeFlyout}
-      />
-    </SecurityCellActions>
+      {!statusData || !hasData(statusData) || isPreview ? (
+        getEmptyTagValue()
+      ) : (
+        <CellActions field={SIGNAL_STATUS_FIELD_NAME} value={statusData.values[0]}>
+          <StatusPopoverButton
+            eventId={eventId}
+            contextId={scopeId}
+            enrichedFieldInfo={statusData}
+            scopeId={scopeId}
+          />
+        </CellActions>
+      )}
+    </AlertHeaderBlock>
   );
 };
 

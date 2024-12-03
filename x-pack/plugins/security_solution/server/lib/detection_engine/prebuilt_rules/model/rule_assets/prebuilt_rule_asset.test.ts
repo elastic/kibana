@@ -17,7 +17,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, rule_id: Required, and 26 more"`
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 2 more"`
     );
   });
 
@@ -32,6 +32,48 @@ describe('Prebuilt rule asset schema', () => {
     expect(result.data).toEqual(getPrebuiltRuleMock());
   });
 
+  describe('omitted fields from the rule schema are ignored', () => {
+    // The PrebuiltRuleAsset schema is built out of the rule schema,
+    // but the following fields are manually omitted.
+    // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts
+    const omittedBaseFields = [
+      'actions',
+      'response_actions',
+      'throttle',
+      'meta',
+      'output_index',
+      'namespace',
+      'alias_purpose',
+      'alias_target_id',
+      'outcome',
+    ];
+
+    test.each(omittedBaseFields)(
+      'ignores the base %s field since it`s an omitted field',
+      (field) => {
+        const payload: Partial<PrebuiltRuleAsset> & Record<string, unknown> = {
+          ...getPrebuiltRuleMock(),
+          [field]: 'some value',
+        };
+
+        const result = PrebuiltRuleAsset.safeParse(payload);
+        expectParseSuccess(result);
+        expect(result.data).toEqual(getPrebuiltRuleMock());
+      }
+    );
+
+    test('ignores the type specific response_actions field since it`s an omitted field', () => {
+      const payload: Partial<PrebuiltRuleAsset> & Record<string, unknown> = {
+        ...getPrebuiltRuleMock(),
+        response_actions: [{ action_type_id: `.osquery`, params: {} }],
+      };
+
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(getPrebuiltRuleMock());
+    });
+  });
+
   test('[rule_id] does not validate', () => {
     const payload: Partial<PrebuiltRuleAsset> = {
       rule_id: 'rule-1',
@@ -40,7 +82,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, version: Required, and 25 more"`
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more"`
     );
   });
 
@@ -57,17 +99,6 @@ describe('Prebuilt rule asset schema', () => {
       type: 'query',
       risk_score: 50,
       version: 1,
-    };
-
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
-  });
-
-  test('You can send in a namespace', () => {
-    const payload: PrebuiltRuleAsset = {
-      ...getPrebuiltRuleMock(),
-      namespace: 'a namespace',
     };
 
     const result = PrebuiltRuleAsset.safeParse(payload);
@@ -177,7 +208,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", index.0: Expected string, received number, index.0: Expected string, received number, type: Invalid literal value, expected \\"saved_query\\", and 20 more"`
+      `"index.0: Expected string, received number"`
     );
   });
 
@@ -201,7 +232,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", filters: Expected array, received string, filters: Expected array, received string, type: Invalid literal value, expected \\"saved_query\\", and 20 more"`
+      `"filters: Expected array, received string"`
     );
   });
 
@@ -236,7 +267,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up', type: Invalid literal value, expected \\"saved_query\\", saved_id: Required, and 19 more"`
+      `"language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up'"`
     );
   });
 
@@ -449,32 +480,6 @@ describe('Prebuilt rule asset schema', () => {
     expect(result.data).toEqual(payload);
   });
 
-  test('You can set meta to any object you want', () => {
-    const payload: PrebuiltRuleAsset = {
-      ...getPrebuiltRuleMock(),
-      meta: {
-        somethingMadeUp: { somethingElse: true },
-      },
-    };
-
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
-  });
-
-  test('You cannot create meta as a string', () => {
-    const payload: Omit<PrebuiltRuleAsset, 'meta'> & { meta: string } = {
-      ...getPrebuiltRuleMock(),
-      meta: 'should not work',
-    };
-
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"meta: Expected object, received string"`
-    );
-  });
-
   test('validates with timeline_id and timeline_title', () => {
     const payload: PrebuiltRuleAsset = {
       ...getPrebuiltRuleMock(),
@@ -497,71 +502,6 @@ describe('Prebuilt rule asset schema', () => {
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
       `"severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk'"`
-    );
-  });
-
-  test('You cannot send in an array of actions that are missing "group"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'group'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
-    };
-
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"actions.0.group: Required"`);
-  });
-
-  test('You cannot send in an array of actions that are missing "id"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
-    };
-
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"actions.0.id: Required"`);
-  });
-
-  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'action_type_id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [{ group: 'group', id: 'id', params: {} }],
-    };
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"actions.0.action_type_id: Required"`
-    );
-  });
-
-  test('You cannot send in an array of actions that are missing "params"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'params'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
-    };
-
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"actions.0.params: Required"`);
-  });
-
-  test('You cannot send in an array of actions that are including "actionTypeId"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'actions'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [
-        {
-          group: 'group',
-          id: 'id',
-          actionTypeId: 'actionTypeId',
-          params: {},
-        },
-      ],
-    };
-
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"actions.0.action_type_id: Required"`
     );
   });
 

@@ -24,16 +24,16 @@
     "@kbn/spaces-plugin",
     "@kbn/securitysolution-es-utils",
     "@kbn/securitysolution-io-ts-types",
-    "@kbn/securitysolution-io-ts-list-types",
     "@kbn/es-types",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/logging",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/share-plugin",
-    "@kbn/alerting-state-types",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server",
+    "@kbn/alerting-types"
   ],
   "exclude": [
     "target/**/*",

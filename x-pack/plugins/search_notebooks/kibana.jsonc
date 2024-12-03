@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-notebooks",
+  "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
+  "description": "Plugin to provide access to and rendering of python notebooks for use in the persistent developer console.",
+  "plugin": {
+    "id": "searchNotebooks",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "search",
+      "notebooks"
+    ],
+    "requiredPlugins": [
+      "console"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

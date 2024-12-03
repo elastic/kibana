@@ -22,13 +22,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
-import { useAgentVersion } from '../../../../../hooks';
+import { useAgentVersion, useGetInfoOutputsForPolicy } from '../../../../../hooks';
 import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 import { AgentDashboardLink } from '../agent_dashboard_link';
+import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
+import { AgentPolicyOutputsSummary } from '../../../agent_list_page/components/agent_policy_outputs_summary';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -42,10 +44,17 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   const latestAgentVersion = useAgentVersion();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
+  const outputRes = useGetInfoOutputsForPolicy(agentPolicy?.id);
+  const outputs = outputRes?.data?.item;
+
   return (
     <EuiPanel>
       <EuiDescriptionList compressed>
-        <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          data-test-subj="agentDetailsOverviewSection"
+        >
           {displayAgentMetrics && (
             <EuiFlexGroup>
               <FlexItemWithMinWidth grow={5}>
@@ -148,7 +157,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description: agent.last_checkin_message ? agent.last_checkin_message : '-',
             },
             {
-              title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
+              title: i18n.translate('xpack.fleet.agentDetails.agentIdLabel', {
                 defaultMessage: 'Agent ID',
               }),
               description: agent.id,
@@ -173,18 +182,15 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     <EuiFlexItem grow={false} className="eui-textNoWrap">
                       {agent.local_metadata.elastic.agent.version}
                     </EuiFlexItem>
-                    {latestAgentVersion && isAgentUpgradeable(agent, latestAgentVersion) ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          position="right"
-                          content={i18n.translate('xpack.fleet.agentList.agentUpgradeLabel', {
-                            defaultMessage: 'Upgrade available',
-                          })}
-                        >
-                          <EuiIcon type="warning" color="warning" />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <AgentUpgradeStatus
+                        isAgentUpgradable={
+                          !!(agentPolicy?.is_managed !== true && isAgentUpgradeable(agent))
+                        }
+                        agent={agent}
+                        latestAgentVersion={latestAgentVersion}
+                      />
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 ) : (
                   '-'
@@ -200,6 +206,31 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   : '-',
             },
             {
+              title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
+                defaultMessage: 'Host ID',
+              }),
+              description:
+                typeof agent.local_metadata?.host?.id === 'string'
+                  ? agent.local_metadata.host.id
+                  : '-',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
+                defaultMessage: 'Output for integrations',
+              }),
+              description: outputs ? <AgentPolicyOutputsSummary outputs={outputs} /> : '-',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
+                defaultMessage: 'Output for monitoring',
+              }),
+              description: outputs ? (
+                <AgentPolicyOutputsSummary outputs={outputs} isMonitoring={true} />
+              ) : (
+                '-'
+              ),
+            },
+            {
               title: i18n.translate('xpack.fleet.agentDetails.logLevel', {
                 defaultMessage: 'Logging level',
               }),
@@ -207,6 +238,23 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
                   ? agent.local_metadata.elastic.agent.log_level
                   : '-',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.privilegeModeLabel', {
+                defaultMessage: 'Privilege mode',
+              }),
+              description:
+                agent.local_metadata.elastic.agent.unprivileged === true ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
+                    defaultMessage="Running as non-root"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+                    defaultMessage="Running as root"
+                  />
+                ),
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {

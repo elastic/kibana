@@ -11,7 +11,7 @@ import type { EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 
 import { useLink } from '../hooks';
-import { AGENTS_PREFIX } from '../constants';
+import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY, PRIVILEGED_AGENT_KUERY } from '../constants';
 
 /**
  * Displays the provided `count` number as a link to the Agents list if it is greater than zero
@@ -21,8 +21,9 @@ export const LinkedAgentCount = memo<
     count: number;
     agentPolicyId: string;
     showAgentText?: boolean;
+    privilegeMode?: 'privileged' | 'unprivileged';
   }
->(({ count, agentPolicyId, showAgentText, ...otherEuiLinkProps }) => {
+>(({ count, agentPolicyId, showAgentText, privilegeMode, ...otherEuiLinkProps }) => {
   const { getHref } = useLink();
   const displayValue = showAgentText ? (
     <FormattedMessage
@@ -33,12 +34,19 @@ export const LinkedAgentCount = memo<
   ) : (
     count
   );
+  const kuery = `${AGENTS_PREFIX}.policy_id : ${agentPolicyId}${
+    privilegeMode
+      ? ` and ${
+          privilegeMode === 'unprivileged' ? UNPRIVILEGED_AGENT_KUERY : PRIVILEGED_AGENT_KUERY
+        }`
+      : ''
+  }`;
+
   return count > 0 ? (
     <EuiLink
       {...otherEuiLinkProps}
-      href={getHref('agent_list', {
-        kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyId}`,
-      })}
+      href={getHref('agent_list', { kuery, showInactive: true })}
+      data-test-subj="LinkedAgentCountLink"
     >
       {displayValue}
     </EuiLink>

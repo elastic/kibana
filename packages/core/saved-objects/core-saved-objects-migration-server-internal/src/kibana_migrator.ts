@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /*
@@ -19,9 +20,9 @@ import type {
   ElasticsearchClient,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import {
-  type SavedObjectUnsanitizedDoc,
-  type ISavedObjectTypeRegistry,
+import type {
+  SavedObjectUnsanitizedDoc,
+  ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsSerializer,
@@ -44,6 +45,7 @@ export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
+  hashToVersionMap: Record<string, string>;
   soMigrationsConfig: SavedObjectsMigrationConfigType;
   kibanaIndex: string;
   kibanaVersion: string;
@@ -65,6 +67,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly defaultIndexTypesMap: IndexTypesMap;
+  private readonly hashToVersionMap: Record<string, string>;
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<MigrationResult[]>;
   private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
@@ -87,6 +90,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     typeRegistry,
     kibanaIndex,
     defaultIndexTypesMap,
+    hashToVersionMap,
     soMigrationsConfig,
     kibanaVersion,
     logger,
@@ -100,7 +104,9 @@ export class KibanaMigrator implements IKibanaMigrator {
     this.soMigrationsConfig = soMigrationsConfig;
     this.typeRegistry = typeRegistry;
     this.defaultIndexTypesMap = defaultIndexTypesMap;
+    this.hashToVersionMap = hashToVersionMap;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
+    // build mappings.properties for all types, all indices
     this.mappingProperties = buildTypesMappings(this.typeRegistry.getAllTypes());
     this.log = logger;
     this.kibanaVersion = kibanaVersion;
@@ -112,11 +118,15 @@ export class KibanaMigrator implements IKibanaMigrator {
     });
     this.waitForMigrationCompletion = waitForMigrationCompletion;
     this.nodeRoles = nodeRoles;
-    // Building the active mappings (and associated md5sums) is an expensive
-    // operation so we cache the result
+    // we are no longer adding _meta information to the mappings at this level
+    // consumers of the exposed mappings are only accessing the 'properties' field
     this.activeMappings = buildActiveMappings(this.mappingProperties);
     this.docLinks = docLinks;
     this.esCapabilities = esCapabilities;
+  }
+
+  public getDocumentMigrator() {
+    return this.documentMigrator;
   }
 
   public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
@@ -168,6 +178,7 @@ export class KibanaMigrator implements IKibanaMigrator {
         kibanaIndexPrefix: this.kibanaIndex,
         typeRegistry: this.typeRegistry,
         defaultIndexTypesMap: this.defaultIndexTypesMap,
+        hashToVersionMap: this.hashToVersionMap,
         logger: this.log,
         documentMigrator: this.documentMigrator,
         migrationConfig: this.soMigrationsConfig,

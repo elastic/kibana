@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { IEsSearchRequest } from '../../../common/search';
+import { coreMock } from '@kbn/core/public/mocks';
+import { IEsSearchRequest } from '@kbn/search-types';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
-import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from '../errors';
+import { EsError, type IEsError } from '@kbn/search-errors';
 import { ISessionService, SearchSessionState } from '..';
 import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
@@ -22,12 +23,12 @@ import * as resourceNotFoundException from '../../../common/search/test_data/res
 import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
 import { UI_SETTINGS } from '../../../common';
-import type { IEsError } from '../errors';
 import type { SearchServiceStartDependencies } from '../search_service';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
-jest.mock('./utils', () => {
-  const originalModule = jest.requireActual('./utils');
+jest.mock('./create_request_hash', () => {
+  const originalModule = jest.requireActual('./create_request_hash');
   return {
     ...originalModule,
     createRequestHash: jest.fn().mockImplementation((input) => {
@@ -36,15 +37,14 @@ jest.mock('./utils', () => {
   };
 });
 
-jest.mock('../errors/search_session_incomplete_warning', () => ({
+jest.mock('./search_session_incomplete_warning', () => ({
   SearchSessionIncompleteWarning: jest.fn(),
 }));
 
-import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
+import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
 
 let searchInterceptor: SearchInterceptor;
-let mockCoreSetup: MockedKeys<CoreSetup>;
 let bfetchSetup: jest.Mocked<BfetchPublicSetup>;
 let fetchMock: jest.Mock<any>;
 
@@ -87,6 +87,7 @@ function mockFetchImplementation(responses: any[]) {
 }
 
 describe('SearchInterceptor', () => {
+  let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
   let sessionService: jest.Mocked<ISessionService>;
   let sessionState$: BehaviorSubject<SearchSessionState>;
@@ -139,7 +140,6 @@ describe('SearchInterceptor', () => {
       http: mockCoreSetup.http,
       executionContext: mockCoreSetup.executionContext,
       session: sessionService,
-      theme: themeServiceMock.createSetupContract(),
       searchConfig: getMockSearchConfig({}),
     });
   });
@@ -157,9 +157,9 @@ describe('SearchInterceptor', () => {
       expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
     });
 
-    test('Renders a PainlessError', async () => {
+    test('Renders a EsError', async () => {
       searchInterceptor.showError(
-        new PainlessError(
+        new EsError(
           {
             statusCode: 400,
             message: 'search_phase_execution_exception',
@@ -167,6 +167,7 @@ describe('SearchInterceptor', () => {
               error: searchPhaseException.error,
             },
           },
+          'search_phase_execution_exception',
           () => {}
         )
       );
@@ -357,13 +358,73 @@ describe('SearchInterceptor', () => {
 
       await timeTravel(1000);
 
-      expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
       expect(fetchMock).toHaveBeenCalled();
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
     });
 
     test('should DELETE a running async search on async timeout after first response', async () => {
+      fetchMock.mockResolvedValue({
+        isPartial: true,
+        isRunning: true,
+        rawResponse: {},
+        id: 1,
+      });
+
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+      // Long enough to reach the timeout
+      await timeTravel(1000);
+
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
+    });
+
+    test('should return the last response on async timeout', async () => {
+      fetchMock.mockResolvedValue({
+        isPartial: true,
+        isRunning: true,
+        rawResponse: {
+          foo: 'bar',
+        },
+        id: 1,
+      });
+
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+      // Long enough to reach the timeout but not long enough to reach the next response
+      await timeTravel(1000);
+
+      expect(next).toHaveBeenCalledTimes(3);
+      expect(next.mock.calls[1]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": 1,
+            "isPartial": true,
+            "isRunning": true,
+            "rawResponse": Object {
+              "foo": "bar",
+            },
+          },
+        ]
+      `);
+    });
+
+    test('should DELETE a running async search on async timeout on error from fetch', async () => {
       const responses = [
         {
           time: 10,
@@ -375,13 +436,13 @@ describe('SearchInterceptor', () => {
           },
         },
         {
-          time: 2000,
+          time: 10,
           value: {
-            isPartial: false,
-            isRunning: false,
-            rawResponse: {},
+            statusCode: 500,
+            message: 'oh no',
             id: 1,
           },
+          isError: true,
         },
       ];
       mockFetchImplementation(responses);
@@ -397,15 +458,17 @@ describe('SearchInterceptor', () => {
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
 
       // Long enough to reach the timeout but not long enough to reach the next response
-      await timeTravel(1000);
+      await timeTravel(10);
 
       expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
+      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
+      expect((error.mock.calls[0][0] as Error).message).toBe('oh no');
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
-    test('should DELETE a running async search on async timeout on error from fetch', async () => {
+    test('should not leak unresolved promises if DELETE fails', async () => {
+      mockCoreSetup.http.delete.mockRejectedValueOnce({ status: 404, statusText: 'Not Found' });
       const responses = [
         {
           time: 10,
@@ -1465,22 +1528,6 @@ describe('SearchInterceptor', () => {
           ).rejects.toThrow(SearchTimeoutError);
           expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
         });
-      });
-
-      test('Should throw Painless error on server error with OSS format', async () => {
-        const mockResponse: IEsError = {
-          statusCode: 400,
-          message: 'search_phase_execution_exception',
-          attributes: {
-            error: searchPhaseException.error,
-          },
-        };
-        fetchMock.mockRejectedValueOnce(mockResponse);
-        const mockRequest: IEsSearchRequest = {
-          params: {},
-        };
-        const response = searchInterceptor.search(mockRequest);
-        await expect(response.toPromise()).rejects.toThrow(PainlessError);
       });
 
       test('Should throw ES error on ES server error', async () => {

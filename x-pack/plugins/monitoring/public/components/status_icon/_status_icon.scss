@@ -1,7 +1,7 @@
 .monStatusIcon {
   display: inline-block;
   margin-left: $euiSizeXS;
-  padding: ($euiSizeXS / 2) $euiSizeS;
+  padding: calc($euiSizeXS / 2) $euiSizeS;
   border-radius: $euiBorderRadius;
   color: $euiColorGhost;
   min-width: 1.9em;

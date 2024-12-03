@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './index.scss';
@@ -26,7 +27,7 @@ import { registrations } from './lib/registrations';
 import type { BrowserUrlService } from './types';
 
 /** @public */
-export type SharePluginSetup = ShareMenuRegistrySetup & {
+export type SharePublicSetup = ShareMenuRegistrySetup & {
   /**
    * Utilities to work with URL locators and short URLs.
    */
@@ -45,7 +46,7 @@ export type SharePluginSetup = ShareMenuRegistrySetup & {
 };
 
 /** @public */
-export type SharePluginStart = ShareMenuManagerStart & {
+export type SharePublicStart = ShareMenuManagerStart & {
   /**
    * Utilities to work with URL locators and short URLs.
    */
@@ -58,17 +59,30 @@ export type SharePluginStart = ShareMenuManagerStart & {
   navigate(options: RedirectOptions): void;
 };
 
-export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
-  private readonly shareMenuRegistry = new ShareMenuRegistry();
-  private readonly shareContextMenu = new ShareMenuManager();
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SharePublicSetupDependencies {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SharePublicStartDependencies {}
+
+export class SharePlugin
+  implements
+    Plugin<
+      SharePublicSetup,
+      SharePublicStart,
+      SharePublicSetupDependencies,
+      SharePublicStartDependencies
+    >
+{
+  private readonly shareMenuRegistry?: ShareMenuRegistry = new ShareMenuRegistry();
+  private readonly shareContextMenu = new ShareMenuManager();
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): SharePluginSetup {
+  public setup(core: CoreSetup): SharePublicSetup {
     const { analytics, http } = core;
     const { basePath } = http;
 
@@ -110,7 +124,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     registrations.setup({ analytics });
 
     return {
-      ...this.shareMenuRegistry.setup(),
+      ...this.shareMenuRegistry!.setup(),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
@@ -122,12 +136,12 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     };
   }
 
-  public start(core: CoreStart): SharePluginStart {
+  public start(core: CoreStart): SharePublicStart {
     const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
-      this.shareMenuRegistry.start(),
+      this.shareMenuRegistry!.start(),
       disableEmbed,
       this.anonymousAccessServiceProvider
     );

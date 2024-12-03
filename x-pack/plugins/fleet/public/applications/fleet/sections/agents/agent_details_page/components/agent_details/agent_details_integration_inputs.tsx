@@ -66,8 +66,9 @@ const StyledEuiTreeView = styled(EuiTreeView)`
 export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
   agent: Agent;
   packagePolicy: PackagePolicy;
+  linkToLogs?: boolean;
   'data-test-subj'?: string;
-}> = memo(({ agent, packagePolicy, 'data-test-subj': dataTestSubj }) => {
+}> = memo(({ agent, packagePolicy, linkToLogs = true, 'data-test-subj': dataTestSubj }) => {
   const { getHref } = useLink();
 
   const inputStatusMap = useMemo(
@@ -128,6 +129,7 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
         current
       ) => {
         if (current.enabled) {
+          const inputStatusFormatter = inputStatusMap.get(current.type);
           return [
             ...acc,
             {
@@ -137,37 +139,43 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
                     defaultMessage: 'View logs',
                   })}
                 >
-                  <StyledEuiLink
-                    href={getHref('agent_details', {
-                      agentId: agent.id,
-                      tabId: 'logs',
-                      logQuery: getLogsQueryByInputType(current.type),
-                    })}
-                    aria-label={i18n.translate(
-                      'xpack.fleet.agentDetailsIntegrations.viewLogsButton',
-                      {
-                        defaultMessage: 'View logs',
-                      }
-                    )}
-                  >
-                    {displayInputType(current.type)}
-                  </StyledEuiLink>
+                  {linkToLogs ? (
+                    <StyledEuiLink
+                      href={getHref('agent_details', {
+                        agentId: agent.id,
+                        tabId: 'logs',
+                        logQuery: getLogsQueryByInputType(current.type),
+                      })}
+                      aria-label={i18n.translate(
+                        'xpack.fleet.agentDetailsIntegrations.viewLogsButton',
+                        {
+                          defaultMessage: 'View logs',
+                        }
+                      )}
+                    >
+                      {displayInputType(current.type)}
+                    </StyledEuiLink>
+                  ) : (
+                    <>{displayInputType(current.type)}</>
+                  )}
                 </EuiToolTip>
               ),
               id: current.type,
               icon: getInputStatusIcon(current.type),
-              children: [
-                {
-                  label: (
-                    <AgentDetailsIntegrationInputStatus
-                      inputStatusFormatter={inputStatusMap.get(current.type)!}
-                    />
-                  ),
-                  id: `input-status-${current.type}`,
-                  isExpanded: true,
-                  className: 'input-action-item-expanded',
-                },
-              ],
+              children: !!inputStatusFormatter
+                ? [
+                    {
+                      label: (
+                        <AgentDetailsIntegrationInputStatus
+                          inputStatusFormatter={inputStatusFormatter}
+                        />
+                      ),
+                      id: `input-status-${current.type}`,
+                      isExpanded: true,
+                      className: 'input-action-item-expanded',
+                    },
+                  ]
+                : [],
             },
           ];
         }

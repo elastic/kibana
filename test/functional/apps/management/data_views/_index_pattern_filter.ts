@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -24,13 +25,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
+    after(async function () {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
     beforeEach(async function () {
       await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     afterEach(async function () {
       await PageObjects.settings.removeIndexPattern();
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should filter indexed fields by type', async function () {
@@ -75,10 +79,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '@tags.raw',
         '@timestamp',
         '_id',
+        '_ignored',
         '_index',
         '_score',
         '_source',
-        '_test',
       ];
 
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
@@ -104,10 +108,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '@tags.raw',
         '@timestamp',
         '_id',
+        '_ignored',
         '_index',
         '_score',
         '_source',
-        'agent',
       ];
 
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
@@ -167,6 +171,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.settings.clickIndexPatternLogstash();
 
+      await PageObjects.settings.refreshDataViewFieldList();
+
       await testSubjects.existOrFail('dataViewMappingConflict');
 
       expect(await PageObjects.settings.getFieldTypes()).to.eql([
@@ -176,10 +182,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'keyword',
         'date',
         '_id',
+        '_ignored',
         '_index',
         '',
         '_source',
-        'text',
       ]);
 
       // set other filters to check if they get reset after pressing the button

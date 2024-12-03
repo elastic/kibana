@@ -1,14 +1,15 @@
 openapi: 3.0.0
 info:
   title: Tags API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/tags:
-    summary: Aggregates and returns rule tags
     get:
-      operationId: ReadTags
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      summary: Aggregates and returns all unique tags from all rules
+      operationId: ReadTags
+      summary: List all detection rule tags
+      description: List all unique tags from all detection rules.
       tags:
         - Tags API
       responses:

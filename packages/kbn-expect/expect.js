@@ -45,7 +45,7 @@ function Assertion (obj, flag, parent) {
     this.flags[flag] = true;
 
     for (var i in parent.flags) {
-      if (parent.flags.hasOwnProperty(i)) {
+      if (Object.hasOwn(parent.flags, i)) {
         this.flags[i] = true;
       }
     }
@@ -70,7 +70,7 @@ function Assertion (obj, flag, parent) {
         };
 
         for (var fn in Assertion.prototype) {
-          if (Assertion.prototype.hasOwnProperty(fn) && fn != name) {
+          if (Object.hasOwn(Assertion.prototype, fn) && fn != name) {
             if (typeof this[name] === 'function' && fn === 'length') {
               continue;
             }
@@ -647,6 +647,11 @@ function i (obj, showHidden, depth) {
       return stylize('null', 'null');
     }
 
+    // format sets like arrays
+    if (value instanceof Set) {
+      value = Array.from(value)
+    }
+
     if (isDOMElement(value)) {
       return getOuterHTML(value);
     }
@@ -930,6 +935,10 @@ expect.eql = function eql(actual, expected) {
   // to determine equivalence.
   } else if (isRegExp(actual) && isRegExp(expected)) {
     return regExpEquiv(actual, expected);
+  // If both are Sets, they should be treated equal if they have the same
+  // entries, independent of the ordering
+  } else if (actual instanceof Set && expected instanceof Set) {
+    return actual.size === expected.size && actual.difference(expected).size === 0;
   // 7.4. For all other Object pairs, including Array objects, equivalence is
   // determined by having the same number of owned properties (as verified
   // with Object.prototype.hasOwnProperty.call), the same set of keys

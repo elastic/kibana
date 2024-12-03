@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { migrationStateActionMachine } from './migrations_state_action_machine';
@@ -39,12 +40,21 @@ describe('migrationsStateActionMachine', () => {
     kibanaVersion: '7.11.0',
     waitForMigrationCompletion: false,
     mustRelocateDocuments: true,
+    indexTypes: ['typeA', 'typeB', 'typeC'],
     indexTypesMap: {
       '.kibana': ['typeA', 'typeB', 'typeC'],
       '.kibana_task_manager': ['task'],
       '.kibana_cases': ['typeD', 'typeE'],
     },
-    targetMappings: { properties: {} },
+    hashToVersionMap: {
+      'typeA|someHash': '10.1.0',
+      'typeB|someHash': '10.1.0',
+      'typeC|someHash': '10.1.0',
+      'task|someHash': '10.1.0',
+      'typeD|someHash': '10.1.0',
+      'typeE|someHash': '10.1.0',
+    },
+    targetIndexMappings: { properties: {} },
     coreMigrationVersionPerType: {},
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',

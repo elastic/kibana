@@ -1,4 +1,4 @@
-summary: Set the closure type and default connector for Stack Management cases.
+summary: Set the closure type, custom fields, and default connector for Stack Management cases.
 value: 
   owner: cases
   connector:
@@ -12,3 +12,22 @@ value:
       label: my-text-field
       required: false
       type: text
+      defaultValue: My custom field default value.
+  templates:
+    - key: 505932fe-ee3a-4960-a661-c781b5acdb05
+      name: template-1
+      caseFields: 
+        title: Default case title
+        tags:
+          - Default case tag
+        category: Default-category
+        description: A default description for cases.
+        assignees:
+          - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            type: text
+            value: A text field value for the template.
+      description: A description of the template.
+      tags:
+        - Template tag 1       

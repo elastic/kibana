@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const getRequestBody = ({
-  indexPattern,
+  indexNameOrPattern,
   startDate = 'now-7d/d',
   endDate = 'now/d',
 }: {
-  indexPattern: string;
+  indexNameOrPattern: string;
   startDate: string;
   endDate: string;
 }): SearchRequest => ({
-  index: indexPattern,
+  index: indexNameOrPattern,
   aggs: {
     index: {
       terms: {

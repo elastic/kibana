@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
 import { EmbeddableInput } from '../embeddables';
 
 export type FilterableEmbeddableInput = EmbeddableInput & {
@@ -17,20 +19,24 @@ export type FilterableEmbeddableInput = EmbeddableInput & {
   timeslice?: [number, number];
 };
 
+export type EmbeddableHasTimeRange = Pick<
+  PublishesWritableUnifiedSearch,
+  'timeRange$' | 'setTimeRange' | 'isCompatibleWithUnifiedSearch'
+>;
+
 /**
  * All embeddables that implement this interface should support being filtered
- * and/or queried via the top navigation bar
- * @public
+ * and/or queried via the top navigation bar.
  */
 export interface FilterableEmbeddable {
   /**
    * Gets the embeddable's local filters
    **/
-  getFilters: () => Promise<Filter[]>;
+  getFilters: () => Filter[];
   /**
    * Gets the embeddable's local query
    **/
-  getQuery: () => Promise<Query | AggregateQuery | undefined>;
+  getQuery: () => Query | AggregateQuery | undefined;
 }
 
 /**

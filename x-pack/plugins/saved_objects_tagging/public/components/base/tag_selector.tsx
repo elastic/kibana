@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useCallback, useState } from 'react';
+import React, { type FC, useMemo, useCallback, useState } from 'react';
 import {
   EuiComboBox,
   EuiHealth,
@@ -17,9 +17,9 @@ import {
   EuiComboBoxProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Tag } from '../../../common';
+import type { Tag } from '../../../common/types';
 import { testSubjFriendly } from '../../utils';
-import { CreateModalOpener } from '../edition_modal';
+import type { CreateModalOpener } from '../edition_modal';
 
 interface CreateOption {
   type: '__create_option__';
@@ -131,11 +131,13 @@ export const TagSelector: FC<TagSelectorProps> = ({
   // we append the 'create' option if user is allowed to create tags
   const options: TagComboBoxOption[] = useMemo(() => {
     return [
-      ...tags.map((tag) => ({
-        label: tag.name,
-        color: tag.color,
-        value: tag,
-      })),
+      ...tags
+        .filter((tag) => !tag.managed)
+        .map((tag) => ({
+          label: tag.name,
+          color: tag.color,
+          value: tag,
+        })),
       ...(allowCreate ? [createTagOption] : []),
     ];
   }, [allowCreate, tags, createTagOption]);

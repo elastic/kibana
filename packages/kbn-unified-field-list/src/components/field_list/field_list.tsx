@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -39,7 +40,7 @@ export interface FieldListProps {
  * @public
  * @constructor
  */
-export const FieldList: React.FC<FieldListProps> = ({
+export const FieldList: FC<PropsWithChildren<FieldListProps>> = ({
   'data-test-subj': dataTestSubject = 'fieldList',
   isProcessing,
   prepend,
@@ -65,7 +66,9 @@ export const FieldList: React.FC<FieldListProps> = ({
         />
       )}
       {!!prepend && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
-      <EuiFlexItem grow={true}>{children}</EuiFlexItem>
+      <EuiFlexItem className="unifiedFieldListSidebar__accordionContainer" grow={true}>
+        {children}
+      </EuiFlexItem>
       {!!append && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
     </EuiFlexGroup>
   );

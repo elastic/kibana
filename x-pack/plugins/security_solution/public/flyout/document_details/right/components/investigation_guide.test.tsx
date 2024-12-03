@@ -9,34 +9,45 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { InvestigationGuide } from './investigation_guide';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import {
   INVESTIGATION_GUIDE_BUTTON_TEST_ID,
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
-import { mockContextValue } from '../mocks/mock_context';
-import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
-import { LeftPanelInvestigationTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInvestigationTab } from '../../left';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
+jest.mock('@kbn/expandable-flyout');
 
-const NO_DATA_MESSAGE = 'Investigation guideThere’s no investigation guide for this rule.';
+const mockFlyoutContextValue = { openLeftPanel: jest.fn() };
+
+const NO_DATA_MESSAGE = "Investigation guideThere's no investigation guide for this rule.";
+const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
+const OPEN_FLYOUT_MESSAGE =
+  'Investigation guide availableOpen alert details to access investigation guides.';
 
 const renderInvestigationGuide = () =>
   render(
     <IntlProvider locale="en">
-      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-        <RightPanelContext.Provider value={mockContextValue}>
-          <InvestigationGuide />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <DocumentDetailsContext.Provider value={mockContextValue}>
+        <InvestigationGuide />
+      </DocumentDetailsContext.Provider>
     </IntlProvider>
   );
 
 describe('<InvestigationGuide />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      openLeftPanel: mockFlyoutContextValue.openLeftPanel,
+    } as unknown as ExpandableFlyoutApi);
+  });
+
   it('should render investigation guide button correctly', () => {
     (useInvestigationGuide as jest.Mock).mockReturnValue({
       loading: false,
@@ -46,7 +57,6 @@ describe('<InvestigationGuide />', () => {
     });
     const { getByTestId, queryByTestId } = renderInvestigationGuide();
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent('Investigation guide');
     expect(getByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).toHaveTextContent(
       'Show investigation guide'
@@ -95,6 +105,38 @@ describe('<InvestigationGuide />', () => {
     const { queryByTestId, getByTestId } = renderInvestigationGuide();
     expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);
+  });
+
+  it('should render preview message when flyout is in preview', () => {
+    (useInvestigationGuide as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      basicAlertData: { ruleId: 'ruleId' },
+      ruleNote: 'test note',
+    });
+    const { queryByTestId, getByTestId } = render(
+      <IntlProvider locale="en">
+        <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+          <InvestigationGuide />
+        </DocumentDetailsContext.Provider>
+      </IntlProvider>
+    );
+
+    expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
+  });
+
+  it('should render open flyout message if isPreviewMode is true', () => {
+    const { queryByTestId, getByTestId } = render(
+      <IntlProvider locale="en">
+        <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreviewMode: true }}>
+          <InvestigationGuide />
+        </DocumentDetailsContext.Provider>
+      </IntlProvider>
+    );
+
+    expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(OPEN_FLYOUT_MESSAGE);
   });
 
   it('should navigate to investigation guide when clicking on button', () => {

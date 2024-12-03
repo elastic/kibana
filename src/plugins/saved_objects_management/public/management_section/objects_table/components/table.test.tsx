@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,6 +15,8 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { columnServiceMock } from '../../../services/column_service.mock';
 import { Table, TableProps } from './table';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
@@ -110,11 +113,11 @@ describe('Table', () => {
     expect(component.state().isSearchTextValid).toBe(true);
   });
 
-  it(`prevents saved objects from being deleted`, () => {
+  it(`prevents hidden saved objects from being deleted`, () => {
     const selectedSavedObjects = [
-      { type: 'visualization' },
-      { type: 'search' },
-      { type: 'index-pattern' },
+      { type: 'visualization', meta: { hiddenType: true } },
+      { type: 'search', meta: { hiddenType: true } },
+      { type: 'index-pattern', meta: { hiddenType: true } },
     ] as any;
     const customizedProps = {
       ...defaultProps,
@@ -145,7 +148,7 @@ describe('Table', () => {
 
     const table = component.find('EuiBasicTable');
     const columns = table.prop('columns') as any[];
-    const actionColumn = columns.find((x) => x.hasOwnProperty('actions')) as { actions: any[] };
+    const actionColumn = columns.find((x) => Object.hasOwn(x, 'actions')) as { actions: any[] };
     const someAction = actionColumn.actions.find(
       (x) => x['data-test-subj'] === 'savedObjectsTableAction-someAction'
     );
@@ -153,5 +156,46 @@ describe('Table', () => {
     expect(onActionRefresh).not.toHaveBeenCalled();
     someAction.onClick();
     expect(onActionRefresh).toHaveBeenCalled();
+  });
+
+  describe('hidden SOs', () => {
+    it('keeps the delete button disabled for hidden SOs', async () => {
+      const hiddenSavedObjects = [
+        { type: 'visualization', managed: false, meta: { hiddenType: true } },
+        { type: 'search', managed: false, meta: { hiddenType: true } },
+        { type: 'index-pattern', managed: false, meta: { hiddenType: true } },
+      ] as any;
+
+      render(
+        <I18nProvider>
+          <Table {...defaultProps} selectedSavedObjects={hiddenSavedObjects} />
+        </I18nProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
+      });
+    });
+
+    it('enables the delete button when the selection contains at least one non-hidden SO', async () => {
+      const selectedSavedObjects = [
+        { type: 'visualization', meta: { hiddenType: true } },
+        { type: 'search', meta: { hiddenType: true } },
+        { type: 'index-pattern', meta: { hiddenType: true } },
+        { type: 'lens', meta: { hiddenType: false } }, // deletable!
+      ] as any;
+
+      render(
+        <I18nProvider>
+          <Table {...defaultProps} selectedSavedObjects={selectedSavedObjects} />
+        </I18nProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeEnabled();
+        expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
+      });
+    });
   });
 });

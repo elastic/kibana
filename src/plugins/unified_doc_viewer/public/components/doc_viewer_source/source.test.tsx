@@ -1,31 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 import { DocViewerSource } from './source';
 import * as hooks from '../../hooks/use_es_doc_search';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../json_code_editor';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { of } from 'rxjs';
+import { setUnifiedDocViewerServices } from '../../plugin';
+import type { UnifiedDocViewerServices } from '../../types';
 
 const mockDataView = {
   getComputedFields: () => [],
 } as never;
-const getMock = jest.fn(() => Promise.resolve(mockDataView));
-const mockDataViewService = {
-  get: getMock,
-} as unknown as DataView;
-const services = {
+setUnifiedDocViewerServices({
   uiSettings: {
     get: (key: string) => {
       if (key === 'discover:useNewFieldsApi') {
@@ -33,29 +30,21 @@ const services = {
       }
     },
   },
-  data: {
-    dataViewService: mockDataViewService,
-  },
-  theme: {
-    theme$: of({ darkMode: false }),
-  },
-};
+} as UnifiedDocViewerServices);
 
 describe('Source Viewer component', () => {
   test('renders loading state', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, () => {}]);
 
     const comp = mountWithIntl(
-      <KibanaContextProvider services={services}>
-        <DocViewerSource
-          id={'1'}
-          index={'index1'}
-          dataView={mockDataView}
-          width={123}
-          hasLineNumbers={true}
-          onRefresh={() => {}}
-        />
-      </KibanaContextProvider>
+      <DocViewerSource
+        id={'1'}
+        index={'index1'}
+        dataView={mockDataView}
+        width={123}
+        hasLineNumbers={true}
+        onRefresh={() => {}}
+      />
     );
     const loadingIndicator = comp.find(EuiLoadingSpinner);
     expect(loadingIndicator).not.toBe(null);
@@ -65,16 +54,14 @@ describe('Source Viewer component', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, () => {}]);
 
     const comp = mountWithIntl(
-      <KibanaContextProvider services={services}>
-        <DocViewerSource
-          id={'1'}
-          index={'index1'}
-          dataView={mockDataView}
-          width={123}
-          hasLineNumbers={true}
-          onRefresh={() => {}}
-        />
-      </KibanaContextProvider>
+      <DocViewerSource
+        id={'1'}
+        index={'index1'}
+        dataView={mockDataView}
+        width={123}
+        hasLineNumbers={true}
+        onRefresh={() => {}}
+      />
     );
     const errorPrompt = comp.find(EuiEmptyPrompt);
     expect(errorPrompt.length).toBe(1);
@@ -105,18 +92,18 @@ describe('Source Viewer component', () => {
       return false;
     });
     const comp = mountWithIntl(
-      <KibanaContextProvider services={services}>
-        <DocViewerSource
-          id={'1'}
-          index={'index1'}
-          dataView={mockDataView}
-          width={123}
-          hasLineNumbers={true}
-          onRefresh={() => {}}
-        />
-      </KibanaContextProvider>
+      <DocViewerSource
+        id={'1'}
+        index={'index1'}
+        dataView={mockDataView}
+        width={123}
+        hasLineNumbers={true}
+        onRefresh={() => {}}
+      />
     );
     const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
     expect(jsonCodeEditor).not.toBe(null);
+    expect(jsonCodeEditor.props().jsonValue).toContain('_source');
+    expect(jsonCodeEditor.props().jsonValue).not.toContain('_score');
   });
 });

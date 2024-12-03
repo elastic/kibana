@@ -7,11 +7,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-
 import type { GetRuleExecutionResultsResponse } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type { FetchRuleExecutionResultsArgs } from '../../api';
 import { api } from '../../api';
-
 import * as i18n from './translations';
 
 export type UseExecutionResultsArgs = Omit<FetchRuleExecutionResultsArgs, 'signal'>;
@@ -22,7 +20,9 @@ export const useExecutionResults = (args: UseExecutionResultsArgs) => {
   return useQuery<GetRuleExecutionResultsResponse>(
     ['detectionEngine', 'ruleMonitoring', 'executionResults', args],
     ({ signal }) => {
-      return api.fetchRuleExecutionResults({ ...args, signal });
+      const runTypeFilters = args.runTypeFilters;
+
+      return api.fetchRuleExecutionResults({ ...args, runTypeFilters, signal });
     },
     {
       keepPreviousData: true,

@@ -9,30 +9,23 @@ import type { EuiBasicTable } from '@elastic/eui';
 import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { TimelineType } from '../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 
 import * as i18n from './translations';
 import type { DeleteTimelines, OpenTimelineResult } from './types';
 import { EditTimelineActions } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
-
-const getExportedIds = (selectedTimelines: OpenTimelineResult[]) => {
-  const array = Array.isArray(selectedTimelines) ? selectedTimelines : [selectedTimelines];
-  return array.reduce(
-    (acc, item) => (item.savedObjectId != null ? [...acc, item.savedObjectId] : [...acc]),
-    [] as string[]
-  );
-};
+import { getSelectedTimelineIdsAndSearchIds, getRequestIds } from '.';
 
 export const useEditTimelineBatchActions = ({
   deleteTimelines,
   selectedItems,
   tableRef,
-  timelineType = TimelineType.default,
+  timelineType = TimelineTypeEnum.default,
 }: {
   deleteTimelines?: DeleteTimelines;
   selectedItems?: OpenTimelineResult[];
-  tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | undefined>;
+  tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | null>;
   timelineType: TimelineType | null;
 }) => {
   const {
@@ -56,7 +49,13 @@ export const useEditTimelineBatchActions = ({
     [disableExportTimelineDownloader, onCloseDeleteTimelineModal, tableRef]
   );
 
-  const selectedIds = useMemo(() => getExportedIds(selectedItems ?? []), [selectedItems]);
+  const { timelineIds, searchIds } = useMemo(() => {
+    if (selectedItems != null) {
+      return getRequestIds(getSelectedTimelineIdsAndSearchIds(selectedItems));
+    } else {
+      return { timelineIds: [], searchIds: undefined };
+    }
+  }, [selectedItems]);
 
   const handleEnableExportTimelineDownloader = useCallback(
     () => enableExportTimelineDownloader(),
@@ -102,13 +101,14 @@ export const useEditTimelineBatchActions = ({
         <>
           <EditTimelineActions
             deleteTimelines={deleteTimelines}
-            ids={selectedIds}
+            ids={timelineIds}
+            savedSearchIds={searchIds}
             isEnableDownloader={isEnableDownloader}
             isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
             onComplete={onCompleteBatchActions.bind(null, closePopover)}
             title={
               selectedItems?.length !== 1
-                ? timelineType === TimelineType.template
+                ? timelineType === TimelineTypeEnum.template
                   ? i18n.SELECTED_TEMPLATES(selectedItems?.length ?? 0)
                   : i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0)
                 : selectedItems[0]?.title ?? ''
@@ -121,7 +121,8 @@ export const useEditTimelineBatchActions = ({
     [
       selectedItems,
       deleteTimelines,
-      selectedIds,
+      timelineIds,
+      searchIds,
       isEnableDownloader,
       isDeleteTimelineModalOpen,
       onCompleteBatchActions,

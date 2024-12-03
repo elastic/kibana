@@ -1,0 +1,108 @@
+- input: gcs
+  template_path: gcs.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: project_id
+      type: text
+      title: Project ID
+      description: >-
+        This attribute is required for various internal operations with respect to authentication, creating storage clients and logging which are used internally for various processing purposes.
+      multi: false
+      required: true
+      show_user: true
+      default: my-project-id
+    - name: service_account_key
+      type: password
+      title: Service Account Key
+      description: >-
+        This attribute contains the json service account credentials string, which can be generated from the google cloud console, ref[Service Account Keys](https://cloud.google.com/iam/docs/creating-managing-service-account-keys).
+        Required if a Service Account File is not provided.
+      multi: false
+      required: false
+      show_user: true
+    - name: service_account_file
+      type: text
+      title: Service Account File
+      description: >-
+        This attribute contains the service account credentials file, which can be generated from the google cloud console, ref [Service Account Keys](https://cloud.google.com/iam/docs/creating-managing-service-account-keys).
+        Required if a Service Account Key is not provided.
+      multi: false
+      required: false
+      show_user: true
+    - name: number_of_workers
+      type: integer
+      title: Maximum number of workers
+      multi: false
+      required: false
+      show_user: true
+      default: 3
+      description: Determines how many workers are spawned per bucket.
+    - name: poll
+      type: bool
+      title: Polling
+      multi: false
+      required: false
+      show_user: true
+      default: true
+      description: Determines if the bucket will be continuously polled for new documents.
+    - name: poll_interval
+      type: text
+      title: Polling interval
+      multi: false
+      required: false
+      show_user: true
+      default: 15s
+      description: Determines the time interval between polling operations.
+    - name: bucket_timeout
+      type: text
+      title: Bucket Timeout
+      multi: false
+      required: false
+      show_user: true
+      default: 120s
+      description: Defines the maximum time that the sdk will wait for a bucket api response before timing out. Valid time units are ns, us, ms, s, m, h.
+    - name: buckets
+      type: yaml
+      title: Buckets
+      description: "This attribute contains the details about a specific bucket like, name, number_of_workers, poll, poll_interval and bucket_timeout. The attribute 'name' is specific to a bucket as it describes the bucket name, while the fields number_of_workers, poll, poll_interval and bucket_timeout can exist both at the bucket level and at the global level. If you have already defined the attributes globally, then you can only specify the name in this yaml config. If you want to override any specific attribute for a specific bucket, then, you can define it here. Any attribute defined in the yaml will override the global definitions. Please see the relevant [Documentation](https://www.elastic.co/guide/en/beats/filebeat/8.5/filebeat-input-gcs.html#attrib-buckets) for further information.\n"
+      required: true
+      show_user: true
+      default: >-
+        # You can define as many buckets as you want here.
+
+        - name: logs
+        - name: logs_2
+
+        # The config below is an example of how to override the global config.
+
+        #- name: event_logs_3
+        #  number_of_workers: 3
+        #  poll: true
+        #  poll_interval: 10s
+        #  bucket_timeout: 30s
+    - name: file_selectors
+      type: yaml
+      title: File Selectors
+      multi: false
+      required: false
+      show_user: false
+      default: >-
+        # - regex: "event/"
+      description: "If the GCS bucket will have events that correspond to files that this integration shouldn’t process, file_selectors can be used to limit the files that are downloaded. This is a list of selectors which is made up of regex patters. \nThe regex should match the GCS bucket filepath. Regexes use [RE2 syntax](https://pkg.go.dev/regexp/syntax). Files that don’t match one of the regexes will not be processed.\n"
+    - name: timestamp_epoch
+      type: integer
+      title: Timestamp Epoch
+      multi: false
+      required: false
+      show_user: false
+      description: Defines the epoch time in seconds, which is used to filter out objects/files that are older than the specified timestamp.
+    - name: alternative_host
+      type: text
+      title: Alternative Host
+      description: Used to override the default host for the storage client (default is storage.googleapis.com)
+      required: false
+      multi: false
+      show_user: false

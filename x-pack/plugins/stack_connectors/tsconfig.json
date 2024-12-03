@@ -4,6 +4,7 @@
     "outDir": "target/types",
   },
   "include": [
+    "__mocks__/**/*",
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
@@ -37,6 +38,12 @@
     "@kbn/securitysolution-ecs",
     "@kbn/ui-theme",
     "@kbn/cases-components",
+    "@kbn/code-editor-mock",
+    "@kbn/utility-types",
+    "@kbn/task-manager-plugin",
+    "@kbn/alerting-types",
+    "@kbn/core-notifications-browser",
+    "@kbn/response-ops-rule-form",
   ],
   "exclude": [
     "target/**/*",

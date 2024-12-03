@@ -21,5 +21,8 @@ export interface CreateRuleData<Params extends RuleParams = never> {
   params: Params;
   schedule: CreateRuleDataType['schedule'];
   actions: CreateRuleDataType['actions'];
+  systemActions?: CreateRuleDataType['systemActions'];
   notifyWhen?: CreateRuleDataType['notifyWhen'];
+  alertDelay?: CreateRuleDataType['alertDelay'];
+  flapping?: CreateRuleDataType['flapping'];
 }

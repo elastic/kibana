@@ -1,0 +1,43 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "__mocks__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-http-browser",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/ml-trained-models-utils",
+    "@kbn/shared-ux-router",
+    "@kbn/core-http-server",
+    "@kbn/share-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/logging",
+    "@kbn/react-kibana-context-render",
+    "@kbn/doc-links",
+    "@kbn/console-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/features-plugin",
+    "@kbn/ui-theme",
+    "@kbn/deeplinks-search",
+    "@kbn/deeplinks-management",
+    "@kbn/serverless",
+    "@kbn/utility-types"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

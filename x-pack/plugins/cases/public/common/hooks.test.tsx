@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { TestProviders } from './mock';
 import { useIsMainApplication } from './hooks';
-import { useApplication } from '../components/cases_context/use_application';
+import { useApplication } from './lib/kibana/use_application';
 
-jest.mock('../components/cases_context/use_application');
+jest.mock('./lib/kibana/use_application');
 
 const useApplicationMock = useApplication as jest.Mock;
 
@@ -28,7 +28,9 @@ describe('hooks', () => {
 
     it('returns true if it is the main application', () => {
       const { result } = renderHook(() => useIsMainApplication(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       });
 
       expect(result.current).toBe(true);
@@ -38,7 +40,9 @@ describe('hooks', () => {
       useApplicationMock.mockReturnValue({ appId: 'testAppId', appTitle: 'Test app' });
 
       const { result } = renderHook(() => useIsMainApplication(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       });
 
       expect(result.current).toBe(false);

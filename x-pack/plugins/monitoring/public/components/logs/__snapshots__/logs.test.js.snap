@@ -7,15 +7,13 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
   title="Want to see more log entries?"
 >
   <RedirectAppLinks>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Visit {link} to dive deeper."
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
-          "link": <EuiLink
-            href=""
-          >
-            Logs
+          "link": <EuiLink>
+            Discover
           </EuiLink>,
         }
       }
@@ -31,15 +29,13 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
   title="Want to see more log entries?"
 >
   <RedirectAppLinks>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Visit {link} to dive deeper."
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
-          "link": <EuiLink
-            href=""
-          >
-            Logs
+          "link": <EuiLink>
+            Discover
           </EuiLink>,
         }
       }
@@ -55,15 +51,13 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
   title="Want to see more log entries?"
 >
   <RedirectAppLinks>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Visit {link} to dive deeper."
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
-          "link": <EuiLink
-            href=""
-          >
-            Logs
+          "link": <EuiLink>
+            Discover
           </EuiLink>,
         }
       }
@@ -274,7 +268,6 @@ exports[`Logs should render normally 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
   <EuiSpacer
@@ -286,15 +279,13 @@ exports[`Logs should render normally 1`] = `
     title="Want to see more log entries?"
   >
     <RedirectAppLinks>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Visit {link} to dive deeper."
         id="xpack.monitoring.logs.listing.linkText"
         values={
           Object {
-            "link": <EuiLink
-              href=""
-            >
-              Logs
+            "link": <EuiLink>
+              Discover
             </EuiLink>,
           }
         }

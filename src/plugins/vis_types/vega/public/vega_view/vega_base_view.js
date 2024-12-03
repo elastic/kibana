@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@kbn/datemath';
 import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
@@ -77,7 +77,7 @@ const getExternalUrlServiceError = (uri) =>
 
 export class VegaBaseView {
   constructor(opts) {
-    this._$parentEl = $(opts.parentEl);
+    this._parentEl = opts.parentEl;
     this._parser = opts.vegaParser;
     this._serviceSettings = opts.serviceSettings;
     this._filterManager = opts.filterManager;
@@ -85,7 +85,7 @@ export class VegaBaseView {
     this._timefilter = opts.timefilter;
     this._view = null;
     this._vegaViewConfig = null;
-    this._$messages = null;
+    this._messages = null;
     this._destroyHandlers = [];
     this._initialized = false;
     this._externalUrl = opts.externalUrl;
@@ -100,11 +100,13 @@ export class VegaBaseView {
 
     try {
       if (this._parser.useResize) {
-        this._$parentEl.addClass('vgaVis--autoresize');
+        this._parentEl.classList.add('vgaVis--autoresize');
       } else {
-        this._$parentEl.removeClass('vgaVis--autoresize');
+        this._parentEl.classList.remove('vgaVis--autoresize');
       }
-      this._$parentEl.empty().addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
+      this._parentEl.replaceChildren();
+      this._parentEl.classList.add('vgaVis');
+      this._parentEl.style.flexDirection = this._parser.containerDir;
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
       for (const warn of this._parser.warnings) {
@@ -116,23 +118,29 @@ export class VegaBaseView {
         return;
       }
 
-      this._$container = $('<div class="vgaVis__view">').appendTo(this._$parentEl);
-      this._$controls = $(
-        `<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`
-      ).appendTo(this._$parentEl);
+      this._container = document.createElement('div');
+      this._container.classList.add('vgaVis__view');
+      this._parentEl.append(this._container);
+
+      this._controls = document.createElement('div');
+      this._controls.classList.add(
+        `vgaVis__controls`,
+        `vgaVis__controls--${this._parser.controlsDir}`
+      );
+      this._parentEl.append(this._controls);
 
       this._addDestroyHandler(() => {
-        if (this._$container) {
-          this._$container.remove();
-          this._$container = null;
+        if (this._container) {
+          this._container.remove();
+          this._container = null;
         }
-        if (this._$controls) {
-          this._$controls.remove();
-          this._$controls = null;
+        if (this._controls) {
+          this._controls.remove();
+          this._controls = null;
         }
-        if (this._$messages) {
-          this._$messages.remove();
-          this._$messages = null;
+        if (this._messages) {
+          this._messages.remove();
+          this._messages = null;
         }
         if (this._view) {
           const state = this._view.getState();
@@ -253,24 +261,30 @@ export class VegaBaseView {
   }
 
   _addMessage(type, text) {
-    if (!this._$messages) {
-      this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
+    if (!this._messages) {
+      this._messages = document.createElement('ul');
+      this._messages.classList.add('vgaVis__messages');
+      this._parentEl.append(this._messages);
     }
-    const isMessageAlreadyDisplayed = this._$messages
-      .find(`pre.vgaVis__messageCode`)
-      .filter((index, element) => element.textContent === text).length;
+    const isMessageAlreadyDisplayed = [
+      ...this._messages.querySelectorAll(`:scope pre.vgaVis__messageCode`),
+    ].filter((index, element) => element.textContent === text).length;
     if (!isMessageAlreadyDisplayed) {
-      this._$messages.append(
-        $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
-          $(`<pre class="vgaVis__messageCode">`).text(text)
-        )
-      );
+      const messageCodeEl = document.createElement('pre');
+      messageCodeEl.classList.add('vgaVis__messageCode');
+      messageCodeEl.textContent = text;
+
+      const messageItemEl = document.createElement('li');
+      messageItemEl.classList.add(`vgaVis__message`, `vgaVis__message--${type}`);
+      messageItemEl.append(messageCodeEl);
+
+      this._messages.append(messageItemEl);
     }
   }
 
-  async resize() {
+  async resize(dimensions) {
     if (this._parser.useResize && this._view) {
-      this.updateVegaSize(this._view);
+      this.updateVegaSize(this._view, dimensions);
       await this._view.runAsync();
 
       // The derived class should create this method
@@ -279,8 +293,8 @@ export class VegaBaseView {
   }
 
   updateVegaSize(view, dimensions) {
-    const width = Math.floor(Math.max(0, dimensions?.width ?? this._$container.width()));
-    const height = Math.floor(Math.max(0, dimensions?.height ?? this._$container.height()));
+    const width = Math.floor(Math.max(0, dimensions?.width ?? this._container.clientWidth - 1));
+    const height = Math.floor(Math.max(0, dimensions?.height ?? this._container.clientHeight - 1));
 
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);
@@ -305,7 +319,7 @@ export class VegaBaseView {
       if (this._parser.tooltips) {
         // position and padding can be specified with
         // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
-        const tthandler = new TooltipHandler(this._$container[0], view, this._parser.tooltips);
+        const tthandler = new TooltipHandler(this._container, view, this._parser.tooltips);
 
         // Vega bug workaround - need to destroy tooltip by hand
         this._addDestroyHandler(() => tthandler.hideTooltip());

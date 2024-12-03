@@ -6,13 +6,20 @@
  */
 
 import type { EuiStepProps } from '@elastic/eui';
-import type { ComponentType, LazyExoticComponent } from 'react';
+import type { ComponentType, LazyExoticComponent, PropsWithChildren } from 'react';
 
 import type { FleetServerAgentComponentUnit } from '../../common/types/models/agent';
 
 import type { PackagePolicyValidationResults } from '../services';
 
-import type { Agent, AgentPolicy, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
+import type {
+  Agent,
+  AgentPolicy,
+  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicy,
+  SetupTechnology,
+} from '.';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -34,8 +41,10 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   | (PackagePolicyCreateExtensionComponentProps & { isEditPage: false })
 ) & {
   validationResults?: PackagePolicyValidationResults;
-  agentPolicy?: AgentPolicy;
+  agentPolicies?: AgentPolicy[];
   packageInfo: PackageInfo;
+  isAgentlessEnabled?: boolean;
+  handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
 };
 
 /**
@@ -109,6 +118,18 @@ export interface PackagePolicyResponseExtension {
   package: string;
   view: 'package-policy-response';
   Component: LazyExoticComponent<PackagePolicyResponseExtensionComponent>;
+}
+
+export interface EndpointAgentTamperProtectionExtension {
+  package: string;
+  view: 'endpoint-agent-tamper-protection';
+  Component: LazyExoticComponent<ComponentType<PropsWithChildren<{}>>>;
+}
+
+export interface PliAuthBlockExtension {
+  package: string;
+  view: 'pli-auth-block';
+  Component: LazyExoticComponent<ComponentType>;
 }
 
 export interface PackageGenericErrorsListExtension {
@@ -217,4 +238,6 @@ export type UIExtensionPoint =
   | PackageAssetsExtension
   | PackageGenericErrorsListExtension
   | AgentEnrollmentFlyoutFinalStepExtension
-  | PackagePolicyCreateMultiStepExtension;
+  | PackagePolicyCreateMultiStepExtension
+  | EndpointAgentTamperProtectionExtension
+  | PliAuthBlockExtension;

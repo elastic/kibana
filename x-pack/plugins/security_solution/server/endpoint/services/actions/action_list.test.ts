@@ -27,6 +27,7 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from '../../mocks';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using `getActionList()', () => {
   let esClient: ElasticsearchClientMock;
@@ -89,9 +90,12 @@ describe('When using `getActionList()', () => {
       endDate: undefined,
       data: [
         {
+          action: '123',
           agents: ['agent-a'],
+          agentType: 'endpoint',
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
           command: 'kill-process',
+          alertIds: undefined,
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
           errors: undefined,
@@ -105,9 +109,28 @@ describe('When using `getActionList()', () => {
           parameters: doc?.EndpointActions.data.parameters,
           agentState: {
             'agent-a': {
+              errors: undefined,
               completedAt: '2022-04-30T16:08:47.449Z',
               isCompleted: true,
               wasSuccessful: true,
+            },
+          },
+          outputs: {
+            'agent-a': {
+              content: {
+                code: 'ra_execute_success_done',
+                cwd: '/some/path',
+                output_file_id: 'some-output-file-id',
+                output_file_stderr_truncated: false,
+                output_file_stdout_truncated: true,
+                shell: 'bash',
+                shell_code: 0,
+                stderr: expect.any(String),
+                stderr_truncated: true,
+                stdout: expect.any(String),
+                stdout_truncated: true,
+              },
+              type: 'json',
             },
           },
         },
@@ -145,6 +168,7 @@ describe('When using `getActionList()', () => {
     ).resolves.toEqual({
       page: 1,
       pageSize: 10,
+      agentTypes: undefined,
       commands: undefined,
       userIds: undefined,
       startDate: undefined,
@@ -152,12 +176,14 @@ describe('When using `getActionList()', () => {
       endDate: undefined,
       data: [
         {
+          action: '123',
           agents: ['agent-a'],
+          agentType: 'endpoint',
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
           command: 'kill-process',
           completedAt: '2022-04-30T16:08:47.449Z',
-          wasSuccessful: true,
           errors: undefined,
+          wasSuccessful: true,
           id: '123',
           isCompleted: true,
           isExpired: false,
@@ -166,17 +192,17 @@ describe('When using `getActionList()', () => {
           outputs: {
             'agent-a': {
               content: {
-                code: 'ra_get-file_success_done',
-                contents: [
-                  {
-                    file_name: 'bad_file.txt',
-                    path: '/some/path/bad_file.txt',
-                    sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-                    size: 1234,
-                    type: 'file',
-                  },
-                ],
-                zip_size: 123,
+                code: 'ra_execute_success_done',
+                cwd: '/some/path',
+                output_file_id: 'some-output-file-id',
+                output_file_stderr_truncated: false,
+                output_file_stdout_truncated: true,
+                shell: 'bash',
+                shell_code: 0,
+                stderr: expect.any(String),
+                stderr_truncated: true,
+                stdout: expect.any(String),
+                stdout_truncated: true,
               },
               type: 'json',
             },
@@ -239,6 +265,7 @@ describe('When using `getActionList()', () => {
       page: 1,
       pageSize: 10,
       commands: undefined,
+      agentTypes: undefined,
       userIds: undefined,
       startDate: undefined,
       elasticAgentIds: undefined,
@@ -246,12 +273,15 @@ describe('When using `getActionList()', () => {
       statuses: undefined,
       data: [
         {
+          action: '123',
           agents: ['agent-a', 'agent-b', 'agent-x'],
+          agentType: 'endpoint',
           hosts: {
             'agent-a': { name: 'Host-agent-a' },
             'agent-b': { name: 'Host-agent-b' },
             'agent-x': { name: '' },
           },
+          alertIds: undefined,
           command: 'kill-process',
           completedAt: undefined,
           wasSuccessful: false,
@@ -264,6 +294,8 @@ describe('When using `getActionList()', () => {
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,
+          ruleId: undefined,
+          ruleName: undefined,
           agentState: {
             'agent-a': {
               completedAt: '2022-04-30T16:08:47.449Z',
@@ -284,6 +316,14 @@ describe('When using `getActionList()', () => {
               errors: undefined,
             },
           },
+          outputs: {
+            'agent-a': {
+              content: {
+                code: 'ra_scan_success_done',
+              },
+              type: 'json',
+            },
+          },
         },
       ],
       total: 1,
@@ -301,6 +341,7 @@ describe('When using `getActionList()', () => {
       esClient,
       logger,
       metadataService: endpointAppContextService.getEndpointMetadataService(),
+      agentTypes: ['endpoint'] as ResponseActionAgentType[],
       elasticAgentIds: ['123'],
       pageSize: 20,
       startDate: 'now-10d',
@@ -312,79 +353,72 @@ describe('When using `getActionList()', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
       {
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  bool: {
-                    filter: [
-                      {
-                        term: {
-                          input_type: 'endpoint',
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-10d',
                         },
                       },
-                      {
-                        term: {
-                          type: 'INPUT_ACTION',
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          lte: 'now',
                         },
                       },
-                      {
-                        range: {
-                          '@timestamp': {
-                            gte: 'now-10d',
-                          },
-                        },
+                    },
+                    {
+                      terms: {
+                        'data.command': ['isolate', 'unisolate', 'get-file'],
                       },
-                      {
-                        range: {
-                          '@timestamp': {
-                            lte: 'now',
-                          },
-                        },
+                    },
+                    {
+                      terms: {
+                        input_type: ['endpoint'],
                       },
-                      {
-                        terms: {
-                          'data.command': ['isolate', 'unisolate', 'get-file'],
-                        },
+                    },
+                    {
+                      terms: {
+                        agents: ['123'],
                       },
-                      {
-                        terms: {
-                          agents: ['123'],
-                        },
-                      },
-                    ],
-                  },
+                    },
+                  ],
                 },
-                {
-                  bool: {
-                    should: [
-                      {
-                        query_string: {
-                          fields: ['user_id'],
-                          query: '*elastic*',
-                        },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      query_string: {
+                        fields: ['user_id'],
+                        query: '*elastic*',
                       },
-                    ],
-                    minimum_should_match: 1,
-                  },
+                    },
+                  ],
+                  minimum_should_match: 1,
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
         from: 0,
         index: '.logs-endpoint.actions-default',
         size: 20,
       },
-      { ignore: [404], meta: true }
+      { ignore: [404] }
     );
   });
 
@@ -408,87 +442,75 @@ describe('When using `getActionList()', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
       {
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  bool: {
-                    filter: [
-                      {
-                        term: {
-                          input_type: 'endpoint',
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-1d',
                         },
                       },
-                      {
-                        term: {
-                          type: 'INPUT_ACTION',
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          lte: 'now',
                         },
                       },
-                      {
-                        range: {
-                          '@timestamp': {
-                            gte: 'now-1d',
-                          },
-                        },
-                      },
-                      {
-                        range: {
-                          '@timestamp': {
-                            lte: 'now',
-                          },
-                        },
-                      },
-                    ],
-                  },
+                    },
+                  ],
                 },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match: {
-                                user_id: 'elastic',
-                              },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              user_id: 'elastic',
                             },
-                          ],
-                          minimum_should_match: 1,
-                        },
+                          },
+                        ],
+                        minimum_should_match: 1,
                       },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match: {
-                                user_id: 'kibana',
-                              },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              user_id: 'kibana',
                             },
-                          ],
-                          minimum_should_match: 1,
-                        },
+                          },
+                        ],
+                        minimum_should_match: 1,
                       },
-                    ],
-                    minimum_should_match: 1,
-                  },
+                    },
+                  ],
+                  minimum_should_match: 1,
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
         from: 0,
         index: '.logs-endpoint.actions-default',
         size: 10,
       },
-      { ignore: [404], meta: true }
+      { ignore: [404] }
     );
   });
 

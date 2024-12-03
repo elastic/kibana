@@ -25,7 +25,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { UIM_SHOW_DETAILS_CLICK } from '../../../constants';
 import { PROXY_MODE } from '../../../../../common/constants';
 import { trackUiMetric, METRIC_TYPE, getRouter } from '../../../services';
-import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
+import { ConnectionStatus, RemoveClusterButtonProvider, SecurityModel } from '../components';
 
 const getFilteredClusters = (clusters, queryText) => {
   if (queryText) {
@@ -250,6 +250,16 @@ export class RemoteClusterTable extends Component {
         },
       },
       {
+        field: 'securityModel',
+        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.authTypeColumnTitle', {
+          defaultMessage: 'Authentication type',
+        }),
+        sortable: true,
+        render: (securityModel) => {
+          return <SecurityModel securityModel={securityModel} />;
+        },
+      },
+      {
         field: 'mode',
         name: i18n.translate(
           'xpack.remoteClusters.remoteClusterList.table.connectionsColumnTitle',
@@ -414,7 +424,6 @@ export class RemoteClusterTable extends Component {
         pagination={pagination}
         sorting={sorting}
         selection={selection}
-        isSelectable={true}
         data-test-subj="remoteClusterListTable"
       />
     );

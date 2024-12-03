@@ -6,8 +6,8 @@
  */
 
 import { Subject } from 'rxjs';
-import { bufferTime, filter as rxFilter, concatMap } from 'rxjs/operators';
-import { reject, isUndefined, isNumber, pick } from 'lodash';
+import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
+import { reject, isUndefined, isNumber, pick, isEmpty, get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
@@ -82,6 +82,7 @@ export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySave
 };
 
 export interface AggregateEventsBySavedObjectResult {
+  hits?: estypes.SearchHitsMetadata<unknown>;
   aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 
@@ -212,6 +213,28 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
+  public async updateIndexTemplate(name: string, template: Record<string, unknown>): Promise<void> {
+    this.logger.info(`Updating index template ${name}`);
+
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+
+      // Simulate the index template to proactively identify any issues with the mappings
+      const simulateResponse = await esClient.indices.simulateTemplate({ name, body: template });
+      const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
+
+      if (isEmpty(mappings)) {
+        throw new Error(
+          `No mappings would be generated for ${template.name}, possibly due to failed/misconfigured bootstrapping`
+        );
+      }
+      await esClient.indices.putIndexTemplate({ name, body: template });
+    } catch (err) {
+      this.logger.error(`Error updating index template ${name}: ${err.message}`);
+      throw err;
+    }
+  }
+
   public async getExistingLegacyIndexTemplates(
     indexTemplatePattern: string
   ): Promise<estypes.IndicesGetTemplateResponse> {
@@ -334,7 +357,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
-  public async createDataStream(name: string, body: Record<string, unknown> = {}): Promise<void> {
+  public async createDataStream(name: string): Promise<void> {
     this.logger.info(`Creating datastream ${name}`);
     try {
       const esClient = await this.elasticsearchClientPromise;
@@ -343,6 +366,23 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       if (err.body?.error?.type !== 'resource_already_exists_exception') {
         throw new Error(`error creating data stream: ${err.message}`);
       }
+    }
+  }
+
+  public async updateConcreteIndices(name: string): Promise<void> {
+    this.logger.info(`Updating concrete index mappings for ${name}`);
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      const simulatedIndexMapping = await esClient.indices.simulateIndexTemplate({ name });
+      const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
+
+      if (simulatedMapping != null) {
+        await esClient.indices.putMapping({ index: name, body: simulatedMapping });
+        this.logger.debug(`Successfully updated concrete index mappings for ${name}`);
+      }
+    } catch (err) {
+      this.logger.error(`Error updating index mappings for ${name}: ${err.message}`);
+      throw err;
     }
   }
 
@@ -455,12 +495,13 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     };
 
     try {
-      const { aggregations } = await esClient.search<IValidatedEvent>({
+      const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
         body,
       });
       return {
         aggregations,
+        hits,
       };
     } catch (err) {
       throw new Error(
@@ -488,19 +529,20 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       query,
       aggs,
     };
-
     try {
-      const { aggregations } = await esClient.search<IValidatedEvent>({
+      const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
         body,
       });
       return {
         aggregations,
+        hits,
       };
     } catch (err) {
-      throw new Error(
+      this.logger.debug(
         `querying for Event Log by for type "${type}" and auth filter failed with: ${err.message}`
       );
+      throw err;
     }
   }
 }
@@ -526,10 +568,11 @@ export function getQueryBodyWithAuthFilter(
     dslFilterQuery = queryFilter ? toElasticsearchQuery(queryFilter) : undefined;
   } catch (err) {
     logger.debug(
-      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
-        message: err.message,
-        statusCode: err.statusCode,
-      })}`
+      () =>
+        `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+          message: err.message,
+          statusCode: err.statusCode,
+        })}`
     );
     throw err;
   }
@@ -688,10 +731,11 @@ export function getQueryBody(
     dslFilterQuery = filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     logger.debug(
-      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
-        message: err.message,
-        statusCode: err.statusCode,
-      })}`
+      () =>
+        `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+          message: err.message,
+          statusCode: err.statusCode,
+        })}`
     );
     throw err;
   }

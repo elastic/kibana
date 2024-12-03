@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   getAnalysisType,
@@ -27,7 +27,7 @@ import {
   TRAINING_DOCS_LOWER,
   TRAINING_DOCS_UPPER,
   VALIDATION_STATUS,
-} from '../../../common/constants/validation';
+} from '@kbn/ml-validators';
 
 interface MissingAgg {
   [key: string]: {

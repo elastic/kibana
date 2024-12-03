@@ -29,7 +29,6 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
         endDate={endDate}
         filterQuery={filterQuery}
         id={HISTOGRAM_QUERY_ID}
-        indexNames={indexNames}
         setQuery={setQuery}
         startDate={startDate}
         {...histogramConfigs}

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
@@ -40,6 +41,11 @@ const SECURITY_RULE_TYPES = [
   NEW_TERMS_RULE_TYPE_ID,
 ];
 
+const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [SERVER_APP_ID],
+}));
+
 export const getSecurityBaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
@@ -52,12 +58,20 @@ export const getSecurityBaseKibanaFeature = ({
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: SECURITY_RULE_TYPES,
+  alerting: alertingFeatures,
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.securityGroupDescription',
+    {
+      defaultMessage:
+        "Each sub-feature privilege in this group must be assigned individually. Global assignment is only supported if your pricing plan doesn't allow individual feature privileges.",
+    }
+  ),
   privileges: {
     all: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
@@ -78,12 +92,8 @@ export const getSecurityBaseKibanaFeature = ({
         read: [],
       },
       alerting: {
-        rule: {
-          all: SECURITY_RULE_TYPES,
-        },
-        alert: {
-          all: SECURITY_RULE_TYPES,
-        },
+        rule: { all: alertingFeatures },
+        alert: { all: alertingFeatures },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -100,10 +110,10 @@ export const getSecurityBaseKibanaFeature = ({
       },
       alerting: {
         rule: {
-          read: SECURITY_RULE_TYPES,
+          read: alertingFeatures,
         },
         alert: {
-          all: SECURITY_RULE_TYPES,
+          all: alertingFeatures,
         },
       },
       management: {

@@ -10,11 +10,16 @@ import { resolve as pathResolve, join as pathJoin } from 'path';
 import { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
-import { ActionsConfig } from '../config';
+import { ActionsConfig, DEFAULT_USAGE_API_URL } from '../config';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { resolveCustomHosts, getCanonicalCustomHostUrl } from './custom_host_settings';
+import {
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+} from '../../common';
 
 const CA_DIR = '../../../../../../packages/kbn-dev-utils/certs';
 const CA_FILE1 = pathResolve(__filename, pathJoin(CA_DIR, 'ca.crt'));
@@ -69,11 +74,15 @@ describe('custom_host_settings', () => {
       enabledActionTypes: [],
       preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
-      proxyRejectUnauthorizedCertificates: true,
-      rejectUnauthorized: true,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration(60000),
       enableFooterInEmail: true,
+      microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+      microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+      microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+      usage: {
+        url: DEFAULT_USAGE_API_URL,
+      },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {
@@ -108,14 +117,12 @@ describe('custom_host_settings', () => {
             url: 'https://elastic.co:443',
             ssl: {
               certificateAuthoritiesData: 'xyz',
-              rejectUnauthorized: false,
             },
           },
           {
             url: 'smtp://mail.elastic.com:25',
             ssl: {
               certificateAuthoritiesData: 'abc',
-              rejectUnauthorized: true,
             },
             smtp: {
               ignoreTLS: true,
@@ -462,15 +469,9 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com/',
-            ssl: {
-              rejectUnauthorized: true,
-            },
           },
           {
             url: 'https://almost.purrfect.com:443',
-            ssl: {
-              rejectUnauthorized: false,
-            },
           },
         ],
       };
@@ -480,9 +481,6 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com:443',
-            ssl: {
-              rejectUnauthorized: true,
-            },
           },
         ],
       };

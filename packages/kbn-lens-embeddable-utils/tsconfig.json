@@ -11,6 +11,12 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/lens-plugin",
+    "@kbn/maps-plugin",
+    "@kbn/event-annotation-common",
+    "@kbn/es-query",
+    "@kbn/expressions-plugin",
     "@kbn/visualizations-plugin",
+    "@kbn/core-saved-objects-common",
+    "@kbn/esql-utils",
   ]
 }

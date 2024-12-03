@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Boom from '@hapi/boom';
@@ -13,8 +14,9 @@ import {
   SavedObjectsErrorHelpers,
   type SavedObjectsRawDoc,
   CheckAuthorizationResult,
-  type SavedObject,
   SavedObjectsRawDocSource,
+  GetFindRedactTypeMapParams,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
@@ -49,15 +51,14 @@ export const performFind = async <T = unknown, A = unknown>(
     allowedTypes: rawAllowedTypes,
     mappings,
     client,
-    migrator,
     extensions = {},
   }: ApiExecutionContext
 ): Promise<SavedObjectsFindResponse<T, A>> => {
   const {
     common: commonHelper,
-    encryption: encryptionHelper,
     serializer: serializerHelper,
     migration: migrationHelper,
+    encryption: encryptionHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
   let namespaces!: string[];
@@ -230,31 +231,66 @@ export const performFind = async <T = unknown, A = unknown>(
     return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
   }
 
-  let result: SavedObjectsFindResponse<T, A>;
+  // if extensions are enabled, we need to build an updated authorization type map
+  // to pass on to the redact method
+  const redactTypeMapParams: GetFindRedactTypeMapParams | undefined = disableExtensions
+    ? undefined
+    : {
+        previouslyCheckedNamespaces: spacesToAuthorize,
+        objects: [],
+      };
+  const savedObjects: SavedObjectsFindResult[] = [];
+
+  body.hits.hits.forEach((hit: estypes.SearchHit<SavedObjectsRawDocSource>) => {
+    const obj = serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
+      migrationVersionCompatibility,
+    });
+
+    if (redactTypeMapParams) {
+      redactTypeMapParams.objects.push({
+        type: obj.type,
+        id: obj.id,
+        existingNamespaces: obj.namespaces ?? [],
+      });
+    }
+
+    savedObjects.push({
+      ...obj,
+      score: hit._score!,
+      sort: hit.sort,
+    });
+  });
+
+  const redactTypeMap = redactTypeMapParams
+    ? await securityExtension?.getFindRedactTypeMap(redactTypeMapParams)
+    : undefined;
+
+  const migratedDocuments: Array<SavedObjectsFindResult<T>> = [];
   try {
-    result = {
-      ...(body.aggregations ? { aggregations: body.aggregations as unknown as A } : {}),
-      page,
-      per_page: perPage,
-      total: body.hits.total,
-      saved_objects: body.hits.hits.map(
-        (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => {
-          let savedObject = serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
-            migrationVersionCompatibility,
-          });
-          // can't migrate a document with partial attributes
-          if (!fields) {
-            savedObject = migrationHelper.migrateStorageDocument(savedObject) as SavedObject;
-          }
-          return {
-            ...savedObject,
-            score: hit._score!,
-            sort: hit.sort,
-          };
-        }
-      ),
-      pit_id: body.pit_id,
-    } as typeof result;
+    for (const savedObject of savedObjects) {
+      let migrated: SavedObjectUnsanitizedDoc | undefined;
+      const { sort, score, ...rawObject } = savedObject;
+
+      if (fields !== undefined) {
+        // If the fields argument is set, don't migrate.
+        // This document may only contains a subset of it's fields meaning the migration
+        // (transform and forwardCompatibilitySchema) is not guaranteed to succeed. We
+        // still try to decrypt/redact the fields that are present in the document.
+        migrated = await encryptionHelper.optionallyDecryptAndRedactSingleResult(
+          savedObject,
+          redactTypeMap
+        );
+      } else if (disableExtensions) {
+        migrated = migrationHelper.migrateStorageDocument(rawObject);
+      } else {
+        migrated = await migrationHelper.migrateAndDecryptStorageDocument({
+          document: rawObject,
+          typeMap: redactTypeMap,
+        });
+      }
+
+      migratedDocuments.push({ ...migrated, sort, score } as SavedObjectsFindResult<T>);
+    }
   } catch (error) {
     throw SavedObjectsErrorHelpers.decorateGeneralError(
       error,
@@ -262,25 +298,14 @@ export const performFind = async <T = unknown, A = unknown>(
     );
   }
 
-  if (disableExtensions) {
-    return result;
-  }
+  const result: SavedObjectsFindResponse<T, A> = {
+    ...(body.aggregations ? { aggregations: body.aggregations as unknown as A } : {}),
+    page,
+    per_page: perPage,
+    total: body.hits.total as number,
+    saved_objects: migratedDocuments,
+    pit_id: body.pit_id,
+  };
 
-  // Now that we have a full set of results with all existing namespaces for each object,
-  // we need an updated authorization type map to pass on to the redact method
-  const redactTypeMap = await securityExtension?.getFindRedactTypeMap({
-    previouslyCheckedNamespaces: spacesToAuthorize,
-    objects: result.saved_objects.map((obj) => {
-      return {
-        type: obj.type,
-        id: obj.id,
-        existingNamespaces: obj.namespaces ?? [],
-      };
-    }),
-  });
-
-  return encryptionHelper.optionallyDecryptAndRedactBulkResult(
-    result,
-    redactTypeMap ?? authorizationResult?.typeMap // If the redact type map is valid, use that one; otherwise, fall back to the authorization check
-  );
+  return result;
 };

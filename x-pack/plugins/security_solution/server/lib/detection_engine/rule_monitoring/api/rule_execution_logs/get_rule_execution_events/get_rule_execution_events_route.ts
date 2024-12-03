@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
@@ -27,8 +27,10 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
     .get({
       access: 'internal',
       path: GET_RULE_EXECUTION_EVENTS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

@@ -2,10 +2,18 @@ steps:
   - command: .buildkite/scripts/steps/functional/response_ops.sh
     label: 'Rules, Alerts and Exceptions ResponseOps Cypress Tests on Security Solution'
     agents:
-      queue: n2-4-spot
-    depends_on: build
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 120
-    parallelism: 4
+    parallelism: 9
     retry:
       automatic:
         - exit_status: '*'

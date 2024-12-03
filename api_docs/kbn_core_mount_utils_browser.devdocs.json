@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-mount-utils-browser",
-        "id": "def-common.OverlayRef",
+        "id": "def-public.OverlayRef",
         "type": "Interface",
         "tags": [],
         "label": "OverlayRef",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-mount-utils-browser",
-            "id": "def-common.OverlayRef.onClose",
+            "id": "def-public.OverlayRef.onClose",
             "type": "Object",
             "tags": [],
             "label": "onClose",
@@ -51,7 +35,7 @@
           },
           {
             "parentPluginId": "@kbn/core-mount-utils-browser",
-            "id": "def-common.OverlayRef.close",
+            "id": "def-public.OverlayRef.close",
             "type": "Function",
             "tags": [],
             "label": "close",
@@ -75,7 +59,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-mount-utils-browser",
-        "id": "def-common.MountPoint",
+        "id": "def-public.MountPoint",
         "type": "Type",
         "tags": [],
         "label": "MountPoint",
@@ -86,9 +70,9 @@
           "(element: T) => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.UnmountCallback",
+            "section": "def-public.UnmountCallback",
             "text": "UnmountCallback"
           }
         ],
@@ -101,7 +85,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-mount-utils-browser",
-            "id": "def-common.MountPoint.$1",
+            "id": "def-public.MountPoint.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "element",
@@ -120,7 +104,7 @@
       },
       {
         "parentPluginId": "@kbn/core-mount-utils-browser",
-        "id": "def-common.UnmountCallback",
+        "id": "def-public.UnmountCallback",
         "type": "Type",
         "tags": [],
         "label": "UnmountCallback",
@@ -138,6 +122,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

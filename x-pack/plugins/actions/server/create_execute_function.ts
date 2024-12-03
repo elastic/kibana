@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsBulkResponse, SavedObjectsClientContract } from '@kbn/core/server';
-import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import {
-  RawAction,
-  ActionTypeRegistryContract,
-  InMemoryConnector,
-  ActionTaskExecutorParams,
-} from './types';
+import { SavedObjectsBulkResponse, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
@@ -25,11 +20,13 @@ interface CreateExecuteFunctionOptions {
   actionTypeRegistry: ActionTypeRegistryContract;
   inMemoryConnectors: InMemoryConnector[];
   configurationUtilities: ActionsConfigurationUtilities;
+  logger: Logger;
 }
 
 export interface ExecuteOptions
   extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects' | 'consumer'> {
   id: string;
+  uuid?: string;
   spaceId: string;
   apiKey: string | null;
   executionId: string;
@@ -70,6 +67,7 @@ export interface ExecutionResponse {
 
 export interface ExecutionResponseItem {
   id: string;
+  uuid?: string;
   actionTypeId: string;
   response: ExecutionResponseType;
 }
@@ -80,6 +78,7 @@ export function createBulkExecutionEnqueuerFunction({
   isESOCanEncrypt,
   inMemoryConnectors,
   configurationUtilities,
+  logger,
 }: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<ExecutionResponse> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
@@ -113,21 +112,30 @@ export function createBulkExecutionEnqueuerFunction({
       inMemoryConnectors,
       connectorIds
     );
+    const runnableActions: ExecuteOptions[] = [];
 
-    connectors.forEach((c) => {
+    for (const c of connectors) {
       const { id, connector, isInMemory } = c;
-      validateCanActionBeUsed(connector);
+      const { actionTypeId, name } = connector;
 
-      const { actionTypeId } = connector;
-      if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
-        actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+      try {
+        validateConnector({ id, connector, actionTypeRegistry });
+      } catch (e) {
+        logger.warn(`Skipped the actions for the connector: ${name} (${id}). Error: ${e.message}`);
+        continue;
+      }
+
+      const actionsWithCurrentConnector = actionsToExecute.filter((action) => action.id === id);
+
+      if (actionsWithCurrentConnector.length > 0) {
+        runnableActions.push(...actionsWithCurrentConnector);
       }
 
       actionTypeIds[id] = actionTypeId;
       connectorIsInMemory[id] = isInMemory;
-    });
+    }
 
-    const actions = actionsToExecute.map((actionToExecute) => {
+    const actions = runnableActions.map((actionToExecute) => {
       // Get saved object references from action ID and relatedSavedObjects
       const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
         actionToExecute.id,
@@ -165,6 +173,7 @@ export function createBulkExecutionEnqueuerFunction({
     });
     const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
       await unsecuredSavedObjectsClient.bulkCreate(actions, { refresh: false });
+
     const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
       const actionId = so.attributes.actionId;
       return {
@@ -177,18 +186,22 @@ export function createBulkExecutionEnqueuerFunction({
         scope: ['actions'],
       };
     });
+
     await taskManager.bulkSchedule(taskInstances);
+
     return {
       errors: actionsOverLimit.length > 0,
-      items: actionsToExecute
+      items: runnableActions
         .map((a) => ({
           id: a.id,
+          uuid: a.uuid,
           actionTypeId: a.actionTypeId,
           response: ExecutionResponseType.SUCCESS,
         }))
         .concat(
           actionsOverLimit.map((a) => ({
             id: a.id,
+            uuid: a.uuid,
             actionTypeId: a.actionTypeId,
             response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
           }))
@@ -197,52 +210,25 @@ export function createBulkExecutionEnqueuerFunction({
   };
 }
 
-export function createEphemeralExecutionEnqueuerFunction({
-  taskManager,
+function validateConnector({
+  id,
+  connector,
   actionTypeRegistry,
-  inMemoryConnectors,
-}: CreateExecuteFunctionOptions): ExecutionEnqueuer<RunNowResult> {
-  return async function execute(
-    unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, consumer, apiKey, executionId }: ExecuteOptions
-  ): Promise<RunNowResult> {
-    const { action } = await getAction(unsecuredSavedObjectsClient, inMemoryConnectors, id);
-    validateCanActionBeUsed(action);
+}: {
+  id: string;
+  connector: InMemoryConnector | RawAction;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}) {
+  const { name, isMissingSecrets, actionTypeId } = connector;
 
-    const { actionTypeId } = action;
-    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
-      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    }
-
-    const taskParams: ActionTaskExecutorParams = {
-      spaceId,
-      taskParams: {
-        actionId: id,
-        consumer,
-        // Saved Objects won't allow us to enforce unknown rather than any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        params: params as Record<string, any>,
-        ...(apiKey ? { apiKey } : {}),
-        ...(executionId ? { executionId } : {}),
-      },
-      ...executionSourceAsSavedObjectReferences(source),
-    };
-
-    return taskManager.ephemeralRunNow({
-      taskType: `actions:${action.actionTypeId}`,
-      params: taskParams,
-      state: {},
-      scope: ['actions'],
-    });
-  };
-}
-
-function validateCanActionBeUsed(action: InMemoryConnector | RawAction) {
-  const { name, isMissingSecrets } = action;
   if (isMissingSecrets) {
     throw new Error(
       `Unable to execute action because no secrets are defined for the "${name}" connector.`
     );
+  }
+
+  if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
+    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
   }
 }
 
@@ -257,21 +243,6 @@ function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorO
         ],
       }
     : {};
-}
-
-async function getAction(
-  unsecuredSavedObjectsClient: SavedObjectsClientContract,
-  inMemoryConnectors: InMemoryConnector[],
-  actionId: string
-): Promise<{ action: InMemoryConnector | RawAction; isInMemory: boolean }> {
-  const inMemoryAction = inMemoryConnectors.find((action) => action.id === actionId);
-
-  if (inMemoryAction) {
-    return { action: inMemoryAction, isInMemory: true };
-  }
-
-  const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return { action: attributes, isInMemory: false };
 }
 
 async function getConnectors(

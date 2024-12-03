@@ -20,13 +20,35 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
-          "<void, void, ",
-          "AppSetupUIPluginDependencies",
+          "<",
+          {
+            "pluginId": "console",
+            "scope": "public",
+            "docId": "kibConsolePluginApi",
+            "section": "def-public.ConsolePluginSetup",
+            "text": "ConsolePluginSetup"
+          },
+          ", ",
+          {
+            "pluginId": "console",
+            "scope": "public",
+            "docId": "kibConsolePluginApi",
+            "section": "def-public.ConsolePluginStart",
+            "text": "ConsolePluginStart"
+          },
+          ", ",
+          {
+            "pluginId": "console",
+            "scope": "public",
+            "docId": "kibConsolePluginApi",
+            "section": "def-public.AppSetupUIPluginDependencies",
+            "text": "AppSetupUIPluginDependencies"
+          },
           ", object>"
         ],
         "path": "src/plugins/console/public/plugin.ts",
@@ -57,9 +79,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -83,13 +105,19 @@
               "({ notifications, getStartServices, http }: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, { devTools, home, share, usageCollection }: ",
-              "AppSetupUIPluginDependencies",
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.AppSetupUIPluginDependencies",
+                "text": "AppSetupUIPluginDependencies"
+              },
               ") => ",
               {
                 "pluginId": "console",
@@ -113,9 +141,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -133,7 +161,13 @@
                 "label": "{ devTools, home, share, usageCollection }",
                 "description": [],
                 "signature": [
-                  "AppSetupUIPluginDependencies"
+                  {
+                    "pluginId": "console",
+                    "scope": "public",
+                    "docId": "kibConsolePluginApi",
+                    "section": "def-public.AppSetupUIPluginDependencies",
+                    "text": "AppSetupUIPluginDependencies"
+                  }
                 ],
                 "path": "src/plugins/console/public/plugin.ts",
                 "deprecated": false,
@@ -151,12 +185,78 @@
             "label": "start",
             "description": [],
             "signature": [
-              "() => void"
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              },
+              ", deps: ",
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.AppStartUIPluginDependencies",
+                "text": "AppStartUIPluginDependencies"
+              },
+              ") => ",
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.ConsolePluginStart",
+                "text": "ConsolePluginStart"
+              }
             ],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "console",
+                "id": "def-public.ConsoleUIPlugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-public.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "src/plugins/console/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "console",
+                "id": "def-public.ConsoleUIPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "console",
+                    "scope": "public",
+                    "docId": "kibConsolePluginApi",
+                    "section": "def-public.AppStartUIPluginDependencies",
+                    "text": "AppStartUIPluginDependencies"
+                  }
+                ],
+                "path": "src/plugins/console/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -167,10 +267,10 @@
     "interfaces": [
       {
         "parentPluginId": "console",
-        "id": "def-public.ConsolePluginSetup",
+        "id": "def-public.AppSetupUIPluginDependencies",
         "type": "Interface",
         "tags": [],
-        "label": "ConsolePluginSetup",
+        "label": "AppSetupUIPluginDependencies",
         "description": [],
         "path": "src/plugins/console/public/types/plugin_dependencies.ts",
         "deprecated": false,
@@ -178,28 +278,205 @@
         "children": [
           {
             "parentPluginId": "console",
-            "id": "def-public.ConsolePluginSetup.locator",
+            "id": "def-public.AppSetupUIPluginDependencies.home",
             "type": "Object",
             "tags": [],
-            "label": "locator",
+            "label": "home",
             "description": [],
             "signature": [
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.HomePublicPluginSetup",
+                "text": "HomePublicPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppSetupUIPluginDependencies.devTools",
+            "type": "Object",
+            "tags": [],
+            "label": "devTools",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "devTools",
+                "scope": "public",
+                "docId": "kibDevToolsPluginApi",
+                "section": "def-public.DevToolsSetup",
+                "text": "DevToolsSetup"
+              }
+            ],
+            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppSetupUIPluginDependencies.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ register: (shareMenuProvider: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShareMenuProvider",
+                "text": "ShareMenuProvider"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
               {
                 "pluginId": "share",
                 "scope": "common",
                 "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
+                "section": "def-common.AnonymousAccessServiceContract",
+                "text": "AnonymousAccessServiceContract"
               },
+              ") => void; }"
+            ],
+            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppSetupUIPluginDependencies.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "console",
+        "id": "def-public.AppStartUIPluginDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppStartUIPluginDependencies",
+        "description": [],
+        "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppStartUIPluginDependencies.home",
+            "type": "Object",
+            "tags": [],
+            "label": "home",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.HomePublicPluginStart",
+                "text": "HomePublicPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppStartUIPluginDependencies.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
               "<",
               {
-                "pluginId": "console",
-                "scope": "public",
-                "docId": "kibConsolePluginApi",
-                "section": "def-public.ConsoleUILocatorParams",
-                "text": "ConsoleUILocatorParams"
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
               },
-              "> | undefined"
+              ">): void; }"
+            ],
+            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppStartUIPluginDependencies.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionStart",
+                "text": "UsageCollectionStart"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
@@ -252,11 +529,325 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "console",
+        "id": "def-public.EmbeddedConsoleView",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddedConsoleView",
+        "description": [],
+        "path": "src/plugins/console/public/types/embeddable_console.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "console",
+            "id": "def-public.EmbeddedConsoleView.ActivationButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ActivationButton",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<",
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.EmbeddedConsoleViewButtonProps",
+                "text": "EmbeddedConsoleViewButtonProps"
+              },
+              ", any> | React.FunctionComponent<",
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.EmbeddedConsoleViewButtonProps",
+                "text": "EmbeddedConsoleViewButtonProps"
+              },
+              ">"
+            ],
+            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.EmbeddedConsoleView.ViewContent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ViewContent",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+            ],
+            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "console",
+        "id": "def-public.EmbeddedConsoleViewButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddedConsoleViewButtonProps",
+        "description": [],
+        "path": "src/plugins/console/public/types/embeddable_console.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "console",
+            "id": "def-public.EmbeddedConsoleViewButtonProps.activeView",
+            "type": "boolean",
+            "tags": [],
+            "label": "activeView",
+            "description": [],
+            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.EmbeddedConsoleViewButtonProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void"
+            ],
+            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "console",
+                "id": "def-public.EmbeddedConsoleViewButtonProps.onClick.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "E"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "console",
+      "id": "def-public.ConsolePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ConsolePluginSetup",
+      "description": [
+        "\nConsole plugin's setup service object"
+      ],
+      "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginSetup.locator",
+          "type": "Object",
+          "tags": [],
+          "label": "locator",
+          "description": [
+            "\nPublic locator for the console UI"
+          ],
+          "signature": [
+            {
+              "pluginId": "share",
+              "scope": "common",
+              "docId": "kibSharePluginApi",
+              "section": "def-common.LocatorPublic",
+              "text": "LocatorPublic"
+            },
+            "<",
+            {
+              "pluginId": "console",
+              "scope": "public",
+              "docId": "kibConsolePluginApi",
+              "section": "def-public.ConsoleUILocatorParams",
+              "text": "ConsoleUILocatorParams"
+            },
+            "> | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "console",
+      "id": "def-public.ConsolePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ConsolePluginStart",
+      "description": [
+        "\nConsole plugin's start service object"
+      ],
+      "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.isEmbeddedConsoleAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "isEmbeddedConsoleAvailable",
+          "description": [
+            "\nisEmbeddedConsoleAvailable is available if the embedded console can be rendered. Returns true when\ncalled if the Embedded Console is currently rendered."
+          ],
+          "signature": [
+            "(() => boolean) | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.openEmbeddedConsole",
+          "type": "Function",
+          "tags": [],
+          "label": "openEmbeddedConsole",
+          "description": [
+            "\nopenEmbeddedConsole is available if the embedded console can be rendered. Calling\nthis function will open the embedded console on the page if it is currently rendered."
+          ],
+          "signature": [
+            "((content?: string | undefined) => void) | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "console",
+              "id": "def-public.ConsolePluginStart.openEmbeddedConsole.$1",
+              "type": "string",
+              "tags": [],
+              "label": "content",
+              "description": [],
+              "signature": [
+                "string | undefined"
+              ],
+              "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.openEmbeddedConsoleAlternateView",
+          "type": "Function",
+          "tags": [],
+          "label": "openEmbeddedConsoleAlternateView",
+          "description": [
+            "\nopenEmbeddedConsoleAlternateView is available if the embedded console can be rendered.\nCalling this function will open the embedded console to the alternative view. If there is no alternative view registered\nthis will open the embedded console."
+          ],
+          "signature": [
+            "(() => void) | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.EmbeddableConsole",
+          "type": "Function",
+          "tags": [],
+          "label": "EmbeddableConsole",
+          "description": [
+            "\nEmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana"
+          ],
+          "signature": [
+            "React.FC<{}> | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.registerEmbeddedConsoleAlternateView",
+          "type": "Function",
+          "tags": [],
+          "label": "registerEmbeddedConsoleAlternateView",
+          "description": [
+            "\nRegister an alternate view for the Embedded Console\n\nWhen registering an alternate view ensure that the content component you register is lazy loaded."
+          ],
+          "signature": [
+            "((view: ",
+            {
+              "pluginId": "console",
+              "scope": "public",
+              "docId": "kibConsolePluginApi",
+              "section": "def-public.EmbeddedConsoleView",
+              "text": "EmbeddedConsoleView"
+            },
+            " | null) => void) | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "console",
+              "id": "def-public.ConsolePluginStart.registerEmbeddedConsoleAlternateView.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "view",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "console",
+                  "scope": "public",
+                  "docId": "kibConsolePluginApi",
+                  "section": "def-public.EmbeddedConsoleView",
+                  "text": "EmbeddedConsoleView"
+                },
+                " | null"
+              ],
+              "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],

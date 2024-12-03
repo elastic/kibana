@@ -12,10 +12,10 @@ import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../servic
 import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
-import { serializeAsESLifecycle } from '../../../../../../common/lib/data_stream_serialization';
+import { serializeAsESLifecycle } from '../../../../../../common/lib';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood

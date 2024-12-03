@@ -1,25 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+
+import type { FilterManager } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { createFilterInActionFactory } from './filter_in';
 import { makeActionContext } from '../../mocks/helpers';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 const mockFilterManager = { addFilters: jest.fn() } as unknown as FilterManager;
 
-const mockCreateFilter = jest.fn((_: any) => ({}));
+const mockCreateFilter = jest.fn((_: unknown) => ({}));
 jest.mock('./create_filter', () => ({
   ...jest.requireActual('./create_filter'),
-  createFilter: (params: any) => mockCreateFilter(params),
+  createFilter: (params: unknown) => mockCreateFilter(params),
 }));
 
 const fieldName = 'user.name';
 const value = 'the value';
+const dataViewId = 'mockDataViewId';
 
 const mockWarningToast = jest.fn();
 
@@ -96,6 +100,7 @@ describe('createFilterInActionFactory', () => {
         key: fieldName,
         value: [value],
         negate: false,
+        dataViewId,
       });
     });
 
@@ -113,6 +118,7 @@ describe('createFilterInActionFactory', () => {
         key: fieldName,
         value: [value],
         negate: false,
+        dataViewId,
       });
     });
 
@@ -126,7 +132,12 @@ describe('createFilterInActionFactory', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: true });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [],
+        negate: true,
+        dataViewId,
+      });
     });
 
     it('should create negate filter query with undefined value', async () => {
@@ -143,6 +154,7 @@ describe('createFilterInActionFactory', () => {
         key: fieldName,
         value: [],
         negate: true,
+        dataViewId,
       });
     });
 
@@ -156,7 +168,12 @@ describe('createFilterInActionFactory', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [''], negate: true });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [''],
+        negate: true,
+        dataViewId,
+      });
     });
 
     it('should create negate filter query with empty array value', async () => {
@@ -169,7 +186,12 @@ describe('createFilterInActionFactory', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: true });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [],
+        negate: true,
+        dataViewId,
+      });
     });
 
     it('should notify the user when value type is unsupported', async () => {

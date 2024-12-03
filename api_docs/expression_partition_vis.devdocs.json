@@ -140,14 +140,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/partition_labels_function.ts",
@@ -709,13 +701,20 @@
           },
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.PartitionVisParams.showValuesInLegend",
-            "type": "CompoundType",
+            "id": "def-common.PartitionVisParams.legendStats",
+            "type": "Array",
             "tags": [],
-            "label": "showValuesInLegend",
+            "label": "legendStats",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.PartitionLegendValue",
+                "text": "PartitionLegendValue"
+              },
+              "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -1004,11 +1003,21 @@
           },
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.WaffleVisConfig.showValuesInLegend",
-            "type": "boolean",
+            "id": "def-common.WaffleVisConfig.legendStats",
+            "type": "Array",
             "tags": [],
-            "label": "showValuesInLegend",
+            "label": "legendStats",
             "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.PartitionLegendValue",
+                "text": "PartitionLegendValue"
+              },
+              "[] | undefined"
+            ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1190,19 +1199,11 @@
           },
           "<",
           {
-            "pluginId": "inspector",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DefaultInspectorAdapters",
+            "text": "DefaultInspectorAdapters"
           },
           ">>"
         ],
@@ -1290,14 +1291,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
@@ -1371,19 +1364,11 @@
           },
           "<",
           {
-            "pluginId": "inspector",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DefaultInspectorAdapters",
+            "text": "DefaultInspectorAdapters"
           },
           ">>"
         ],
@@ -1488,19 +1473,11 @@
           },
           "<",
           {
-            "pluginId": "inspector",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DefaultInspectorAdapters",
+            "text": "DefaultInspectorAdapters"
           },
           ">>"
         ],
@@ -1575,19 +1552,11 @@
           },
           "<",
           {
-            "pluginId": "inspector",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DefaultInspectorAdapters",
+            "text": "DefaultInspectorAdapters"
           },
           ">>"
         ],

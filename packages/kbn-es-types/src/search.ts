@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
@@ -68,6 +69,16 @@ type MaybeArray<T> = T | T[];
 type Fields = Required<Required<estypes.SearchRequest>['body']>['fields'];
 type DocValueFields = MaybeArray<string | estypes.QueryDslFieldAndFormat>;
 
+export type ChangePointType =
+  | 'indeterminable'
+  | 'dip'
+  | 'distribution_change'
+  | 'non_stationary'
+  | 'spike'
+  | 'stationary'
+  | 'step_change'
+  | 'trend_change';
+
 export type SearchHit<
   TSource extends any = unknown,
   TFields extends Fields | undefined = undefined,
@@ -78,7 +89,7 @@ export type SearchHit<
     ? {
         fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
       }
-    : {}) &
+    : { fields?: Record<string, unknown[]> }) &
   (TDocValueFields extends DocValueFields
     ? {
         fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>;
@@ -159,6 +170,16 @@ export type AggregateOf<
       bucket_script: {
         value: unknown;
       };
+      categorize_text: {
+        buckets: Array<
+          {
+            doc_count: number;
+            key: string;
+            regex: string;
+            max_matching_length: number;
+          } & SubAggregateOf<TAggregationContainer, TDocument>
+        >;
+      };
       cardinality: {
         value: number;
       };
@@ -167,12 +188,12 @@ export type AggregateOf<
           key: string;
         };
         type: Record<
-          string,
+          ChangePointType,
           {
             change_point?: number;
             r_value?: number;
             trend?: string;
-            p_value: number;
+            p_value?: number;
           }
         >;
       };
@@ -421,6 +442,7 @@ export type AggregateOf<
           {
             doc_count: number;
             key: string[];
+            key_as_string: string;
           } & SubAggregateOf<TAggregationContainer, TDocument>
         >;
       };
@@ -593,7 +615,7 @@ export type AggregateOf<
 
 export type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
   [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends AggregationsAggregationContainer
-    ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
+    ? AggregateOf<Required<TAggregationMap>[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };
 
@@ -645,11 +667,33 @@ export type InferSearchResponseOf<
       };
   };
 
-export interface ClusterDetails {
-  status: 'running' | 'successful' | 'partial' | 'skipped' | 'failed';
-  indices: string;
+export interface ESQLColumn {
+  name: string;
+  type: string;
+}
+
+export type ESQLRow = unknown[];
+
+export interface ESQLSearchResponse {
+  columns: ESQLColumn[];
+  // In case of ?drop_null_columns in the query, then
+  // all_columns will have available and empty fields
+  // while columns only the available ones (non nulls)
+  all_columns?: ESQLColumn[];
+  values: ESQLRow[];
   took?: number;
-  timed_out: boolean;
-  _shards?: estypes.ShardStatistics;
-  failures?: estypes.ShardFailure[];
+  _clusters?: estypes.ClusterStatistics;
+}
+
+export interface ESQLSearchParams {
+  // TODO: time_zone support was temporarily removed from ES|QL,
+  // we will need to add it back in once it is supported again.
+  // https://github.com/elastic/elasticsearch/pull/102767
+  // time_zone?: string;
+  query: string;
+  filter?: unknown;
+  locale?: string;
+  include_ccs_metadata?: boolean;
+  dropNullColumns?: boolean;
+  params?: estypesWithoutBodyKey.ScalarValue[] | Array<Record<string, string | undefined>>;
 }

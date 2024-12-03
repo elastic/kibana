@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../../functional/ftr_provider_context';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTable"] .euiDataGridRow';
 
@@ -196,7 +196,7 @@ export class DetectionsPageObject extends FtrService {
    */
   async openResponseConsoleFromAlertDetails(): Promise<void> {
     await this.testSubjects.existOrFail('eventDetails');
-    await this.testSubjects.click('take-action-dropdown-btn');
+    await this.testSubjects.click('securitySolutionFlyoutFooterDropdownButton');
     await this.testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
     await this.testSubjects.existOrFail('consolePageOverlay');
   }

@@ -1,35 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { ActionBar } from './components/action_bar/action_bar';
 import { GetStateReturn } from './services/context_state';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
+
+const dataViewMock = buildDataViewMock({
+  name: 'the-data-view',
+  fields: deepMockedFields,
+});
 
 describe('ContextAppContent test', () => {
-  const mountComponent = async ({
-    anchorStatus,
-    isLegacy,
-  }: {
-    anchorStatus?: LoadingStatus;
-    isLegacy?: boolean;
-  }) => {
+  const mountComponent = async ({ anchorStatus }: { anchorStatus?: LoadingStatus }) => {
     const hit = {
       _id: '123',
       _index: 'test_index',
@@ -69,7 +67,6 @@ describe('ContextAppContent test', () => {
       onRemoveColumn: () => {},
       onSetColumns: () => {},
       sort: [['order_date', 'desc']] as Array<[string, SortDirection]>,
-      isLegacy: isLegacy ?? true,
       setAppState: () => {},
       addFilter: () => {},
       interceptedWarnings: [],
@@ -87,24 +84,15 @@ describe('ContextAppContent test', () => {
     return component;
   };
 
-  it('should render legacy table correctly', async () => {
-    const component = await mountComponent({});
-    expect(component.find(DocTableWrapper).length).toBe(1);
-    const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
-    expect(loadingIndicator.length).toBe(0);
-    expect(component.find(ActionBar).length).toBe(2);
-  });
-
-  it('renders loading indicator', async () => {
-    const component = await mountComponent({ anchorStatus: LoadingStatus.LOADING });
-    const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
-    expect(component.find(DocTableWrapper).length).toBe(1);
-    expect(loadingIndicator.length).toBe(1);
-  });
-
   it('should render discover grid correctly', async () => {
-    const component = await mountComponent({ isLegacy: false });
+    const component = await mountComponent({});
     expect(component.find(UnifiedDataTable).length).toBe(1);
-    expect(findTestSubject(component, 'dscGridToolbar').exists()).toBe(true);
+    expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
+  });
+
+  it('should not show display options button', async () => {
+    const component = await mountComponent({});
+    expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
+    expect(findTestSubject(component, 'dataGridDisplaySelectorButton').exists()).toBe(false);
   });
 });

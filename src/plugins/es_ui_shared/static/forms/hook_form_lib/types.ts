@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ReactNode, ChangeEvent, FormEvent, MouseEvent } from 'react';
@@ -101,6 +102,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
     InternalFieldType = FieldType
   >(
     fieldPath: string
+    // @ts-expect-error upgrade typescript v4.9.5
   ) => FieldConfig<FieldType, FormType, InternalFieldType> | undefined;
   __getFormDefaultValue: () => I | undefined;
   __getFieldsRemoved: () => FieldsMap;
@@ -139,6 +141,10 @@ export interface FormOptions {
    * Remove empty string field ("") from form data
    */
   stripEmptyFields?: boolean;
+  /**
+   * Remove fields from form data that don't have initial value and are not modified by the user.
+   */
+  stripUnsetFields?: boolean;
 }
 
 export interface FieldHook<T = unknown, I = T> {
@@ -210,7 +216,7 @@ export interface FieldHook<T = unknown, I = T> {
 export interface FieldConfig<T = unknown, FormType extends FormData = FormData, I = T> {
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
-  readonly helpText?: string | ReactNode;
+  readonly helpText?: string | ReactNode | (() => ReactNode);
   readonly type?: string;
   readonly defaultValue?: T;
   readonly validations?: Array<ValidationConfig<FormType, string, I>>;

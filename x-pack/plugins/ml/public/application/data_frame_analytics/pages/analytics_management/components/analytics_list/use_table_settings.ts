@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Direction, EuiBasicTableProps, Pagination } from '@elastic/eui';
+import type { Direction, EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
-import { ListingPageUrlState } from '../../../../../../../common/types/common';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 // Copying from EUI EuiBasicTable types as type is not correctly picked up for table's onChange
 // Can be removed when https://github.com/elastic/eui/issues/4011 is addressed in EUI
-export interface Criteria<T> {
+export interface Criteria<T extends object> {
   page?: {
     index: number;
     size: number;
@@ -23,16 +23,18 @@ export interface Criteria<T> {
     direction: Direction;
   };
 }
-export interface CriteriaWithPagination<T> extends Criteria<T> {
+export interface CriteriaWithPagination<T extends object> extends Criteria<T> {
   page: {
     index: number;
     size: number;
   };
 }
 
-interface UseTableSettingsReturnValue<T> {
+interface UseTableSettingsReturnValue<T extends object, HidePagination extends boolean = false> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
-  pagination: Required<Omit<Pagination, 'showPerPageOptions'>>;
+  pagination: HidePagination extends true
+    ? Required<Omit<Pagination, 'showPerPageOptions'>> | boolean
+    : Required<Omit<Pagination, 'showPerPageOptions'>>;
   sorting: {
     sort: {
       field: keyof T;
@@ -41,11 +43,34 @@ interface UseTableSettingsReturnValue<T> {
   };
 }
 
-export function useTableSettings<TypeOfItem>(
+export function useTableSettings<TypeOfItem extends object>(
   totalItemCount: number,
   pageState: ListingPageUrlState,
-  updatePageState: (update: Partial<ListingPageUrlState>) => void
-): UseTableSettingsReturnValue<TypeOfItem> {
+  updatePageState: (update: Partial<ListingPageUrlState>) => void,
+  hide: true
+): UseTableSettingsReturnValue<TypeOfItem, true>;
+
+export function useTableSettings<TypeOfItem extends object>(
+  totalItemCount: number,
+  pageState: ListingPageUrlState,
+  updatePageState: (update: Partial<ListingPageUrlState>) => void,
+  hide?: false
+): UseTableSettingsReturnValue<TypeOfItem, false>;
+
+/**
+ *
+ * @param totalItemCount
+ * @param pageState
+ * @param updatePageState
+ * @param hide If true, hides pagination when total number of items is lower that the smallest per page option
+ * @returns
+ */
+export function useTableSettings<TypeOfItem extends object>(
+  totalItemCount: number,
+  pageState: ListingPageUrlState,
+  updatePageState: (update: Partial<ListingPageUrlState>) => void,
+  hide: boolean = false
+): UseTableSettingsReturnValue<TypeOfItem, boolean> {
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
   const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
@@ -66,15 +91,19 @@ export function useTableSettings<TypeOfItem>(
     [pageState, updatePageState]
   );
 
-  const pagination = useMemo(
-    () => ({
+  const pagination = useMemo(() => {
+    if (hide && totalItemCount <= Math.min(...PAGE_SIZE_OPTIONS)) {
+      // Hide pagination if total number of items is lower that the smallest per page option
+      return false;
+    }
+
+    return {
       pageIndex,
       pageSize,
       totalItemCount,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
-    }),
-    [totalItemCount, pageIndex, pageSize]
-  );
+    };
+  }, [totalItemCount, pageIndex, pageSize, hide]);
 
   const sorting = useMemo(
     () => ({

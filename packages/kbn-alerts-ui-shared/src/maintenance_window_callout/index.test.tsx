@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor, cleanup, screen } from '@testing-library/react';
-import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import { MaintenanceWindowCallout } from '.';
 import { fetchActiveMaintenanceWindows } from './api';
 import {
@@ -24,7 +25,7 @@ jest.mock('./api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
 }));
 
-const TestProviders: React.FC<{}> = ({ children }) => {
+const TestProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const queryClient = new QueryClient();
   return (
     <I18nProvider>
@@ -231,7 +232,7 @@ describe('MaintenanceWindowCallout', () => {
           warn: console.warn,
         },
       });
-      const wrapper: React.FC = ({ children }) => (
+      const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       );
       return wrapper;

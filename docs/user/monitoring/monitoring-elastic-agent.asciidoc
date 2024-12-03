@@ -4,8 +4,6 @@
 <titleabbrev>Collect monitoring data with {agent}</titleabbrev>
 ++++
 
-preview::[]
-
 In 8.5 and later, you can use {agent} to collect data about {kib} and ship it to
 the monitoring cluster, rather than <<monitoring-metricbeat,using {metricbeat}>>
 or routing data through the production cluster as described in
@@ -29,7 +27,7 @@ in the {ref}/monitoring-production.html[{es} monitoring documentation].
 To collect {kib} monitoring data, add a {kib} integration to an {agent} and
 deploy it to the host where {kib} is running.
 
-. Go to the {kib} home page and click **Add integrations**.
+. Go to the **Integrations** page.
 +
 NOTE: If you're using a monitoring cluster, use the {kib} instance connected to
 the monitoring cluster.

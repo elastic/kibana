@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ConnectorSyncRulesForm } from './connector_sync_form';
 
-export const EditSyncRulesTab: React.FC<{ revertAction: () => void }> = ({
-  children,
-  revertAction,
-}) => {
+export const EditSyncRulesTab: FC<
+  PropsWithChildren<{
+    revertAction: () => void;
+  }>
+> = ({ children, revertAction }) => {
   return (
     <>
       <EuiSpacer />
@@ -24,6 +25,7 @@ export const EditSyncRulesTab: React.FC<{ revertAction: () => void }> = ({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchEditSyncRulesTabRevertToActiveRulesButton"
                 data-telemetry-id="entSearchContent-connector-syncRules-editRules-revert"
                 onClick={revertAction}
               >

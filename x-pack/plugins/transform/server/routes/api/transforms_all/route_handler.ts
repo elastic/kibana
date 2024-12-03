@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import { TransformRequestHandlerContext } from '../../../services/license';
+import type { TransformRequestHandlerContext } from '../../../services/license';
 import { transformHealthServiceProvider } from '../../../lib/alerting/transform_health_rule_type/transform_health_service';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
@@ -28,10 +28,13 @@ export const routeHandler: RequestHandler<
     });
 
     const alerting = await ctx.alerting;
+
     if (alerting) {
+      const rulesClient = await alerting.getRulesClient();
+
       const transformHealthService = transformHealthServiceProvider({
         esClient: esClient.asCurrentUser,
-        rulesClient: alerting.getRulesClient(),
+        rulesClient,
       });
 
       // @ts-ignore

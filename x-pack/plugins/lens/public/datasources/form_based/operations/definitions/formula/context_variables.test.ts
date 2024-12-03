@@ -6,6 +6,13 @@
  */
 
 import type { FormBasedLayer } from '../../../../..';
+import {
+  INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
+  INTERVAL_OP_MISSING_TIME_RANGE,
+  INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
+  TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
+  TIMERANGE_OP_MISSING_TIME_RANGE,
+} from '../../../../../user_messages_ids';
 import { createMockedIndexPattern } from '../../../mocks';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import {
@@ -34,20 +41,6 @@ function createLayer<T extends ConstantsIndexPatternColumn>(
   };
 }
 
-function createExpression(type: 'interval' | 'now' | 'time_range', value: number) {
-  return [
-    {
-      type: 'function',
-      function: 'mathColumn',
-      arguments: {
-        id: ['col1'],
-        name: [`Constant: ${type}`],
-        expression: [String(value)],
-      },
-    },
-  ];
-}
-
 describe('context variables', () => {
   describe('interval', () => {
     describe('getErrorMessages', () => {
@@ -63,7 +56,10 @@ describe('context variables', () => {
           )
         ).toEqual(
           expect.arrayContaining([
-            'Cannot compute an interval without a date histogram column configured',
+            {
+              uniqueId: INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
+              message: 'Cannot compute an interval without a date histogram column configured',
+            },
           ])
         );
       });
@@ -78,7 +74,14 @@ describe('context variables', () => {
             {},
             100
           )
-        ).toEqual(expect.arrayContaining(['The current time range interval is not available']));
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              uniqueId: INTERVAL_OP_MISSING_TIME_RANGE,
+              message: 'The current time range interval is not available',
+            },
+          ])
+        );
       });
 
       it('should return error if no targetBar is passed over', () => {
@@ -90,7 +93,14 @@ describe('context variables', () => {
             { fromDate: new Date().toISOString(), toDate: new Date().toISOString() },
             {}
           )
-        ).toEqual(expect.arrayContaining(['Missing "histogram:barTarget" value']));
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              uniqueId: INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
+              message: 'Missing "histogram:barTarget" value',
+            },
+          ])
+        );
       });
 
       it('should not return errors if all context is provided', () => {
@@ -121,54 +131,7 @@ describe('context variables', () => {
             {},
             100
           )
-        ).toBeUndefined();
-      });
-    });
-    describe('toExpression', () => {
-      it('should return 0 if no dateRange is passed', () => {
-        expect(
-          intervalOperation.toExpression(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            { now: new Date(), targetBars: 100 }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('interval', 0)));
-      });
-
-      it('should return 0 if no targetBars is passed', () => {
-        expect(
-          intervalOperation.toExpression(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            {
-              dateRange: {
-                fromDate: new Date(2022, 0, 1).toISOString(),
-                toDate: new Date(2023, 0, 1).toISOString(),
-              },
-              now: new Date(),
-            }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('interval', 0)));
-      });
-
-      it('should return a valid value > 0 if both dateRange and targetBars is passed', () => {
-        expect(
-          intervalOperation.toExpression(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            {
-              dateRange: {
-                fromDate: new Date(2022, 0, 1).toISOString(),
-                toDate: new Date(2023, 0, 1).toISOString(),
-              },
-              now: new Date(),
-              targetBars: 100,
-            }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('interval', 86400000)));
+        ).toHaveLength(0);
       });
     });
   });
@@ -184,7 +147,14 @@ describe('context variables', () => {
             {},
             100
           )
-        ).toEqual(expect.arrayContaining(['The current time range interval is not available']));
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              message: 'The current time range interval is not available',
+              uniqueId: TIMERANGE_OP_MISSING_TIME_RANGE,
+            },
+          ])
+        );
       });
 
       it('should return error if dataView is not time-based', () => {
@@ -199,36 +169,14 @@ describe('context variables', () => {
             {},
             100
           )
-        ).toEqual(expect.arrayContaining(['The current time range interval is not available']));
-      });
-    });
-
-    describe('toExpression', () => {
-      it('should return 0 if no dateRange is passed', () => {
-        expect(
-          timeRangeOperation.toExpression(
-            createLayer('time_range'),
-            'col1',
-            createMockedIndexPattern(),
-            { now: new Date(), targetBars: 100 }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('time_range', 0)));
-      });
-
-      it('should return a valid value > 0 if dateRange is passed', () => {
-        expect(
-          timeRangeOperation.toExpression(
-            createLayer('time_range'),
-            'col1',
-            createMockedIndexPattern(),
+        ).toEqual(
+          expect.arrayContaining([
             {
-              dateRange: {
-                fromDate: new Date(2022, 0, 1).toISOString(),
-                toDate: new Date(2023, 0, 1).toISOString(),
-              },
-            }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('time_range', 31536000000)));
+              message: 'The current dataView is not time based',
+              uniqueId: TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
+            },
+          ])
+        );
       });
     });
   });
@@ -237,18 +185,7 @@ describe('context variables', () => {
       it('should return no error even without context', () => {
         expect(
           nowOperation.getErrorMessage!(createLayer('now'), 'col1', createMockedIndexPattern())
-        ).toBeUndefined();
-      });
-    });
-
-    describe('toExpression', () => {
-      it('should return the now value when passed', () => {
-        const now = new Date();
-        expect(
-          nowOperation.toExpression(createLayer('now'), 'col1', createMockedIndexPattern(), {
-            now,
-          })
-        ).toEqual(expect.arrayContaining(createExpression('now', +now)));
+        ).toHaveLength(0);
       });
     });
   });

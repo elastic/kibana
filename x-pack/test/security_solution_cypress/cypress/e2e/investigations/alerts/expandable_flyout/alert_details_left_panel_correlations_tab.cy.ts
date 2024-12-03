@@ -26,20 +26,22 @@ import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_detai
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
   createNewCaseFromExpandableFlyout,
-  expandFirstAlertExpandableFlyout,
+  expandAlertAtIndexExpandableFlyout,
 } from '../../../../tasks/expandable_flyout/common';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
 describe('Expandable flyout left panel correlations', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
+    deleteAlertsAndRules();
     login();
     createRule(getNewRule());
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
-    expandFirstAlertExpandableFlyout();
+    expandAlertAtIndexExpandableFlyout();
     expandDocumentDetailsExpandableFlyoutLeftSection();
     createNewCaseFromExpandableFlyout();
     openInsightsTab();

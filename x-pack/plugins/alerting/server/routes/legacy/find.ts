@@ -7,15 +7,35 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { estypes } from '@elastic/elasticsearch';
+import { KueryNode } from '@kbn/es-query';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { renameKeys } from '../lib/rename_keys';
-import { FindOptions } from '../../rules_client';
+import { IndexType } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
+
+export interface FindOptions extends IndexType {
+  perPage?: number;
+  page?: number;
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: estypes.SortOrder;
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+  fields?: string[];
+  filter?: string | KueryNode;
+  filterConsumers?: string[];
+}
 
 // config definition
 const querySchema = schema.object({
@@ -45,13 +65,31 @@ const querySchema = schema.object({
 export const findAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  docLinks: DocLinksServiceSetup,
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.get(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/_find`,
       validate: {
         query: querySchema,
+      },
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Find alerts',
+        tags: ['oas-tag:alerting'],
+        description:
+          'Gets a paginated set of alerts. Alert `params` are stored as a flattened field type and analyzed as keywords. As alerts change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.',
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'GET',
+            newApiPath: '/api/alerting/rules/_find',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
@@ -66,7 +104,8 @@ export const findAlertRoute = (
         ) as string[],
         usageCounter
       );
-      const rulesClient = (await context.alerting).getRulesClient();
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
 
       const query = req.query;
       const renameMap = {
@@ -99,7 +138,10 @@ export const findAlertRoute = (
 
       const findResult = await rulesClient.find({ options, excludeFromPublicApi: true });
       return res.ok({
-        body: findResult,
+        body: {
+          ...findResult,
+          data: findResult.data.map(({ systemActions, ...rule }) => rule),
+        },
       });
     })
   );

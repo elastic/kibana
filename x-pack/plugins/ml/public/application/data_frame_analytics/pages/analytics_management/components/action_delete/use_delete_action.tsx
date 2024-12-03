@@ -14,20 +14,20 @@ import { useMlKibana } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 import {
-  deleteAnalytics,
-  deleteAnalyticsAndDestIndex,
-  canDeleteIndex,
+  useDeleteAnalytics,
+  useDeleteAnalyticsAndDestIndex,
+  useCanDeleteIndex,
 } from '../../services/analytics_service';
 
-import {
-  isDataFrameAnalyticsRunning,
+import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
+import { isDataFrameAnalyticsRunning } from '../analytics_list/common';
 
 import { deleteActionNameText, DeleteActionName } from './delete_action_name';
 
-import { JobType } from '../../../../../../../common/types/saved_objects';
+import type { JobType } from '../../../../../../../common/types/saved_objects';
 
 import { getDestinationIndex } from '../../../../common/get_destination_index';
 
@@ -56,10 +56,13 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const indexName = getDestinationIndex(item?.config);
 
   const toastNotificationService = useToastNotificationService();
+  const deleteAnalytics = useDeleteAnalytics();
+  const deleteAnalyticsAndDestIndex = useDeleteAnalyticsAndDestIndex();
+  const canDeleteIndex = useCanDeleteIndex();
 
   const checkDataViewExists = async () => {
     try {
-      const dv = (await dataViews.getIdsWithTitle()).find(({ title }) => title === indexName);
+      const dv = (await dataViews.getIdsWithTitle(true)).find(({ title }) => title === indexName);
       if (dv !== undefined) {
         setDataViewExists(true);
       } else {
@@ -83,7 +86,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   };
   const checkUserIndexPermission = async () => {
     try {
-      const userCanDelete = await canDeleteIndex(indexName, toastNotificationService);
+      const userCanDelete = await canDeleteIndex(indexName);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
@@ -132,13 +135,11 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       if ((userCanDeleteIndex && deleteTargetIndex) || (userCanDeleteIndex && deleteDataView)) {
         deleteAnalyticsAndDestIndex(
           item.config,
-          item.stats,
           deleteTargetIndex,
-          dataViewExists && deleteDataView,
-          toastNotificationService
+          dataViewExists && deleteDataView
         );
       } else {
-        deleteAnalytics(item.config, item.stats, toastNotificationService);
+        deleteAnalytics(item.config);
       }
     }
   };

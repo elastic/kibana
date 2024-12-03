@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // ---------------------------------- WARNING ----------------------------------
 // this file was generated, and should not be edited by hand
@@ -68,6 +69,7 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const LegacyAlertRequired = rt.type({
 });
+// prettier-ignore
 const LegacyAlertOptional = rt.partial({
   'ecs.version': schemaString,
   'kibana.alert.risk_score': schemaNumber,
@@ -96,6 +98,7 @@ const LegacyAlertOptional = rt.partial({
   'kibana.alert.suppression.terms.value': schemaStringArray,
   'kibana.alert.system_status': schemaString,
   'kibana.alert.workflow_reason': schemaString,
+  'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_user': schemaString,
 });
 

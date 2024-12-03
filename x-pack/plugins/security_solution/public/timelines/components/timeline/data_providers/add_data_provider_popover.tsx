@@ -21,13 +21,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 
 import type { BrowserFields } from '../../../../common/containers/source';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { DataProviderTypeEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline, getDisplayValue } from './helpers';
-import { DataProviderType } from './data_provider';
-import { timelineSelectors } from '../../../store/timeline';
+import { timelineSelectors } from '../../../store';
 import { ADD_FIELD_LABEL, ADD_TEMPLATE_FIELD_LABEL } from './translations';
+import type { OnDataProviderEdited } from '../events';
 
 interface AddDataProviderPopoverProps {
   browserFields: BrowserFields;
@@ -59,7 +59,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
     [setIsAddFilterPopoverOpen]
   );
 
-  const handleDataProviderEdited = useCallback(
+  const handleDataProviderEdited = useCallback<OnDataProviderEdited>(
     ({ andProviderId, excluded, field, id, operator, providerId, value, type }) => {
       addContentToTimeline({
         dataProviders,
@@ -102,9 +102,9 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             icon: <EuiIcon type="plusInCircle" size="m" />,
             panel: 1,
           },
-          timelineType === TimelineType.template
+          timelineType === TimelineTypeEnum.template
             ? {
-                disabled: timelineType !== TimelineType.template,
+                disabled: timelineType !== TimelineTypeEnum.template,
                 name: ADD_TEMPLATE_FIELD_LABEL,
                 icon: <EuiIcon type="visText" size="m" />,
                 panel: 2,
@@ -125,7 +125,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             operator=":"
             timelineId={timelineId}
             value=""
-            type={DataProviderType.default}
+            type={DataProviderTypeEnum.default}
             providerId={`${timelineId}-${uuidv4()}`}
           />
         ),
@@ -143,7 +143,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             operator=":"
             timelineId={timelineId}
             value=""
-            type={DataProviderType.template}
+            type={DataProviderTypeEnum.template}
             providerId={`${timelineId}-${uuidv4()}`}
           />
         ),
@@ -153,7 +153,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
   );
 
   const button = useMemo(() => {
-    if (timelineType === TimelineType.template) {
+    if (timelineType === TimelineTypeEnum.template) {
       return (
         <EuiButton
           size="s"
@@ -181,7 +181,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
   }, [togglePopoverState, timelineType]);
 
   const content = useMemo(() => {
-    if (timelineType === TimelineType.template) {
+    if (timelineType === TimelineTypeEnum.template) {
       return <EuiContextMenu initialPanelId={0} panels={panels} />;
     }
 
@@ -194,7 +194,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         operator=":"
         timelineId={timelineId}
         value=""
-        type={DataProviderType.default}
+        type={DataProviderTypeEnum.default}
         providerId={`${timelineId}-${uuidv4()}`}
       />
     );
