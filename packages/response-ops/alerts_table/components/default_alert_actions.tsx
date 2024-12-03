@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { useLoadRuleTypesQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { ViewRuleDetailsAlertAction } from './view_rule_details_alert_action';
 import type { AlertActionsProps } from '../types';
 import { ViewAlertDetailsAlertAction } from './view_alert_details_alert_action';
@@ -29,6 +30,7 @@ export const DefaultAlertActions = (props: AlertActionsProps) => {
     filteredRuleTypes: [],
     http,
     toasts,
+    context: AlertsQueryContext,
   });
 
   return (

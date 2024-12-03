@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { keyBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { useMemo } from 'react';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +31,7 @@ export interface UseRuleTypesProps {
   filteredRuleTypes?: string[];
   registeredRuleTypes?: Array<{ id: string; description: string }>;
   enabled?: boolean;
+  context?: UseQueryOptions['context'];
 }
 
 const getFilteredIndex = ({
@@ -67,6 +72,7 @@ export const useLoadRuleTypesQuery = ({
   toasts,
   filteredRuleTypes,
   registeredRuleTypes,
+  context,
   enabled = true,
 }: UseRuleTypesProps) => {
   const queryFn = () => {
@@ -91,6 +97,7 @@ export const useLoadRuleTypesQuery = ({
     // other state-sharing solutions turned out to be overly complex and less readable
     staleTime: 60 * 1000,
     enabled,
+    context,
   });
 
   const filteredIndex = useMemo(
