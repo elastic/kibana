@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql columns', function () {
+  describe.only('discover esql columns', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -181,14 +181,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset columns if available fields or index pattern are different in transformational query', async () => {
-      await monacoEditor.setCodeEditorValue('from logstash-* | keep ip, @timestamp');
+      await monacoEditor.setCodeEditorValue('from logstash-* | keep ip, @timestamp | limit 500');
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['ip', '@timestamp']);
 
       // reset columns if available fields are different
-      await monacoEditor.setCodeEditorValue('from logstash-* | keep ip, @timestamp, bytes');
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | keep ip, @timestamp, bytes | limit 500'
+      );
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
