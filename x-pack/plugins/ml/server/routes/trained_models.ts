@@ -6,15 +6,18 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName, ElserVersion } from '@kbn/ml-trained-models-utils';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
-import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
 import { ML_INTERNAL_BASE_PATH, type MlFeatures } from '../../common/constants/app';
-import type { RouteInitialization } from '../types';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
+import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { wrapError } from '../client/error_wrapper';
+import { modelsProvider } from '../models/model_management';
+import type { RouteInitialization } from '../types';
+import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import {
   createIngestPipelineSchema,
   curatedModelsParamsSchema,
@@ -33,9 +36,6 @@ import {
   threadingParamsQuerySchema,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
-import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
-import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
-import { modelsProvider } from '../models/model_management';
 
 export function filterForEnabledFeatureModels<
   T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
