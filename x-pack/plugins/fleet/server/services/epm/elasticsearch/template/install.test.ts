@@ -124,12 +124,13 @@ describe('EPM index template install', () => {
 
     const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
 
-    if (!('mappings' in packageTemplate)) {
+    if (!('settings' in packageTemplate)) {
       throw new Error('no mappings on package template');
     }
 
-    expect(packageTemplate.mappings).toHaveProperty('_source');
-    expect(packageTemplate.mappings._source).toEqual({ mode: 'synthetic' });
+    expect(packageTemplate.settings?.index?.mapping).toHaveProperty('source');
+    // @ts-expect-error esclient mapping out-of-date
+    expect(packageTemplate.settings?.index?.mapping?.source).toEqual({ mode: 'synthetic' });
   });
 
   it('tests prepareTemplate to set source mode to synthetics if index_mode:time_series', async () => {
@@ -154,12 +155,13 @@ describe('EPM index template install', () => {
 
     const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
 
-    if (!('mappings' in packageTemplate)) {
-      throw new Error('no mappings on package template');
+    if (!('settings' in packageTemplate)) {
+      throw new Error('no settings on package template');
     }
 
-    expect(packageTemplate.mappings).toHaveProperty('_source');
-    expect(packageTemplate.mappings._source).toEqual({ mode: 'synthetic' });
+    expect(packageTemplate.settings?.index?.mapping).toHaveProperty('source');
+    // @ts-expect-error esclient mapping out-of-date
+    expect(packageTemplate.settings?.index?.mapping?.source).toEqual({ mode: 'synthetic' });
   });
 
   it('tests prepareTemplate to not set source mode to synthetics if index_mode:time_series and user disabled synthetic', async () => {
@@ -193,11 +195,11 @@ describe('EPM index template install', () => {
 
     const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
 
-    if (!('mappings' in packageTemplate)) {
+    if (!('settings' in packageTemplate)) {
       throw new Error('no mappings on package template');
     }
 
-    expect(packageTemplate.mappings).not.toHaveProperty('_source');
+    expect(packageTemplate.settings?.index?.mapping).not.toHaveProperty('source');
   });
 
   it('tests prepareTemplate to not set source mode to synthetics if specified but user disabled it', async () => {
@@ -231,11 +233,11 @@ describe('EPM index template install', () => {
 
     const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
 
-    if (!('mappings' in packageTemplate)) {
-      throw new Error('no mappings on package template');
+    if (!('settings' in packageTemplate)) {
+      throw new Error('no settings on package template');
     }
 
-    expect(packageTemplate.mappings).not.toHaveProperty('_source');
+    expect(packageTemplate.settings?.index?.mapping).not.toHaveProperty('source');
   });
 
   it('tests prepareTemplate to set index_mode time series if index_mode:time_series', async () => {
