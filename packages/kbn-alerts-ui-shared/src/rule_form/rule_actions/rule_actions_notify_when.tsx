@@ -156,7 +156,9 @@ export interface RuleActionsNotifyWhenProps {
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   onChange: (frequency: RuleActionFrequency) => void;
+  onRuleNotifyChange?: (ruleNotifyWhen: RuleNotifyWhenType) => void;
   onUseDefaultMessage: () => void;
+  ruleNotifyWhen?: RuleNotifyWhenType | null;
 }
 
 export const RuleActionsNotifyWhen = ({
@@ -167,21 +169,30 @@ export const RuleActionsNotifyWhen = ({
   showMinimumThrottleWarning,
   showMinimumThrottleUnitWarning,
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
+  ruleNotifyWhen,
   onChange,
   onUseDefaultMessage,
+  onRuleNotifyChange,
 }: RuleActionsNotifyWhenProps) => {
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
 
-  const showCustomThrottleOpts = frequency?.notifyWhen === RuleNotifyWhen.THROTTLE;
+  const showCustomThrottleOpts =
+    (frequency?.notifyWhen || ruleNotifyWhen) === RuleNotifyWhen.THROTTLE;
 
   const onNotifyWhenValueChange = useCallback(
     (newValue: RuleNotifyWhenType) => {
       const newThrottle = newValue === RuleNotifyWhen.THROTTLE ? throttle ?? 1 : null;
+      // if (frequency) {
       onChange({
-        ...frequency,
+        ...(frequency ?? DEFAULT_FREQUENCY),
         notifyWhen: newValue,
         throttle: newThrottle ? `${newThrottle}${throttleUnit}` : null,
       });
+      // }
+
+      // if (ruleNotifyWhen) {
+      //   onRuleNotifyChange?.(newValue);
+      // }
     },
     [onChange, throttle, throttleUnit, frequency]
   );
@@ -197,17 +208,17 @@ export const RuleActionsNotifyWhen = ({
   );
 
   const notifyWhenOptions = useMemo(
-    () => (frequency.summary ? summaryNotifyWhenOptions : forEachAlertNotifyWhenOptions),
-    [forEachAlertNotifyWhenOptions, frequency.summary, summaryNotifyWhenOptions]
+    () => (frequency?.summary ? summaryNotifyWhenOptions : forEachAlertNotifyWhenOptions),
+    [forEachAlertNotifyWhenOptions, frequency?.summary, summaryNotifyWhenOptions]
   );
 
   const selectedOptionDoesNotExist = useCallback(
     (summary: boolean) =>
       (summary &&
-        !summaryNotifyWhenOptions.filter((o) => o.value === frequency.notifyWhen).length) ||
+        !summaryNotifyWhenOptions.filter((o) => o.value === frequency?.notifyWhen).length) ||
       (!summary &&
-        !forEachAlertNotifyWhenOptions.filter((o) => o.value === frequency.notifyWhen).length),
-    [forEachAlertNotifyWhenOptions, frequency.notifyWhen, summaryNotifyWhenOptions]
+        !forEachAlertNotifyWhenOptions.filter((o) => o.value === frequency?.notifyWhen).length),
+    [forEachAlertNotifyWhenOptions, frequency?.notifyWhen, summaryNotifyWhenOptions]
   );
 
   const getDefaultNotifyWhenOption = useCallback(
@@ -226,13 +237,15 @@ export const RuleActionsNotifyWhen = ({
 
   const selectSummaryOption = useCallback(
     (summary: boolean) => {
+      // if (frequency) {
       onChange({
         summary,
         notifyWhen: selectedOptionDoesNotExist(summary)
           ? getDefaultNotifyWhenOption(summary)
-          : frequency.notifyWhen,
-        throttle: frequency.throttle,
+          : frequency?.notifyWhen ?? DEFAULT_FREQUENCY.notifyWhen,
+        throttle: frequency?.throttle ?? DEFAULT_FREQUENCY.throttle,
       });
+      //  }
       onUseDefaultMessage();
       setSummaryMenuOpen(false);
     },
@@ -259,7 +272,7 @@ export const RuleActionsNotifyWhen = ({
       <EuiContextMenuItem
         key="summary"
         onClick={() => selectSummaryOption(true)}
-        icon={frequency.summary ? 'check' : 'empty'}
+        icon={frequency?.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-summary"
         data-test-subj="actionNotifyWhen-option-summary"
         className={summaryContextMenuOptionStyles}
@@ -269,7 +282,7 @@ export const RuleActionsNotifyWhen = ({
       <EuiContextMenuItem
         key="for_each"
         onClick={() => selectSummaryOption(false)}
-        icon={!frequency.summary ? 'check' : 'empty'}
+        icon={!frequency?.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-for_each"
         data-test-subj="actionNotifyWhen-option-for_each"
         className={summaryContextMenuOptionStyles}
@@ -277,18 +290,18 @@ export const RuleActionsNotifyWhen = ({
         {FOR_EACH_ALERT}
       </EuiContextMenuItem>,
     ],
-    [frequency.summary, selectSummaryOption, summaryContextMenuOptionStyles]
+    [frequency?.summary, selectSummaryOption, summaryContextMenuOptionStyles]
   );
 
   const summaryOrPerRuleSelect = (
     <EuiPopover
       data-test-subj="summaryOrPerRuleSelect"
-      initialFocus={`#actionNotifyWhen-option-${frequency.summary ? 'summary' : 'for_each'}`}
+      initialFocus={`#actionNotifyWhen-option-${frequency?.summary ? 'summary' : 'for_each'}`}
       isOpen={summaryMenuOpen}
       closePopover={useCallback(() => setSummaryMenuOpen(false), [setSummaryMenuOpen])}
       panelPaddingSize="none"
       anchorPosition="downLeft"
-      aria-label={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
+      aria-label={frequency?.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
       aria-roledescription={i18n.translate(
         'alertsUIShared.ruleActionsNotifyWhen.summaryOrRulePerSelectRoleDescription',
         { defaultMessage: 'Action frequency type select' }
@@ -300,7 +313,7 @@ export const RuleActionsNotifyWhen = ({
           iconSide="right"
           onClick={useCallback(() => setSummaryMenuOpen(!summaryMenuOpen), [summaryMenuOpen])}
         >
-          {frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
+          {frequency?.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
         </EuiButtonEmpty>
       }
     >
@@ -322,7 +335,11 @@ export const RuleActionsNotifyWhen = ({
             prepend={hasAlertsMappings ? summaryOrPerRuleSelect : <></>}
             data-test-subj="notifyWhenSelect"
             options={notifyWhenOptions}
-            valueOfSelected={frequency.notifyWhen}
+            valueOfSelected={
+              ruleNotifyWhen
+                ? ruleNotifyWhen
+                : frequency?.notifyWhen ?? DEFAULT_FREQUENCY.notifyWhen
+            }
             onChange={onNotifyWhenValueChange}
           />
           {showCustomThrottleOpts && (
@@ -351,7 +368,7 @@ export const RuleActionsNotifyWhen = ({
                           filter((value) => !isNaN(value)),
                           map((value) => {
                             onChange({
-                              ...frequency,
+                              ...(frequency ?? DEFAULT_FREQUENCY),
                               throttle: `${value}${throttleUnit}`,
                             });
                           })
@@ -367,7 +384,7 @@ export const RuleActionsNotifyWhen = ({
                       options={getTimeOptions(throttle ?? 1)}
                       onChange={(e) => {
                         onChange({
-                          ...frequency,
+                          ...(frequency ?? DEFAULT_FREQUENCY),
                           throttle: `${throttle}${e.target.value}`,
                         });
                       }}

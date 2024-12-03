@@ -35,6 +35,7 @@ import {
   RuleActionFrequency,
   RuleActionParam,
   RuleActionParams,
+  RuleNotifyWhenType,
 } from '@kbn/alerting-types';
 import { isEmpty, some } from 'lodash';
 import { css } from '@emotion/react';
@@ -95,6 +96,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const {
     plugins: { actionTypeRegistry, http },
+    formData: { notifyWhen: ruleNotifyWhen, throttle: ruleThrottle },
     actionsParamsErrors = {},
     selectedRuleType,
     selectedRuleTypeModel,
@@ -335,20 +337,50 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const onNotifyWhenChange = useCallback(
     (frequency: RuleActionFrequency) => {
-      dispatch({
-        type: 'setActionProperty',
-        payload: {
-          uuid: action.uuid!,
-          key: 'frequency',
-          value: frequency,
-        },
-      });
-      if (frequency.summary !== action.frequency?.summary) {
-        onDefaultParamsChange(action.group, frequency.summary);
+      if (!action.frequency && ruleNotifyWhen) {
+        console.log('dispatching ruleNotifyWhen', {
+          freq: action.frequency,
+          ruleNotifyWhen,
+          frequency,
+        });
+
+        dispatch({
+          type: 'setNotifyWhen',
+          payload: frequency.notifyWhen,
+        });
+
+        dispatch({
+          type: 'setRuleProperty',
+          payload: {
+            property: 'throttle',
+            value: frequency.throttle,
+          },
+        });
+      } else {
+        console.log('dispatching action frequency', {
+          freq: action.frequency,
+          ruleNotifyWhen,
+          frequency,
+        });
+        dispatch({
+          type: 'setActionProperty',
+          payload: {
+            uuid: action.uuid!,
+            key: 'frequency',
+            value: frequency,
+          },
+        });
+        if (frequency.summary !== action.frequency?.summary) {
+          onDefaultParamsChange(action.group, frequency.summary);
+        }
       }
     },
     [action, onDefaultParamsChange, dispatch]
   );
+
+  // const onRuleNotifyChange = useCallback((value: RuleNotifyWhenType) => {}, [dispatch]);
+
+  // const onRuleThrottleChange = useCallback(() => {}, []);
 
   const onActionGroupChange = useCallback(
     (group: string) => {
@@ -513,6 +545,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
               producerId={producerId}
               onUseDefaultMessageChange={() => setUseDefaultMessage(true)}
               onNotifyWhenChange={onNotifyWhenChange}
+              // onRuleNotifyChange={onRuleNotifyChange}
               onActionGroupChange={onActionGroupChange}
               onAlertsFilterChange={onAlertsFilterChange}
               onTimeframeChange={onTimeframeChange}

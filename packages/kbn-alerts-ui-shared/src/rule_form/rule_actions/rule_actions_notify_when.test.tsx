@@ -95,6 +95,36 @@ describe('ruleActionsNotifyWhen', () => {
     ).toEqual('h');
   });
 
+  it('renders the passed-in rule level notify_when and throttle on load', async () => {
+    const wrapperDefault = mountWithIntl(
+      <RuleActionsNotifyWhen
+        frequency={undefined}
+        throttle={9}
+        throttleUnit={'m'}
+        onChange={jest.fn()}
+        onUseDefaultMessage={jest.fn()}
+        hasAlertsMappings={true}
+        ruleNotifyWhen={RuleNotifyWhen.THROTTLE}
+      />
+    );
+
+    const summaryOrPerRuleSelect = wrapperDefault.find('[data-test-subj="summaryOrPerRuleSelect"]');
+    expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
+    expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
+
+    const notifyWhenSelect = wrapperDefault.find('[data-test-subj="notifyWhenSelect"]');
+    expect(notifyWhenSelect.exists()).toBeTruthy();
+    expect((notifyWhenSelect.first().props() as EuiSuperSelectProps<''>).valueOfSelected).toEqual(
+      RuleNotifyWhen.THROTTLE
+    );
+    expect(wrapperDefault.find('[data-test-subj="throttleInput"]').first().props().value).toEqual(
+      9
+    );
+    expect(
+      wrapperDefault.find('[data-test-subj="throttleUnitInput"]').first().props().value
+    ).toEqual('m');
+  });
+
   it('hides the summary selector when hasAlertsMappings is false', async () => {
     const wrapper = await setup(DEFAULT_FREQUENCY, false);
     const summaryOrPerRuleSelect = wrapper.find('[data-test-subj="summaryOrPerRuleSelect"]');

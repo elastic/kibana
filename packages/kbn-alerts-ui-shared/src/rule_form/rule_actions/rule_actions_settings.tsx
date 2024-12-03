@@ -15,6 +15,7 @@ import {
   AlertsFilterTimeframe,
   RecoveredActionGroup,
   RuleActionFrequency,
+  RuleNotifyWhenType,
 } from '@kbn/alerting-types';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import { useRuleFormState } from '../hooks';
@@ -126,6 +127,7 @@ export interface RuleActionsSettingsProps {
   onActionGroupChange: (group: string) => void;
   onAlertsFilterChange: (query?: AlertsFilter['query']) => void;
   onTimeframeChange: (timeframe?: AlertsFilterTimeframe) => void;
+  onRuleNotifyChange?: (ruleNotifyWhen: RuleNotifyWhenType) => void;
 }
 
 export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
@@ -137,6 +139,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     onActionGroupChange,
     onAlertsFilterChange,
     onTimeframeChange,
+    onRuleNotifyChange,
   } = props;
 
   const {
@@ -144,6 +147,8 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     formData: {
       consumer,
       schedule: { interval },
+      notifyWhen: ruleNotifyWhen,
+      throttle: ruleThrottle,
     },
     actionsErrors = {},
     validConsumers = DEFAULT_VALID_CONSUMERS,
@@ -172,10 +177,14 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
 
   const actionThrottle = action.frequency?.throttle
     ? getDurationNumberInItsUnit(action.frequency.throttle)
+    : ruleThrottle
+    ? getDurationNumberInItsUnit(ruleThrottle)
     : null;
 
   const actionThrottleUnit = action.frequency?.throttle
     ? getDurationUnitValue(action.frequency?.throttle)
+    : ruleThrottle
+    ? getDurationUnitValue(ruleThrottle)
     : 'h';
 
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = [
@@ -209,8 +218,10 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
               hasAlertsMappings={selectedRuleType.hasAlertsMappings}
               onChange={onNotifyWhenChange}
               onUseDefaultMessage={onUseDefaultMessageChange}
+              // onRuleNotifyChange={onRuleNotifyChange}
               showMinimumThrottleWarning={showMinimumThrottleWarning}
               showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+              ruleNotifyWhen={ruleNotifyWhen}
             />
           </EuiFlexItem>
           <EuiFlexItem>

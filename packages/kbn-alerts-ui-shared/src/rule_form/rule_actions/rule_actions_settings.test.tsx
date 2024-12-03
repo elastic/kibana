@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { RuleActionsSettings } from './rule_actions_settings';
 import { getAction } from '../../common/test_utils/actions_test_utils';
 import { RuleTypeModel } from '../../common';
-import { RuleType } from '@kbn/alerting-types';
+import { RuleNotifyWhen, RuleType } from '@kbn/alerting-types';
 import userEvent from '@testing-library/user-event';
 import type { RuleActionsNotifyWhenProps } from './rule_actions_notify_when';
 import type { RuleActionsAlertsFilterProps } from './rule_actions_alerts_filter';
@@ -198,6 +198,38 @@ describe('ruleActionsSettings', () => {
 
     expect(screen.queryByText('showMinimumThrottleUnitWarning')).not.toBeInTheDocument();
     expect(screen.queryByText('showMinimumThrottleWarning')).not.toBeInTheDocument();
+  });
+
+  test('should render notify when with rule level notify when value', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        settings: {},
+      },
+      formData: {
+        consumer: 'stackAlerts',
+        schedule: { interval: '5m' },
+        notifyWhen: RuleNotifyWhen.THROTTLE,
+        throttle: '9d',
+      },
+      actionErrors: {},
+      validConsumers: ['stackAlerts', 'logs'],
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(
+      <RuleActionsSettings
+        action={getAction('1')}
+        producerId="stackAlerts"
+        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
+        onNotifyWhenChange={mockOnNotifyWhenChange}
+        onActionGroupChange={mockOnActionGroupChange}
+        onAlertsFilterChange={mockOnAlertsFilterChange}
+        onTimeframeChange={mockOnTimeframeChange}
+      />
+    );
+
+    expect(screen.getByText('RuleActionsNotifyWhen')).toBeInTheDocument();
   });
 
   test('should render show minimum throttle unit warning', () => {

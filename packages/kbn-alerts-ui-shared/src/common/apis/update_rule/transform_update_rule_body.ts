@@ -26,9 +26,11 @@ export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
   actions = [],
   alertDelay,
   flapping,
+  notifyWhen,
   ...res
 }): any => ({
   ...res,
+  ...(notifyWhen !== undefined ? { notify_when: notifyWhen } : {}),
   actions: actions.map((action) => {
     const { id, params, uuid } = action;
     return {
