@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Aiops } from '../../components/aiops';
+import { AiopsWrapper } from '../../components/aiops_wrapper';
 import { DateHistogram } from '../../components/date_histogram';
 import { HistogramWrapper } from '../../components/histogram_wrapper';
 import { Esql } from '../../components/esql';
@@ -70,7 +70,7 @@ export const App: FC = () => {
                         <DateHistogram key={field} field={field} />
                       ))}
                       <HistogramWrapper />
-                      <Aiops field={'response.keyword'} />
+                      <AiopsWrapper />
                       <Logs />
                     </div>
                   )}
