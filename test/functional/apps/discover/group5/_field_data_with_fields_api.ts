@@ -107,6 +107,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(marks.length).to.be.above(0);
         expect(marks).to.contain('election');
       });
+
+      it('should show @timestamp and Summary columns for links with _source as a column', async function () {
+        const currentUrl = await browser.getCurrentUrl();
+        const [, hash] = currentUrl.split('#/');
+        const nextHash = hash
+          .replace('columns:!(relatedContent)', 'columns:!(_source)')
+          .replace('election', 'club');
+
+        expect(nextHash).to.contain('columns:!(_source)');
+
+        await common.navigateToUrl('discover', nextHash, { useActualUrl: true });
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const gridHeader = await discover.getDocHeader();
+        expect(gridHeader).to.contain('@timestamp');
+        expect(gridHeader).to.contain('Summary');
+
+        const marks = await discover.getMarks();
+        expect(marks.length).to.be.above(0);
+        expect(marks).to.contain('club');
+
+        expect(await browser.getCurrentUrl()).to.contain('columns:!()');
+      });
     });
   });
 }
