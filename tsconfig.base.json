@@ -1530,6 +1530,8 @@
       "@kbn/saved-objects-tagging-oss-plugin/*": ["src/plugins/saved_objects_tagging_oss/*"],
       "@kbn/saved-objects-tagging-plugin": ["x-pack/plugins/saved_objects_tagging"],
       "@kbn/saved-objects-tagging-plugin/*": ["x-pack/plugins/saved_objects_tagging/*"],
+      "@kbn/saved-search-component": ["packages/kbn-saved-search-component"],
+      "@kbn/saved-search-component/*": ["packages/kbn-saved-search-component/*"],
       "@kbn/saved-search-plugin": ["src/plugins/saved_search"],
       "@kbn/saved-search-plugin/*": ["src/plugins/saved_search/*"],
       "@kbn/screenshot-mode-example-plugin": ["examples/screenshot_mode_example"],
