@@ -981,8 +981,8 @@ x-pack/plugins/snapshot_restore @elastic/kibana-management
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/plugins/stack_alerts @elastic/response-ops
 x-pack/plugins/stack_connectors @elastic/response-ops
-x-pack/plugins/streams @simianhacker @flash1293 @dgieselaar
-x-pack/plugins/streams_app @simianhacker @flash1293 @dgieselaar
+x-pack/plugins/streams @elastic/streams-program-team
+x-pack/plugins/streams_app @elastic/streams-program-team
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
@@ -2458,6 +2458,9 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 
 ## Security Solution sub teams - GenAI
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
+
+## Security Solution sub teams - Automatic Import
+x-pack/test/automatic_import_api_integration @elastic/security-scalability
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/test/osquery_cypress @elastic/security-defend-workflows
