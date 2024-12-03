@@ -23,11 +23,9 @@ import { AlertEvent } from './alert_event';
 
 export const EventsTimeLine = () => {
   const { dependencies } = useKibana();
-
   const baseTheme = dependencies.start.charts.theme.useChartsBaseTheme();
-
-  const { globalParams, updateInvestigationParams } = useInvestigation();
-  const { alert } = useInvestigation();
+  const { globalParams, updateInvestigationParams, alert } = useInvestigation();
+  const chartRef = useRef(null);
 
   const filter = useMemo(() => {
     const group = (alert?.[ALERT_GROUP] as unknown as Group[])?.find(
@@ -42,7 +40,6 @@ export const EventsTimeLine = () => {
     filter,
   });
 
-  const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(dependencies.start.charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });

@@ -43,6 +43,7 @@ export function InvestigationItems() {
             <AssistantHypothesis investigationId={investigation.id} />
           </EuiFlexItem>
         )}
+
         <EuiFlexItem grow={false}>
           <InvestigationItemsList />
         </EuiFlexItem>

@@ -23,6 +23,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { Note } from './note';
 import { ResizableTextInput } from './resizable_text_input';
+import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
 
 export interface Props {
   user: AuthenticatedUser;
@@ -30,15 +31,23 @@ export interface Props {
 
 export function InvestigationNotes({ user }: Props) {
   const theme = useTheme();
-  const { investigation, addNote, isAddingNote } = useInvestigation();
+  const { investigation } = useInvestigation();
+  const { mutate: addNote, isLoading: isAddingNote } = useAddInvestigationNote();
+
   const { data: userProfiles, isLoading: isLoadingUserProfiles } = useFetchUserProfiles({
     profileIds: new Set(investigation?.notes.map((note) => note.createdBy)),
   });
 
   const [noteInput, setNoteInput] = useState('');
-  const onAddNote = async (content: string) => {
-    await addNote(content);
-    setNoteInput('');
+  const onAddNote = (content: string) => {
+    addNote(
+      { investigationId: investigation!.id, note: { content } },
+      {
+        onSuccess: () => {
+          setNoteInput('');
+        },
+      }
+    );
   };
 
   const panelClassName = css`
