@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-// todo update
-export const celTestState = {
+import { CelInputState } from '../../server/types';
+
+export const celTestState: CelInputState = {
   dataStreamName: 'testDataStream',
   lastExecutedChain: 'testchain',
   finalized: false,
   apiQuerySummary: 'testQuerySummary',
-  exampleCelPrograms: [],
   currentProgram: 'testProgram',
   stateVarNames: ['testVar'],
   stateSettings: { test: 'testDetails' },
   redactVars: ['testRedact'],
   results: { test: 'testResults' },
+  path: './testPath',
+  authType: 'basic',
+  openApiPathDetails: {},
+  openApiSchemas: {},
+  openApiAuthSchema: {},
+  hasProgramHeaders: false,
 };
 
 export const celQuerySummaryMockedResponse = `To cover all events in a chronological manner for the device_tasks endpoint, you should use the /v1/device_tasks GET route with pagination parameters. Specifically, use the pageSize and pageToken query parameters. Start with a large pageSize and use the nextPageToken from each response to fetch subsequent pages until all events are retrieved.
