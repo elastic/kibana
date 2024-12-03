@@ -561,6 +561,7 @@ packages/react/kibana_context/styled @elastic/appex-sharedux
 packages/react/kibana_context/theme @elastic/appex-sharedux
 packages/react/kibana_mount @elastic/appex-sharedux
 packages/response-ops/feature_flag_service @elastic/response-ops
+packages/response-ops/rule_form @elastic/response-ops
 packages/response-ops/rule_params @elastic/response-ops
 packages/serverless/project_switcher @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management

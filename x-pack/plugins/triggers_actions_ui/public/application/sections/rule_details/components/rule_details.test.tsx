@@ -27,7 +27,7 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config', () => ({
+jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
   fetchUiConfig: jest
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),

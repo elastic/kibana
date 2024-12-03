@@ -13,7 +13,7 @@ import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import { RuleTypeModal } from '@kbn/alerts-ui-shared/src/rule_type_modal';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import React, {
   lazy,
   useEffect,
