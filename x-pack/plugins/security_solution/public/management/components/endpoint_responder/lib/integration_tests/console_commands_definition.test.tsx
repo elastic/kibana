@@ -46,7 +46,6 @@ describe('When displaying Endpoint Response Actions', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
         responseActionUploadEnabled: true,
-        crowdstrikeRunScriptEnabled: true,
       });
       commands = getEndpointConsoleCommands({
         agentType: 'endpoint',

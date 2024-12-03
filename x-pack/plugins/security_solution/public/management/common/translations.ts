@@ -216,7 +216,7 @@ export const CONSOLE_COMMANDS = {
 };
 
 export const CROWDSTRIKE_CONSOLE_COMMANDS = {
-  execute: {
+  runscript: {
     args: {
       raw: {
         about: i18n.translate(

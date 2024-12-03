@@ -525,7 +525,7 @@ export const getEndpointConsoleCommands = ({
     consoleCommands.push({
       name: 'runscript',
       about: getCommandAboutInfo({
-        aboutInfo: CROWDSTRIKE_CONSOLE_COMMANDS.execute.about,
+        aboutInfo: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
         isSupported: doesEndpointSupportCommand('runscript'),
       }),
       RenderComponent: () => null,
@@ -543,38 +543,38 @@ C:\\> runscript -Raw=\`\`\`Get-ChildItem .\`\`\` -CommandLine=""
 Run a raw script whose entire contents are provided in the "-Raw=" flag
 C:\\> runscript -HostPath="C:\\temp\\LocalScript.ps1" -CommandLine="-Verbose true"
 Run a script from a path on the remote host with the specified command line arguments`,
-      exampleInstruction: CROWDSTRIKE_CONSOLE_COMMANDS.execute.about,
+      exampleInstruction: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         Raw: {
           required: false,
           allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.raw.about,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
           mustHaveValue: 'non-empty-string',
         },
         CloudFile: {
           required: false,
           allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.cloudFile.about,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
           mustHaveValue: 'non-empty-string',
         },
         CommandLine: {
           required: false,
           allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.commandLine.about,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
           mustHaveValue: 'non-empty-string',
         },
         HostPath: {
           required: false,
           allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.hostPath.about,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
           mustHaveValue: 'non-empty-string',
         },
         Timeout: {
           required: false,
           allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.timeout.about,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.timeout.about,
           mustHaveValue: 'non-empty-string',
         },
         ...commandCommentArgument(),
