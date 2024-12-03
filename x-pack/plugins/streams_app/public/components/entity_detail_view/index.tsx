@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiIcon, EuiLink, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { StreamDefinition } from '@kbn/streams-plugin/common';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -25,6 +26,7 @@ export function EntityDetailViewWithoutParams({
   selectedTab,
   tabs,
   entity,
+  definition,
 }: {
   selectedTab: string;
   tabs: EntityViewTab[];
@@ -32,6 +34,7 @@ export function EntityDetailViewWithoutParams({
     displayName?: string;
     id: string;
   };
+  definition?: StreamDefinition;
 }) {
   const router = useStreamsAppRouter();
   useStreamsAppBreadcrumbs(() => {
@@ -71,31 +74,54 @@ export function EntityDetailViewWithoutParams({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiPanel color="transparent">
-        <EuiLink data-test-subj="streamsEntityDetailViewGoBackHref" href={router.link('/')}>
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiIcon type="arrowLeft" />
-            {i18n.translate('xpack.streams.entityDetailView.goBackLinkLabel', {
-              defaultMessage: 'Back',
+      <EuiFlexItem grow={false}>
+        <EuiPanel color="transparent">
+          <EuiLink data-test-subj="streamsEntityDetailViewGoBackHref" href={router.link('/')}>
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+              <EuiIcon type="arrowLeft" />
+              {i18n.translate('xpack.streams.entityDetailView.goBackLinkLabel', {
+                defaultMessage: 'Back',
+              })}
+            </EuiFlexGroup>
+          </EuiLink>
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <StreamsAppPageHeader
+          verticalPaddingSize="none"
+          title={
+            <StreamsAppPageHeaderTitle
+              title={
+                <>
+                  {entity.displayName}
+                  {definition && !definition.managed ? (
+                    <>
+                      {' '}
+                      <EuiBadge>
+                        {i18n.translate(
+                          'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
+                          { defaultMessage: 'Unmanaged' }
+                        )}
+                      </EuiBadge>
+                    </>
+                  ) : null}
+                </>
+              }
+            />
+          }
+        >
+          <EntityOverviewTabList
+            tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
+              return {
+                name: tabKey,
+                label,
+                href,
+                selected: selectedTab === tabKey,
+              };
             })}
-          </EuiFlexGroup>
-        </EuiLink>
-      </EuiPanel>
-      <StreamsAppPageHeader
-        verticalPaddingSize="none"
-        title={<StreamsAppPageHeaderTitle title={entity.displayName} />}
-      >
-        <EntityOverviewTabList
-          tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
-            return {
-              name: tabKey,
-              label,
-              href,
-              selected: selectedTab === tabKey,
-            };
-          })}
-        />
-      </StreamsAppPageHeader>
+          />
+        </StreamsAppPageHeader>
+      </EuiFlexItem>
       <StreamsAppPageBody>{selectedTabObject.content}</StreamsAppPageBody>
     </EuiFlexGroup>
   );

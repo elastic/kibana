@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Cluster, LegacyRequest } from '../../../types';
-import { getIndexPatterns, getKibanaDataset } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getKibanaDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 import { createQuery } from '../../create_query';
 import { KibanaClusterRuleMetric } from '../../metrics';

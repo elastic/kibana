@@ -10,7 +10,7 @@ import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
 import { createQuery } from '../create_query';
 import { LogstashClusterMetric } from '../metrics';
-import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getLogstashDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 const { MEMORY, PERSISTED } = LOGSTASH.QUEUE_TYPES;
