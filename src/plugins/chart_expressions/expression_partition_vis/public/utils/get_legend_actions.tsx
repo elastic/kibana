@@ -125,7 +125,7 @@ export const getLegendActions = (
         ref={ref}
         role="button"
         aria-pressed="false"
-        style={{
+        css={{
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',

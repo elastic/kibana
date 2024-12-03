@@ -24,7 +24,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   },
   security: {
     authz: {
-      requiredPrivileges: ['uptime-read', ...(uptimeRoute?.writeAccess ? ['uptime-write'] : [])],
+      requiredPrivileges: [
+        'uptime-read',
+        ...(uptimeRoute.requiredPrivileges ?? []),
+        ...(uptimeRoute?.writeAccess ? ['uptime-write'] : []),
+      ],
     },
   },
   handler: async (context, request, response) => {

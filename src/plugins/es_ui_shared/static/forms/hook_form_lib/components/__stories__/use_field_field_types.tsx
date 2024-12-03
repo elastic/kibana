@@ -98,7 +98,7 @@ const getPropsForType = (type: FieldType) => {
               {
                 value: 'warning',
                 inputDisplay: (
-                  <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
+                  <EuiHealth color="subdued" css={{ lineHeight: 'inherit' }}>
                     Warning
                   </EuiHealth>
                 ),
@@ -107,7 +107,7 @@ const getPropsForType = (type: FieldType) => {
               {
                 value: 'minor',
                 inputDisplay: (
-                  <EuiHealth color="warning" style={{ lineHeight: 'inherit' }}>
+                  <EuiHealth color="warning" css={{ lineHeight: 'inherit' }}>
                     Minor
                   </EuiHealth>
                 ),
@@ -115,7 +115,7 @@ const getPropsForType = (type: FieldType) => {
               {
                 value: 'critical',
                 inputDisplay: (
-                  <EuiHealth color="danger" style={{ lineHeight: 'inherit' }}>
+                  <EuiHealth color="danger" css={{ lineHeight: 'inherit' }}>
                     Critical
                   </EuiHealth>
                 ),

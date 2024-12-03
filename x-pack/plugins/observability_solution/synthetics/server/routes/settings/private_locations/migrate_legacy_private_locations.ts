@@ -6,6 +6,8 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { Logger } from '@kbn/logging';
 import {
   type PrivateLocationAttributes,
   SyntheticsPrivateLocationsAttributes,
@@ -15,29 +17,26 @@ import {
   legacyPrivateLocationsSavedObjectName,
   privateLocationSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
-import { RouteContext } from '../../types';
 
-export const migrateLegacyPrivateLocations = async ({
-  server,
-  savedObjectsClient,
-}: RouteContext) => {
+export const migrateLegacyPrivateLocations = async (
+  soClient: ISavedObjectsRepository,
+  logger: Logger
+) => {
   try {
     let obj: SavedObject<SyntheticsPrivateLocationsAttributes> | undefined;
     try {
-      obj = await savedObjectsClient.get<SyntheticsPrivateLocationsAttributes>(
+      obj = await soClient.get<SyntheticsPrivateLocationsAttributes>(
         legacyPrivateLocationsSavedObjectName,
         legacyPrivateLocationsSavedObjectId
       );
     } catch (e) {
-      server.logger.error(`Error getting legacy private locations: ${e}`);
+      // we don't need to do anything if the legacy object doesn't exist
       return;
     }
     const legacyLocations = obj?.attributes.locations ?? [];
     if (legacyLocations.length === 0) {
       return;
     }
-
-    const soClient = server.coreStart.savedObjects.createInternalRepository();
 
     await soClient.bulkCreate<PrivateLocationAttributes>(
       legacyLocations.map((location) => ({
@@ -51,20 +50,21 @@ export const migrateLegacyPrivateLocations = async ({
       }
     );
 
-    const { total } = await savedObjectsClient.find<PrivateLocationAttributes>({
+    const { total } = await soClient.find<PrivateLocationAttributes>({
       type: privateLocationSavedObjectName,
       fields: [],
       perPage: 0,
+      namespaces: ['*'],
     });
 
     if (total === legacyLocations.length) {
-      await savedObjectsClient.delete(
+      await soClient.delete(
         legacyPrivateLocationsSavedObjectName,
         legacyPrivateLocationsSavedObjectId,
         {}
       );
     }
   } catch (e) {
-    server.logger.error(`Error migrating legacy private locations: ${e}`);
+    logger.error(`Error migrating legacy private locations: ${e}`);
   }
 };

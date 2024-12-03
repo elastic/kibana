@@ -8,6 +8,7 @@
 import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import pMap from 'p-map';
 
 import type {
   IndicesCreateRequest,
@@ -38,6 +39,7 @@ import {
   PACKAGE_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
   STACK_COMPONENT_TEMPLATES,
+  MAX_CONCURRENT_COMPONENT_TEMPLATES,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -103,15 +105,18 @@ export const prepareToInstallTemplates = (
       await installPreBuiltComponentTemplates(packageInstallContext, esClient, logger);
       await installPreBuiltTemplates(packageInstallContext, esClient, logger);
 
-      await Promise.all(
-        templates.map((template) =>
+      await pMap(
+        templates,
+        (template) =>
           installComponentAndIndexTemplateForDataStream({
             esClient,
             logger,
             componentTemplates: template.componentTemplates,
             indexTemplate: template.indexTemplate,
-          })
-        )
+          }),
+        {
+          concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES,
+        }
       );
 
       return templates.map((template) => template.indexTemplate);
@@ -125,32 +130,37 @@ const installPreBuiltTemplates = async (
   logger: Logger
 ) => {
   const templatePaths = packageInstallContext.paths.filter((path) => isTemplate(path));
-  const templateInstallPromises = templatePaths.map(async (path) => {
-    const { file } = getPathParts(path);
-    const templateName = file.substr(0, file.lastIndexOf('.'));
-    const content = JSON.parse(
-      getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
-    );
-
-    const esClientParams = { name: templateName, body: content };
-    const esClientRequestOptions = { ignore: [404] };
-
-    if (Object.hasOwn(content, 'template') || Object.hasOwn(content, 'composed_of')) {
-      // Template is v2
-      return retryTransientEsErrors(
-        () => esClient.indices.putIndexTemplate(esClientParams, esClientRequestOptions),
-        { logger }
-      );
-    } else {
-      // template is V1
-      return retryTransientEsErrors(
-        () => esClient.indices.putTemplate(esClientParams, esClientRequestOptions),
-        { logger }
-      );
-    }
-  });
   try {
-    return await Promise.all(templateInstallPromises);
+    await pMap(
+      templatePaths,
+      async (path) => {
+        const { file } = getPathParts(path);
+        const templateName = file.substr(0, file.lastIndexOf('.'));
+        const content = JSON.parse(
+          getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
+        );
+
+        const esClientParams = { name: templateName, body: content };
+        const esClientRequestOptions = { ignore: [404] };
+
+        if (Object.hasOwn(content, 'template') || Object.hasOwn(content, 'composed_of')) {
+          // Template is v2
+          return retryTransientEsErrors(
+            () => esClient.indices.putIndexTemplate(esClientParams, esClientRequestOptions),
+            { logger }
+          );
+        } else {
+          // template is V1
+          return retryTransientEsErrors(
+            () => esClient.indices.putTemplate(esClientParams, esClientRequestOptions),
+            { logger }
+          );
+        }
+      },
+      {
+        concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES,
+      }
+    );
   } catch (e) {
     throw new Boom.Boom(`Error installing prebuilt index templates ${e.message}`, {
       statusCode: 400,
@@ -164,26 +174,30 @@ const installPreBuiltComponentTemplates = async (
   logger: Logger
 ) => {
   const templatePaths = packageInstallContext.paths.filter((path) => isComponentTemplate(path));
-  const templateInstallPromises = templatePaths.map(async (path) => {
-    const { file } = getPathParts(path);
-    const templateName = file.substr(0, file.lastIndexOf('.'));
-    const content = JSON.parse(
-      getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
-    );
-
-    const esClientParams = {
-      name: templateName,
-      body: content,
-    };
-
-    return retryTransientEsErrors(
-      () => esClient.cluster.putComponentTemplate(esClientParams, { ignore: [404] }),
-      { logger }
-    );
-  });
-
   try {
-    return await Promise.all(templateInstallPromises);
+    await pMap(
+      templatePaths,
+      async (path) => {
+        const { file } = getPathParts(path);
+        const templateName = file.substr(0, file.lastIndexOf('.'));
+        const content = JSON.parse(
+          getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
+        );
+
+        const esClientParams = {
+          name: templateName,
+          body: content,
+        };
+
+        return retryTransientEsErrors(
+          () => esClient.cluster.putComponentTemplate(esClientParams, { ignore: [404] }),
+          { logger }
+        );
+      },
+      {
+        concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES,
+      }
+    );
   } catch (e) {
     throw new Boom.Boom(`Error installing prebuilt component templates ${e.message}`, {
       statusCode: 400,
@@ -450,8 +464,9 @@ async function installDataStreamComponentTemplates({
   logger: Logger;
   componentTemplates: TemplateMap;
 }) {
-  await Promise.all(
-    Object.entries(componentTemplates).map(async ([name, body]) => {
+  await pMap(
+    Object.entries(componentTemplates),
+    async ([name, body]) => {
       // @custom component template should be lazily created by user
       if (isUserSettingsTemplate(name)) {
         return;
@@ -459,7 +474,10 @@ async function installDataStreamComponentTemplates({
 
       const { clusterPromise } = putComponentTemplate(esClient, logger, { body, name });
       return clusterPromise;
-    })
+    },
+    {
+      concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES,
+    }
   );
 }
 
@@ -467,10 +485,12 @@ export async function ensureDefaultComponentTemplates(
   esClient: ElasticsearchClient,
   logger: Logger
 ) {
-  return Promise.all(
-    FLEET_COMPONENT_TEMPLATES.map(({ name, body }) =>
-      ensureComponentTemplate(esClient, logger, name, body)
-    )
+  return await pMap(
+    FLEET_COMPONENT_TEMPLATES,
+    ({ name, body }) => ensureComponentTemplate(esClient, logger, name, body),
+    {
+      concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES,
+    }
   );
 }
 

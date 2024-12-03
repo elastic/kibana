@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { without } from 'lodash';
 import { EntityV2, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -23,9 +24,26 @@ import { stopTransforms } from './entities/stop_transforms';
 import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
-import { EntitySource, getEntityInstancesQuery } from './queries';
+import { EntitySource, SortBy, getEntityInstancesQuery } from './queries';
 import { mergeEntitiesList, runESQLQuery } from './queries/utils';
 import { UnknownEntityType } from './entities/errors/unknown_entity_type';
+
+interface SearchCommon {
+  start: string;
+  end: string;
+  sort?: SortBy;
+  metadataFields?: string[];
+  filters?: string[];
+  limit?: number;
+}
+
+export type SearchByType = SearchCommon & {
+  type: string;
+};
+
+export type SearchBySources = SearchCommon & {
+  sources: EntitySource[];
+};
 
 export class EntityClient {
   constructor(
@@ -191,17 +209,11 @@ export class EntityClient {
     type,
     start,
     end,
+    sort,
     metadataFields = [],
     filters = [],
     limit = 10,
-  }: {
-    type: string;
-    start: string;
-    end: string;
-    metadataFields?: string[];
-    filters?: string[];
-    limit?: number;
-  }) {
+  }: SearchByType) {
     const sources = await this.getEntitySources({ type });
     if (sources.length === 0) {
       throw new UnknownEntityType(`No sources found for entity type [${type}]`);
@@ -213,6 +225,7 @@ export class EntityClient {
       end,
       metadataFields,
       filters,
+      sort,
       limit,
     });
   }
@@ -221,21 +234,22 @@ export class EntityClient {
     sources,
     start,
     end,
+    sort,
     metadataFields = [],
     filters = [],
     limit = 10,
-  }: {
-    sources: EntitySource[];
-    start: string;
-    end: string;
-    metadataFields?: string[];
-    filters?: string[];
-    limit?: number;
-  }) {
+  }: SearchBySources) {
     const entities = await Promise.all(
       sources.map(async (source) => {
-        const mandatoryFields = [source.timestamp_field, ...source.identity_fields];
+        const mandatoryFields = [
+          ...source.identity_fields,
+          ...(source.timestamp_field ? [source.timestamp_field] : []),
+          ...(source.display_name ? [source.display_name] : []),
+        ];
         const metaFields = [...metadataFields, ...source.metadata_fields];
+
+        // operations on an unmapped field result in a failing query so we verify
+        // field capabilities beforehand
         const { fields } = await this.options.esClient.fieldCaps({
           index: source.index_patterns,
           fields: [...mandatoryFields, ...metaFields],
@@ -244,15 +258,25 @@ export class EntityClient {
         const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
         if (!sourceHasMandatoryFields) {
           // we can't build entities without id fields so we ignore the source.
-          // filters should likely behave similarly.
+          // TODO filters should likely behave similarly. we should also throw
+          const missingFields = mandatoryFields.filter((field) => !fields[field]);
           this.options.logger.info(
-            `Ignoring source for type [${source.type}] with index_patterns [${source.index_patterns}] because some mandatory fields [${mandatoryFields}] are not mapped`
+            `Ignoring source for type [${source.type}] with index_patterns [${
+              source.index_patterns
+            }] because some mandatory fields [${missingFields.join(', ')}] are not mapped`
           );
           return [];
         }
 
         // but metadata field not being available is fine
         const availableMetadataFields = metaFields.filter((field) => fields[field]);
+        if (availableMetadataFields.length < metaFields.length) {
+          this.options.logger.info(
+            `Ignoring unmapped fields [${without(metaFields, ...availableMetadataFields).join(
+              ', '
+            )}]`
+          );
+        }
 
         const query = getEntityInstancesQuery({
           source: {
@@ -262,6 +286,7 @@ export class EntityClient {
           },
           start,
           end,
+          sort,
           limit,
         });
         this.options.logger.debug(`Entity query: ${query}`);
@@ -271,14 +296,10 @@ export class EntityClient {
           esClient: this.options.esClient,
         });
 
-        return rawEntities.map((entity) => {
-          entity['entity.id'] = source.identity_fields.map((field) => entity[field]).join(':');
-          entity['entity.type'] = source.type;
-          return entity;
-        });
+        return rawEntities;
       })
     ).then((results) => results.flat());
 
-    return mergeEntitiesList(entities).slice(0, limit);
+    return mergeEntitiesList(sources, entities).slice(0, limit);
   }
 }

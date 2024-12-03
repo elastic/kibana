@@ -131,6 +131,11 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
     router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            requiredPrivileges: ['indexPatterns:manage'],
+          },
+        },
         validate: {
           request: {
             params: schema.object(

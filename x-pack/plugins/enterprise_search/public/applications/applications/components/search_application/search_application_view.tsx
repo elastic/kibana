@@ -6,13 +6,12 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { Status } from '../../../../../common/types/api';
 import {
   SEARCH_APPLICATION_PATH,
   SEARCH_APPLICATION_CONTENT_PATH,
@@ -22,51 +21,22 @@ import {
   SearchApplicationContentTabs,
 } from '../../routes';
 
-import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 import { DeleteSearchApplicationModal } from '../search_applications/delete_search_application_modal';
 
 import { SearchApplicationConnect } from './connect/search_application_connect';
 import { SearchApplicationDocsExplorer } from './docs_explorer/docs_explorer';
 import { SearchApplicationContent } from './search_application_content';
-import { SearchApplicationError } from './search_application_error';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 
 export const SearchApplicationView: React.FC = () => {
   const { fetchSearchApplication, closeDeleteSearchApplicationModal } = useActions(
     SearchApplicationViewLogic
   );
-  const {
-    searchApplicationName,
-    fetchSearchApplicationApiError,
-    fetchSearchApplicationApiStatus,
-    hasSchemaConflicts,
-    isDeleteModalVisible,
-  } = useValues(SearchApplicationViewLogic);
-  const { tabId = SearchApplicationViewTabs.DOCS_EXPLORER } = useParams<{
-    tabId?: string;
-  }>();
+  const { searchApplicationName, isDeleteModalVisible } = useValues(SearchApplicationViewLogic);
 
   useEffect(() => {
     fetchSearchApplication({ name: searchApplicationName });
   }, [searchApplicationName]);
-
-  if (fetchSearchApplicationApiStatus === Status.ERROR) {
-    return (
-      <EnterpriseSearchApplicationsPageTemplate
-        isEmptyState
-        pageChrome={[searchApplicationName]}
-        pageViewTelemetry={tabId}
-        pageHeader={{
-          bottomBorder: false,
-          pageTitle: searchApplicationName,
-          rightSideItems: [],
-        }}
-        searchApplicationName={searchApplicationName}
-        emptyState={<SearchApplicationError error={fetchSearchApplicationApiError} />}
-        hasSchemaConflicts={hasSchemaConflicts}
-      />
-    );
-  }
 
   return (
     <>
@@ -92,22 +62,6 @@ export const SearchApplicationView: React.FC = () => {
           from={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}`}
           to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/${SearchApplicationConnectTabs.SEARCHAPI}`}
         />
-        <Route>
-          <EnterpriseSearchApplicationsPageTemplate
-            isEmptyState
-            pageChrome={[searchApplicationName]}
-            pageViewTelemetry={tabId}
-            pageHeader={{
-              bottomBorder: false,
-              pageTitle: searchApplicationName,
-              rightSideItems: [],
-            }}
-            searchApplicationName={searchApplicationName}
-            hasSchemaConflicts={hasSchemaConflicts}
-          >
-            <SearchApplicationError notFound />
-          </EnterpriseSearchApplicationsPageTemplate>
-        </Route>
       </Routes>
     </>
   );

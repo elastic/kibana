@@ -17,10 +17,12 @@ import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import minVersion from 'semver/ranges/min-version';
 
 import { chunk } from 'lodash';
+import pMap from 'p-map';
 
 import { updateIndexSettings } from '../elasticsearch/index/update_settings';
 
 import {
+  MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -209,29 +211,36 @@ async function bulkDeleteSavedObjects(
   }
 }
 
-export function deleteESAssets(
+export const deleteESAsset = async (
+  installedObject: EsAssetReference,
+  esClient: ElasticsearchClient
+): Promise<void> => {
+  const { id, type } = installedObject;
+  const assetType = type as AssetType;
+  if (assetType === ElasticsearchAssetType.ingestPipeline) {
+    return deletePipeline(esClient, id);
+  } else if (assetType === ElasticsearchAssetType.indexTemplate) {
+    return deleteIndexTemplate(esClient, id);
+  } else if (assetType === ElasticsearchAssetType.componentTemplate) {
+    return deleteComponentTemplate(esClient, id);
+  } else if (assetType === ElasticsearchAssetType.transform) {
+    return deleteTransforms(esClient, [id], true);
+  } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
+    return deleteIlms(esClient, [id]);
+  } else if (assetType === ElasticsearchAssetType.ilmPolicy) {
+    return deleteIlms(esClient, [id]);
+  } else if (assetType === ElasticsearchAssetType.mlModel) {
+    return deleteMlModel(esClient, [id]);
+  }
+};
+
+export const deleteESAssets = (
   installedObjects: EsAssetReference[],
   esClient: ElasticsearchClient
-): Array<Promise<unknown>> {
-  return installedObjects.map(async ({ id, type }) => {
-    const assetType = type as AssetType;
-    if (assetType === ElasticsearchAssetType.ingestPipeline) {
-      return deletePipeline(esClient, id);
-    } else if (assetType === ElasticsearchAssetType.indexTemplate) {
-      return deleteIndexTemplate(esClient, id);
-    } else if (assetType === ElasticsearchAssetType.componentTemplate) {
-      return deleteComponentTemplate(esClient, id);
-    } else if (assetType === ElasticsearchAssetType.transform) {
-      return deleteTransforms(esClient, [id], true);
-    } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
-      return deleteIlms(esClient, [id]);
-    } else if (assetType === ElasticsearchAssetType.ilmPolicy) {
-      return deleteIlms(esClient, [id]);
-    } else if (assetType === ElasticsearchAssetType.mlModel) {
-      return deleteMlModel(esClient, [id]);
-    }
-  });
-}
+): Array<Promise<void>> => {
+  return installedObjects.map((installedObject) => deleteESAsset(installedObject, esClient));
+};
+
 type Tuple = [EsAssetReference[], EsAssetReference[], EsAssetReference[], EsAssetReference[]];
 
 export const splitESAssets = (installedEs: EsAssetReference[]) => {
@@ -291,16 +300,24 @@ export async function deletePrerequisiteAssets(
   try {
     // must first unset any default pipeline associated with any existing indices
     // by setting empty string
-    await Promise.all(
-      indexAssets.map((asset) => updateIndexSettings(esClient, asset.id, { default_pipeline: '' }))
+    await pMap(
+      indexAssets,
+      (asset) => updateIndexSettings(esClient, asset.id, { default_pipeline: '' }),
+      {
+        concurrency: MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
+      }
     );
 
     // in case transform's destination index contains any pipeline,
     // we should delete the transforms first
-    await Promise.all(deleteESAssets(transformAssets, esClient));
+    await pMap(transformAssets, (transformAsset) => deleteESAsset(transformAsset, esClient), {
+      concurrency: MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
+    });
 
     // then delete index templates and pipelines
-    await Promise.all(deleteESAssets(indexTemplatesAndPipelines, esClient));
+    await pMap(indexTemplatesAndPipelines, (asset) => deleteESAsset(asset, esClient), {
+      concurrency: MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
+    });
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

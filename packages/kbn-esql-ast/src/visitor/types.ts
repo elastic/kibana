@@ -20,7 +20,7 @@ export type ESQLAstQueryNode = ast.ESQLAstQueryExpression;
  * Represents an "expression" node in the AST.
  */
 // export type ESQLAstExpressionNode = ESQLAstItem;
-export type ESQLAstExpressionNode = ast.ESQLSingleAstItem;
+export type ESQLAstExpressionNode = ast.ESQLAstExpression;
 
 /**
  * All possible AST nodes supported by the visitor.

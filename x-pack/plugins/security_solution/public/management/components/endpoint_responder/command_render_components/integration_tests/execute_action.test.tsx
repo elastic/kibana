@@ -73,6 +73,7 @@ describe('When using execute action from response actions console', () => {
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
                   endpointPrivileges,
+                  platform: 'linux',
                 }),
               },
             };

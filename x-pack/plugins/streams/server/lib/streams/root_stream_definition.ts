@@ -9,6 +9,7 @@ import { StreamDefinition } from '../../../common/types';
 
 export const rootStreamDefinition: StreamDefinition = {
   id: 'logs',
+  managed: true,
   processing: [],
   children: [],
   fields: [

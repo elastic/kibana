@@ -37,6 +37,8 @@ import type {
   LogRateAnalysisEmbeddableState,
 } from './types';
 
+export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
+
 export const getLogRateAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {

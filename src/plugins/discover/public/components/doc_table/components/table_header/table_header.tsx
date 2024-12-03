@@ -47,7 +47,7 @@ export function TableHeader({
 
   return (
     <tr data-test-subj="docTableHeader" className="kbnDocTableHeader">
-      <th style={{ width: '24px' }} />
+      <th css={{ width: '24px' }} />
       {displayedColumns.map((col, index) => {
         return (
           <TableHeaderColumn

@@ -401,6 +401,7 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['save'],
+          api: ['indexPatterns:manage'],
         },
         read: {
           app: ['kibana'],

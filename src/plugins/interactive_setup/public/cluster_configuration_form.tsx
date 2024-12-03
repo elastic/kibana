@@ -171,7 +171,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             defaultMessage="Connect to"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
+        <EuiFlexItem grow={false} css={{ overflow: 'hidden' }}>
           <TextTruncate>
             <strong>{host}</strong>
           </TextTruncate>

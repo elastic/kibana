@@ -32,7 +32,7 @@ interface TypeFieldProps {
 }
 
 const standardSelectItem = (
-  <EuiDescriptionList style={{ whiteSpace: 'nowrap' }} data-test-subj="standardType">
+  <EuiDescriptionList css={{ whiteSpace: 'nowrap' }} data-test-subj="standardType">
     <EuiDescriptionListTitle>
       <FormattedMessage
         id="indexPatternEditor.typeSelect.standardTitle"
@@ -49,7 +49,7 @@ const standardSelectItem = (
 );
 
 const rollupSelectItem = (
-  <EuiDescriptionList style={{ whiteSpace: 'nowrap' }} data-test-subj="rollupType">
+  <EuiDescriptionList css={{ whiteSpace: 'nowrap' }} data-test-subj="rollupType">
     <EuiDescriptionListTitle>
       <FormattedMessage
         id="indexPatternEditor.typeSelect.rollupTitle"

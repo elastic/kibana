@@ -205,7 +205,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async waitUntilPossibleMitigationsLoaded() {
-      await find.waitForDeletedByCssSelector('.euiFlyoutBody .euiSkeletonRectangle', 20 * 1000);
+      await find.waitForDeletedByCssSelector(
+        '.euiFlyoutBody .datasetQualityDetailsFlyoutManualMitigationsLoading',
+        20 * 1000
+      );
     },
 
     async waitUntilDegradedFieldFlyoutLoaded() {

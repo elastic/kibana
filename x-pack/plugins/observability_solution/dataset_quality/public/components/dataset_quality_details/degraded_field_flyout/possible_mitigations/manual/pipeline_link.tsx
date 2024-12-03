@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -34,7 +34,11 @@ const AccordionTitle = () => (
   </EuiTitle>
 );
 
-export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boolean }) {
+export function CreateEditPipelineLink({
+  areIntegrationAssetsAvailable,
+}: {
+  areIntegrationAssetsAvailable: boolean;
+}) {
   const {
     services: {
       share: {
@@ -50,10 +54,7 @@ export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boole
   const { datasetDetails } = useDatasetQualityDetailsState();
   const { type, name } = datasetDetails;
 
-  const pipelineName = useMemo(
-    () => (isIntegration ? `${type}-${name}@custom` : `${type}@custom`),
-    [isIntegration, type, name]
-  );
+  const pipelineName = areIntegrationAssetsAvailable ? `${type}-${name}@custom` : `${type}@custom`;
 
   const ingestPipelineLocator = locators.get('INGEST_PIPELINES_APP_LOCATOR');
 

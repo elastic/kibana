@@ -80,6 +80,11 @@ export interface AppDependencies {
   kibanaVersion: SemVer;
   overlays: OverlayStart;
   canUseSyntheticSource: boolean;
+  privs: {
+    monitor: boolean;
+    manageEnrich: boolean;
+    monitorEnrich: boolean;
+  };
 }
 
 export const AppContextProvider = ({

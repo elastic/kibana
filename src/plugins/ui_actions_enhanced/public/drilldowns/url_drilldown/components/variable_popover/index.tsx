@@ -74,7 +74,7 @@ export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variable
         }}
       >
         {(list, search) => (
-          <div style={{ width: 320 }}>
+          <div css={{ width: 320 }}>
             <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
             {variablesHelpLink && (

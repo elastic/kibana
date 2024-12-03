@@ -2617,7 +2617,6 @@ describe('Action Scheduler', () => {
       });
 
       expect(buildActionParams).not.toHaveBeenCalledWith();
-      expect(actionsClient.ephemeralEnqueuedExecution).not.toHaveBeenCalled();
       expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
       expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
       expect(executorParams.logger.warn).toHaveBeenCalledWith(
@@ -2662,7 +2661,6 @@ describe('Action Scheduler', () => {
       expect(res).toEqual({ throttledSummaryActions: {} });
       expect(buildActionParams).not.toHaveBeenCalled();
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
-      expect(actionsClient.ephemeralEnqueuedExecution).not.toHaveBeenCalled();
       expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
       expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
     });

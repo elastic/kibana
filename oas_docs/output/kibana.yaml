@@ -35070,7 +35070,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -35102,7 +35102,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -35121,8 +35121,6 @@ paths:
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: exportSavedObjectsDefault
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -35282,8 +35280,6 @@ paths:
       description: |
         Create sets of Kibana saved objects from a file created by the export API.
         Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: importSavedObjectsDefault
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -35380,8 +35376,6 @@ paths:
         * Retry certain saved objects
         * Overwrite specific saved objects
         * Change references to different saved objects
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: resolveImportErrors
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -56377,18 +56371,22 @@ components:
       properties:
         frequency:
           default: 1m
-          description: Configure how often the transform runs, default 1m
+          description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
           example: 5m
           type: string
         preventInitialBackfill:
           default: false
-          description: Prevents the transform from backfilling data when it starts.
+          description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
           example: true
           type: boolean
         syncDelay:
           default: 1m
-          description: The synch delay to apply to the transform. Default 1m
+          description: The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.
           example: 5m
+          type: string
+        syncField:
+          description: The date field that is used to identify new documents in the source. It is strongly recommended to use a field that contains the ingest timestamp. If you use a different field, you might need to set the delay such that it accounts for data transmission delays. When unspecified, we use the indicator timestamp field.
+          example: event.ingested
           type: string
       title: Settings
       type: object

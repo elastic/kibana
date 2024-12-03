@@ -6,42 +6,28 @@
  */
 
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
-import { SyntheticsServerSetup } from '../../../types';
-import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  type ISavedObjectsRepository,
-  SavedObjectsClientContract,
-} from '@kbn/core-saved-objects-api-server';
+import { type ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { Logger } from '@kbn/logging';
 
 describe('migrateLegacyPrivateLocations', () => {
-  let serverMock: SyntheticsServerSetup;
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let repositoryMock: ISavedObjectsRepository;
+  let loggerMockVal: Logger;
+  let repositoryMock: jest.Mocked<ISavedObjectsRepository>;
   beforeEach(() => {
-    const coreStartMock = coreMock.createStart();
-    serverMock = {
-      coreStart: coreStartMock,
-      logger: loggerMock.create(),
-    } as any;
-    savedObjectsClient = savedObjectsClientMock.create();
-    repositoryMock = coreMock.createStart().savedObjects.createInternalRepository();
-
-    coreStartMock.savedObjects.createInternalRepository.mockReturnValue(repositoryMock);
+    repositoryMock = savedObjectsRepositoryMock.create();
+    loggerMockVal = loggerMock.create();
   });
 
   it('should get the legacy private locations', async () => {
-    savedObjectsClient.get.mockResolvedValueOnce({
+    repositoryMock.get.mockResolvedValueOnce({
       attributes: { locations: [{ id: '1', label: 'Location 1' }] },
     } as any);
-    savedObjectsClient.find.mockResolvedValueOnce({ total: 1 } as any);
+    repositoryMock.find.mockResolvedValueOnce({ total: 1 } as any);
 
-    await migrateLegacyPrivateLocations({
-      server: serverMock,
-      savedObjectsClient,
-    } as any);
+    await migrateLegacyPrivateLocations(repositoryMock, loggerMockVal);
 
-    expect(savedObjectsClient.get).toHaveBeenCalledWith(
+    expect(repositoryMock.get).toHaveBeenCalledWith(
       'synthetics-privates-locations',
       'synthetics-privates-locations-singleton'
     );
@@ -49,43 +35,36 @@ describe('migrateLegacyPrivateLocations', () => {
 
   it('should log and return if an error occurs while getting legacy private locations', async () => {
     const error = new Error('Get error');
-    savedObjectsClient.get.mockRejectedValueOnce(error);
-
-    await migrateLegacyPrivateLocations({
-      server: serverMock,
-      savedObjectsClient,
+    repositoryMock.get.mockResolvedValueOnce({
+      attributes: { locations: [{ id: '1', label: 'Location 1' }] },
     } as any);
+    repositoryMock.bulkCreate.mockRejectedValueOnce(error);
 
-    expect(serverMock.logger.error).toHaveBeenCalledWith(
-      `Error getting legacy private locations: ${error}`
+    await migrateLegacyPrivateLocations(repositoryMock, loggerMockVal);
+
+    expect(loggerMockVal.error).toHaveBeenCalledWith(
+      'Error migrating legacy private locations: Error: Get error'
     );
-    expect(repositoryMock.bulkCreate).not.toHaveBeenCalled();
   });
 
   it('should return if there are no legacy locations', async () => {
-    savedObjectsClient.get.mockResolvedValueOnce({
+    repositoryMock.get.mockResolvedValueOnce({
       attributes: { locations: [] },
     } as any);
 
-    await migrateLegacyPrivateLocations({
-      server: serverMock,
-      savedObjectsClient: savedObjectsClientMock,
-    } as any);
+    await migrateLegacyPrivateLocations(repositoryMock, loggerMockVal);
 
     expect(repositoryMock.bulkCreate).not.toHaveBeenCalled();
   });
 
   it('should bulk create new private locations if there are legacy locations', async () => {
     const legacyLocations = [{ id: '1', label: 'Location 1' }];
-    savedObjectsClient.get.mockResolvedValueOnce({
+    repositoryMock.get.mockResolvedValueOnce({
       attributes: { locations: legacyLocations },
     } as any);
-    savedObjectsClient.find.mockResolvedValueOnce({ total: 1 } as any);
+    repositoryMock.find.mockResolvedValueOnce({ total: 1 } as any);
 
-    await migrateLegacyPrivateLocations({
-      server: serverMock,
-      savedObjectsClient,
-    } as any);
+    await migrateLegacyPrivateLocations(repositoryMock, loggerMockVal);
 
     expect(repositoryMock.bulkCreate).toHaveBeenCalledWith(
       legacyLocations.map((location) => ({
@@ -100,17 +79,14 @@ describe('migrateLegacyPrivateLocations', () => {
 
   it('should delete legacy private locations if bulk create count matches', async () => {
     const legacyLocations = [{ id: '1', label: 'Location 1' }];
-    savedObjectsClient.get.mockResolvedValueOnce({
+    repositoryMock.get.mockResolvedValueOnce({
       attributes: { locations: legacyLocations },
     } as any);
-    savedObjectsClient.find.mockResolvedValueOnce({ total: 1 } as any);
+    repositoryMock.find.mockResolvedValueOnce({ total: 1 } as any);
 
-    await migrateLegacyPrivateLocations({
-      server: serverMock,
-      savedObjectsClient,
-    } as any);
+    await migrateLegacyPrivateLocations(repositoryMock, loggerMockVal);
 
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith(
+    expect(repositoryMock.delete).toHaveBeenCalledWith(
       'synthetics-privates-locations',
       'synthetics-privates-locations-singleton',
       {}

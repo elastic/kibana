@@ -13,6 +13,7 @@ import {
   type EntityViewClickedParams,
   type EntityInventorySearchQuerySubmittedParams,
   TelemetryEventTypes,
+  EntityInventoryEntityTypeFilteredParams,
 } from './types';
 
 describe('TelemetryService', () => {
@@ -141,6 +142,26 @@ describe('TelemetryService', () => {
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
         TelemetryEventTypes.ENTITY_VIEW_CLICKED,
+        params
+      );
+    });
+  });
+
+  describe('#reportEntityInventoryEntityTypeFiltered', () => {
+    it('should report entity type filtered with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const params: EntityInventoryEntityTypeFilteredParams = {
+        include_entity_types: ['container'],
+        exclude_entity_types: ['service'],
+      };
+
+      telemetry.reportEntityInventoryEntityTypeFiltered(params);
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        TelemetryEventTypes.ENTITY_INVENTORY_ENTITY_TYPE_FILTERED,
         params
       );
     });

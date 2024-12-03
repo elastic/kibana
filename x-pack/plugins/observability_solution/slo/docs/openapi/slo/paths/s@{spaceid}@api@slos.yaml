@@ -46,9 +46,6 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/409_response.yaml'
-  servers:
-    - url: https://localhost:5601
-
 get:
   summary: Get a paginated list of SLOs
   operationId: findSlosOp

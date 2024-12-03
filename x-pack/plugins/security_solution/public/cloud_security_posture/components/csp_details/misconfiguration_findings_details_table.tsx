@@ -10,8 +10,12 @@ import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { useMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
-import type { CspFinding, CspFindingResult } from '@kbn/cloud-security-posture-common';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import {
+  MISCONFIGURATION_STATUS,
+  type CspFinding,
+  type CspFindingResult,
+  buildMisconfigurationEntityFlyoutPreviewQuery,
+} from '@kbn/cloud-security-posture-common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -25,11 +29,17 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
 type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
 
-const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+const getFindingsStats = (
+  passedFindingsStats: number,
+  failedFindingsStats: number,
+  filterFunction: (filter: string) => void,
+  currentFilter: string
+) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
     {
@@ -41,6 +51,14 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
       ),
       count: passedFindingsStats,
       color: euiThemeVars.euiColorSuccess,
+      filter: () => {
+        filterFunction(MISCONFIGURATION_STATUS.PASSED);
+      },
+      isCurrentFilter: currentFilter === MISCONFIGURATION_STATUS.PASSED,
+      reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+        filterFunction('');
+        event?.stopPropagation();
+      },
     },
     {
       key: i18n.translate(
@@ -51,6 +69,14 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
       ),
       count: failedFindingsStats,
       color: euiThemeVars.euiColorVis9,
+      filter: () => {
+        filterFunction(MISCONFIGURATION_STATUS.FAILED);
+      },
+      isCurrentFilter: currentFilter === MISCONFIGURATION_STATUS.FAILED,
+      reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+        filterFunction('');
+        event?.stopPropagation();
+      },
     },
   ];
 };
@@ -67,15 +93,16 @@ export const MisconfigurationFindingsDetailsTable = memo(
       );
     }, []);
 
+    const [currentFilter, setCurrentFilter] = useState<string>('');
+
     const { data } = useMisconfigurationFindings({
-      query: buildEntityFlyoutPreviewQuery(field, value),
+      query: buildMisconfigurationEntityFlyoutPreviewQuery(field, value, currentFilter),
       sort: [],
       enabled: true,
       pageSize: 1,
     });
 
-    const passedFindings = data?.count.passed || 0;
-    const failedFindings = data?.count.failed || 0;
+    const { passedFindings, failedFindings } = useHasMisconfigurations(field, value);
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
@@ -128,6 +155,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const linkWidth = 40;
     const resultWidth = 74;
+
+    const misconfgurationStats = getFindingsStats(
+      passedFindings,
+      failedFindings,
+      setCurrentFilter,
+      currentFilter
+    );
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
@@ -202,7 +236,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             <EuiIcon type={'popout'} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
-          <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
+          <DistributionBar stats={misconfgurationStats} />
           <EuiSpacer size="l" />
           <EuiBasicTable
             items={pageOfItems || []}
