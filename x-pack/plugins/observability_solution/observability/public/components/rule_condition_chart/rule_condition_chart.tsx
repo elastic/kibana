@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { Query, Filter } from '@kbn/es-query';
 import {
@@ -129,10 +129,42 @@ export function RuleConditionChart({
   const [warningThresholdReferenceLine, setWarningThresholdReferenceLine] =
     useState<XYReferenceLinesLayer[]>();
   const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
-  const filters = [...(searchConfiguration.filter || []), ...additionalFilters];
+  const filters = useMemo(
+    () => (searchConfiguration.filter || []).concat(additionalFilters),
+    [additionalFilters, searchConfiguration.filter]
+  );
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
+  const [chartLoaded, setChartLoaded] = useState(false);
+  const onChartLoaded = useCallback((isLoading: boolean) => {
+    setChartLoaded(!isLoading);
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(function () {
+      const errorDiv = document.querySelector('.lnsEmbeddedError');
+      if (errorDiv) {
+        const paragraphElements = errorDiv.querySelectorAll('p');
+        if (!paragraphElements || paragraphElements.length < 2) return;
+        paragraphElements[0].innerText = i18n.translate(
+          'xpack.observability.ruleCondition.chart.error_equation.title',
+          {
+            defaultMessage: 'An error occurred while rendering the chart',
+          }
+        );
+        paragraphElements[1].innerText = i18n.translate(
+          'xpack.observability.ruleCondition.chart.error_equation.description',
+          {
+            defaultMessage: 'Check the rule equation.',
+          }
+        );
+      }
+    });
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [attributes, chartLoaded]);
 
   // Build the warning threshold reference line
   useEffect(() => {
@@ -474,41 +506,7 @@ export function RuleConditionChart({
         disableTriggers={true}
         query={(searchConfiguration.query as Query) || defaultQuery}
         filters={filters}
-        onBeforeBadgesRender={(badges): UserMessage[] => {
-          if (badges.length < 2) {
-            return [];
-          }
-          const genericErrorMessage = i18n.translate(
-            'xpack.observability.ruleCondition.chart.error_equation.title',
-            {
-              defaultMessage: 'An error occurred while rendering the chart',
-            }
-          );
-          const ruleMessage = i18n.translate(
-            'xpack.observability.ruleCondition.chart.error_equation.description',
-            {
-              defaultMessage: 'Check the rule equation.',
-            }
-          );
-          return [
-            {
-              uniqueId: 'generic_error',
-              severity: 'error',
-              shortMessage: '',
-              longMessage: genericErrorMessage,
-              fixableInEditor: false,
-              displayLocations: [{ id: 'visualization' }],
-            },
-            {
-              uniqueId: 'rule_error',
-              severity: 'error',
-              shortMessage: '',
-              longMessage: ruleMessage,
-              fixableInEditor: false,
-              displayLocations: [{ id: 'visualization' }],
-            },
-          ];
-        }}
+        onLoad={onChartLoaded}
       />
     </div>
   );
