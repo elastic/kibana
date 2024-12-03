@@ -57,10 +57,6 @@ describe('Create enrich policy', () => {
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setGetMatchingIndices(getMatchingIndices());
-    httpRequestsMockHelpers.setGetPrivilegesResponse({
-      hasAllPrivileges: true,
-      missingPrivileges: { cluster: [] },
-    });
     httpRequestsMockHelpers.setGetMatchingDataStreams(getMatchingDataStreams());
 
     await act(async () => {
