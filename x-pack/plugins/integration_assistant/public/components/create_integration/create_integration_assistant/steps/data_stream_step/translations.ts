@@ -279,3 +279,18 @@ export const GENERATION_ERROR_TRANSLATION: Record<
     }
   },
 };
+
+export const TECH_PREVIEW = i18n.translate(
+  'xpack.integrationAssistant.createIntegrationLanding.assistant.techPreviewBadge',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+export const TECH_PREVIEW_TOOLTIP = i18n.translate(
+  'xpack.integrationAssistant.createIntegrationLanding.assistant.techPreviewTooltip',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and is subject to change. Please use with caution in production environments.',
+  }
+);

@@ -7,6 +7,7 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
@@ -235,7 +236,19 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 </EuiFormRow>
                 {showCelOpenApiSpecButton && (
                   <EuiFormRow
-                    label={i18n.ADD_OPEN_API_SPEC_LABEL}
+                    label={
+                      <EuiFlexGroup direction="row" gutterSize="s">
+                        {i18n.ADD_OPEN_API_SPEC_LABEL}
+                        <EuiBetaBadge
+                          iconType="beaker"
+                          label={i18n.TECH_PREVIEW}
+                          tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
+                          size="s"
+                          color="hollow"
+                          data-test-subj="techPreviewBadge"
+                        />
+                      </EuiFlexGroup>
+                    }
                     labelAppend={
                       <EuiText size="xs" color="subdued">
                         <p>{i18n.ADD_OPEN_API_SPEC_OPTIONAL_LABEL}</p>

@@ -17,7 +17,6 @@ import { type State } from '../../state';
 import * as i18n from './translations';
 import type { CelFlyoutStepName } from './create_cel_config';
 
-//
 const AnalyzeApiButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
   if (!isGenerating) {
     return <>{i18n.CONTINUE}</>;
