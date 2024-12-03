@@ -1069,6 +1069,10 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
+    subobjectsFieldChanged =
+      subobjectsFieldChanged ||
+      (err.body?.error?.type === 'mapper_exception' &&
+        err.body?.error?.reason?.includes('subobjects'));
     if (
       (isResponseError(err) &&
         err.statusCode === 400 &&
