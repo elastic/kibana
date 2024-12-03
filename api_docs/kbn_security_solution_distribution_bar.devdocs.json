@@ -84,7 +84,7 @@
               "distribution data points"
             ],
             "signature": [
-              "{ key: string; count: number; color: string; label?: React.ReactNode; }[]"
+              "{ key: string; count: number; color: string; label?: React.ReactNode; isCurrentFilter?: boolean | undefined; filter?: (() => void) | undefined; reset?: ((event: React.MouseEvent<SVGElement, MouseEvent>) => void) | undefined; }[]"
             ],
             "path": "x-pack/packages/security-solution/distribution_bar/src/distribution_bar.tsx",
             "deprecated": false,
