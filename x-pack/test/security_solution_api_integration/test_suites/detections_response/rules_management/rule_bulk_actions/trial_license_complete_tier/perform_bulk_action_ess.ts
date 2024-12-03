@@ -6,8 +6,6 @@
  */
 
 import expect from 'expect';
-import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
@@ -25,7 +23,6 @@ import {
   checkInvestigationFieldSoValue,
   createLegacyRuleAction,
   createRuleThroughAlertingEndpoint,
-  dataGeneratorFactory,
   getCustomQueryRuleParams,
   getLegacyActionSO,
   getRuleSavedObjectWithLegacyInvestigationFields,
@@ -127,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
           log,
           getCustomQueryRuleParams({
             rule_id: ruleId,
-            index: ['logs-*'],
+            index: ['*'],
             interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
             enabled: false,
           })
@@ -139,15 +136,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const sidecarActionsResults = await getLegacyActionSO(es);
       expect(sidecarActionsResults.hits.hits.length).toBe(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule.id);
-
-      const { indexListOfDocuments } = dataGeneratorFactory({
-        es,
-        index: 'logs-1',
-        log,
-      });
-      await indexListOfDocuments([
-        { id: uuidv4(), '@timestamp': moment(new Date()).subtract(5, 's') },
-      ]);
 
       const { body } = await securitySolutionApi
         .performRulesBulkAction({
