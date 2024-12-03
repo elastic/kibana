@@ -16,6 +16,7 @@ import { Aiops } from './aiops';
 export const AiopsWrapper: FC = () => {
   const state = useEventBusExampleState();
   const aiopsFieldCandidates = state.useState((s) => s.aiopsFieldCandidates);
+  const aiopsEnabled = state.useState((s) => s.aiopsEnabled);
   const filters = state.useState((s) => s.filters);
 
   useEffect(() => {
@@ -31,7 +32,8 @@ export const AiopsWrapper: FC = () => {
 
   if (
     Object.keys(filters).filter((key) => !key.startsWith('aiops_')).length === 0 ||
-    aiopsFieldCandidates.length === 0
+    aiopsFieldCandidates.length === 0 ||
+    !aiopsEnabled
   ) {
     return null;
   }
