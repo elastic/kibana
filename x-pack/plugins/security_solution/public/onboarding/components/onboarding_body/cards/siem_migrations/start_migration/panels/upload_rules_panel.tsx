@@ -15,18 +15,21 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
-import { SiemMigrationsIcon } from '../../../../../../siem_migrations/common/icon';
+import { SiemMigrationsIcon } from '../../../../../../../siem_migrations/common/icon';
+import * as i18n from '../translations';
+import { useStartMigrationContext } from '../context';
+import { TITLE_CLASS_NAME } from '../start_migration_card.styles';
 import { useStyles } from './upload_rules_panel.styles';
-import * as i18n from './translations';
-import { useStartMigrationContext } from './context';
 
 export interface UploadRulesPanelProps {
   isUploadMore?: boolean;
 }
 export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(({ isUploadMore = false }) => {
   const styles = useStyles(isUploadMore);
-  const { setIsFlyoutOpen } = useStartMigrationContext();
-  const openFlyout = useCallback(() => setIsFlyoutOpen(true), [setIsFlyoutOpen]);
+  const { openFlyout } = useStartMigrationContext();
+  const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
+    openFlyout();
+  }, [openFlyout]);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize={isUploadMore ? 'm' : 'l'}>
@@ -36,13 +39,13 @@ export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(({ isUploadMor
         </EuiFlexItem>
         <EuiFlexItem>
           {isUploadMore ? (
-            <EuiText size="s" className="siemMigrationsUploadTitle">
+            <EuiText size="s" className={TITLE_CLASS_NAME}>
               <p>{i18n.START_MIGRATION_CARD_UPLOAD_MORE_TITLE}</p>
             </EuiText>
           ) : (
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiText size="m" className="siemMigrationsUploadTitle">
+                <EuiText size="m" className={TITLE_CLASS_NAME}>
                   <p>{i18n.START_MIGRATION_CARD_UPLOAD_TITLE}</p>
                 </EuiText>
               </EuiFlexItem>
@@ -61,11 +64,11 @@ export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(({ isUploadMor
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {isUploadMore ? (
-            <EuiButtonEmpty iconType="download" iconSide="right" onClick={openFlyout}>
+            <EuiButtonEmpty iconType="download" iconSide="right" onClick={onOpenFlyout}>
               {i18n.START_MIGRATION_CARD_UPLOAD_MORE_BUTTON}
             </EuiButtonEmpty>
           ) : (
-            <EuiButton iconType="download" iconSide="right" onClick={openFlyout}>
+            <EuiButton iconType="download" iconSide="right" onClick={onOpenFlyout}>
               {i18n.START_MIGRATION_CARD_UPLOAD_BUTTON}
             </EuiButton>
           )}

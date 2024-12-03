@@ -17,37 +17,44 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { DataInputStep } from './constants';
 import { RulesDataInput } from './steps/rules/rules_data_input';
+import { useStartMigration } from '../../service/hooks/use_start_migration';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
-  migrationId?: string;
-  dataInputStep?: DataInputStep;
+  migrationStats?: RuleMigrationTaskStats;
 }
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
-  ({
-    onClose,
-    migrationId: initialMigrationId,
-    dataInputStep: initialDataInputStep = DataInputStep.rules,
-  }) => {
-    const { siemMigrations } = useKibana().services;
-    const [migrationId, setMigrationId] = useState<string | undefined>(initialMigrationId);
+  ({ onClose, migrationStats: initialMigrationSats }) => {
+    const [migrationStats, setMigrationStats] = useState<RuleMigrationTaskStats | undefined>(
+      initialMigrationSats
+    );
 
-    const onStart = useCallback(() => {
-      if (migrationId) {
-        siemMigrations.rules.startRuleMigration(migrationId);
-        onClose();
+    const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
+    const onStartMigration = useCallback(() => {
+      if (migrationStats?.id) {
+        startMigration(migrationStats.id);
       }
-    }, [migrationId, siemMigrations.rules, onClose]);
+    }, [migrationStats, startMigration]);
 
     const [dataInputStep, setDataInputStep] = useState<DataInputStep>(() => {
-      if (initialMigrationId && initialDataInputStep === DataInputStep.rules) {
-        return DataInputStep.macros; // if initialMigrationId is defined the rules step is not available anymore.
+      if (migrationStats) {
+        return DataInputStep.macros;
       }
-      return initialDataInputStep;
+      return DataInputStep.rules;
     });
+
+    const onMigrationCreated = useCallback(
+      (createdMigrationStats: RuleMigrationTaskStats) => {
+        if (createdMigrationStats) {
+          setMigrationStats(createdMigrationStats);
+          setDataInputStep(DataInputStep.macros);
+        }
+      },
+      [setDataInputStep]
+    );
 
     return (
       <EuiFlyoutResizable
@@ -68,7 +75,10 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <RulesDataInput />
+          <RulesDataInput
+            selected={dataInputStep === DataInputStep.rules}
+            onMigrationCreated={onMigrationCreated}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -81,7 +91,12 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onStart} disabled={!migrationId}>
+              <EuiButton
+                fill
+                onClick={onStartMigration}
+                disabled={!migrationStats?.id}
+                isLoading={isStartLoading}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.translateButton"
                   defaultMessage="Translate"

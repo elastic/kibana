@@ -6,17 +6,22 @@
  */
 
 import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
+import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 interface StartMigrationContextValue {
-  setIsFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  openFlyout: (migrationStats?: RuleMigrationTaskStats) => void;
+  closeFlyout: () => void;
 }
 
 const StartMigrationContext = createContext<StartMigrationContextValue | null>(null);
 
 export const StartMigrationContextProvider: React.FC<
   PropsWithChildren<StartMigrationContextValue>
-> = React.memo(({ children, setIsFlyoutOpen }) => {
-  const value = useMemo<StartMigrationContextValue>(() => ({ setIsFlyoutOpen }), [setIsFlyoutOpen]);
+> = React.memo(({ children, openFlyout, closeFlyout }) => {
+  const value = useMemo<StartMigrationContextValue>(
+    () => ({ openFlyout, closeFlyout }),
+    [openFlyout, closeFlyout]
+  );
   return <StartMigrationContext.Provider value={value}>{children}</StartMigrationContext.Provider>;
 });
 StartMigrationContextProvider.displayName = 'StartMigrationContextProvider';

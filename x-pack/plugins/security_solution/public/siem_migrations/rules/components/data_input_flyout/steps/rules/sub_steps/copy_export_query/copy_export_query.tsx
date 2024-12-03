@@ -8,19 +8,21 @@
 import React, { useCallback } from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SubStepProps } from '../../../types';
-import { RULES_SPL_QUERY } from '../../../constants';
-import * as i18n from '../translations';
+import { RULES_SPL_QUERY } from '../../../../constants';
+import * as i18n from './translations';
 
-export const CopyExportQuery = React.memo<SubStepProps>(({ onComplete }) => {
+interface CopyExportQueryProps {
+  onCopied: () => void;
+}
+export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) => {
   const onClick: React.MouseEventHandler = useCallback(
     (ev) => {
       // The only button inside the element is the "copy" button.
       if ((ev.target as Element).tagName === 'BUTTON') {
-        onComplete();
+        onCopied();
       }
     },
-    [onComplete]
+    [onCopied]
   );
 
   return (
@@ -30,7 +32,7 @@ export const CopyExportQuery = React.memo<SubStepProps>(({ onComplete }) => {
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
       <div onClick={onClick}>
         {/* onCopy react event is dispatched when the user copies text manually */}
-        <EuiCodeBlock language="text" fontSize="m" paddingSize="m" isCopyable onCopy={onComplete}>
+        <EuiCodeBlock language="text" fontSize="m" paddingSize="m" isCopyable onCopy={onCopied}>
           {RULES_SPL_QUERY}
         </EuiCodeBlock>
       </div>
@@ -40,7 +42,7 @@ export const CopyExportQuery = React.memo<SubStepProps>(({ onComplete }) => {
           id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description"
           defaultMessage="From you admin Splunk account, go to the {section} app and run the above query. Export your results as {format}."
           values={{
-            section: <b>{i18n.RULES_DATA_INPUT_DESCRIPTION_SECTION}</b>,
+            section: <b>{i18n.RULES_DATA_INPUT_COPY_DESCRIPTION_SECTION}</b>,
             format: <b>{'JSON'}</b>,
           }}
         />

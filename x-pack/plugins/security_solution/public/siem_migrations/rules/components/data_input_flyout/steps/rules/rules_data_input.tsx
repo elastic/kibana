@@ -16,11 +16,13 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { SubStepWrapper } from '../common/sub_step_wrapper';
+import type { OnMigrationCreated } from '../../types';
+import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
+import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
 import * as i18n from './translations';
-import { CopyExportQuery } from './sub_steps/copy_export_query';
-import { RulesFileUpload } from './sub_steps/rules_file_upload';
+import { useCheckResourcesStep } from './sub_steps/check_resources';
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 const getStatus = (step: Step, currentStep: Step): EuiStepStatus => {
   if (step === currentStep) {
     return 'current';
@@ -31,47 +33,63 @@ const getStatus = (step: Step, currentStep: Step): EuiStepStatus => {
   return 'incomplete';
 };
 
-export const RulesDataInput = React.memo(() => {
-  const [step, setStep] = useState<Step>(1);
+interface RulesDataInputProps {
+  selected: boolean;
+  onMigrationCreated: OnMigrationCreated;
+}
 
-  const steps = useMemo<EuiStepProps[]>(
-    () => [
-      {
-        title: 'Copy rule query',
-        status: getStatus(1, step),
-        children: <CopyExportQuery onComplete={() => setStep(2)} />,
-      },
-      {
-        title: 'Update your rule export',
-        status: getStatus(2, step),
-        children: <RulesFileUpload onComplete={() => setStep(3)} />,
-      },
-    ],
-    [setStep, step]
-  );
+export const RulesDataInput = React.memo<RulesDataInputProps>(
+  ({ selected, onMigrationCreated }) => {
+    const [step, setStep] = useState<Step>(1);
 
-  return (
-    <EuiPanel hasShadow={false} hasBorder>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiFlexGroup direction="row" justifyContent="center" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <EuiStepNumber number={1} titleSize="xs" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <b>{i18n.RULES_DATA_INPUT_TITLE}</b>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SubStepWrapper>
-            <EuiSteps titleSize="xxs" steps={steps} />
-          </SubStepWrapper>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-});
+    const copyStep = useCopyExportQueryStep({
+      status: getStatus(1, step),
+      onCopied: () => setStep(2),
+    });
+
+    const uploadStep = useRulesFileUploadStep({
+      status: getStatus(2, step),
+      onMigrationCreated: (stats) => {
+        onMigrationCreated(stats);
+        setStep(3);
+      },
+    });
+
+    const resourcesStep = useCheckResourcesStep({
+      status: getStatus(3, step),
+      onComplete: () => {
+        setStep(4);
+      },
+    });
+
+    const steps = useMemo<EuiStepProps[]>(
+      () => [copyStep, uploadStep, resourcesStep],
+      [copyStep, uploadStep, resourcesStep]
+    );
+
+    return (
+      <EuiPanel hasShadow={false} hasBorder>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiFlexGroup direction="row" justifyContent="center" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiStepNumber number={1} titleSize="xs" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <b>{i18n.RULES_DATA_INPUT_TITLE}</b>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SubStepWrapper>
+              <EuiSteps titleSize="xxs" steps={steps} />
+            </SubStepWrapper>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+);
 RulesDataInput.displayName = 'RulesDataInput';

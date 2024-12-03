@@ -20,7 +20,7 @@ export const SPL_RULES_COLUMNS = [
   'action.correlationsearch.annotations',
 ] as const;
 
-export const RULES_SPL_QUERY = `| rest /servicesNS/-/Splunk_Security_Essentials/saved/searches
-| union [ rest /servicesNS/-/SplunkEnterpriseSecuritySuite/saved/searches ]
-| search is_scheduled=1 disabled=0
+export const RULES_SPL_QUERY = `| rest splunk_server=local /servicesNS/-/-/saved/searches
+| search action.correlationsearch.enabled = "1" OR (eai:acl.app = "Splunk_Security_Essentials" AND is_scheduled=1)
+| where disabled=0
 | table ${SPL_RULES_COLUMNS.join(', ')}`;

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { AssistantAvatar } from '@kbn/elastic-assistant/impl/assistant/assistant_avatar/assistant_avatar';
 import type { OnboardingCardConfig } from '../../../../../types';
 import { OnboardingCardId } from '../../../../../constants';
 import { AI_CONNECTOR_CARD_TITLE } from './translations';

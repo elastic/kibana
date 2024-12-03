@@ -11,13 +11,19 @@ import type {
   CreateRuleMigrationRequestBody,
   CreateRuleMigrationResponse,
   GetAllStatsRuleMigrationResponse,
+  GetRuleMigrationStatsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
 import type { GetRuleMigrationsStatsAllParams } from '../api/api';
-import { createRuleMigration, getRuleMigrationsStatsAll, startRuleMigration } from '../api/api';
+import {
+  createRuleMigration,
+  getRuleMigrationsStats,
+  getRuleMigrationsStatsAll,
+  startRuleMigration,
+} from '../api/api';
 import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
@@ -87,6 +93,10 @@ export class SiemRulesMigrationsService {
       throw new Error(i18n.MISSING_CONNECTOR_ERROR);
     }
     return createRuleMigration({ body });
+  }
+
+  public async getRuleMigrationsStats(migrationId: string): Promise<GetRuleMigrationStatsResponse> {
+    return getRuleMigrationsStats({ migrationId });
   }
 
   public async startRuleMigration(migrationId: string): Promise<GetAllStatsRuleMigrationResponse> {

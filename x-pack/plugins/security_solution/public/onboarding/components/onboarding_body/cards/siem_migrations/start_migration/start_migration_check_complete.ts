@@ -6,12 +6,11 @@
  */
 
 import type { OnboardingCardCheckComplete } from '../../../../../types';
-import type { StartMigrationCardMetadata } from './types';
 
-export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
-  StartMigrationCardMetadata
-> = async ({ siemMigrations }) => {
+export const checkStartMigrationCardComplete: OnboardingCardCheckComplete = async ({
+  siemMigrations,
+}) => {
   const migrationsStats = await siemMigrations.rules.getRuleMigrationTasksStats();
   const isComplete = migrationsStats.length > 0;
-  return { isComplete, metadata: { migrationsStats } };
+  return isComplete;
 };

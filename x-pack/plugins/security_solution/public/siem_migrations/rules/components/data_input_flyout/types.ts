@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export interface SubStepProps {
-  onComplete: () => void;
-}
+import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+
+export type OnMigrationCreated = (migrationStats: RuleMigrationTaskStats) => void;

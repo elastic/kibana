@@ -11,11 +11,13 @@ import type { LangSmithOptions } from '../../../../common/siem_migrations/model/
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import {
+  SIEM_RULE_MIGRATIONS_PATH,
   SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
   SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH,
   SIEM_RULE_MIGRATION_INSTALL_PATH,
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_START_PATH,
+  SIEM_RULE_MIGRATION_STATS_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationRequestBody,
@@ -25,7 +27,25 @@ import type {
   InstallTranslatedMigrationRulesResponse,
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
+  GetRuleMigrationStatsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+
+export interface GetRuleMigrationsStatsParams {
+  /** `id` of the migration to get stats for */
+  migrationId: string;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Retrieves the stats for all the existing migrations, aggregated by `migration_id`. */
+export const getRuleMigrationsStats = async ({
+  migrationId,
+  signal,
+}: GetRuleMigrationsStatsParams): Promise<GetRuleMigrationStatsResponse> => {
+  return KibanaServices.get().http.fetch<GetRuleMigrationStatsResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_STATS_PATH, { migration_id: migrationId }),
+    { method: 'GET', version: '1', signal }
+  );
+};
 
 export interface GetRuleMigrationsStatsAllParams {
   /** Optional AbortSignal for cancelling request */
@@ -52,7 +72,7 @@ export const createRuleMigration = async ({
   body,
   signal,
 }: CreateRuleMigrationParams): Promise<CreateRuleMigrationResponse> => {
-  return KibanaServices.get().http.post<CreateRuleMigrationResponse>(SIEM_RULE_MIGRATION_PATH, {
+  return KibanaServices.get().http.post<CreateRuleMigrationResponse>(SIEM_RULE_MIGRATIONS_PATH, {
     body: JSON.stringify(body),
     version: '1',
     signal,

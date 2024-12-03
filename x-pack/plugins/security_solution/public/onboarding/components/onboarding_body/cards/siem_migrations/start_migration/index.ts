@@ -11,9 +11,8 @@ import { OnboardingCardId } from '../../../../../constants';
 import { START_MIGRATION_CARD_TITLE } from './translations';
 import cardIcon from './images/card_header_icon.png';
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';
-import type { StartMigrationCardMetadata } from './types';
 
-export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
+export const startMigrationCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.siemMigrationsStart,
   title: START_MIGRATION_CARD_TITLE,
   icon: cardIcon,

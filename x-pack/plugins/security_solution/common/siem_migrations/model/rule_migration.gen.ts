@@ -25,6 +25,19 @@ export type OriginalRuleVendor = z.infer<typeof OriginalRuleVendor>;
 export const OriginalRuleVendor = z.literal('splunk');
 
 /**
+ * The original rule annotations containing additional information.
+ */
+export type OriginalRuleAnnotations = z.infer<typeof OriginalRuleAnnotations>;
+export const OriginalRuleAnnotations = z
+  .object({
+    /**
+     * The original rule Mitre Attack IDs.
+     */
+    mitre_attack: z.array(z.string()).optional(),
+  })
+  .catchall(z.unknown());
+
+/**
  * The original rule to migrate.
  */
 export type OriginalRule = z.infer<typeof OriginalRule>;
@@ -40,7 +53,7 @@ export const OriginalRule = z.object({
   /**
    * The original rule name.
    */
-  title: z.string(),
+  title: NonEmptyString,
   /**
    * The original rule description.
    */
@@ -48,15 +61,15 @@ export const OriginalRule = z.object({
   /**
    * The original rule query.
    */
-  query: z.string(),
+  query: z.string().min(1),
   /**
    * The original rule query language.
    */
   query_language: z.string(),
   /**
-   * The original rule Mitre Attack technique IDs.
+   * The original rule annotations containing additional information.
    */
-  mitre_attack_ids: z.array(z.string()).optional(),
+  annotations: OriginalRuleAnnotations.optional(),
 });
 
 /**

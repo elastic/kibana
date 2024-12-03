@@ -9,7 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
-import { UploadRulesPanel } from './upload_rules_panel';
+import { UploadRulesPanel } from './panels/upload_rules_panel';
+import { MigrationProgressPanel } from './panels/migration_progress_panel';
+import { MigrationResultPanel } from './panels/migration_result_panel';
+import { MigrationReadyPanel } from './panels/migration_ready_panel';
 
 export interface UploadRulesPanelsProps {
   migrationsStats: RuleMigrationStats[];
@@ -20,17 +23,20 @@ export const UploadRulesPanels = React.memo<UploadRulesPanelsProps>(({ migration
   }
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <UploadRulesPanel isUploadMore />
       </EuiFlexItem>
       {migrationsStats.map((migrationStats) => (
         <EuiFlexItem grow={false}>
+          {migrationStats.status === SiemMigrationTaskStatus.READY && (
+            <MigrationReadyPanel migrationStats={migrationStats} />
+          )}
           {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-            <RuleMigrationProcess migrationStats={migrationStats} />
+            <MigrationProgressPanel migrationStats={migrationStats} />
           )}
           {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
-            <RuleMigrationResult migrationStats={migrationStats} />
+            <MigrationResultPanel migrationStats={migrationStats} />
           )}
         </EuiFlexItem>
       ))}
@@ -38,6 +44,3 @@ export const UploadRulesPanels = React.memo<UploadRulesPanelsProps>(({ migration
   );
 });
 UploadRulesPanels.displayName = 'UploadRulesPanels';
-
-const RuleMigrationProcess = () => null;
-const RuleMigrationResult = () => null;

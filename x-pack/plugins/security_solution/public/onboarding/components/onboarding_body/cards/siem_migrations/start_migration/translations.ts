@@ -48,3 +48,57 @@ export const START_MIGRATION_CARD_UPLOAD_READ_DOCS = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.upload.readAiDocsLink',
   { defaultMessage: 'Read AI docs' }
 );
+
+export const START_MIGRATION_CARD_MIGRATION_READY_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.ready.description',
+  {
+    defaultMessage:
+      'Migration is created and ready but the translation has not started yet. You can either upload macros & lookups or start the translation process',
+  }
+);
+export const START_MIGRATION_CARD_TRANSLATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.translate.button',
+  { defaultMessage: 'Start translation' }
+);
+export const START_MIGRATION_CARD_UPLOAD_MACROS_BUTTON = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.uploadMacros.button',
+  { defaultMessage: 'Upload macros' }
+);
+
+export const START_MIGRATION_CARD_MIGRATION_TITLE = (number: number) =>
+  i18n.translate('xpack.securitySolution.onboarding.startMigration.migrationTitle', {
+    defaultMessage: 'SIEM rules migration #{number}',
+    values: { number },
+  });
+
+export const START_MIGRATION_CARD_PROGRESS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.progress.description',
+  {
+    defaultMessage: `This may take a few minutes & the task will work in the background. Just stay logged in and we'll notify you when done.`,
+  }
+);
+
+export const START_MIGRATION_CARD_RESULT_TITLE = (number: number) =>
+  i18n.translate('xpack.securitySolution.onboarding.startMigration.result.title', {
+    defaultMessage: 'SIEM rules migration #{number} complete',
+    values: { number },
+  });
+
+export const START_MIGRATION_CARD_RESULT_DESCRIPTION = (values: {
+  createdAt: string;
+  finishedAt: string;
+}) =>
+  i18n.translate('xpack.securitySolution.onboarding.startMigration.result.description', {
+    defaultMessage: 'Export uploaded on {createdAt} and translation finished {finishedAt}.',
+    values,
+  });
+
+export const VIEW_TRANSLATED_RULES_TITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.result.translatedRules.title',
+  { defaultMessage: 'Translation Summary' }
+);
+
+export const VIEW_TRANSLATED_RULES_BUTTON = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.result.translatedRules.button',
+  { defaultMessage: 'View translated rules' }
+);
