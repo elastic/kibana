@@ -4,20 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiSearchBar,
-  EuiSelectable,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiSearchBar, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamDefinition } from '@kbn/streams-plugin/common';
 import React, { useMemo, useState, useCallback } from 'react';
-import { Dashboard } from '@kbn/streams-plugin/common/assets';
+import { ReadDashboard } from '@kbn/streams-plugin/common/assets';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -49,7 +40,7 @@ const useDashboardCrud = (id?: string) => {
   }, [id, signal, streamsRepositoryClient]);
 
   const addDashboards = useCallback(
-    async (dashboards: Dashboard[]) => {
+    async (dashboards: ReadDashboard[]) => {
       if (!id) {
         return;
       }
@@ -60,7 +51,7 @@ const useDashboardCrud = (id?: string) => {
             params: {
               path: {
                 id,
-                dashboardId: dashboard.assetId,
+                dashboardId: dashboard.id,
               },
             },
           });
@@ -72,7 +63,7 @@ const useDashboardCrud = (id?: string) => {
   );
 
   const removeDashboards = useCallback(
-    async (dashboards: Dashboard[]) => {
+    async (dashboards: ReadDashboard[]) => {
       if (!id) {
         return;
       }
@@ -85,7 +76,7 @@ const useDashboardCrud = (id?: string) => {
               params: {
                 path: {
                   id,
-                  dashboardId: dashboard.assetId,
+                  dashboardId: dashboard.id,
                 },
               },
             }
@@ -107,20 +98,11 @@ const useDashboardCrud = (id?: string) => {
 export function StreamDetailDashboardsView({ definition }: { definition?: StreamDefinition }) {
   const [query, setQuery] = useState('');
 
-  const [isTagsPopoverOpen, setIsTagsPopoverOpen] = useState(false);
-
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
 
   const { dashboardsFetch, addDashboards, removeDashboards } = useDashboardCrud(definition?.id);
 
-  const tagsButton = (
-    <EuiFilterButton iconType="arrowDown" isSelected={isTagsPopoverOpen}>
-      {i18n.translate('xpack.streams.streamDetailDashboardView.tagsFilterButtonLabel', {
-        defaultMessage: 'Tags',
-      })}
-    </EuiFilterButton>
-  );
-
+  const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const linkedDashboards = useMemo(() => {
     return dashboardsFetch.value?.dashboards ?? [];
   }, [dashboardsFetch.value?.dashboards]);
@@ -131,7 +113,7 @@ export function StreamDetailDashboardsView({ definition }: { definition?: Stream
     });
   }, [linkedDashboards, query]);
 
-  const [selectedDashboards, setSelectedDashboards] = useState<Dashboard[]>([]);
+  const [selectedDashboards, setSelectedDashboards] = useState<ReadDashboard[]>([]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -141,9 +123,15 @@ export function StreamDetailDashboardsView({ definition }: { definition?: Stream
             <EuiButton
               data-test-subj="streamsAppStreamDetailRemoveDashboardButton"
               iconType="trash"
+              isLoading={isUnlinkLoading}
               onClick={async () => {
-                await removeDashboards(selectedDashboards);
-                setSelectedDashboards([]);
+                try {
+                  setIsUnlinkLoading(true);
+                  await removeDashboards(selectedDashboards);
+                  setSelectedDashboards([]);
+                } finally {
+                  setIsUnlinkLoading(false);
+                }
               }}
               color="danger"
             >
@@ -161,11 +149,6 @@ export function StreamDetailDashboardsView({ definition }: { definition?: Stream
               setQuery(nextQuery.queryText);
             }}
           />
-          <EuiFilterGroup>
-            <EuiPopover button={tagsButton} isOpen={isTagsPopoverOpen}>
-              <EuiSelectable />
-            </EuiPopover>
-          </EuiFilterGroup>
           <EuiButton
             data-test-subj="streamsAppStreamDetailAddDashboardButton"
             iconType="plusInCircle"

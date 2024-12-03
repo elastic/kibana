@@ -48,7 +48,7 @@ export const forkStreamsRoute = createServerRoute({
         throw new ForkConditionMissing('You must provide a condition to fork a stream');
       }
 
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
 
       const { definition: rootDefinition } = await readStream({
         scopedClusterClient,
@@ -79,6 +79,7 @@ export const forkStreamsRoute = createServerRoute({
       // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition: childDefinition,
         rootDefinition,
         logger,
@@ -91,6 +92,7 @@ export const forkStreamsRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition: rootDefinition,
         rootDefinition,
         logger,

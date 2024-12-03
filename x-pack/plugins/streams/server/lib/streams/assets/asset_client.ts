@@ -21,7 +21,7 @@ import {
   Dashboard,
   Slo,
 } from '../../../../common/assets';
-import { ASSET_ENTITY_ID, ASSET_ENTITY_TYPE } from './fields';
+import { ASSET_ENTITY_ID, ASSET_ENTITY_TYPE, ASSET_TYPE } from './fields';
 
 function sloSavedObjectToAsset(
   sloId: string,
@@ -93,6 +93,62 @@ export class AssetClient {
     });
   }
 
+  async syncAssetList({
+    entityId,
+    entityType,
+    assetType,
+    assetIds,
+  }: {
+    entityId: string;
+    entityType: string;
+    assetType: AssetType;
+    assetIds: string[];
+  }) {
+    const assetsResponse = await this.clients.storageClient.search('get_assets_for_entity', {
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(ASSET_ENTITY_ID, entityId),
+            ...termQuery(ASSET_ENTITY_TYPE, entityType),
+            ...termQuery(ASSET_TYPE, assetType),
+          ],
+        },
+      },
+    });
+
+    const existingAssetLinks = assetsResponse.hits.hits.map((hit) => hit._source);
+
+    const missingAssetIds = assetIds.filter(
+      (assetId) =>
+        !existingAssetLinks.some((existingAssetLink) => existingAssetLink['asset.id'] === assetId)
+    );
+
+    const tooMuchAssetIds = existingAssetLinks
+      .map((existingAssetLink) => existingAssetLink['asset.id'])
+      .filter((assetId) => !assetIds.includes(assetId));
+
+    await Promise.all([
+      ...missingAssetIds.map((assetId) =>
+        this.linkAsset({
+          entityId,
+          entityType,
+          assetId,
+          assetType,
+        })
+      ),
+      ...tooMuchAssetIds.map((assetId) =>
+        this.unlinkAsset({
+          entityId,
+          entityType,
+          assetId,
+          assetType,
+        })
+      ),
+    ]);
+  }
+
   async unlinkAsset({
     entityId,
     entityType,
@@ -112,6 +168,32 @@ export class AssetClient {
     });
 
     await this.clients.storageClient.delete(id);
+  }
+
+  async getAssetIds({
+    entityId,
+    entityType,
+    assetType,
+  }: {
+    entityId: string;
+    entityType: 'stream';
+    assetType: AssetType;
+  }): Promise<string[]> {
+    const assetsResponse = await this.clients.storageClient.search('get_assets_for_entity', {
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(ASSET_ENTITY_ID, entityId),
+            ...termQuery(ASSET_ENTITY_TYPE, entityType),
+            ...termQuery(ASSET_TYPE, assetType),
+          ],
+        },
+      },
+    });
+
+    return assetsResponse.hits.hits.map((hit) => hit._source['asset.id']);
   }
 
   async getAssets({
@@ -210,16 +292,20 @@ export class AssetClient {
     entityType,
     query,
     assetType,
+    tags,
   }: {
     entityId: string;
     entityType: string;
     query: string;
+    tags?: string[];
     assetType: T;
   }): Promise<Array<{ asset: AssetTypeToAssetMap[T] }>> {
     if (assetType === 'dashboard') {
       const dashboardSavedObjects = await this.clients.soClient.find<{ title: string }>({
         type: 'dashboard',
         search: query,
+        hasReferenceOperator: 'OR',
+        hasReference: tags?.map((tag) => ({ type: 'tag', id: tag })),
       });
 
       return dashboardSavedObjects.saved_objects.map((dashboardSavedObject) => {

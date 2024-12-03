@@ -6,17 +6,24 @@
  */
 import {
   EuiButton,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSearchBar,
+  EuiSelectable,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Dashboard } from '@kbn/streams-plugin/common/assets';
+import type { ReadDashboard } from '@kbn/streams-plugin/common/assets';
 import { debounce } from 'lodash';
 import React, { useMemo, useState, useEffect } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
@@ -30,14 +37,15 @@ export function AddDashboardFlyout({
   onClose,
 }: {
   entityId: string;
-  onAddDashboards: (dashboard: Dashboard[]) => void;
-  linkedDashboards: Dashboard[];
+  onAddDashboards: (dashboard: ReadDashboard[]) => Promise<void>;
+  linkedDashboards: ReadDashboard[];
   onClose: () => void;
 }) {
   const {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
+        savedObjectsTagging: { ui: savedObjectsTaggingUi },
       },
     },
   } = useKibana();
@@ -45,6 +53,10 @@ export function AddDashboardFlyout({
   const [query, setQuery] = useState('');
 
   const [submittedQuery, setSubmittedQuery] = useState(query);
+  const [selectedDashboards, setSelectedDashboards] = useState<ReadDashboard[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const setSubmittedQueryDebounced = useMemo(() => {
     return debounce(setSubmittedQuery, 150);
@@ -53,7 +65,7 @@ export function AddDashboardFlyout({
   const dashboardSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient
-        .fetch('GET /api/streams/{id}/dashboards/_suggestions', {
+        .fetch('POST /api/streams/{id}/dashboards/_suggestions', {
           signal,
           params: {
             path: {
@@ -61,6 +73,9 @@ export function AddDashboardFlyout({
             },
             query: {
               query: submittedQuery,
+            },
+            body: {
+              tags: selectedTags,
             },
           },
         })
@@ -70,16 +85,36 @@ export function AddDashboardFlyout({
               .map((suggestion) => suggestion.dashboard)
               .filter((dashboard) => {
                 return !linkedDashboards.find(
-                  (linkedDashboard) => linkedDashboard.assetId === dashboard.assetId
+                  (linkedDashboard) => linkedDashboard.id === dashboard.id
                 );
               }),
           };
         });
     },
-    [streamsRepositoryClient, entityId, submittedQuery, linkedDashboards]
+    [streamsRepositoryClient, entityId, submittedQuery, selectedTags, linkedDashboards]
   );
 
-  const [selectedDashboards, setSelectedDashboards] = useState<Dashboard[]>([]);
+  const tagList = savedObjectsTaggingUi.getTagList();
+
+  const button = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      badgeColor="success"
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      isSelected={isPopoverOpen}
+      numFilters={tagList.length}
+      hasActiveFilters={selectedTags.length > 0}
+      numActiveFilters={selectedTags.length}
+    >
+      {i18n.translate('xpack.streams.addDashboardFlyout.filterButtonLabel', {
+        defaultMessage: 'Tags',
+      })}
+    </EuiFilterButton>
+  );
+
+  const filterGroupPopoverId = useGeneratedHtmlId({
+    prefix: 'filterGroupPopover',
+  });
 
   useEffect(() => {
     setSelectedDashboards([]);
@@ -112,16 +147,61 @@ export function AddDashboardFlyout({
             })}
           </EuiText>
           <EuiFlexGroup direction="row" gutterSize="s">
-            <EuiSearchBar
-              box={{
-                incremental: true,
-              }}
-              query={query}
-              onChange={({ queryText }) => {
-                setQuery(queryText);
-                setSubmittedQueryDebounced(queryText);
-              }}
-            />
+            <EuiFlexItem grow>
+              <EuiSearchBar
+                box={{
+                  incremental: true,
+                }}
+                query={query}
+                onChange={({ queryText }) => {
+                  setQuery(queryText);
+                  setSubmittedQueryDebounced(queryText);
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup>
+                <EuiPopover
+                  id={filterGroupPopoverId}
+                  button={button}
+                  isOpen={isPopoverOpen}
+                  closePopover={() => setIsPopoverOpen(false)}
+                  panelPaddingSize="none"
+                >
+                  <EuiSelectable
+                    allowExclusions
+                    searchable
+                    searchProps={{
+                      placeholder: i18n.translate(
+                        'xpack.streams.addDashboardFlyout.searchTagsLabel',
+                        {
+                          defaultMessage: 'Search tags',
+                        }
+                      ),
+                      compressed: true,
+                    }}
+                    options={(tagList || []).map((tag) => ({
+                      label: tag.name,
+                      checked: selectedTags.includes(tag.id) ? 'on' : undefined,
+                    }))}
+                    onChange={(newOptions) => {
+                      setSelectedTags(
+                        newOptions
+                          .filter((option) => option.checked === 'on')
+                          .map((option) => savedObjectsTaggingUi.getTagIdFromName(option.label)!)
+                      );
+                    }}
+                  >
+                    {(list, search) => (
+                      <div style={{ width: 300 }}>
+                        <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+                        {list}
+                      </div>
+                    )}
+                  </EuiSelectable>
+                </EuiPopover>
+              </EuiFilterGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <DashboardsTable
             dashboards={allDashboards}
@@ -133,9 +213,16 @@ export function AddDashboardFlyout({
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButton
+          isLoading={isLoading}
+          disabled={selectedDashboards.length === 0}
           data-test-subj="streamsAppAddDashboardFlyoutAddDashboardsButton"
-          onClick={() => {
-            onAddDashboards(selectedDashboards);
+          onClick={async () => {
+            setIsLoading(true);
+            try {
+              await onAddDashboards(selectedDashboards);
+            } finally {
+              setIsLoading(false);
+            }
           }}
         >
           {i18n.translate('xpack.streams.addDashboardFlyout.addDashboardsButtonLabel', {

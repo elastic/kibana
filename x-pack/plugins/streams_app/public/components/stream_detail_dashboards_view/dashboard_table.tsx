@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Dashboard } from '@kbn/streams-plugin/common/assets';
+import { ReadDashboard } from '@kbn/streams-plugin/common/assets';
 import React, { useMemo } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
+import { tagListToReferenceList } from './to_reference_list';
 
 export function DashboardsTable({
   dashboards,
@@ -23,12 +19,19 @@ export function DashboardsTable({
   loading,
 }: {
   loading: boolean;
-  dashboards: Dashboard[] | undefined;
+  dashboards: ReadDashboard[] | undefined;
   compact?: boolean;
-  selecedDashboards: Dashboard[];
-  setSelectedDashboards: (dashboards: Dashboard[]) => void;
+  selecedDashboards: ReadDashboard[];
+  setSelectedDashboards: (dashboards: ReadDashboard[]) => void;
 }) {
-  const columns = useMemo((): Array<EuiBasicTableColumn<Dashboard>> => {
+  const {
+    dependencies: {
+      start: {
+        savedObjectsTagging: { ui: savedObjectsTaggingUi },
+      },
+    },
+  } = useKibana();
+  const columns = useMemo((): Array<EuiBasicTableColumn<ReadDashboard>> => {
     return [
       {
         field: 'label',
@@ -45,20 +48,18 @@ export function DashboardsTable({
               }),
               render: (_, { tags }) => {
                 return (
-                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                    {tags.map((tag) => (
-                      <EuiBadge key={tag} color="hollow">
-                        {tag}
-                      </EuiBadge>
-                    ))}
+                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap>
+                    <savedObjectsTaggingUi.components.TagList
+                      object={{ references: tagListToReferenceList(tags) }}
+                    />
                   </EuiFlexGroup>
                 );
               },
             },
-          ] satisfies Array<EuiBasicTableColumn<Dashboard>>)
+          ] satisfies Array<EuiBasicTableColumn<ReadDashboard>>)
         : []),
     ];
-  }, [compact]);
+  }, [compact, savedObjectsTaggingUi]);
 
   const items = useMemo(() => {
     return dashboards ?? [];
@@ -69,11 +70,11 @@ export function DashboardsTable({
       <EuiFlexItem grow={false} />
       <EuiBasicTable
         columns={columns}
-        itemId="assetId"
+        itemId="id"
         items={items}
         loading={loading}
         selection={{
-          onSelectionChange: (newSelection: Dashboard[]) => {
+          onSelectionChange: (newSelection: ReadDashboard[]) => {
             setSelectedDashboards(newSelection);
           },
           selected: selectedDashboards,

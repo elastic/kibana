@@ -37,6 +37,12 @@ export interface Dashboard extends Asset {
   type: typeof ASSET_TYPES.Dashboard;
 }
 
+export interface ReadDashboard {
+  id: string;
+  label: string;
+  tags: string[];
+}
+
 export interface Slo extends Asset {
   type: typeof ASSET_TYPES.Slo;
 }

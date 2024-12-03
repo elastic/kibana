@@ -88,6 +88,7 @@ export const streamWithoutIdDefinitonSchema = z.object({
       })
     )
     .default([]),
+  dashboards: z.optional(z.array(z.string()).default([])),
 });
 
 export type StreamWithoutIdDefinition = z.infer<typeof streamDefinitonSchema>;

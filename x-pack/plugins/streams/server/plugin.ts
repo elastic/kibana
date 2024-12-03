@@ -70,9 +70,10 @@ export class StreamsPlugin
         server: this.server,
         getScopedClients: async ({ request }: { request: KibanaRequest }) => {
           const [coreStart] = await core.getStartServices();
+          const assetClient = await assetService.getClientWithRequest({ request });
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
-          return { scopedClusterClient, soClient };
+          return { scopedClusterClient, soClient, assetClient };
         },
       },
       core,

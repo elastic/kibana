@@ -30,6 +30,7 @@ import {
   upsertIngestPipeline,
 } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
+import { AssetClient } from './assets/asset_client';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -42,9 +43,15 @@ interface BaseParamsWithDefinition extends BaseParams {
 interface DeleteStreamParams extends BaseParams {
   id: string;
   logger: Logger;
+  assetClient: AssetClient;
 }
 
-export async function deleteStreamObjects({ id, scopedClusterClient, logger }: DeleteStreamParams) {
+export async function deleteStreamObjects({
+  id,
+  scopedClusterClient,
+  logger,
+  assetClient,
+}: DeleteStreamParams) {
   await deleteDataStream({
     esClient: scopedClusterClient.asCurrentUser,
     name: id,
@@ -70,6 +77,12 @@ export async function deleteStreamObjects({ id, scopedClusterClient, logger }: D
     id: getReroutePipelineName(id),
     logger,
   });
+  await assetClient.syncAssetList({
+    entityId: id,
+    entityType: 'stream',
+    assetType: 'dashboard',
+    assetIds: [],
+  });
   await scopedClusterClient.asInternalUser.delete({
     id,
     index: STREAMS_INDEX,
@@ -77,12 +90,30 @@ export async function deleteStreamObjects({ id, scopedClusterClient, logger }: D
   });
 }
 
-async function upsertInternalStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
+async function upsertInternalStream({
+  definition: { dashboards, ...definition },
+  scopedClusterClient,
+}: BaseParamsWithDefinition) {
   return scopedClusterClient.asInternalUser.index({
     id: definition.id,
     index: STREAMS_INDEX,
     document: { ...definition, managed: true },
     refresh: 'wait_for',
+  });
+}
+
+async function syncAssets({
+  definition,
+  assetClient,
+}: {
+  definition: StreamDefinition;
+  assetClient: AssetClient;
+}) {
+  await assetClient.syncAssetList({
+    entityId: definition.id,
+    entityType: 'stream',
+    assetType: 'dashboard',
+    assetIds: definition.dashboards ?? [],
   });
 }
 
@@ -355,6 +386,7 @@ export async function checkReadAccess({
 
 interface SyncStreamParams {
   scopedClusterClient: IScopedClusterClient;
+  assetClient: AssetClient;
   definition: StreamDefinition;
   rootDefinition?: StreamDefinition;
   logger: Logger;
@@ -362,6 +394,7 @@ interface SyncStreamParams {
 
 export async function syncStream({
   scopedClusterClient,
+  assetClient,
   definition,
   rootDefinition,
   logger,
@@ -412,6 +445,10 @@ export async function syncStream({
   await upsertInternalStream({
     scopedClusterClient,
     definition,
+  });
+  await syncAssets({
+    definition,
+    assetClient,
   });
   await rolloverDataStreamIfNecessary({
     esClient: scopedClusterClient.asCurrentUser,

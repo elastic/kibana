@@ -5,7 +5,7 @@
     "@elastic/appex-sharedux"
   ],
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "plugin": {
     "id": "savedObjectsTagging",
     "browser": true,

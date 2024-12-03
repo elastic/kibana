@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { Asset, Dashboard } from '../../../common/assets';
+import { Asset, Dashboard, ReadDashboard } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 
 export interface ListDashboardsResponse {
-  dashboards: Dashboard[];
+  dashboards: ReadDashboard[];
 }
 
 export interface LinkDashboardResponse {
@@ -23,7 +23,7 @@ export interface UnlinkDashboardResponse {
 
 export interface SuggestDashboardResponse {
   suggestions: Array<{
-    dashboard: Dashboard;
+    dashboard: ReadDashboard;
   }>;
 }
 
@@ -54,7 +54,13 @@ export const listDashboardsRoute = createServerRoute({
           entityId: streamId,
           entityType: 'stream',
         })
-      ).filter(isDashboard),
+      )
+        .filter(isDashboard)
+        .map((asset) => ({
+          id: asset.assetId,
+          label: asset.label,
+          tags: asset.tags,
+        })),
     };
   },
 });
@@ -122,7 +128,7 @@ export const unlinkDashboardRoute = createServerRoute({
 });
 
 export const suggestDashboardsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{id}/dashboards/_suggestions',
+  endpoint: 'POST /api/streams/{id}/dashboards/_suggestions',
   options: {
     access: 'internal',
   },
@@ -133,6 +139,9 @@ export const suggestDashboardsRoute = createServerRoute({
     query: z.object({
       query: z.string(),
     }),
+    body: z.object({
+      tags: z.optional(z.array(z.string())),
+    }),
   }),
   handler: async ({ params, request, assets }): Promise<SuggestDashboardResponse> => {
     const assetsClient = await assets.getClientWithRequest({ request });
@@ -140,6 +149,7 @@ export const suggestDashboardsRoute = createServerRoute({
     const {
       path: { id: streamId },
       query: { query },
+      body: { tags },
     } = params;
 
     const suggestions = (
@@ -148,9 +158,14 @@ export const suggestDashboardsRoute = createServerRoute({
         entityType: 'stream',
         assetType: 'dashboard',
         query,
+        tags,
       })
     ).map(({ asset: dashboard }) => ({
-      dashboard,
+      dashboard: {
+        id: dashboard.assetId,
+        label: dashboard.label,
+        tags: dashboard.tags,
+      },
     }));
 
     return {
