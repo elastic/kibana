@@ -196,7 +196,7 @@ describe('EPM index template install', () => {
     const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
 
     if (!('settings' in packageTemplate)) {
-      throw new Error('no mappings on package template');
+      throw new Error('no settings on package template');
     }
 
     expect(packageTemplate.settings?.index?.mapping).not.toHaveProperty('source');
