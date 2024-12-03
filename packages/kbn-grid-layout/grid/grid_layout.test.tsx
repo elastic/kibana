@@ -16,68 +16,58 @@ import { cloneDeep } from 'lodash';
 
 describe('GridLayout', () => {
   const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
-    const sampleLayout = getSampleLayout();
-    const rtlRender = render(
-      <GridLayout
-        accessMode={'EDIT'}
-        layout={sampleLayout}
-        gridSettings={gridSettings}
-        renderPanelContents={mockRenderPanelContents}
-        onLayoutChange={jest.fn()}
-        {...propsOverrides}
-      />
-    );
-    const rerender = (overrides: Partial<GridLayoutProps>) => {
-      return rtlRender.rerender(
-        <GridLayout
-          accessMode={'EDIT'}
-          layout={sampleLayout}
-          gridSettings={gridSettings}
-          renderPanelContents={mockRenderPanelContents}
-          onLayoutChange={jest.fn()}
-          {...overrides}
-        />
-      );
+    const defaultProps: GridLayoutProps = {
+      accessMode: 'EDIT',
+      layout: getSampleLayout(),
+      gridSettings,
+      renderPanelContents: mockRenderPanelContents,
+      onLayoutChange: jest.fn(),
     };
 
-    return { ...rtlRender, rerender };
+    const { rerender, ...rtlRest } = render(<GridLayout {...defaultProps} {...propsOverrides} />);
+
+    return {
+      ...rtlRest,
+      rerender: (overrides: Partial<GridLayoutProps>) =>
+        rerender(<GridLayout {...defaultProps} {...overrides} />),
+    };
+  };
+  const getAllThePanelIds = () =>
+    screen
+      .getAllByRole('button', { name: /panelId:panel/i })
+      .map((el) => el.getAttribute('aria-label')?.replace(/panelId:/g, ''));
+
+  const startDragging = (handle: HTMLElement, options = { clientX: 0, clientY: 0 }) => {
+    fireEvent.mouseDown(handle, options);
+  };
+  const moveTo = (options = { clientX: 256, clientY: 128 }) => {
+    fireEvent.mouseMove(document, options);
+  };
+  const drop = (handle: HTMLElement) => {
+    fireEvent.mouseUp(handle);
   };
 
+  const assertTabThroughPanel = async (panelId: string) => {
+    await userEvent.tab(); // tab to drag handle
+    await userEvent.tab(); // tab to the panel
+    expect(screen.getByLabelText(`panelId:${panelId}`)).toHaveFocus();
+    await userEvent.tab(); // tab to the resize handle
+  };
+
+  const expectedInitialOrder = [
+    'panel1',
+    'panel5',
+    'panel2',
+    'panel3',
+    'panel7',
+    'panel6',
+    'panel8',
+    'panel4',
+    'panel9',
+    'panel10',
+  ];
+
   describe('panels order: panels are rendered from left to right, from top to bottom', () => {
-    const assertTabThroughPanel = async (panelId: string) => {
-      await userEvent.tab(); // tab to drag handle
-      await userEvent.tab(); // tab to the panel
-      expect(screen.getByLabelText(`panelId:${panelId}`)).toHaveFocus();
-      await userEvent.tab(); // tab to the resize handle
-    };
-
-    const getAllThePanelIds = () =>
-      screen
-        .getAllByRole('button', { name: /panelId:panel/i })
-        .map((el) => el.getAttribute('aria-label')?.replace(/panelId:/g, ''));
-
-    const expectedInitialOrder = [
-      'panel1',
-      'panel5',
-      'panel2',
-      'panel3',
-      'panel7',
-      'panel6',
-      'panel8',
-      'panel4',
-      'panel9',
-      'panel10',
-    ];
-
-    const startDragging = (handle: HTMLElement, options = { clientX: 0, clientY: 0 }) => {
-      fireEvent.mouseDown(handle, options);
-    };
-    const moveTo = (options = { clientX: 256, clientY: 128 }) => {
-      fireEvent.mouseMove(document, options);
-    };
-    const drop = (handle: HTMLElement) => {
-      fireEvent.mouseUp(handle);
-    };
     it('focus management - tabbing through the panels', async () => {
       renderGridLayout();
       // we only test a few rows because otherwise that test would execute for too long
