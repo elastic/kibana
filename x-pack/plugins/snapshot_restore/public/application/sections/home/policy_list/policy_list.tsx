@@ -172,24 +172,32 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         {!isSlmRunning ? (
           <Fragment>
             <EuiCallOut
-              title="Snapshot lifecycle management (SLM) is not running"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.slmWarningTitle"
+                  defaultMessage="Snapshot lifecycle management (SLM) is not running"
+                />
+              }
               color="warning"
               iconType="warning"
             >
-              <p>
-                {i18n.translate('xpack.snapshotRestore.slmWarning', {
-                  defaultMessage: 'Policies are not executed. You must restart SLM',
-                })}{' '}
-                <EuiLink
-                  href={docLinks.links.snapshotRestore.slmStart}
-                  external={true}
-                  target="_blank"
-                >
-                  {i18n.translate('xpack.snapshotRestore.slmDocLink', {
-                    defaultMessage: 'by using the API.',
-                  })}
-                </EuiLink>
-              </p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.slmWarningDescription"
+                defaultMessage="Policies are not executed. You must restart SLM {slmDocLink}"
+                values={{
+                  slmDocLink: (
+                    <EuiLink
+                      href={docLinks.links.snapshotRestore.slmStart}
+                      external={true}
+                      target="_blank"
+                    >
+                      {i18n.translate('xpack.snapshotRestore.slmDocLink', {
+                        defaultMessage: 'by using the API.',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
             </EuiCallOut>
             <EuiSpacer />
           </Fragment>

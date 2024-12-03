@@ -36,7 +36,6 @@ export const snapshotListSchema = schema.object({
     schema.literal('startTimeInMillis'),
     schema.literal('shards.total'),
     schema.literal('shards.failed'),
-    schema.literal('state'),
   ]),
   sortDirection: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
   pageIndex: schema.number(),

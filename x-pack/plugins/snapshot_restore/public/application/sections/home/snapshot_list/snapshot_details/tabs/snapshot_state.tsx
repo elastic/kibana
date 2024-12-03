@@ -14,10 +14,10 @@ import { useServices } from '../../../../../app_context';
 
 interface Props {
   state: any;
-  tooltipIcon: boolean;
+  displayTooltipIcon: boolean;
 }
 
-export const SnapshotState: React.FC<Props> = ({ state, tooltipIcon }) => {
+export const SnapshotState: React.FC<Props> = ({ state, displayTooltipIcon }) => {
   const { i18n } = useServices();
 
   const stateMap: any = {
@@ -57,7 +57,7 @@ export const SnapshotState: React.FC<Props> = ({ state, tooltipIcon }) => {
 
   const { color, label, tip } = stateMap[state];
 
-  const iconTip = tooltipIcon && tip && <EuiIcon type="questionInCircle" />;
+  const iconTip = displayTooltipIcon && tip && <EuiIcon type="questionInCircle" />;
 
   return (
     <EuiToolTip position="top" content={tip}>

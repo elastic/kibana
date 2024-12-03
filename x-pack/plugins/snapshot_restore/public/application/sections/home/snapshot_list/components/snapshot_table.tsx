@@ -100,8 +100,8 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
         defaultMessage: 'State',
       }),
       truncateText: false,
-      sortable: true,
-      render: (state: string) => <SnapshotState state={state} tooltipIcon={false} />,
+      sortable: false,
+      render: (state: string) => <SnapshotState state={state} displayTooltipIcon={false} />,
     },
     {
       field: 'repository',
