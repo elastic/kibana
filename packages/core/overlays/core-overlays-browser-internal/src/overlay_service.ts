@@ -18,11 +18,11 @@ import { FlyoutService } from './flyout';
 import { ModalService } from './modal';
 
 interface StartDeps {
+  targetDomElement: HTMLElement;
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
-  targetDomElement: HTMLElement;
   uiSettings: IUiSettingsClient;
 }
 
@@ -32,34 +32,21 @@ export class OverlayService {
   private modalService = new ModalService();
   private flyoutService = new FlyoutService();
 
-  public start({
-    analytics,
-    i18n,
-    targetDomElement,
-    uiSettings,
-    theme,
-    userProfile,
-  }: StartDeps): OverlayStart {
+  public start({ targetDomElement, ...startDeps }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
     targetDomElement.appendChild(flyoutElement);
     const flyouts = this.flyoutService.start({
-      analytics,
-      i18n,
-      theme,
-      userProfile,
       targetDomElement: flyoutElement,
+      ...startDeps,
     });
 
-    const banners = this.bannersService.start({ uiSettings, analytics, i18n, theme, userProfile });
+    const banners = this.bannersService.start(startDeps);
 
     const modalElement = document.createElement('div');
     targetDomElement.appendChild(modalElement);
     const modals = this.modalService.start({
-      analytics,
-      i18n,
-      theme,
-      userProfile,
       targetDomElement: modalElement,
+      ...startDeps,
     });
 
     return {

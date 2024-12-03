@@ -51,9 +51,7 @@ export class ShareMenuManager {
           anonymousAccess,
           toasts: core.notifications.toasts,
           publicAPIEnabled: !disableEmbed,
-          userProfile: core.userProfile,
-          theme: core.theme,
-          i18n: core.i18n,
+          ...core,
         });
       },
     };

@@ -69,13 +69,7 @@ export class ModalService {
   private activeModal: ModalRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({
-    analytics,
-    i18n,
-    theme,
-    userProfile,
-    targetDomElement,
-  }: StartDeps): OverlayModalStart {
+  public start({ targetDomElement, ...startDeps }: StartDeps): OverlayModalStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -98,12 +92,7 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <KibanaRenderContextProvider
-            analytics={analytics}
-            i18n={i18n}
-            theme={theme}
-            userProfile={userProfile}
-          >
+          <KibanaRenderContextProvider {...startDeps}>
             <EuiModal {...options} onClose={() => modal.close()}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiModal>
@@ -163,12 +152,7 @@ export class ModalService {
           };
 
           render(
-            <KibanaRenderContextProvider
-              analytics={analytics}
-              i18n={i18n}
-              theme={theme}
-              userProfile={userProfile}
-            >
+            <KibanaRenderContextProvider {...startDeps}>
               <EuiConfirmModal {...props} />
             </KibanaRenderContextProvider>,
             targetDomElement
