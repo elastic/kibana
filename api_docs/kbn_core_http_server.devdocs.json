@@ -4675,11 +4675,11 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/routes/metric_indices/index.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/routes/metric_indices/index.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -4983,39 +4983,39 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/apm.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/apm.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/flamechart.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/flamechart.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/functions.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/functions.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/topn.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/topn.ts"
               },
               {
                 "plugin": "synthetics",
@@ -5043,7 +5043,7 @@
               },
               {
                 "plugin": "apmDataAccess",
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
               },
               {
                 "plugin": "console",
@@ -7281,7 +7281,7 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -7565,7 +7565,7 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "synthetics",
@@ -9043,7 +9043,7 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -9469,7 +9469,7 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -9963,7 +9963,7 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -15851,7 +15851,7 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -16582,7 +16582,7 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -17425,7 +17425,7 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -17964,7 +17964,7 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -18215,7 +18215,7 @@
               },
               {
                 "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",

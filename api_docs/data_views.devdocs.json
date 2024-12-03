@@ -14036,7 +14036,7 @@
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "triggersActionsUi",
@@ -14232,7 +14232,7 @@
               },
               {
                 "plugin": "ux",
-                "path": "x-pack/plugins/observability_solution/ux/public/components/app/rum_dashboard/local_uifilters/use_data_view.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/ux/public/components/app/rum_dashboard/local_uifilters/use_data_view.ts"
               },
               {
                 "plugin": "maps",

@@ -462,11 +462,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm/readme.md[apm]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/apm/readme.md[apm]
 |This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm_data_access[apmDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/apm_data_access[apmDataAccess]
 |WARNING: Missing README.
 
 
@@ -596,6 +596,10 @@ activities.
 |A shared component for visualizing observability data types via lens embeddable. For further details.
 
 
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/Users/gsoldevila/Work/kibana-obs-ux-infra_services-team/Users/gsoldevila/Work/kibana-obs-ux-infra_services-team/x-pack/examples/exploratory_view_example/README.md[exploratoryViewExample]
+|To run this example plugin, use the command yarn start --run-examples.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
 
@@ -661,7 +665,7 @@ the infrastructure monitoring use-case within Kibana.
 |Team owner: Security Integrations Scalability
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/inventory/README.md[inventory]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/inventory/README.md[inventory]
 |Home of the Inventory plugin, which renders the... inventory.
 
 
@@ -722,7 +726,7 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/metrics_data_access/README.md[metricsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/metrics_data_access/README.md[metricsDataAccess]
 |Exposes utilities to access metrics data.
 
 
@@ -783,11 +787,11 @@ Elastic.
 |This plugin contains the product documentation base service.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/profiling/README.md[profiling]
 |Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling_data_access[profilingDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/profiling_data_access[profilingDataAccess]
 |WARNING: Missing README.
 
 
@@ -973,7 +977,7 @@ in their infrastructure.
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/ux/readme.md[ux]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/ux/readme.md[ux]
 |https://docs.elastic.dev/kibana-dev-docs/welcome
 
 

@@ -633,7 +633,7 @@ module.exports = {
         '**/*.test.js',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
-        'x-pack/plugins/observability_solution/apm/**/*.js',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/**/*.js',
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/*.config.ts',
@@ -914,10 +914,10 @@ module.exports = {
      */
     {
       files: [
-        'x-pack/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/observability/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -934,7 +934,7 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/observability_solution/apm/**/*.stories.*',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/**/*.stories.*',
         'x-pack/plugins/observability_solution/observability/**/*.stories.*',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
         'x-pack/plugins/observability_solution/slo/**/*.stories.*',
@@ -998,7 +998,7 @@ module.exports = {
     },
     {
       // require explicit return types in route handlers for performance reasons
-      files: ['x-pack/plugins/observability_solution/apm/server/**/route.ts'],
+      files: ['x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/server/**/route.ts'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'error',

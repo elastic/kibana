@@ -920,39 +920,39 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "observabilityLogsExplorer",
@@ -1196,11 +1196,11 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "datasetQuality",
@@ -1380,43 +1380,43 @@
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "securitySolution",
