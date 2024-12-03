@@ -97,7 +97,6 @@ For information about the {kib} 8.17.0 release, review the following information
 The following functionality is deprecated in 8.17.0, and will be removed in 9.0.0.
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
 you make the necessary updates after you upgrade to 8.17.0.
-
       
 [discrete]
 [[deprecation-197227]]
@@ -107,7 +106,17 @@ you make the necessary updates after you upgrade to 8.17.0.
 *Details* +
 The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With this change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
 ====
-      
+
+[discrete]
+.The Observability > Logs > Explorer app is now deprecated in favor of Discover.
+[%collapsible]
+====
+*Details* +
+Both the Logs Explorer and the Logs Stream application in Kibana are now deprecated and will be removed in 9.0. We continue to make enhancements to Discover to offer similar functionality in 9.x. 
+====
+
+
+
 [float]
 [[features-8.17.0]]
 === Features
