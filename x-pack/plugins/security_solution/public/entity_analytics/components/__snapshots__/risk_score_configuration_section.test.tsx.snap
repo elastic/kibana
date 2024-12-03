@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RiskScoreConfigurationSection renders correctly 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiSwitch
+        checked={false}
+        data-test-subj="includeClosedAlertsSwitch"
+        label="Include closed alerts for risk scoring"
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <Styled(div) />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiSuperDatePicker
+        compressed={false}
+        end="now"
+        onTimeChange={[Function]}
+        showUpdateButton={false}
+        start="now-30m"
+        width="auto"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiText
+    size="s"
+  >
+    <p>
+      Enable this option to factor both open and closed alerts into the risk engine
+            calculations. Including closed alerts helps provide a more comprehensive risk assessment
+            based on past incidents, leading to more accurate scoring and insights.
+    </p>
+  </EuiText>
+</Fragment>
+`;

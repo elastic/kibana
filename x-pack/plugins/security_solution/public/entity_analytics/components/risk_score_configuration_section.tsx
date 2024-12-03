@@ -25,7 +25,7 @@ import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
 
-export const IncludeClosedAlertsSection = ({
+export const RiskScoreConfigurationSection = ({
   includeClosedAlerts,
   setIncludeClosedAlerts,
   from,
@@ -141,6 +141,7 @@ export const IncludeClosedAlertsSection = ({
             label="Include closed alerts for risk scoring"
             checked={includeClosedAlerts}
             onChange={handleToggle}
+            data-test-subj="includeClosedAlertsSwitch"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -194,6 +195,7 @@ export const IncludeClosedAlertsSection = ({
                   iconType="check"
                   onClick={handleSave}
                   isLoading={isLoading}
+                  data-test-subj="riskScoreSaveButton"
                 >
                   {i18n.SAVE_CHANGES}
                 </EuiButton>

@@ -24,7 +24,7 @@ import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { RiskScoreUsefulLinksSection } from '../components/risk_score_useful_links_section';
-import { IncludeClosedAlertsSection } from '../components/include_closed_alerts_section';
+import { RiskScoreConfigurationSection } from '../components/risk_score_configuration_section';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useScheduleNowRiskEngineMutation } from '../api/hooks/use_schedule_now_risk_engine_mutation';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
@@ -54,8 +54,12 @@ export const EntityAnalyticsManagementPage = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       scheduleNowRiskEngine();
+
+      if (!isLoading) {
+        addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
+      }
     } catch (error) {
-      setIsLoading(false);
+      addSuccess(i18n.RISK_SCORE_ENGINE_RUN_FAILURE, { toastLifeTimeMs: 5000 });
     } finally {
       setIsLoading(false);
     }
@@ -114,12 +118,7 @@ export const EntityAnalyticsManagementPage = () => {
                       size="s"
                       iconType="play"
                       isLoading={isLoading}
-                      onClick={async () => {
-                        await handleRunEngineClick();
-                        if (!isLoading) {
-                          addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
-                        }
-                      }}
+                      onClick={handleRunEngineClick}
                     >
                       {i18n.RUN_RISK_SCORE_ENGINE}
                     </EuiButton>
@@ -154,7 +153,7 @@ export const EntityAnalyticsManagementPage = () => {
       <EuiHorizontalRule />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem grow={2}>
-          <IncludeClosedAlertsSection
+          <RiskScoreConfigurationSection
             includeClosedAlerts={includeClosedAlerts}
             setIncludeClosedAlerts={handleIncludeClosedAlertsToggle}
             from={from}

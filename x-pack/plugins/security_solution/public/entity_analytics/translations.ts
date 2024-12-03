@@ -348,3 +348,10 @@ export const DISCARD_CHANGES = i18n.translate(
     defaultMessage: 'Discard',
   }
 );
+
+export const RISK_SCORE_ENGINE_RUN_FAILURE = i18n.translate(
+  'xpack.securitySolution.riskScore.engineRunSuccess',
+  {
+    defaultMessage: 'Entity risk score engine failed to start',
+  }
+);
