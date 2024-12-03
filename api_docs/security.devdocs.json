@@ -6535,35 +6535,35 @@
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
             },
             {
               "plugin": "fleet",

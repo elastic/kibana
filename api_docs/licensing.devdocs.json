@@ -852,7 +852,7 @@
             },
             {
               "plugin": "slo",
-              "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo/public/plugin.ts"
             }
           ]
         },

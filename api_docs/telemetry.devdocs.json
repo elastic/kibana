@@ -829,15 +829,15 @@
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/telemetry/sender.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.test.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/telemetry/sender.test.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.test.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/telemetry/sender.test.ts"
             },
             {
               "plugin": "securitySolution",

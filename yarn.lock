@@ -5208,7 +5208,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-forge@link:x-pack/packages/kbn-data-forge":
+"@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
   version "0.0.0"
   uid ""
 
@@ -5292,7 +5292,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-observability@link:packages/deeplinks/observability":
+"@kbn/deeplinks-observability@link:src/platform/packages/shared/deeplinks/observability":
   version "0.0.0"
   uid ""
 
@@ -5604,7 +5604,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/exploratory-view-plugin@link:x-pack/plugins/observability_solution/exploratory_view":
+"@kbn/exploratory-view-plugin@link:x-pack/solutions/observability/plugins/observability_solution/exploratory_view":
   version "0.0.0"
   uid ""
 
@@ -5936,7 +5936,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/infra-forge@link:x-pack/packages/kbn-infra-forge":
+"@kbn/infra-forge@link:x-pack/platform/packages/private/kbn-infra-forge":
   version "0.0.0"
   uid ""
 
@@ -5980,15 +5980,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/investigate-app-plugin@link:x-pack/plugins/observability_solution/investigate_app":
+"@kbn/investigate-app-plugin@link:x-pack/solutions/observability/plugins/observability_solution/investigate_app":
   version "0.0.0"
   uid ""
 
-"@kbn/investigate-plugin@link:x-pack/plugins/observability_solution/investigate":
+"@kbn/investigate-plugin@link:x-pack/solutions/observability/plugins/observability_solution/investigate":
   version "0.0.0"
   uid ""
 
-"@kbn/investigation-shared@link:packages/kbn-investigation-shared":
+"@kbn/investigation-shared@link:x-pack/solutions/observability/packages/kbn-investigation-shared":
   version "0.0.0"
   uid ""
 
@@ -6448,15 +6448,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alert-details@link:x-pack/packages/observability/alert_details":
+"@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/observability/alert_details":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alerting-rule-utils@link:x-pack/packages/observability/alerting_rule_utils":
+"@kbn/observability-alerting-rule-utils@link:x-pack/platform/packages/shared/observability/alerting_rule_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alerting-test-data@link:x-pack/packages/observability/alerting_test_data":
+"@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/observability/alerting_test_data":
   version "0.0.0"
   uid ""
 
@@ -6464,7 +6464,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/packages/observability/get_padded_alert_time_range_util":
+"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/solutions/observability/packages/observability/get_padded_alert_time_range_util":
   version "0.0.0"
   uid ""
 
@@ -6484,7 +6484,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-plugin@link:x-pack/plugins/observability_solution/observability":
+"@kbn/observability-plugin@link:x-pack/solutions/observability/plugins/observability_solution/observability":
   version "0.0.0"
   uid ""
 
@@ -6492,7 +6492,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-synthetics-test-data@link:x-pack/packages/observability/synthetics_test_data":
+"@kbn/observability-synthetics-test-data@link:x-pack/solutions/observability/packages/observability/synthetics_test_data":
   version "0.0.0"
   uid ""
 
@@ -7184,7 +7184,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
+"@kbn/serverless-observability@link:x-pack/solutions/observability/plugins/serverless_observability":
   version "0.0.0"
   uid ""
 
@@ -7440,11 +7440,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
+"@kbn/slo-plugin@link:x-pack/solutions/observability/plugins/observability_solution/slo":
   version "0.0.0"
   uid ""
 
-"@kbn/slo-schema@link:x-pack/packages/kbn-slo-schema":
+"@kbn/slo-schema@link:x-pack/platform/packages/shared/kbn-slo-schema":
   version "0.0.0"
   uid ""
 
@@ -7528,11 +7528,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-e2e@link:x-pack/plugins/observability_solution/synthetics/e2e":
+"@kbn/synthetics-e2e@link:x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-plugin@link:x-pack/plugins/observability_solution/synthetics":
+"@kbn/synthetics-plugin@link:x-pack/solutions/observability/plugins/observability_solution/synthetics":
   version "0.0.0"
   uid ""
 
@@ -7772,7 +7772,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/uptime-plugin@link:x-pack/plugins/observability_solution/uptime":
+"@kbn/uptime-plugin@link:x-pack/solutions/observability/plugins/observability_solution/uptime":
   version "0.0.0"
   uid ""
 

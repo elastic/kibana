@@ -25,7 +25,7 @@
         "tags": [],
         "label": "SyntheticsRunner",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+        "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,7 +50,7 @@
             "tags": [],
             "label": "kibanaUrl",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -61,7 +61,7 @@
             "tags": [],
             "label": "testFilesLoaded",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -75,7 +75,7 @@
             "signature": [
               "ArgParams"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -89,7 +89,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -103,7 +103,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -118,7 +118,7 @@
                 "signature": [
                   "ArgParams"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -136,7 +136,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -152,7 +152,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -168,7 +168,7 @@
             "signature": [
               "(callback: (reload?: boolean | undefined) => Promise<void>, reload?: boolean) => Promise<void>"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -182,7 +182,7 @@
                 "signature": [
                   "(reload?: boolean | undefined) => Promise<void>"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -197,7 +197,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -215,7 +215,7 @@
             "signature": [
               "(e2eDir: string, dataArchives: string[]) => Promise<void>"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -229,7 +229,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -244,7 +244,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -262,7 +262,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -278,7 +278,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -294,7 +294,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -312,7 +312,7 @@
               "JourneyResult",
               "; }) => void"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -328,7 +328,7 @@
                   "JourneyResult",
                   "; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -346,7 +346,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -369,7 +369,7 @@
           "Page",
           "; isRemote?: boolean | undefined; username?: string | undefined; password?: string | undefined; }) => { waitForLoadingToFinish(): Promise<void>; loginToKibana(usernameT?: \"editor\" | \"viewer\" | undefined, passwordT?: string | undefined): Promise<void>; }"
         ],
-        "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+        "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -380,7 +380,7 @@
             "tags": [],
             "label": "{\n  page,\n  isRemote = false,\n  username = 'elastic',\n  password = 'changeme',\n}",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -394,7 +394,7 @@
                 "signature": [
                   "Page"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -408,7 +408,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -422,7 +422,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -436,7 +436,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -462,7 +462,7 @@
           "ElementHandle",
           "<HTMLElement | SVGElement>>; }"
         ],
-        "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/utils.tsx",
+        "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/page_objects/utils.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -473,7 +473,7 @@
             "tags": [],
             "label": "{ page }",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/utils.tsx",
+            "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/page_objects/utils.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -487,7 +487,7 @@
                 "signature": [
                   "Page"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/utils.tsx",
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/page_objects/utils.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -512,7 +512,7 @@
         "signature": [
           "{ [x: string]: unknown; headless: boolean; bail: boolean; grep: undefined; _: string[]; $0: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/parse_args_params.ts",
+        "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e/helpers/parse_args_params.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

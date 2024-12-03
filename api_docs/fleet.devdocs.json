@@ -1706,7 +1706,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -24594,7 +24594,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
               },
               {
                 "plugin": "securitySolution",

@@ -10801,15 +10801,15 @@
               },
               {
                 "plugin": "slo",
-                "path": "x-pack/plugins/observability_solution/slo/server/saved_objects/slo.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo/server/saved_objects/slo.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
               },
               {
                 "plugin": "eventAnnotation",

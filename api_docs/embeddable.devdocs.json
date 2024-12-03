@@ -15054,7 +15054,7 @@
             },
             {
               "plugin": "investigateApp",
-              "path": "x-pack/plugins/observability_solution/investigate_app/public/items/embeddable_item/register_embeddable_item.tsx"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/investigate_app/public/items/embeddable_item/register_embeddable_item.tsx"
             },
             {
               "plugin": "dashboard",

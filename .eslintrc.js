@@ -915,10 +915,10 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -935,9 +935,9 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/apm/**/*.stories.*',
-        'x-pack/plugins/observability_solution/observability/**/*.stories.*',
-        'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
-        'x-pack/plugins/observability_solution/slo/**/*.stories.*',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/observability/**/*.stories.*',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/exploratory_view/**/*.stories.*',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo/**/*.stories.*',
       ],
       rules: {
         'react/function-component-definition': [
@@ -1011,7 +1011,7 @@ module.exports = {
     {
       // disable imports from legacy uptime plugin
       files: [
-        'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-restricted-imports': [

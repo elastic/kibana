@@ -3792,7 +3792,7 @@
               },
               {
                 "plugin": "slo",
-                "path": "x-pack/plugins/observability_solution/slo/server/lib/rules/slo_burn_rate/executor.test.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo/server/lib/rules/slo_burn_rate/executor.test.ts"
               }
             ]
           },

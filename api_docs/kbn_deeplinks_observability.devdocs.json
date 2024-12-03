@@ -44,7 +44,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,7 +55,7 @@
             "tags": [],
             "label": "dataStream",
             "description": [],
-            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,7 +69,7 @@
             "signature": [
               "TimeRangeConfig | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -83,7 +83,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,7 +97,7 @@
             "signature": [
               "{ table?: DegradedFieldsTable | undefined; } | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -111,7 +111,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -125,7 +125,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -156,7 +156,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -170,7 +170,7 @@
             "signature": [
               "Filters | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -201,7 +201,7 @@
             "text": "LogsExplorerNavigationParams"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,7 +217,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -248,7 +248,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -271,7 +271,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -294,7 +294,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -325,7 +325,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -348,7 +348,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -371,7 +371,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -394,7 +394,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -410,7 +410,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -441,7 +441,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -455,7 +455,7 @@
             "signature": [
               "{ id: \"application-log-onboarding\"; } | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -486,7 +486,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -502,7 +502,7 @@
             "signature": [
               "\"kubernetes\" | \"auto-detect\" | \"customLogs\" | \"otel-logs\" | \"firehose\" | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -516,7 +516,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -547,7 +547,7 @@
             "text": "DatasetLocatorParams"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -560,7 +560,7 @@
             "description": [
               "\nData view id to select"
             ],
-            "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -591,7 +591,7 @@
             "text": "DatasetLocatorParams"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -607,7 +607,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -620,7 +620,7 @@
             "description": [
               "\nDataset name to be selected.\nex: system.syslog"
             ],
-            "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -651,7 +651,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/uptime.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -665,7 +665,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -679,7 +679,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -693,7 +693,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -707,7 +707,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -738,7 +738,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/uptime.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -752,7 +752,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -766,7 +766,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -780,7 +780,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -800,7 +800,7 @@
         "signature": [
           "\"observabilityAIAssistant\""
         ],
-        "path": "packages/deeplinks/observability/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -815,7 +815,7 @@
         "signature": [
           "\"ALL_DATASETS_LOCATOR\""
         ],
-        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -844,7 +844,7 @@
             "text": "ObservabilityLogsExplorerLocationState"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -859,7 +859,7 @@
         "signature": [
           "\"profiling\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"streams\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\""
         ],
-        "path": "packages/deeplinks/observability/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -874,7 +874,7 @@
         "signature": [
           "\"DATA_QUALITY_DETAILS_LOCATOR\""
         ],
-        "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -889,7 +889,7 @@
         "signature": [
           "\"DATA_QUALITY_LOCATOR\""
         ],
-        "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -918,7 +918,7 @@
             "text": "ObservabilityLogsExplorerLocationState"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -940,7 +940,7 @@
           },
           " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\""
         ],
-        "path": "packages/deeplinks/observability/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -955,7 +955,7 @@
         "signature": [
           "{ type: \"document-field\"; field: string; width?: number | undefined; }"
         ],
-        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -978,7 +978,7 @@
           },
           " | undefined; }"
         ],
-        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1007,7 +1007,7 @@
             "text": "SmartFieldGridColumnOptions"
           }
         ],
-        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1022,7 +1022,7 @@
         "signature": [
           "\"last-used-logs-viewer\""
         ],
-        "path": "packages/deeplinks/observability/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1037,7 +1037,7 @@
         "signature": [
           "{ mode: \"include\"; values: string[]; }"
         ],
-        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1052,7 +1052,7 @@
         "signature": [
           "\"logs\""
         ],
-        "path": "packages/deeplinks/observability/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1067,7 +1067,7 @@
         "signature": [
           "\"LOGS_EXPLORER_LOCATOR\""
         ],
-        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1082,7 +1082,7 @@
         "signature": [
           "\"profiling\""
         ],
-        "path": "packages/deeplinks/observability/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1097,7 +1097,7 @@
         "signature": [
           "\"ux\""
         ],
-        "path": "packages/deeplinks/observability/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1112,7 +1112,7 @@
         "signature": [
           "\"OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR\""
         ],
-        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1127,7 +1127,7 @@
         "signature": [
           "\"obs-logs-explorer:lastUsedViewer\""
         ],
-        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1142,7 +1142,7 @@
         "signature": [
           "\"observability-logs-explorer\""
         ],
-        "path": "packages/deeplinks/observability/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1157,7 +1157,7 @@
         "signature": [
           "\"observabilityOnboarding\""
         ],
-        "path": "packages/deeplinks/observability/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1172,7 +1172,7 @@
         "signature": [
           "\"OBSERVABILITY_ONBOARDING_LOCATOR\""
         ],
-        "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1187,7 +1187,7 @@
         "signature": [
           "\"observability-overview\""
         ],
-        "path": "packages/deeplinks/observability/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1202,7 +1202,7 @@
         "signature": [
           "{ pause: boolean; value: number; }"
         ],
-        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1217,7 +1217,7 @@
         "signature": [
           "\"SINGLE_DATASET_LOCATOR\""
         ],
-        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1232,7 +1232,7 @@
         "signature": [
           "{ type: \"smart-field\"; smartField: \"content\" | \"resource\"; width?: number | undefined; }"
         ],
-        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1247,7 +1247,7 @@
         "signature": [
           "\"UPTIME_OVERVIEW_LOCATOR\""
         ],
-        "path": "packages/deeplinks/observability/locators/uptime.ts",
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
