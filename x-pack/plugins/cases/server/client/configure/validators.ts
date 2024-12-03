@@ -6,11 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
+import type { ConfigurationRequest } from '../../../common/types/api';
 import type {
   CustomFieldsConfiguration,
   CustomFieldTypes,
   TemplatesConfiguration,
 } from '../../../common/types/domain';
+import { ListCustomFieldConfigurationRt } from '../../../common/types/domain';
 import { validateDuplicatedKeysInRequest } from '../validators';
 import {
   validateCustomFieldKeysAgainstConfiguration,
@@ -44,6 +46,38 @@ export const validateCustomFieldTypesInRequest = ({
   if (invalidFields.length > 0) {
     throw Boom.badRequest(
       `Invalid custom field types in request for the following labels: ${invalidFields.join(', ')}`
+    );
+  }
+};
+
+export const validateCustomFieldDefaultValuesInRequest = ({
+  requestCustomFields,
+}: {
+  requestCustomFields?: ConfigurationRequest['customFields'];
+}) => {
+  if (!Array.isArray(requestCustomFields)) {
+    return;
+  }
+
+  const invalidFields: string[] = [];
+
+  for (const requestField of requestCustomFields) {
+    if (ListCustomFieldConfigurationRt.is(requestField)) {
+      const hasDefaultValue = Boolean(requestField.defaultValue);
+      const defaultValueIsInOptions = requestField.options.some(
+        (o) => o.key === requestField.defaultValue
+      );
+      if (hasDefaultValue && !defaultValueIsInOptions) {
+        invalidFields.push(`"${requestField.label}"`);
+      }
+    }
+  }
+
+  if (invalidFields.length > 0) {
+    throw Boom.badRequest(
+      `Default value is not present in options for the following fields: ${invalidFields.join(
+        ', '
+      )}`
     );
   }
 };

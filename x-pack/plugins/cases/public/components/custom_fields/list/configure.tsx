@@ -20,6 +20,7 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldList>['Configure'] = ()
     required: false,
     label: i18n.DEFAULT_VALUE.toLocaleLowerCase(),
   });
+  const [hasInitialized, setHasInitialized] = useState(false);
   const [currentOptions, setCurrentOptions] = useState<ListCustomFieldOption[]>(INITIAL_OPTIONS);
   const currentEuiSelectOptions = useMemo(
     () => listCustomFieldOptionsToEuiSelectOptions(currentOptions),
@@ -33,7 +34,19 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldList>['Configure'] = ()
     if (isEqual(currentOptions, INITIAL_OPTIONS) && fields.options?.value) {
       setCurrentOptions(fields.options?.value as ListCustomFieldOption[]);
     }
+    setHasInitialized(true);
   }, [currentOptions, fields]);
+
+  // Clear default value if it's removed from the options list
+  useEffect(() => {
+    if (
+      hasInitialized &&
+      fields.defaultValue?.value &&
+      !currentOptions.find((o) => o.key === fields.defaultValue?.value)
+    ) {
+      fields.defaultValue.setValue('');
+    }
+  }, [currentOptions, fields, hasInitialized]);
 
   return (
     <>
