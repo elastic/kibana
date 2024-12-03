@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { eventResponseSchema } from './event';
+import { eventTypeSchema } from '../schema';
 
 const getEventsParamsSchema = z
   .object({
@@ -17,6 +18,18 @@ const getEventsParamsSchema = z
         rangeFrom: z.string(),
         rangeTo: z.string(),
         filter: z.string(),
+        types: z.string().transform((val, ctx) => {
+          const eventTypes = val.split(',');
+          const hasInvalidType = eventTypes.some((type) => !eventTypeSchema.parse(type));
+          if (hasInvalidType) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Invalid event type',
+            });
+            return z.NEVER;
+          }
+          return eventTypes;
+        }),
       })
       .partial(),
   })

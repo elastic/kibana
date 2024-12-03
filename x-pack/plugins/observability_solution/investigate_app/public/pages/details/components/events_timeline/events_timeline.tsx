@@ -15,7 +15,7 @@ import { Group } from '@kbn/observability-alerting-rule-utils';
 import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { AnnotationEvent } from './annotation_event';
-import { TIME_LINE_THEME } from './timeline_theme';
+import { TIMELINE_THEME } from './timeline_theme';
 import { useFetchEvents } from '../../../../hooks/use_fetch_events';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -38,6 +38,7 @@ export const EventsTimeLine = () => {
     rangeFrom: globalParams.timeRange.from,
     rangeTo: globalParams.timeRange.to,
     filter,
+    types: ['alert', 'annotation'],
   });
 
   const handleCursorUpdate = useActiveCursor(dependencies.start.charts.activeCursor, chartRef, {
@@ -73,7 +74,7 @@ export const EventsTimeLine = () => {
           min: moment(globalParams.timeRange.from).valueOf(),
           max: moment(globalParams.timeRange.to).valueOf(),
         }}
-        theme={TIME_LINE_THEME}
+        theme={TIMELINE_THEME}
         baseTheme={baseTheme}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{

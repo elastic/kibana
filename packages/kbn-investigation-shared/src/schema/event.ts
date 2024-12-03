@@ -48,4 +48,4 @@ const eventSchema = z.intersection(
   z.discriminatedUnion('eventType', [annotationEventSchema, alertEventSchema])
 );
 
-export { eventSchema };
+export { eventSchema, eventTypeSchema };

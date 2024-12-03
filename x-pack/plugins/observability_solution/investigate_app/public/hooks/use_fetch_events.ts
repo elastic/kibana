@@ -24,10 +24,12 @@ export function useFetchEvents({
   rangeFrom,
   rangeTo,
   filter,
+  types,
 }: {
   rangeFrom?: string;
   rangeTo?: string;
   filter?: string;
+  types?: string[];
 }): Response {
   const {
     core: {
@@ -37,13 +39,14 @@ export function useFetchEvents({
   } = useKibana();
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: investigationKeys.events(rangeFrom, rangeTo, filter),
+    queryKey: investigationKeys.events({ rangeFrom, rangeTo, filter, types }),
     queryFn: async ({ signal }) => {
       return await http.get<GetEventsResponse>(`/api/observability/events`, {
         query: {
           rangeFrom,
           rangeTo,
           filter,
+          ...(!!types && types.length > 0 && { types: types.join(',') }),
         },
         version: '2023-10-31',
         signal,

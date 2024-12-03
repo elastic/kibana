@@ -334,12 +334,17 @@ const getEventsRoute = createInvestigateAppServerRoute({
     const alertsClient: AlertsClient = await getAlertsClient({ plugins, request });
     const events: GetEventsResponse = [];
 
-    if (annotationsClient) {
+    const includeAllEventTypes = !params?.query?.types || params.query.types.length === 0;
+
+    if (
+      annotationsClient &&
+      (includeAllEventTypes || params?.query?.types?.includes('annotation'))
+    ) {
       const annotationEvents = await getAnnotationEvents(params?.query ?? {}, annotationsClient);
       events.push(...annotationEvents);
     }
 
-    if (alertsClient) {
+    if (alertsClient && (includeAllEventTypes || params?.query?.types?.includes('alert'))) {
       const alertEvents = await getAlertEvents(params?.query ?? {}, alertsClient);
       events.push(...alertEvents);
     }

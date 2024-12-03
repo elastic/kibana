@@ -12,8 +12,8 @@ export const investigationKeys = {
   userProfiles: (profileIds: Set<string>) =>
     [...investigationKeys.all, 'userProfiles', ...profileIds] as const,
   tags: () => [...investigationKeys.all, 'tags'] as const,
-  events: (rangeFrom?: string, rangeTo?: string, filter?: string) =>
-    [...investigationKeys.all, 'events', rangeFrom, rangeTo, filter] as const,
+  events: (params: { rangeFrom?: string; rangeTo?: string; filter?: string; types?: string[] }) =>
+    [...investigationKeys.all, 'events', params] as const,
   stats: () => [...investigationKeys.all, 'stats'] as const,
   lists: () => [...investigationKeys.all, 'list'] as const,
   list: (params: { page: number; perPage: number; search?: string; filter?: string }) =>
