@@ -184,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(policy).to.eql(customLifecycle.policy);
     });
 
-    it('is not available to unauthorized users', async () => {
+    it('should deny access for users without the ai_assistant privilege', async () => {
       const UNAUTHZD_TEST_USERNAME = 'UNAUTHZD_TEST_USERNAME';
       const UNAUTHZD_TEST_USER_PASSWORD = 'UNAUTHZD_TEST_USER_PASSWORD';
 

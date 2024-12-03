@@ -14,8 +14,11 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { SupertestReturnType } from '../../common/observability_ai_assistant_api_client';
+import { unauthorizedUser } from '../../common/users/users';
+import { resolveEndpoint } from '../../common/resolve_endpoint';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const conversationCreate: ConversationCreateRequest = {
@@ -247,6 +250,86 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(updateAfterCreateResponse.body.conversation.title).to.eql(
             conversationUpdate.conversation.title
           );
+        });
+      });
+    });
+
+    describe('security roles and access privileges', () => {
+      let createResponse: Awaited<
+        SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
+      >;
+
+      before(async () => {
+        createResponse = await observabilityAIAssistantAPIClient
+          .editor({
+            endpoint: 'POST /internal/observability_ai_assistant/conversation',
+            params: {
+              body: {
+                conversation: conversationCreate,
+              },
+            },
+          })
+          .expect(200);
+      });
+
+      const routes: Array<{
+        endpoint: string;
+        method: 'get' | 'post' | 'put' | 'delete';
+        payload?: Record<string, any>;
+        requiredPrivileges: string[];
+      }> = [
+        {
+          endpoint: '/internal/observability_ai_assistant/conversations',
+          method: 'post',
+          requiredPrivileges: ['ai_assistant'],
+        },
+        {
+          endpoint: '/internal/observability_ai_assistant/conversation/{conversationId}',
+          method: 'put',
+          payload: {
+            path: { conversationId: 'test-id' },
+            body: { conversation: conversationUpdate },
+          },
+          requiredPrivileges: ['ai_assistant'],
+        },
+        {
+          endpoint: '/internal/observability_ai_assistant/conversation/{conversationId}',
+          method: 'get',
+          payload: {
+            path: { conversationId: 'test-id' },
+          },
+          requiredPrivileges: ['ai_assistant'],
+        },
+        {
+          endpoint: '/internal/observability_ai_assistant/conversation/{conversationId}',
+          method: 'delete',
+          payload: {
+            path: { conversationId: 'test-id' },
+          },
+          requiredPrivileges: ['ai_assistant'],
+        },
+      ];
+
+      routes.forEach((route) => {
+        const { endpoint, method, payload } = route;
+
+        describe(`${method.toUpperCase()} ${endpoint}`, () => {
+          it('should deny access for unauthorized users', async () => {
+            const request = supertestWithoutAuth[method](
+              resolveEndpoint(
+                endpoint,
+                payload?.path ? { conversationId: createResponse.body.conversation.id } : {}
+              )
+            )
+              .auth(unauthorizedUser.username, unauthorizedUser.password)
+              .set('kbn-xsrf', 'true');
+
+            if (payload?.body) {
+              request.send(payload.body);
+            }
+
+            await request.expect(403);
+          });
         });
       });
     });

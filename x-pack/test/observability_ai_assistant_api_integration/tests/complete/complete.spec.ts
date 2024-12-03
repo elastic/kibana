@@ -32,14 +32,16 @@ import {
   getConversationUpdatedEvent,
 } from '../conversations/helpers';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+import { unauthorizedUser, editor } from '../../common/users/users';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  const COMPLETE_API_URL = `/internal/observability_ai_assistant/chat/complete`;
+  const COMPLETE_API_URL = '/internal/observability_ai_assistant/chat/complete';
 
   const messages: Message[] = [
     {
@@ -486,5 +488,44 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     // todo
     it.skip('executes a function', async () => {});
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        await supertestWithoutAuth
+          .post(COMPLETE_API_URL)
+          .auth(unauthorizedUser.username, unauthorizedUser.password)
+          .send({
+            messages,
+            connectorId,
+            persist: false,
+            screenContexts: [],
+            scopes: ['all'],
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(403)
+          .then(({ body }: any) => {
+            expect(body).to.eql({
+              statusCode: 403,
+              error: 'Forbidden',
+              message: `API [POST ${COMPLETE_API_URL}] is unauthorized for user, this action is granted by the Kibana privileges [ai_assistant]`,
+            });
+          });
+      });
+
+      it('should allow access for users with the ai_assistant privilege', async () => {
+        await supertest
+          .post(COMPLETE_API_URL)
+          .auth(editor.username, editor.password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            messages,
+            connectorId,
+            persist: false,
+            screenContexts: [],
+            scopes: ['all'],
+          })
+          .expect(200);
+      });
+    });
   });
 }

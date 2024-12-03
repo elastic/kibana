@@ -13,11 +13,15 @@ import {
   TINY_ELSER,
   deleteInferenceEndpoint,
 } from './helpers';
+import { unauthorizedUser } from '../../common/users/users';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+  const KNOWLEDGE_BASE_STATUS_API_URL = '/internal/observability_ai_assistant/kb/status';
 
   describe('/internal/observability_ai_assistant/kb/status', () => {
     beforeEach(async () => {
@@ -41,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('returns correct status after knowledge base is setup', async () => {
       const res = await observabilityAIAssistantAPIClient
-        .editor({ endpoint: 'GET /internal/observability_ai_assistant/kb/status' })
+        .editor({ endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}` })
         .expect(200);
 
       expect(res.body.ready).to.be(true);
@@ -54,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const res = await observabilityAIAssistantAPIClient
         .editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+          endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
         })
         .expect(200);
 
@@ -70,7 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const res = await observabilityAIAssistantAPIClient
         .editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+          endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
         })
         .expect(200);
 
@@ -79,6 +83,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(res.body.errorMessage).to.include.string(
         'Inference endpoint not found [obs_ai_assistant_kb_inference]'
       );
+    });
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        await supertestWithoutAuth
+          .get(KNOWLEDGE_BASE_STATUS_API_URL)
+          .auth(unauthorizedUser.username, unauthorizedUser.password)
+          .set('kbn-xsrf', 'true')
+          .expect(403)
+          .then(({ body }: any) => {
+            expect(body).to.eql({
+              statusCode: 403,
+              error: 'Forbidden',
+              message: `API [GET ${KNOWLEDGE_BASE_STATUS_API_URL}] is unauthorized for user, this action is granted by the Kibana privileges [ai_assistant]`,
+            });
+          });
+      });
     });
   });
 }

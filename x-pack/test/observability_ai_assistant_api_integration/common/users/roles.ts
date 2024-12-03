@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const AI_ASSISTANT_ROLE_NAME = 'ai_assistant_role';
+
 // Example role:
 // export const allAccessRole: Role = {
 //   name: 'all_access',
@@ -49,4 +51,21 @@ export interface Role {
   };
 }
 
-export const allRoles = [];
+const kibanaPrivileges = [
+  {
+    feature: {
+      observabilityAIAssistant: ['all'],
+      actions: ['read'],
+    },
+    spaces: ['*'],
+  },
+];
+
+export const aiAssistantRole: Role = {
+  name: AI_ASSISTANT_ROLE_NAME,
+  privileges: {
+    kibana: kibanaPrivileges,
+  },
+};
+
+export const allRoles = [aiAssistantRole];

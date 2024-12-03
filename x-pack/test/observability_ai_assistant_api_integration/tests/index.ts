@@ -7,6 +7,7 @@
 import globby from 'globby';
 import path from 'path';
 import { createUsersAndRoles } from '../common/users/create_users_and_roles';
+// import { deleteUnauthorizedUser } from '../common/users/delete_user';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
 const cwd = path.join(__dirname);
@@ -23,6 +24,11 @@ export default function observabilityAIAssistantApiIntegrationTests({
     before(async () => {
       await createUsersAndRoles(getService);
     });
+
+    // // Delete unauthorized user after running tests
+    // after(async () => {
+    //   await deleteUnauthorizedUser(getService);
+    // });
 
     tests.forEach((testName) => {
       describe(testName, () => {
