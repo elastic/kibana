@@ -9372,7 +9372,7 @@
     "@smithy/url-parser" "^3.0.8"
     tslib "^2.6.2"
 
-"@smithy/eventstream-codec@^3.1.1", "@smithy/eventstream-codec@^3.1.7", "@smithy/eventstream-codec@^3.1.9":
+"@smithy/eventstream-codec@^3.1.1", "@smithy/eventstream-codec@^3.1.9":
   version "3.1.9"
   resolved "https://registry.yarnpkg.com/@smithy/eventstream-codec/-/eventstream-codec-3.1.9.tgz#4271354e75e57d30771fca307da403896c657430"
   integrity sha512-F574nX0hhlNOjBnP+noLtsPFqXnWh2L0+nZKCwcu7P7J8k+k+rdIDs+RMnrMwrzhUE4mwMgyN0cYnEn0G8yrnQ==
