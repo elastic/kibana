@@ -24,6 +24,7 @@ export async function validateActions(
   context: RulesClientContext,
   ruleType: UntypedNormalizedRuleType,
   data: ValidateActionsData,
+  consumer: string,
   allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
   const { actions, notifyWhen, throttle, systemActions = [] } = data;
@@ -76,6 +77,30 @@ export async function validateActions(
       );
     }
   }
+
+  // check for invalid EDR actions
+  const allConnectorTypes = await actionsClient.listTypes({});
+  const edrConnectorTypes = allConnectorTypes.filter((type) => type.isEdrActionType);
+  const edrConnectorTypesMap = Object.fromEntries(edrConnectorTypes.map((type) => [type.id, type]));
+
+  const edrConnectorTypeIds = Object.keys(edrConnectorTypesMap);
+  const actionTypeIds = new Set(actionResults.map((result) => result.actionTypeId));
+  const edrActionTypeIds = edrConnectorTypeIds.filter((id) => actionTypeIds.has(id));
+
+  const hasInvalidEdrActions =
+    edrActionTypeIds.length > 0 &&
+    edrActionTypeIds.some(
+      (actionId) => !edrConnectorTypesMap[actionId]?.supportedFeatureIds.includes(consumer)
+    );
+
+  if (hasInvalidEdrActions) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.edrConnector', {
+        defaultMessage: 'Invalid EDR connectors.',
+      })
+    );
+  }
+
   // check for actions with invalid action groups
   const { actionGroups: alertTypeActionGroups } = ruleType;
   const usedAlertActionGroups = actions.map((action) => action.group);

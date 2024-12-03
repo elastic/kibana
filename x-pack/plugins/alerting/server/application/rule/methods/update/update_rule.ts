@@ -211,7 +211,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
   const actionsClient = await context.getActionsClient();
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
-  await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
+  await validateActions(context, ruleType, data, consumer, allowMissingConnectorSecrets);
   await validateAndAuthorizeSystemActions({
     actionsClient,
     actionsAuthorization: context.actionsAuthorization,

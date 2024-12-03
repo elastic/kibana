@@ -9,7 +9,7 @@ import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { EdrForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator, ActionExecutionSourceType } from '@kbn/actions-plugin/server';
 import { CONNECTORS_EDR_EXECUTE_PRIVILEGE } from '@kbn/actions-plugin/server/feature';
 import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
@@ -35,7 +35,7 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
     secrets: SentinelOneSecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
-  supportedFeatureIds: [SecurityConnectorFeatureId],
+  supportedFeatureIds: [EdrForSecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
   isEdrActionType: true,

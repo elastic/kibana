@@ -15,13 +15,14 @@ export interface UseLoadConnectorTypesProps {
   http: HttpStart;
   includeSystemActions?: boolean;
   enabled?: boolean;
+  featureId?: string;
 }
 
 export const useLoadConnectorTypes = (props: UseLoadConnectorTypesProps) => {
-  const { http, includeSystemActions, enabled = true } = props;
+  const { http, includeSystemActions, enabled = true, featureId } = props;
 
   const queryFn = () => {
-    return fetchConnectorTypes({ http, includeSystemActions });
+    return fetchConnectorTypes({ http, includeSystemActions, featureId });
   };
 
   const { data, isLoading, isFetching, isInitialLoading } = useQuery({

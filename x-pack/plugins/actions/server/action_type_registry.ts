@@ -24,7 +24,6 @@ import {
   ActionTypeSecrets,
   ActionTypeParams,
 } from './types';
-import { isBidirectionalConnectorType } from './lib/bidirectional_connectors';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -242,27 +241,21 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(featureId?: string): CommonActionType[] {
-    return (
-      Array.from(this.actionTypes)
-        .filter(([_, actionType]) =>
-          featureId ? actionType.supportedFeatureIds.includes(featureId) : true
-        )
-        // Temporarily don't return SentinelOne and Crowdstrike connector for Security Solution Rule Actions
-        .filter(([actionTypeId]) =>
-          featureId ? !isBidirectionalConnectorType(actionTypeId) : true
-        )
-        .map(([actionTypeId, actionType]) => ({
-          id: actionTypeId,
-          name: actionType.name,
-          minimumLicenseRequired: actionType.minimumLicenseRequired,
-          enabled: this.isActionTypeEnabled(actionTypeId),
-          enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-          enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-          supportedFeatureIds: actionType.supportedFeatureIds,
-          isSystemActionType: !!actionType.isSystemActionType,
-          isEdrActionType: !!actionType.isEdrActionType,
-        }))
-    );
+    return Array.from(this.actionTypes)
+      .filter(([_, actionType]) => {
+        return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
+      })
+      .map(([actionTypeId, actionType]) => ({
+        id: actionTypeId,
+        name: actionType.name,
+        minimumLicenseRequired: actionType.minimumLicenseRequired,
+        enabled: this.isActionTypeEnabled(actionTypeId),
+        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
+        supportedFeatureIds: actionType.supportedFeatureIds,
+        isSystemActionType: !!actionType.isSystemActionType,
+        isEdrActionType: !!actionType.isEdrActionType,
+      }));
   }
 
   /**
