@@ -10,28 +10,7 @@ import {
   HOST_DEFINITION_VERSION,
   UNIVERSAL_DEFINITION_VERSION,
   USER_DEFINITION_VERSION,
-} from './entity_types';
-import type { MappingProperties } from './types';
-
-export const BASE_ENTITY_INDEX_MAPPING: MappingProperties = {
-  '@timestamp': {
-    type: 'date',
-  },
-  'asset.criticality': {
-    type: 'keyword',
-  },
-  'entity.name': {
-    type: 'keyword',
-    fields: {
-      text: {
-        type: 'match_only_text',
-      },
-    },
-  },
-  'entity.source': {
-    type: 'keyword',
-  },
-};
+} from './entity_descriptions';
 
 export const VERSIONS_BY_ENTITY_TYPE: Record<EntityType, string> = {
   host: HOST_DEFINITION_VERSION,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { collectValues as collect } from '../definition_utils';
+import { collectValues as collect } from './field_utils';
 import type { EntityDescription } from '../types';
-import { getCommonUnitedFieldDefinitions } from './common';
+import { getCommonFieldDescriptions } from './common';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
 export const HOST_IDENTITY_FIELD = 'host.name';
@@ -43,6 +43,6 @@ export const hostEntityEngineDescription: EntityDescription = {
     collect({ source: 'host.mac' }),
     collect({ source: 'host.type' }),
     collect({ source: 'host.architecture' }),
-    ...getCommonUnitedFieldDefinitions('host'),
+    ...getCommonFieldDescriptions('host'),
   ],
 };

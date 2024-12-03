@@ -6,8 +6,8 @@
  */
 
 import type { EntityDescription } from '../types';
+import { collectValues as collect } from './field_utils';
 
-import { collectValues as collect } from '../definition_utils';
 export const UNIVERSAL_DEFINITION_VERSION = '1.0.0';
 export const UNIVERSAL_IDENTITY_FIELD = 'related.entity';
 

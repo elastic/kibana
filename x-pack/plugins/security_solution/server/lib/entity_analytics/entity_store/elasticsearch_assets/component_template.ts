@@ -10,13 +10,13 @@ import {
   EngineComponentResourceEnum,
   type EngineComponentStatus,
 } from '../../../../../common/api/entity_analytics';
-import type { EntityEngineInstallationDescriptor } from '../united_entity_definitions/types';
+import type { EntityEngineInstallationDescriptor } from '../installation/types';
 
 const getComponentTemplateName = (definitionId: string) => `${definitionId}-latest@platform`;
 
 interface Options {
   /**
-   * The entity engined description id
+   * The entity engine description id
    **/
   id: string;
   esClient: ElasticsearchClient;

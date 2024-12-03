@@ -8,4 +8,4 @@
 export * from './host';
 export * from './user';
 export * from './universal';
-export { getCommonUnitedFieldDefinitions } from './common';
+export { getCommonFieldDescriptions } from './common';

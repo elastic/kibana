@@ -6,7 +6,7 @@
  */
 
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import type { FieldDescription } from './types';
+import type { FieldDescription } from '../../installation/types';
 
 export const collectValues = ({
   destination,

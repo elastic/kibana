@@ -18,8 +18,8 @@ import {
 
 import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
 
-import type { EntityEngineInstallationDescriptor } from '../united_entity_definitions/types';
 import { fieldOperatorToIngestProcessor } from '../field_retention_definition';
+import type { EntityEngineInstallationDescriptor } from '../installation/types';
 
 const getPlatformPipelineId = (descriptionId: string) => {
   return `${descriptionId}-latest@platform`;
@@ -55,49 +55,6 @@ const buildIngestPipeline = ({
     version: description.version,
   });
 
-  /**
-   * 
-
-  const old = [
-    ...(debugMode ? [debugDeepCopyContextStep()] : []),
-    {
-      enrich: {
-        policy_name: enrichPolicyName,
-        field: matchField,
-        target_field: ENRICH_FIELD,
-      },
-    },
-    {
-      set: {
-        field: '@timestamp',
-        value: '{{entity.last_seen_timestamp}}',
-      },
-    },
-    {
-      set: {
-        field: 'entity.name',
-        value: `{{${getIdentityFieldForEntityType(entityType)}}}`,
-      },
-    },
-    ...getDotExpanderSteps(allEntityFields),
-    ...retentionDefinitionToIngestProcessorSteps(fieldRetentionDefinition, {
-      enrichField: ENRICH_FIELD,
-    }),
-    ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${entityType}.risk`]),
-    removeEntityDefinitionFieldsStep(),
-    ...(!debugMode
-      ? [
-          {
-            remove: {
-              ignore_failure: true,
-              field: ENRICH_FIELD,
-            },
-          },
-        ]
-      : []),
-  ];
-  */
-
   return [
     ...(debugMode ? [debugDeepCopyContextStep()] : []),
     {
@@ -120,12 +77,8 @@ const buildIngestPipeline = ({
       },
     },
     ...getDotExpanderSteps(allEntityFields),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    ...description.fields.map(({ destination, retention: retention_operator }) =>
-      fieldOperatorToIngestProcessor(
-        { field: destination, ...retention_operator },
-        { enrichField: ENRICH_FIELD }
-      )
+    ...description.fields.map((field) =>
+      fieldOperatorToIngestProcessor(field, { enrichField: ENRICH_FIELD })
     ),
     ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${description.entityType}.risk`]),
     removeEntityDefinitionFieldsStep(),

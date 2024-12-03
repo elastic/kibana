@@ -6,11 +6,11 @@
  */
 
 import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
+import type { FieldDescription } from '../../installation/types';
 
-import { oldestValue, newestValue } from '../definition_utils';
-import type { FieldDescription } from '../types';
+import { oldestValue, newestValue } from './field_utils';
 
-export const getCommonUnitedFieldDefinitions = (entityType: EntityType): FieldDescription[] => {
+export const getCommonFieldDescriptions = (entityType: EntityType): FieldDescription[] => {
   return [
     oldestValue({
       source: '_index',

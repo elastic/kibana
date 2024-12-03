@@ -9,13 +9,13 @@ import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/ty
 import { preferNewestValueProcessor } from './prefer_newest_value';
 import { preferOldestValueProcessor } from './prefer_oldest_value';
 import { collectValuesProcessor } from './collect_values';
-import type { FieldDescription } from '../united_entity_definitions/types';
+import type { FieldDescription } from '../installation/types';
 
 /**
  * Converts a field retention operator to an ingest processor.
  * An ingest processor is a step that can be added to an ingest pipeline.
  */
-export const deriveIngestProcessor = (
+export const fieldOperatorToIngestProcessor = (
   field: FieldDescription,
   options: { enrichField: string }
 ): IngestProcessorContainer => {
