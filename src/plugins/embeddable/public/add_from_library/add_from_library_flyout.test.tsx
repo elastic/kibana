@@ -72,7 +72,9 @@ describe('add from library flyout', () => {
   });
 
   test('renders SavedObjectFinder', async () => {
-    const { container: componentContainer } = render(<AddFromLibraryFlyout container={container} />);
+    const { container: componentContainer } = render(
+      <AddFromLibraryFlyout container={container} />
+    );
 
     // component should not contain an extra flyout
     // https://github.com/elastic/kibana/issues/64789

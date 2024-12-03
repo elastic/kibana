@@ -99,9 +99,7 @@ export function mockFilterableEmbeddable<OriginalEmbeddableType>(
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
-    registerAddFromLibraryType: jest
-      .fn()
-      .mockImplementation(registerAddFromLibraryType),
+    registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     registerEmbeddableFactory: jest.fn(),
     registerEnhancement: jest.fn(),

@@ -27,9 +27,7 @@ import {
   contentManagement,
   usageCollection,
 } from '../kibana_services';
-import {
-  EmbeddableFactoryNotFoundError,
-} from '../lib';
+import { EmbeddableFactoryNotFoundError } from '../lib';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
 
 const runAddTelemetry = (
@@ -47,11 +45,9 @@ const runAddTelemetry = (
 
 export const AddFromLibraryFlyout = ({
   container,
-  onAddPanel,
   modalTitleId,
 }: {
   container: CanAddNewPanel;
-  onAddPanel?: (id: string) => void;
   modalTitleId?: string;
 }) => {
   const libraryTypes = useAddFromLibraryTypes();
@@ -68,11 +64,11 @@ export const AddFromLibraryFlyout = ({
         core.notifications.toasts.addWarning(new EmbeddableFactoryNotFoundError(type).message);
         return;
       }
-      
+
       libraryType.onAdd(container, savedObject);
       runAddTelemetry(container, savedObject, libraryType.savedObjectMetaData);
     },
-    [container, onAddPanel]
+    [container]
   );
 
   return (

@@ -14,9 +14,7 @@ import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-p
 import { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { useMemo } from 'react';
 
-export type RegistryItem<
-  TSavedObjectAttributes extends FinderAttributes = FinderAttributes
-> = {
+export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
   onAdd: (
     container: CanAddNewPanel,
     savedObject: SavedObjectCommon<TSavedObjectAttributes>
@@ -26,9 +24,7 @@ export type RegistryItem<
 
 const registry: Map<string, RegistryItem<any>> = new Map();
 
-export const registerAddFromLibraryType = <
-  TSavedObjectAttributes extends FinderAttributes
->({
+export const registerAddFromLibraryType = <TSavedObjectAttributes extends FinderAttributes>({
   onAdd,
   savedObjectType,
   savedObjectName,
@@ -67,8 +63,8 @@ export const registerAddFromLibraryType = <
 export function useAddFromLibraryTypes() {
   return useMemo(() => {
     return [...registry.entries()]
-    .map(([type, registryItem]) => registryItem.savedObjectMetaData)
-    .sort((a, b) => a.type.localeCompare(b.type));
+      .map(([type, registryItem]) => registryItem.savedObjectMetaData)
+      .sort((a, b) => a.type.localeCompare(b.type));
   }, []);
 }
 

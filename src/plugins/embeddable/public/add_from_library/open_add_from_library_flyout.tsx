@@ -25,11 +25,9 @@ const htmlId = htmlIdGenerator('modalTitleId');
 
 export const openAddFromLibraryFlyout = ({
   container,
-  onAddPanel,
   onClose,
 }: {
   container: CanAddNewPanel;
-  onAddPanel?: (id: string) => void;
   onClose?: () => void;
 }): OverlayRef => {
   const modalTitleId = htmlId();
@@ -37,11 +35,7 @@ export const openAddFromLibraryFlyout = ({
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyAddPanelFlyout
-          container={container}
-          onAddPanel={onAddPanel}
-          modalTitleId={modalTitleId}
-        />
+        <LazyAddPanelFlyout container={container} modalTitleId={modalTitleId} />
       </Suspense>,
       core
     ),
