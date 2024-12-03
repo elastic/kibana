@@ -14,7 +14,7 @@ import {
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import React, { ComponentType } from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -22,6 +22,7 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ChatRequestData, MessageRole } from '../common/types';
 
 export * from '../common/types';
@@ -37,6 +38,7 @@ export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {}
 
 export interface AppPluginSetupDependencies {
+  cloud?: CloudSetup;
   share: SharePluginSetup;
 }
 
@@ -51,6 +53,7 @@ export interface AppPluginStartDependencies {
   data: DataPublicPluginStart;
   searchNavigation?: SearchNavigationPluginStart;
   security: SecurityPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;

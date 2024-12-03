@@ -53,6 +53,7 @@ export class SearchPlaygroundPlugin
 
     features.registerKibanaFeature({
       id: PLUGIN_ID,
+      minimumLicense: 'enterprise',
       name: PLUGIN_NAME,
       order: 1,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
