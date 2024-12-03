@@ -18,11 +18,12 @@ import {
   DataStreamDocsStat,
   UpdateFieldLimitResponse,
   DataStreamRolloverResponse,
+  CheckAndLoadIntegrationResponse,
 } from '../../../common/api_types';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { datasetQualityPrivileges } from '../../services';
-import { getDataStreamDetails, getDataStreamSettings } from './get_data_stream_details';
+import { getDataStreamDetails } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
@@ -34,6 +35,8 @@ import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
 import { getAggregatedDatasetPaginatedResults } from './get_dataset_aggregated_paginated_results';
 import { updateFieldLimit } from './update_field_limit';
 import { createDatasetQualityESClient } from '../../utils';
+import { getDataStreamSettings } from './get_datastream_settings';
+import { checkAndLoadIntegration } from './check_and_load_integration';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -293,6 +296,38 @@ const dataStreamSettingsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const checkAndLoadIntegrationRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/integration/check',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<CheckAndLoadIntegrationResponse> {
+    const { context, params, plugins, logger } = resources;
+    const { dataStream } = params.path;
+    const coreContext = await context.core;
+
+    // Query dataStreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const fleetPluginStart = await plugins.fleet.start();
+    const packageClient = fleetPluginStart.packageService.asInternalUser;
+
+    const integration = await checkAndLoadIntegration({
+      esClient,
+      packageClient,
+      logger,
+      dataStream,
+    });
+
+    return integration;
+  },
+});
+
 const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/details',
   params: t.type({
@@ -418,6 +453,7 @@ export const dataStreamsRouteRepository = {
   ...degradedFieldValuesRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
+  ...checkAndLoadIntegrationRoute,
   ...analyzeDegradedFieldRoute,
   ...updateFieldLimitRoute,
   ...rolloverDataStream,
