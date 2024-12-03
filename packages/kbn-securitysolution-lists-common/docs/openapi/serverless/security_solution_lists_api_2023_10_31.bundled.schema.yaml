@@ -1562,6 +1562,76 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
+  - description: >-
+      Lists can be used with detection rule exceptions to define values that
+      prevent a rule from generating alerts.
+
+
+      Lists are made up of:
+
+
+      * **List containers**: A container for values of the same Elasticsearch
+      data type. The following data types can be used:
+          * `boolean`
+          * `byte`
+          * `date`
+          * `date_nanos`
+          * `date_range`
+          * `double`
+          * `double_range`
+          * `float`
+          * `float_range`
+          * `half_float`
+          * `integer`
+          * `integer_range`
+          * `ip`
+          * `ip_range`
+          * `keyword`
+          * `long`
+          * `long_range`
+          * `short`
+          * `text`
+      * **List items**: The values used to determine whether the exception
+      prevents an alert from being generated.
+
+
+      All list items in the same list container must be of the same data type,
+      and each item defines a single value. For example, an IP list container
+      named `internal-ip-addresses-southport` contains five items, where each
+      item defines one internal IP address:
+
+      1. `192.168.1.1`
+
+      2. `192.168.1.3`
+
+      3. `192.168.1.18`
+
+      4. `192.168.1.12`
+
+      5. `192.168.1.7`
+
+
+      To use these IP addresses as values for defining rule exceptions, use the
+      Security exceptions API to create an exception item that references the
+      `internal-ip-addresses-southport` list.
+
+      > info
+
+      > Lists cannot be added directly to rules, nor do they define the
+      operators used to determine when exceptions are applied (`is in list`, `is
+      not in list`). Use an exception item to define the operator and associate
+      it with an exception container. You can then add the exception container
+      to a rule's `exceptions_list` object.
+
+
+      ## Lists requirements
+
+
+      Before you can start using lists, you must create the `.lists` and
+      `.items` data streams for the relevant Kibana space. To do this, use the
+      Create list data streams endpoint. Once these data streams are created,
+      your role needs privileges to manage rules. Refer to [Enable and access
+      detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui)
+      for a complete list of requirements.
     name: Security Lists API
     x-displayName: Security lists
