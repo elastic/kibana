@@ -11,17 +11,14 @@
     "public/**/*.json",
     "server/**/*.ts",
     "server/**/*.json",
-    "../../../typings/**/*",
+    "../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
-    "@kbn/navigation-plugin",
     "@kbn/i18n",
-    "@kbn/securitysolution-es-utils",
+    "@kbn/securitysolution-es-utils"
   ]
 }

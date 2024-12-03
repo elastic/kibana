@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssetInventoryPluginSetup {}
@@ -12,6 +11,5 @@ export interface AssetInventoryPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssetInventoryPluginStart {}
 
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AppPluginStartDependencies {}

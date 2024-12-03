@@ -9,13 +9,11 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 interface AssetInventoryAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
-  navigation: NavigationPublicPluginStart;
 }
 
 export const AssetInventoryApp = ({ basename }: AssetInventoryAppDeps) => {

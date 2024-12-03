@@ -12,16 +12,11 @@ import { AssetInventoryApp } from './components/app';
 
 export const renderApp = (
   { notifications, http }: CoreStart,
-  { navigation }: AppPluginStartDependencies,
+  {}: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <AssetInventoryApp
-      basename={appBasePath}
-      notifications={notifications}
-      http={http}
-      navigation={navigation}
-    />,
+    <AssetInventoryApp basename={appBasePath} notifications={notifications} http={http} />,
     element
   );
 

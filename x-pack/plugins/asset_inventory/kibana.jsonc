@@ -1,9 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/asset-inventory-plugin",
-  "owner": [
-    "@elastic/kibana-cloud-security-posture"
-  ],
+  "owner": ["@elastic/kibana-cloud-security-posture"],
   "group": "security",
   "visibility": "private",
   "description": "Centralized asset inventory experience within the Elastic Security solution. A central place for users to view and manage all their assets from different environments",
@@ -11,12 +9,9 @@
     "id": "assetInventory",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "assetInventory"
-    ],
-    "requiredPlugins": ["navigation"],
+    "configPath": ["xpack", "assetInventory"],
+    "requiredPlugins": [],
     "requiredBundles": [],
     "optionalPlugins": []
-  },
+  }
 }
