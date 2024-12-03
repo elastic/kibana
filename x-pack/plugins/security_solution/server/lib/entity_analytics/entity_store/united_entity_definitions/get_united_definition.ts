@@ -7,9 +7,10 @@
 
 import { pipe } from 'fp-ts/lib/function';
 
-import { assign, concat, map, merge, pick, update } from 'lodash/fp';
+import { assign, concat, map, merge, update } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
-import type { EntityEngineInstallationDescriptor } from './types';
+import type { EntityDescription, EntityEngineInstallationDescriptor } from './types';
 import { generateIndexMappings } from './united_entity_definition';
 
 import type { EntityStoreConfig } from '../types';
@@ -18,8 +19,14 @@ import {
   userEntityEngineDescription,
   universalEntityEngineDescription,
 } from './entity_types';
+import {
+  DEFAULT_FIELD_HISTORY_LENGTH,
+  DEFAULT_LOOKBACK_PERIOD,
+  DEFAULT_TIMESTAMP_FIELD,
+} from './constants';
+import { buildEntityDefinitionId } from '../utils';
 
-const engineDescriptionRegistry: Record<EntityType, EntityEngineInstallationDescriptor> = {
+const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   host: hostEntityEngineDescription,
   user: userEntityEngineDescription,
   universal: universalEntityEngineDescription,
@@ -28,34 +35,56 @@ const engineDescriptionRegistry: Record<EntityType, EntityEngineInstallationDesc
 
 export const getAvailableEntityTypes = () => Object.keys(engineDescriptionRegistry) as EntityType[];
 
-interface EngineDescriptionDependencies {
+interface EngineDescriptionParams {
   entityType: EntityType;
   namespace: string;
-  fieldHistoryLength?: number;
-  indexPatterns: string[];
   config: EntityStoreConfig;
+  requestParams?: {
+    indexPattern?: string;
+    fieldHistoryLength?: number;
+  };
+  defaultIndexPatterns: string[];
 }
 
-export const contextualizeEngineDescription = (_deps: EngineDescriptionDependencies) => {
-  const deps = merge({ fieldHistoryLength: 10 }, _deps);
-  const description = engineDescriptionRegistry[deps.entityType];
+export const createEngineDescription = (options: EngineDescriptionParams) => {
+  const { entityType, namespace, config, requestParams, defaultIndexPatterns } = options;
+  const fieldHistoryLength = requestParams?.fieldHistoryLength || DEFAULT_FIELD_HISTORY_LENGTH;
+
+  const indexPatterns = requestParams?.indexPattern
+    ? defaultIndexPatterns.concat(requestParams?.indexPattern.split(','))
+    : defaultIndexPatterns;
+
+  const description = engineDescriptionRegistry[entityType];
+
+  const settings: EntityEngineInstallationDescriptor['settings'] = {
+    syncDelay: config.syncDelay,
+    frequency: config.frequency,
+    lookbackPeriod: description.settings?.lookbackPeriod || DEFAULT_LOOKBACK_PERIOD,
+    timestampField: description.settings?.timestampField || DEFAULT_TIMESTAMP_FIELD,
+  };
 
   const updatedDescription = pipe(
     description,
-    update('indexPatterns', concat(deps.indexPatterns)),
-    update('settings', assign(pick(['syncDelay', 'frequency'], deps.config))),
-    update(
-      'fields',
-      map(
-        merge({
-          retention_operator: { maxLength: deps.fieldHistoryLength },
-          aggregation: { limit: deps.fieldHistoryLength },
-        })
-      )
-    )
+    set('id', buildEntityDefinitionId(entityType, namespace)),
+    update('indexPatterns', concat(indexPatterns)),
+    update('settings', assign(settings)),
+    updateRetentionFields(fieldHistoryLength),
+    addIndexMappings
   ) as EntityEngineInstallationDescriptor;
-
-  updatedDescription.indexMappings = generateIndexMappings(updatedDescription);
 
   return updatedDescription;
 };
+
+const updateRetentionFields = (fieldHistoryLength: number) =>
+  update(
+    'fields',
+    map(
+      merge({
+        retention_operator: { maxLength: fieldHistoryLength },
+        aggregation: { limit: fieldHistoryLength },
+      })
+    )
+  );
+
+const addIndexMappings = (description: EntityEngineInstallationDescriptor) =>
+  set('indexMappings', description, generateIndexMappings(description));
