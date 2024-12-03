@@ -1541,19 +1541,19 @@
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1561,35 +1561,35 @@
           },
           {
             "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
           }
         ],
         "initialIsOpen": false

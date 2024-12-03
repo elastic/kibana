@@ -636,7 +636,7 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -1436,11 +1436,11 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",

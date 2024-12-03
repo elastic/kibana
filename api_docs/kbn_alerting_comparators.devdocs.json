@@ -27,7 +27,7 @@
         "tags": [],
         "label": "Comparator",
         "description": [],
-        "path": "x-pack/packages/kbn-alerting-comparators/src/comparators.ts",
+        "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "x-pack/packages/kbn-alerting-comparators/src/comparators.ts",
+            "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,7 +49,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "x-pack/packages/kbn-alerting-comparators/src/comparators.ts",
+            "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,7 +60,7 @@
             "tags": [],
             "label": "requiredValues",
             "description": [],
-            "path": "x-pack/packages/kbn-alerting-comparators/src/comparators.ts",
+            "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -76,7 +76,7 @@
         "tags": [],
         "label": "COMPARATORS",
         "description": [],
-        "path": "x-pack/packages/kbn-alerting-comparators/src/comparators.ts",
+        "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

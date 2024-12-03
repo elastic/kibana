@@ -2364,11 +2364,11 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/plugin.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.test.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/factory.test.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/client/factory.test.ts"
               },
               {
                 "plugin": "security",

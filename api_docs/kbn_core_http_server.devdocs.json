@@ -3731,15 +3731,15 @@
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/health.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/metrics.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/metrics.ts"
               },
               {
                 "plugin": "licensing",
@@ -3887,147 +3887,147 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get_all/get_all.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get_all/get_all.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get_all_system/get_all_system.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get_all_system/get_all_system.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types/list_types.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types_system/list_types_system.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get/get.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get/get.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_state.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_instance_summary.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_instance_summary.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/list_alert_types.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/get/get_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/get/get_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_rules_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_alert_summary.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_alert_summary.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_execution_log.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_execution_log.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_global_execution_logs.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_global_execution_logs.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_global_execution_kpi.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_global_execution_kpi.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_action_error_log.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_action_error_log.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_execution_kpi.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_execution_kpi.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_state.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/resolve/resolve_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/list_types/rule_types.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_flapping_settings.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_flapping_settings.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/tags/get_rule_tags.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/get_schedule_frequency/get_schedule_frequency_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/get_schedule_frequency/get_schedule_frequency_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/get/get_query_delay_settings.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rules_settings/apis/get/get_query_delay_settings.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/get/get_backfill_route.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/get_alert_by_id.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_by_id.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/get_alert_index.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_index.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/get_feature_ids_by_registration_contexts.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_feature_ids_by_registration_contexts.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/get_browser_fields_by_feature_id.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_browser_fields_by_feature_id.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
               },
               {
                 "plugin": "banners",
@@ -4183,11 +4183,11 @@
               },
               {
                 "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/routes/health.ts"
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/health.ts"
               },
               {
                 "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.ts"
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/config.ts"
               },
               {
                 "plugin": "inference",
@@ -4879,11 +4879,11 @@
               },
               {
                 "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_well_known_email_service.ts"
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_well_known_email_service.ts"
               },
               {
                 "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_inference_services.ts"
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_inference_services.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -5251,59 +5251,59 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_action_error_log.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_action_error_log.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_action_error_log.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_action_error_log.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_flapping_settings.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_flapping_settings.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_global_execution_kpi.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_global_execution_kpi.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_global_execution_logs.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_global_execution_logs.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_alert_summary.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_alert_summary.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_alert_summary.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_alert_summary.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_execution_kpi.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_execution_kpi.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_execution_kpi.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_execution_kpi.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_execution_log.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_execution_log.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_execution_log.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_execution_log.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_state.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_state.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_state.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.test.ts"
               },
               {
                 "plugin": "features",
@@ -5319,279 +5319,279 @@
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/__mocks__/server.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_inference_services.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_inference_services.test.ts"
               },
               {
                 "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_well_known_email_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_well_known_email_service.test.ts"
               },
               {
                 "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_well_known_email_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_well_known_email_service.test.ts"
               },
               {
                 "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_well_known_email_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_well_known_email_service.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/health.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/health.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/health.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/health.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/health.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/health.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/health.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/health.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/metrics.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/metrics.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/metrics.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/metrics.test.ts"
               },
               {
                 "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/metrics.test.ts"
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/metrics.test.ts"
               },
               {
                 "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.test.ts"
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/config.test.ts"
               },
               {
                 "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.test.ts"
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/config.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/find.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_state.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_state.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_state.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_state.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_state.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/get_alert_state.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/list_alert_types.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/list_alert_types.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/list_alert_types.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/list_alert_types.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/list_alert_types.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/list_alert_types.test.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -5599,71 +5599,71 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get/get.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get/get.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get/get.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get/get.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get_all/get_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get_all/get_all.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get_all/get_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get_all/get_all.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get_all/get_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get_all/get_all.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get_all_system/get_all_system.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get_all_system/get_all_system.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get_all_system/get_all_system.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get_all_system/get_all_system.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/get_all_system/get_all_system.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/get_all_system/get_all_system.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types/list_types.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types/list_types.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types/list_types.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types/list_types.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
@@ -5707,191 +5707,191 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/framework/apis/health/health.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/get/get_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/get/get_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/get/get_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/get/get_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/get/get_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/get/get_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/get/get_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/get/get_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/get_schedule_frequency/get_schedule_frequency_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/get_schedule_frequency/get_schedule_frequency_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/get/get_query_delay_settings.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rules_settings/apis/get/get_query_delay_settings.test.ts"
               },
               {
                 "plugin": "monitoringCollection",
@@ -6549,191 +6549,191 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/create/create.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/create/create.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/execute/execute.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get_oauth_access_token.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/get_oauth_access_token.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get_global_execution_logs.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/get_global_execution_logs.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get_global_execution_kpi.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/get_global_execution_kpi.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/enable.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/enable.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/disable.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/disable.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update_api_key.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update_api_key.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_instance.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_instance.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_instance.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_instance.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_all.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_all.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_all.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_all.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/disable/disable_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/enable/enable_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_internal_rules_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_internal_rules_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_all/mute_all_rule.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_alert/mute_alert.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_alert/mute_alert.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/snooze_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/run_soon.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/clone/clone_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/clone/clone_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/update_flapping_settings.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack_by_query/bulk_untrack_alerts_by_query_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_untrack_by_query/bulk_untrack_alerts_by_query_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_rules.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/suggestions/values_suggestion_rules.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/suggestions/fields_rules.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/suggestions/fields_rules.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_alerts.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/suggestions/values_suggestion_alerts.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/find/find_backfill_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/find/find_backfill_route.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/get_alerts_group_aggregations.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alerts_group_aggregations.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/update_alert_by_id.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/update_alert_by_id.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/bulk_update_alerts.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/bulk_update_alerts.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/find.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/find.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/get_alert_summary.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_summary.ts"
               },
               {
                 "plugin": "savedObjectsTagging",
@@ -6857,15 +6857,15 @@
               },
               {
                 "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/time_series_query.ts"
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/time_series_query.ts"
               },
               {
                 "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/fields.ts"
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/fields.ts"
               },
               {
                 "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
                 "plugin": "inference",
@@ -7505,7 +7505,7 @@
               },
               {
                 "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/valid_slack_api_channels.ts"
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/valid_slack_api_channels.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -7805,43 +7805,43 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get_global_execution_kpi.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/get_global_execution_kpi.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get_global_execution_logs.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/get_global_execution_logs.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get_oauth_access_token.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/get_oauth_access_token.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get_oauth_access_token.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/get_oauth_access_token.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get_oauth_access_token.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/get_oauth_access_token.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get_oauth_access_token.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/get_oauth_access_token.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/run_soon.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/run_soon.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/run_soon.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/update_flapping_settings.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -7861,207 +7861,207 @@
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/__mocks__/server.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/disable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/disable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/disable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/disable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/disable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/disable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/disable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/disable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/disable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/disable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/enable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/enable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/enable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/enable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/enable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/enable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/enable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/enable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/enable.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/enable.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/mute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_all.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_all.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_instance.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/unmute_instance.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update_api_key.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update_api_key.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update_api_key.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update_api_key.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update_api_key.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update_api_key.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update_api_key.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update_api_key.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update_api_key.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update_api_key.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/suggestions/fileds_rule.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/suggestions/fileds_rule.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/suggestions/fileds_rule.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/suggestions/fileds_rule.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_alerts.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/suggestions/values_suggestion_alerts.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_rules.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/suggestions/values_suggestion_rules.test.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -8069,35 +8069,35 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/create/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/create/create.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/create/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/create/create.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/create/create.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/create/create.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/execute/execute.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/execute/execute.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/execute/execute.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/execute/execute.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/execute/execute.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
@@ -8137,307 +8137,307 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack_by_query/bulk_untrack_alerts_by_query_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_untrack_by_query/bulk_untrack_alerts_by_query_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/enable/enable_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/enable/enable_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/find/find_internal_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/find/find_internal_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_alert/mute_alert.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_alert/mute_alert.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_alert/mute_alert.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_alert/mute_alert.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.test.ts"
               },
               {
                 "plugin": "home",
@@ -8779,15 +8779,15 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/update/update.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/update/update.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update/update_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -9159,39 +9159,39 @@
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/__mocks__/server.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/update.test.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -9199,15 +9199,15 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/update/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/update/update.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/update/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/update/update.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/update/update.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/update/update.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
@@ -9235,23 +9235,23 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -9259,7 +9259,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/routes/api/register_routes.test.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/routes/api/register_routes.test.ts"
               },
               {
                 "plugin": "security",
@@ -9445,15 +9445,15 @@
             "references": [
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -9497,67 +9497,67 @@
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/__mocks__/server.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -9775,23 +9775,23 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/delete/delete.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/delete.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/delete.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/delete/delete_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/delete/delete_backfill_route.ts"
               },
               {
                 "plugin": "savedObjectsTagging",
@@ -10055,31 +10055,31 @@
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/routes/__mocks__/server.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/delete.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/delete.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/delete.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/delete.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/delete.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/delete.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/delete.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/delete.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/delete.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/delete.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/delete.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/legacy/delete.test.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -10087,15 +10087,15 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/delete/delete.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/delete/delete.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/delete/delete.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
@@ -10103,43 +10103,43 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
