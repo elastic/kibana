@@ -54,7 +54,6 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
   const filters = state.useState((s) => s.filters);
 
   const [range, setRange] = useState();
-  console.log('range', range);
 
   const panelFilters = useMemo(() => {
     const pfs = cloneDeep(filters);
@@ -103,7 +102,6 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
 
     return els.join('\n| ');
   }, [esql, field, panelFilters, range]);
-  console.log('esqlWithFilters', esqlWithFilters);
 
   const rawDataWithFilters = useFetchESQL(esqlWithFilters);
 
@@ -160,7 +158,6 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
         view.tooltip(new vegaTooltip.Handler().call);
 
         view.addSignalListener('brushX', function (event, item) {
-          console.group('listener', item);
           if (item.name) {
             dispatch(
               `${field} >= ${Math.round(item.name[0])} AND ${field} < ${Math.round(item.name[1])}`
