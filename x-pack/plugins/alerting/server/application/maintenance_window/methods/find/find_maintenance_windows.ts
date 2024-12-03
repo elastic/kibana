@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { fromKueryExpression } from '@kbn/es-query';
 import { MaintenanceWindowClientContext } from '../../../../../common';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
@@ -26,11 +27,16 @@ export async function findMaintenanceWindows(
     throw Boom.badRequest(`Error validating find maintenance windows data - ${error.message}`);
   }
 
+  const filterRunningStatusMWQuery =
+    'maintenance-window.attributes.events >= "now" and maintenance-window.attributes.events <= "now"';
+  // use statuses
+  const filter = fromKueryExpression(filterRunningStatusMWQuery);
+
   try {
     const result = await findMaintenanceWindowSo({
       savedObjectsClient,
       ...(params
-        ? { savedObjectsFindOptions: { page: params.page, perPage: params.perPage } }
+        ? { savedObjectsFindOptions: { page: params.page, perPage: params.perPage, search: params.search, filter: '' } }
         : {}),
     });
 

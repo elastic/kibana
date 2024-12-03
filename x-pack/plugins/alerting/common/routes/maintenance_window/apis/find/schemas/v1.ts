@@ -30,6 +30,22 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
         description: 'The number of maintenance windows to return per page.',
       },
     }),
+    search: schema.string({
+      defaultValue: '',
+      meta: {
+        description: 'The search query string for filtering results.',
+      },
+    }),
+    statuses: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal('running'),
+          schema.literal('finished'),
+          schema.literal('upcoming'),
+          schema.literal('archived'),
+        ])
+      )
+    )
   },
   {
     validate: (params) => {

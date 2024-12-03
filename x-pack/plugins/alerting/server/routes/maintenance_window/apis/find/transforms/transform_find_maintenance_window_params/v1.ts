@@ -13,4 +13,6 @@ export const transformFindMaintenanceWindowParams = (
 ): FindMaintenanceWindowsParams => ({
   ...(params.page ? { page: params.page } : {}),
   ...(params.per_page ? { perPage: params.per_page } : {}),
+  ...(params.statuses ? { statuses: params.statuses } : {}),
+  ...(params.search ? { search: params.search } : {})
 });
