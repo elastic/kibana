@@ -152,6 +152,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
+          isRuleCustomizationEnabled: config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
         });
       }),
 
