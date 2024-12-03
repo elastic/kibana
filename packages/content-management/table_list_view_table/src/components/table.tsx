@@ -113,7 +113,7 @@ export function Table<T extends UserContentCommonSchema>({
   favoritesEnabled,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
-  const { getTagList, isTaggingEnabled } = useServices();
+  const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -340,6 +340,7 @@ export function Table<T extends UserContentCommonSchema>({
       }}
       selectedUsers={tableFilter.createdBy}
       showNoUserOption={showNoUserOption}
+      isKibanaVersioningEnabled={isKibanaVersioningEnabled}
     >
       <TagFilterContextProvider
         isPopoverOpen={isPopoverOpen}

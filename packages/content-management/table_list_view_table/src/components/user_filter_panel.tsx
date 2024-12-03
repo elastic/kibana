@@ -14,7 +14,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
 import { i18n } from '@kbn/i18n';
 import { useUserProfiles, NoCreatorTip } from '@kbn/content-management-user-profiles';
-import { useContentInsightsServices } from '@kbn/content-management-content-insights-public';
 
 interface Context {
   enabled: boolean;
@@ -22,6 +21,7 @@ interface Context {
   selectedUsers: string[];
   allUsers: string[];
   showNoUserOption: boolean;
+  isKibanaVersioningEnabled: boolean;
 }
 
 const UserFilterContext = React.createContext<Context | null>(null);
@@ -45,10 +45,8 @@ export const UserFilterPanel: FC<{}> = () => {
   if (!componentContext)
     throw new Error('UserFilterPanel must be used within a UserFilterContextProvider');
 
-  const contentInsightsServices = useContentInsightsServices();
-  const isKibanaVersioningEnabled = contentInsightsServices?.isKibanaVersioningEnabled ?? false;
-
-  const { onSelectedUsersChange, selectedUsers, showNoUserOption } = componentContext;
+  const { onSelectedUsersChange, selectedUsers, showNoUserOption, isKibanaVersioningEnabled } =
+    componentContext;
 
   const [isPopoverOpen, setPopoverOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');

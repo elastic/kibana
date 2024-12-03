@@ -79,6 +79,9 @@ export interface Services {
   /** Handler to return the url to navigate to the kibana tags management */
   getTagManagementUrl: () => string;
   getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
+  /** Whether versioning is enabled for the current kibana instance. (aka is Serverless)
+   This is used to determine if we should show the version mentions in the help text.*/
+  isKibanaVersioningEnabled: boolean;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -290,6 +293,7 @@ export const TableListViewKibanaProvider: FC<
                 itemHasTags={itemHasTags}
                 getTagIdsFromReferences={getTagIdsFromReferences}
                 getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+                isKibanaVersioningEnabled={services.isKibanaVersioningEnabled ?? false}
               >
                 {children}
               </TableListViewProvider>

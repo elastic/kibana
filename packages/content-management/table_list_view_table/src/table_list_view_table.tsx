@@ -376,11 +376,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     getTagList,
     isFavoritesEnabled,
+    isKibanaVersioningEnabled,
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
   const contentInsightsServices = useContentInsightsServices();
-  const isKibanaVersioningEnabled = contentInsightsServices?.isKibanaVersioningEnabled ?? false;
 
   const isInRouterContext = useInRouterContext();
 
