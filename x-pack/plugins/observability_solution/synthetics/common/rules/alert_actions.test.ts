@@ -291,4 +291,77 @@ describe('Alert Actions factory', () => {
       },
     ]);
   });
+
+  it('generate expected action for email opsgenie connector', async () => {
+    const resp = populateAlertActions({
+      groupId: SYNTHETICS_MONITOR_STATUS.id,
+      defaultActions: [
+        {
+          frequency: {
+            notifyWhen: 'onActionGroupChange',
+            summary: false,
+            throttle: null,
+          },
+          actionTypeId: '.opsgenie',
+          group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+          params: {},
+          id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        },
+      ] as unknown as ActionConnector[],
+      defaultEmail: {
+        to: ['test@email.com'],
+      },
+      translations: {
+        defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+        defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
+        defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
+        defaultRecoverySubjectMessage:
+          SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
+      },
+    });
+    expect(resp).toEqual([
+      {
+        frequency: {
+          notifyWhen: 'onActionGroupChange',
+          summary: false,
+          throttle: null,
+        },
+        group: 'recovered',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        params: {
+          subAction: 'closeAlert',
+          subActionParams: {
+            alias: '{{rule.id}}:{{alert.id}}',
+            description:
+              'The alert for monitor "{{context.monitorName}}" from {{context.locationNames}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationNames}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+            message:
+              'Monitor "{{context.monitorName}}" ({{context.locationNames}}) {{context.recoveryStatus}} - Elastic Synthetics',
+            priority: 'P2',
+            tags: ['{{rule.tags}}'],
+          },
+        },
+      },
+      {
+        frequency: {
+          notifyWhen: 'onActionGroupChange',
+          summary: false,
+          throttle: null,
+        },
+        group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        params: {
+          subAction: 'createAlert',
+          subActionParams: {
+            alias: '{{rule.id}}:{{alert.id}}',
+            description:
+              'Monitor "{{context.monitorName}}" is {{{context.status}}} from {{context.locationNames}}.{{{context.pendingLastRunAt}}} - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationNames}}  \n- Reason: {{{context.reason}}} \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+            message:
+              'Monitor "{{context.monitorName}}" ({{context.locationNames}}) is down - Elastic Synthetics',
+            priority: 'P2',
+            tags: ['{{rule.tags}}'],
+          },
+        },
+      },
+    ]);
+  });
 });
