@@ -72,7 +72,10 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      const expectedCommands: string[] = [...CONSOLE_RESPONSE_ACTION_COMMANDS];
+      const endpointCommands = CONSOLE_RESPONSE_ACTION_COMMANDS.filter(
+        (command) => command !== 'runscript'
+      );
+      const expectedCommands: string[] = [...endpointCommands];
       // add status to the list of expected commands in that order
       expectedCommands.splice(2, 0, 'status');
 
