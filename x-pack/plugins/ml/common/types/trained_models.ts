@@ -409,7 +409,8 @@ export function isModelDownloadItem(item: TrainedModelUIItem): item is ModelDown
   return 'putModelConfig' in item && !!item.type?.includes(TRAINED_MODEL_TYPE.PYTORCH);
 }
 
-export const isBuiltInModel = (item: TrainedModelUIItem) => item.tags.includes(BUILT_IN_MODEL_TAG);
+export const isBuiltInModel = (item: TrainedModelConfigResponse | TrainedModelUIItem) =>
+  item.tags.includes(BUILT_IN_MODEL_TAG);
 /**
  * This type represents a union of different model entities:
  * - Any existing trained model returned by the API, e.g., lang_ident_model_1, DFA models, etc.

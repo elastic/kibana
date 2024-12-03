@@ -49,7 +49,7 @@ import type {
   TrainedModelUIItem,
   TrainedModelWithPipelines,
 } from '../../../common/types/trained_models';
-import { isExistingModel } from '../../../common/types/trained_models';
+import { isBuiltInModel, isExistingModel } from '../../../common/types/trained_models';
 import {
   isDFAModelItem,
   isElasticModel,
@@ -399,7 +399,7 @@ export class ModelsProvider {
         // Extract model types
         type: [
           model.model_type,
-          ...(isNLPModelItem(model) ? [BUILT_IN_MODEL_TYPE] : []),
+          ...(isBuiltInModel(model) ? [BUILT_IN_MODEL_TYPE] : []),
           ...(isElasticModel(model) ? [ELASTIC_MODEL_TYPE] : []),
           ...(typeof model.inference_config === 'object'
             ? Object.keys(model.inference_config)

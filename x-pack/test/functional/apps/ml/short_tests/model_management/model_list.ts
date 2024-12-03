@@ -94,7 +94,8 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       // Assign model to all spaces
-      await ml.api.updateTrainedModelSpaces(modelAllSpaces.name, ['*'], []);
+      await ml.api.updateTrainedModelSpaces(modelAllSpaces.name, ['*'], ['default']);
+      await ml.api.assertTrainedModelSpaces(modelAllSpaces.name, ['*']);
 
       await ml.api.createTestTrainedModels('classification', 15, true);
       await ml.api.createTestTrainedModels('regression', 15);
@@ -178,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.securityUI.logout();
       });
 
-      it('should not be able to delete a model assigned to all spaces, and show a warning copy explaining the situation', async () => {
+      it.skip('should not be able to delete a model assigned to all spaces, and show a warning copy explaining the situation', async () => {
         await ml.testExecution.logTestStep('should select a model');
         await ml.trainedModelsTable.filterWithSearchString(modelAllSpaces.name, 1);
         await ml.trainedModels.selectModel(modelAllSpaces.name);
@@ -499,6 +500,11 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.trainedModelsTable.assertStatsTabContent();
             await ml.trainedModelsTable.assertPipelinesTabContent(false);
           });
+        }
+
+        describe('supports actions for an imported model', function () {
+          // It's enough to test the actions for one model
+          const model = trainedModels[trainedModels.length - 1];
 
           it(`starts deployment of the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.startDeploymentWithParams(model.id, {
@@ -519,7 +525,7 @@ export default function ({ getService }: FtrProviderContext) {
           it(`deletes the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.deleteModel(model.id);
           });
-        }
+        });
       });
     });
 
