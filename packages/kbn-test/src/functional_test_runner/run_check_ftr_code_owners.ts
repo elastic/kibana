@@ -35,12 +35,9 @@ export async function runCheckFtrCodeOwnersCli() {
       const reversedCodeowners = getPathsWithOwnersReversed();
 
       const testFiles = await getRepoFiles(TEST_DIRECTORIES);
-      for (const { repoRel } of testFiles) {
-        const owners = getCodeOwnersForFile(repoRel, reversedCodeowners);
-        if (owners === undefined || owners === '') {
+      for (const { repoRel } of testFiles)
+        if (getCodeOwnersForFile(repoRel, reversedCodeowners) === undefined)
           missingOwners.add(repoRel);
-        }
-      }
 
       const timeSpent = fmtMs(performance.now() - start);
 

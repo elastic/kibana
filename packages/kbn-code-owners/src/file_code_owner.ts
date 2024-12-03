@@ -65,12 +65,10 @@ export function getPathsWithOwnersReversed(): PathWithOwners[] {
 export function getCodeOwnersForFile(
   filePath: string,
   reversedCodeowners?: PathWithOwners[]
-): string | undefined {
+): { path: string | undefined; teams: string | undefined } {
   const pathsWithOwners = reversedCodeowners ?? getPathsWithOwnersReversed();
-
   const match = pathsWithOwners.find((p) => p.ignorePattern.test(filePath).ignored);
-
-  return match?.teams;
+  return { path: match?.path, teams: match?.teams };
 }
 
 /**
