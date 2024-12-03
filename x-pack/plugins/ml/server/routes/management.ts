@@ -117,7 +117,6 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
                   { trained_model_stats: modelsStats },
                   modelSpaces,
                 ] = await Promise.all([
-                  // TODO should use getTrainedModelList instead
                   mlClient.getTrainedModels(),
                   mlClient.getTrainedModelsStats(),
                   trainedModelsSpaces(),

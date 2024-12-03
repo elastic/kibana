@@ -188,15 +188,10 @@ export class ModelsProvider {
    * Assigns trained model stats to trained models
    * @param trainedModels
    */
-  async assignModelStats(
-    trainedModels: ExistingModelBase[],
-    params?: { modelId?: string }
-  ): Promise<TrainedModelItem[]> {
-    // Fetch trained model stats
+  async assignModelStats(trainedModels: ExistingModelBase[]): Promise<TrainedModelItem[]> {
     const { trained_model_stats: modelsStatsResponse } = await this._mlClient.getTrainedModelsStats(
       {
-        ...(params?.modelId ? { model_id: params.modelId } : {}),
-        size: 10000,
+        size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
       }
     );
 
@@ -280,7 +275,8 @@ export class ModelsProvider {
         } as ModelDownloadItem;
       });
 
-    return [...resultItems, ...notDownloaded];
+    // show model downloads first
+    return [...notDownloaded, ...resultItems];
   }
 
   /**
@@ -388,7 +384,7 @@ export class ModelsProvider {
    */
   async getTrainedModelList(): Promise<TrainedModelUIItem[]> {
     const resp = await this._mlClient.getTrainedModels({
-      size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+      size: 1000,
     } as MlGetTrainedModelsRequest);
 
     let resultItems: TrainedModelUIItem[] = [];
