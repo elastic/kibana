@@ -46,7 +46,6 @@ export interface CreateRuleFormProps {
   showMustacheAutocompleteSwitch?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
-  connectorFeatureId?: string;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -61,7 +60,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     shouldUseRuleProducer = false,
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
-    connectorFeatureId = 'alerting',
     onCancel,
     onSubmit,
   } = props;

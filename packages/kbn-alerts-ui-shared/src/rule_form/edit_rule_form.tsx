@@ -34,7 +34,6 @@ export interface EditRuleFormProps {
   connectorFeatureId?: string;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
-  connectorFeatureId?: string;
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
