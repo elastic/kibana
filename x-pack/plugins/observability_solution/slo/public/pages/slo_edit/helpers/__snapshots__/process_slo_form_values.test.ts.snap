@@ -26,7 +26,10 @@ Object {
     "target": 99,
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -74,7 +77,10 @@ Object {
     "target": 99,
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -104,7 +110,10 @@ Object {
     "target": 99,
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -146,7 +155,10 @@ Object {
     "target": 99,
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -178,7 +190,10 @@ Object {
     "timesliceWindow": "2",
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -208,12 +223,114 @@ Object {
     "target": 99,
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
     "duration": "1M",
     "type": "calendarAligned",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state settings handles optional 'syncField' URL state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": "",
+      "index": "",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "settings": Object {
+    "frequency": 1,
+    "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": "override-field",
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state settings handles partial 'settings' URL state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": "",
+      "index": "",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "settings": Object {
+    "frequency": 1,
+    "preventInitialBackfill": false,
+    "syncDelay": 12,
+    "syncField": null,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
+exports[`Transform partial URL state into form state settings handles the 'settings' URL state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": "",
+      "index": "",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "settings": Object {
+    "frequency": 1,
+    "preventInitialBackfill": true,
+    "syncDelay": 180,
+    "syncField": null,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
   },
 }
 `;
@@ -239,7 +356,10 @@ Object {
     "target": 99,
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -271,7 +391,10 @@ Object {
     "target": 99,
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -301,7 +424,10 @@ Object {
     "target": 99,
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -331,7 +457,10 @@ Object {
     "target": 99,
   },
   "settings": Object {
+    "frequency": 1,
     "preventInitialBackfill": false,
+    "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {

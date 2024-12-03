@@ -6,6 +6,7 @@ steps:
       imageProject: elastic-images-qa
       provider: gcp
       machineType: c2-standard-16
+      diskSizeGb: 125
     timeout_in_minutes: 120
     retry:
       automatic:
