@@ -6754,6 +6754,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-rule-form@link:packages/response-ops/rule_form":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-ops-rule-params@link:packages/response-ops/rule_params":
   version "0.0.0"
   uid ""
