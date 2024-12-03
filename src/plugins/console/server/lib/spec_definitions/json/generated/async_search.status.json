@@ -4,7 +4,12 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "keep_alive": [
+        "5d",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
