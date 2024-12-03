@@ -10,6 +10,7 @@ import {
   chunked,
   chunkedBy,
   findCommonPrefixes,
+  chunkStringsByMaxLength,
 } from './collections_helpers';
 
 describe('telemetry.utils.chunked', () => {
@@ -153,5 +154,37 @@ describe('telemetry.utils.findCommonPrefixes', () => {
 
     expect(output).toHaveLength(config.maxPrefixes);
     expect(output.map((v, _) => v.indexCount).reduce((acc, i) => acc + i, 0)).toBe(indices.length);
+  });
+});
+
+describe('telemetry.utils.splitIndicesByNameLength', () => {
+  it('should chunk simple case', async () => {
+    const input = ['aa', 'b', 'ccc', 'ddd'];
+    const output = chunkStringsByMaxLength(input, 5);
+    expect(output).toEqual([['aa', 'b'], ['ccc'], ['ddd']]);
+  });
+
+  it('should chunk with remainder', async () => {
+    const input = ['aaa', 'b'];
+    const output = chunkStringsByMaxLength(input, 10);
+    expect(output).toEqual([['aaa', 'b']]);
+  });
+
+  it('should chunk with empty list', async () => {
+    const input: string[] = [];
+    const output = chunkStringsByMaxLength(input, 3);
+    expect(output).toEqual([]);
+  });
+
+  it('should chunk with single element smaller than max weight', async () => {
+    const input = ['aa'];
+    const output = chunkStringsByMaxLength(input, 3);
+    expect(output).toEqual([['aa']]);
+  });
+
+  it('should chunk with single element bigger than max weight', async () => {
+    const input = ['aaaa', 'bb'];
+    const output = chunkStringsByMaxLength(input, 4);
+    expect(output).toEqual([['aaaa'], ['bb']]);
   });
 });

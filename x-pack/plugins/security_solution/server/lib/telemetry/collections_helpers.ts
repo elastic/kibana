@@ -192,3 +192,24 @@ export function findCommonPrefixes(indices: string[], config: CommonPrefixesConf
 
   return prefixes;
 }
+
+/**
+ * Splits an array of strings into chunks where the total length of strings in each chunk
+ * does not exceed the specified `maxLength`.
+ *
+ * @param strings - An array of strings to be chunked.
+ * @param maxLength - The maximum total length allowed for strings in each chunk. Defaults to 1024.
+ * @returns A two-dimensional array where each inner array is a chunk of strings.
+ *
+ * @example
+ * ```typescript
+ * const strings = ["hello", "world", "this", "is", "a", "test"];
+ * const chunks = chunkStringsByMaxLength(strings, 10);
+ * console.log(chunks);
+ * // Output: [["hello", "world"], ["this", "is"], ["a", "test"]]
+ * ```
+ */
+export function chunkStringsByMaxLength(strings: string[], maxLength: number = 3072): string[][] {
+  // plus 1 for the comma separator
+  return chunkedBy(strings, maxLength, (index) => index.length + 1);
+}

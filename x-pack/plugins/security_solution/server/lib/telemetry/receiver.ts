@@ -101,7 +101,7 @@ import type {
   Index,
   IndexStats,
 } from './indices.metadata.types';
-import { type CommonPrefixesConfig, findCommonPrefixes } from './collections_helpers';
+import { type CommonPrefixesConfig, chunkStringsByMaxLength } from './collections_helpers';
 
 export interface ITelemetryReceiver {
   start(
@@ -1408,7 +1408,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     this.logger.l('Fetching indices stats', { indices } as LogMeta);
 
-    const groupedIndices = findCommonPrefixes(indices, config).map((v, _) => v.parts);
+    const groupedIndices = chunkStringsByMaxLength(indices);
 
     this.logger.l('Splitted indices into groups', {
       groups: groupedIndices.length,
@@ -1416,37 +1416,35 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     } as LogMeta);
 
     for (const group of groupedIndices) {
-      for (const name of group) {
-        const request: IndicesStatsRequest = {
-          index: `${name}*`,
-          level: 'indices',
-          metric: ['docs', 'search', 'store'],
-          expand_wildcards: ['open', 'hidden'],
-          filter_path: [
-            'indices.*.total.search.query_total',
-            'indices.*.total.search.query_time_in_millis',
-            'indices.*.total.docs.count',
-            'indices.*.total.docs.deleted',
-            'indices.*.total.store.size_in_bytes',
-          ],
-        };
+      const request: IndicesStatsRequest = {
+        index: group,
+        level: 'indices',
+        metric: ['docs', 'search', 'store'],
+        expand_wildcards: ['open', 'hidden'],
+        filter_path: [
+          'indices.*.total.search.query_total',
+          'indices.*.total.search.query_time_in_millis',
+          'indices.*.total.docs.count',
+          'indices.*.total.docs.deleted',
+          'indices.*.total.store.size_in_bytes',
+        ],
+      };
 
-        try {
-          const response = await es.indices.stats(request);
-          for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
-            yield {
-              index_name: indexName,
-              query_total: stats.total?.search?.query_total,
-              query_time_in_millis: stats.total?.search?.query_time_in_millis,
-              docs_count: stats.total?.docs?.count,
-              docs_deleted: stats.total?.docs?.deleted,
-              docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
-            } as IndexStats;
-          }
-        } catch (error) {
-          this.logger.warn('Error fetching indices stats', { error_message: error } as LogMeta);
-          throw error;
+      try {
+        const response = await es.indices.stats(request);
+        for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
+          yield {
+            index_name: indexName,
+            query_total: stats.total?.search?.query_total,
+            query_time_in_millis: stats.total?.search?.query_time_in_millis,
+            docs_count: stats.total?.docs?.count,
+            docs_deleted: stats.total?.docs?.deleted,
+            docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
+          } as IndexStats;
         }
+      } catch (error) {
+        this.logger.warn('Error fetching indices stats', { error_message: error } as LogMeta);
+        throw error;
       }
     }
   }
@@ -1454,38 +1452,37 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async *getIlmsStats(indices: string[], config: CommonPrefixesConfig) {
     const es = this.esClient();
 
-    const groupedIndices = findCommonPrefixes(indices, config).map((v, _) => v.parts);
+    const groupedIndices = chunkStringsByMaxLength(indices);
 
-    this.logger.l('Splitted indices into groups', {
+    this.logger.l('Splitted ilms into groups', {
       groups: groupedIndices.length,
       indices: indices.length,
     } as LogMeta);
 
     for (const group of groupedIndices) {
-      for (const name of group) {
-        const request: IlmExplainLifecycleRequest = {
-          index: `${name}*`,
-          only_managed: false,
-          filter_path: ['indices.*.phase', 'indices.*.age', 'indices.*.policy'],
-        };
+      const indices = group.join(',');
+      const request: IlmExplainLifecycleRequest = {
+        index: indices,
+        only_managed: false,
+        filter_path: ['indices.*.phase', 'indices.*.age', 'indices.*.policy'],
+      };
 
-        const data = await es.ilm.explainLifecycle(request);
+      const data = await es.ilm.explainLifecycle(request);
 
-        try {
-          for (const [indexName, stats] of Object.entries(data.indices ?? {})) {
-            const entry = {
-              index_name: indexName,
-              phase: ('phase' in stats && stats.phase) || undefined,
-              age: ('age' in stats && stats.age) || undefined,
-              policy_name: ('policy' in stats && stats.policy) || undefined,
-            } as IlmStats;
+      try {
+        for (const [indexName, stats] of Object.entries(data.indices ?? {})) {
+          const entry = {
+            index_name: indexName,
+            phase: ('phase' in stats && stats.phase) || undefined,
+            age: ('age' in stats && stats.age) || undefined,
+            policy_name: ('policy' in stats && stats.policy) || undefined,
+          } as IlmStats;
 
-            yield entry;
-          }
-        } catch (error) {
-          this.logger.warn('Error fetching ilm stats', { error_message: error } as LogMeta);
-          throw error;
+          yield entry;
         }
+      } catch (error) {
+        this.logger.warn('Error fetching ilm stats', { error_message: error } as LogMeta);
+        throw error;
       }
     }
   }
@@ -1503,49 +1500,48 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       return value;
     };
 
-    const groupedIlms = findCommonPrefixes(ilms, config).map((v, _) => v.parts);
+    const groupedIlms = chunkStringsByMaxLength(ilms);
 
-    this.logger.l(`Splitted ilms into groups`, {
+    this.logger.l('Splitted ilms into groups', {
       groups: groupedIlms.length,
       ilms: ilms.length,
     } as LogMeta);
 
     for (const group of groupedIlms) {
-      for (const name of group) {
-        this.logger.l('Fetching ilm policies', { name } as LogMeta);
-        const request: IlmGetLifecycleRequest = {
-          name: `${name}*`,
-          filter_path: [
-            '*.policy.phases.cold.min_age',
-            '*.policy.phases.delete.min_age',
-            '*.policy.phases.frozen.min_age',
-            '*.policy.phases.hot.min_age',
-            '*.policy.phases.warm.min_age',
-            '*.modified_date',
-          ],
-        };
+      const ilms = group.join(',');
+      this.logger.l('Fetching ilm policies', { ilms } as LogMeta);
+      const request: IlmGetLifecycleRequest = {
+        name: ilms,
+        filter_path: [
+          '*.policy.phases.cold.min_age',
+          '*.policy.phases.delete.min_age',
+          '*.policy.phases.frozen.min_age',
+          '*.policy.phases.hot.min_age',
+          '*.policy.phases.warm.min_age',
+          '*.modified_date',
+        ],
+      };
 
-        const response = await es.ilm.getLifecycle(request);
-        try {
-          for (const [policyName, stats] of Object.entries(response ?? {})) {
-            yield {
-              policy_name: policyName,
-              modified_date: stats.modified_date,
-              phases: {
-                cold: phase(stats.policy.phases.cold),
-                delete: phase(stats.policy.phases.delete),
-                frozen: phase(stats.policy.phases.frozen),
-                hot: phase(stats.policy.phases.hot),
-                warm: phase(stats.policy.phases.warm),
-              } as IlmPhases,
-            } as IlmPolicy;
-          }
-        } catch (error) {
-          this.logger.warn('Error fetching ilm policies', {
-            error_message: error.message,
-          } as LogMeta);
-          throw error;
+      const response = await es.ilm.getLifecycle(request);
+      try {
+        for (const [policyName, stats] of Object.entries(response ?? {})) {
+          yield {
+            policy_name: policyName,
+            modified_date: stats.modified_date,
+            phases: {
+              cold: phase(stats.policy.phases.cold),
+              delete: phase(stats.policy.phases.delete),
+              frozen: phase(stats.policy.phases.frozen),
+              hot: phase(stats.policy.phases.hot),
+              warm: phase(stats.policy.phases.warm),
+            } as IlmPhases,
+          } as IlmPolicy;
         }
+      } catch (error) {
+        this.logger.warn('Error fetching ilm policies', {
+          error_message: error.message,
+        } as LogMeta);
+        throw error;
       }
     }
   }

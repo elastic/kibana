@@ -77,10 +77,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           items: [],
         };
 
-        for await (const stat of receiver.getIndicesStats(
-          indices.slice(0, taskConfig.indices_threshold),
-          queryConfig
-        )) {
+        for await (const stat of receiver.getIndicesStats(indices, queryConfig)) {
           indicesStats.items.push(stat);
         }
         sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT, indicesStats);
@@ -119,7 +116,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           ilmPolicies.items.push(policy);
         }
         sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT, ilmPolicies);
-        log.info(`Sent ILM policies`, { count: ilmPolicies.items.length } as LogMeta);
+        log.info('Sent ILM policies', { count: ilmPolicies.items.length } as LogMeta);
         return ilmPolicies.items.length;
       };
 
