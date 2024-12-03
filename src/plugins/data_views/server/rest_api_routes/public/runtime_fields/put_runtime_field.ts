@@ -81,6 +81,11 @@ const putRuntimeFieldRouteFactory =
     router.versioned.put({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            requiredPrivileges: ['indexPatterns:manage'],
+          },
+        },
         validate: {
           request: {
             params: schema.object({

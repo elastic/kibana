@@ -29,7 +29,8 @@ export const deleteBackfillRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const params: DeleteBackfillRequestParamsV1 = req.params;
 
         await rulesClient.deleteBackfill(params.id);
