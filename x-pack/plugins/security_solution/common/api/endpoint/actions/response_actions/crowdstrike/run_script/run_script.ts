@@ -9,67 +9,77 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from '../../../common/base';
 
+const { parameters, ...restBaseSchema } = BaseActionRequestSchema;
 export const RunScriptActionRequestSchema = {
   body: schema.object({
-    ...BaseActionRequestSchema,
-    parameters: schema.object({
-      /**
-       * The script to run
-       */
-      Raw: schema.maybe(
-        schema.string({
-          minLength: 1,
-          validate: (value) => {
-            if (!value.trim().length) {
-              return 'Raw cannot be an empty string';
-            }
-          },
-        })
-      ),
-      /**
-       * The path to the script on the host to run
-       */
-      HostPath: schema.maybe(
-        schema.string({
-          minLength: 1,
-          validate: (value) => {
-            if (!value.trim().length) {
-              return 'HostPath cannot be an empty string';
-            }
-          },
-        })
-      ),
-      /**
-       * The path to the script in the cloud to run
-       */
-      CloudFile: schema.maybe(
-        schema.string({
-          minLength: 1,
-          validate: (value) => {
-            if (!value.trim().length) {
-              return 'CloudFile cannot be an empty string';
-            }
-          },
-        })
-      ),
-      /**
-       * The command line to run
-       */
-      CommandLine: schema.maybe(
-        schema.string({
-          minLength: 1,
-          validate: (value) => {
-            if (!value.trim().length) {
-              return 'CommandLine cannot be an empty string';
-            }
-          },
-        })
-      ),
-      /**
-       * The max timeout value before the command is killed. Number represents milliseconds
-       */
-      Timeout: schema.maybe(schema.number({ min: 1 })),
-    }),
+    ...restBaseSchema,
+    parameters: schema.object(
+      {
+        /**
+         * The script to run
+         */
+        Raw: schema.maybe(
+          schema.string({
+            minLength: 1,
+            validate: (value) => {
+              if (!value.trim().length) {
+                return 'Raw cannot be an empty string';
+              }
+            },
+          })
+        ),
+        /**
+         * The path to the script on the host to run
+         */
+        HostPath: schema.maybe(
+          schema.string({
+            minLength: 1,
+            validate: (value) => {
+              if (!value.trim().length) {
+                return 'HostPath cannot be an empty string';
+              }
+            },
+          })
+        ),
+        /**
+         * The path to the script in the cloud to run
+         */
+        CloudFile: schema.maybe(
+          schema.string({
+            minLength: 1,
+            validate: (value) => {
+              if (!value.trim().length) {
+                return 'CloudFile cannot be an empty string';
+              }
+            },
+          })
+        ),
+        /**
+         * The command line to run
+         */
+        CommandLine: schema.maybe(
+          schema.string({
+            minLength: 1,
+            validate: (value) => {
+              if (!value.trim().length) {
+                return 'CommandLine cannot be an empty string';
+              }
+            },
+          })
+        ),
+        /**
+         * The max timeout value before the command is killed. Number represents milliseconds
+         */
+        Timeout: schema.maybe(schema.number({ min: 1 })),
+      },
+      {
+        validate: (params) => {
+          if (!params.Raw && !params.HostPath && !params.CloudFile && !params.CommandLine) {
+            return 'At least one of Raw, HostPath, CloudFile, or CommandLine must be provided';
+          }
+        },
+      }
+    ),
   }),
 };
 

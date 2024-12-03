@@ -12,12 +12,10 @@ import { CustomHttpRequestError } from '../../../../utils/custom_http_request_er
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { EndpointAppContext } from '../../../types';
 import type {
-  CrowdStrikeActionDataParameterTypes,
   CrowdStrikeActionRunScriptOutputContent,
   CrowdStrikeActionsRunScriptParameters,
 } from '../../../../../common/endpoint/types/crowdstrike';
 import { createBaseActionRequestHandler } from '../base_response_actions_handler';
-import type { ResponseActionsRequestBody } from '../../../../../common/api/endpoint';
 import type { ResponseActionsClient } from '../../../services';
 import type {
   ResponseActionAgentType,
@@ -28,7 +26,7 @@ import type {
   ActionDetailsAgentTypeMapping,
 } from '../../../../../common/endpoint/types';
 
-export function crowdStrikeActionRequestHandler<T extends CrowdStrikeActionDataParameterTypes>(
+export function crowdStrikeActionRequestHandler<T extends CrowdStrikeActionsRunScriptParameters>(
   endpointContext: EndpointAppContext,
   command: EDRActionsApiCommandNames<'crowdstrike'>
 ): RequestHandler<
@@ -57,7 +55,7 @@ export function crowdStrikeActionRequestHandler<T extends CrowdStrikeActionDataP
 
 const handleCrowdstrikeActionCreation = async (
   command: EDRActionsApiCommandNames<'crowdstrike'>,
-  body: ResponseActionsRequestBody,
+  body: CrowdstrikeActionsRequestBody,
   responseActionsClient: ResponseActionsClient
 ): Promise<
   ActionDetails<

@@ -7,8 +7,8 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type {
-  CrowdStrikeActionDataParameterTypes,
   CrowdStrikeActionResponseDataOutput,
+  CrowdStrikeActionsRunScriptParameters,
 } from '../../../../common/endpoint/types/crowdstrike';
 import type { ResponseActionsClient } from '../../services';
 import type {
@@ -18,6 +18,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import type {
+  EDR_COMMANDS_MAPPING,
   EDRActionsApiCommandNames,
   ResponseActionAgentType,
 } from '../../../../common/endpoint/service/response_actions/constants';
@@ -31,13 +32,19 @@ import { CustomHttpRequestError } from '../../../utils/custom_http_request_error
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import type { CrowdstrikeActionsRequestBody } from '../../../../common/api/endpoint/actions/response_actions/crowdstrike';
 
+interface ActionsRequestBody {
+  endpoint: ResponseActionsRequestBody;
+  crowdstrike: CrowdstrikeActionsRequestBody;
+  sentinel_one: unknown;
+}
+
 type SupportedActionsDetails =
   | ActionDetails<unknown, unknown>
   | ActionDetails<EndpointActionResponseDataOutput, EndpointActionDataParameterTypes>
-  | ActionDetails<CrowdStrikeActionResponseDataOutput, CrowdStrikeActionDataParameterTypes>;
+  | ActionDetails<CrowdStrikeActionResponseDataOutput, CrowdStrikeActionsRunScriptParameters>;
 
 export function createBaseActionRequestHandler<
-  TAgentType extends 'endpoint' | 'sentinel_one' | 'crowdstrike'
+  TAgentType extends keyof typeof EDR_COMMANDS_MAPPING // Ensure TAgentType is either 'endpoint', 'crowdstrike' or 'sentinel_ne'
 >(
   endpointContext: EndpointAppContext,
   command: EDRActionsApiCommandNames<TAgentType>,
@@ -47,7 +54,7 @@ export function createBaseActionRequestHandler<
   ) => boolean,
   actionCreationFn: (
     command: EDRActionsApiCommandNames<TAgentType>,
-    body: ResponseActionsRequestBody | CrowdstrikeActionsRequestBody,
+    body: ActionsRequestBody[TAgentType],
     responseActionsClient: ResponseActionsClient
   ) => Promise<ActionDetails<unknown, unknown>>
 ): RequestHandler<
@@ -95,7 +102,9 @@ export function createBaseActionRequestHandler<
         responseActionsClient
       );
       const { action: actionId, ...data } = action;
-      const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
+      const legacyResponseData = responseActionsWithLegacyActionProperty.includes(
+        command as EDRActionsApiCommandNames<'endpoint'>
+      )
         ? { action: actionId ?? data.id ?? '' }
         : {};
 

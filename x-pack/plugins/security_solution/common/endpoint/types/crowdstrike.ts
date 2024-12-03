@@ -10,7 +10,11 @@ export interface CrowdstrikeActionRequestCommonMeta {
   hostName: string;
 }
 
-export interface CrowdStrikeActionsRunScriptParameters {
+type AtLeastOne<T, K extends keyof T = keyof T> = K extends keyof T
+  ? Required<Pick<T, K>> & Partial<Omit<T, K>>
+  : never;
+
+export interface CrowdStrikeActionsRunScriptParametersBase {
   Raw?: string;
   HostPath?: string;
   CloudFile?: string;
@@ -22,7 +26,11 @@ export interface CrowdStrikeActionRunScriptOutputContent {
   output: string;
 }
 
-export type CrowdStrikeActionDataParameterTypes = undefined | CrowdStrikeActionsRunScriptParameters;
+// Enforce at least one of the script parameters is required
+export type CrowdStrikeActionsRunScriptParameters = AtLeastOne<
+  CrowdStrikeActionsRunScriptParametersBase,
+  'Raw' | 'HostPath' | 'CloudFile' | 'CommandLine'
+>;
 
 export type CrowdStrikeActionResponseDataOutput =
   | Record<string, never> // Empty object

@@ -21,7 +21,7 @@ import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import type {
   ResponseActionAgentType,
-  EDRActionsApiCommandNames<'endpoint'>,
+  EDRActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
