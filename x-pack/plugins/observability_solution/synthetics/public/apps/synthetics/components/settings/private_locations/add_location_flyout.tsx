@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
@@ -56,7 +57,7 @@ export const AddLocationFlyout = ({
         lat: 0,
         lon: 0,
       },
-      spaces: spaceId ? [spaceId] : [],
+      spaces: [ALL_SPACES_ID],
     },
   });
 
