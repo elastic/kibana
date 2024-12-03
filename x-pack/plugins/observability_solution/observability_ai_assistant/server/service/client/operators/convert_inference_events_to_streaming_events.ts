@@ -22,7 +22,7 @@ export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
   InferenceChatCompletionEvent,
   ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent
 > {
-  return (events$) => {
+  return (events$: Observable<InferenceChatCompletionEvent>) => {
     return events$.pipe(
       map((event) => {
         if (event.type === InferenceChatCompletionEventType.ChatCompletionChunk) {
