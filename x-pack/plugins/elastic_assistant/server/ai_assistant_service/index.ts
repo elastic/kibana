@@ -141,7 +141,9 @@ export class AIAssistantService {
       .then((productDocManager) => {
         this.productDocManager = productDocManager;
       })
-      .catch();
+      .catch((error) => {
+        this.options.logger.warn(`Failed to initialize productDocManager: ${error.message}`);
+      });
   }
 
   public isInitialized() {
