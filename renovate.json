@@ -401,6 +401,33 @@
       "minimumReleaseAge": "7 days"
     },
     {
+      "groupName": "@elastic/kibana-management dependencies",
+      "matchDepNames": [
+        "@elastic/request-converter",
+        "@mapbox/vector-tile",
+        "brace",
+        "cronstrue",
+        "file-saver",
+        "moment-duration-format",
+        "@mapbox/vector-tile",
+        "@types/mapbox__vector-tile",
+        "@types/moment-duration-format"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Kibana Management",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
       "groupName": "@elastic/kibana-visualizations test dependencies",
       "matchDepNames": [
         "@types/faker",
