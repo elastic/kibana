@@ -15,7 +15,7 @@ import type {
 
 import type { AssetInventoryPluginSetup, AssetInventoryPluginStart } from './types';
 import { defineRoutes } from './routes';
-import { createKeywordBuilderPipeline, deleteKeywordBuilderPipeline } from './lib/ingest_pipelines'
+import { createKeywordBuilderPipeline, deleteKeywordBuilderPipeline } from './lib/ingest_pipelines';
 
 // TODO Uncomment this line when initialize() is enabled
 // import { initializeTransforms } from './create_transforms/create_transforms';
@@ -59,7 +59,7 @@ export class AssetInventoryPlugin
     deleteKeywordBuilderPipeline({
       logger: this.logger,
       esClient: this.esClient!,
-    })
+    });
   }
 
   /**
@@ -72,9 +72,9 @@ export class AssetInventoryPlugin
 
     createKeywordBuilderPipeline({
       logger: this.logger,
-      esClient: this.esClient
-    })
-    this.logger.debug("create keyword builder pipeline")
+      esClient: this.esClient,
+    });
+    this.logger.debug('create keyword builder pipeline');
 
     this.isInitialized = true;
   }

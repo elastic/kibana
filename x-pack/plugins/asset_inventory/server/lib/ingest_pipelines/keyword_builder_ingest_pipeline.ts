@@ -1,29 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
-const PIPELINE_ID = "entity-keyword-builder@platform"
+const PIPELINE_ID = 'entity-keyword-builder@platform';
 
 const buildIngestPipeline = (): IngestProcessorContainer[] => {
   return [
     {
       script: {
-        lang: "painless",
+        lang: 'painless',
         on_failure: [
           {
             set: {
-              field: "error.message",
-              value: "Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message {{ _ingest.on_failure_message }}",
-            }
-          }
+              field: 'error.message',
+              value:
+                'Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message {{ _ingest.on_failure_message }}',
+            },
+          },
         ],
 
-        // There are two layers of language to string scape on this script. 
-        // - One is in javascript 
+        // There are two layers of language to string scape on this script.
+        // - One is in javascript
         // - Another one is in painless.
         //
         // .e.g, in painless we want the following line:
-        //    entry.getKey().replace("\"", "\\\"");   
+        //    entry.getKey().replace("\"", "\\\"");
         //
         // To do so we must scape each backslash in javascript, otherwise the backslashes will only scape the next character
         // and the backslashes won't end up in the painless layer
@@ -103,16 +110,16 @@ const buildIngestPipeline = (): IngestProcessorContainer[] => {
 
           ctx['entities']['keyword'] = keywords;
           `,
-      }
+      },
     },
     {
       set: {
-        field: "event.ingested",
-        value: "{{{_ingest.timestamp}}}"
-      }
+        field: 'event.ingested',
+        value: '{{{_ingest.timestamp}}}',
+      },
     },
-  ]
-}
+  ];
+};
 
 // developing the pipeline is a bit tricky, so we have a debug mode
 // set  xpack.securitySolution.entityAnalytics.entityStore.developer.pipelineDebugMode
@@ -124,7 +131,6 @@ export const createKeywordBuilderPipeline = async ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }) => {
-
   const pipeline = {
     id: PIPELINE_ID,
     body: {
@@ -134,13 +140,13 @@ export const createKeywordBuilderPipeline = async ({
       },
       description: `Serialize entities.metadata into a keyword field`,
       processors: buildIngestPipeline(),
-    }
-  }
+    },
+  };
 
   logger.debug(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);
 
   await esClient.ingest.putPipeline(pipeline);
-}
+};
 
 export const deleteKeywordBuilderPipeline = ({
   logger,
