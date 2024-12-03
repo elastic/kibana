@@ -5,81 +5,131 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
-  EuiInMemoryTable,
   EuiSkeletonLoading,
-  EuiProgress,
   EuiSkeletonTitle,
   EuiSkeletonText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  EuiBasicTable,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import {
-  RULES_TABLE_INITIAL_PAGE_SIZE,
-  RULES_TABLE_PAGE_SIZE_OPTIONS,
-} from '../../../../detection_engine/rule_management_ui/components/rules_table/constants';
 import { NoItemsMessage } from './no_items_message';
-import { Filters } from './filters';
 import { useRulesTableColumns } from '../../hooks/use_rules_table_columns';
-import { useGetRuleMigrationsQuery } from '../../api/hooks/use_get_rule_migrations';
-import type { TableFilterOptions } from '../../hooks/use_filter_rules_to_install';
-import { useFilterRulesToInstall } from '../../hooks/use_filter_rules_to_install';
+import { useRulePreviewFlyout } from '../../hooks/use_rule_preview_flyout';
+import { useInstallMigrationRules } from '../../logic/use_install_migration_rules';
+import { useGetMigrationRules } from '../../logic/use_get_migration_rules';
+import { useInstallTranslatedMigrationRules } from '../../logic/use_install_translated_migration_rules';
+import { BulkActions } from './bulk_actions';
+import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { SearchField } from './search_field';
+
+const DEFAULT_PAGE_SIZE = 10;
 
 export interface RulesTableComponentProps {
   /**
    * Selected rule migration id
    */
   migrationId: string;
-
-  /**
-   * Opens the flyout with the details of the rule migration
-   * @param rule Rule migration
-   * @returns
-   */
-  openRulePreview: (rule: RuleMigration) => void;
 }
 
 /**
  * Table Component for displaying SIEM rules migrations
  */
-const RulesTableComponent: React.FC<RulesTableComponentProps> = ({
-  migrationId,
-  openRulePreview,
-}) => {
-  const { data: ruleMigrations, isLoading } = useGetRuleMigrationsQuery(migrationId);
+const RulesTableComponent: React.FC<RulesTableComponentProps> = ({ migrationId }) => {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [searchTerm, setSearchTerm] = useState<string | undefined>();
+
+  const { data: translationStats, isLoading: isStatsLoading } =
+    useGetMigrationTranslationStats(migrationId);
+
+  const {
+    data: { ruleMigrations, total } = { ruleMigrations: [], total: 0 },
+    isLoading: isDataLoading,
+  } = useGetMigrationRules({
+    migrationId,
+    page: pageIndex,
+    perPage: pageSize,
+    searchTerm,
+  });
 
   const [selectedRuleMigrations, setSelectedRuleMigrations] = useState<RuleMigration[]>([]);
 
-  const [filterOptions, setFilterOptions] = useState<TableFilterOptions>({
-    filter: '',
-  });
+  const pagination = useMemo(() => {
+    return {
+      pageIndex,
+      pageSize,
+      totalItemCount: total,
+    };
+  }, [pageIndex, pageSize, total]);
 
-  const filteredRuleMigrations = useFilterRulesToInstall({
-    filterOptions,
-    ruleMigrations: ruleMigrations ?? [],
-  });
+  const onTableChange = useCallback(({ page, sort }: CriteriaWithPagination<RuleMigration>) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
+  }, []);
 
-  const shouldShowProgress = isLoading;
+  const handleOnSearch = useCallback((value: string) => {
+    setSearchTerm(value.trim());
+  }, []);
+
+  const { mutateAsync: installMigrationRules } = useInstallMigrationRules(migrationId);
+  const { mutateAsync: installTranslatedMigrationRules } =
+    useInstallTranslatedMigrationRules(migrationId);
+
+  const [isTableLoading, setTableLoading] = useState(false);
+  const installSingleRule = useCallback(
+    async (migrationRule: RuleMigration, enable?: boolean) => {
+      setTableLoading(true);
+      try {
+        await installMigrationRules([migrationRule.id]);
+      } finally {
+        setTableLoading(false);
+      }
+    },
+    [installMigrationRules]
+  );
+
+  const installTranslatedRules = useCallback(
+    async (enable?: boolean) => {
+      setTableLoading(true);
+      try {
+        await installTranslatedMigrationRules();
+      } finally {
+        setTableLoading(false);
+      }
+    },
+    [installTranslatedMigrationRules]
+  );
+
+  const ruleActionsFactory = useCallback(
+    (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
+      // TODO: Add flyout action buttons
+      return null;
+    },
+    []
+  );
+
+  const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
+    ruleActionsFactory,
+  });
 
   const rulesColumns = useRulesTableColumns({
-    openRulePreview,
+    disableActions: isTableLoading,
+    openMigrationRulePreview: openRulePreview,
+    installMigrationRule: installSingleRule,
   });
 
   return (
     <>
-      {shouldShowProgress && (
-        <EuiProgress
-          data-test-subj="loadingRulesInfoProgress"
-          size="xs"
-          position="absolute"
-          color="accent"
-        />
-      )}
       <EuiSkeletonLoading
-        isLoading={isLoading}
+        isLoading={isDataLoading}
         loadingContent={
           <>
             <EuiSkeletonTitle />
@@ -87,36 +137,43 @@ const RulesTableComponent: React.FC<RulesTableComponentProps> = ({
           </>
         }
         loadedContent={
-          !filteredRuleMigrations.length ? (
+          !translationStats?.rules.total ? (
             <NoItemsMessage />
           ) : (
             <>
-              <EuiFlexGroup direction="column">
+              <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
+                <EuiFlexItem>
+                  <SearchField initialValue={searchTerm} onSearch={handleOnSearch} />
+                </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <Filters filterOptions={filterOptions} setFilterOptions={setFilterOptions} />
+                  <BulkActions
+                    isTableLoading={isStatsLoading || isDataLoading || isTableLoading}
+                    numberOfTranslatedRules={translationStats?.rules.installable ?? 0}
+                    numberOfSelectedRules={0}
+                    installTranslatedRule={installTranslatedRules}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
-
-              <EuiInMemoryTable
-                items={filteredRuleMigrations}
-                sorting
-                pagination={{
-                  initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
-                  pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-                }}
+              <EuiSpacer size="m" />
+              <EuiBasicTable<RuleMigration>
+                loading={isTableLoading}
+                items={ruleMigrations}
+                pagination={pagination}
+                onChange={onTableChange}
                 selection={{
                   selectable: () => true,
                   onSelectionChange: setSelectedRuleMigrations,
                   initialSelected: selectedRuleMigrations,
                 }}
-                itemId="rule_id"
-                data-test-subj="rules-translation-table"
+                itemId={'id'}
+                data-test-subj={'rules-translation-table'}
                 columns={rulesColumns}
               />
             </>
           )
         }
       />
+      {rulePreviewFlyout}
     </>
   );
 };

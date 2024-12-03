@@ -6,29 +6,38 @@
  */
 
 import { z } from '@kbn/zod';
+import { notFound, internal } from '@hapi/boom';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { readAncestors, readStream } from '../../lib/streams/stream_crud';
+import { StreamDefinition } from '../../../common';
 
 export const readStreamRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{id} 2023-10-31',
+  endpoint: 'GET /api/streams/{id}',
   options: {
-    access: 'public',
-    availability: {
-      stability: 'experimental',
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
-      },
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({ response, params, request, getScopedClients }) => {
+  handler: async ({
+    response,
+    params,
+    request,
+    logger,
+    getScopedClients,
+  }): Promise<
+    StreamDefinition & {
+      inheritedFields: Array<StreamDefinition['fields'][number] & { from: string }>;
+    }
+  > => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
       const streamEntity = await readStream({
@@ -36,7 +45,14 @@ export const readStreamRoute = createServerRoute({
         id: params.path.id,
       });
 
-      const ancestors = await readAncestors({
+      if (streamEntity.definition.managed === false) {
+        return {
+          ...streamEntity.definition,
+          inheritedFields: [],
+        };
+      }
+
+      const { ancestors } = await readAncestors({
         id: streamEntity.definition.id,
         scopedClusterClient,
       });
@@ -48,13 +64,13 @@ export const readStreamRoute = createServerRoute({
         ),
       };
 
-      return response.ok({ body });
+      return body;
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
-        return response.notFound({ body: e });
+        throw notFound(e);
       }
 
-      return response.customError({ body: e, statusCode: 500 });
+      throw internal(e);
     }
   },
 });

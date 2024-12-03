@@ -11,6 +11,7 @@ import { Logger, KibanaRequest, KibanaResponseFactory, RouteRegistrar } from '@k
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import {
+  DefaultRouteCreateOptions,
   IoTsParamsObject,
   ServerRouteRepository,
   stripNullishRequestParameters,
@@ -30,6 +31,7 @@ import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
   APMCore,
+  APMRouteCreateOptions,
   MinimalApmPluginRequestHandlerContext,
   TelemetryUsageCounter,
 } from '../typings';
@@ -78,7 +80,11 @@ export function registerRoutes({
   const router = core.setup.http.createRouter();
 
   routes.forEach((route) => {
-    const { params, endpoint, options, handler } = route;
+    const { endpoint, handler, security } = route;
+
+    const options = ('options' in route ? route.options : {}) as DefaultRouteCreateOptions &
+      APMRouteCreateOptions;
+    const params = 'params' in route ? route.params : undefined;
 
     const { method, pathname, version } = parseEndpoint(endpoint);
 
@@ -109,7 +115,10 @@ export function registerRoutes({
         );
 
         const getApmIndices = async () => {
-          const apmIndices = await plugins.apmDataAccess.setup.getApmIndices();
+          const coreContext = await context.core;
+          const apmIndices = await plugins.apmDataAccess.setup.getApmIndices(
+            coreContext.savedObjects.client
+          );
           return apmIndices;
         };
 
@@ -215,6 +224,7 @@ export function registerRoutes({
           path: pathname,
           options,
           validate: passThroughValidationObject,
+          security,
         },
         wrappedHandler
       );
@@ -228,6 +238,7 @@ export function registerRoutes({
         path: pathname,
         access: pathname.includes('/internal/apm') ? 'internal' : 'public',
         options,
+        security,
       }).addVersion(
         {
           version,

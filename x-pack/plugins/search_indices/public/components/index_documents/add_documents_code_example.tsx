@@ -60,7 +60,7 @@ export const AddDocumentsCodeExample = ({
       generateSampleDocument(codeSampleMappings, `Example text ${num}`)
     );
   }, [codeSampleMappings]);
-  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+  const { apiKey } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
       indexName,
@@ -68,17 +68,9 @@ export const AddDocumentsCodeExample = ({
       sampleDocuments,
       indexHasMappings,
       mappingProperties: codeSampleMappings,
-      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
+      apiKey: apiKey || undefined,
     };
-  }, [
-    indexName,
-    elasticsearchUrl,
-    sampleDocuments,
-    codeSampleMappings,
-    indexHasMappings,
-    apiKeyIsVisible,
-    apiKey,
-  ]);
+  }, [indexName, elasticsearchUrl, sampleDocuments, codeSampleMappings, indexHasMappings, apiKey]);
 
   return (
     <EuiPanel

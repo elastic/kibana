@@ -46,7 +46,7 @@ export interface NewAgentPolicy {
   global_data_tags?: GlobalDataTag[];
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
-    enabled: boolean;
+    enabled?: boolean;
     host?: string;
     port?: number;
     buffer?: {
@@ -272,7 +272,6 @@ export interface FleetServerPolicy {
 
 export interface AgentlessApiResponse {
   id: string;
-  region_id: string;
 }
 
 // Definitions for agent policy outputs endpoints

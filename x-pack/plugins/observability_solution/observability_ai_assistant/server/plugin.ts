@@ -111,7 +111,18 @@ export class ObservabilityAIAssistantPlugin
             ];
           }),
       };
-    }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
+    }) as Pick<
+      ObservabilityAIAssistantRouteHandlerResources['plugins'],
+      keyof ObservabilityAIAssistantPluginStartDependencies
+    >;
+
+    const withCore = {
+      ...routeHandlerPlugins,
+      core: {
+        setup: core,
+        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+      },
+    };
 
     const service = (this.service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
@@ -123,8 +134,9 @@ export class ObservabilityAIAssistantPlugin
       core,
       taskManager: plugins.taskManager,
       logger: this.logger,
-    }).catch((error) => {
-      this.logger.error(`Failed to register migrate knowledge base entries task: ${error}`);
+      config: this.config,
+    }).catch((e) => {
+      this.logger.error(`Knowledge base migration was not successfully: ${e.message}`);
     });
 
     service.register(registerFunctions);
@@ -133,7 +145,7 @@ export class ObservabilityAIAssistantPlugin
       core,
       logger: this.logger,
       dependencies: {
-        plugins: routeHandlerPlugins,
+        plugins: withCore,
         service: this.service,
       },
     });
