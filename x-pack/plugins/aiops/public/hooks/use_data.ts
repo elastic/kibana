@@ -19,10 +19,9 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
-
-import { useAiopsAppContext } from './use_aiops_app_context';
 
 import { useDocumentCountStats } from './use_document_count_stats';
 

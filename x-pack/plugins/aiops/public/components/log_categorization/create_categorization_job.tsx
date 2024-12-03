@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-
 import moment from 'moment';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
@@ -17,9 +16,8 @@ import {
   type CreateCategorizationADJobContext,
 } from '@kbn/ml-ui-actions';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { i18n } from '@kbn/i18n';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 interface Props {
   dataView: DataView;

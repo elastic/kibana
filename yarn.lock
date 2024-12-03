@@ -3860,6 +3860,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-context@link:x-pack/packages/ml/aiops_context":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-log-pattern-analysis@link:x-pack/packages/ml/aiops_log_pattern_analysis":
   version "0.0.0"
   uid ""
@@ -5584,11 +5588,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-bus-plugin@link:src/plugins/event_bus":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-log-fixture-plugin@link:x-pack/test/plugin_api_integration/plugins/event_log":
   version "0.0.0"
   uid ""
 
 "@kbn/event-log-plugin@link:x-pack/plugins/event_log":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eventbus-example-plugin@link:examples/eventbus":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eventbus-slices@link:packages/eventbus-slices":
   version "0.0.0"
   uid ""
 
@@ -6009,6 +6025,10 @@
   uid ""
 
 "@kbn/journeys@link:packages/kbn-journeys":
+  version "0.0.0"
+  uid ""
+
+"@kbn/js-sandbox-plugin@link:src/plugins/js_sandbox":
   version "0.0.0"
   uid ""
 
@@ -32363,6 +32383,11 @@ vega-label@~1.2.1:
     vega-dataflow "^5.7.3"
     vega-scenegraph "^4.9.2"
     vega-util "^1.15.2"
+
+vega-lite-api@^5.5.0:
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/vega-lite-api/-/vega-lite-api-5.6.0.tgz#4029e038db8fbfd9d507f84d612f62c518f78fc5"
+  integrity sha512-8es9NUcbhqHnyMvUNtejbzR5pt3Kk0PNN+sng+CoKefQJkej4p648CmEXG1PiPpkfMlykDsIKMmBrQG3KVqyeQ==
 
 vega-lite@^5.5.0:
   version "5.5.0"
