@@ -17,39 +17,35 @@ export interface EndpointInfoProps {
   provider: InferenceAPIConfigResponse;
 }
 
-export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, provider }) => {
-  const isInTechPreview = isProviderTechPreview(provider);
-
-  return (
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, provider }) => (
+  <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <span>
+            <strong>{inferenceId}</strong>
+          </span>
+        </EuiFlexItem>
+        {isProviderTechPreview(provider) ? (
           <EuiFlexItem grow={false}>
             <span>
-              <strong>{inferenceId}</strong>
+              <EuiBetaBadge
+                label={i18n.TECH_PREVIEW_LABEL}
+                size="s"
+                color="hollow"
+                alignment="middle"
+              />
             </span>
           </EuiFlexItem>
-          {isInTechPreview ? (
-            <EuiFlexItem grow={false}>
-              <span>
-                <EuiBetaBadge
-                  label={i18n.TECH_PREVIEW_LABEL}
-                  size="s"
-                  color="hollow"
-                  alignment="middle"
-                />
-              </span>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <span>
-          {isEndpointPreconfigured(inferenceId) ? (
-            <EuiBetaBadge label={i18n.PRECONFIGURED_LABEL} size="s" color="hollow" />
-          ) : null}
-        </span>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+        ) : null}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <span>
+        {isEndpointPreconfigured(inferenceId) ? (
+          <EuiBetaBadge label={i18n.PRECONFIGURED_LABEL} size="s" color="hollow" />
+        ) : null}
+      </span>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
