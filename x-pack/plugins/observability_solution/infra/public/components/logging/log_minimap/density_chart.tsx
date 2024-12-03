@@ -66,14 +66,14 @@ export const DensityChart: React.FC<DensityChartProps> = ({
 
 const DensityChartPositiveBackground = styled.rect`
   fill: ${(props) =>
-    props.theme.darkMode
+    props.theme.colorMode === 'DARK'
       ? props.theme.euiTheme.colors.lightShade
       : props.theme.euiTheme.colors.lightestShade};
 `;
 
 const PositiveAreaPath = styled.path`
   fill: ${(props) =>
-    props.theme.darkMode
+    props.theme.colorMode === 'DARK'
       ? props.theme.euiTheme.colors.mediumShade
       : props.theme.euiTheme.colors.lightShade};
 `;

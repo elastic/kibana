@@ -7,7 +7,7 @@
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { FC, PropsWithChildren } from 'react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -34,10 +34,11 @@ export const CommonInfraProviders: FC<
   }>
 > = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
   const darkMode = useIsDarkMode();
+  const colorMode = darkMode ? 'DARK' : 'LIGHT';
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
-      <EuiThemeProvider darkMode={darkMode}>
+      <EuiThemeProvider colorMode={colorMode}>
         <DataUIProviders appName={appName} storage={storage}>
           <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
             <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>

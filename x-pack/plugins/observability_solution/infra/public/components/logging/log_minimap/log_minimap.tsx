@@ -166,7 +166,7 @@ const TimeCursor = styled.line`
   pointer-events: none;
   stroke-width: 1px;
   stroke: ${(props) =>
-    props.theme.darkMode
+    props.theme.colorMode === 'DARK'
       ? props.theme.euiTheme.colors.darkestShade
       : props.theme.euiTheme.colors.darkShade};
 `;
