@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import { ScanActionRequestSchema } from '../..';
+import { ScanActionRequestSchema } from '../response_actions/scan';
 import { ExecuteActionRequestSchema } from '../response_actions/execute';
 import { EndpointActionGetFileSchema } from '../response_actions/get_file';
 import { IsolateRouteRequestSchema } from '../response_actions/isolate';
