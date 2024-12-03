@@ -8,10 +8,7 @@
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import {
-  AlertingAuthorization,
-  PluginStartContract as AlertingStart,
-} from '@kbn/alerting-plugin/server';
+import { AlertingAuthorization, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { IRuleDataService } from '../rule_data_plugin_service';
 import { AlertsClient } from './alerts_client';
@@ -19,12 +16,14 @@ import { AlertsClient } from './alerts_client';
 export interface AlertsClientFactoryProps {
   logger: Logger;
   esClient: ElasticsearchClient;
-  getAlertingAuthorization: (request: KibanaRequest) => PublicMethodsOf<AlertingAuthorization>;
+  getAlertingAuthorization: (
+    request: KibanaRequest
+  ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
   securityPluginSetup: SecurityPluginSetup | undefined;
   ruleDataService: IRuleDataService | null;
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
-  getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
+  getAlertIndicesAlias: AlertingServerStart['getAlertIndicesAlias'];
 }
 
 export class AlertsClientFactory {
@@ -33,12 +32,12 @@ export class AlertsClientFactory {
   private esClient!: ElasticsearchClient;
   private getAlertingAuthorization!: (
     request: KibanaRequest
-  ) => PublicMethodsOf<AlertingAuthorization>;
+  ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
   private securityPluginSetup!: SecurityPluginSetup | undefined;
   private ruleDataService!: IRuleDataService | null;
   private getRuleType!: RuleTypeRegistry['get'];
   private getRuleList!: RuleTypeRegistry['list'];
-  private getAlertIndicesAlias!: AlertingStart['getAlertIndicesAlias'];
+  private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
   public initialize(options: AlertsClientFactoryProps) {
     /**
@@ -61,10 +60,11 @@ export class AlertsClientFactory {
 
   public async create(request: KibanaRequest): Promise<AlertsClient> {
     const { securityPluginSetup, getAlertingAuthorization, logger } = this;
+    const authorization = await getAlertingAuthorization(request);
 
     return new AlertsClient({
       logger,
-      authorization: getAlertingAuthorization(request),
+      authorization,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       esClient: this.esClient,
       ruleDataService: this.ruleDataService!,
