@@ -49,7 +49,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           {isIntegrationsCardAvailable && !isIntegrationsCardComplete ? (
-             <EuiFlexItem
+            <EuiFlexItem
               className={css`
                 width: 45%;
               `}
@@ -71,7 +71,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
               />
             </EuiFlexItem>
           ) : (
-           <ConnectorCards connectors={connectors} onConnectorSaved={checkComplete} />
+            <ConnectorCards connectors={connectors} onConnectorSaved={checkComplete} />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
