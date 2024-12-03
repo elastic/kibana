@@ -19,8 +19,10 @@ import {
   merge,
   tap,
   map,
+  startWith,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import { getEditPath } from '../../common/constants';
 import type {
   GetStateType,
@@ -53,6 +55,41 @@ type ReloadReason =
   | 'disableTriggers'
   | 'viewMode'
   | 'searchContext';
+
+type FetchType = Pick<
+  FetchContext,
+  'query' | 'filters' | 'timeRange' | 'timeslice' | 'searchSessionId'
+>;
+
+const shouldRefreshFilterCompareOptions = {
+  ...COMPARE_ALL_OPTIONS,
+  // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
+  state: false,
+};
+
+// this is borrowed from the previous Embeddable logic
+function shouldFetch$(unifiedSearch$: BehaviorSubject<FetchType>, initialValue: FetchType) {
+  return unifiedSearch$.pipe(
+    startWith(initialValue),
+    distinctUntilChanged((previous: FetchType, current: FetchType) => {
+      if (
+        !fastIsEqual(
+          [previous.searchSessionId, previous.query, previous.timeRange, previous.timeslice],
+          [current.searchSessionId, current.query, current.timeRange, current.timeslice]
+        )
+      ) {
+        return false;
+      }
+
+      return onlyDisabledFiltersChanged(
+        previous.filters,
+        current.filters,
+        shouldRefreshFilterCompareOptions
+      );
+    }),
+    skip(1)
+  );
+}
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -112,15 +149,16 @@ export function loadEmbeddableData(
     }
   };
 
-  const unifiedSearch$ = new BehaviorSubject<
-    Pick<FetchContext, 'query' | 'filters' | 'timeRange' | 'timeslice' | 'searchSessionId'>
-  >({
-    query: undefined,
-    filters: undefined,
-    timeRange: undefined,
-    timeslice: undefined,
-    searchSessionId: undefined,
-  });
+  const unifiedSearchInitialValue = {
+    query: api.query$.getValue(),
+    filters: api.filters$.getValue(),
+    timeRange: api.timeRange$.getValue(),
+    timeslice: api.timeslice$?.getValue(),
+    searchSessionId: apiPublishesSearchSession(parentApi)
+      ? parentApi.searchSessionId$.getValue()
+      : '',
+  };
+  const unifiedSearch$ = new BehaviorSubject<FetchType>(unifiedSearchInitialValue);
 
   async function reload(
     // make reload easier to debug
@@ -259,18 +297,9 @@ export function loadEmbeddableData(
   }
 
   const mergedSubscriptions = merge(
-    // on data change from the parentApi, reload
-    fetch$(api).pipe(
-      tap((data) => {
-        const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
-        unifiedSearch$.next({
-          query: data.query,
-          filters: data.filters,
-          timeRange: data.timeRange,
-          timeslice: data.timeslice,
-          searchSessionId,
-        });
-      }),
+    // on fetch context change from the parentApi,
+    // make sure to distill changes before reloading
+    shouldFetch$(unifiedSearch$, unifiedSearchInitialValue).pipe(
       map(() => 'searchContext' as ReloadReason)
     ),
     // On state change, reload
@@ -302,6 +331,18 @@ export function loadEmbeddableData(
   );
 
   const subscriptions: Subscription[] = [
+    // subscribe to the search context changes
+    // will distill the output later on from the unifiedSearch$
+    fetch$(api).subscribe((data) => {
+      const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+      unifiedSearch$.next({
+        query: data.query,
+        filters: data.filters,
+        timeRange: data.timeRange,
+        timeslice: data.timeslice,
+        searchSessionId,
+      });
+    }),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // make sure to reload on viewMode change
     api.viewMode.subscribe(() => {
