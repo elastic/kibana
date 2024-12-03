@@ -601,7 +601,9 @@ export const ESQLEditor = memo(function ESQLEditor({
     renderLineHighlightOnlyWhenFocus: true,
     scrollbar: {
       horizontal: 'hidden',
+      horizontalScrollbarSize: 6,
       vertical: 'auto',
+      verticalScrollbarSize: 6,
     },
     scrollBeyondLastLine: false,
     theme: darkMode ? ESQL_DARK_THEME_ID : ESQL_LIGHT_THEME_ID,
