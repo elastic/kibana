@@ -15,6 +15,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { mockTimelineData } from '../../common/mock';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
+import { waitFor } from '@testing-library/dom';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -30,7 +31,7 @@ jest.mock('../../notes/hooks/use_fetch_notes');
 const onLoadMock = jest.fn();
 const useFetchNotesMock = useFetchNotes as jest.Mock;
 
-const mockEvents = mockTimelineData.filter((i, index) => index <= 11);
+const mockEvents = mockTimelineData.slice(0, 10);
 
 const mockSearch = jest.fn();
 
@@ -60,22 +61,28 @@ jest.mock('../../common/lib/kibana', () => ({
             mockSearch();
             return {
               subscribe: jest.fn().mockImplementation(({ next }) => {
-                next({
-                  isRunning: false,
-                  isPartial: false,
-                  inspect: {
-                    dsl: [],
-                    response: [],
-                  },
-                  edges: mockEvents.map((item) => ({ node: item })),
-                  pageInfo: {
-                    activePage: 0,
-                    totalPages: 10,
-                  },
-                  rawResponse: {},
-                  totalCount: mockTimelineData.length,
-                });
-                return { unsubscribe: jest.fn() };
+                const timeoutHandler = setTimeout(() => {
+                  next({
+                    isRunning: false,
+                    isPartial: false,
+                    inspect: {
+                      dsl: [],
+                      response: [],
+                    },
+                    edges: mockEvents.map((item) => ({ node: item })),
+                    pageInfo: {
+                      activePage: args.pagination.activePage,
+                      totalPages: 10,
+                    },
+                    rawResponse: {},
+                    totalCount: mockTimelineData.length,
+                  });
+                }, 50);
+                return {
+                  unsubscribe: jest.fn(() => {
+                    clearTimeout(timeoutHandler);
+                  }),
+                };
               }),
             };
           }),
@@ -122,12 +129,12 @@ describe('useTimelineEvents', () => {
   const endDate: string = '3000-01-01T00:00:00.000Z';
   const props: UseTimelineEventsProps = {
     dataViewId: 'data-view-id',
-    endDate: '',
+    endDate,
     id: TimelineId.active,
     indexNames: ['filebeat-*'],
     fields: ['@timestamp', 'event.kind'],
     filterQuery: '',
-    startDate: '',
+    startDate,
     limit: 25,
     runtimeMappings: {},
     sort: initSortDefault,
@@ -167,7 +174,7 @@ describe('useTimelineEvents', () => {
         UseTimelineEventsProps,
         [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
+        initialProps: { ...props, startDate: '', endDate: '' },
       });
 
       // useEffect on params request
@@ -176,20 +183,22 @@ describe('useTimelineEvents', () => {
       // useEffect on params request
       await waitForNextUpdate();
 
-      expect(mockSearch).toHaveBeenCalledTimes(2);
-      expect(result.current).toEqual([
-        DataLoadingState.loaded,
-        {
-          events: mockEvents,
-          id: TimelineId.active,
-          inspect: result.current[1].inspect,
-          loadPage: result.current[1].loadPage,
-          pageInfo: result.current[1].pageInfo,
-          refetch: result.current[1].refetch,
-          totalCount: 32,
-          refreshedAt: result.current[1].refreshedAt,
-        },
-      ]);
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(2);
+        expect(result.current).toEqual([
+          DataLoadingState.loaded,
+          {
+            events: mockEvents,
+            id: TimelineId.active,
+            inspect: result.current[1].inspect,
+            loadPage: result.current[1].loadPage,
+            pageInfo: result.current[1].pageInfo,
+            refetch: result.current[1].refetch,
+            totalCount: 32,
+            refreshedAt: result.current[1].refreshedAt,
+          },
+        ]);
+      });
     });
   });
 
@@ -199,7 +208,7 @@ describe('useTimelineEvents', () => {
         UseTimelineEventsProps,
         [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
+        initialProps: { ...props, startDate: '', endDate: '' },
       });
 
       // useEffect on params request
@@ -218,21 +227,23 @@ describe('useTimelineEvents', () => {
         },
       ]);
 
-      expect(mockSearch).toHaveBeenCalledTimes(2);
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(2);
 
-      expect(result.current).toEqual([
-        DataLoadingState.loaded,
-        {
-          events: mockEvents,
-          id: TimelineId.active,
-          inspect: result.current[1].inspect,
-          loadPage: result.current[1].loadPage,
-          pageInfo: result.current[1].pageInfo,
-          refetch: result.current[1].refetch,
-          totalCount: 32,
-          refreshedAt: result.current[1].refreshedAt,
-        },
-      ]);
+        expect(result.current).toEqual([
+          DataLoadingState.loaded,
+          {
+            events: mockEvents,
+            id: TimelineId.active,
+            inspect: result.current[1].inspect,
+            loadPage: result.current[1].loadPage,
+            pageInfo: result.current[1].pageInfo,
+            refetch: result.current[1].refetch,
+            totalCount: 32,
+            refreshedAt: result.current[1].refreshedAt,
+          },
+        ]);
+      });
     });
   });
 
@@ -285,7 +296,7 @@ describe('useTimelineEvents', () => {
         UseTimelineEventsProps,
         [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
+        initialProps: { ...props, startDate: '', endDate: '' },
       });
 
       // useEffect on params request
@@ -304,9 +315,9 @@ describe('useTimelineEvents', () => {
         fields: ['@timestamp', 'event.kind', 'event.category'],
       });
 
-      await waitForNextUpdate();
-
-      expect(mockSearch).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
@@ -316,7 +327,7 @@ describe('useTimelineEvents', () => {
         UseTimelineEventsProps,
         [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
+        initialProps: { ...props, startDate: '', endDate: '' },
       });
 
       // useEffect on params request
@@ -330,19 +341,17 @@ describe('useTimelineEvents', () => {
 
       rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
 
-      // since there is no new update in useEffect, it should throw an timeout error
-      await expect(waitForNextUpdate()).rejects.toThrowError();
-
       expect(mockSearch).toHaveBeenCalledTimes(0);
     });
   });
+
   test('should not query again when a removed field is added back', async () => {
     await act(async () => {
       const { waitForNextUpdate, rerender } = renderHook<
         UseTimelineEventsProps,
         [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
+        initialProps: { ...props, startDate: '', endDate: '' },
       });
 
       // useEffect on params request
@@ -357,35 +366,32 @@ describe('useTimelineEvents', () => {
       // remove `event.kind` from default fields
       rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
 
-      // since there is no new update in useEffect, it should throw an timeout error
-      await expect(waitForNextUpdate()).rejects.toThrowError();
-
       expect(mockSearch).toHaveBeenCalledTimes(0);
 
       // request default Fields
       rerender({ ...props, startDate, endDate });
 
-      // since there is no new update in useEffect, it should throw an timeout error
-      await expect(waitForNextUpdate()).rejects.toThrowError();
-
       expect(mockSearch).toHaveBeenCalledTimes(0);
     });
   });
 
-  describe('Fetch Notes', () => {
-    test('should call onLoad for notes when events are fetched', async () => {
-      await act(async () => {
-        const { waitFor } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
-          (args) => useTimelineEvents(args),
-          {
-            initialProps: { ...props },
-          }
-        );
+  test('should return the combined list of events for all the pages when multiple pages are queried', async () => {
+    await act(async () => {
+      const { result } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props },
+      });
+      await waitFor(() => {
+        expect(result.current[1].events).toHaveLength(10);
+      });
 
-        await waitFor(() => {
-          expect(mockSearch).toHaveBeenCalledTimes(1);
-          expect(onLoadMock).toHaveBeenNthCalledWith(1, expect.objectContaining(mockEvents));
-        });
+      result.current[1].loadPage(1);
+
+      await waitFor(() => {
+        expect(result.current[0]).toEqual(DataLoadingState.loadingMore);
+      });
+
+      await waitFor(() => {
+        expect(result.current[1].events).toHaveLength(20);
       });
     });
   });

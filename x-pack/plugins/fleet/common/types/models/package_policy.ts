@@ -92,6 +92,7 @@ export interface NewPackagePolicy {
     };
   };
   overrides?: { inputs?: { [key: string]: any } } | null;
+  supports_agentless?: boolean | null;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

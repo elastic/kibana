@@ -7,6 +7,14 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
+export const DataStreamsRequestSchema = {
+  query: schema.object({
+    includeZeroStorage: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export type DataStreamsRequestQuery = TypeOf<typeof DataStreamsRequestSchema.query>;
+
 export const DataStreamsResponseSchema = {
   body: () =>
     schema.arrayOf(

@@ -24,12 +24,24 @@ export function setElasticsearchRoute({
       path: ELASTICSEARCH_CONFIG_ROUTE,
       access: 'internal',
     })
-    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
-      const body: ElasticsearchConfigType = {
-        elasticsearch_url: elasticsearchUrl,
-      };
-      return response.ok({
-        body,
-      });
-    });
+    .addVersion(
+      {
+        version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {},
+      },
+      async (context, request, response) => {
+        const body: ElasticsearchConfigType = {
+          elasticsearch_url: elasticsearchUrl,
+        };
+        return response.ok({
+          body,
+        });
+      }
+    );
 }
