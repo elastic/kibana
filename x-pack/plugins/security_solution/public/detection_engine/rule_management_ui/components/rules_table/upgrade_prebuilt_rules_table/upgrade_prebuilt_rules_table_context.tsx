@@ -404,7 +404,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     () => ({
       state: {
         rulesUpgradeState,
-        hasRulesToUpgrade: isFetched && Object.keys(rulesUpgradeState).length > 0,
+        hasRulesToUpgrade: isFetched && ruleUpgradeInfos.length > 0,
         filterOptions,
         tags,
         isFetched,
@@ -418,6 +418,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       actions,
     }),
     [
+      ruleUpgradeInfos.length,
       rulesUpgradeState,
       filterOptions,
       tags,
