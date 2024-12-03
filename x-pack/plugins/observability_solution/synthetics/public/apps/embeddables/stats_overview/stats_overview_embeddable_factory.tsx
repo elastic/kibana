@@ -67,6 +67,7 @@ export const getStatsOverviewEmbeddableFactory = (
             i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
               defaultMessage: 'filters',
             }),
+
           isEditingEnabled: () => true,
           onEdit: async () => {
             try {
