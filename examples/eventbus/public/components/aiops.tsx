@@ -11,8 +11,6 @@ import React, { useMemo, type FC } from 'react';
 
 import { EuiBadge } from '@elastic/eui';
 
-import { criticalTableLookup } from '@kbn/ml-chi2test';
-
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 import { useFetchESQL } from '../hooks/use_fetch_esql';
 
@@ -26,20 +24,14 @@ export const Aiops: FC<AiopsProps> = ({ field }) => {
   const state = useEventBusExampleState();
   const esql = state.useState((s) => s.esql);
   const filters = state.useState((s) => s.filters);
-  console.log('filters', filters);
 
   const esqlWithFilters = useMemo(() => {
     if (esql === '' || Object.values(filters).length === 0) return null;
 
-    // FROM kibana_sample_data_logs
-    // | STATS baseline = COUNT(*) WHERE response.keyword != "404",
-    //         deviation = COUNT(*) WHERE response.keyword == "404" BY machine.os.keyword
-    // | SORT deviation DESC
-
     const els = esql.split('|').map((d) => d.trim());
     const filter = Object.entries(filters)
       .filter(([key, value]) => {
-        return key !== iframeID;
+        return !key.startsWith('aiops_');
       })
       .map((d) => d[1])
       .join(' AND ');
@@ -50,13 +42,10 @@ export const Aiops: FC<AiopsProps> = ({ field }) => {
     els.push('SORT deviation DESC');
 
     return els.join('\n| ');
-  }, [iframeID, field, filters, esql]);
+  }, [field, filters, esql]);
   // console.log('esqlWithFilters', esqlWithFilters);
 
   const data = useFetchESQL(esqlWithFilters);
-  if (field === 'response.keyword') {
-    console.log('data', JSON.stringify(data?.values, null, 2));
-  }
 
   const significantData = useMemo(() => {
     if (!data) return null;
@@ -67,17 +56,6 @@ export const Aiops: FC<AiopsProps> = ({ field }) => {
     // columns: baseline, deviation, entity
     // console.log('data', data);
     const augmented = data.values.map((d) => {
-      if (field === 'response.keyword') {
-        console.log('observation', {
-          field,
-          value: d[2],
-          observed: d[1],
-          expected: d[0],
-          observedTotal,
-          expectedTotal,
-        });
-      }
-
       const baseline = d[0] as number;
       const deviation = d[1] as number;
 
@@ -103,31 +81,31 @@ export const Aiops: FC<AiopsProps> = ({ field }) => {
       };
     });
 
-    if (field === 'response.keyword') {
-      console.log('augmented', augmented);
-    }
-
     return augmented.filter((d) => d.isSignificant);
   }, [data, field]);
 
   const toggleItem = (filter: string) => {
-    console.log('toggleItem', filter);
-    state.actions.setCrossfilter({ id: iframeID, filter });
+    const filterName = `${iframeID}__${filter}`;
+    if (!filters[filterName]) {
+      state.actions.setCrossfilter({ id: filterName, filter });
+    } else {
+      state.actions.setCrossfilter({ id: filterName, filter: '' });
+    }
   };
 
   if (significantData) {
     return (
       <>
         {significantData.map((d) => {
-          const isSelected = Object.values(filters).includes(`${field}=="${d.value}"`);
+          const value = d.value as string;
+          const isSelected = Object.values(filters).includes(`${field}=="${value}"`);
           return (
-            <div css={{ padding: '2px', display: 'inline-block' }}>
+            <div key={value} css={{ padding: '2px', display: 'inline-block' }}>
               <EuiBadge
-                key={d.value}
                 color={isSelected ? 'primary' : 'lightgray'}
                 onClick={() => toggleItem(`${field}=="${d.value}"`)}
               >
-                {d.field}:{d.value}
+                {field}:{value}
               </EuiBadge>
             </div>
           );
@@ -165,15 +143,38 @@ function chiSquaredTest(
   return { chiSquared, pValue, isSignificant };
 }
 
-// Chi-squared CDF approximation function
-function chiSquaredCDF(x: number, df: number) {
+/**
+ * Calculates the cumulative distribution function (CDF) for the chi-squared distribution.
+ *
+ * This approximation evaluates the probability of observing a chi-squared statistic
+ * less than or equal to the given `x` for a specified number of degrees of freedom (`df`).
+ * The calculation uses the series expansion of the incomplete gamma function, which is
+ * proportional to the chi-squared distribution's CDF.
+ *
+ * @param {number} x - The chi-squared statistic to evaluate (non-negative).
+ * @param {number} df - Degrees of freedom for the chi-squared distribution (positive even integer).
+ * @returns {number} The cumulative probability (0 ≤ result ≤ 1).
+ */
+function chiSquaredCDF(x: number, df: number): number {
+  // Guard against invalid inputs: the chi-squared statistic must be non-negative.
   if (x < 0) return 0;
+
+  // Halve the chi-squared statistic for use in the series expansion.
   const m = x / 2.0;
-  let sum = Math.exp(-m);
-  let term = sum;
+
+  // Start with the first term in the series (e^(-m)).
+  let sum = Math.exp(-m); // This is the zeroth term of the series.
+  let term = sum; // Current term in the series expansion.
+
+  // Iterate over the series terms to calculate the cumulative sum.
+  // The loop runs for `df / 2` iterations, representing the degrees of freedom.
   for (let i = 1; i <= df / 2; i++) {
+    // Calculate the next term in the series using the recurrence relation:
+    // term = term * (m / i), where `i` represents the iteration index.
     term *= m / i;
-    sum += term;
+    sum += term; // Add the current term to the cumulative sum.
   }
+
+  // The result is the cumulative probability, capped at 1 (as probabilities cannot exceed 1).
   return Math.min(sum, 1);
 }
