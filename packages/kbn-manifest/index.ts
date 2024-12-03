@@ -9,6 +9,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { listManifestFiles, printManifest, updateManifest } from './manifest';
+import { relocateModules } from './relocate';
 
 /**
  * A CLI to manipulate Kibana package manifest files
@@ -17,7 +18,9 @@ export const runKbnManifestCli = () => {
   run(
     async ({ log, flags }) => {
       if (flags.list === 'all') {
-        listManifestFiles(flags, log);
+        await listManifestFiles(flags, log);
+      } else if (typeof flags.relocate === 'string' && flags.relocate!.length > 0) {
+        await relocateModules(flags.relocate, log);
       } else {
         if (!flags.package && !flags.plugin) {
           throw new Error('You must specify the identifer of the --package or --plugin to update.');
@@ -31,10 +34,11 @@ export const runKbnManifestCli = () => {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['list', 'package', 'plugin', 'set', 'unset'],
+        string: ['list', 'relocate', 'package', 'plugin', 'set', 'unset'],
         help: `
           Usage: node scripts/manifest --package <packageId> --set group=platform --set visibility=private
           --list all List all the manifests
+          --relocate <owner> Relocate all modules (packages and plugins) belonging to the specified owner
           --package [packageId] Select a package to update.
           --plugin [pluginId] Select a plugin to update.
           --set [property]=[value] Set the desired "[property]": "[value]"
