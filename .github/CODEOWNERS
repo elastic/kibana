@@ -867,6 +867,7 @@ x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/plugins/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/plugins/aiops @elastic/ml-ui
 x-pack/plugins/alerting @elastic/response-ops
+x-pack/plugins/asset_inventory @elastic/kibana-cloud-security-posture
 x-pack/plugins/banners @elastic/appex-sharedux
 x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/plugins/cases @elastic/response-ops
@@ -2457,6 +2458,9 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 
 ## Security Solution sub teams - GenAI
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
+
+## Security Solution sub teams - Automatic Import
+x-pack/test/automatic_import_api_integration @elastic/security-scalability
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/test/osquery_cypress @elastic/security-defend-workflows
