@@ -17,6 +17,7 @@ import type {
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -43,8 +44,6 @@ import { type TrainedModelConfigResponse } from '../../common/types/trained_mode
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
-
-export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
 export function filterForEnabledFeatureModels<
   T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
