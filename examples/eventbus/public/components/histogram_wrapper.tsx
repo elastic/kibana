@@ -13,21 +13,26 @@ import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 
 import { OrdinalHistogram } from './ordinal_histogram';
 
+interface SelectedField {
+  name: string;
+  type: string;
+}
+
 export const HistogramWrapper: FC = () => {
   const state = useEventBusExampleState();
 
   const chartWidth = state.useState((s) => s.chartWidth);
 
-  const groupedKeywordFields = state.useState((s) => {
+  const groupedFields = state.useState((s) => {
     // console.log('allFields', s.allFields);
-    const keywordFields = Object.entries(s.allFields)
+    const selectedFields = Object.entries(s.allFields)
       .filter(([name, type]) => {
         return s.selectedFields.includes(name) && type === 'keyword';
       })
-      .map((d) => d[0]);
+      .map((d) => ({ name: d[0], type: d[1] }));
 
     // regroup keyword fields into groups of 3
-    return keywordFields.reduce<string[][]>((acc, field, i) => {
+    return selectedFields.reduce<SelectedField[][]>((acc, field, i) => {
       if (i % 4 === 0) {
         acc.push([]);
       }
@@ -35,26 +40,28 @@ export const HistogramWrapper: FC = () => {
       return acc;
     }, []);
   });
-  // console.log('keywordFields', groupedKeywordFields);
+  // console.log('groupedFields', groupedFields);
 
   return (
     <>
-      {groupedKeywordFields.map((g, i) => (
+      {groupedFields.map((g, i) => (
         <div key={`row_${i}`} css={{ position: 'relative', padding: '5px' }}>
           {g.map((field) => (
             <div
-              key={field}
+              key={field.name}
               css={{
                 display: 'inline-block',
                 position: 'relative',
                 width: `${Math.round(chartWidth / g.length) - 15}px`,
               }}
             >
-              <OrdinalHistogram
-                field={field}
-                width={Math.round(chartWidth / g.length) - 20}
-                height={150}
-              />
+              {field.type === 'keyword' && (
+                <OrdinalHistogram
+                  field={field.name}
+                  width={Math.round(chartWidth / g.length) - 20}
+                  height={150}
+                />
+              )}
             </div>
           ))}
         </div>
