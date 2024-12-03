@@ -10,7 +10,6 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type {
   RuleFieldsToUpgrade,
-  RuleUpgradeInfoForReview,
   RuleUpgradeSpecifier,
 } from '../../../../../../common/api/detection_engine';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
@@ -33,7 +32,7 @@ import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/field_upgrade_state';
 import { isNonUpgradeableFieldName } from '../../../../rule_management/model/prebuilt_rule_upgrade/fields';
-import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
+import { useRulePreviewFlyout } from '../use_rules_preview_flyout/use_rule_preview_flyout';
 import { MlJobUpgradeModal } from './modals/ml_job_upgrade_modal';
 import { UpgradeConflictsModal } from './modals/upgrade_conflicts_modal';
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
@@ -46,10 +45,6 @@ import * as ruleDetailsI18n from '../../../../rule_management/components/rule_de
 import * as i18n from './translations';
 
 export interface UpgradePrebuiltRulesTableState {
-  /**
-   * Rule upgrade state (all rules available for upgrade)
-   */
-  ruleUpgradeInfos: RuleUpgradeInfoForReview[];
   /**
    * Rule upgrade state after applying `filterOptions`
    */
@@ -102,6 +97,7 @@ export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeRules: (ruleIds: RuleSignatureId[]) => void;
+  upgradeAllRules: () => void;
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   openRulePreview: (ruleId: string) => void;
 }
@@ -264,6 +260,12 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     [isPrebuiltRulesCustomizationEnabled, upgradeRulesToResolved, upgradeRulesToTarget]
   );
 
+  const upgradeAllRules = useCallback(
+    // Upgrade all rules, ignoring filter and selection
+    () => upgradeRules(ruleUpgradeInfos.map((rule) => rule.rule_id)),
+    [ruleUpgradeInfos, upgradeRules]
+  );
+
   const subHeaderFactory = useCallback(
     (rule: RuleResponse) =>
       rulesUpgradeState[rule.rule_id] ? (
@@ -392,18 +394,18 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     () => ({
       reFetchRules: refetch,
       upgradeRules,
+      upgradeAllRules,
       setFilterOptions,
       openRulePreview,
     }),
-    [refetch, upgradeRules, openRulePreview]
+    [refetch, upgradeRules, upgradeAllRules, openRulePreview]
   );
 
-  const providerValue = useMemo<UpgradePrebuiltRulesContextType>(() => {
-    return {
+  const providerValue = useMemo<UpgradePrebuiltRulesContextType>(
+    () => ({
       state: {
-        ruleUpgradeInfos,
         rulesUpgradeState,
-        hasRulesToUpgrade: isFetched && ruleUpgradeInfos.length > 0,
+        hasRulesToUpgrade: isFetched && Object.keys(rulesUpgradeState).length > 0,
         filterOptions,
         tags,
         isFetched,
@@ -415,22 +417,22 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isPrebuiltRulesCustomizationEnabled,
       },
       actions,
-    };
-  }, [
-    ruleUpgradeInfos,
-    rulesUpgradeState,
-    filterOptions,
-    tags,
-    isFetched,
-    isLoading,
-    loadingJobs,
-    isRefetching,
-    isUpgradingSecurityPackages,
-    loadingRules,
-    dataUpdatedAt,
-    actions,
-    isPrebuiltRulesCustomizationEnabled,
-  ]);
+    }),
+    [
+      rulesUpgradeState,
+      filterOptions,
+      tags,
+      isFetched,
+      isLoading,
+      loadingJobs,
+      isRefetching,
+      isUpgradingSecurityPackages,
+      loadingRules,
+      dataUpdatedAt,
+      actions,
+      isPrebuiltRulesCustomizationEnabled,
+    ]
+  );
 
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
