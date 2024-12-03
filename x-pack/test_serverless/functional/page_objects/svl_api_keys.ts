@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const APIKEY_MASK = '•'.repeat(60);
@@ -27,8 +28,12 @@ export function SvlApiKeysProvider({ getService, getPageObjects }: FtrProviderCo
       await browser.clearSessionStorage();
     },
 
+    async expectAPIKeyExists() {
+      await testSubjects.existOrFail('apiKeyFormAPIKey', { timeout: 1000 });
+    },
+
     async expectAPIKeyAvailable() {
-      await testSubjects.existOrFail('apiKeyFormAPIKey');
+      await testSubjects.existOrFail('apiKeyFormAPIKey', { timeout: 1000 });
       await retry.try(async () => {
         expect(await testSubjects.getVisibleText('apiKeyFormAPIKey')).to.be(APIKEY_MASK);
       });
@@ -88,8 +93,20 @@ export function SvlApiKeysProvider({ getService, getPageObjects }: FtrProviderCo
     },
 
     async deleteAPIKeys() {
+      const filterInvalid = (key: SecurityApiKey) => !key.invalidated;
+
       const { api_keys: apiKeys } = await es.security.getApiKey();
-      await es.security.invalidateApiKey({ ids: apiKeys.map((key) => key.id) });
+
+      const validKeys = apiKeys.filter(filterInvalid);
+
+      if (validKeys.length === 0) {
+        return;
+      }
+
+      await es.security.invalidateApiKey({
+        ids: validKeys.map((key) => key.id),
+      });
+
     },
 
     async expectCreateApiKeyAction() {
