@@ -75,7 +75,7 @@ export function QualitiesSelector({
     <EuiFilterButton
       data-test-subj="datasetQualityQualitiesSelectableButton"
       iconType="arrowDown"
-      badgeColor="success"
+      badgeColor="accentSecondary"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={qualities.length}

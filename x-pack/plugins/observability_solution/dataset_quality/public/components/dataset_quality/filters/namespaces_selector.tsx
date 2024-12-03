@@ -71,7 +71,7 @@ export function NamespacesSelector({
     <EuiFilterButton
       data-test-subj="datasetQualityNamespacesSelectableButton"
       iconType="arrowDown"
-      badgeColor="success"
+      badgeColor="accentSecondary"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={namespaces.length}

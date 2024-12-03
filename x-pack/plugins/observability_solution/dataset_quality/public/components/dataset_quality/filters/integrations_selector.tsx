@@ -91,7 +91,7 @@ export function IntegrationsSelector({
     <EuiFilterButton
       data-test-subj="datasetQualityIntegrationsSelectableButton"
       iconType="arrowDown"
-      badgeColor="success"
+      badgeColor="accentSecondary"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={integrations.length}
