@@ -148,26 +148,20 @@ export const ensureProductDocumentationInstalled = async (
   productDocManager: ProductDocBaseStartContract['management'],
   logger: Logger
 ) => {
-  productDocManager
-    .getStatus()
-    .then(({ status }) => {
-      if (status !== 'installed') {
-        logger.debug(`Installing product documentation for AIAssistantService`);
-        productDocManager
-          .install()
-          .then(() => {
-            logger.debug(`Successfully installed product documentation for AIAssistantService`);
-          })
-          .catch((e) => {
-            logger.warn(
-              `Failed to install product documentation for AIAssistantService: ${e.message}`
-            );
-          });
+  try {
+    const { status } = await productDocManager.getStatus();
+    if (status !== 'installed') {
+      logger.debug(`Installing product documentation for AIAssistantService`);
+      try {
+        await productDocManager.install();
+        logger.debug(`Successfully installed product documentation for AIAssistantService`);
+      } catch (e) {
+        logger.warn(`Failed to install product documentation for AIAssistantService: ${e.message}`);
       }
-    })
-    .catch((e) => {
-      logger.warn(
-        `Failed to get status of product documentation installation for AIAssistantService: ${e.message}`
-      );
-    });
+    }
+  } catch (e) {
+    logger.warn(
+      `Failed to get status of product documentation installation for AIAssistantService: ${e.message}`
+    );
+  }
 };
