@@ -342,7 +342,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
           const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
-          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=logs`;
+          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=host`;
           expect(currentUrl).to.equal(expectedUrlPattern);
         });
       });

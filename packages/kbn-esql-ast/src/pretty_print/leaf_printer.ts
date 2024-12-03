@@ -11,7 +11,10 @@ import {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLColumn,
+  ESQLIdentifier,
   ESQLLiteral,
+  ESQLParamLiteral,
+  ESQLProperNode,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -26,21 +29,43 @@ const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
 export const LeafPrinter = {
   source: (node: ESQLSource) => node.name,
 
+  identifier: (node: ESQLIdentifier) => {
+    const name = node.name;
+
+    if (regexUnquotedIdPattern.test(name)) {
+      return name;
+    } else {
+      // Escape backticks "`" with double backticks "``".
+      const escaped = name.replace(/`/g, '``');
+      return '`' + escaped + '`';
+    }
+  },
+
   column: (node: ESQLColumn) => {
-    const parts: string[] = node.parts;
+    const args = node.args;
 
     let formatted = '';
 
-    for (const part of parts) {
-      if (formatted.length > 0) {
-        formatted += '.';
-      }
-      if (regexUnquotedIdPattern.test(part)) {
-        formatted += part;
-      } else {
-        // Escape backticks "`" with double backticks "``".
-        const escaped = part.replace(/`/g, '``');
-        formatted += '`' + escaped + '`';
+    for (const arg of args) {
+      switch (arg.type) {
+        case 'identifier': {
+          if (formatted.length > 0) {
+            formatted += '.';
+          }
+
+          formatted += LeafPrinter.identifier(arg);
+
+          break;
+        }
+        case 'literal': {
+          if (formatted.length > 0) {
+            formatted += '.';
+          }
+
+          formatted += LeafPrinter.literal(arg);
+
+          break;
+        }
       }
     }
 
@@ -56,13 +81,7 @@ export const LeafPrinter = {
         return String(node.value).toUpperCase() === 'TRUE' ? 'TRUE' : 'FALSE';
       }
       case 'param': {
-        switch (node.paramType) {
-          case 'named':
-          case 'positional':
-            return '?' + node.value;
-          default:
-            return '?';
-        }
+        return LeafPrinter.param(node);
       }
       case 'keyword': {
         return String(node.value);
@@ -79,6 +98,16 @@ export const LeafPrinter = {
       default: {
         return String(node.value);
       }
+    }
+  },
+
+  param: (node: ESQLParamLiteral) => {
+    switch (node.paramType) {
+      case 'named':
+      case 'positional':
+        return '?' + node.value;
+      default:
+        return '?';
     }
   },
 
@@ -113,5 +142,23 @@ export const LeafPrinter = {
       if (commentText) text += (text ? ' ' : '') + commentText;
     }
     return text;
+  },
+
+  print: (node: ESQLProperNode): string => {
+    switch (node.type) {
+      case 'identifier': {
+        return LeafPrinter.identifier(node);
+      }
+      case 'column': {
+        return LeafPrinter.column(node);
+      }
+      case 'literal': {
+        return LeafPrinter.literal(node);
+      }
+      case 'timeInterval': {
+        return LeafPrinter.timeInterval(node);
+      }
+    }
+    return '';
   },
 };

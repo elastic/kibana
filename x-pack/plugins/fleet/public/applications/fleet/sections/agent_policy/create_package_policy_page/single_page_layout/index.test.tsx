@@ -13,17 +13,12 @@ import type { MockedFleetStartServices, TestRenderer } from '../../../../../../m
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { FLEET_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../../constants';
 import type { CreatePackagePolicyRouteState } from '../../../../types';
-
-import { ExperimentalFeaturesService } from '../../../../../../services';
-
 import {
   sendCreatePackagePolicy,
   sendCreateAgentPolicy,
   sendGetAgentStatus,
-  sendGetOneAgentPolicy,
   useIntraAppState,
   useStartServices,
-  useGetAgentPolicies,
   useGetPackageInfoByKeyQuery,
   useConfig,
 } from '../../../../hooks';
@@ -138,10 +133,6 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-import { AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
-
-import { useAllNonManagedAgentPolicies } from '../components/steps/components/use_policies';
-
 import { CreatePackagePolicySinglePage } from '.';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from './components/setup_technology_selector';
 
@@ -154,14 +145,7 @@ afterAll(() => {
   consoleDebugMock.mockRestore();
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/196463
-// FLAKY: https://github.com/elastic/kibana/issues/196464
-// FLAKY: https://github.com/elastic/kibana/issues/196465
-// FLAKY: https://github.com/elastic/kibana/issues/196466
-// FLAKY: https://github.com/elastic/kibana/issues/196467
-// FLAKY: https://github.com/elastic/kibana/issues/196468
-// FLAKY: https://github.com/elastic/kibana/issues/196469
-describe.skip('When on the package policy create page', () => {
+describe('When on the package policy create page', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -291,17 +275,15 @@ describe.skip('When on the package policy create page', () => {
       let cancelButton: HTMLAnchorElement;
 
       beforeEach(async () => {
-        await act(async () => {
-          render();
+        render();
 
-          cancelLink = renderResult.getByTestId(
-            'createPackagePolicy_cancelBackLink'
-          ) as HTMLAnchorElement;
+        cancelLink = renderResult.getByTestId(
+          'createPackagePolicy_cancelBackLink'
+        ) as HTMLAnchorElement;
 
-          cancelButton = (await renderResult.findByTestId(
-            'createPackagePolicyCancelButton'
-          )) as HTMLAnchorElement;
-        });
+        cancelButton = (await renderResult.findByTestId(
+          'createPackagePolicyCancelButton'
+        )) as HTMLAnchorElement;
       });
 
       test('should use custom "cancel" URL', () => {
@@ -701,108 +683,6 @@ describe.skip('When on the package policy create page', () => {
       });
     });
 
-    describe('With agentless policy and Serverless available', () => {
-      beforeEach(async () => {
-        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
-          ...useStartServices(),
-          cloud: {
-            ...useStartServices().cloud,
-            isServerlessEnabled: true,
-          },
-        });
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true } as any);
-        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
-          getMockPackageInfo({ requiresRoot: false, dataStreamRequiresRoot: false })
-        );
-
-        (sendGetOneAgentPolicy as jest.MockedFunction<any>).mockResolvedValue({
-          data: { item: { id: AGENTLESS_POLICY_ID, name: 'Agentless CSPM', namespace: 'default' } },
-        });
-        (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
-          data: {
-            items: [{ id: AGENTLESS_POLICY_ID, name: 'Agentless CSPM', namespace: 'default' }],
-          },
-          error: undefined,
-          isLoading: false,
-          resendRequest: jest.fn(),
-        });
-        (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
-          { id: AGENTLESS_POLICY_ID, name: 'Agentless CSPM', namespace: 'default' },
-        ]);
-
-        await act(async () => {
-          render();
-        });
-      });
-
-      test('should not force create package policy when not in serverless', async () => {
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: false } as any);
-        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
-          ...useStartServices(),
-          cloud: {
-            ...useStartServices().cloud,
-            isServerlessEnabled: false,
-          },
-        });
-        await act(async () => {
-          fireEvent.click(renderResult.getByText('Existing hosts')!);
-        });
-
-        await act(async () => {
-          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
-        });
-
-        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
-        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
-          ...newPackagePolicy,
-          force: false,
-          policy_ids: [AGENTLESS_POLICY_ID],
-        });
-
-        await waitFor(() => {
-          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
-        });
-      });
-
-      test('should force create package policy', async () => {
-        await act(async () => {
-          fireEvent.click(renderResult.getByText('Existing hosts')!);
-        });
-
-        await act(async () => {
-          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
-        });
-
-        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
-        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
-          ...newPackagePolicy,
-          force: true,
-          policy_ids: [AGENTLESS_POLICY_ID],
-        });
-
-        await waitFor(() => {
-          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
-        });
-      });
-
-      test('should not show confirmation modal', async () => {
-        (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
-          data: { results: { total: 1 } },
-        });
-
-        await act(async () => {
-          fireEvent.click(renderResult.getByText('Existing hosts')!);
-        });
-
-        await act(async () => {
-          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
-        });
-
-        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
-        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
-      });
-    });
-
     describe('With agentless Cloud available', () => {
       beforeEach(async () => {
         (useConfig as jest.MockedFunction<any>).mockReturnValue({
@@ -828,10 +708,6 @@ describe.skip('When on the package policy create page', () => {
           },
         });
 
-        (sendCreatePackagePolicy as jest.MockedFunction<any>).mockResolvedValue({
-          data: { item: { id: 'policy-1', inputs: [], policy_ids: ['agentless-policy-1'] } },
-        });
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true } as any);
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
           getMockPackageInfo({
             requiresRoot: false,
@@ -849,13 +725,10 @@ describe.skip('When on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
-        // tech debt: this should be converted to use MSW to mock the API calls
-        // https://github.com/elastic/security-team/issues/9816
-        expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
         expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             monitoring_enabled: ['logs', 'metrics', 'traces'],
-            name: 'Agent policy 1',
+            name: 'Agent policy 2',
           }),
           { withSysMonitoring: true }
         );
@@ -868,7 +741,7 @@ describe.skip('When on the package policy create page', () => {
 
       test('should create agentless agent policy and package policy when in cloud and agentless API url is set', async () => {
         fireEvent.click(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ));
-        fireEvent.click(renderResult.getByText('Agentless'));
+        fireEvent.click(renderResult.getAllByText('Agentless')[0]);
         await act(async () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });

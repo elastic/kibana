@@ -31,7 +31,7 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 [[maps-create]]
 === Step 1. Create a map
 
-. Open the main menu, and then click *Dashboard*.
+. Go to *Dashboards*.
 . Click **Create dashboard**.
 . Set the time range to *Last 7 days*.
 . Click the **Create new Maps** icon image:maps/images/app_gis_icon.png[].

@@ -64,6 +64,7 @@ components:
         - structured
         - unstructured
         - unsupported
+        - cef
 
     SamplesFormat:
       type: object

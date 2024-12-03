@@ -115,11 +115,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/many_fields');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/many_fields_data_view'
+      );
       await browser.setWindowSize(1300, 1000);
     });
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/many_fields_data_view'
+      );
+      await esArchiver.unload('test/functional/fixtures/es_archiver/many_fields');
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -190,6 +198,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await checkHistogramVis(defaultTimespan, defaultTotalCount);
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForDataView');
+    });
+
+    it('should show no histogram for non-time-based data in data view and ES|QL modes', async () => {
+      await dataViews.switchToAndValidate('indices-stats*');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await checkNoVis('50');
+
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await checkNoVis('10');
     });
 
     it('should show ESQL histogram for ES|QL query', async () => {
@@ -654,8 +674,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
-      await discover.chooseLensSuggestion('pie');
-      expect(await getCurrentVisTitle()).to.be('Pie');
+      await discover.chooseLensSuggestion('waffle');
+      expect(await getCurrentVisTitle()).to.be('Waffle');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 

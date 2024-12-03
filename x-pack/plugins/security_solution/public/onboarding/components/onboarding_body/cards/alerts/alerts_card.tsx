@@ -6,13 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
 import { CardCallOut } from '../common/card_callout';
+import { CardSubduedText } from '../common/card_subdued_text';
 import alertsImageSrc from './images/alerts.png';
 import * as i18n from './translations';
 
@@ -39,9 +40,9 @@ export const AlertsCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText data-test-subj="alertsCardDescription" size="s" color="subdued">
+          <CardSubduedText data-test-subj="alertsCardDescription" size="s">
             {i18n.ALERTS_CARD_DESCRIPTION}
-          </EuiText>
+          </CardSubduedText>
           {!isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />

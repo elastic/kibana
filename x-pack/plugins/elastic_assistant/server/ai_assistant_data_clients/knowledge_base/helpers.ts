@@ -27,37 +27,29 @@ export const isModelAlreadyExistsError = (error: Error) => {
  *
  * @param filter - Optional filter to apply to the search
  * @param kbResource - Specific resource tag to filter for, e.g. 'esql' or 'user'
- * @param modelId - ID of the model to search with, e.g. `.elser_model_2`
  * @param query - The search query provided by the user
  * @param required - Whether to only include required entries
  * @param user - The authenticated user
- * @param v2KnowledgeBaseEnabled whether the new v2 KB is enabled
  * @returns
  */
 export const getKBVectorSearchQuery = ({
   filter,
   kbResource,
-  modelId,
   query,
   required,
   user,
-  v2KnowledgeBaseEnabled = false,
 }: {
   filter?: QueryDslQueryContainer | undefined;
   kbResource?: string | undefined;
-  modelId: string;
   query?: string;
   required?: boolean | undefined;
   user: AuthenticatedUser;
-  v2KnowledgeBaseEnabled: boolean;
 }): QueryDslQueryContainer => {
-  const kbResourceKey = v2KnowledgeBaseEnabled ? 'kb_resource' : 'metadata.kbResource';
-  const requiredKey = v2KnowledgeBaseEnabled ? 'required' : 'metadata.required';
   const resourceFilter = kbResource
     ? [
         {
           term: {
-            [kbResourceKey]: kbResource,
+            kb_resource: kbResource,
           },
         },
       ]
@@ -66,7 +58,7 @@ export const getKBVectorSearchQuery = ({
     ? [
         {
           term: {
-            [requiredKey]: required,
+            required,
           },
         },
       ]
@@ -120,23 +112,12 @@ export const getKBVectorSearchQuery = ({
         text_expansion: { 'vector.tokens': { model_id: string; model_text: string } };
       }> = [];
 
-  if (v2KnowledgeBaseEnabled && query) {
+  if (query) {
     semanticTextFilter = [
       {
         semantic: {
           field: 'semantic_text',
           query,
-        },
-      },
-    ];
-  } else if (!v2KnowledgeBaseEnabled) {
-    semanticTextFilter = [
-      {
-        text_expansion: {
-          'vector.tokens': {
-            model_id: modelId,
-            model_text: query as string,
-          },
         },
       },
     ];
@@ -192,13 +173,11 @@ export const getStructuredToolForIndexEntry = ({
 
       // Generate filters for inputSchema fields
       const filter =
-        indexEntry.inputSchema?.reduce((prev, i) => {
-          return [
-            ...prev,
-            // @ts-expect-error Possible to override types with dynamic input schema?
-            { term: { [`${i.fieldName}`]: input?.[i.fieldName] } },
-          ];
-        }, [] as Array<{ term: { [key: string]: string } }>) ?? [];
+        indexEntry.inputSchema?.reduce(
+          // @ts-expect-error Possible to override types with dynamic input schema?
+          (prev, i) => [...prev, { term: { [`${i.fieldName}`]: input?.[i.fieldName] } }],
+          [] as Array<{ term: { [key: string]: string } }>
+        ) ?? [];
 
       const params: SearchRequest = {
         index: indexEntry.index,

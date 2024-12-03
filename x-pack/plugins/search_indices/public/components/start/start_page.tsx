@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -16,7 +17,13 @@ import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
 import { ElasticsearchStart } from './elasticsearch_start';
-import { StartPageError } from './status_error';
+import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { usePageChrome } from '../../hooks/use_page_chrome';
+
+const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
+  defaultMessage: 'Create your first index',
+});
 
 export const ElasticsearchStartPage = () => {
   const { console: consolePlugin } = useKibana().services;
@@ -27,6 +34,7 @@ export const ElasticsearchStartPage = () => {
     error: indicesFetchError,
   } = useIndicesStatusQuery();
   const { data: userPrivileges } = useUserPrivilegesQuery();
+  usePageChrome(PageTitle, [...IndexManagementBreadcrumbs, { text: PageTitle }]);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -43,7 +51,7 @@ export const ElasticsearchStartPage = () => {
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
-        {hasIndicesStatusFetchError && <StartPageError error={indicesFetchError} />}
+        {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (
           <ElasticsearchStart indicesData={indicesData} userPrivileges={userPrivileges} />
         )}

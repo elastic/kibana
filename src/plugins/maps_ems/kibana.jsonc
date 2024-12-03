@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/maps-ems-plugin",
-  "owner": "@elastic/kibana-gis",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "mapsEms",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "map"
     ],

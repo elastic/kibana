@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/entities-schema",
-  "owner": "@elastic/obs-entities"
+  "owner": [
+    "@elastic/obs-entities"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

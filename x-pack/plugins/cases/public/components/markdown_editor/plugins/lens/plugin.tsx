@@ -343,6 +343,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       <EuiModalBody>
         <SavedObjectFinder
           key="searchSavedObjectFinder"
+          id="casesMarkdownLens"
           onChoose={handleChooseLensSO}
           showFilter={false}
           noItemsMessage={

@@ -34,7 +34,7 @@
   },
   {
     "name": "endpoint",
-    "version": "8.16.0"
+    "version": "8.17.0"
   },
   {
     "name": "fleet_server",
@@ -52,10 +52,10 @@
   },
   {
     "name": "synthetics",
-    "version": "1.2.2"
+    "version": "1.2.4"
   },
   {
     "name": "security_detection_engine",
-    "version": "8.15.9"
+    "version": "8.16.2"
   }
 ]

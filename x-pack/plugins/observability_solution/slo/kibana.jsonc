@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/slo-plugin",
-  "owner": "@elastic/obs-ux-management-team",
+  "owner": [
+    "@elastic/obs-ux-management-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "slo",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "slo"
@@ -18,6 +22,7 @@
       "dashboard",
       "data",
       "dataViews",
+      "discoverShared",
       "lens",
       "dataViewEditor",
       "dataViewFieldEditor",
@@ -34,14 +39,14 @@
       "presentationUtil",
       "features",
       "licensing",
-      "usageCollection"
+      "usageCollection",
     ],
     "optionalPlugins": [
       "cloud",
-      "spaces",
       "serverless",
       "discover",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "spaces",
     ],
     "requiredBundles": [
       "controls",

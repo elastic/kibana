@@ -152,7 +152,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
               >
                 <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -533,7 +533,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -808,7 +808,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
               >
                 <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -1026,7 +1026,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -1273,7 +1273,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
               >
                 <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -1464,7 +1464,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -1712,7 +1712,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
               >
                 <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -1973,7 +1973,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"

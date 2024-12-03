@@ -28,7 +28,6 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
-  TemplateAgentPolicyInput,
 } from '../../types';
 
 import type { FleetAuthzRouteConfig } from '../security/types';
@@ -57,6 +56,7 @@ import {
   getPackages,
   installPackage,
   getTemplateInputs,
+  getPackageInfo,
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
@@ -114,18 +114,23 @@ export interface PackageClient {
     options?: Parameters<typeof getPackageFieldsMetadata>['1']
   ): ReturnType<typeof getPackageFieldsMetadata>;
 
+  getLatestPackageInfo(
+    packageName: string,
+    prerelease?: boolean
+  ): ReturnType<typeof getPackageInfo>;
+
   getPackages(params?: {
     excludeInstallStatus?: false;
     category?: CategoryId;
     prerelease?: false;
   }): Promise<PackageList>;
 
-  getAgentPolicyInputs(
+  getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,
     ignoreUnverified?: boolean
-  ): Promise<TemplateAgentPolicyInput[]>;
+  ): Promise<string>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -288,7 +293,7 @@ class PackageClientImpl implements PackageClient {
     return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
   }
 
-  public async getAgentPolicyInputs(
+  public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,
@@ -302,16 +307,14 @@ class PackageClientImpl implements PackageClient {
       pkgVersion = pkg.version;
     }
 
-    const { inputs } = await getTemplateInputs(
+    return getTemplateInputs(
       this.internalSoClient,
       pkgName,
       pkgVersion,
-      'json',
+      'yml',
       prerelease,
       ignoreUnverified
     );
-
-    return inputs;
   }
 
   public async getPackage(
@@ -329,6 +332,16 @@ class PackageClientImpl implements PackageClient {
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackageFieldsMetadata(params, options);
+  }
+
+  public async getLatestPackageInfo(packageName: string, prerelease?: boolean) {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+    return getPackageInfo({
+      savedObjectsClient: this.internalSoClient,
+      pkgName: packageName,
+      pkgVersion: '',
+      prerelease,
+    });
   }
 
   public async getPackages(params?: {

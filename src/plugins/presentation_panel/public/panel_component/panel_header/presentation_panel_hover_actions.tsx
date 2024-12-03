@@ -54,6 +54,9 @@ import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
 
+const DASHED_OUTLINE = `1px dashed ${euiThemeVars.euiColorMediumShade}`;
+const SOLID_OUTLINE = `1px solid ${euiThemeVars.euiBorderColor}`;
+
 const QUICK_ACTION_IDS = {
   edit: [
     'editPanel',
@@ -67,12 +70,14 @@ const QUICK_ACTION_IDS = {
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
-const ALL_ROUNDED_CORNERS = `border-radius: ${euiThemeVars.euiBorderRadius};
+const ALL_ROUNDED_CORNERS = `
+  border-radius: ${euiThemeVars.euiBorderRadius};
 `;
-const TOP_ROUNDED_CORNERS = `border-top-left-radius: ${euiThemeVars.euiBorderRadius};
- border-top-right-radius: ${euiThemeVars.euiBorderRadius};
- border-bottom: 0 !important;
- `;
+const TOP_ROUNDED_CORNERS = `
+  border-top-left-radius: ${euiThemeVars.euiBorderRadius};
+  border-top-right-radius: ${euiThemeVars.euiBorderRadius};
+  border-bottom: 0px;
+`;
 
 const createClickHandler =
   (action: AnyApiAction, context: ActionExecutionContext<EmbeddableApiContext>) =>
@@ -101,6 +106,7 @@ export const PresentationPanelHoverActions = ({
   className,
   viewMode,
   showNotifications = true,
+  showBorder,
 }: {
   index?: number;
   api: DefaultPresentationPanelApi | null;
@@ -110,6 +116,7 @@ export const PresentationPanelHoverActions = ({
   className?: string;
   viewMode?: ViewMode;
   showNotifications?: boolean;
+  showBorder?: boolean;
 }) => {
   const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
@@ -195,7 +202,6 @@ export const PresentationPanelHoverActions = ({
   );
 
   const hideTitle = hidePanelTitle || parentHideTitle;
-
   const showDescription = description && (!title || hideTitle);
 
   const quickActionIds = useMemo(
@@ -387,7 +393,7 @@ export const PresentationPanelHoverActions = ({
         <EuiNotificationBadge
           data-test-subj={`embeddablePanelNotification-${notification.id}`}
           key={notification.id}
-          style={{ marginTop: euiThemeVars.euiSizeXS, marginRight: euiThemeVars.euiSizeXS }}
+          css={{ marginTop: euiThemeVars.euiSizeXS, marginRight: euiThemeVars.euiSizeXS }}
           onClick={() =>
             notification.execute({ embeddable: api, trigger: panelNotificationTrigger })
           }
@@ -429,7 +435,7 @@ export const PresentationPanelHoverActions = ({
       onClick={() => {
         setIsContextMenuOpen(!isContextMenuOpen);
         if (apiCanLockHoverActions(api)) {
-          api?.lockHoverActions(!hasLockedHoverActions);
+          api.lockHoverActions(!hasLockedHoverActions);
         }
       }}
       iconType="boxesVertical"
@@ -451,26 +457,81 @@ export const PresentationPanelHoverActions = ({
     />
   );
 
+  const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
+
   return (
     <div
       onMouseOver={updateCombineHoverActions}
       onFocus={updateCombineHoverActions}
       ref={anchorRef}
-      className="embPanel__hoverActionsAnchor"
+      className={classNames('embPanel__hoverActionsAnchor', {
+        'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
+      })}
       data-test-embeddable-id={api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
         /\s/g,
         ''
       )}`}
+      css={css`
+        border-radius: ${euiThemeVars.euiBorderRadius};
+        position: relative;
+        height: 100%;
+
+        .embPanel {
+          ${showBorder
+            ? `
+              outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+            `
+            : ''}
+        }
+
+        .embPanel__hoverActions {
+          opacity: 0;
+          padding: calc(${euiThemeVars.euiSizeXS} - 1px);
+          display: flex;
+          flex-wrap: nowrap;
+
+          background-color: ${euiThemeVars.euiColorEmptyShade};
+          height: ${euiThemeVars.euiSizeXL};
+
+          pointer-events: all; // Re-enable pointer-events for hover actions
+        }
+
+        &:hover,
+        &:focus-within,
+        &.embPanel__hoverActionsAnchor--lockHoverActions {
+          .embPanel {
+            outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+            z-index: ${euiThemeVars.euiZLevel2};
+          }
+          .embPanel__hoverActionsWrapper {
+            z-index: ${euiThemeVars.euiZLevel9};
+            top: -${euiThemeVars.euiSizeXL};
+
+            .embPanel__hoverActions {
+              opacity: 1;
+            }
+          }
+        }
+      `}
     >
       {children}
       {api ? (
         <div
           ref={hoverActionsRef}
-          css={css`anchorStyles`}
-          className={classNames('embPanel__hoverActionsWrapper', {
-            'embPanel__hoverActionsWrapper--lockHoverActions': hasLockedHoverActions,
-          })}
+          className="embPanel__hoverActionsWrapper"
+          css={css`
+            height: ${euiThemeVars.euiSizeXL};
+            position: absolute;
+            top: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 ${euiThemeVars.euiSize};
+            flex-wrap: nowrap;
+            min-width: 100%;
+            z-index: -1;
+            pointer-events: none; // Prevent hover actions wrapper from blocking interactions with other panels
+          `}
         >
           {viewMode === 'edit' && !combineHoverActions ? (
             <div
@@ -482,6 +543,7 @@ export const PresentationPanelHoverActions = ({
                 className
               )}
               css={css`
+                border: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
                 ${borderStyles}
               `}
             >
@@ -490,72 +552,75 @@ export const PresentationPanelHoverActions = ({
           ) : (
             <div /> // necessary for the right hover actions to align correctly when left hover actions are not present
           )}
-          <div
-            ref={rightHoverActionsRef}
-            data-test-subj="embPanel__hoverActions__right"
-            className={classNames(
-              'embPanel__hoverActions',
-              'embPanel__hoverActionsRight',
-              className
-            )}
-            css={css`
-              ${borderStyles}
-            `}
-          >
-            {viewMode === 'edit' && combineHoverActions && dragHandle}
-            {showNotifications && notificationElements}
-            {showDescription && (
-              <EuiIconTip
-                title={!hideTitle ? title || undefined : undefined}
-                content={description}
-                delay="regular"
-                position="top"
-                anchorClassName="embPanel__descriptionTooltipAnchor"
-                data-test-subj="embeddablePanelDescriptionTooltip"
-                type="iInCircle"
-              />
-            )}
-            {quickActionElements.map(
-              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-                <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
-                  <EuiButtonIcon
-                    iconType={iconType}
-                    color="text"
-                    onClick={onClick as MouseEventHandler}
-                    data-test-subj={dataTestSubj}
-                    aria-label={name as string}
-                  />
-                </EuiToolTip>
-              )
-            )}
-            {contextMenuPanels.length ? (
-              <EuiPopover
-                repositionOnScroll
-                panelPaddingSize="none"
-                anchorPosition="downRight"
-                button={ContextMenuButton}
-                isOpen={isContextMenuOpen}
-                className={contextMenuClasses}
-                closePopover={onClose}
-                data-test-subj={
-                  isContextMenuOpen
-                    ? 'embeddablePanelContextMenuOpen'
-                    : 'embeddablePanelContextMenuClosed'
-                }
-                focusTrapProps={{
-                  closeOnMouseup: true,
-                  clickOutsideDisables: false,
-                  onClickOutside: onClose,
-                }}
-              >
-                <EuiContextMenu
-                  data-test-subj="presentationPanelContextMenuItems"
-                  initialPanelId={'mainMenu'}
-                  panels={contextMenuPanels}
+          {hasHoverActions ? (
+            <div
+              ref={rightHoverActionsRef}
+              data-test-subj="embPanel__hoverActions__right"
+              className={classNames(
+                'embPanel__hoverActions',
+                'embPanel__hoverActionsRight',
+                className
+              )}
+              css={css`
+                border: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+                ${borderStyles}
+              `}
+            >
+              {viewMode === 'edit' && combineHoverActions && dragHandle}
+              {showNotifications && notificationElements}
+              {showDescription && (
+                <EuiIconTip
+                  title={!hideTitle ? title || undefined : undefined}
+                  content={description}
+                  delay="regular"
+                  position="top"
+                  anchorClassName="embPanel__descriptionTooltipAnchor"
+                  data-test-subj="embeddablePanelDescriptionTooltip"
+                  type="iInCircle"
                 />
-              </EuiPopover>
-            ) : null}
-          </div>
+              )}
+              {quickActionElements.map(
+                ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+                  <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                    <EuiButtonIcon
+                      iconType={iconType}
+                      color="text"
+                      onClick={onClick as MouseEventHandler}
+                      data-test-subj={dataTestSubj}
+                      aria-label={name as string}
+                    />
+                  </EuiToolTip>
+                )
+              )}
+              {contextMenuPanels.length ? (
+                <EuiPopover
+                  repositionOnScroll
+                  panelPaddingSize="none"
+                  anchorPosition="downRight"
+                  button={ContextMenuButton}
+                  isOpen={isContextMenuOpen}
+                  className={contextMenuClasses}
+                  closePopover={onClose}
+                  data-test-subj={
+                    isContextMenuOpen
+                      ? 'embeddablePanelContextMenuOpen'
+                      : 'embeddablePanelContextMenuClosed'
+                  }
+                  focusTrapProps={{
+                    closeOnMouseup: true,
+                    clickOutsideDisables: false,
+                    onClickOutside: onClose,
+                  }}
+                >
+                  <EuiContextMenu
+                    data-test-subj="presentationPanelContextMenuItems"
+                    initialPanelId={'mainMenu'}
+                    panels={contextMenuPanels}
+                  />
+                </EuiPopover>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

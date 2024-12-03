@@ -7,14 +7,9 @@
 import { Outlet, createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { defaultEntitySortField, entityColumnIdsRt } from '../../common/entities';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
 import { InventoryPage } from '../pages/inventory_page';
-import {
-  defaultEntitySortField,
-  entityTypesRt,
-  entityColumnIdsRt,
-  entityViewRt,
-} from '../../common/entities';
 
 /**
  * The array of route definitions to be used when the application
@@ -34,10 +29,9 @@ const inventoryRoutes = {
           sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         }),
         t.partial({
-          entityTypes: entityTypesRt,
-          kuery: t.string,
-          view: entityViewRt,
           pagination: t.string,
+          entityTypes: t.string,
+          kuery: t.string,
         }),
       ]),
     }),
@@ -45,7 +39,6 @@ const inventoryRoutes = {
       query: {
         sortField: defaultEntitySortField,
         sortDirection: 'desc',
-        view: 'grouped',
       },
     },
     children: {

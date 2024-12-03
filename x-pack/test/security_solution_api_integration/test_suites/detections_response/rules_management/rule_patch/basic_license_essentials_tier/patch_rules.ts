@@ -284,6 +284,33 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
       });
+
+      it('should not change required_fields when not present in patch body', async () => {
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            required_fields: [
+              {
+                name: 'event.action',
+                type: 'keyword',
+              },
+            ],
+          }),
+        });
+
+        // patch a simple rule's name
+        const { body: patchedRule } = await securitySolutionApi
+          .patchRule({ body: { rule_id: 'rule-1', name: 'some other name' } })
+          .expect(200);
+
+        expect(patchedRule.required_fields).toEqual([
+          {
+            name: 'event.action',
+            type: 'keyword',
+            ecs: true,
+          },
+        ]);
+      });
     });
   });
 };

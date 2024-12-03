@@ -19,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { MetricRendererConfig } from '../../common/types';
 
 const strings = {
@@ -34,8 +33,7 @@ const strings = {
 };
 
 export const getMetricRenderer =
-  (theme$: Observable<CoreTheme> = defaultTheme$) =>
-  (): ExpressionRenderDefinition<MetricRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<MetricRendererConfig> => ({
     name: 'metric',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),

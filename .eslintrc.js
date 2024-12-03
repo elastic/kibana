@@ -952,6 +952,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
       rules: {
@@ -959,7 +960,7 @@ module.exports = {
           'error',
           {
             additionalHooks:
-              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$',
+              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
           },
         ],
       },
@@ -968,6 +969,7 @@ module.exports = {
       files: [
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
+        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'src/plugins/ai_assistant_management/**/*.tsx',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
@@ -984,6 +986,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/{streams,streams_app}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/packages/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
@@ -1026,7 +1029,9 @@ module.exports = {
      */
     {
       files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
       rules: {
+        'testing-library/await-async-utils': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
@@ -1955,6 +1960,16 @@ module.exports = {
     },
 
     /**
+     * Cloud Security Team overrides
+     */
+    {
+      files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
+      rules: {
+        'testing-library/await-async-utils': 'error',
+      },
+    },
+    /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
@@ -1976,6 +1991,43 @@ module.exports = {
       ],
       rules: {
         'max-classes-per-file': 'off',
+      },
+    },
+    {
+      files: [
+        // logsShared depends on o11y/private plugins, but platform plugins depend on it
+        'x-pack/plugins/observability_solution/logs_shared/**',
+
+        // this plugin depends on visTypeTimeseries plugin (for TSVB viz) which is platform/private ATM
+        'x-pack/plugins/observability_solution/infra/**',
+
+        // TODO @kibana/operations
+        'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
+        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
+
+        // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
+        'x-pack/plugins/osquery/**',
+
+        // For now, we keep the exception to let tests depend on anythying.
+        // Ideally, we need to classify the solution specific ones to reduce CI times
+        'test/**',
+        'x-pack/test_serverless/**',
+        'x-pack/test/**',
+        'x-pack/test/plugin_functional/plugins/resolver_test/**',
+      ],
+      rules: {
+        '@kbn/imports/no_group_crossing_manifests': 'warn',
+        '@kbn/imports/no_group_crossing_imports': 'warn',
+      },
+    },
+    {
+      files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
+      rules: {
+        // disabling it since package is a CLI tool
+        'no-console': 'off',
+        // disabling it since package is marked as module and it requires extension for files written
+        '@kbn/imports/uniform_imports': 'off',
       },
     },
   ],

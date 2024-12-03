@@ -14,7 +14,10 @@ import {
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
-import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
+import {
+  legacyPrivateLocationsSavedObjectName,
+  privateLocationSavedObjectName,
+} from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import {
   syntheticsSettingsObjectType,
@@ -29,6 +32,8 @@ const UPTIME_RULE_TYPES = [
   'xpack.uptime.alerts.durationAnomaly',
 ];
 
+export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
+
 const ruleTypes = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
@@ -36,8 +41,8 @@ const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = 
   privileges: [
     {
       id: 'elastic_managed_locations_enabled',
-      name: i18n.translate('xpack.synthetics.features.elasticManagedLocations', {
-        defaultMessage: 'Elastic managed locations enabled',
+      name: i18n.translate('xpack.synthetics.features.elasticManagedLocations.label', {
+        defaultMessage: 'Enabled',
       }),
       includeIn: 'all',
       savedObject: {
@@ -45,6 +50,25 @@ const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = 
         read: [],
       },
       ui: ['elasticManagedLocationsEnabled'],
+    },
+  ],
+};
+
+const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_manage_private_locations',
+      name: i18n.translate('xpack.synthetics.features.canManagePrivateLocations', {
+        defaultMessage: 'Can manage',
+      }),
+      includeIn: 'all',
+      api: [PRIVATE_LOCATION_WRITE_API],
+      savedObject: {
+        all: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
+        read: [],
+      },
+      ui: ['canManagePrivateLocations'],
     },
   ],
 };
@@ -71,12 +95,12 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
-          privateLocationsSavedObjectName,
           syntheticsParamType,
+
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
         ],
-        read: [],
+        read: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
       },
       alerting: {
         rule: {
@@ -102,7 +126,8 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
-          privateLocationsSavedObjectName,
+          privateLocationSavedObjectName,
+          legacyPrivateLocationsSavedObjectName,
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
         ],
@@ -123,10 +148,24 @@ export const syntheticsFeature = {
   },
   subFeatures: [
     {
-      name: i18n.translate('xpack.synthetics.features.app', {
-        defaultMessage: 'Synthetics',
+      name: i18n.translate('xpack.synthetics.features.app.elastic', {
+        defaultMessage: 'Elastic managed locations',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.elasticDescription', {
+        defaultMessage:
+          'This feature enables users to create monitors that execute tests from Elastic managed infrastructure around the globe. There is an additional charge to use Elastic Managed testing locations. See the Elastic Cloud Pricing https://www.elastic.co/pricing page for current prices.',
       }),
       privilegeGroups: [elasticManagedLocationsEnabledPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.private', {
+        defaultMessage: 'Private locations',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.private,description', {
+        defaultMessage:
+          'This feature allows you to manage your private locations, for example adding, or deleting them.',
+      }),
+      privilegeGroups: [canManagePrivateLocationsPrivilege],
     },
   ],
 };

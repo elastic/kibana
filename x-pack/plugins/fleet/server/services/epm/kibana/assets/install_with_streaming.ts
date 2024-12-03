@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { Installation, PackageInstallContext } from '../../../../../common/types';
+import type { PackageInstallContext } from '../../../../../common/types';
 import type { KibanaAssetReference, KibanaAssetType } from '../../../../types';
 import { getPathParts } from '../../archive';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
 
+import { makeManagedIndexPatternsGlobal } from '../index_pattern/install';
+
 import type { ArchiveAsset } from './install';
 import {
   KibanaSavedObjectTypeMapping,
+  createDefaultIndexPatterns,
   createSavedObjectKibanaAsset,
   isKibanaAssetType,
   toAssetReference,
@@ -27,7 +30,6 @@ interface InstallKibanaAssetsWithStreamingArgs {
   packageInstallContext: PackageInstallContext;
   spaceId: string;
   savedObjectsClient: SavedObjectsClientContract;
-  installedPkg?: SavedObject<Installation> | undefined;
 }
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 100;
@@ -37,11 +39,14 @@ export async function installKibanaAssetsWithStreaming({
   packageInstallContext,
   savedObjectsClient,
   pkgName,
-  installedPkg,
 }: InstallKibanaAssetsWithStreamingArgs): Promise<KibanaAssetReference[]> {
   const { archiveIterator } = packageInstallContext;
 
-  const { savedObjectClientWithSpace } = getSpaceAwareSaveobjectsClients(spaceId);
+  const { savedObjectClientWithSpace, savedObjectsImporter } =
+    getSpaceAwareSaveobjectsClients(spaceId);
+
+  await createDefaultIndexPatterns(savedObjectsImporter);
+  await makeManagedIndexPatternsGlobal(savedObjectsClient);
 
   const assetRefs: KibanaAssetReference[] = [];
   let batch: ArchiveAsset[] = [];

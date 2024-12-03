@@ -137,6 +137,7 @@ export interface PackagePolicySOAttributes {
   };
   agents?: number;
   overrides?: any | null;
+  bump_agent_policy_revision?: boolean;
 }
 
 interface OutputSoBaseAttributes {

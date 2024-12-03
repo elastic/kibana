@@ -6,13 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
 import { CardCallOut } from '../common/card_callout';
 import { CardLinkButton } from '../common/card_link_button';
+import { CardSubduedText } from '../common/card_subdued_text';
 import dashboardsImageSrc from './images/dashboards.png';
 import * as i18n from './translations';
 
@@ -42,9 +43,9 @@ export const DashboardsCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText data-test-subj="dashboardsDescription" size="s" color="subdued">
+          <CardSubduedText data-test-subj="dashboardsDescription" size="s">
             {i18n.DASHBOARDS_CARD_DESCRIPTION}
-          </EuiText>
+          </CardSubduedText>
           {!isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />

@@ -52,6 +52,9 @@ export const openAddPanelFlyout = ({
         if (onClose) onClose();
         overlayRef.close();
       },
+      size: 'm',
+      maxWidth: 500,
+      paddingSize: 'm',
       'data-test-subj': 'dashboardAddPanel',
       'aria-labelledby': modalTitleId,
     }

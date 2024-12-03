@@ -13,7 +13,7 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { appIds } from '@kbn/management-cards-navigation';
+import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
 import { of } from 'rxjs';
@@ -147,12 +147,31 @@ export class ServerlessSearchPlugin
   ): ServerlessSearchPluginStart {
     const { serverless, management, indexManagement, security } = services;
     serverless.setProjectHome(services.searchIndices.startRoute);
+    const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
-    const navigationTree$ = of(navigationTree());
+    const navigationTree$ = of(navigationTree(core.application));
     serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
-      security.authz.isRoleManagementEnabled()
+      security.authz.isRoleManagementEnabled(),
+      aiAssistantIsEnabled
+        ? {
+            observabilityAiAssistantManagement: {
+              category: appCategories.OTHER,
+              title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
+                defaultMessage: 'AI Assistant Settings',
+              }),
+              description: i18n.translate(
+                'xpack.serverlessSearch.aiAssistantManagementDescription',
+                {
+                  defaultMessage:
+                    'Manage knowledge base and control assistant behavior, including response language.',
+                }
+              ),
+              icon: 'sparkles',
+            },
+          }
+        : undefined
     );
 
     management.setupCardsNavigation({

@@ -23,6 +23,7 @@ export const FinderApp = (props: {
     <ContentClientProvider contentClient={props.contentClient}>
       <I18nProvider>
         <SavedObjectFinder
+          id="cmFinderApp"
           showFilter={true}
           services={{
             savedObjectsTagging: props.savedObjectsTagging.getTaggingApi(),

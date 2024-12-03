@@ -13,6 +13,7 @@ import { expectedExportedTimelineTemplate } from '../../../objects/timeline';
 import { TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 import { createTimelineTemplate, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { searchByTitle } from '../../../tasks/table_pagination';
+import { getFullname } from '../../../tasks/common';
 
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
@@ -36,11 +37,12 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-
-      cy.wrap(response?.body).should(
-        'eql',
-        expectedExportedTimelineTemplate(this.templateResponse)
-      );
+      getFullname('admin').then((username) => {
+        cy.wrap(response?.body).should(
+          'eql',
+          expectedExportedTimelineTemplate(this.templateResponse, username as string)
+        );
+      });
     });
   });
 });

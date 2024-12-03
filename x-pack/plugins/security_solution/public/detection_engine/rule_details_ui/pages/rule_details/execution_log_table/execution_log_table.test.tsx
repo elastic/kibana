@@ -32,7 +32,7 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => {
 });
 
 const mockTelemetry = {
-  reportEventLogShowSourceEventDateRange: jest.fn(),
+  reportEvent: jest.fn(),
 };
 
 const mockedUseKibana = {
@@ -91,6 +91,6 @@ describe('ExecutionLogTable', () => {
 
     fireEvent.click(switchButton);
 
-    expect(mockTelemetry.reportEventLogShowSourceEventDateRange).toHaveBeenCalled();
+    expect(mockTelemetry.reportEvent).toHaveBeenCalled();
   });
 });

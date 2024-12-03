@@ -53,6 +53,12 @@ export function templatesApi(getService: FtrProviderContext['getService']) {
       .set('kbn-xsrf', 'xxx')
       .send(payload);
 
+  const simulateTemplateByName = (name: string) =>
+    supertest
+      .post(`${API_BASE_PATH}/index_templates/simulate/${name}`)
+      .set('kbn-xsrf', 'xxx')
+      .send();
+
   return {
     getAllTemplates,
     getOneTemplate,
@@ -61,5 +67,6 @@ export function templatesApi(getService: FtrProviderContext['getService']) {
     deleteTemplates,
     cleanUpTemplates,
     simulateTemplate,
+    simulateTemplateByName,
   };
 }

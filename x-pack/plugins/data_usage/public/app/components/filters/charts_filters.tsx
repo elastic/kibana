@@ -20,6 +20,7 @@ import { FilterName } from '../../hooks';
 export interface ChartFiltersProps {
   dateRangePickerState: DateRangePickerValues;
   isDataLoading: boolean;
+  isUpdateDisabled: boolean;
   filterOptions: Record<FilterName, ChartsFilterProps['filterOptions']>;
   onRefresh: () => void;
   onRefreshChange: (evt: OnRefreshChangeProps) => void;
@@ -33,6 +34,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
   ({
     dateRangePickerState,
     isDataLoading,
+    isUpdateDisabled,
     filterOptions,
     onClick,
     onRefresh,
@@ -46,18 +48,21 @@ export const ChartFilters = memo<ChartFiltersProps>(
     const filters = useMemo(() => {
       return (
         <>
-          {showMetricsTypesFilter && <ChartsFilter filterOptions={filterOptions.metricTypes} />}
+          {showMetricsTypesFilter && (
+            <ChartsFilter filterOptions={filterOptions.metricTypes} data-test-subj={dataTestSubj} />
+          )}
           {!filterOptions.dataStreams.isFilterLoading && (
-            <ChartsFilter filterOptions={filterOptions.dataStreams} />
+            <ChartsFilter filterOptions={filterOptions.dataStreams} data-test-subj={dataTestSubj} />
           )}
         </>
       );
-    }, [filterOptions, showMetricsTypesFilter]);
+    }, [dataTestSubj, filterOptions, showMetricsTypesFilter]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 
     return (
-      <EuiFlexGroup responsive gutterSize="m">
+      <EuiFlexGroup responsive gutterSize="m" alignItems="center" justifyContent="flexEnd">
+        <EuiFlexItem grow={2} />
         <EuiFlexItem grow={1}>
           <EuiFilterGroup>{filters}</EuiFilterGroup>
         </EuiFlexItem>
@@ -68,6 +73,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
             onTimeChange={onTimeChange}
+            data-test-subj={dataTestSubj}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -75,6 +81,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
             data-test-subj={getTestId('super-refresh-button')}
             fill={false}
             isLoading={isDataLoading}
+            isDisabled={isUpdateDisabled}
             onClick={onClickRefreshButton}
           />
         </EuiFlexItem>
