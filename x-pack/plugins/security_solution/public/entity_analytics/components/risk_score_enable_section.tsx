@@ -33,7 +33,6 @@ import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mut
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import { useOnOpenCloseHandler } from '../../helper_hooks';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
@@ -213,8 +212,6 @@ export const RiskScoreEnableSection: React.FC<{
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
-
-  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 
   const isLoading =
     initRiskEngineMutation.isLoading ||
