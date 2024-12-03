@@ -405,7 +405,6 @@
       "matchDepNames": [
         "@elastic/request-converter",
         "@mapbox/vector-tile",
-        "brace",
         "cronstrue",
         "file-saver",
         "moment-duration-format",
