@@ -11,11 +11,7 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Prebuilt Rule Customization Integration Tests - Serverless Env - Complete Tier',
+      'Rules Management - Prebuilt Rule Customization Disabled Integration Tests - Serverless Env',
   },
-  kbnTestServerArgs: [
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-      'prebuiltRulesCustomizationEnabled',
-    ])}`,
-  ],
+  kbnTestServerArgs: [],
 });

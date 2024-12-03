@@ -17,18 +17,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('..')],
     junit: {
       reportName:
-        'Rules Management - Prebuilt Rule Customization Integration Tests - ESS Env - Trial License',
+        'Rules Management - Prebuilt Rule Customization Disabled Integration Tests - ESS Env',
     },
   };
-  testConfig.kbnTestServer.serverArgs = testConfig.kbnTestServer.serverArgs.map((arg: string) => {
-    // Override the default value of `--xpack.securitySolution.enableExperimental` to enable the prebuilt rules customization feature
-    if (arg.includes('--xpack.securitySolution.enableExperimental')) {
-      return `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        'prebuiltRulesCustomizationEnabled',
-      ])}`;
-    }
-    return arg;
-  });
 
   return testConfig;
 }
