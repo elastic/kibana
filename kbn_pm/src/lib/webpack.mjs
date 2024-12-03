@@ -14,8 +14,8 @@ import path from 'path';
 /**
  * Builds a set of packages with NX, relying on an existing build target
  * @param {string[]} packages
- * @param {{quiet: boolean, disableNXCache: boolean, log: object}} options
- * @returns {Promise<void>}
+ * @param {{quiet: boolean, disableNXCache: boolean, log: any}} options
+ * @returns {Promise<unknown>}
  */
 export async function buildPackages(packages, options) {
   if (packages.length === 0) {

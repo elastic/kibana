@@ -98,7 +98,9 @@ async function read(readable, output) {
  * @param {undefined | (SpawnOpts & { description?: string, pipe?: boolean })} opts
  */
 export async function run(cmd, args, opts = undefined) {
+  /** @type {ChildProcess.IOType[] | undefined} */
   const stdioOptions = opts?.pipe ? ['ignore', 'inherit', 'inherit'] : undefined;
+
   const proc = ChildProcess.spawn(cmd === 'node' ? process.execPath : cmd, args, {
     cwd: opts?.cwd ?? REPO_ROOT,
     env: {
@@ -114,8 +116,8 @@ export async function run(cmd, args, opts = undefined) {
   let exitCode = null;
   if (!opts?.pipe) {
     [, , exitCode] = await Promise.all([
-      read(proc.stdout, output),
-      read(proc.stderr, output),
+      proc.stdout && read(proc.stdout, output),
+      proc.stderr && read(proc.stderr, output),
       getExit(proc),
     ]);
   } else {

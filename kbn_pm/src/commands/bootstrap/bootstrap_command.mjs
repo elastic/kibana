@@ -23,19 +23,13 @@ import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 
-const tryImportLockValidator = (() => {
-  let yarnLockValidator = null;
-  return () => {
-    try {
-      if (!yarnLockValidator) {
-        yarnLockValidator = External['@kbn/yarn-lock-validator']();
-      }
-      return yarnLockValidator;
-    } catch (_err) {
-      return null;
-    }
-  };
-})();
+const tryImportLockValidator = () => {
+  try {
+    return External['@kbn/yarn-lock-validator']();
+  } catch (_err) {
+    return null;
+  }
+};
 
 /** @type {import('../../lib/command').Command} */
 export const command = {
@@ -141,6 +135,13 @@ export const command = {
       await time('validate dependencies', async () => {
         // now that deps are installed we can import `@kbn/yarn-lock-validator`
         const lockValidatorModule = tryImportLockValidator();
+        if (!lockValidatorModule) {
+          log.warning(
+            'Yarn lock validator is not installed, skipping dependency validation. ' +
+              'This is likely due to a failure in the bootstrap process.'
+          );
+          return;
+        }
         const { readYarnLock, validateDependencies } = lockValidatorModule;
         await validateDependencies(log, await readYarnLock());
       });
