@@ -68,6 +68,11 @@ export const sampleStreamRoute = createServerRoute({
             ],
           },
         },
+        // Conditions could be using fields which are not indexed or they could use it with other types than they are eventually mapped as.
+        // Because of this we can't rely on mapped fields to draw a sample, instead we need to use runtime fields to simulate what happens during
+        // ingest in the painless condition checks.
+        // This is less efficient than it could be - in some cases, these fields _are_ indexed with the right type and we could use them directly.
+        // This can be optimized in the future.
         runtime_mappings: Object.fromEntries(
           getFields(params.body.condition).map((field) => [
             field.name,
