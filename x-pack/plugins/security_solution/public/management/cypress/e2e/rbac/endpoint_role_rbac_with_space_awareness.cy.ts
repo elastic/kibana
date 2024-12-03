@@ -23,8 +23,7 @@ import {
   setSecuritySolutionEndpointGroupPrivilege,
 } from '../../screens/stack_management/role_page';
 
-// Failing: See https://github.com/elastic/kibana/issues/200962
-describe.skip(
+describe(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
   {
     // TODO:PR Remove `'@skipInServerlessMKI` once PR merges to `main`
@@ -66,12 +65,12 @@ describe.skip(
       navigateToRolePage();
       setRoleName(roleName);
       openKibanaFeaturePrivilegesFlyout();
+      setKibanaPrivilegeSpace(spaceId);
       expandSecuritySolutionCategoryKibanaPrivileges();
       expandEndpointSecurityFeaturePrivileges();
     });
 
     it('should allow configuration per-space', () => {
-      setKibanaPrivilegeSpace(spaceId);
       setSecuritySolutionEndpointGroupPrivilege('all');
       clickEndpointSubFeaturePrivilegesCustomization();
       setEndpointSubFeaturePrivilege('endpoint_list', 'all');
