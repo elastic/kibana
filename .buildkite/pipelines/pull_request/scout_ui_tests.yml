@@ -12,7 +12,7 @@ steps:
       - linting_with_types
       - check_types
       - check_oas_snapshot
-    timeout_in_minutes: 20
+    timeout_in_minutes: 30
     retry:
       automatic:
         - exit_status: '-1'
