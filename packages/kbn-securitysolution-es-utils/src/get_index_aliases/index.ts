@@ -20,7 +20,7 @@ interface IndexAlias {
  *
  * @param esClient An {@link ElasticsearchClient}
  * @param alias alias name used to filter results
- * @param index alias name used to filter results
+ * @param index index name used to filter results
  *
  * @returns an array of {@link IndexAlias} objects
  */
