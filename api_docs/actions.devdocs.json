@@ -3272,20 +3272,6 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-server.ActionTypeExecutorOptions.isEphemeral",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isEphemeral",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
             "id": "def-server.ActionTypeExecutorOptions.taskInfo",
             "type": "Object",
             "tags": [],
@@ -3838,16 +3824,6 @@
           "ExecuteOptions",
           "[]) => Promise<",
           "ExecutionResponse",
-          ">; ephemeralEnqueuedExecution: (options: ",
-          "ExecuteOptions",
-          ") => Promise<",
-          {
-            "pluginId": "taskManager",
-            "scope": "server",
-            "docId": "kibTaskManagerPluginApi",
-            "section": "def-server.RunNowResult",
-            "text": "RunNowResult"
-          },
           ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
           "ListTypesParams",
           ") => Promise<",

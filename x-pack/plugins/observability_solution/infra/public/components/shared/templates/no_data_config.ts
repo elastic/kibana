@@ -18,7 +18,7 @@ import { noMetricIndicesPromptDescription, noMetricIndicesPromptTitle } from '..
 
 export enum OnboardingFlow {
   Infra = 'infra',
-  Hosts = 'logs',
+  Hosts = 'host',
 }
 
 interface NoDataConfigDetails {
