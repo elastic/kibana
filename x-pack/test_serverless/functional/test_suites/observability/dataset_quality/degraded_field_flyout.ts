@@ -54,7 +54,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const apmAppDatasetName = 'apm.app.tug';
   const apmAppDataStreamName = `${type}-${apmAppDatasetName}-${defaultNamespace}`;
 
-  describe('Degraded fields flyout', () => {
+  describe('Degraded fields flyout', function () {
+    // see details: https://github.com/elastic/kibana/issues/202641
+    this.tags(['failsOnMKI']);
     describe('degraded field flyout open-close', () => {
       before(async () => {
         await synthtrace.index([

@@ -382,14 +382,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\ntrue');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\nfalse');
         });
       });
@@ -463,14 +463,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
       });
