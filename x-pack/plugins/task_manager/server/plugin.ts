@@ -158,7 +158,7 @@ export class TaskManagerPlugin
       this.config.poll_interval > MGET_DEFAULT_POLL_INTERVAL
     ) {
       this.logger.warn(
-        `Setting xpack.task_manager.poll_interval to a value greater than the default ( ${MGET_DEFAULT_POLL_INTERVAL} ms) can increase task latency and reduce overall throughput. Do not override the default unless it is explicitly required.`
+        `Setting xpack.task_manager.poll_interval to a value greater than the default (${MGET_DEFAULT_POLL_INTERVAL} ms) can increase task latency and reduce overall throughput. Do not override the default unless it is explicitly required.`
       );
     }
 
