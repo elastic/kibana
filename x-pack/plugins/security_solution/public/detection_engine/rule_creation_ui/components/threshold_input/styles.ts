@@ -9,6 +9,8 @@ import { css, cx } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 const CONTAINER_BREAKPOINT = 500;
+const OPERATOR_WIDTH = 40;
+const INPUT_WIDTH = 100;
 
 export const mainContainer = css`
   container-type: inline-size;
@@ -23,6 +25,10 @@ export const dropdownContainer = cx(
   css`
     @container (min-width: ${CONTAINER_BREAKPOINT}px) {
       flex: 1;
+      max-width: calc(
+        100% - ${OPERATOR_WIDTH}px - ${INPUT_WIDTH}px - ${euiThemeVars.euiSizeL} -
+          ${euiThemeVars.euiSizeL}
+      );
     }
   `
 );
