@@ -17,7 +17,7 @@ import type {
   ResponseActionAgentType,
   EDRActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import { EDR_COMMANDS_MAPPING } from '../../../../common/endpoint/service/response_actions/constants';
+import { getActionsForAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { getAgentTypeName } from '../../translations';
 
 export const ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD = (
@@ -78,7 +78,10 @@ export interface AlertResponseActionsSupport {
   };
 }
 
-type AlertAgentActionsSupported = Record<EDRActionsApiCommandNames<'endpoint'>, boolean>;
+type AlertAgentActionsSupported = Record<
+  EDRActionsApiCommandNames<'endpoint' | 'crowdstrike' | 'sentinel_one'>,
+  boolean
+>;
 
 /**
  * Determines the level of support that an alert's host has for Response Actions.
@@ -131,19 +134,22 @@ export const useAlertResponseActionsSupport = (
   }, [agentId, agentType, isAlert, isFeatureEnabled]);
 
   const supportedActions = useMemo(() => {
-    return EDR_COMMANDS_MAPPING.reduce<AlertAgentActionsSupported>((acc, responseActionName) => {
-      acc[responseActionName] = false;
+    return getActionsForAgentType(agentType).reduce<AlertAgentActionsSupported>(
+      (acc, responseActionName) => {
+        acc[responseActionName] = false;
 
-      if (agentType && isFeatureEnabled) {
-        acc[responseActionName] = isAgentTypeAndActionSupported(
-          agentType,
-          responseActionName,
-          'manual'
-        );
-      }
+        if (agentType && isFeatureEnabled) {
+          acc[responseActionName] = isAgentTypeAndActionSupported(
+            agentType,
+            responseActionName,
+            'manual'
+          );
+        }
 
-      return acc;
-    }, {} as AlertAgentActionsSupported);
+        return acc;
+      },
+      {} as AlertAgentActionsSupported
+    );
   }, [agentType, isFeatureEnabled]);
 
   const hostName = useMemo(() => {

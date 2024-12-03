@@ -7,7 +7,7 @@
 
 import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
 import { login, ROLE } from '../../../tasks/login';
-import { EDR_COMMANDS_MAPPING } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { EDR_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import {
   getEndpointManagementPageMap,
   getFleetAgentListTable,
@@ -69,7 +69,9 @@ describe(
         });
       }
 
-      for (const actionName of EDR_COMMANDS_MAPPING.filter((apiName) => apiName !== 'unisolate')) {
+      for (const actionName of EDR_ACTION_API_COMMANDS_NAMES.endpoint.filter(
+        (apiName) => apiName !== 'unisolate'
+      )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });
@@ -96,7 +98,9 @@ describe(
         });
       });
 
-      for (const actionName of EDR_COMMANDS_MAPPING.filter((apiName) => apiName !== 'unisolate')) {
+      for (const actionName of EDR_ACTION_API_COMMANDS_NAMES.endpoint.filter(
+        (apiName) => apiName !== 'unisolate'
+      )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });

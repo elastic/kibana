@@ -14,7 +14,7 @@ import {
 import type { ResponseActionType } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   type ConsoleResponseActionCommands,
-  EDR_COMMANDS_MAPPING,
+  EDR_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   type ResponseActionAgentType,
   type EDRActionsApiCommandNames,
@@ -107,7 +107,9 @@ export const actionsLogFiltersFromUrlParams = (
         .split(',')
         .reduce<Required<ActionsLogFiltersFromUrlParams>['commands']>((acc, curr) => {
           if (
-            EDR_COMMANDS_MAPPING.endpoint.includes(curr as EDRActionsApiCommandNames<'endpoint'>) ||
+            EDR_ACTION_API_COMMANDS_NAMES.endpoint.includes(
+              curr as EDRActionsApiCommandNames<'endpoint'>
+            ) ||
             curr === 'release' ||
             curr === 'processes'
           ) {

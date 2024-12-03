@@ -9,7 +9,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
-  EDR_COMMANDS_MAPPING,
+  EDR_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
 } from '../../../../endpoint/service/response_actions/constants';
@@ -18,7 +18,7 @@ import { agentTypesSchema } from '../common/base';
 
 const commandsSchema = schema.oneOf(
   // @ts-expect-error TS2769: No overload matches this call
-  EDR_COMMANDS_MAPPING.endpoint.map((command) => schema.literal(command))
+  EDR_ACTION_API_COMMANDS_NAMES.endpoint.map((command) => schema.literal(command))
 );
 
 const statusesSchema = {

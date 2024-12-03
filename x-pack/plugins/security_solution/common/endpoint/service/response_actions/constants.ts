@@ -19,24 +19,41 @@ export type ResponseActionAgentType = (typeof RESPONSE_ACTION_AGENT_TYPE)[number
  * The Command names that are used in the API payload for the `{ command: '' }` attribute
  */
 
-export const EDR_COMMANDS_MAPPING = {
-  endpoint: [
-    'isolate',
-    'unisolate',
-    'kill-process',
-    'suspend-process',
-    'running-processes',
-    'get-file',
-    'execute',
-    'upload',
-    'scan',
-  ] as const,
-  crowdstrike: ['isolate', 'runscript'] as const,
-  sentinel_one: [] as const,
-} as const;
+export const ENDPOINT_ACTIONS = [
+  'isolate',
+  'unisolate',
+  'kill-process',
+  'suspend-process',
+  'running-processes',
+  'get-file',
+  'execute',
+  'upload',
+  'scan',
+] as const;
 
-export type EDRActionsApiCommandNames<TAgentType extends keyof typeof EDR_COMMANDS_MAPPING> =
-  (typeof EDR_COMMANDS_MAPPING)[TAgentType][number];
+export const CROWDSTRIKE_ACTIONS = ['isolate', 'unisolate', 'runscript'] as const;
+
+export const SENTINEL_ONE_ACTIONS = [] as const;
+
+export const ALL_EDR_ACTIONS = Array.from(
+  new Set([...ENDPOINT_ACTIONS, ...CROWDSTRIKE_ACTIONS, ...SENTINEL_ONE_ACTIONS])
+);
+
+export const EDR_ACTION_API_COMMANDS_NAMES = {
+  endpoint: ENDPOINT_ACTIONS,
+  crowdstrike: CROWDSTRIKE_ACTIONS,
+  sentinel_one: SENTINEL_ONE_ACTIONS,
+};
+
+export type EDRActionsApiCommandNames<
+  TAgentType extends keyof typeof EDR_ACTION_API_COMMANDS_NAMES
+> = (typeof EDR_ACTION_API_COMMANDS_NAMES)[TAgentType][number];
+
+export const getActionsForAgentType = <TAgentType extends ResponseActionAgentType>(
+  agentType: TAgentType = 'endpoint' as TAgentType
+): ReadonlyArray<EDRActionsApiCommandNames<TAgentType>> => {
+  return EDR_ACTION_API_COMMANDS_NAMES[agentType];
+};
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: Array<
   EDRActionsApiCommandNames<'endpoint'>

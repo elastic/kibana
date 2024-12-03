@@ -19,7 +19,6 @@ import {
 } from '../../../../common/api/endpoint';
 
 import {
-  CROWDSTRIKE_RUN_SCRIPT_ROUTE,
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
@@ -281,31 +280,6 @@ export function registerResponseActionRoutes(
         { all: ['canWriteScanOperations'] },
         logger,
         responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
-      )
-    );
-
-  router.versioned
-    .post({
-      access: 'public',
-      path: CROWDSTRIKE_RUN_SCRIPT_ROUTE,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
-      },
-      options: { authRequired: true },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: ExecuteActionRequestSchema,
-        },
-      },
-      withEndpointAuthz(
-        { all: ['canWriteExecuteOperations'] },
-        logger,
-        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
       )
     );
 }

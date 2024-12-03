@@ -19,7 +19,7 @@ import { ExperimentalFeaturesService } from '../../../experimental_features_serv
  */
 export const isAgentTypeAndActionSupported = (
   agentType: ResponseActionAgentType,
-  actionName?: EDRActionsApiCommandNames<'endpoint'>,
+  actionName?: EDRActionsApiCommandNames<typeof agentType>,
   actionType: ResponseActionType = 'manual'
 ): boolean => {
   const features = ExperimentalFeaturesService.get();

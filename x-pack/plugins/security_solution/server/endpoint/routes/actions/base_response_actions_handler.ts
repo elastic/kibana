@@ -18,7 +18,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import type {
-  EDR_COMMANDS_MAPPING,
+  EDR_ACTION_API_COMMANDS_NAMES,
   EDRActionsApiCommandNames,
   ResponseActionAgentType,
 } from '../../../../common/endpoint/service/response_actions/constants';
@@ -44,7 +44,7 @@ type SupportedActionsDetails =
   | ActionDetails<CrowdStrikeActionResponseDataOutput, CrowdStrikeActionsRunScriptParameters>;
 
 export function createBaseActionRequestHandler<
-  TAgentType extends keyof typeof EDR_COMMANDS_MAPPING // Ensure TAgentType is either 'endpoint', 'crowdstrike' or 'sentinel_ne'
+  TAgentType extends keyof typeof EDR_ACTION_API_COMMANDS_NAMES // Ensure TAgentType is either 'endpoint', 'crowdstrike' or 'sentinel_ne'
 >(
   endpointContext: EndpointAppContext,
   command: EDRActionsApiCommandNames<TAgentType>,
@@ -98,7 +98,7 @@ export function createBaseActionRequestHandler<
     try {
       const action: SupportedActionsDetails = await actionCreationFn(
         command,
-        req.body,
+        req.body as ActionsRequestBody[TAgentType],
         responseActionsClient
       );
       const { action: actionId, ...data } = action;

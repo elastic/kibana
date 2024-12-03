@@ -126,6 +126,18 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       crowdstrike: false,
     },
   },
+  runscript: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: true,
+    },
+  },
 };
 
 /**
@@ -136,7 +148,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
  */
 export const isActionSupportedByAgentType = (
   agentType: ResponseActionAgentType,
-  actionName: EDRActionsApiCommandNames<'endpoint'>,
+  actionName: EDRActionsApiCommandNames<typeof agentType>,
   actionType: ResponseActionType
 ): boolean => {
   return RESPONSE_ACTIONS_SUPPORT_MAP[actionName][actionType][agentType];
