@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { AlertsMigrationCleanupRequestBody } from '../../../../../common/api/detection_engine/signals_migration';
@@ -15,7 +16,10 @@ import { buildSiemResponse } from '../utils';
 import { signalsMigrationService } from '../../migrations/migration_service';
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
 
-export const deleteSignalsMigrationRoute = (router: SecuritySolutionPluginRouter) => {
+export const deleteSignalsMigrationRoute = (
+  router: SecuritySolutionPluginRouter,
+  docLinks: DocLinksServiceSetup
+) => {
   router.versioned
     .delete({
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -34,8 +38,7 @@ export const deleteSignalsMigrationRoute = (router: SecuritySolutionPluginRouter
         },
         options: {
           deprecated: {
-            documentationUrl:
-              'https://www.elastic.co/guide/en/security/current/signals-migration-api.html',
+            documentationUrl: docLinks.links.securitySolution.signalsMigrationApi,
             severity: 'warning',
             reason: { type: 'remove' },
           },

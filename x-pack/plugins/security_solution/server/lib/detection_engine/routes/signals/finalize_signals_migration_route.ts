@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { transformError, BadRequestError } from '@kbn/securitysolution-es-utils';
 import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -19,7 +20,8 @@ import { getMigrationSavedObjectsById } from '../../migrations/get_migration_sav
 
 export const finalizeSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataService: RuleDataPluginService
+  ruleDataService: RuleDataPluginService,
+  docLinks: DocLinksServiceSetup
 ) => {
   router.versioned
     .post({
@@ -39,8 +41,7 @@ export const finalizeSignalsMigrationRoute = (
         },
         options: {
           deprecated: {
-            documentationUrl:
-              'https://www.elastic.co/guide/en/security/current/signals-migration-api.html',
+            documentationUrl: docLinks.links.securitySolution.signalsMigrationApi,
             severity: 'warning',
             reason: { type: 'remove' },
           },

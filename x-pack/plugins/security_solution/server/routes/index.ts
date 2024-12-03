@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor, Logger } from '@kbn/core/server';
+import type { StartServicesAccessor, Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import type { SecuritySolutionPluginRouter } from '../types';
@@ -78,7 +78,8 @@ export const initRoutes = (
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
   previewTelemetryReceiver: ITelemetryReceiver,
-  isServerless: boolean
+  isServerless: boolean,
+  docLinks: DocLinksServiceSetup
 ) => {
   registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -111,10 +112,10 @@ export const initRoutes = (
   setAlertTagsRoute(router);
   setAlertAssigneesRoute(router);
   querySignalsRoute(router, ruleDataClient);
-  getSignalsMigrationStatusRoute(router);
-  createSignalsMigrationRoute(router);
-  finalizeSignalsMigrationRoute(router, ruleDataService);
-  deleteSignalsMigrationRoute(router);
+  getSignalsMigrationStatusRoute(router, docLinks);
+  createSignalsMigrationRoute(router, docLinks);
+  finalizeSignalsMigrationRoute(router, ruleDataService, docLinks);
+  deleteSignalsMigrationRoute(router, docLinks);
   suggestUserProfilesRoute(router, getStartServices);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { transformError, BadRequestError, getIndexAliases } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { CreateAlertsMigrationRequestBody } from '../../../../../common/api/detection_engine/signals_migration';
@@ -19,7 +20,10 @@ import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 
-export const createSignalsMigrationRoute = (router: SecuritySolutionPluginRouter) => {
+export const createSignalsMigrationRoute = (
+  router: SecuritySolutionPluginRouter,
+  docLinks: DocLinksServiceSetup
+) => {
   router.versioned
     .post({
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -38,8 +42,7 @@ export const createSignalsMigrationRoute = (router: SecuritySolutionPluginRouter
         },
         options: {
           deprecated: {
-            documentationUrl:
-              'https://www.elastic.co/guide/en/security/current/signals-migration-api.html',
+            documentationUrl: docLinks.links.securitySolution.signalsMigrationApi,
             severity: 'warning',
             reason: { type: 'remove' },
           },

@@ -12,6 +12,7 @@ import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 import { getSignalsMigrationStatusRoute } from './get_signals_migration_status_route';
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../migrations/get_signals_indices_in_range');
 jest.mock('../../migrations/get_signal_versions_by_index');
@@ -19,10 +20,11 @@ jest.mock('../../migrations/get_migration_saved_objects_by_index');
 
 describe('get signals migration status', () => {
   let server: ReturnType<typeof serverMock.create>;
+  const docLinks = docLinksServiceMock.createSetupContract();
 
   beforeEach(() => {
     server = serverMock.create();
-    getSignalsMigrationStatusRoute(server.router);
+    getSignalsMigrationStatusRoute(server.router, docLinks);
 
     (getSignalsIndicesInRange as jest.Mock).mockResolvedValueOnce(['my-signals-index']);
     (getSignalVersionsByIndex as jest.Mock).mockResolvedValueOnce({
