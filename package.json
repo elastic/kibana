@@ -491,7 +491,6 @@
     "@kbn/esql": "link:src/plugins/esql",
     "@kbn/esql-ast": "link:packages/kbn-esql-ast",
     "@kbn/esql-ast-inspector-plugin": "link:examples/esql_ast_inspector",
-    "@kbn/esql-controls": "link:packages/kbn-esql-controls",
     "@kbn/esql-datagrid": "link:src/plugins/esql_datagrid",
     "@kbn/esql-editor": "link:packages/kbn-esql-editor",
     "@kbn/esql-utils": "link:packages/kbn-esql-utils",

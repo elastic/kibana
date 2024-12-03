@@ -10,11 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { EsqlControlType } from '@kbn/esql-controls';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { monaco } from '@kbn/monaco';
+import type { EsqlControlType } from './types';
+
 const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
 
 // should move to one place

@@ -26,7 +26,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/esql-controls",
     "@kbn/esql-variables",
   ],
   "exclude": [

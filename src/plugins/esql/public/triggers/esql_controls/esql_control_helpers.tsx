@@ -11,13 +11,14 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { type EsqlControlType, ESQLControlsFlyout } from '@kbn/esql-controls';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { monaco } from '@kbn/monaco';
+import { ESQLControlsFlyout } from './esql_controls_flyout';
+import type { EsqlControlType } from './types';
 import { esqlVariablesService } from '../../../common';
 import { untilPluginStartServicesReady } from '../../kibana_services';
 

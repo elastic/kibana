@@ -862,8 +862,6 @@
       "@kbn/esql-ast/*": ["packages/kbn-esql-ast/*"],
       "@kbn/esql-ast-inspector-plugin": ["examples/esql_ast_inspector"],
       "@kbn/esql-ast-inspector-plugin/*": ["examples/esql_ast_inspector/*"],
-      "@kbn/esql-controls": ["packages/kbn-esql-controls"],
-      "@kbn/esql-controls/*": ["packages/kbn-esql-controls/*"],
       "@kbn/esql-datagrid": ["src/plugins/esql_datagrid"],
       "@kbn/esql-datagrid/*": ["src/plugins/esql_datagrid/*"],
       "@kbn/esql-editor": ["packages/kbn-esql-editor"],

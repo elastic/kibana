@@ -100,7 +100,6 @@
     "reactPackages": "packages/react",
     "esqlEditor": "packages/kbn-esql-editor",
     "esqlUtils": "packages/kbn-esql-utils",
-    "esqlControls": "packages/kbn-esql-controls",
     "reporting": "packages/kbn-reporting",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
