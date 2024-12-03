@@ -50,12 +50,14 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
               logger.debug(`Run task: "${TASK_TYPE}"`);
               const esClient = coreStart.elasticsearch.client;
 
-              const hasExistingIndices = await esClient.asInternalUser.indices.exists({
-                index: [resourceNames.aliases.kb, resourceNames.aliases.conversations],
+              const hasKbIndex = await esClient.asInternalUser.indices.exists({
+                index: resourceNames.aliases.kb,
               });
 
-              if (!hasExistingIndices) {
-                logger.debug('Indices do not exist. Skipping migration.');
+              if (!hasKbIndex) {
+                logger.debug(
+                  'Knowledge base index does not exist. Skipping semantic text migration.'
+                );
                 return;
               }
 
