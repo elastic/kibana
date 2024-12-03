@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { UseField } from '../../../shared_imports';
-import { AnomalyThresholdSlider } from '../../rule_creation_ui/components/anomaly_threshold_slider';
+import { UseField } from '../../../../shared_imports';
+import { AnomalyThresholdSlider } from '../../../rule_creation_ui/components/anomaly_threshold_slider';
+import * as i18n from './translations';
 
 const componentProps = {
   describedByIds: ['anomalyThreshold'],
@@ -19,6 +20,15 @@ interface AnomalyThresholdEditProps {
 
 export function AnomalyThresholdEdit({ path }: AnomalyThresholdEditProps): JSX.Element {
   return (
-    <UseField path={path} component={AnomalyThresholdSlider} componentProps={componentProps} />
+    <UseField
+      path={path}
+      config={ANOMALY_THRESHOLD_FIELD_CONFIG}
+      component={AnomalyThresholdSlider}
+      componentProps={componentProps}
+    />
   );
 }
+
+const ANOMALY_THRESHOLD_FIELD_CONFIG = {
+  label: i18n.ANOMALY_THRESHOLD_LABEL,
+};

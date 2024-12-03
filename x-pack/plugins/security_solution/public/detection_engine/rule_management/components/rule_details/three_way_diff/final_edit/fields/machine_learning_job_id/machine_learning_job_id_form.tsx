@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { FormData, FormSchema } from '../../../../../../../../shared_imports';
-import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
+import type { FormData } from '../../../../../../../../shared_imports';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { type MachineLearningJobId } from '../../../../../../../../../common/api/detection_engine';
 import { normalizeMachineLearningJobId } from '../../../../../../../../common/utils/normalize_machine_learning_job_id';
@@ -21,7 +20,7 @@ export function MachineLearningJobIdForm(): JSX.Element {
   return (
     <RuleFieldEditFormWrapper
       component={MachineLearningJobIdAdapter}
-      ruleFieldFormSchema={machineLearningJobIdSchema}
+      ruleFieldFormSchema={schema}
       deserializer={deserializer}
     />
   );
@@ -33,6 +32,4 @@ function deserializer(defaultValue: FormData): MachineLearningJobIdFormData {
   };
 }
 
-const machineLearningJobIdSchema = {
-  machine_learning_job_id: schema.machineLearningJobId,
-} as FormSchema<MachineLearningJobIdFormData>;
+const schema = {};

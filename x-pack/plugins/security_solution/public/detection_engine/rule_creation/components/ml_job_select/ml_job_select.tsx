@@ -64,7 +64,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({
 
   return (
     <EuiFlexGroup justifyContent="flexStart" className={styles.mlJobSelectClassName}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiFormRow
           label={field.label}
           helpText={shouldShowHelpText && <HelpText jobs={jobs} selectedJobIds={selectedJobIds} />}

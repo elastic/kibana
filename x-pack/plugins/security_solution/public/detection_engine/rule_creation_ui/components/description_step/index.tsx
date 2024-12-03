@@ -74,6 +74,8 @@ import {
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { THRESHOLD_VALUE_LABEL } from '../../../rule_creation/components/threshold_edit/translations';
 import type { FieldValueQueryBar } from '../query_bar_field';
+import { MACHINE_LEARNING_JOB_ID_LABEL } from '../../../rule_creation/components/machine_learning_job_id_edit/translations';
+import { ANOMALY_THRESHOLD_LABEL } from '../../../rule_creation/components/anomaly_threshold_edit/translations';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -107,10 +109,7 @@ export const StepRuleDescriptionComponent = <T,>({
     if (key === 'machineLearningJobId') {
       return [
         ...acc,
-        buildMlJobsDescription(
-          get(key, data) as string[],
-          (get(key, schema) as { label: string }).label
-        ),
+        buildMlJobsDescription(get(key, data) as string[], MACHINE_LEARNING_JOB_ID_LABEL),
       ];
     }
 
@@ -358,6 +357,9 @@ export const getDescriptionItem = (
   } else if (field === 'maxSignals') {
     const value: number | undefined = get(field, data);
     return value ? [{ title: label, description: value }] : [];
+  } else if (field === 'anomalyThreshold') {
+    const value: number | undefined = get(field, data);
+    return value ? [{ title: ANOMALY_THRESHOLD_LABEL, description: value }] : [];
   }
 
   const description: string = get(field, data);

@@ -6,9 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { UseField } from '../../../../shared_imports';
+import { UseField, fieldValidators } from '../../../../shared_imports';
 import { MlJobSelect } from '../ml_job_select';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
+import * as i18n from './translations';
 
 interface MachineLearningJobIdEditProps {
   path: string;
@@ -30,5 +31,23 @@ export function MachineLearningJobIdEdit({
     [jobs, loading, shouldShowHelpText]
   );
 
-  return <UseField path={path} component={MlJobSelect} componentProps={componentProps} />;
+  return (
+    <UseField
+      path={path}
+      config={MACHINE_LEARNING_JOB_ID_FIELD_CONFIG}
+      component={MlJobSelect}
+      componentProps={componentProps}
+    />
+  );
 }
+
+const MACHINE_LEARNING_JOB_ID_FIELD_CONFIG = {
+  label: i18n.MACHINE_LEARNING_JOB_ID_LABEL,
+  validations: [
+    {
+      validator: fieldValidators.emptyField(
+        i18n.MACHINE_LEARNING_JOB_ID_EMPTY_FIELD_VALIDATION_ERROR
+      ),
+    },
+  ],
+};

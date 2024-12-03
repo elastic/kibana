@@ -142,46 +142,8 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     validations: [],
   },
-  anomalyThreshold: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel',
-      {
-        defaultMessage: 'Anomaly score threshold',
-      }
-    ),
-    validations: [],
-  },
-  machineLearningJobId: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel',
-      {
-        defaultMessage: 'Machine Learning job',
-      }
-    ),
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isMlRule(formData.ruleType);
-
-          if (!needsValidation) {
-            return;
-          }
-
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired',
-              {
-                defaultMessage: 'A Machine Learning job is required.',
-              }
-            )
-          )(...args);
-        },
-      },
-    ],
-  },
+  anomalyThreshold: {},
+  machineLearningJobId: {},
   relatedIntegrations: {
     type: FIELD_TYPES.JSON,
     label: i18n.translate(
