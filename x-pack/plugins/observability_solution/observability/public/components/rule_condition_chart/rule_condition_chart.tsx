@@ -8,12 +8,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { Query, Filter } from '@kbn/es-query';
-import {
-  FillStyle,
-  SeriesType,
-  TermsIndexPatternColumn,
-  UserMessage,
-} from '@kbn/lens-plugin/public';
+import { FillStyle, SeriesType, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
@@ -146,17 +141,10 @@ export function RuleConditionChart({
       const errorDiv = document.querySelector('.lnsEmbeddedError');
       if (errorDiv) {
         const paragraphElements = errorDiv.querySelectorAll('p');
-        if (!paragraphElements || paragraphElements.length < 2) return;
         paragraphElements[0].innerText = i18n.translate(
           'xpack.observability.ruleCondition.chart.error_equation.title',
           {
             defaultMessage: 'An error occurred while rendering the chart',
-          }
-        );
-        paragraphElements[1].innerText = i18n.translate(
-          'xpack.observability.ruleCondition.chart.error_equation.description',
-          {
-            defaultMessage: 'Check the rule equation.',
           }
         );
       }
