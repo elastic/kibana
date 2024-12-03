@@ -32,7 +32,7 @@ describe('GridRow', () => {
     renderGridRow();
     const firstRowPanels = Object.values(getSampleLayout()[0].panels);
     firstRowPanels.forEach((panel) => {
-      expect(screen.getByLabelText(panel.id)).toBeInTheDocument();
+      expect(screen.getByLabelText(`panelId:${panel.id}`)).toBeInTheDocument();
     });
   });
 
