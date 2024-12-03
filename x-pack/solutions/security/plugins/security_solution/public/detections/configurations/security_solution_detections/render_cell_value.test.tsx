@@ -48,7 +48,7 @@ describe('RenderCellValue', () => {
     header = cloneDeep(defaultHeaders[0]);
     props = {
       columnId,
-      data,
+      legacyAlert: data,
       eventId,
       header,
       isDetails: false,
@@ -78,7 +78,13 @@ describe('RenderCellValue', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(DefaultCellRenderer).props()).toEqual(props);
+    const { legacyAlert, ...defaultCellRendererProps } = props;
+
+    expect(wrapper.find(DefaultCellRenderer).props()).toEqual({
+      ...defaultCellRendererProps,
+      data: legacyAlert,
+      scopeId: SourcererScopeName.default,
+    });
   });
 
   test('it renders a GuidedOnboardingTourStep', () => {

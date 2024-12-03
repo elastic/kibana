@@ -8,12 +8,29 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../mock';
-import { mockTriggersActionsUi } from '../../mock/mock_triggers_actions_ui_plugin';
 import type { ColumnHeaderOptions, HeaderActionProps } from '../../../../common/types';
 import { TimelineTabs } from '../../../../common/types';
 import { HeaderActions } from './header_actions';
 import { timelineActions } from '../../../timelines/store';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
+
+jest.mock('@kbn/response-ops-alerts-fields-browser', () => ({
+  FieldBrowser: jest.fn().mockImplementation(
+    /* eslint-disable jsx-a11y/click-events-have-key-events */
+    ({
+      onToggleColumn,
+      onResetColumns,
+    }: {
+      onToggleColumn: (columnId: string) => void;
+      onResetColumns: () => void;
+    }) => (
+      <div data-test-subj="mock-field-browser">
+        <div data-test-subj="mock-toggle-button" onClick={() => onToggleColumn(columnId)} />
+        <div data-test-subj="mock-reset-button" onClick={onResetColumns} />
+      </div>
+    )
+  ),
+}));
 
 jest.mock('../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
@@ -36,30 +53,6 @@ jest.mock('../../hooks/use_selector', () => ({
 
 const columnId = 'test-field';
 const timelineId = 'test-timeline';
-
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-mockTriggersActionsUi.getFieldBrowser.mockImplementation(
-  ({
-    onToggleColumn,
-    onResetColumns,
-  }: {
-    onToggleColumn: (columnId: string) => void;
-    onResetColumns: () => void;
-  }) => (
-    <div data-test-subj="mock-field-browser">
-      <div data-test-subj="mock-toggle-button" onClick={() => onToggleColumn(columnId)} />
-      <div data-test-subj="mock-reset-button" onClick={onResetColumns} />
-    </div>
-  )
-);
-
-jest.mock('../../lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      triggersActionsUi: { ...mockTriggersActionsUi },
-    },
-  }),
-}));
 
 const defaultProps: HeaderActionProps = {
   browserFields: {},
