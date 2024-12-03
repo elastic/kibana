@@ -149,7 +149,7 @@ function getColorFromMappingFactory(
   }
   // the mosaic configures the main categories in the second column, instead of the first
   // as it happens in all the other partition types.
-  // Independentely from the bucket aggregation used, the categories will always be casted
+  // Independently from the bucket aggregation used, the categories will always be casted
   // as string to make it nicely working with a text input field, avoiding a field
   const categories =
     chartType === ChartTypes.MOSAIC && columns.length === 2

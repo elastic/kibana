@@ -40,16 +40,26 @@ function buildRoundRobinCategoricalWithMappedColors(
       const mappedColor = mappedColors.get(colorKey);
       outputColor = chartConfiguration.behindText ? behindTextColorMap[mappedColor] : mappedColor;
     } else {
-      outputColor =
-        chartConfiguration.behindText && behindTextColors
-          ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
-          : colors[series[0].rankAtDepth % colors.length];
+      if (id === KbnPalette.Default) {
+        // no behind color for new default palette
+        outputColor = colors[series[0].rankAtDepth % 10];
+      } else {
+        outputColor =
+          chartConfiguration.behindText && behindTextColors
+            ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
+            : colors[series[0].rankAtDepth % colors.length];
+      }
     }
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
     }
 
+    if (id === KbnPalette.Default) {
+      // divides palette into 3 - 10 color levels and assigns color round robin
+      const colorIndex = series[0].rankAtDepth % 10;
+      return colors[(series.length - 1) * 10 + colorIndex]; // max series count of 3
+    }
     return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
   }
   return {
