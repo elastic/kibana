@@ -122,19 +122,19 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
       const actionTypeModel = actionTypeRegistry.get(actionTypeId);
       const subtype = actionTypeModel.subtype;
 
-      const otherActionTypeId = actionTypeModel.hideInUi
+      const shownActionTypeId = actionTypeModel.hideInUi
         ? subtype?.filter((type) => type.id !== actionTypeId)[0].id
         : undefined;
 
-      const actionTypeKey = otherActionTypeId ? otherActionTypeId : actionTypeId;
+      const currentActionTypeId = shownActionTypeId ? shownActionTypeId : actionTypeId;
 
-      if (result[actionTypeKey]) {
-        result[actionTypeKey].total += 1;
+      if (result[currentActionTypeId]) {
+        result[currentActionTypeId].total += 1;
       } else {
-        result[actionTypeKey] = {
-          actionTypeId: actionTypeKey,
+        result[currentActionTypeId] = {
+          actionTypeId: currentActionTypeId,
           total: 1,
-          name: connectorTypes.find(({ id }) => id === actionTypeKey)?.name || '',
+          name: connectorTypes.find(({ id }) => id === currentActionTypeId)?.name || '',
         };
       }
 
