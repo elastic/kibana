@@ -36,9 +36,6 @@ interface EditServiceTypeProps {
   connector: Connector;
   isDisabled?: boolean;
 }
-interface OptionData {
-  secondaryContent?: string;
-}
 
 // TODO move these constants to a common file in Serverless as we have in Stack
 const BETA_LABEL = i18n.translate('xpack.serverlessSearch.betaLabel', {
@@ -49,16 +46,18 @@ const TECH_PREVIEW_LABEL = i18n.translate('xpack.serverlessSearch.techPreviewLab
   defaultMessage: 'Tech preview',
 });
 
+interface CustomOptionData {
+  _append: React.ReactNode[];
+  _prepend: React.ReactNode;
+  serviceType: string;
+}
+
+type ExpandedComboBoxOption = EuiComboBoxOptionOption<CustomOptionData>;
+
 interface GeneratedConnectorNameResult {
   connectorName: string;
   indexName: string;
 }
-
-type ExpandedComboBoxOption = EuiComboBoxOptionOption<OptionData> & {
-  _append: React.ReactNode[];
-  _prepend: React.ReactNode;
-  serviceType: string;
-};
 
 export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isDisabled }) => {
   const { http } = useKibanaServices();
@@ -123,7 +122,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
     },
   });
 
-  const getInitialOptions = () => {
+  const getInitialOptions = (): ExpandedComboBoxOption[] => {
     return allConnectors.map((conn, key) => {
       const _append: React.ReactNode[] = [];
       let _ariaLabelAppend = '';
@@ -157,12 +156,14 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         _ariaLabelAppend += `, ${BETA_LABEL}`;
       }
       return {
-        _append,
-        _prepend: <EuiIcon size="l" type={conn.iconPath} />,
-        'aria-label': conn.name + _ariaLabelAppend,
         key: key.toString(),
         label: conn.name,
-        serviceType: conn.serviceType,
+        value: {
+          _append,
+          _prepend: <EuiIcon size="l" type={conn.iconPath} />,
+          serviceType: conn.serviceType,
+        },
+        'aria-label': conn.name + _ariaLabelAppend,
       };
     });
   };
@@ -171,12 +172,15 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
   const { euiTheme } = useEuiTheme();
 
   const renderOption = (
-    option: EuiComboBoxOptionOption<OptionData>,
+    option: ExpandedComboBoxOption,
     searchValue: string,
     contentClassName: string
   ) => {
-    const expandedOption = option as ExpandedComboBoxOption;
-    const { _append, key, label, _prepend, serviceType } = expandedOption;
+    const {
+      value: { _append, _prepend, serviceType } = { _append: [], _prepend: null, serviceType: '' },
+      key,
+      label,
+    } = option;
     return (
       <EuiFlexGroup
         className={contentClassName}
@@ -205,7 +209,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
   };
 
   const onSelectedOptionChange = useCallback(
-    (selectedItem: Array<EuiComboBoxOptionOption<OptionData>>) => {
+    (selectedItem: Array<EuiComboBoxOptionOption<CustomOptionData>>) => {
       if (selectedItem.length === 0) {
         return;
       }
@@ -223,12 +227,11 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
       data-test-subj="serverlessSearchEditConnectorType"
       fullWidth
     >
-      <EuiComboBox
+      <EuiComboBox<CustomOptionData>
         aria-label={i18n.translate(
           'xpack.serverlessSearch.connectors.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
           { defaultMessage: 'Select a data source for your connector to use.' }
         )}
-        // We only want to allow people to set the service type once to avoid weird conflicts
         isDisabled={Boolean(connector.service_type) || isDisabled}
         isLoading={isLoading}
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
@@ -251,7 +254,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         )}
         options={initialOptions}
         selectedOptions={initialOptions
-          .filter((option) => option.serviceType === connector.service_type)
+          .filter((option) => option.value?.serviceType === connector.service_type)
           .slice(0, 1)}
         onChange={(selectedItem) => {
           onSelectedOptionChange(selectedItem);
