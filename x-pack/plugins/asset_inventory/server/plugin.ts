@@ -10,10 +10,13 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 
 import type { AssetInventoryPluginSetup, AssetInventoryPluginStart } from './types';
 import { defineRoutes } from './routes';
+import { createKeywordBuilderPipeline, deleteKeywordBuilderPipeline } from './lib/ingest_pipelines'
+
 // TODO Uncomment this line when initialize() is enabled
 // import { initializeTransforms } from './create_transforms/create_transforms';
 
@@ -21,9 +24,8 @@ export class AssetInventoryPlugin
   implements Plugin<AssetInventoryPluginSetup, AssetInventoryPluginStart>
 {
   private readonly logger: Logger;
-
-  // TODO Uncomment this line when initialize() is enabled
-  // private isInitialized: boolean = false;
+  private esClient?: ElasticsearchClient;
+  private isInitialized: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -42,22 +44,38 @@ export class AssetInventoryPlugin
   public start(core: CoreStart) {
     this.logger.debug('assetInventory: Started');
 
-    // TODO Invoke initialize() when it's due
-    // this.initialize(core).catch(() => {});
+    this.initialize(core).catch(() => {});
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (!this.isInitialized) {
+      return;
+    }
+
+    this.logger.debug('stopping');
+
+    deleteKeywordBuilderPipeline({
+      logger: this.logger,
+      esClient: this.esClient!,
+    })
+  }
 
   /**
    * Initialization is idempotent and required for (re)creating indices and transforms.
    */
-  // TODO Uncomment these lines when initialize() is enabled
-  // async initialize(core: CoreStart): Promise<void> {
-  //   this.logger.debug('initialize');
-  //   const esClient = core.elasticsearch.client.asInternalUser;
-  //   await initializeTransforms(esClient, this.logger);
-  //   this.isInitialized = true;
-  // }
+  async initialize(core: CoreStart): Promise<void> {
+    this.logger.debug('initialize');
+    this.esClient = core.elasticsearch.client.asInternalUser;
+    // await initializeTransforms(esClient, this.logger);
+
+    createKeywordBuilderPipeline({
+      logger: this.logger,
+      esClient: this.esClient
+    })
+    this.logger.debug("create keyword builder pipeline")
+
+    this.isInitialized = true;
+  }
 }

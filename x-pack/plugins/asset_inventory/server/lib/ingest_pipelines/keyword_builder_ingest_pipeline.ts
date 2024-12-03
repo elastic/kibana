@@ -1,17 +1,11 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import { debugDeepCopyContextStep, } from './ingest_processor_steps';
 
 const PIPELINE_ID = "entity-keyword-builder@platform"
 
-const buildIngestPipeline = ({
-  debugMode
-}: {
-  debugMode?: boolean;
-}): IngestProcessorContainer[] => {
+const buildIngestPipeline = (): IngestProcessorContainer[] => {
   return [
-    ...(debugMode ? [debugDeepCopyContextStep()] : []),
     {
       script: {
         lang: "painless",
@@ -38,7 +32,7 @@ const buildIngestPipeline = ({
         //    entry.getKey().replace("\\"", "\\\\\\"");
         // That is one extra backslash per backslash (there is no need to scape quotes in the javascript layer)
         source: `
-          String jsonFromMap(Map map) {
+            String jsonFromMap(Map map) {
               StringBuilder json = new StringBuilder("{");
               boolean first = true;
               for (entry in map.entrySet()) {
@@ -96,8 +90,18 @@ const buildIngestPipeline = ({
               return json.toString();
           }
 
-          def metadata = jsonFromMap(ctx['entities']['metadata']);
-          ctx['entities']['keyword'] = metadata;
+          if (ctx.entities?.metadata == null) {
+            return;
+          }
+
+          def keywords = [];
+          for (key in ctx.entities.metadata.keySet()) {
+            def value = ctx.entities.metadata[key];
+            def metadata = jsonFromMap([key: value]);  
+            keywords.add(metadata);
+          }
+
+          ctx['entities']['keyword'] = keywords;
           `,
       }
     },
@@ -116,11 +120,9 @@ const buildIngestPipeline = ({
 export const createKeywordBuilderPipeline = async ({
   logger,
   esClient,
-  debugMode,
 }: {
   logger: Logger;
   esClient: ElasticsearchClient;
-  debugMode?: boolean;
 }) => {
 
   const pipeline = {
@@ -131,9 +133,7 @@ export const createKeywordBuilderPipeline = async ({
         managed: true,
       },
       description: `Serialize entities.metadata into a keyword field`,
-      processors: buildIngestPipeline({
-        debugMode,
-      }),
+      processors: buildIngestPipeline(),
     }
   }
 
