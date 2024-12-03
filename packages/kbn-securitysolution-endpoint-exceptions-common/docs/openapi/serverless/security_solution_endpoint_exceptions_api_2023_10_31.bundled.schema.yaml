@@ -847,8 +847,8 @@ components:
       type: string
     NonEmptyString:
       description: A string that is not empty and does not contain only whitespace
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     PlatformErrorResponse:
       type: object
