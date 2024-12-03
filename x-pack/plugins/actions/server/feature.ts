@@ -71,4 +71,139 @@ export const ACTIONS_FEATURE = {
       ui: ['show', 'execute'],
     },
   },
+  subFeatures: [
+    {
+      name: 'Communication & Notification',
+      description:
+        'Includes: Email, Server log, Slack, Slack API, Microsoft Teams, PagerDuty, xMatters, Opsgenie',
+      privilegeGroups: [
+        {
+          groupType: 'mutually_exclusive',
+          privileges: [
+            {
+              api: [],
+              name: 'Run',
+              id: 'run-comm-notif',
+              includeIn: 'read',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['ui-run-comm-notif'],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'Security Orchestration & Incident Response',
+      description: 'Includes: Swimlane, Torq, Tines, D3 Security, IBM Resilient, TheHive',
+      privilegeGroups: [
+        {
+          groupType: 'mutually_exclusive',
+          privileges: [
+            {
+              api: [],
+              name: 'Run',
+              id: 'run-orch-i-resp',
+              includeIn: 'read',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['ui-run-orch-i-resp'],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'IT Service Management & Issue Tracking',
+      description: 'Includes: ServiceNow ITSM, ServiceNow SecOps, ServiceNow ITOM, JIRA',
+      privilegeGroups: [
+        {
+          groupType: 'mutually_exclusive',
+          privileges: [
+            {
+              api: [],
+              name: 'Run',
+              id: 'run-im',
+              includeIn: 'read',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['ui-run-im'],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'Artificial Intelligence & Machine Learning',
+      description: 'Includes: OpenAI, Amazon Bedrock, Google Gemini',
+      privilegeGroups: [
+        {
+          groupType: 'mutually_exclusive',
+          privileges: [
+            {
+              api: [],
+              name: 'Run',
+              id: 'run-ai',
+              includeIn: 'read',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['ui-run-ai'],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'Endpoint Security',
+      description: 'Includes: Sentinel One, CrowdStrike',
+      privilegeGroups: [
+        {
+          groupType: 'mutually_exclusive',
+          privileges: [
+            {
+              api: [],
+              name: 'Run',
+              id: 'run-edr',
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['ui-run-edr'],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'General Integration',
+      description: 'Includes: Index, Webhook, Webhook - Case Management',
+      privilegeGroups: [
+        {
+          groupType: 'mutually_exclusive',
+          privileges: [
+            {
+              api: [],
+              name: 'Run',
+              id: 'run-g',
+              includeIn: 'read',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['ui-run-g'],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
