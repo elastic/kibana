@@ -32,6 +32,14 @@ export const deleteSignalsMigrationRoute = (router: SecuritySolutionPluginRouter
         validate: {
           request: { body: buildRouteValidationWithZod(AlertsMigrationCleanupRequestBody) },
         },
+        options: {
+          deprecated: {
+            documentationUrl:
+              'https://www.elastic.co/guide/en/security/current/signals-migration-api.html',
+            severity: 'warning',
+            reason: { type: 'remove' },
+          },
+        },
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
