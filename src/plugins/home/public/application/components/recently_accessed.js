@@ -58,7 +58,7 @@ export class RecentlyAccessed extends Component {
     for (let i = NUM_LONG_LINKS; i < this.props.recentlyAccessed.length; i++) {
       dropdownLinks.push(
         <li
-          style={{ marginBottom: 8 }}
+          css={{ marginBottom: 8 }}
           key={this.props.recentlyAccessed[i].id}
           data-test-subj={`moreRecentlyAccessedItem${this.props.recentlyAccessed[i].id}`}
         >

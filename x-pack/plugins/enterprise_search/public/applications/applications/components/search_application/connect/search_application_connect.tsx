@@ -21,7 +21,6 @@ import {
 } from '../../../routes';
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
-import { SearchApplicationError } from '../search_application_error';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { SearchApplicationAPI } from './search_application_api';
@@ -47,7 +46,6 @@ const DOCUMENTATION_TAB_TITLE = i18n.translate(
     defaultMessage: 'Documentation',
   }
 );
-const ConnectTabs: string[] = Object.values(SearchApplicationConnectTabs);
 const getTabBreadCrumb = (tabId: string) => {
   switch (tabId) {
     case SearchApplicationConnectTabs.SEARCHAPI:
@@ -75,26 +73,6 @@ export const SearchApplicationConnect: React.FC = () => {
       })
     );
   };
-
-  if (!ConnectTabs.includes(connectTabId)) {
-    return (
-      <EnterpriseSearchApplicationsPageTemplate
-        pageChrome={[searchApplicationName, pageTitle]}
-        pageViewTelemetry={SearchApplicationViewTabs.CONNECT}
-        isLoading={isLoadingSearchApplication}
-        pageHeader={{
-          bottomBorder: false,
-          className: 'searchApplicationHeaderBackgroundColor',
-          pageTitle,
-          rightSideItems: [],
-        }}
-        searchApplicationName={searchApplicationName}
-        hasSchemaConflicts={hasSchemaConflicts}
-      >
-        <SearchApplicationError notFound />
-      </EnterpriseSearchApplicationsPageTemplate>
-    );
-  }
 
   return (
     <EnterpriseSearchApplicationsPageTemplate

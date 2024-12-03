@@ -232,10 +232,9 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
-  GetEntityStoreStatusResponse,
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
-} from './entity_analytics/entity_store/enablement.gen';
+} from './entity_analytics/entity_store/enable.gen';
 import type { ApplyEntityEngineDataviewIndicesResponse } from './entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
@@ -258,10 +257,6 @@ import type {
   StartEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/start.gen';
 import type {
-  GetEntityEngineStatsRequestParamsInput,
-  GetEntityEngineStatsResponse,
-} from './entity_analytics/entity_store/engine/stats.gen';
-import type {
   StopEntityEngineRequestParamsInput,
   StopEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
@@ -269,6 +264,10 @@ import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
+import type {
+  GetEntityStoreStatusRequestQueryInput,
+  GetEntityStoreStatusResponse,
+} from './entity_analytics/entity_store/status.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -364,6 +363,11 @@ import type {
   GetRuleMigrationResourcesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
+  InstallMigrationRulesRequestParamsInput,
+  InstallMigrationRulesRequestBodyInput,
+  InstallMigrationRulesResponse,
+  InstallTranslatedMigrationRulesRequestParamsInput,
+  InstallTranslatedMigrationRulesResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
@@ -1310,19 +1314,7 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getEntityEngineStats(props: GetEntityEngineStatsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetEntityEngineStats`);
-    return this.kbnClient
-      .request<GetEntityEngineStatsResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}/stats', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getEntityStoreStatus() {
+  async getEntityStoreStatus(props: GetEntityStoreStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
     return this.kbnClient
       .request<GetEntityStoreStatusResponse>({
@@ -1331,6 +1323,8 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1591,6 +1585,22 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Installs migration rules
+   */
+  async installMigrationRules(props: InstallMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallMigrationRules`);
+    return this.kbnClient
+      .request<InstallMigrationRulesResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/install', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Install and update all Elastic prebuilt detection rules and Timelines.
    */
   async installPrebuiltRulesAndTimelines() {
@@ -1618,6 +1628,24 @@ finalize it.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Installs all translated migration rules
+   */
+  async installTranslatedMigrationRules(props: InstallTranslatedMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallTranslatedMigrationRules`);
+    return this.kbnClient
+      .request<InstallTranslatedMigrationRulesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/install_translated',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2308,8 +2336,8 @@ export interface GetEndpointSuggestionsProps {
 export interface GetEntityEngineProps {
   params: GetEntityEngineRequestParamsInput;
 }
-export interface GetEntityEngineStatsProps {
-  params: GetEntityEngineStatsRequestParamsInput;
+export interface GetEntityStoreStatusProps {
+  query: GetEntityStoreStatusRequestQueryInput;
 }
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
@@ -2358,8 +2386,15 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
+export interface InstallMigrationRulesProps {
+  params: InstallMigrationRulesRequestParamsInput;
+  body: InstallMigrationRulesRequestBodyInput;
+}
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
+}
+export interface InstallTranslatedMigrationRulesProps {
+  params: InstallTranslatedMigrationRulesRequestParamsInput;
 }
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
