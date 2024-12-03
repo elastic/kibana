@@ -23,7 +23,7 @@ export function OptionalFormRow(props: OptionalFormRowProps) {
         },
         '.euiFormLabel > .euiFlexGroup > div:last-of-type': {
           fontWeight: 'normal',
-          color: euiTheme.colors.subduedText,
+          color: euiTheme.colors.textSubdued,
         },
       }}
       label={
