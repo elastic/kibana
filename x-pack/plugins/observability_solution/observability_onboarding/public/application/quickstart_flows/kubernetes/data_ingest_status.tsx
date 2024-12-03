@@ -140,6 +140,10 @@ export function DataIngestStatus({ onboardingId }: Props) {
                 href:
                   dashboardLocator?.getRedirectUrl({
                     dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                    refreshInterval: {
+                      pause: false,
+                      value: 60000,
+                    },
                   }) ?? '',
               },
             ]}

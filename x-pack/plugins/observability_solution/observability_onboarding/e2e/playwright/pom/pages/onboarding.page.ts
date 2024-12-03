@@ -35,6 +35,8 @@ export class OnboardingPage {
   public readonly streamHostLogs = () => this.page.getByTestId('integration-card:system-logs');
   private readonly kubernetes = () =>
     this.page.locator('xpath=//button[contains(text(), "Kubernetes")]');
+  private readonly kubernetesQuickStartCard = () =>
+    this.page.locator('xpath=//div[@data-test-subj="integration-card:kubernetes-quick-start"]');
   private readonly kubernetesElasticAgent = () =>
     this.page.getByTestId('integration-card:kubernetes-quick-start');
   public readonly contentNotLoaded = () =>
@@ -59,6 +61,8 @@ export class OnboardingPage {
     this.page.getByTestId('observabilityOnboardingCopyToClipboardButton');
   private readonly receivedDataIndicator = () =>
     this.page.locator('xpath=//div[contains(text(), "Your data is ready to explore!")]');
+  private readonly receivedDataIndicatorKubernetes = () =>
+    this.page.locator('xpath=//div[contains(text(), "We are monitoring your cluster")]');
   private readonly logsShipped = () =>
     this.page.locator(
       'xpath=//div[@data-test-subj="obltOnboardingCheckLogsStep"]//*[contains(text(), "Logs are being shipped!")]'
@@ -74,6 +78,10 @@ export class OnboardingPage {
   private readonly autoDetectSystemIntegrationActionLink = () =>
     this.page.locator(
       'xpath=//a[@data-test-subj="observabilityOnboardingDataIngestStatusActionLink-inventory-host-details"]'
+    );
+  private readonly kubernetesAgentExploreDataActionLink = () =>
+    this.page.locator(
+      'xpath=//a[@data-test-subj="observabilityOnboardingDataIngestStatusActionLink-kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c"]'
     );
 
   public async selectCollectLogs() {
@@ -167,5 +175,24 @@ export class OnboardingPage {
 
   public async clickAutoDetectSystemIntegrationCTA() {
     await this.autoDetectSystemIntegrationActionLink().click();
+  }
+
+  public async selectKubernetesUseCase() {
+    await this.useCaseKubernetes().click();
+  }
+
+  public async selectKubernetesQuickstart() {
+    await this.kubernetesQuickStartCard().click();
+  }
+
+  public async assertReceivedDataIndicatorKubernetes() {
+    await expect(
+      this.receivedDataIndicatorKubernetes(),
+      'Received data indicator should be visible'
+    ).toBeVisible();
+  }
+
+  public async clickKubernetesAgentCTA() {
+    await this.kubernetesAgentExploreDataActionLink().click();
   }
 }

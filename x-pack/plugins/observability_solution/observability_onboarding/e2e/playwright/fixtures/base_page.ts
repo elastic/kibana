@@ -10,12 +10,14 @@ import { HeaderBar } from '../pom/components/header_bar.component';
 import { OnboardingPage } from '../pom/pages/onboarding.page';
 import { SpaceSelector } from '../pom/components/space_selector.component';
 import { SideNav } from '../pom/components/side_nav.component';
+import { KubernetesOverviewDashboardPage } from '../pom/pages/kubernetes_overview_dashboard.page';
 
 export const test = base.extend<{
   headerBar: HeaderBar;
   onboardingPage: OnboardingPage;
   spaceSelector: SpaceSelector;
   sideNav: SideNav;
+  kubernetesOverviewDashboardPage: KubernetesOverviewDashboardPage;
 }>({
   headerBar: async ({ page }, use) => {
     await use(new HeaderBar(page));
@@ -31,5 +33,9 @@ export const test = base.extend<{
 
   spaceSelector: async ({ page }, use) => {
     await use(new SpaceSelector(page));
+  },
+
+  kubernetesOverviewDashboardPage: async ({ page }, use) => {
+    await use(new KubernetesOverviewDashboardPage(page));
   },
 });

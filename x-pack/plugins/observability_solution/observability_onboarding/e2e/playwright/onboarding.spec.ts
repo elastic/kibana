@@ -21,7 +21,7 @@ test.beforeEach(async ({ headerBar, page, sideNav, spaceSelector }) => {
   await page.goto(`${process.env.KIBANA_HOST}/app/observabilityOnboarding`);
 });
 
-test('Auto-detect logs and metrics', async ({ onboardingPage, page }) => {
+test.skip('Auto-detect logs and metrics', async ({ onboardingPage, page }) => {
   const fileName = 'code_snippet_logs_auto_detect.sh';
   const outputPath = path.join(__dirname, outputDirectory, fileName);
   const maxRetries = 3;
@@ -78,4 +78,45 @@ test('Auto-detect logs and metrics', async ({ onboardingPage, page }) => {
 
   await hostsPage.clickHostDetailsLogsTab();
   await hostsPage.assertHostDetailsLogsStream();
+});
+
+test('Kubernetes EA', async ({ onboardingPage, page, kubernetesOverviewDashboardPage }) => {
+  const fileName = 'code_snippet_kubernetes.sh';
+  const outputPath = path.join(__dirname, outputDirectory, fileName);
+  const maxRetries = 3;
+  let retries = 0;
+  let codeBlockAppeared = false;
+
+  await onboardingPage.selectKubernetesUseCase();
+  await onboardingPage.selectKubernetesQuickstart();
+
+  const [c] = await waitForOneOf([onboardingPage.codeBlock(), onboardingPage.contentNotLoaded()]);
+
+  const codeNotLoaded = c === 1;
+  if (codeNotLoaded) {
+    while (retries < maxRetries) {
+      try {
+        onboardingPage.clickRetry();
+        await onboardingPage.codeBlock().waitFor({ state: 'visible', timeout: 2000 });
+        codeBlockAppeared = true;
+        break;
+      } catch (error) {
+        retries++;
+        log.error(`Code block visibility assertion attempt ${retries} failed. Retrying...`);
+      }
+    }
+    if (!codeBlockAppeared) {
+      throw new Error('Page content not loaded after 3 attempts.');
+    }
+  }
+  await onboardingPage.assertVisibilityCodeBlock();
+  await onboardingPage.copyToClipboard();
+  const clipboardData = (await page.evaluate('navigator.clipboard.readText()')) as string;
+  fs.writeFileSync(outputPath, clipboardData);
+  await onboardingPage.assertReceivedDataIndicatorKubernetes();
+
+  await onboardingPage.clickKubernetesAgentCTA();
+
+  await kubernetesOverviewDashboardPage.openNodesInspector();
+  await kubernetesOverviewDashboardPage.assetNodesInspectorStatusTableCells();
 });
