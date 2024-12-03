@@ -10,6 +10,7 @@ import React from 'react';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoint_helper';
 import * as i18n from './translations';
+import { isProviderTechPreview } from '../../../../utils/reranker_helper';
 
 export interface EndpointInfoProps {
   inferenceId: string;
@@ -17,11 +18,7 @@ export interface EndpointInfoProps {
 }
 
 export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, provider }) => {
-  const taskType = provider.task_type;
-  const isInTechPreview =
-    taskType === 'rerank' &&
-    // @ts-ignore
-    provider.service_settings?.model_id?.startsWith('.');
+  const isInTechPreview = isProviderTechPreview(provider);
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
