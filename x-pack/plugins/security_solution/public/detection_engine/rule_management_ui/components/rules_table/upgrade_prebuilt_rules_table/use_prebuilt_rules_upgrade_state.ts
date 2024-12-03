@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { pick } from 'lodash';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import type {
   RulesUpgradeState,
@@ -14,7 +13,10 @@ import type {
   SetRuleFieldResolvedValueFn,
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import type { PartialRuleDiff } from '../../../../../../common/api/detection_engine';
+import type {
+  PartialRuleDiff,
+  RuleFieldsDiff,
+} from '../../../../../../common/api/detection_engine';
 import {
   type FieldsDiff,
   type DiffableAllFields,
@@ -90,25 +92,28 @@ export function usePrebuiltRulesUpgradeState(
 }
 
 function calcCustomizableFieldsDiff(ruleFieldsDiff: PartialRuleDiff): PartialRuleDiff {
-  const cutomizableFieldNames = Object.keys(ruleFieldsDiff.fields).filter(
-    (fieldName) => !NON_UPGRADEABLE_DIFFABLE_FIELDS.includes(fieldName)
-  );
-  const fieldsDiff = pick(ruleFieldsDiff.fields, cutomizableFieldNames);
-
+  const fieldsDiff: Partial<RuleFieldsDiff> = {};
   let numFieldsWithUpdates = 0;
   let numFieldsWithConflicts = 0;
   let numFieldsWithNonSolvableConflicts = 0;
 
-  for (const fieldDiff of Object.values(fieldsDiff)) {
-    if (fieldDiff.has_update) {
+  for (const [fieldName, diff] of Object.entries(ruleFieldsDiff.fields)) {
+    if (NON_UPGRADEABLE_DIFFABLE_FIELDS.includes(fieldName)) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    fieldsDiff[fieldName as keyof RuleFieldsDiff] = diff;
+
+    if (diff.has_update) {
       numFieldsWithUpdates++;
     }
 
-    if (fieldDiff.conflict !== ThreeWayDiffConflict.NONE) {
+    if (diff.conflict !== ThreeWayDiffConflict.NONE) {
       numFieldsWithConflicts++;
     }
 
-    if (fieldDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
+    if (diff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
       numFieldsWithNonSolvableConflicts++;
     }
   }

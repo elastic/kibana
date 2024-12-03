@@ -32,7 +32,7 @@ import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/field_upgrade_state';
 import { isNonUpgradeableFieldName } from '../../../../rule_management/model/prebuilt_rule_upgrade/fields';
-import { useRulePreviewFlyout } from '../use_rules_preview_flyout/use_rule_preview_flyout';
+import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 import { MlJobUpgradeModal } from './modals/ml_job_upgrade_modal';
 import { UpgradeConflictsModal } from './modals/upgrade_conflicts_modal';
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
