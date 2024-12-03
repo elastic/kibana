@@ -48,13 +48,12 @@ test.describe('Discover app - saved searches', { tag: tags.DEPLOYMENT_AGNOSTIC }
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.ECOMMERCE);
     await uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.ECOMMERCE,
-      'doc_table:legacy': false,
       'timepicker:timeDefaults': `{ "from": "${START_TIME}", "to": "${END_TIME}"}`,
     });
   });
 
   test.afterAll(async ({ kbnClient, uiSettings }) => {
-    await uiSettings.unset('doc_table:legacy', 'defaultIndex', 'timepicker:timeDefaults');
+    await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
     await kbnClient.savedObjects.cleanStandardList();
   });
 

@@ -17,14 +17,13 @@ test.describe(
       await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
       await uiSettings.set({
         defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
-        'doc_table:legacy': false,
         'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
         'autocomplete:useTimeRange': false,
       });
     });
 
     test.afterAll(async ({ uiSettings, kbnClient }) => {
-      await uiSettings.unset('doc_table:legacy', 'defaultIndex', 'timepicker:timeDefaults');
+      await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await uiSettings.set({ 'autocomplete:useTimeRange': true });
       await kbnClient.savedObjects.cleanStandardList();
     });
