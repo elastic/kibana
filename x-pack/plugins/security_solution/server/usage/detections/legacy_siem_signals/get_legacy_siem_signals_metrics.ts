@@ -27,7 +27,7 @@ export const getLegacySiemSignalsUsage = async ({
   });
 
   return {
-    indices_total: indices.length,
+    non_migrated_indices_total: indices.length,
     spaces_total: spaces.length,
   };
 };

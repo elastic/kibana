@@ -3078,16 +3078,17 @@ export const registerCollector: RegisterCollector = ({
           },
         },
         legacy_siem_signals: {
-          indices_total: {
+          non_migrated_indices_total: {
             type: 'long',
             _meta: {
-              description: 'Total number of legacy siem signals indices',
+              description: 'Total number of non migrated legacy siem signals indices',
             },
           },
           spaces_total: {
             type: 'long',
             _meta: {
-              description: 'Total number of Kibana spaces that have legacy siem signals indices',
+              description:
+                'Total number of Kibana spaces that have non migrated legacy siem signals indices',
             },
           },
         },

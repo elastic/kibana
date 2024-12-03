@@ -5,6 +5,6 @@
  * 2.0.
  */
 export interface LegacySiemSignals {
-  indices_total: number;
+  non_migrated_indices_total: number;
   spaces_total: number;
 }

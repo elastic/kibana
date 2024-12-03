@@ -101,14 +101,6 @@ export const getNonMigratedSignalsInfo = async ({
       []
     );
 
-    if (outdatedIndices.length === 0) {
-      return {
-        isMigrationRequired: false,
-        spaces: [],
-        indices: [],
-      };
-    }
-
     const outdatedIndexNames = outdatedIndices.map((outdatedIndex) => outdatedIndex.indexName);
 
     // remove duplicated spaces

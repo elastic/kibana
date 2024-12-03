@@ -8,6 +8,6 @@
 import type { LegacySiemSignals } from './types';
 
 export const getInitialLegacySiemSignalsUsage = (): LegacySiemSignals => ({
-  indices_total: 0,
+  non_migrated_indices_total: 0,
   spaces_total: 0,
 });
