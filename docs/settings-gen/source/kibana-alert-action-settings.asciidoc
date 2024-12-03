@@ -1017,15 +1017,6 @@ For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir
 === Alerting settings
 
 
-`xpack.alerting.maxEphemeralActionsPerAlert` {ess-icon}::
-+
-====
-**Deprecated:** Deprecated in version 8.8.0
-
-Sets the number of actions that will run ephemerally. To use this, enable ephemeral tasks in task manager first with <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
-
-====
-
 `xpack.alerting.cancelAlertsOnRuleTimeout` {ess-icon}::
 +
 ====

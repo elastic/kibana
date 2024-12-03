@@ -32,7 +32,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
   - group: Action settings
     id: action-settings
@@ -59,7 +59,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.customHostSettings
         # id:
@@ -130,7 +130,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.customHostSettings[n].smtp.ignoreTLS
         # id:
@@ -149,7 +149,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.customHostSettings[n].smtp.requireTLS
         # id:
@@ -168,7 +168,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.verificationMode
         id: action-config-custom-host-verification-mode
@@ -187,7 +187,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles
         # id:
@@ -206,7 +206,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData
         # id:
@@ -225,7 +225,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.email.domain_allowlist
         id: action-config-email-domain-allowlist
@@ -244,7 +244,7 @@ groups:
         # type: static/dynamic
         platforms:
          - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.enableFooterInEmail
         # id:
@@ -263,7 +263,7 @@ groups:
         # type: static/dynamic
         platforms:
          - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.enabledActionTypes
         # id:
@@ -283,7 +283,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.microsoftExchangeUrl
         # id:
@@ -302,7 +302,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.microsoftGraphApiUrl
         # id:
@@ -321,7 +321,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.microsoftGraphApiScope
         # id:
@@ -340,7 +340,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.proxyUrl
         # id:
@@ -445,7 +445,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.ssl.proxyVerificationMode
         id: action-config-proxy-verification-mode
@@ -468,7 +468,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.ssl.verificationMode
         id: action-config-verification-mode
@@ -491,7 +491,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.maxResponseContentLength
         # id:
@@ -510,7 +510,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.responseTimeout
         # id:
@@ -529,7 +529,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.run.maxAttempts
         # id:
@@ -548,7 +548,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.run.connectorTypeOverrides
         # id:
@@ -596,7 +596,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
   - group: Preconfigured connector settings
     id: preconfigured-connector-settings
@@ -634,7 +634,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured
         # id:
@@ -653,7 +653,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.actionTypeId
         # id:
@@ -678,7 +678,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config
         # id:
@@ -697,7 +697,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiProvider
         # id:
@@ -717,7 +717,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiUrl
         # id:
@@ -745,7 +745,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.appId
         # id:
@@ -765,7 +765,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.clientId
         # id:
@@ -786,7 +786,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.configUrl
         # id:
@@ -805,7 +805,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentJson
         # id:
@@ -824,7 +824,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentMethod
         # id:
@@ -845,7 +845,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentUrl
         # id:
@@ -864,7 +864,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentJson
         # id:
@@ -883,7 +883,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentMethod
         # id:
@@ -904,7 +904,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentUrl
         # id:
@@ -923,7 +923,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentResponseKey
         # id:
@@ -942,7 +942,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.defaultModel
         # id:
@@ -964,7 +964,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.executionTimeField
         # id:
@@ -983,7 +983,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.from
         # id:
@@ -1002,7 +1002,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentResponseExternalTitleKey
         # id:
@@ -1021,7 +1021,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentUrl
         # id:
@@ -1040,7 +1040,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.hasAuth
         # id:
@@ -1059,7 +1059,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.headers
         # id:
@@ -1078,7 +1078,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.host
         # id:
@@ -1097,7 +1097,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.index
         # id:
@@ -1116,7 +1116,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.isOAuth
         # id:
@@ -1135,7 +1135,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.jwtKeyId
         # id:
@@ -1154,7 +1154,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings
         # id:
@@ -1173,7 +1173,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.alertIdConfig
         # id:
@@ -1192,7 +1192,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseIdConfig
         # id:
@@ -1211,7 +1211,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseNameConfig
         # id:
@@ -1230,7 +1230,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.commentsConfig
         # id:
@@ -1249,7 +1249,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.descriptionConfig
         # id:
@@ -1268,7 +1268,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.ruleNameConfig
         # id:
@@ -1287,7 +1287,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.severityConfig
         # id:
@@ -1306,7 +1306,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.method
         # id:
@@ -1325,7 +1325,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.orgId
         # id:
@@ -1344,7 +1344,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.port
         # id:
@@ -1363,7 +1363,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.projectKey
         # id:
@@ -1382,7 +1382,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.secure
         # id:
@@ -1401,7 +1401,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.service
         # id:
@@ -1420,7 +1420,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.tenantId
         # id:
@@ -1439,7 +1439,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentJson
         # id:
@@ -1458,7 +1458,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentMethod
         # id:
@@ -1479,7 +1479,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentUrl
         # id:
@@ -1498,7 +1498,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.url
         # id:
@@ -1520,7 +1520,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.userIdentifierValue
         # id:
@@ -1539,7 +1539,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesBasic
         # id:
@@ -1558,7 +1558,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesTableApi
         # id:
@@ -1577,7 +1577,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl
         # id:
@@ -1596,7 +1596,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.webhookIntegrationUrl
         # id:
@@ -1615,7 +1615,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.name
         # id:
@@ -1634,7 +1634,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets
         # id:
@@ -1653,7 +1653,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.accessKey
         # id:
@@ -1672,7 +1672,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apikey
         # id:
@@ -1691,7 +1691,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.credentialsJson
         # id:
@@ -1712,7 +1712,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeyId
         # id:
@@ -1731,7 +1731,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeySecret
         # id:
@@ -1750,7 +1750,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiToken
         # id:
@@ -1769,7 +1769,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.clientSecret
         # id:
@@ -1790,7 +1790,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.email
         # id:
@@ -1811,7 +1811,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.password
         # id:
@@ -1833,7 +1833,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKey
         # id:
@@ -1852,7 +1852,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKeyPassword
         # id:
@@ -1871,7 +1871,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.routingKey
         # id:
@@ -1890,7 +1890,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secret
         # id:
@@ -1909,7 +1909,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl
         # id:
@@ -1928,7 +1928,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.token
         # id:
@@ -1951,7 +1951,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.user
         # id:
@@ -1972,7 +1972,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl
         # id:
@@ -1993,7 +1993,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.username
         # id:
@@ -2012,7 +2012,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
   - group: Alerting settings
     id: alert-settings
@@ -2020,25 +2020,6 @@ groups:
     #  - ""
     # example: example-group-name.asciidoc
     settings:
-
-      - setting: xpack.alerting.maxEphemeralActionsPerAlert
-        # id:
-        description:
-          - "Sets the number of actions that will run ephemerally. To use this, enable ephemeral tasks in task manager first with <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>"
-        state: deprecated
-        deprecation_details: "Deprecated in version 8.8.0"
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
-        # default:
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
-        platforms:
-          - cloud
-        # example: example-setting-name.asciidoc
 
       - setting: xpack.alerting.cancelAlertsOnRuleTimeout
         # id:
@@ -2057,7 +2038,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.alerting.rules.maxScheduledPerMinute
         # id: 
@@ -2076,7 +2057,7 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.value
         # id:
@@ -2095,7 +2076,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.enforce
         # id:
@@ -2114,7 +2095,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.alerting.rules.run.actions.max
         # id:
@@ -2133,7 +2114,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.alerting.rules.run.alerts.max
         # id:
@@ -2152,7 +2133,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.alerting.rules.run.timeout
         # id:
@@ -2171,7 +2152,7 @@ groups:
         # type: static/dynamic
         platforms:
           - cloud
-        # example: example-setting-name.asciidoc
+         # example: |
 
       - setting: xpack.alerting.rules.run.ruleTypeOverrides
         # id:
