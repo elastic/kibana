@@ -52,6 +52,7 @@ export function convertMessagesForInference(messages: Message[]): InferenceMessa
       }
 
       inferenceMessages.push({
+        name: message.message.name!,
         role: InferenceMessageRole.Tool,
         response: JSON.parse(message.message.content ?? '{}'),
         toolCallId: toolCallRequest.toolCalls![0].toolCallId,

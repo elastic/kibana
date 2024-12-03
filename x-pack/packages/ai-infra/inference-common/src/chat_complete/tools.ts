@@ -8,24 +8,24 @@
 import type { ValuesType } from 'utility-types';
 import { FromToolSchema, ToolSchema } from './tool_schema';
 
-type Assert<TValue, TType> = TValue extends TType ? TValue & TType : never;
-
 type ToolsOfChoice<TToolOptions extends ToolOptions> = TToolOptions['toolChoice'] extends {
   function: infer TToolName;
 }
   ? TToolName extends keyof TToolOptions['tools']
-    ? Pick<TToolOptions['tools'], TToolName>
+    ? TToolName extends string
+      ? Pick<TToolOptions['tools'], TToolName>
+      : TToolOptions['tools']
     : TToolOptions['tools']
   : TToolOptions['tools'];
 
 /**
  * Utility type to infer the tool calls response shape.
  */
-type ToolResponsesOf<TTools extends Record<string, ToolDefinition> | undefined> =
+export type ToolResponsesOf<TTools extends Record<string, ToolDefinition> | undefined> =
   TTools extends Record<string, ToolDefinition>
     ? Array<
         ValuesType<{
-          [TName in keyof TTools]: ToolResponseOf<Assert<TName, string>, TTools[TName]>;
+          [TName in keyof TTools & string]: ToolCall<TName, ToolResponseOf<TTools[TName]>>;
         }>
       >
     : never[];
@@ -33,10 +33,11 @@ type ToolResponsesOf<TTools extends Record<string, ToolDefinition> | undefined> 
 /**
  * Utility type to infer the tool call response shape.
  */
-type ToolResponseOf<TName extends string, TToolDefinition extends ToolDefinition> = ToolCall<
-  TName,
-  TToolDefinition extends { schema: ToolSchema } ? FromToolSchema<TToolDefinition['schema']> : {}
->;
+export type ToolResponseOf<TToolDefinition extends ToolDefinition> = TToolDefinition extends {
+  schema: ToolSchema;
+}
+  ? FromToolSchema<TToolDefinition['schema']>
+  : {};
 
 /**
  * Tool invocation choice type.
@@ -129,6 +130,10 @@ export interface ToolCall<
     name: TName;
   } & (TArguments extends Record<string, any> ? { arguments: TArguments } : {});
 }
+/**
+ * Utility type to get the tool names of ToolOptions
+ */
+export type ToolNamesOf<TToolOptions extends ToolOptions> = keyof TToolOptions['tools'] & string;
 
 /**
  * Tool-related parameters of {@link ChatCompleteAPI}

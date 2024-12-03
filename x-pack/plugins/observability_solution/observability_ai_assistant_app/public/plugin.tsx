@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { lazy } from 'react';
 import ReactDOM from 'react-dom';
 import {
   type AppMountParameters,
@@ -18,6 +18,7 @@ import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
 import { createAppService, AIAssistantAppService } from '@kbn/ai-assistant';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -26,6 +27,7 @@ import type {
 } from './types';
 import { getObsAIAssistantConnectorType } from './rule_connector';
 import { NavControlInitiator } from './components/nav_control/lazy_nav_control';
+import { SharedProviders } from './utils/shared_providers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}
@@ -131,9 +133,33 @@ export class ObservabilityAIAssistantAppPlugin
       await registerFunctions({ pluginsStart, registerRenderFunction });
     });
 
+    const withProviders = <P extends {}, R = {}>(Component: React.ComponentType<P>) =>
+      React.forwardRef((props: P, ref: React.Ref<R>) => (
+        <SharedProviders
+          coreStart={coreStart}
+          pluginsStart={pluginsStart}
+          service={service}
+          theme$={coreStart.theme.theme$}
+        >
+          <Component {...props} ref={ref} />
+        </SharedProviders>
+      ));
+
+    const LazilyLoadedRootCauseAnalysisContainer = withSuspense(
+      withProviders(
+        lazy(() =>
+          import('./components/rca/rca_container').then((m) => ({
+            default: m.RootCauseAnalysisContainer,
+          }))
+        )
+      )
+    );
+
     pluginsStart.triggersActionsUi.actionTypeRegistry.register(
       getObsAIAssistantConnectorType(service)
     );
-    return {};
+    return {
+      RootCauseAnalysisContainer: LazilyLoadedRootCauseAnalysisContainer,
+    };
   }
 }
