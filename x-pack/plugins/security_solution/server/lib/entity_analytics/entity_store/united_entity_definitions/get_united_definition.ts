@@ -4,53 +4,58 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { memoize } from 'lodash';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
-import {
-  getHostUnitedDefinition,
-  getUserUnitedDefinition,
-  getServiceUnitedDefinition,
-} from './entity_types';
-import type { UnitedDefinitionBuilder } from './types';
-import { UnitedEntityDefinition } from './united_entity_definition';
-import { getUniversalUnitedDefinition } from './entity_types/universal';
 
-const unitedDefinitionBuilders: Record<EntityType, UnitedDefinitionBuilder> = {
-  host: getHostUnitedDefinition,
-  user: getUserUnitedDefinition,
+import { pipe } from 'fp-ts/lib/function';
+
+import { assign, concat, map, merge, pick, update } from 'lodash/fp';
+import type { EntityType } from '../../../../../common/api/entity_analytics';
+import type { EntityEngineInstallationDescriptor } from './types';
+import { generateIndexMappings } from './united_entity_definition';
+
+import type { EntityStoreConfig } from '../types';
+import {
+  hostEntityEngineDescription,
+  userEntityEngineDescription,
+  universalEntityEngineDescription,
+} from './entity_types';
+
+const engineDescriptionRegistry: Record<EntityType, EntityEngineInstallationDescriptor> = {
+  host: hostEntityEngineDescription,
+  user: userEntityEngineDescription,
+  universal: universalEntityEngineDescription,
   service: getServiceUnitedDefinition,
-  universal: getUniversalUnitedDefinition,
 };
 
-interface Options {
+export const getAvailableEntityTypes = () => Object.keys(engineDescriptionRegistry) as EntityType[];
+
+interface EngineDescriptionDependencies {
   entityType: EntityType;
   namespace: string;
-  fieldHistoryLength: number;
+  fieldHistoryLength?: number;
   indexPatterns: string[];
-  syncDelay: string;
-  frequency: string;
+  config: EntityStoreConfig;
 }
 
-export const getUnitedEntityDefinition = memoize(
-  ({
-    entityType,
-    namespace,
-    fieldHistoryLength,
-    indexPatterns,
-    syncDelay,
-    frequency,
-  }: Options): UnitedEntityDefinition => {
-    const unitedDefinition = unitedDefinitionBuilders[entityType](fieldHistoryLength);
+export const contextualizeEngineDescription = (_deps: EngineDescriptionDependencies) => {
+  const deps = merge({ fieldHistoryLength: 10 }, _deps);
+  const description = engineDescriptionRegistry[deps.entityType];
 
-    return new UnitedEntityDefinition({
-      ...unitedDefinition,
-      namespace,
-      indexPatterns,
-      syncDelay,
-      frequency,
-    });
-  }
-);
+  const updatedDescription = pipe(
+    description,
+    update('indexPatterns', concat(deps.indexPatterns)),
+    update('settings', assign(pick(['syncDelay', 'frequency'], deps.config))),
+    update(
+      'fields',
+      map(
+        merge({
+          retention_operator: { maxLength: deps.fieldHistoryLength },
+          aggregation: { limit: deps.fieldHistoryLength },
+        })
+      )
+    )
+  ) as EntityEngineInstallationDescriptor;
 
-export const getAvailableEntityTypes = (): EntityType[] =>
-  Object.keys(unitedDefinitionBuilders) as EntityType[];
+  updatedDescription.indexMappings = generateIndexMappings(updatedDescription);
+
+  return updatedDescription;
+};

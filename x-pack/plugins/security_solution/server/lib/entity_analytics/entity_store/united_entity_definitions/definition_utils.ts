@@ -6,81 +6,74 @@
  */
 
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import type { UnitedDefinitionField } from './types';
+import type { FieldDescription } from './types';
 
 export const collectValues = ({
-  field,
+  destination,
+  source,
+  fieldHistoryLength = 10,
   mapping = { type: 'keyword' },
-  sourceField,
-  fieldHistoryLength,
 }: {
-  field: string;
+  source: string;
+  destination?: string;
   mapping?: MappingProperty;
-  sourceField?: string;
-  fieldHistoryLength: number;
-}): UnitedDefinitionField => ({
-  field,
-  definition: {
-    source: sourceField ?? field,
-    destination: field,
-    aggregation: {
-      type: 'terms',
-      limit: fieldHistoryLength,
-    },
+  fieldHistoryLength?: number;
+}): FieldDescription => ({
+  destination: destination ?? source,
+  source,
+  retention: {
+    operation: 'collect_values',
+    maxLength: fieldHistoryLength,
   },
-  retention_operator: { operation: 'collect_values', field, maxLength: fieldHistoryLength },
+  aggregation: {
+    type: 'terms',
+    limit: fieldHistoryLength,
+  },
   mapping,
 });
 
-export const collectValuesWithLength =
-  (fieldHistoryLength: number) =>
-  (opts: { field: string; mapping?: MappingProperty; sourceField?: string }) =>
-    collectValues({ ...opts, fieldHistoryLength });
-
 export const newestValue = ({
-  field,
+  destination,
   mapping = { type: 'keyword' },
-  sourceField,
+  source,
+  sort,
 }: {
-  field: string;
+  source: string;
+  destination?: string;
   mapping?: MappingProperty;
-  sourceField?: string;
-}): UnitedDefinitionField => ({
-  field,
-  definition: {
-    source: sourceField ?? field,
-    destination: field,
-    aggregation: {
-      type: 'top_value',
-      sort: {
-        '@timestamp': 'desc',
-      },
+  sort?: Record<string, 'asc' | 'desc'>;
+}): FieldDescription => ({
+  destination: destination ?? source,
+  source,
+  retention: { operation: 'prefer_newest_value' },
+  aggregation: {
+    type: 'top_value',
+    sort: sort ?? {
+      '@timestamp': 'desc',
     },
   },
-  retention_operator: { operation: 'prefer_newest_value', field },
   mapping,
 });
 
 export const oldestValue = ({
-  field,
+  source,
+  destination,
   mapping = { type: 'keyword' },
-  sourceField,
+  sort,
 }: {
-  field: string;
+  source: string;
+  destination?: string;
   mapping?: MappingProperty;
-  sourceField?: string;
-}): UnitedDefinitionField => ({
-  field,
-  definition: {
-    source: sourceField ?? field,
-    destination: field,
-    aggregation: {
-      type: 'top_value',
-      sort: {
-        '@timestamp': 'asc',
-      },
+  sort?: Record<string, 'asc' | 'desc'>;
+}): FieldDescription => ({
+  destination: destination ?? source,
+  source,
+  retention: { operation: 'prefer_oldest_value' },
+  aggregation: {
+    type: 'top_value',
+    sort: sort ?? {
+      '@timestamp': 'asc',
     },
   },
-  retention_operator: { operation: 'prefer_oldest_value', field },
   mapping,
 });

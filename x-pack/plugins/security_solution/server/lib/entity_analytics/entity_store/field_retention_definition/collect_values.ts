@@ -6,23 +6,18 @@
  */
 
 import { isFieldMissingOrEmpty } from '../painless';
-import type { BaseFieldRetentionOperator, FieldRetentionOperatorBuilder } from './types';
-
-export interface CollectValues extends BaseFieldRetentionOperator {
-  operation: 'collect_values';
-  maxLength: number;
-}
+import type { FieldRetentionOperatorBuilder } from './types';
 
 /**
  * A field retention operator that collects up to `maxLength` values of the specified field.
  * Values are first collected from the field, then from the enrich field if the field is not present or empty.
  */
-export const collectValuesProcessor: FieldRetentionOperatorBuilder<CollectValues> = (
-  { field, maxLength },
+export const collectValuesProcessor: FieldRetentionOperatorBuilder = (
+  { destination, maxLength },
   { enrichField }
 ) => {
-  const ctxField = `ctx.${field}`;
-  const ctxEnrichField = `ctx.${enrichField}.${field}`;
+  const ctxField = `ctx.${destination}`;
+  const ctxEnrichField = `ctx.${enrichField}.${destination}`;
   return {
     script: {
       lang: 'painless',

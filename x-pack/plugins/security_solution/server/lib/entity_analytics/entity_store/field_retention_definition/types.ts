@@ -6,29 +6,13 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
-import type { CollectValues } from './collect_values';
-import type { PreferNewestValue } from './prefer_newest_value';
-import type { PreferOldestValue } from './prefer_oldest_value';
+import type { FieldDescription } from '../united_entity_definitions/types';
 
-export interface FieldRetentionDefinition {
-  entityType: EntityType;
-  matchField: string;
-  fields: FieldRetentionOperator[];
-}
-
-export interface BaseFieldRetentionOperator {
-  field: string;
-  operation: string;
-}
-
-export interface FieldRetentionOperatorBuilderOptions {
+interface Options {
   enrichField: string;
 }
 
-export type FieldRetentionOperator = PreferNewestValue | PreferOldestValue | CollectValues;
-
-export type FieldRetentionOperatorBuilder<O extends BaseFieldRetentionOperator> = (
-  operator: O,
-  options: FieldRetentionOperatorBuilderOptions
+export type FieldRetentionOperatorBuilder = (
+  field: FieldDescription,
+  options: Options
 ) => IngestProcessorContainer;

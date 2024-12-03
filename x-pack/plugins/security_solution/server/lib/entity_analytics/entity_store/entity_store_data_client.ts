@@ -51,7 +51,7 @@ import type {
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
-import { getUnitedEntityDefinition } from './united_entity_definitions';
+import { contextualizeEngineDescription } from './united_entity_definitions';
 import {
   startEntityStoreFieldRetentionEnrichTask,
   removeEntityStoreFieldRetentionEnrichTask,
@@ -88,6 +88,7 @@ import {
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
+import { convertToEntityManagerDefinition } from './united_entity_definitions/united_entity_definition';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -352,38 +353,34 @@ export class EntityStoreDataClient {
     try {
       const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
-      const unitedDefinition = getUnitedEntityDefinition({
-        indexPatterns,
+      const description = contextualizeEngineDescription({
         entityType,
         namespace,
         fieldHistoryLength,
-        syncDelay: `${config.syncDelay.asSeconds()}s`,
-        frequency: `${config.frequency.asSeconds()}s`,
+        indexPatterns,
+        config,
       });
-      const { entityManagerDefinition } = unitedDefinition;
 
       // clean up any existing entity store
       await this.delete(entityType, taskManager, { deleteData: false, deleteEngine: false });
 
       // set up the entity manager definition
+      const definition = convertToEntityManagerDefinition(description, {
+        fieldHistoryLength,
+        indexPattern,
+        namespace,
+        filter,
+      });
+
       await this.entityClient.createEntityDefinition({
-        definition: {
-          ...entityManagerDefinition,
-          filter,
-          indexPatterns: indexPattern
-            ? [...entityManagerDefinition.indexPatterns, ...indexPattern.split(',')]
-            : entityManagerDefinition.indexPatterns,
-        },
+        definition,
         installOnly: true,
       });
       this.log(`debug`, entityType, `Created entity definition`);
 
       // the index must be in place with the correct mapping before the enrich policy is created
       // this is because the enrich policy will fail if the index does not exist with the correct fields
-      await createEntityIndexComponentTemplate({
-        unitedDefinition,
-        esClient: this.esClient,
-      });
+      await createEntityIndexComponentTemplate(description, this.esClient);
       this.log(`debug`, entityType, `Created entity index component template`);
       await createEntityIndex({
         entityType,
@@ -396,20 +393,24 @@ export class EntityStoreDataClient {
       // we must create and execute the enrich policy before the pipeline is created
       // this is because the pipeline will fail if the enrich index does not exist
       await createFieldRetentionEnrichPolicy({
-        unitedDefinition,
+        description,
+        options: { namespace },
         esClient: this.esClient,
       });
       this.log(`debug`, entityType, `Created field retention enrich policy`);
 
       await executeFieldRetentionEnrichPolicy({
-        unitedDefinition,
+        entityType,
+        version: description.version,
+        options: { namespace },
         esClient: this.esClient,
         logger,
       });
       this.log(`debug`, entityType, `Executed field retention enrich policy`);
       await createPlatformPipeline({
+        description,
+        options: { namespace },
         debugMode: pipelineDebugMode,
-        unitedDefinition,
         logger,
         esClient: this.esClient,
       });
@@ -595,16 +596,16 @@ export class EntityStoreDataClient {
     const descriptor = await this.engineClient.maybeGet(entityType);
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
-    // TODO delete unitedDefinition from this method. we only need the id for deletion
-    const unitedDefinition = getUnitedEntityDefinition({
-      indexPatterns,
+    const description = contextualizeEngineDescription({
       entityType,
-      namespace: this.options.namespace,
-      fieldHistoryLength: descriptor?.fieldHistoryLength ?? 10,
-      syncDelay: `${config.syncDelay.asSeconds()}s`,
-      frequency: `${config.frequency.asSeconds()}s`,
+      namespace,
+      indexPatterns,
+      config,
     });
-    const { entityManagerDefinition } = unitedDefinition;
+
+    if (!description.id) {
+      throw new Error(`Unable to find entity definition for ${entityType}`);
+    }
 
     this.log('info', entityType, `Deleting entity store`);
     this.audit(
@@ -617,7 +618,7 @@ export class EntityStoreDataClient {
     try {
       await this.entityClient
         .deleteEntityDefinition({
-          id: entityManagerDefinition.id,
+          id: description.id,
           deleteData,
         })
         // Swallowing the error as it is expected to fail if no entity definition exists
@@ -627,20 +628,21 @@ export class EntityStoreDataClient {
       this.log('debug', entityType, `Deleted entity definition`);
 
       await deleteEntityIndexComponentTemplate({
-        unitedDefinition,
+        id: description.id,
         esClient: this.esClient,
       });
       this.log('debug', entityType, `Deleted entity index component template`);
 
       await deletePlatformPipeline({
-        unitedDefinition,
+        description,
         logger,
         esClient: this.esClient,
       });
       this.log('debug', entityType, `Deleted platform pipeline`);
 
       await deleteFieldRetentionEnrichPolicy({
-        unitedDefinition,
+        description,
+        options: { namespace },
         esClient: this.esClient,
         logger,
       });
