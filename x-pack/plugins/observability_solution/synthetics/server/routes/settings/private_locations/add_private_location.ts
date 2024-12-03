@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { isEmpty } from 'lodash';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
@@ -26,7 +27,9 @@ export const PrivateLocationSchema = schema.object({
       lon: schema.number(),
     })
   ),
-  spaces: schema.maybe(schema.arrayOf(schema.string())),
+  spaces: schema.maybe(schema.arrayOf(schema.string()), {
+    minSize: 1,
+  }),
 });
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
@@ -95,7 +98,7 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       formattedLocation,
       {
         id: location.agentPolicyId,
-        initialNamespaces: spaces?.length ? (spaces?.includes('*') ? ['*'] : spaces) : [spaceId],
+        initialNamespaces: isEmpty(spaces) || spaces?.includes('*') ? ['*'] : spaces,
       }
     );
 
