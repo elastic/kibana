@@ -13010,22 +13010,22 @@
   resolved "https://registry.yarnpkg.com/@webpack-cli/serve/-/serve-1.7.0.tgz#e1993689ac42d2b16e9194376cfb6753f6254db1"
   integrity sha512-oxnCNGj88fL+xzV+dacXs44HcDwf1ovs3AuEzvP7mqXw7fQntqIhQ1BRmynh4qEKQSSSRSWVyXRjmTbZIX9V2Q==
 
-"@wojtekmaj/enzyme-adapter-react-17@^0.6.7":
-  version "0.6.7"
-  resolved "https://registry.yarnpkg.com/@wojtekmaj/enzyme-adapter-react-17/-/enzyme-adapter-react-17-0.6.7.tgz#7784bd32f518b186218cebb26c98c852676f30b0"
-  integrity sha512-B+byiwi/T1bx5hcj9wc0fUL5Hlb5giSXJzcnEfJVl2j6dGV2NJfcxDBYX0WWwIxlzNiFz8kAvlkFWI2y/nscZQ==
+"@wojtekmaj/enzyme-adapter-react-17@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@wojtekmaj/enzyme-adapter-react-17/-/enzyme-adapter-react-17-0.8.0.tgz#138f404f82f502d152242c049e87d9621dcda4bd"
+  integrity sha512-zeUGfQRziXW7R7skzNuJyi01ZwuKCH8WiBNnTgUJwdS/CURrJwAhWsfW7nG7E30ak8Pu3ZwD9PlK9skBfAoOBw==
   dependencies:
-    "@wojtekmaj/enzyme-adapter-utils" "^0.1.4"
+    "@wojtekmaj/enzyme-adapter-utils" "^0.2.0"
     enzyme-shallow-equal "^1.0.0"
     has "^1.0.0"
     prop-types "^15.7.0"
     react-is "^17.0.0"
     react-test-renderer "^17.0.0"
 
-"@wojtekmaj/enzyme-adapter-utils@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@wojtekmaj/enzyme-adapter-utils/-/enzyme-adapter-utils-0.1.4.tgz#bcd411ad6e368f17dce5425582c2907104cdb1ad"
-  integrity sha512-ARGIQSIIv3oBia1m5Ihn1VU0FGmft6KPe39SBKTb8p7LSXO23YI4kNtc4M/cKoIY7P+IYdrZcgMObvedyjoSQA==
+"@wojtekmaj/enzyme-adapter-utils@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@wojtekmaj/enzyme-adapter-utils/-/enzyme-adapter-utils-0.2.0.tgz#dc2a8c14f92e502da28ea6b3fad96a082076d028"
+  integrity sha512-ZvZm9kZxZEKAbw+M1/Q3iDuqQndVoN8uLnxZ8bzxm7KgGTBejrGRoJAp8f1EN8eoO3iAjBNEQnTDW/H4Ekb0FQ==
   dependencies:
     function.prototype.name "^1.1.0"
     has "^1.0.0"
@@ -15099,7 +15099,7 @@ cheerio-select@^2.1.0:
     domhandler "^5.0.3"
     domutils "^3.0.1"
 
-cheerio@^1.0.0-rc.12, cheerio@^1.0.0-rc.3:
+cheerio@=1.0.0-rc.12, cheerio@^1.0.0-rc.3:
   version "1.0.0-rc.12"
   resolved "https://registry.yarnpkg.com/cheerio/-/cheerio-1.0.0-rc.12.tgz#788bf7466506b1c6bf5fae51d24a2c4d62e47683"
   integrity sha512-VqR8m68vM46BNnuZ5NtnGBKIE/DfN0cRIzg9n40EIq9NOv90ayxLBXA8fXC5gquFRGJSTRqBq25Jt2ECLR431Q==
@@ -15111,6 +15111,23 @@ cheerio@^1.0.0-rc.12, cheerio@^1.0.0-rc.3:
     htmlparser2 "^8.0.1"
     parse5 "^7.0.0"
     parse5-htmlparser2-tree-adapter "^7.0.0"
+
+cheerio@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/cheerio/-/cheerio-1.0.0.tgz#1ede4895a82f26e8af71009f961a9b8cb60d6a81"
+  integrity sha512-quS9HgjQpdaXOvsZz82Oz7uxtXiy6UIsIQcpBj7HRw2M63Skasm9qlDocAM7jNuaxdhpPU7c4kJN+gA5MCu4ww==
+  dependencies:
+    cheerio-select "^2.1.0"
+    dom-serializer "^2.0.0"
+    domhandler "^5.0.3"
+    domutils "^3.1.0"
+    encoding-sniffer "^0.2.0"
+    htmlparser2 "^9.1.0"
+    parse5 "^7.1.2"
+    parse5-htmlparser2-tree-adapter "^7.0.0"
+    parse5-parser-stream "^7.1.2"
+    undici "^6.19.5"
+    whatwg-mimetype "^4.0.0"
 
 child-process-promise@^2.2.1:
   version "2.2.1"
@@ -17416,7 +17433,7 @@ domhandler@^4.0.0, domhandler@^4.2.0, domhandler@^4.3.1:
   dependencies:
     domelementtype "^2.2.0"
 
-domhandler@^5.0.1, domhandler@^5.0.2, domhandler@^5.0.3:
+domhandler@^5.0.2, domhandler@^5.0.3:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-5.0.3.tgz#cc385f7f751f1d1fc650c21374804254538c7d31"
   integrity sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==
@@ -17437,14 +17454,14 @@ domutils@^2.0.0, domutils@^2.5.2, domutils@^2.8.0:
     domelementtype "^2.2.0"
     domhandler "^4.2.0"
 
-domutils@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/domutils/-/domutils-3.0.1.tgz#696b3875238338cb186b6c0612bd4901c89a4f1c"
-  integrity sha512-z08c1l761iKhDFtfXO04C7kTdPBLi41zwOZl00WS8b5eiaebNpY00HKbztwBq+e3vyqWNwWF3mP9YLUeqIrF+Q==
+domutils@^3.0.1, domutils@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/domutils/-/domutils-3.1.0.tgz#c47f551278d3dc4b0b1ab8cbb42d751a6f0d824e"
+  integrity sha512-H78uMmQtI2AhgDJjWeQmHwJJ2bLPD3GMmO7Zja/ZZh84wkm+4ut+IUnUdRa8uCGX88DiVx1j6FRe1XfxEgjEZA==
   dependencies:
     dom-serializer "^2.0.0"
     domelementtype "^2.3.0"
-    domhandler "^5.0.1"
+    domhandler "^5.0.3"
 
 dot-case@^3.0.3, dot-case@^3.0.4:
   version "3.0.4"
@@ -17744,6 +17761,14 @@ encodeurl@~2.0.0:
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-2.0.0.tgz#7b8ea898077d7e409d3ac45474ea38eaf0857a58"
   integrity sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==
 
+encoding-sniffer@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/encoding-sniffer/-/encoding-sniffer-0.2.0.tgz#799569d66d443babe82af18c9f403498365ef1d5"
+  integrity sha512-ju7Wq1kg04I3HtiYIOrUrdfdDvkyO9s5XM8QAj/bN61Yo/Vb4vgJxy5vi4Yxk01gWHbrofpPtpxM8bKger9jhg==
+  dependencies:
+    iconv-lite "^0.6.3"
+    whatwg-encoding "^3.1.1"
+
 end-of-stream@^1.0.0, end-of-stream@^1.1.0, end-of-stream@^1.4.1, end-of-stream@^1.4.4:
   version "1.4.4"
   resolved "https://registry.yarnpkg.com/end-of-stream/-/end-of-stream-1.4.4.tgz#5ae64a5f45057baf3626ec14da0ca5e4b2431eb0"
@@ -17794,10 +17819,10 @@ entities@^2.0.0:
   resolved "https://registry.yarnpkg.com/entities/-/entities-2.2.0.tgz#098dc90ebb83d8dffa089d55256b351d34c4da55"
   integrity sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==
 
-entities@^4.2.0, entities@^4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/entities/-/entities-4.4.0.tgz#97bdaba170339446495e653cfd2db78962900174"
-  integrity sha512-oYp7156SP8LkeGD0GF85ad1X9Ai79WtRsZ2gxJqtBuzH+98YUV6jkHEKlZkMbcrjJjIVJNIDP/3WL9wQkoPbWA==
+entities@^4.2.0, entities@^4.4.0, entities@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/entities/-/entities-4.5.0.tgz#5d268ea5e7113ec74c4d033b79ea5a35a488fb48"
+  integrity sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==
 
 env-paths@^2.2.1:
   version "2.2.1"
@@ -20673,6 +20698,16 @@ htmlparser2@^8.0.1:
     domhandler "^5.0.3"
     domutils "^3.0.1"
     entities "^4.4.0"
+
+htmlparser2@^9.1.0:
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/htmlparser2/-/htmlparser2-9.1.0.tgz#cdb498d8a75a51f739b61d3f718136c369bc8c23"
+  integrity sha512-5zfg6mHUoaer/97TxnGpxmbR7zJtPwIYFMZ/H5ucTlPZhKvtum05yiPK3Mgai3a0DyVxv7qYqoweaEd2nrYQzQ==
+  dependencies:
+    domelementtype "^2.3.0"
+    domhandler "^5.0.3"
+    domutils "^3.1.0"
+    entities "^4.5.0"
 
 http-cache-semantics@^4.0.0:
   version "4.1.1"
@@ -25868,15 +25903,22 @@ parse5-htmlparser2-tree-adapter@^7.0.0:
     domhandler "^5.0.2"
     parse5 "^7.0.0"
 
+parse5-parser-stream@^7.1.2:
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/parse5-parser-stream/-/parse5-parser-stream-7.1.2.tgz#d7c20eadc37968d272e2c02660fff92dd27e60e1"
+  integrity sha512-JyeQc9iwFLn5TbvvqACIF/VXG6abODeB3Fwmv/TGdLk2LfbWkaySGY72at4+Ty7EkPZj854u4CrICqNk2qIbow==
+  dependencies:
+    parse5 "^7.0.0"
+
 parse5@^6.0.0:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/parse5/-/parse5-6.0.1.tgz#e1a1c085c569b3dc08321184f19a39cc27f7c30b"
   integrity sha512-Ofn/CTFzRGTTxwpNEs9PP93gXShHcTq255nzRYSKe8AkVpZY7e1fpmTfOyoIvjP5HG7Z2ZM7VS9PPhQGW2pOpw==
 
-parse5@^7.0.0, parse5@^7.1.1:
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/parse5/-/parse5-7.1.1.tgz#4649f940ccfb95d8754f37f73078ea20afe0c746"
-  integrity sha512-kwpuwzB+px5WUg9pyK0IcK/shltJN5/OVhQagxhCQNtT9Y9QRZqNY2e1cmbu/paRh5LMnz/oVTVLBpjFmMZhSg==
+parse5@^7.0.0, parse5@^7.1.1, parse5@^7.1.2:
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/parse5/-/parse5-7.1.2.tgz#0736bebbfd77793823240a23b7fc5e010b7f8e32"
+  integrity sha512-Czj1WaSVpaoj0wbhMzLmWD69anp2WH7FXMB9n1Sy8/ZFF9jolSQVMu1Ij5WIyGmcBmhk7EOndpO4mIpihVqAXw==
   dependencies:
     entities "^4.4.0"
 
@@ -31724,10 +31766,10 @@ undici@^5.28.3:
   dependencies:
     "@fastify/busboy" "^2.0.0"
 
-undici@^6.12.0:
-  version "6.19.2"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.19.2.tgz#231bc5de78d0dafb6260cf454b294576c2f3cd31"
-  integrity sha512-JfjKqIauur3Q6biAtHJ564e3bWa8VvT+7cSiOJHFbX4Erv6CLGDpg8z+Fmg/1OI/47RA+GI2QZaF48SSaLvyBA==
+undici@^6.12.0, undici@^6.19.5:
+  version "6.21.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.21.0.tgz#4b3d3afaef984e07b48e7620c34ed8a285ed4cd4"
+  integrity sha512-BUgJXc752Kou3oOIuU1i+yZZypyZRqNPW0vqoMPl8VaoalSfeR0D8/t4iAS3yirs79SSMTxTag+ZC86uswv+Cw==
 
 unfetch@^4.2.0:
   version "4.2.0"
@@ -33104,6 +33146,13 @@ whatwg-encoding@^2.0.0:
   dependencies:
     iconv-lite "0.6.3"
 
+whatwg-encoding@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/whatwg-encoding/-/whatwg-encoding-3.1.1.tgz#d0f4ef769905d426e1688f3e34381a99b60b76e5"
+  integrity sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==
+  dependencies:
+    iconv-lite "0.6.3"
+
 whatwg-fetch@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-3.0.0.tgz#fc804e458cc460009b1a2b966bc8817d2578aefb"
@@ -33113,6 +33162,11 @@ whatwg-mimetype@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/whatwg-mimetype/-/whatwg-mimetype-3.0.0.tgz#5fa1a7623867ff1af6ca3dc72ad6b8a4208beba7"
   integrity sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==
+
+whatwg-mimetype@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/whatwg-mimetype/-/whatwg-mimetype-4.0.0.tgz#bc1bf94a985dc50388d54a9258ac405c3ca2fc0a"
+  integrity sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==
 
 whatwg-url@^11.0.0:
   version "11.0.0"
