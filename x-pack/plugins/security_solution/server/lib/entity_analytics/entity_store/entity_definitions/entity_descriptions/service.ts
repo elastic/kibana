@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { collectValuesWithLength, newestValue } from '../definition_utils';
+import { collectValuesWithLength, newestValue } from './field_utils';
 import type { UnitedDefinitionBuilder } from '../types';
 
 export const SERVICE_DEFINITION_VERSION = '1.0.0';

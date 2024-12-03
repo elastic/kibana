@@ -6,7 +6,7 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { FieldDescription } from '../united_entity_definitions/types';
+import type { FieldDescription } from '../entity_definitions/types';
 
 interface Options {
   enrichField: string;

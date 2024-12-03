@@ -13,9 +13,13 @@ import type { FieldRetentionOperatorBuilder } from './types';
  * Values are first collected from the field, then from the enrich field if the field is not present or empty.
  */
 export const collectValuesProcessor: FieldRetentionOperatorBuilder = (
-  { destination, maxLength },
+  { destination, retention },
   { enrichField }
 ) => {
+  if (retention?.operation !== 'collect_values') {
+    throw new Error('Wrong operation for collectValuesProcessor');
+  }
+
   const ctxField = `ctx.${destination}`;
   const ctxEnrichField = `ctx.${enrichField}.${destination}`;
   return {
@@ -41,7 +45,7 @@ export const collectValuesProcessor: FieldRetentionOperatorBuilder = (
   ${ctxField} = new ArrayList(uniqueVals).subList(0, (int) Math.min(params.max_length, uniqueVals.size()));
   `,
       params: {
-        max_length: maxLength,
+        max_length: retention.maxLength,
       },
     },
   };

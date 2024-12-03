@@ -6,12 +6,14 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EntityType } from '../../../../../common/api/entity_analytics';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
-import type { UnitedEntityDefinition } from '../united_entity_definitions';
-import type { EntityEngineInstallationDescriptor } from '../united_entity_definitions/types';
+import type { EntityEngineInstallationDescriptor } from '../installation/types';
 
-type DefinitionMetadata = Pick<UnitedEntityDefinition, 'namespace' | 'entityType' | 'version'>;
+type DefinitionMetadata = Pick<EntityEngineInstallationDescriptor, 'entityType' | 'version'> & {
+  namespace: string;
+};
 
 export const getFieldRetentionEnrichPolicyName = ({
   namespace,
@@ -51,7 +53,7 @@ export const executeFieldRetentionEnrichPolicy = async ({
   logger,
   options,
 }: {
-  entityType: string;
+  entityType: EntityType;
   version: string;
   esClient: ElasticsearchClient;
   logger: Logger;
