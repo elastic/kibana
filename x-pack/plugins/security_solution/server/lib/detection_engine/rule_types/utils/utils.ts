@@ -27,7 +27,7 @@ import type {
 import type {
   AlertInstanceContext,
   AlertInstanceState,
-  PluginSetupContract,
+  AlertingServerSetup,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
@@ -429,7 +429,7 @@ export const getRuleRangeTuples = async ({
   interval: string;
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  alerting: PluginSetupContract;
+  alerting: AlertingServerSetup;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });

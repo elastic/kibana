@@ -65,7 +65,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { KueryNode } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ValidationResult } from '@kbn/response-ops-rule-form';
-import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type {
   EcsFieldsResponse,
   RuleRegistrySearchRequestPagination,
@@ -157,12 +157,8 @@ export {
 };
 export type {
   ActionConnector,
-  ActionTypeRegistryContract,
-  UserConfiguredActionConnector,
-  ValidationResult,
-  RuleType,
-  RuleTypeIndex,
   ActionType,
+  ActionTypeRegistryContract,
   AlertStatus,
   AlertSummaryTimeRange,
   AsApiContract,
@@ -191,6 +187,8 @@ export type {
   RuleTagBadgeProps,
   RuleTagFilterProps,
   RuleTaskState,
+  RuleType,
+  RuleTypeIndex,
   RuleTypeMetaData,
   RuleTypeParams,
   RuleUiAction,
@@ -198,6 +196,8 @@ export type {
   RulesListProps,
   RulesListVisibleColumns,
   SanitizedRule,
+  UserConfiguredActionConnector,
+  ValidationResult,
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;
@@ -493,7 +493,7 @@ export type AlertsTableProps = {
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  featureIds?: ValidFeatureId[];
+  ruleTypeIds?: string[];
   pageIndex: number;
   pageSize: number;
   sort: SortCombinations[];

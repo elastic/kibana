@@ -16,7 +16,7 @@ import {
   RecoveredActionGroup,
   RuleActionFrequency,
 } from '@kbn/alerting-types';
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { useRuleFormState } from '../hooks';
 import { RuleAction, RuleTypeWithDescription } from '../common';
 import {
@@ -120,7 +120,6 @@ const actionGroupDisplay = ({
 
 export interface RuleActionsSettingsProps {
   action: RuleAction;
-  producerId: string;
   onUseDefaultMessageChange: () => void;
   onNotifyWhenChange: (frequency: RuleActionFrequency) => void;
   onActionGroupChange: (group: string) => void;
@@ -131,7 +130,6 @@ export interface RuleActionsSettingsProps {
 export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   const {
     action,
-    producerId,
     onUseDefaultMessageChange,
     onNotifyWhenChange,
     onActionGroupChange,
@@ -190,12 +188,14 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     minimumActionThrottleUnit,
   });
 
+  const ruleTypeId = selectedRuleType.id;
+
   const showActionAlertsFilter =
     hasFieldsForAad({
       ruleType: selectedRuleType,
       consumer,
       validConsumers,
-    }) || producerId === AlertConsumers.SIEM;
+    }) || isSiemRuleType(ruleTypeId);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="ruleActionsSettings">
@@ -258,9 +258,8 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
                 <RuleActionsAlertsFilter
                   action={action}
                   onChange={onAlertsFilterChange}
-                  featureIds={[producerId as ValidFeatureId]}
                   appName="stackAlerts"
-                  ruleTypeId={selectedRuleType.id}
+                  ruleTypeId={ruleTypeId}
                 />
               </EuiFormRow>
             </EuiFlexItem>
