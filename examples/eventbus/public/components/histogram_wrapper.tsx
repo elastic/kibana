@@ -12,6 +12,7 @@ import React, { type FC } from 'react';
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 
 import { OrdinalHistogram } from './ordinal_histogram';
+import { QuantitativeHistogram } from './quantitative_histogram';
 
 interface SelectedField {
   name: string;
@@ -24,10 +25,9 @@ export const HistogramWrapper: FC = () => {
   const chartWidth = state.useState((s) => s.chartWidth);
 
   const groupedFields = state.useState((s) => {
-    // console.log('allFields', s.allFields);
     const selectedFields = Object.entries(s.allFields)
       .filter(([name, type]) => {
-        return s.selectedFields.includes(name) && type === 'keyword';
+        return s.selectedFields.includes(name) && (type === 'keyword' || type === 'long');
       })
       .map((d) => ({ name: d[0], type: d[1] }));
 
@@ -57,6 +57,13 @@ export const HistogramWrapper: FC = () => {
             >
               {field.type === 'keyword' && (
                 <OrdinalHistogram
+                  field={field.name}
+                  width={Math.round(chartWidth / g.length) - 20}
+                  height={150}
+                />
+              )}
+              {field.type === 'long' && (
+                <QuantitativeHistogram
                   field={field.name}
                   width={Math.round(chartWidth / g.length) - 20}
                   height={150}

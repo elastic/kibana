@@ -1,4 +1,7 @@
 FROM kibana_sample_data_logs
+| STATS min = MIN(bytes),max = MAX(bytes)
+
+FROM kibana_sample_data_logs
 | STATS count = COUNT(*) BY bytes = BUCKET(bytes, 20, 0, 10000)
 | SORT count DESC
 | LIMIT 10000
