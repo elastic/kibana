@@ -51,7 +51,10 @@ export const createJoinCommand = (ctx: JoinCommandContext): ESQLCommand => {
   }
 
   command.args.push(joinTarget);
-  command.args.push(onOption);
+
+  if (onOption.args.length) {
+    command.args.push(onOption);
+  }
 
   return command;
 };

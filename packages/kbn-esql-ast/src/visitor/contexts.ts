@@ -17,6 +17,7 @@ import type {
   ESQLAstCommand,
   ESQLAstExpression,
   ESQLAstItem,
+  ESQLAstJoinCommand,
   ESQLAstNodeWithArgs,
   ESQLAstNodeWithChildren,
   ESQLAstRenameExpression,
@@ -24,6 +25,7 @@ import type {
   ESQLCommandOption,
   ESQLDecimalLiteral,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLInlineCast,
   ESQLIntegerLiteral,
   ESQLList,
@@ -467,6 +469,12 @@ export class MvExpandCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
+// <LOOKUP | LEFT | RIGHT> JOIN <target> ON <condition>
+export class JoinCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstJoinCommand> {}
+
 // Expressions -----------------------------------------------------------------
 
 export class ExpressionVisitorContext<
@@ -567,3 +575,8 @@ export class OrderExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLOrderExpression> {}
+
+export class IdentifierExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLIdentifier> {}

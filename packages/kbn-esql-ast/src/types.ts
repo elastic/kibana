@@ -9,7 +9,7 @@
 
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
+export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand | ESQLAstJoinCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -90,6 +90,10 @@ export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
   sources: ESQLSource[];
   aggregates?: ESQLAstField[];
   grouping?: ESQLAstField[];
+}
+
+export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
+  commandType: 'lookup' | 'left' | 'right';
 }
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {

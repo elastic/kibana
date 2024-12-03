@@ -20,6 +20,7 @@ import {
   ESQLTimeInterval,
   ESQLInlineCast,
   ESQLUnknownItem,
+  ESQLIdentifier,
 } from '../types';
 import { walk, Walker } from './walker';
 
@@ -80,6 +81,23 @@ describe('structurally can walk all nodes', () => {
         'stats',
         'where',
       ]);
+    });
+
+    test('can traverse JOIN command', () => {
+      const { ast } = parse('FROM index | LEFT JOIN a AS b ON c, d');
+      const commands: ESQLCommand[] = [];
+      const identifiers: ESQLIdentifier[] = [];
+      const columns: ESQLColumn[] = [];
+
+      walk(ast, {
+        visitCommand: (cmd) => commands.push(cmd),
+        visitIdentifier: (id) => identifiers.push(id),
+        visitColumn: (col) => columns.push(col),
+      });
+
+      expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'join']);
+      expect(identifiers.map(({ name }) => name).sort()).toStrictEqual(['a', 'as', 'b', 'c', 'd']);
+      expect(columns.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
     });
 
     test('"visitAny" can capture command nodes', () => {
@@ -1048,6 +1066,37 @@ describe('Walker.match()', () => {
     expect(res).toMatchObject({
       type: 'column',
       name: 'a.b.c',
+    });
+  });
+
+  test('can find WHERE command by its type', () => {
+    const query = 'FROM index | LEFT JOIN a | RIGHT JOIN b';
+    const { root } = parse(query);
+
+    const join1 = Walker.match(root, {
+      type: 'command',
+      name: 'join',
+      commandType: 'left',
+    })!;
+    const identifier1 = Walker.match(join1, {
+      type: 'identifier',
+      name: 'a',
+    })!;
+    const join2 = Walker.match(root, {
+      type: 'command',
+      name: 'join',
+      commandType: 'right',
+    })!;
+    const identifier2 = Walker.match(join2, {
+      type: 'identifier',
+      name: 'b',
+    })!;
+
+    expect(identifier1).toMatchObject({
+      name: 'a',
+    });
+    expect(identifier2).toMatchObject({
+      name: 'b',
     });
   });
 });
