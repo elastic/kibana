@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
+import React, { useMemo } from 'react';
+import { FieldUpgradeState, type RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import {
   UtilityBar,
   UtilityBarGroup,
@@ -21,7 +21,20 @@ interface UpgradeInfoBarProps {
 
 export function RuleUpgradeInfoBar({ ruleUpgradeState }: UpgradeInfoBarProps): JSX.Element {
   const numOfFieldsWithUpdates = ruleUpgradeState.customizableFieldsDiff.num_fields_with_updates;
-  const numOfConflicts = ruleUpgradeState.customizableFieldsDiff.num_fields_with_conflicts;
+  const numOfSolvedConflicts = useMemo(
+    () =>
+      Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
+        (x) => x === FieldUpgradeState.SolvableConflict
+      ).length,
+    [ruleUpgradeState.fieldsUpgradeState]
+  );
+  const numOfUnsolvedConflicts = useMemo(
+    () =>
+      Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
+        (x) => x === FieldUpgradeState.NonSolvableConflict
+      ).length,
+    [ruleUpgradeState.fieldsUpgradeState]
+  );
 
   return (
     <UtilityBar>
@@ -33,7 +46,12 @@ export function RuleUpgradeInfoBar({ ruleUpgradeState }: UpgradeInfoBarProps): J
         </UtilityBarGroup>
         <UtilityBarGroup>
           <UtilityBarText dataTestSubj="showingRules">
-            {i18n.NUM_OF_CONFLICTS(numOfConflicts)}
+            {i18n.NUM_OF_SOLVED_CONFLICTS(numOfSolvedConflicts)}
+          </UtilityBarText>
+        </UtilityBarGroup>
+        <UtilityBarGroup>
+          <UtilityBarText dataTestSubj="showingRules">
+            {i18n.NUM_OF_UNSOLVED_CONFLICTS(numOfUnsolvedConflicts)}
           </UtilityBarText>
         </UtilityBarGroup>
       </UtilityBarSection>

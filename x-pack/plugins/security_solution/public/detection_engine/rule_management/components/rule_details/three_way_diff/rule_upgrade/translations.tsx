@@ -19,10 +19,18 @@ export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) => (
   />
 );
 
-export const NUM_OF_CONFLICTS = (count: number) => (
+export const NUM_OF_SOLVED_CONFLICTS = (count: number) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfConflicts"
-    defaultMessage="{count} {count, plural, one {conflict} other {conflicts}}"
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfSolvableConflicts"
+    defaultMessage="{count} solved {count, plural, one {conflict} other {conflicts}}"
+    values={{ count: <strong>{count}</strong> }}
+  />
+);
+
+export const NUM_OF_UNSOLVED_CONFLICTS = (count: number) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfNonSolvableConflicts"
+    defaultMessage="{count} unsolved {count, plural, one {conflict} other {conflicts}}"
     values={{ count: <strong>{count}</strong> }}
   />
 );
