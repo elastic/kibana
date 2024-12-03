@@ -35,7 +35,7 @@ export function FieldFinalSideContent(): JSX.Element {
       return (
         <>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiButtonEmpty iconType="pencil" onClick={setReadOnlyMode}>
+            <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexGroup>
