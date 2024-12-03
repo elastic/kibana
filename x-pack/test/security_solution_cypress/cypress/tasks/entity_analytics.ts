@@ -64,7 +64,6 @@ export const mockRiskEngineEnabled = () => {
     statusCode: 200,
     body: {
       risk_engine_status: 'ENABLED',
-      legacy_risk_engine_status: 'INSTALLED',
     },
   }).as('riskEngineStatus');
 };
