@@ -30,6 +30,7 @@
     "@kbn/alerting-plugin",
     "@kbn/rison",
     "@kbn/embeddable-plugin",
+    "@kbn/embeddable-enhanced-plugin",
     "@kbn/lens-plugin",
     "@kbn/ui-theme",
     "@kbn/es-query",
