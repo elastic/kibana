@@ -78,22 +78,16 @@ export async function validateActions(
     }
   }
 
-  // check for invalid EDR actions
+  // check for invalid EDR connectors
   const allConnectorTypes = await actionsClient.listTypes({});
-  const edrConnectorTypes = allConnectorTypes.filter((type) => type.isEdrActionType);
-  const edrConnectorTypesMap = Object.fromEntries(edrConnectorTypes.map((type) => [type.id, type]));
+  const edrConnectorTypeIds = new Set(
+    allConnectorTypes.filter((type) => type.isEdrActionType).map((type) => type.id)
+  );
+  const edrActionTypeIds = actionResults
+    .map((result) => result.actionTypeId)
+    .filter((id) => edrConnectorTypeIds.has(id));
 
-  const edrConnectorTypeIds = Object.keys(edrConnectorTypesMap);
-  const actionTypeIds = new Set(actionResults.map((result) => result.actionTypeId));
-  const edrActionTypeIds = edrConnectorTypeIds.filter((id) => actionTypeIds.has(id));
-
-  const hasInvalidEdrActions =
-    edrActionTypeIds.length > 0 &&
-    edrActionTypeIds.some(
-      (actionId) => !edrConnectorTypesMap[actionId]?.supportedFeatureIds.includes(consumer)
-    );
-
-  if (hasInvalidEdrActions) {
+  if (edrActionTypeIds.length > 0) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.edrConnector', {
         defaultMessage: 'Invalid EDR connectors.',

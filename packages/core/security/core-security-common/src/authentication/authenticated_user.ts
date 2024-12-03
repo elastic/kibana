@@ -25,6 +25,18 @@ export interface UserRealm {
   type: string;
 }
 
+export interface ApiKey {
+  /**
+   *  Name of the API key.
+   */
+  name: string;
+
+  /**
+   * The ID of the API key.
+   */
+  id: string;
+}
+
 /**
  * Represents the currently authenticated user.
  */
@@ -60,4 +72,9 @@ export interface AuthenticatedUser extends User {
    * User profile ID of this user.
    */
   profile_uid?: string;
+
+  /**
+   * Metadata of the API key that was used to authenticate the user.
+   */
+  api_key?: ApiKey;
 }

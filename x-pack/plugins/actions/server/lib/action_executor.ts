@@ -552,6 +552,7 @@ export class ActionExecutor {
           event.user = event.user || {};
           event.user.name = currentUser?.username;
           event.user.id = currentUser?.profile_uid;
+          event.api_key = currentUser?.api_key;
           set(
             event,
             'kibana.action.execution.usage.request_body_bytes',
