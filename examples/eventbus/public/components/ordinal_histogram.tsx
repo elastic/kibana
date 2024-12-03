@@ -19,6 +19,8 @@ import { EuiBadge } from '@elastic/eui';
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 import { useFetchESQL } from '../hooks/use_fetch_esql';
 
+import { EsqlPopover } from './esql_popover';
+
 function truncateString(str: string, n: number) {
   // Check if the string length exceeds the limit
   if (str.length > n) {
@@ -210,6 +212,7 @@ export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
 
   return (
     <div css={{ position: 'relative' }}>
+      {esqlWithFilters !== null && <EsqlPopover esql={esqlWithFilters} />}
       {filters[iframeID] && (
         <div css={{ position: 'absolute', bottom: 0 }}>
           <EuiBadge
