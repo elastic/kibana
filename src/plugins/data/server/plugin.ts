@@ -83,7 +83,7 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
+    { expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
     const querySetup = this.queryService.setup(core);
