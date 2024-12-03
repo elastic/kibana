@@ -83,6 +83,7 @@ describe('When using scan action from response actions console', () => {
       endpointAgentId: 'agent-a',
       endpointCapabilities: [...ENDPOINT_CAPABILITIES],
       endpointPrivileges,
+      platform: 'linux',
     };
 
     render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
