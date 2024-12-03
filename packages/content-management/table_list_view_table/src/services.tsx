@@ -258,7 +258,7 @@ export const TableListViewKibanaProvider: FC<
         <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
           <ContentInsightsProvider
             contentInsightsClient={services.contentInsightsClient}
-            isKibanaVersioningEnabled={true}
+            isKibanaVersioningEnabled={services.isKibanaVersioningEnabled}
           >
             <FavoritesContextProvider
               favoritesClient={services.favorites}
