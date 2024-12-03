@@ -46,6 +46,7 @@
     "@kbn/search-navigation",
     "@kbn/features-plugin",
     "@kbn/security-plugin",
+    "@kbn/licensing-plugin",
   ],
   "exclude": [
     "target/**/*",
