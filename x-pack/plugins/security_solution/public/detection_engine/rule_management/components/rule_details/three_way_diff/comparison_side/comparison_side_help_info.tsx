@@ -42,7 +42,7 @@ export function ComparisonSideHelpInfo(): JSX.Element {
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
-          id="xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText"
+          id="xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSide.upgradeHelpText"
           defaultMessage="{title} shows field's JSON diff between prebuilt rule field versions affecting the rule update process. {versions}"
           values={{
             title: <strong>{TITLE}</strong>,
@@ -73,7 +73,7 @@ export function ComparisonSideHelpInfo(): JSX.Element {
 }
 
 const BASE_VERSION_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText.baseVersionExplanation',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.baseVersionExplanation',
   {
     defaultMessage: 'version originally installed from Elastic prebuilt rules package',
   }
@@ -81,7 +81,7 @@ const BASE_VERSION_EXPLANATION = i18n.translate(
 
 const CURRENT_VERSION_EXPLANATION = (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText.currentVersionExplanation"
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionExplanation"
     defaultMessage="current version including modification made after prebuilt rule installation. With lack of modifications it matches with {base}."
     values={{
       base: <strong>{BASE_VERSION}</strong>,
@@ -90,14 +90,14 @@ const CURRENT_VERSION_EXPLANATION = (
 );
 
 const TARGET_VERSION_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText.currentVersionExplanation',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.targetVersionExplanation',
   {
     defaultMessage: 'version coming from a new version of Elastic prebuilt rules package',
   }
 );
 
 const FINAL_VERSION_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText.currentVersionExplanation',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.finalVersionExplanation',
   {
     defaultMessage:
       'version used to the update the rule. Initial value is suggested by the diff algorithm.',

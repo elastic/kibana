@@ -34,7 +34,7 @@ export function FieldFinalSideHelpInfo(): JSX.Element {
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
-          id="xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText"
+          id="xpack.securitySolution.detectionEngine.rules.upgradeRules.finalSide.upgradeHelpText"
           defaultMessage="Choose field values used in the upgraded rule. "
         />
       </EuiText>
