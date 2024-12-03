@@ -19,6 +19,8 @@ import { EuiBadge } from '@elastic/eui';
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 import { useFetchESQL } from '../hooks/use_fetch_esql';
 
+import { EsqlPopover } from './esql_popover';
+
 function truncateString(str: string, n: number) {
   // Check if the string length exceeds the limit
   if (str.length > n) {
@@ -99,6 +101,8 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
         `STATS count = COUNT(*) WHERE ${filter}, context = COUNT(*) WHERE NOT(${filter}), total = COUNT(*) BY bucket = BUCKET(${field}, 20, ${range[0]}, ${range[1]})`
       );
     }
+
+    els.push('SORT bucket ASC');
 
     return els.join('\n| ');
   }, [esql, field, panelFilters, range]);
@@ -233,6 +237,7 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
 
   return (
     <div css={{ position: 'relative' }}>
+      {esqlWithFilters !== null && <EsqlPopover esql={esqlWithFilters} />}
       {filters[iframeID] && (
         <div css={{ position: 'absolute', bottom: 0 }}>
           <EuiBadge
