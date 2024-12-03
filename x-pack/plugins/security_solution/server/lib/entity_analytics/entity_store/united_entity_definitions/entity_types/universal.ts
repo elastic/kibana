@@ -5,18 +5,56 @@
  * 2.0.
  */
 
-import { collectValuesWithLength } from '../definition_utils';
-import type { UnitedDefinitionBuilder } from '../types';
+import type { EntityEngineInstallationDescriptor } from '../types';
 
+import { collectValues as collect } from '../definition_utils';
 export const UNIVERSAL_DEFINITION_VERSION = '1.0.0';
+export const UNIVERSAL_IDENTITY_FIELD = 'related.entity';
 
-export const getUniversalUnitedDefinition: UnitedDefinitionBuilder = (
-  fieldHistoryLength: number
-) => {
-  const collect = collectValuesWithLength(fieldHistoryLength);
-  return {
-    entityType: 'universal',
-    version: UNIVERSAL_DEFINITION_VERSION,
-    fields: [collect({ field: 'collected.metadata', sourceField: 'entities.keyword' })],
-  };
+const entityMetadataExtractorProcessor = {
+  script: {
+    tag: 'entity_metadata_extractor',
+    on_failure: [
+      {
+        set: {
+          field: 'error.message',
+          value:
+            'Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message {{ _ingest.on_failure_message }}',
+        },
+      },
+    ],
+    lang: 'painless',
+    source: `
+Map merged = ctx;
+def id = ctx.entity.id;
+for (meta in ctx.collected.metadata) {
+    Object json = Processors.json(meta);
+    
+    for (entry in ((Map)json)[id].entrySet()) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
+      merged.put(key, value);
+    }
+}
+merged.entity.id = id;
+ctx = merged;
+`,
+  },
+};
+
+export const universalEntityEngineDescription: EntityEngineInstallationDescriptor = {
+  version: UNIVERSAL_DEFINITION_VERSION,
+  entityType: 'universal',
+  indexPatterns: ['logs-store'],
+  identityFields: [UNIVERSAL_IDENTITY_FIELD],
+  fields: [collect({ source: 'entities.keyword', destination: 'collected.metadata' })],
+  settings: {
+    syncDelay: '1m',
+    frequency: '1m',
+    lookbackPeriod: '1d',
+    timestampField: 'event.ingested',
+  },
+  pipeline: [entityMetadataExtractorProcessor],
+
+  indexMappings: {},
 };

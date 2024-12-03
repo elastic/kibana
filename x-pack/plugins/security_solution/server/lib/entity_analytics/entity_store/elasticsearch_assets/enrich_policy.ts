@@ -6,10 +6,10 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EnrichPutPolicyRequest } from '@elastic/elasticsearch/lib/api/types';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
 import type { UnitedEntityDefinition } from '../united_entity_definitions';
+import type { EntityEngineInstallationDescriptor } from '../united_entity_definitions/types';
 
 type DefinitionMetadata = Pick<UnitedEntityDefinition, 'namespace' | 'entityType' | 'version'>;
 
@@ -21,41 +21,47 @@ export const getFieldRetentionEnrichPolicyName = ({
   return `entity_store_field_retention_${entityType}_${namespace}_v${version}`;
 };
 
-const getFieldRetentionEnrichPolicy = (
-  unitedDefinition: UnitedEntityDefinition
-): EnrichPutPolicyRequest => {
-  const { namespace, entityType, fieldRetentionDefinition } = unitedDefinition;
-  return {
-    name: getFieldRetentionEnrichPolicyName(unitedDefinition),
-    match: {
-      indices: getEntitiesIndexName(entityType, namespace),
-      match_field: fieldRetentionDefinition.matchField,
-      enrich_fields: fieldRetentionDefinition.fields.map(({ field }) => field),
-    },
-  };
-};
-
 export const createFieldRetentionEnrichPolicy = async ({
   esClient,
-  unitedDefinition,
+  description,
+  options,
 }: {
   esClient: ElasticsearchClient;
-  unitedDefinition: UnitedEntityDefinition;
+  description: EntityEngineInstallationDescriptor;
+  options: { namespace: string };
 }) => {
-  const policy = getFieldRetentionEnrichPolicy(unitedDefinition);
-  return esClient.enrich.putPolicy(policy);
+  return esClient.enrich.putPolicy({
+    name: getFieldRetentionEnrichPolicyName({
+      namespace: options.namespace,
+      entityType: description.entityType,
+      version: description.version,
+    }),
+    match: {
+      indices: getEntitiesIndexName(description.entityType, options.namespace),
+      match_field: description.identityFields[0], // TODO figure out what happens when there are multiple identity fields
+      enrich_fields: description.fields.map(({ destination }) => destination),
+    },
+  });
 };
 
 export const executeFieldRetentionEnrichPolicy = async ({
   esClient,
-  unitedDefinition,
+  entityType,
+  version,
   logger,
+  options,
 }: {
-  unitedDefinition: DefinitionMetadata;
+  entityType: string;
+  version: string;
   esClient: ElasticsearchClient;
   logger: Logger;
+  options: { namespace: string };
 }): Promise<{ executed: boolean }> => {
-  const name = getFieldRetentionEnrichPolicyName(unitedDefinition);
+  const name = getFieldRetentionEnrichPolicyName({
+    namespace: options.namespace,
+    entityType,
+    version,
+  });
   try {
     await esClient.enrich.executePolicy({ name });
     return { executed: true };
@@ -63,27 +69,31 @@ export const executeFieldRetentionEnrichPolicy = async ({
     if (e.statusCode === 404) {
       return { executed: false };
     }
-    logger.error(
-      `Error executing field retention enrich policy for ${unitedDefinition.entityType}: ${e.message}`
-    );
+    logger.error(`Error executing field retention enrich policy for ${entityType}: ${e.message}`);
     throw e;
   }
 };
 
 export const deleteFieldRetentionEnrichPolicy = async ({
-  unitedDefinition,
+  description,
+  options,
   esClient,
   logger,
   attempts = 5,
   delayMs = 2000,
 }: {
-  unitedDefinition: DefinitionMetadata;
+  description: EntityEngineInstallationDescriptor;
+  options: { namespace: string };
   esClient: ElasticsearchClient;
   logger: Logger;
   attempts?: number;
   delayMs?: number;
 }) => {
-  const name = getFieldRetentionEnrichPolicyName(unitedDefinition);
+  const name = getFieldRetentionEnrichPolicyName({
+    namespace: options.namespace,
+    entityType: description.entityType,
+    version: description.version,
+  });
   let currentAttempt = 1;
   while (currentAttempt <= attempts) {
     try {

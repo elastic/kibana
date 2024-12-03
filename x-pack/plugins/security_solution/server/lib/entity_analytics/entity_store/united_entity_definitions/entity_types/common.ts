@@ -6,41 +6,34 @@
  */
 
 import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
-import { getIdentityFieldForEntityType } from '../../utils';
-import { oldestValue, newestValue } from '../definition_utils';
-import type { UnitedDefinitionField } from '../types';
 
-export const getCommonUnitedFieldDefinitions = ({
-  entityType,
-  fieldHistoryLength,
-}: {
-  entityType: EntityType;
-  fieldHistoryLength: number;
-}): UnitedDefinitionField[] => {
-  const identityField = getIdentityFieldForEntityType(entityType);
+import { oldestValue, newestValue } from '../definition_utils';
+import type { FieldDescription } from '../types';
+
+export const getCommonUnitedFieldDefinitions = (entityType: EntityType): FieldDescription[] => {
   return [
     oldestValue({
-      sourceField: '_index',
-      field: 'entity.source',
+      source: '_index',
+      destination: 'entity.source',
     }),
-    newestValue({ field: 'asset.criticality' }),
+    newestValue({ source: 'asset.criticality' }),
     newestValue({
-      field: `${entityType}.risk.calculated_level`,
+      source: `${entityType}.risk.calculated_level`,
     }),
     newestValue({
-      field: `${entityType}.risk.calculated_score`,
+      source: `${entityType}.risk.calculated_score`,
       mapping: {
         type: 'float',
       },
     }),
     newestValue({
-      field: `${entityType}.risk.calculated_score_norm`,
+      source: `${entityType}.risk.calculated_score_norm`,
       mapping: {
         type: 'float',
       },
     }),
-    {
-      field: identityField,
-    },
+    // {
+    //   source: identityField,
+    // },
   ];
 };

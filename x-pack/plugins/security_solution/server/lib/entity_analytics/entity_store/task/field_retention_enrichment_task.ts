@@ -79,10 +79,10 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
     const [coreStart, _] = await getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    const unitedDefinitionVersion = VERSIONS_BY_ENTITY_TYPE[entityType];
-
     return executeFieldRetentionEnrichPolicy({
-      unitedDefinition: { namespace, entityType, version: unitedDefinitionVersion },
+      entityType,
+      version: VERSIONS_BY_ENTITY_TYPE[entityType],
+      options: { namespace },
       esClient,
       logger,
     });

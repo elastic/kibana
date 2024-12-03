@@ -9,20 +9,20 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
-import { type FieldRetentionDefinition } from '../field_retention_definition';
+
 import {
   debugDeepCopyContextStep,
   getDotExpanderSteps,
   getRemoveEmptyFieldSteps,
   removeEntityDefinitionFieldsStep,
-  retentionDefinitionToIngestProcessorSteps,
 } from './ingest_processor_steps';
-import { getIdentityFieldForEntityType } from '../utils';
-import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
-import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
-const getPlatformPipelineId = (definition: EntityDefinition) => {
-  return `${definition.id}-latest@platform`;
+import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
+
+import type { EntityEngineInstallationDescriptor } from '../united_entity_definitions/types';
+
+const getPlatformPipelineId = (description: EntityEngineInstallationDescriptor) => {
+  return `${description.id}-latest@platform`;
 };
 
 // the field that the enrich processor writes to
@@ -38,25 +38,27 @@ export const ENRICH_FIELD = 'historical';
  * and the context field in the document to help with debugging.
  */
 const buildIngestPipeline = ({
-  version,
-  fieldRetentionDefinition,
   allEntityFields,
   debugMode,
   namespace,
+  description,
 }: {
-  fieldRetentionDefinition: FieldRetentionDefinition;
   allEntityFields: string[];
   debugMode?: boolean;
   namespace: string;
   version: string;
+  description: EntityEngineInstallationDescriptor;
 }): IngestProcessorContainer[] => {
-  const { entityType, matchField } = fieldRetentionDefinition;
   const enrichPolicyName = getFieldRetentionEnrichPolicyName({
     namespace,
-    entityType,
-    version,
+    entityType: description.entityType,
+    version: description.version,
   });
-  return [
+
+  /**
+   * 
+
+  const old = [
     ...(debugMode ? [debugDeepCopyContextStep()] : []),
     {
       enrich: {
@@ -93,41 +95,50 @@ const buildIngestPipeline = ({
           },
         ]
       : []),
-    // {
-    //   pipeline: {
-    //     name: 'entity_metadata_extractor_entity_store_poc',
-    //   },
-    // },
+  ];
+  */
+
+  return [
+    ...(debugMode ? [debugDeepCopyContextStep()] : []),
     {
-      script: {
-        tag: 'entity_metadata_extractor',
-        on_failure: [
-          {
-            set: {
-              field: 'error.message',
-              value:
-                'Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message {{ _ingest.on_failure_message }}',
-            },
-          },
-        ],
-        lang: 'painless',
-        source: `
-Map merged = ctx;
-def id = ctx.entity.id;
-for (meta in ctx.collected.metadata) {
-    Object json = Processors.json(meta);
-    
-    for (entry in ((Map)json)[id].entrySet()) {
-      String key = entry.getKey();
-      Object value = entry.getValue();
-      merged.put(key, value);
-    }
-}
-merged.entity.id = id;
-ctx = merged;
-`,
+      enrich: {
+        policy_name: enrichPolicyName,
+        field: description.identityFields[0], // TODO figure out what happens when there are multiple identity fields
+        target_field: ENRICH_FIELD,
       },
     },
+    {
+      set: {
+        field: '@timestamp',
+        value: '{{entity.last_seen_timestamp}}',
+      },
+    },
+    {
+      set: {
+        field: 'entity.name',
+        value: `{{${description.identityFields[0]}}}`,
+      },
+    },
+    ...getDotExpanderSteps(allEntityFields),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    ...description.fields.map(({ destination, retention: retention_operator }) =>
+      fieldOperatorToIngestProcessor(
+        { field: destination, ...retention_operator },
+        { enrichField: ENRICH_FIELD }
+      )
+    ),
+    ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${description.entityType}.risk`]),
+    removeEntityDefinitionFieldsStep(),
+    ...(!debugMode
+      ? [
+          {
+            remove: {
+              ignore_failure: true,
+              field: ENRICH_FIELD,
+            },
+          },
+        ]
+      : []),
   ];
 };
 
@@ -135,37 +146,32 @@ ctx = merged;
 // set  xpack.securitySolution.entityAnalytics.entityStore.developer.pipelineDebugMode
 // to true to keep the enrich field and the context field in the document to help with debugging.
 export const createPlatformPipeline = async ({
-  unitedDefinition,
   logger,
   esClient,
   debugMode,
+  description,
+  options,
 }: {
-  unitedDefinition: UnitedEntityDefinition;
+  description: EntityEngineInstallationDescriptor;
+  options: { namespace: string };
   logger: Logger;
   esClient: ElasticsearchClient;
   debugMode?: boolean;
 }) => {
-  const { fieldRetentionDefinition, entityManagerDefinition } = unitedDefinition;
-  const allEntityFields: string[] = (entityManagerDefinition?.metadata || []).map((m) => {
-    if (typeof m === 'string') {
-      return m;
-    }
-
-    return m.destination;
-  });
+  const allEntityFields = description.fields.map(({ destination }) => destination);
 
   const pipeline = {
-    id: getPlatformPipelineId(entityManagerDefinition),
+    id: getPlatformPipelineId(description),
     body: {
       _meta: {
         managed_by: 'entity_store',
         managed: true,
       },
-      description: `Ingest pipeline for entity definition ${entityManagerDefinition.id}`,
+      description: `Ingest pipeline for entity definition ${description.id}`,
       processors: buildIngestPipeline({
-        namespace: unitedDefinition.namespace,
-        version: unitedDefinition.version,
-        fieldRetentionDefinition,
+        namespace: options.namespace,
+        description,
+        version: description.version,
         allEntityFields,
         debugMode,
       }),
@@ -178,15 +184,15 @@ export const createPlatformPipeline = async ({
 };
 
 export const deletePlatformPipeline = ({
-  unitedDefinition,
+  description,
   logger,
   esClient,
 }: {
-  unitedDefinition: UnitedEntityDefinition;
+  description: EntityEngineInstallationDescriptor;
   logger: Logger;
   esClient: ElasticsearchClient;
 }) => {
-  const pipelineId = getPlatformPipelineId(unitedDefinition.entityManagerDefinition);
+  const pipelineId = getPlatformPipelineId(description);
   logger.debug(`Attempting to delete pipeline: ${pipelineId}`);
   return esClient.ingest.deletePipeline(
     {
