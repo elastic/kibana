@@ -32,7 +32,6 @@ import * as i18n from '../translations';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useSourcererDataView } from '../../sourcerer/containers';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../common';
 interface IRiskScorePreviewPanel {
@@ -142,11 +141,6 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   from,
   to,
 }) => {
-  const [dateRange, setDateRange] = useState<{ from: string; to: string }>({
-    from,
-    to,
-  });
-
   const [filters, setFilters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
@@ -164,16 +158,14 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
     });
   }, [includeClosedAlerts]);
 
-  const { addError } = useAppToasts();
-
   const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
     data_view_id: sourcererDataView.title,
     filter: filters,
     range: {
-      start: dateRange.from,
-      end: dateRange.to,
+      start: from,
+      end: to,
     },
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiSuperDatePicker,
@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
@@ -42,6 +43,17 @@ export const IncludeClosedAlertsSection = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showBar, setShowBar] = useState(false);
   const { addSuccess } = useAppToasts();
+  const initialIncludeClosedAlerts = useRef(includeClosedAlerts);
+  const initialStart = useRef(from);
+  const initialEnd = useRef(to);
+
+  const [savedIncludeClosedAlerts, setSavedIncludeClosedAlerts] = useLocalStorage(
+    'includeClosedAlerts',
+    includeClosedAlerts
+  );
+  const [savedStart, setSavedStart] = useLocalStorage('savedFrom', from);
+  const [savedEnd, setSavedEnd] = useLocalStorage('savedto', to);
+
   const VerticalSeparator = styled.div`
     :before {
       content: '';
@@ -50,45 +62,48 @@ export const IncludeClosedAlertsSection = ({
     }
   `;
 
-  // Retrieve state from localStorage on initial render
   useEffect(() => {
-    const savedIncludeClosedAlerts = localStorage.getItem('includeClosedAlerts');
-    const savedStart = localStorage.getItem('dateStart');
-    const savedEnd = localStorage.getItem('dateEnd');
-
     if (savedIncludeClosedAlerts !== null) {
-      setIncludeClosedAlerts(JSON.parse(savedIncludeClosedAlerts));
+      initialIncludeClosedAlerts.current = savedIncludeClosedAlerts ?? includeClosedAlerts;
+      setIncludeClosedAlerts(savedIncludeClosedAlerts ?? includeClosedAlerts);
     }
-    if (savedStart) {
+    if (savedStart && savedEnd) {
+      initialStart.current = savedStart;
+      initialEnd.current = savedEnd;
       setFrom(savedStart);
-    }
-    if (savedEnd) {
       setTo(savedEnd);
     }
-  }, [setIncludeClosedAlerts]);
+  }, [savedIncludeClosedAlerts, includeClosedAlerts, setIncludeClosedAlerts, savedStart, savedEnd]);
 
   const onRefresh = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
     setFrom(newStart);
     setTo(newEnd);
     onDateChange({ start: newStart, end: newEnd });
-    setShowBar(true);
-
-    localStorage.setItem('dateStart', newStart);
-    localStorage.setItem('dateEnd', newEnd);
+    checkForChanges(newStart, newEnd, includeClosedAlerts);
   };
 
   const handleToggle = () => {
     const newValue = !includeClosedAlerts;
     setIncludeClosedAlerts(newValue);
-    setShowBar(true);
-    localStorage.setItem('includeClosedAlerts', JSON.stringify(newValue));
+    checkForChanges(start, end, newValue);
+  };
+
+  const checkForChanges = (newStart: string, newEnd: string, newIncludeClosedAlerts: boolean) => {
+    if (
+      newStart !== initialStart.current ||
+      newEnd !== initialEnd.current ||
+      newIncludeClosedAlerts !== initialIncludeClosedAlerts.current
+    ) {
+      setShowBar(true);
+    } else {
+      setShowBar(false);
+    }
   };
 
   const { mutate } = useConfigureSORiskEngineMutation();
 
   const handleSave = () => {
     setIsLoading(true);
-
     mutate(
       {
         includeClosedAlerts,
@@ -101,15 +116,20 @@ export const IncludeClosedAlertsSection = ({
             toastLifeTimeMs: 5000,
           });
           setIsLoading(false);
+
+          initialStart.current = start;
+          initialEnd.current = end;
+          initialIncludeClosedAlerts.current = includeClosedAlerts;
+
+          setSavedIncludeClosedAlerts(includeClosedAlerts);
+          setSavedStart(start);
+          setSavedEnd(end);
         },
         onError: () => {
           setIsLoading(false);
         },
       }
     );
-
-    // Persist the toggle state in localStorage after saving
-    localStorage.setItem('includeClosedAlerts', JSON.stringify(includeClosedAlerts));
   };
 
   return (
@@ -129,9 +149,7 @@ export const IncludeClosedAlertsSection = ({
           <EuiSuperDatePicker
             start={start}
             end={end}
-            onTimeChange={({ start: newStart, end: newEnd }) =>
-              onRefresh({ start: newStart, end: newEnd })
-            }
+            onTimeChange={onRefresh}
             width={'auto'}
             compressed={false}
             showUpdateButton={false}
@@ -157,7 +175,12 @@ export const IncludeClosedAlertsSection = ({
                   color="text"
                   size="s"
                   iconType="cross"
-                  onClick={() => setShowBar(false)}
+                  onClick={() => {
+                    setShowBar(false);
+                    setFrom(initialStart.current);
+                    setTo(initialEnd.current);
+                    setIncludeClosedAlerts(initialIncludeClosedAlerts.current);
+                  }}
                 >
                   {i18n.DISCARD_CHANGES}
                 </EuiButtonEmpty>

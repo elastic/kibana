@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
   EuiHorizontalRule,
   EuiButton,
-  useEuiTheme,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
+import moment from 'moment';
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
@@ -35,14 +35,12 @@ export const EntityAnalyticsManagementPage = () => {
   const [includeClosedAlerts, setIncludeClosedAlerts] = useState(false);
   const [from, setFrom] = useState(localStorage.getItem('dateStart') || 'now-30m');
   const [to, setTo] = useState(localStorage.getItem('dateEnd') || 'now');
-  const { euiTheme } = useEuiTheme();
   const { data: riskEngineStatus } = useRiskEngineStatus();
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
   const runEngineEnabled = currentRiskEngineStatus === 'ENABLED';
   const [isLoading, setIsLoading] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess } = useAppToasts();
-  const [nextRunTime, setNextRunTime] = useState('');
   const VerticalSeparator = styled.div`
     :before {
       content: '';
@@ -74,35 +72,28 @@ export const EntityAnalyticsManagementPage = () => {
     localStorage.setItem('dateEnd', end);
   };
 
-  const calculateNextRunTime = useCallback((): string => {
-    if (runEngineEnabled) {
-      const currentTime = new Date();
-      const runAtTime = riskEngineStatus?.risk_engine_task_status?.runAt
-        ? new Date(riskEngineStatus.risk_engine_task_status.runAt)
-        : new Date();
-      const minutesUntilNextRun = Math.round((runAtTime.getTime() - currentTime.getTime()) / 60000);
-      return i18n.RISK_ENGINE_NEXT_RUN_TIME(minutesUntilNextRun);
+  const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
+
+  const isRunning = useMemo(
+    () => status === 'running' || (!!runAt && new Date(runAt) < new Date()),
+    [runAt, status]
+  );
+
+  const formatTimeFromNow = (time: string | undefined): string => {
+    if (!time) {
+      return '';
     }
-    return '';
-  }, [runEngineEnabled, riskEngineStatus]);
+    const scheduleTime = moment(time);
+    return i18n.RISK_ENGINE_NEXT_RUN_TIME(scheduleTime.fromNow(true));
+  };
 
-  useEffect(() => {
-    let intervalId: string | number | NodeJS.Timeout;
-
-    if (riskEngineStatus?.risk_engine_task_status?.status === 'idle') {
-      setNextRunTime(calculateNextRunTime());
-
-      intervalId = setInterval(() => {
-        setNextRunTime(calculateNextRunTime());
-      }, 60000);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [calculateNextRunTime, riskEngineStatus?.risk_engine_task_status?.status]);
+  const countDownText = useMemo(
+    () =>
+      isRunning
+        ? 'Now running'
+        : formatTimeFromNow(riskEngineStatus?.risk_engine_task_status?.runAt),
+    [isRunning, riskEngineStatus?.risk_engine_task_status?.runAt]
+  );
 
   return (
     <>
@@ -146,7 +137,7 @@ export const EntityAnalyticsManagementPage = () => {
                 {runEngineEnabled && (
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="subdued">
-                      {nextRunTime}
+                      {` ${countDownText}`}
                     </EuiText>
                   </EuiFlexItem>
                 )}
