@@ -108,7 +108,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(marks).to.contain('election');
       });
 
-      it('should show @timestamp and Summary columns for links with _source as a column', async function () {
+      // we used to add _source as a column by default when `discover:searchFieldsFromSource` existed
+      it('should show @timestamp and Summary columns for legacy links with _source as a column', async function () {
         const currentUrl = await browser.getCurrentUrl();
         const [, hash] = currentUrl.split('#/');
         const nextHash = hash
