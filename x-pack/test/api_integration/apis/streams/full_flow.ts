@@ -135,6 +135,48 @@ export default function ({ getService }: FtrProviderContext) {
           log: { level: 'info', logger: 'nginx' },
         });
       });
+
+      it('Fork logs to logs.nginx.error with invalid condition', async () => {
+        const body = {
+          stream: {
+            id: 'logs.nginx.error',
+            fields: [],
+            processing: [],
+          },
+          condition: { field: 'log', operator: 'eq', value: 'error' },
+        };
+        const response = await forkStream(supertest, 'logs.nginx', body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('Index an Nginx error log message, should goto logs.nginx.error but fails', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: JSON.stringify({
+            'log.level': 'error',
+            'log.logger': 'nginx',
+            message: 'test',
+          }),
+        };
+        const response = await indexDocument(esClient, 'logs', doc);
+        expect(response.result).to.eql('created');
+
+        await waitForDocumentInIndex({
+          esClient,
+          indexName: 'logs.nginx',
+          retryService,
+          logger,
+          docCountTarget: 2,
+        });
+
+        const result = await fetchDocument(esClient, 'logs.nginx', response._id);
+        expect(result._index).to.match(/^\.ds\-logs.nginx-.*/);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: 'test',
+          log: { level: 'error', logger: 'nginx' },
+        });
+      });
     });
   });
 }
