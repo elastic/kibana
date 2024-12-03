@@ -53,7 +53,11 @@ export const mockedRequestWithPipeline = {
   currentPipeline: currentPipelineMock,
 };
 
-// todo update
 export const mockedRequestWithCelDetails = {
-  dataStreamName: 'audit',
+  dataStreamTitle: 'audit',
+  path: '/events',
+  // authType: 'basic' as CelAuthType,
+  openApiDetails: {},
+  openApiSchema: {},
+  openApiAuthSchema: {},
 };

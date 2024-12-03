@@ -33,7 +33,7 @@ import * as i18n from './translations';
 import { useTelemetry } from '../../../../../telemetry';
 import type { ApiPathOptions } from '../../../../types';
 
-export type OnComplete = (result: State['celSuggestedPaths']) => void;
+export type OnComplete = (result: string[]) => void;
 
 const getApiPathsWithDescriptions = (apiSpec: Oas | undefined): ApiPathOptions => {
   const pathMap: { [key: string]: string } = {};

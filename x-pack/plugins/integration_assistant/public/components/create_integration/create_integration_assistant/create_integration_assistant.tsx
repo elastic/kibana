@@ -12,17 +12,14 @@ import { Footer } from './footer';
 import { ConnectorStep, isConnectorStepReady } from './steps/connector_step';
 import { IntegrationStep, isIntegrationStepReady } from './steps/integration_step';
 import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
-import { CreateCelConfigFlyout } from './flyout/cel_configuration/create_cel_config';
+import { CreateCelConfigFlyout } from './flyout/cel_configuration';
 import { ReviewStep, isReviewStepReady } from './steps/review_step';
 import { DeployStep } from './steps/deploy_step';
 import { reducer, initialState, ActionsProvider, type Actions } from './state';
 import { useTelemetry } from '../telemetry';
-// import { ExperimentalFeaturesService } from '../../../services';
 
 export const CreateIntegrationAssistant = React.memo(() => {
   const [state, dispatch] = useReducer(reducer, initialState);
-
-  // const { generateCel: isGenerateCelEnabled } = ExperimentalFeaturesService.get();
 
   const telemetry = useTelemetry();
   useEffect(() => {
@@ -79,21 +76,21 @@ export const CreateIntegrationAssistant = React.memo(() => {
         <KibanaPageTemplate.Section grow paddingSize="l">
           {state.step === 1 && <ConnectorStep connector={state.connector} />}
           {state.step === 2 && <IntegrationStep integrationSettings={state.integrationSettings} />}
-          {state.step === 3 && (
-            <DataStreamStep
-              integrationSettings={state.integrationSettings}
-              celInputResult={state.celInputResult}
-              connector={state.connector}
-              isGenerating={state.isGenerating}
-            />
-          )}
-          {state.step === 3 && state.showCelCreateFlyout && (
-            <CreateCelConfigFlyout
-              integrationSettings={state.integrationSettings}
-              isFlyoutGenerating={state.isFlyoutGenerating}
-              connector={state.connector}
-            />
-          )}
+          {state.step === 3 &&
+            (state.showCelCreateFlyout ? (
+              <CreateCelConfigFlyout
+                integrationSettings={state.integrationSettings}
+                isFlyoutGenerating={state.isFlyoutGenerating}
+                connector={state.connector}
+              />
+            ) : (
+              <DataStreamStep
+                integrationSettings={state.integrationSettings}
+                celInputResult={state.celInputResult}
+                connector={state.connector}
+                isGenerating={state.isGenerating}
+              />
+            ))}
           {state.step === 4 && (
             <ReviewStep
               integrationSettings={state.integrationSettings}

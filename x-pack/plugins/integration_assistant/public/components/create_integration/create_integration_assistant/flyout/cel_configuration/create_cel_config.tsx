@@ -32,11 +32,6 @@ const flyoutBodyCss = css`
 `;
 
 export type CelFlyoutStepName = 'upload_spec' | 'confirm_details' | 'success';
-// const stepNames: Record<CelFlyoutStepName, string> = {
-//   upload_spec: 'CEL Input Step',
-//   confirm_details: 'CEL Review Step',
-//   success: 'CEL Success Step',
-// };
 
 interface CreateCelConfigFlyoutProps {
   integrationSettings: State['integrationSettings'];
@@ -118,4 +113,4 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
     );
   }
 );
-CreateCelConfigFlyout.displayName = 'CreateCelConfig';
+CreateCelConfigFlyout.displayName = 'CreateCelConfigFlyout';

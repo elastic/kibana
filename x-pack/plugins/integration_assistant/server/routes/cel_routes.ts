@@ -73,7 +73,7 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
           });
 
           const parameters = {
-            dataStreamTitle,
+            dataStreamName: dataStreamTitle,
             path: celDetails.path,
             authType: celDetails.auth,
             openApiPathDetails: JSON.parse(celDetails.openApiDetails?.operation ?? ''),

@@ -17,7 +17,7 @@ export async function handleGetSuggestedPaths({
   const suggestedPathsGraph = SUGGESTED_PATHS_PROMPT.pipe(model).pipe(outputParser);
 
   const paths = await suggestedPathsGraph.invoke({
-    data_stream_name: state.dataStreamName,
+    data_stream_title: state.dataStreamName,
     path_options: state.pathOptions,
   });
 

@@ -68,7 +68,7 @@ export function registerApiAnalysisRoutes(
           });
 
           const parameters = {
-            dataStreamTitle,
+            dataStreamName: dataStreamTitle,
             pathOptions,
           };
 

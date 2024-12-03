@@ -20,7 +20,7 @@ Here is some context for you to reference for your task, read it carefully as yo
   [
     'human',
     `Review each of the path_options specified as each option represents a REST endpoint path and a short description of that path. Please determine from the provided options
-a list of recommendations for which paths to use to retrieve data relevant to {data_stream_name}. Return at least 1, but up to 4 options in order of best fit. Be sure
+a list of recommendations for which paths to use to retrieve data relevant to {data_stream_title}. Return at least 1, but up to 4 options in order of best fit. Be sure
 to only respond with exact path from the options provided.
 
 You ALWAYS follow these guidelines when writing your response:

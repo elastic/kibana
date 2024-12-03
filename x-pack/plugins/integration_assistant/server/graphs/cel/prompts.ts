@@ -205,7 +205,7 @@ You ALWAYS follow these guidelines when writing your response:
 - Do not enclose the final output in backticks, only return the codeblock and nothing else.
 </guidelines>`,
   ],
-  ['ai', ``],
+  ['ai', `Please find the updated program below:`],
 ]);
 
 export const CEL_AUTH_OAUTH2_PROMPT = ChatPromptTemplate.fromMessages([
