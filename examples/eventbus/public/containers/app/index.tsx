@@ -18,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { Options } from '../../components/options';
 import { AiopsWrapper } from '../../components/aiops_wrapper';
 import { DateHistogram } from '../../components/date_histogram';
 import { HistogramWrapper } from '../../components/histogram_wrapper';
@@ -55,7 +56,15 @@ export const App: FC = () => {
       <State />
       <EuiPageTemplate restrictWidth={false} offset={0}>
         <EuiPageTemplate.Section>
-          <Esql />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <Esql />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <Options />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           <EuiSpacer size="s" />
           <div data-test-id="eventBusExampleLogs" css={{ width: '100%' }}>
             <EuiFlexGroup gutterSize="s">
