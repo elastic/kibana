@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useRef } from 'react';
 import moment from 'moment';
+import React, { useMemo, useRef } from 'react';
 
-import { Chart, Axis, AreaSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import { useActiveCursor } from '@kbn/charts-plugin/public';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiSkeletonText } from '@elastic/eui';
-import { getBrushData } from '@kbn/observability-utils-browser/chart/utils';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { Group } from '@kbn/observability-alerting-rule-utils';
-import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
+import { getBrushData } from '@kbn/observability-utils-browser/chart/utils';
+import { ALERT_GROUP } from '@kbn/rule-data-utils';
+import { assertNever } from '@kbn/std';
+import { useFetchEvents } from '../../../../hooks/use_fetch_events';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useInvestigation } from '../../contexts/investigation_context';
+import { AlertEvent } from './alert_event';
 import { AnnotationEvent } from './annotation_event';
 import { TIMELINE_THEME } from './timeline_theme';
-import { useFetchEvents } from '../../../../hooks/use_fetch_events';
-import { useInvestigation } from '../../contexts/investigation_context';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { AlertEvent } from './alert_event';
 
 export const EventsTimeLine = () => {
   const { dependencies } = useKibana();
@@ -38,7 +39,7 @@ export const EventsTimeLine = () => {
     rangeFrom: globalParams.timeRange.from,
     rangeTo: globalParams.timeRange.to,
     filter,
-    types: ['alert', 'annotation'],
+    eventTypes: ['alert', 'annotation'],
   });
 
   const handleCursorUpdate = useActiveCursor(dependencies.start.charts.activeCursor, chartRef, {
@@ -63,9 +64,6 @@ export const EventsTimeLine = () => {
   if (isLoading) {
     return <EuiSkeletonText />;
   }
-
-  const alertEvents = events?.filter((evt) => evt.eventType === 'alert');
-  const annotations = events?.filter((evt) => evt.eventType === 'annotation');
 
   return (
     <Chart size={['100%', 100]} ref={chartRef}>
@@ -101,13 +99,15 @@ export const EventsTimeLine = () => {
         }}
       />
 
-      {alertEvents?.map((event) => (
-        <AlertEvent key={event.id} event={event} />
-      ))}
-
-      {annotations?.map((annotation) => (
-        <AnnotationEvent key={annotation.id} event={annotation} />
-      ))}
+      {events?.map((event) => {
+        if (event.eventType === 'alert') {
+          return <AlertEvent key={event.id} event={event} />;
+        }
+        if (event.eventType === 'annotation') {
+          return <AnnotationEvent key={event.id} event={event} />;
+        }
+        assertNever(event);
+      })}
 
       <AreaSeries
         id="Time"

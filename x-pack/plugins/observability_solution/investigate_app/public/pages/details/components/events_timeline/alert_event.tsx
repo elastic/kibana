@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { LineAnnotation, AnnotationDomainType } from '@elastic/charts';
+import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import React from 'react';
+import { AlertEventResponse } from '@kbn/investigation-shared';
 import moment from 'moment';
-import { EventSchema } from '@kbn/investigation-shared';
+import React from 'react';
 
-export const AlertEvent = ({ event }: { event: EventSchema }) => {
+export const AlertEvent = ({ event }: { event: AlertEventResponse }) => {
   return (
     <LineAnnotation
       id={event.id}

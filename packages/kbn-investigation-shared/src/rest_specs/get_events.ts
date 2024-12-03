@@ -8,8 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { eventResponseSchema } from './event';
-import { eventTypeSchema } from '../schema';
+import { eventTypeSchema, eventSchema } from '../schema';
 
 const getEventsParamsSchema = z
   .object({
@@ -18,9 +17,9 @@ const getEventsParamsSchema = z
         rangeFrom: z.string(),
         rangeTo: z.string(),
         filter: z.string(),
-        types: z.string().transform((val, ctx) => {
+        eventTypes: z.string().transform((val, ctx) => {
           const eventTypes = val.split(',');
-          const hasInvalidType = eventTypes.some((type) => !eventTypeSchema.parse(type));
+          const hasInvalidType = eventTypes.some((eventType) => !eventTypeSchema.parse(eventType));
           if (hasInvalidType) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -35,7 +34,7 @@ const getEventsParamsSchema = z
   })
   .partial();
 
-const getEventsResponseSchema = z.array(eventResponseSchema);
+const getEventsResponseSchema = z.array(eventSchema);
 
 type GetEventsParams = z.infer<typeof getEventsParamsSchema.shape.query>;
 type GetEventsResponse = z.output<typeof getEventsResponseSchema>;
