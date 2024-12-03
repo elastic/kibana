@@ -72,7 +72,7 @@ export function useRulePreviewFlyout({
     ),
     openRulePreview: useCallback(
       (ruleId: RuleSignatureId) => {
-        const ruleToShowInFlyout = rules.find((x) => x.id === ruleId);
+        const ruleToShowInFlyout = rules.find((x) => x.rule_id === ruleId);
 
         invariant(ruleToShowInFlyout, `Rule with id ${ruleId} not found`);
         setRuleForPreview(ruleToShowInFlyout);
