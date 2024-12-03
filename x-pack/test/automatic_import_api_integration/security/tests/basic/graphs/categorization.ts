@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { postEcsMapping } from '../../../../common/lib/api/ecs';
+import { postCategorization } from '../../../../common/lib/api/categorization';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { User } from '../../../../common/lib/authentication/types';
 
@@ -13,9 +13,9 @@ import { User } from '../../../../common/lib/authentication/types';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
-  describe('Run ecs_mapping', () => {
-    it('should get 404 when trying to run ecs_mapping with basic license', async () => {
-      return await postEcsMapping({
+  describe('Run categorization', () => {
+    it('should get 404 when trying to run categorization with basic license', async () => {
+      return await postCategorization({
         supertest,
         req: {
           packageName: 'some-package',
@@ -25,6 +25,9 @@ export default ({ getService }: FtrProviderContext): void => {
             name: 'json',
           },
           connectorId: 'bedrock-connector',
+          currentPipeline: {
+            processors: [],
+          },
         },
         auth: {
           user: { username: 'elastic', password: 'elastic' } as User,

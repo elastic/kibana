@@ -6,26 +6,26 @@
  */
 import type SuperTest from 'supertest';
 import {
-  EcsMappingRequestBody,
-  ECS_GRAPH_PATH,
-  EcsMappingResponse,
+  CategorizationRequestBody,
+  CATEGORIZATION_GRAPH_PATH,
+  CategorizationResponse,
 } from '@kbn/integration-assistant-plugin/common';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
 
-export const postEcsMapping = async ({
+export const postCategorization = async ({
   supertest,
   req,
   expectedHttpCode = 404,
   auth = { user: superUser },
 }: {
   supertest: SuperTest.Agent;
-  req: EcsMappingRequestBody;
+  req: CategorizationRequestBody;
   expectedHttpCode?: number;
   auth: { user: User };
-}): Promise<EcsMappingResponse> => {
+}): Promise<CategorizationResponse> => {
   const { body: response } = await supertest
-    .post(`${ECS_GRAPH_PATH}`)
+    .post(`${CATEGORIZATION_GRAPH_PATH}`)
     .send(req)
     .set('kbn-xsrf', 'abc')
     .set('elastic-api-version', '1')
