@@ -16,7 +16,7 @@ import {
   PaletteRegistry,
   CustomPaletteParams,
   PaletteOutput,
-  getDefaultColorStops,
+  getOverridePaletteStops,
 } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -98,13 +98,13 @@ function computePaletteParams(
   paletteService: PaletteRegistry,
   palette: PaletteOutput<CustomPaletteParams>
 ) {
-  const colorStops = getDefaultColorStops(paletteService, palette);
+  const stops = getOverridePaletteStops(paletteService, palette);
 
   return {
     ...palette.params,
     // rewrite colors and stops as two distinct arguments
-    colors: colorStops?.map(({ color }) => color),
-    stops: palette.params?.name === 'custom' ? colorStops?.map(({ stop }) => stop) : [],
+    colors: stops?.map(({ color }) => color),
+    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
     reverse: false, // managed at UI level
   };
 }

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, getDefaultColorStops } from '@kbn/coloring';
+import { PaletteRegistry, getOverridePaletteStops } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
@@ -76,11 +76,11 @@ const getMetricLayerConfiguration = (
     const hasDynamicColoring = Boolean(isMetricNumeric && props.state.palette);
 
     if (hasDynamicColoring) {
-      const colorStops = getDefaultColorStops(paletteService, props.state.palette);
+      const stops = getOverridePaletteStops(paletteService, props.state.palette);
 
       return {
         triggerIconType: 'colorBy',
-        palette: colorStops?.map(({ color }) => color),
+        palette: stops?.map(({ color }) => color),
       };
     }
 

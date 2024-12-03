@@ -15,7 +15,7 @@ import {
   CustomPaletteParams,
   CUSTOM_PALETTE,
   applyPaletteParams,
-  getDefaultColorStops,
+  getOverridePaletteStops,
   PaletteOutput,
 } from '@kbn/coloring';
 import type {
@@ -69,13 +69,13 @@ function computePaletteParams(
   paletteService: PaletteRegistry,
   palette: PaletteOutput<CustomPaletteParams>
 ) {
-  const colorStops = getDefaultColorStops(paletteService, palette);
+  const stops = getOverridePaletteStops(paletteService, palette);
 
   return {
     ...palette.params,
     // rewrite colors and stops as two distinct arguments
-    colors: colorStops?.map(({ color }) => color),
-    stops: palette.params?.name === 'custom' ? colorStops?.map(({ stop }) => stop) : [],
+    colors: stops?.map(({ color }) => color),
+    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
     reverse: false, // managed at UI level
   };
 }

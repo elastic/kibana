@@ -226,19 +226,26 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
 
 /**
  * Returns color stops for given palette type:
+ *
  * - custom - User has modified the stops in some way - return stops as is
  * - non-custom - Default palette stops - Return new stops based on palette
  *
  * > This is needed for BWC when switching between kibana themes.
  */
-export function getDefaultColorStops<T extends PaletteOutput<CustomPaletteParams>>(
+export function getOverridePaletteStops<T extends PaletteOutput<CustomPaletteParams>>(
   paletteService: PaletteRegistry,
   activePalette?: T
 ) {
-  return activePalette && activePalette.name !== CUSTOM_PALETTE
-    ? applyPaletteParams(paletteService, activePalette, {
-        min: activePalette.params?.rangeMin ?? 0,
-        max: activePalette.params?.rangeMax ?? 100,
-      })
-    : activePalette?.params?.stops;
+  if (!activePalette || activePalette.name === CUSTOM_PALETTE || !activePalette.params?.stops) {
+    return activePalette?.params?.stops;
+  }
+
+  const { stops, ...otherParams } = activePalette.params;
+  const colors = paletteService
+    .get(activePalette.name ?? DEFAULT_PALETTE_NAME)
+    .getCategoricalColors(stops.length, otherParams);
+  return stops.map((stop, i) => ({
+    ...stop,
+    color: colors[i],
+  }));
 }

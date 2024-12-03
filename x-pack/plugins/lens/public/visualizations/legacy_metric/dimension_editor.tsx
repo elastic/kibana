@@ -59,7 +59,7 @@ export function MetricDimensionEditor(
   };
 
   // need to tell the helper that the colorStops are required to display
-  const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
+  const stops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
   return (
     <>
@@ -114,7 +114,7 @@ export function MetricDimensionEditor(
                   // align this initial computation with same format for default
                   // palettes in the panel. This to avoid custom computation issue with metric
                   // fake data range
-                  stops: displayStops.map((v, i, array) => ({
+                  stops: stops.map((v, i, array) => ({
                     ...v,
                     stop: currentMinMax.min + (i === 0 ? 0 : array[i - 1].stop),
                   })),
@@ -142,7 +142,7 @@ export function MetricDimensionEditor(
           })}
         >
           <PalettePanelContainer
-            palette={displayStops.map(({ color }) => color)}
+            palette={stops.map(({ color }) => color)}
             siblingRef={props.panelRef}
             isInlineEditing={isInlineEditing}
             title={i18n.translate('xpack.lens.paletteMetricGradient.label', {

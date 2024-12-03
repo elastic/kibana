@@ -12,7 +12,7 @@ import {
   PaletteRegistry,
   CUSTOM_PALETTE,
   shiftPalette,
-  getDefaultColorStops,
+  getOverridePaletteStops,
 } from '@kbn/coloring';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -70,20 +70,20 @@ const toExpression = (
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
-  const colorStops = getDefaultColorStops(paletteService, state.palette) ?? [];
+  const stops = getOverridePaletteStops(paletteService, state.palette) ?? [];
   const isCustomPalette = state.palette?.params?.name === CUSTOM_PALETTE;
 
   const canColor = operation?.dataType === 'number';
 
   const paletteParams = {
     ...state.palette?.params,
-    colors: colorStops.map(({ color }) => color),
+    colors: stops.map(({ color }) => color),
     stops:
       isCustomPalette || state.palette?.params?.rangeMax == null
-        ? colorStops.map(({ stop }) => stop)
+        ? stops.map(({ stop }) => stop)
         : shiftPalette(
-            colorStops,
-            Math.max(state.palette?.params?.rangeMax, ...colorStops.map(({ stop }) => stop))
+            stops,
+            Math.max(state.palette?.params?.rangeMax, ...stops.map(({ stop }) => stop))
           ).map(({ stop }) => stop),
     reverse: false,
   };
@@ -218,7 +218,7 @@ export const getLegacyMetricVisualization = ({
 
   getConfiguration(props) {
     const hasColoring = props.state.palette != null;
-    const colorStops = getDefaultColorStops(paletteService, props.state.palette);
+    const stops = getOverridePaletteStops(paletteService, props.state.palette);
 
     return {
       groups: [
@@ -240,7 +240,7 @@ export const getLegacyMetricVisualization = ({
                 {
                   columnId: props.state.accessor,
                   triggerIconType: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring ? colorStops?.map(({ color }) => color) : undefined,
+                  palette: hasColoring ? stops?.map(({ color }) => color) : undefined,
                 },
               ]
             : [],
@@ -318,7 +318,7 @@ export const getLegacyMetricVisualization = ({
     }
 
     const hasColoring = state.palette != null;
-    const colorStops = getDefaultColorStops(paletteService, state.palette);
+    const stops = getOverridePaletteStops(paletteService, state.palette);
 
     return {
       layers: [
@@ -328,7 +328,7 @@ export const getLegacyMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
-          palette: hasColoring ? colorStops?.map(({ color }) => color) : undefined,
+          palette: hasColoring ? stops?.map(({ color }) => color) : undefined,
         },
       ],
     };

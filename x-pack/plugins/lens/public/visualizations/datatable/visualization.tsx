@@ -15,7 +15,7 @@ import {
   PaletteOutput,
   CustomPaletteParams,
   applyPaletteParams,
-  getDefaultColorStops,
+  getOverridePaletteStops,
 } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
@@ -583,14 +583,14 @@ export const getDatatableVisualization = ({
       columns: columns
         .filter((c) => !c.collapseFn)
         .map((column) => {
-          const colorStops = getDefaultColorStops(paletteService, column.palette);
+          const stops = getOverridePaletteStops(paletteService, column.palette);
           const paletteParams = {
             ...column.palette?.params,
             // rewrite colors and stops as two distinct arguments
-            colors: colorStops?.map(({ color }) => color),
+            colors: stops?.map(({ color }) => color),
             stops:
               column.palette?.params?.name === RowHeightMode.custom
-                ? colorStops?.map(({ stop }) => stop)
+                ? stops?.map(({ stop }) => stop)
                 : [],
             reverse: false, // managed at UI level
           };
