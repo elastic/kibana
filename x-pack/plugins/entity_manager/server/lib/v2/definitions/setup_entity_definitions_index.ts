@@ -19,6 +19,9 @@ const definitionsIndexTemplate = {
   },
   version: TEMPLATE_VERSION,
   template: {
+    settings: {
+      hidden: true,
+    },
     aliases: {
       [DEFINITIONS_ALIAS]: {},
     },
