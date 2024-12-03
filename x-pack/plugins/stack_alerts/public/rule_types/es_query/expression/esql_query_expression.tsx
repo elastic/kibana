@@ -37,7 +37,7 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http, fieldFormats, isServerless, dataViews } = useTriggerUiActionServices();
+  const { expressions, http, isServerless, dataViews } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -150,7 +150,6 @@ export const EsqlQueryExpression: React.FC<
     currentRuleParams,
     esqlQuery,
     expressions,
-    fieldFormats,
     timeField,
     isServerless,
   ]);
