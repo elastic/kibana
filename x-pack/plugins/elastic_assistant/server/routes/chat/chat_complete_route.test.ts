@@ -61,6 +61,7 @@ const mockContext = {
       getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
       logger: loggingSystemMock.createLogger(),
       telemetry: { ...coreMock.createSetup().analytics, reportEvent },
+      llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
       getCurrentUser: () => ({
         username: 'user',
         email: 'email',
