@@ -12,12 +12,8 @@ import type { EntityEngineInstallationDescriptor } from '../installation/types';
 
 export const convertToEntityManagerDefinition = (
   description: EntityEngineInstallationDescriptor,
-  options: { fieldHistoryLength: number; indexPattern: string; namespace: string; filter: string }
+  options: { namespace: string; filter: string }
 ): EntityDefinition => {
-  const indexPatterns = options.indexPattern
-    ? description.indexPatterns.concat(options.indexPattern.split(','))
-    : description.indexPatterns;
-
   const metadata = [
     ...description.fields.map(pick(['source', 'destination', 'aggregation'])),
     ...description.identityFields.map((source) => ({ source })),
@@ -27,7 +23,7 @@ export const convertToEntityManagerDefinition = (
     id: buildEntityDefinitionId(description.entityType, options.namespace),
     name: `Security '${description.entityType}' Entity Store Definition`,
     type: description.entityType,
-    indexPatterns,
+    indexPatterns: description.indexPatterns,
     identityFields: description.identityFields,
     displayNameTemplate: `{{${description.identityFields.join('_')}}}`,
     metadata,

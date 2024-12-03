@@ -18,7 +18,7 @@ import {
 
 import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
 
-import { fieldOperatorToIngestProcessor } from '../field_retention_definition';
+import { fieldOperatorToIngestProcessor } from '../field_retention';
 import type { EntityEngineInstallationDescriptor } from '../installation/types';
 
 const getPlatformPipelineId = (descriptionId: string) => {

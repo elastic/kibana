@@ -364,8 +364,6 @@ export class EntityStoreDataClient {
 
       // set up the entity manager definition
       const definition = convertToEntityManagerDefinition(description, {
-        fieldHistoryLength,
-        indexPattern,
         namespace,
         filter,
       });
