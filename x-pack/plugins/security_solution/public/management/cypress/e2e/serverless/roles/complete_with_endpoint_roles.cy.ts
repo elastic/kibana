@@ -124,8 +124,9 @@ describe(
         'suspend-process',
         'get-file',
         'upload',
-        'scan',
-        'runscript'
+        'scan'
+        // TODO: currently not implemented for Endpoint
+        // 'runscript'
       );
 
       const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');
