@@ -12,7 +12,7 @@
         "tags": [],
         "label": "PlaygroundPageMode",
         "description": [],
-        "path": "x-pack/plugins/search_playground/public/types.ts",
+        "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -27,7 +27,7 @@
       "tags": [],
       "label": "SearchPlaygroundPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_playground/public/types.ts",
+      "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -41,7 +41,7 @@
       "tags": [],
       "label": "SearchPlaygroundPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_playground/public/types.ts",
+      "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -55,7 +55,7 @@
           "signature": [
             "React.FunctionComponent<{ children?: React.ReactNode; }>"
           ],
-          "path": "x-pack/plugins/search_playground/public/types.ts",
+          "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -102,7 +102,7 @@
             "AppProps",
             ">"
           ],
-          "path": "x-pack/plugins/search_playground/public/types.ts",
+          "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -147,7 +147,7 @@
           "signature": [
             "React.FunctionComponent<{}>"
           ],
-          "path": "x-pack/plugins/search_playground/public/types.ts",
+          "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -201,7 +201,7 @@
       "tags": [],
       "label": "SearchPlaygroundPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_playground/server/types.ts",
+      "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -215,7 +215,7 @@
       "tags": [],
       "label": "SearchPlaygroundPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_playground/server/types.ts",
+      "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -239,7 +239,7 @@
         "signature": [
           "\"searchPlayground\""
         ],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -254,7 +254,7 @@
         "signature": [
           "\"Playground\""
         ],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -269,7 +269,7 @@
         "signature": [
           "\"/app/search_playground\""
         ],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -284,7 +284,7 @@
         "signature": [
           "\"searchPlayground:searchModeEnabled\""
         ],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -298,7 +298,7 @@
         "tags": [],
         "label": "DEFAULT_PAGINATION",
         "description": [],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -309,7 +309,7 @@
             "tags": [],
             "label": "from",
             "description": [],
-            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -320,7 +320,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -331,7 +331,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -4907,7 +4907,7 @@
               },
               {
                 "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
+                "path": "x-pack/solutions/search/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
               {
                 "plugin": "transform",

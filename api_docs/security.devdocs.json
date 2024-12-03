@@ -1252,19 +1252,19 @@
           "references": [
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
             }
           ]
         }
@@ -6388,15 +6388,15 @@
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+              "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+              "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+              "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
             }
           ]
         }
@@ -6515,7 +6515,7 @@
             },
             {
               "plugin": "serverlessSearch",
-              "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
+              "path": "x-pack/solutions/search/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
             {
               "plugin": "transform",

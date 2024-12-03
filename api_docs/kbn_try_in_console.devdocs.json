@@ -31,7 +31,7 @@
           "TryInConsoleButtonProps",
           ") => React.JSX.Element | null"
         ],
-        "path": "packages/kbn-try-in-console/components/try_in_console_button.tsx",
+        "path": "src/platform/packages/shared/kbn-try-in-console/components/try_in_console_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "TryInConsoleButtonProps"
             ],
-            "path": "packages/kbn-try-in-console/components/try_in_console_button.tsx",
+            "path": "src/platform/packages/shared/kbn-try-in-console/components/try_in_console_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
