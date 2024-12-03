@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiBasicTable,
   EuiFieldSearch,
+  EuiSpacer
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SortDirection } from '../types';
@@ -217,55 +218,58 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
 
     return (
       <>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              data-test-subj="maintenance-window-search"
-              fullWidth
-              isClearable
-              incremental={false} // which one is better? test!
-              placeholder={i18n.SEARCH_PLACEHOLDER}
-              value={inputText}
-              onChange={onSearchChange}
-              onKeyUp={onSearchKeyup}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StatusFilter selectedStatuses={selectedStatuses} onChange={onSelectedStatusesChange} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="refresh-button"
-              iconType="refresh"
-              onClick={refreshData}
-              isLoading={isMutatingOrLoading}
-              isDisabled={isMutatingOrLoading}
-            >
-              {i18n.REFRESH}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiBasicTable
-              data-test-subj="maintenance-windows-table"
-              css={tableCss}
-              itemId="id"
-              loading={isMutatingOrLoading}
-              tableCaption="Maintenance Windows List"
-              items={items}
-              columns={columns}
-              pagination={{
-                pageIndex: page - 1,
-                pageSize: perPage,
-                pageSizeOptions: [10, 25, 50],
-                totalItemCount: total,
-              }}
-              rowProps={rowProps}
-              onChange={onPageChange}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+          <EuiFlexGroup >
+            <EuiFlexItem>
+              <EuiFieldSearch
+                data-test-subj="maintenance-window-search"
+                fullWidth
+                isClearable
+                incremental={false} // which one is better? test!
+                placeholder={i18n.SEARCH_PLACEHOLDER}
+                value={inputText}
+                onChange={onSearchChange}
+                onKeyUp={onSearchKeyup}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <StatusFilter selectedStatuses={selectedStatuses} onChange={onSelectedStatusesChange} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="refresh-button"
+                iconType="refresh"
+                onClick={refreshData}
+                isLoading={isMutatingOrLoading}
+                isDisabled={isMutatingOrLoading}
+              >
+                {i18n.REFRESH}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiBasicTable
+                data-test-subj="maintenance-windows-table"
+                css={tableCss}
+                itemId="id"
+                loading={isMutatingOrLoading}
+                tableCaption="Maintenance Windows List"
+                items={items}
+                columns={columns}
+                pagination={{
+                  pageIndex: page - 1,
+                  pageSize: perPage,
+                  pageSizeOptions: [10, 25, 50],
+                  totalItemCount: total,
+                }}
+                rowProps={rowProps}
+                onChange={onPageChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </>
     );
   }
