@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -32,9 +32,9 @@ export const Header = () => {
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.deprecation.message"
             tagName="span"
-            defaultMessage="Use {runtimeDocs} instead."
+            defaultMessage="Use {runtimeFieldsLink} instead of scripted fields. Runtime fields support Painless scripting and provide greater flexibility. You can also use the {esqlLink} to compute values directly at query time."
             values={{
-              runtimeDocs: (
+              runtimeFieldsLink: (
                 <EuiLink target="_blank" href={links.indexPatterns.runtimeFields}>
                   <FormattedMessage
                     id="indexPatternManagement.header.runtimeLink"
@@ -42,10 +42,18 @@ export const Header = () => {
                   />
                 </EuiLink>
               ),
+              esqlLink: (
+                <EuiLink target="_blank" href={links.query.queryESQL}>
+                  <FormattedMessage
+                    id="indexPatternManagement.header.esqlLink"
+                    defaultMessage="Elasticsearch Query Language (ES|QL)"
+                  />
+                </EuiLink>
+              ),
             }}
           />
         </EuiCallOut>
-        <br />
+        <EuiSpacer size="m" />
         <EuiText size="s">
           <p>
             <FormattedMessage

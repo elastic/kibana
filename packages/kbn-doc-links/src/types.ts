@@ -63,9 +63,6 @@ export interface DocLinks {
     readonly urlDrilldownTemplateSyntax: string;
     readonly urlDrilldownVariables: string;
   };
-  readonly dataViews: {
-    readonly migrateOffScriptedFields: string;
-  };
   readonly discover: Record<string, string>;
   readonly filebeat: {
     readonly base: string;
@@ -307,6 +304,7 @@ export interface DocLinks {
     readonly fieldFormattersNumber: string;
     readonly fieldFormattersString: string;
     readonly runtimeFields: string;
+    readonly migrateOffScriptedFields: string;
   };
   readonly addData: string;
   readonly kibana: {

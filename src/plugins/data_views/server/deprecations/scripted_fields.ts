@@ -56,7 +56,7 @@ export const createScriptedFieldsDeprecationsConfig: (
           dataViewsWithScriptedFields,
           docLinks: core.docLinks.links,
         }),
-        documentationUrl: core.docLinks.links.dataViews.migrateOffScriptedFields,
+        documentationUrl: core.docLinks.links.indexPatterns.migrateOffScriptedFields,
         deprecationType: 'feature',
         level: 'warning', // warning because it is not set in stone WHEN we remove scripted fields, hence this deprecation is not a blocker for 9.0 upgrade
         correctiveActions: {
@@ -133,7 +133,7 @@ The following is a list of all data views with scripted fields and their associa
 {dataViewsList}`,
     values: {
       numberOfDataViewsWithScriptedFields: dataViewsWithScriptedFields.length,
-      runtimeFieldsLink: docLinks.runtimeFields.overview,
+      runtimeFieldsLink: docLinks.indexPatterns.runtimeFields,
       esqlLink: docLinks.query.queryESQL,
       dataViewsList: dataViewsWithScriptedFields.map(buildDataViewsListEntry).join('\n'),
     },

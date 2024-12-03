@@ -170,7 +170,7 @@ Edit the settings for runtime fields, or remove runtime fields from data views.
 [[scripted-fields]]
 === Add scripted fields to data views
 
-deprecated::[7.13,Use {ref}/runtime.html[runtime fields] instead of scripted fields. Runtime fields support Painless scripts and provide greater flexibility. You can also use the {ref}/esql.html[Elasticsearch Query Language (ES|QL)] to compute values directly at query time.]
+deprecated::[7.13,Use {ref}/runtime.html[runtime fields] instead of scripted fields. Runtime fields support Painless scripting and provide greater flexibility. You can also use the {ref}/esql.html[Elasticsearch Query Language (ES|QL)] to compute values directly at query time.]
 
 Scripted fields compute data on the fly from the data in your {es} indices. The data is shown on
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations. You query scripted fields with the <<kuery-query, {kib} query language>>, and can filter them using the filter bar. The scripted field values are computed at query time, so they aren't indexed and cannot be searched using the {kib} default

@@ -35,11 +35,20 @@ exports[`Header should render normally 1`] = `
           >
             runtime fields
           </button>
-           instead.
+           instead of scripted fields. Runtime fields support Painless scripting and provide greater flexibility. You can also use the 
+          <button
+            class="euiLink emotion-euiLink-primary"
+            type="button"
+          >
+            Elasticsearch Query Language (ES|QL)
+          </button>
+           to compute values directly at query time.
         </span>
       </div>
     </div>
-    <br />
+    <div
+      class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+    />
     <div
       class="euiText emotion-euiText-s"
     >
