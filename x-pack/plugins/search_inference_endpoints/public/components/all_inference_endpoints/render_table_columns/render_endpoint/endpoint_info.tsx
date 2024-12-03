@@ -32,7 +32,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, provide
               <EuiBetaBadge
                 label={i18n.TECH_PREVIEW_LABEL}
                 size="s"
-                color="hollow"
+                color="subdued"
                 alignment="middle"
               />
             </span>
