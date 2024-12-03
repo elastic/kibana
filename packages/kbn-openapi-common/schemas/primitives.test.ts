@@ -15,10 +15,4 @@ describe('NonEmptyString', () => {
   test('rejects comment with just spaces', () => {
     expect(() => NonEmptyString.parse('    ')).toThrow();
   });
-  test('accepts null', () => {
-    expect(() => NonEmptyString.parse(null)).not.toThrow();
-  });
-  test('accepts undefined', () => {
-    expect(() => NonEmptyString.parse(undefined)).not.toThrow();
-  });
 });

@@ -17,16 +17,13 @@
  */
 
 import { z } from '@kbn/zod';
+import { isNonEmptyString } from '@kbn/zod-helpers';
 
 /**
  * A string that is not empty and does not contain only whitespace
  */
 export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z
-  .string()
-  .min(1)
-  // .refine((data) => data.trim() !== '', { message: 'cannot allow empty comment' });
-  .regex(/^(?! *$).+$/);
+export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * A universally unique identifier
