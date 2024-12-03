@@ -19,7 +19,6 @@
     "@kbn/alerting-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/developer-examples-plugin",
-    "@kbn/rule-data-utils",
     "@kbn/data-plugin",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
