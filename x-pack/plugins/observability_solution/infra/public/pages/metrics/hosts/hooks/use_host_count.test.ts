@@ -32,7 +32,7 @@ describe('useHostCount', () => {
       typeof useUnifiedSearchHooks.useUnifiedSearchContext
     >;
 
-  const mockUseUnifiedContext = (searchCriteria) => {
+  const mockUseUnifiedContext = (searchCriteria: any) => {
     useUnifiedSearchContextMock.mockReturnValue({
       buildQuery: jest.fn(() => 'query'),
       parsedDateRange: { from: '', to: '' },
