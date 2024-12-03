@@ -167,7 +167,7 @@ export const dateHistogramOperation: OperationDefinition<
       const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
       interval =
         calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }, interval, false)
-          .description || 'hour';
+          ?.description || 'hour';
       return `${field} per ${interval}`;
     }
     return field;
@@ -205,6 +205,10 @@ export const dateHistogramOperation: OperationDefinition<
     };
   },
   getSerializedFormat: (column, targetColumn, indexPattern, uiSettings, dateRange) => {
+    if (!indexPattern || !dateRange || !uiSettings)
+      return {
+        id: 'date',
+      };
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
     const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
     const usedInterval =
@@ -212,11 +216,11 @@ export const dateHistogramOperation: OperationDefinition<
         { from: dateRange.fromDate, to: dateRange.toDate },
         interval,
         false
-      ).asMilliseconds() || 3600000;
+      )?.asMilliseconds() || 3600000;
     const rules = uiSettings?.get('dateFormat:scaled');
     for (let i = rules.length - 1; i >= 0; i--) {
       const rule = rules[i];
-      if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]))) {
+      if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]).asMilliseconds())) {
         return { id: 'date', params: { pattern: rule[1] } };
       }
     }

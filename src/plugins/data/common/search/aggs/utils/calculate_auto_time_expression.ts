@@ -8,6 +8,7 @@
  */
 
 import moment from 'moment';
+import { TimeBucketsInterval } from '../buckets/lib/time_buckets/time_buckets';
 import { UI_SETTINGS } from '../../../constants';
 import { TimeRange } from '../../../query';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
@@ -15,11 +16,28 @@ import { toAbsoluteDates } from './date_interval_utils';
 import { autoInterval } from '../buckets/_interval_options';
 
 export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) {
-  return function calculateAutoTimeExpression(
+  function calculateAutoTimeExpression(range: TimeRange): string | undefined;
+  function calculateAutoTimeExpression(
+    range: TimeRange,
+    interval: string,
+    expression?: true
+  ): string | undefined;
+  function calculateAutoTimeExpression(
+    range: TimeRange,
+    interval: string,
+    expression: false
+  ): TimeBucketsInterval | undefined;
+  function calculateAutoTimeExpression(
+    range: TimeRange,
+    interval?: string,
+    expression?: boolean
+  ): string | TimeBucketsInterval | undefined;
+
+  function calculateAutoTimeExpression(
     range: TimeRange,
     interval: string = autoInterval,
     expression: boolean = true
-  ) {
+  ): string | TimeBucketsInterval | undefined {
     const dates = toAbsoluteDates(range);
     if (!dates) {
       return;
@@ -38,9 +56,12 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) 
       max: moment(dates.to),
     });
 
+    const intervalResult = buckets.getInterval();
     if (expression) {
-      return buckets.getInterval().expression;
+      return intervalResult.expression;
     }
-    return buckets.getInterval();
-  };
+    return intervalResult;
+  }
+
+  return calculateAutoTimeExpression;
 }
