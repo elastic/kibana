@@ -57,7 +57,7 @@ export const RadioGroup = ({
             key={option.id}
             content={option.tooltip}
             anchorProps={{
-              style: {
+              css: {
                 flex: '1 1 0',
               },
             }}
@@ -75,7 +75,7 @@ export const RadioGroup = ({
               iconType={option.icon}
               iconSide="right"
               contentProps={{
-                style: {
+                css: {
                   justifyContent: 'flex-start',
                 },
               }}

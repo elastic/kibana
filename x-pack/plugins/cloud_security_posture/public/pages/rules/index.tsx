@@ -33,7 +33,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem css={{ width: 'fit-content' }}>
               <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
-                <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
+                <EuiButtonEmpty iconType="arrowLeft" contentProps={{ css: { padding: 0 } }}>
                   <FormattedMessage
                     id="xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel"
                     defaultMessage="Benchmarks"
