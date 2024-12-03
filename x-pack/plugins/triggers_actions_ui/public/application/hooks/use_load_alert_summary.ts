@@ -6,7 +6,6 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { estypes } from '@elastic/elasticsearch';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
@@ -15,7 +14,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { Alert, AlertSummaryTimeRange } from '../sections/alert_summary_widget/types';
 
 interface UseLoadAlertSummaryProps {
-  featureIds?: ValidFeatureId[];
+  ruleTypeIds?: string[];
+  consumers?: string[];
   timeRange: AlertSummaryTimeRange;
   filter?: estypes.QueryDslQueryContainer;
 }
@@ -32,7 +32,12 @@ interface LoadAlertSummaryResponse {
   error?: string;
 }
 
-export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAlertSummaryProps) {
+export function useLoadAlertSummary({
+  ruleTypeIds,
+  consumers,
+  timeRange,
+  filter,
+}: UseLoadAlertSummaryProps) {
   const { http } = useKibana().services;
   const [alertSummary, setAlertSummary] = useState<LoadAlertSummaryResponse>({
     isLoading: true,
@@ -45,14 +50,15 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
   const loadAlertSummary = useCallback(async () => {
-    if (!featureIds) return;
+    if (!ruleTypeIds) return;
     isCancelledRef.current = false;
     abortCtrlRef.current.abort();
     abortCtrlRef.current = new AbortController();
 
     try {
       const { activeAlertCount, activeAlerts, recoveredAlertCount } = await fetchAlertSummary({
-        featureIds,
+        ruleTypeIds,
+        consumers,
         filter,
         http,
         signal: abortCtrlRef.current.signal,
@@ -80,7 +86,7 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
         }
       }
     }
-  }, [featureIds, filter, http, timeRange]);
+  }, [ruleTypeIds, consumers, filter, http, timeRange]);
 
   useEffect(() => {
     loadAlertSummary();
@@ -90,26 +96,29 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
 }
 
 async function fetchAlertSummary({
-  featureIds,
+  ruleTypeIds,
+  consumers,
   filter,
   http,
   signal,
   timeRange: { utcFrom, utcTo, fixedInterval },
 }: {
   http: HttpSetup;
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   signal: AbortSignal;
   timeRange: AlertSummaryTimeRange;
   filter?: estypes.QueryDslQueryContainer;
 }): Promise<AlertSummary> {
-  const res = featureIds.length
+  const res = ruleTypeIds.length
     ? await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/_alert_summary`, {
         signal,
         body: JSON.stringify({
           fixed_interval: fixedInterval,
           gte: utcFrom,
           lte: utcTo,
-          featureIds,
+          ruleTypeIds,
+          consumers,
           filter: [filter],
         }),
       })

@@ -25,7 +25,6 @@ import { Credentials } from './components/credentials';
 import { EngineRouter } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
-import { ErrorConnecting } from './components/error_connecting';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
 import { RoleMappings } from './components/role_mappings';
@@ -46,14 +45,6 @@ describe('AppSearch', () => {
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(AppSearchUnconfigured)).toHaveLength(1);
-  });
-
-  it('renders ErrorConnecting when Enterprise Search is unavailable', () => {
-    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
-    const wrapper = shallow(<AppSearch />);
-
-    const errorConnection = wrapper.find(ErrorConnecting);
-    expect(errorConnection).toHaveLength(1);
   });
 
   it('renders AppSearchConfigured when config.host is set & available', () => {

@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { Space } from '@kbn/spaces-plugin/server';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
@@ -14,7 +14,6 @@ import { RuleTypeRegistry } from './types';
 
 export interface AlertingAuthorizationClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
-  securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   getSpaceId: (request: KibanaRequest) => string;
@@ -23,33 +22,39 @@ export interface AlertingAuthorizationClientFactoryOpts {
 
 export class AlertingAuthorizationClientFactory {
   private isInitialized = false;
-  private ruleTypeRegistry!: RuleTypeRegistry;
-  private securityPluginStart?: SecurityPluginStart;
-  private features!: FeaturesPluginStart;
-  private getSpace!: (request: KibanaRequest) => Promise<Space | undefined>;
-  private getSpaceId!: (request: KibanaRequest) => string;
+  // The reason this is protected is because we'll get type collisions otherwise because we're using a type guard assert
+  // to ensure the options member is instantiated before using it in various places
+  // See for more info: https://stackoverflow.com/questions/66206180/typescript-typeguard-attribut-with-method
+  protected options?: AlertingAuthorizationClientFactoryOpts;
 
   public initialize(options: AlertingAuthorizationClientFactoryOpts) {
     if (this.isInitialized) {
       throw new Error('AlertingAuthorizationClientFactory already initialized');
     }
     this.isInitialized = true;
-    this.getSpace = options.getSpace;
-    this.ruleTypeRegistry = options.ruleTypeRegistry;
-    this.securityPluginStart = options.securityPluginStart;
-    this.features = options.features;
-    this.getSpaceId = options.getSpaceId;
+    this.options = options;
   }
 
-  public create(request: KibanaRequest): AlertingAuthorization {
-    const { securityPluginStart, features } = this;
-    return new AlertingAuthorization({
-      authorization: securityPluginStart?.authz,
+  public async create(request: KibanaRequest): Promise<AlertingAuthorization> {
+    this.validateInitialization();
+
+    return AlertingAuthorization.create({
+      authorization: this.options.securityPluginStart?.authz,
       request,
-      getSpace: this.getSpace,
-      getSpaceId: this.getSpaceId,
-      ruleTypeRegistry: this.ruleTypeRegistry,
-      features: features!,
+      getSpace: this.options.getSpace,
+      getSpaceId: this.options.getSpaceId,
+      ruleTypeRegistry: this.options.ruleTypeRegistry,
+      features: this.options.features,
     });
+  }
+
+  private validateInitialization(): asserts this is this & {
+    options: AlertingAuthorizationClientFactoryOpts;
+  } {
+    if (!this.isInitialized || this.options == null) {
+      throw new Error(
+        'AlertingAuthorizationClientFactory must be initialized before calling create'
+      );
+    }
   }
 }
