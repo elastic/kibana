@@ -20,6 +20,8 @@ export interface Consumer {
   name: string;
 }
 
+export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts'>;
+
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export interface CellComponentProps {
