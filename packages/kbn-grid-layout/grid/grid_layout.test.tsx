@@ -70,7 +70,7 @@ describe('GridLayout', () => {
   describe('panels order: panels are rendered from left to right, from top to bottom', () => {
     it('focus management - tabbing through the panels', async () => {
       renderGridLayout();
-      // we only test a few rows because otherwise that test would execute for too long
+      // we only test a few panels because otherwise that test would execute for too long
       await assertTabThroughPanel('panel1');
       await assertTabThroughPanel('panel5');
       await assertTabThroughPanel('panel2');
