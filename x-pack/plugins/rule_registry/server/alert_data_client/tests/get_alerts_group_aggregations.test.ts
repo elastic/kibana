@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 import { DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE, MAX_ALERTS_GROUPING_QUERY_SIZE } from '../constants';
 
@@ -33,40 +31,38 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
+const authorizedRuleTypes = new Map([
+  [
+    'apm.error_rate',
+    {
+      producer: 'apm',
+      id: 'apm.error_rate',
+      alerts: {
+        context: 'observability.apm',
+      },
+      authorizedConsumers: {},
+    },
+  ],
+]);
 
 beforeEach(() => {
   jest.resetAllMocks();
   alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
-  // @ts-expect-error
-  alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
-    Promise.resolve({ filter: [] })
-  );
-  // @ts-expect-error
-  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
-    const authorizedRuleTypes = new Set();
-    authorizedRuleTypes.add({ producer: 'apm' });
-    return Promise.resolve({ authorizedRuleTypes });
+  alertingAuthMock.getAuthorizationFilter.mockResolvedValue({
+    filter: undefined,
+    ensureRuleTypeIsAuthorized: jest.fn(),
+  });
+  alertingAuthMock.getAllAuthorizedRuleTypes.mockResolvedValue({
+    hasAllRequested: true,
+    authorizedRuleTypes,
   });
 
-  alertingAuthMock.ensureAuthorized.mockImplementation(
-    // @ts-expect-error
-    async ({
-      ruleTypeId,
-      consumer,
-      operation,
-      entity,
-    }: {
-      ruleTypeId: string;
-      consumer: string;
-      operation: string;
-      entity: typeof AlertingAuthorizationEntity.Alert;
-    }) => {
-      if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
-        return Promise.resolve();
-      }
-      return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+  alertingAuthMock.ensureAuthorized.mockImplementation(async ({ ruleTypeId, consumer }) => {
+    if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
+      return Promise.resolve();
     }
-  );
+    return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+  });
 });
 
 describe('getGroupAggregations()', () => {
@@ -74,7 +70,9 @@ describe('getGroupAggregations()', () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     alertsClient.find = jest.fn().mockResolvedValue({ aggregations: {} });
 
-    const featureIds = [AlertConsumers.STACK_ALERTS];
+    const ruleTypeIds = ['.es-query'];
+    const consumers = ['stackAlerts'];
+
     const groupByField = 'kibana.alert.rule.name';
     const aggregations = {
       usersCount: {
@@ -86,7 +84,8 @@ describe('getGroupAggregations()', () => {
     const filters = [{ range: { '@timestamp': { gte: 'now-1d/d', lte: 'now/d' } } }];
 
     await alertsClient.getGroupAggregations({
-      featureIds,
+      ruleTypeIds,
+      consumers,
       groupByField,
       aggregations,
       filters,
@@ -95,7 +94,8 @@ describe('getGroupAggregations()', () => {
     });
 
     expect(alertsClient.find).toHaveBeenCalledWith({
-      featureIds,
+      ruleTypeIds,
+      consumers,
       aggs: {
         groupByFields: {
           terms: {
@@ -157,7 +157,7 @@ describe('getGroupAggregations()', () => {
     });
 
     const result = await alertsClient.getGroupAggregations({
-      featureIds: [AlertConsumers.STACK_ALERTS],
+      ruleTypeIds: ['.es-query'],
       groupByField: 'kibana.alert.rule.name',
       aggregations: {},
       filters: [],
@@ -176,7 +176,7 @@ describe('getGroupAggregations()', () => {
 
     await expect(() =>
       alertsClient.getGroupAggregations({
-        featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+        ruleTypeIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
         groupByField: 'kibana.alert.rule.name',
         pageIndex: 101,
         pageSize: 50,
@@ -186,7 +186,7 @@ describe('getGroupAggregations()', () => {
     );
     await expect(() =>
       alertsClient.getGroupAggregations({
-        featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+        ruleTypeIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
         groupByField: 'kibana.alert.rule.name',
         pageIndex: 10,
         pageSize: 5000,

@@ -10,7 +10,7 @@ import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import {
   MISCONFIGURATION_INSIGHT,
   uiMetricService,
@@ -58,7 +58,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   const { scopeId, isPreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
   const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery(fieldName, name),
+    query: buildGenericEntityFlyoutPreviewQuery(fieldName, name),
     sort: [],
     enabled: true,
     pageSize: 1,

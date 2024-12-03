@@ -13,11 +13,9 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
-import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
-import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 
 async function saveDataSource({
   savedSearch,
@@ -127,12 +125,7 @@ export async function onSaveSearch({
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
     savedSearch.timeRestore = newTimeRestore;
-    savedSearch.rowsPerPage = isLegacyTableEnabled({
-      uiSettings,
-      isEsqlMode: isDataSourceType(appState.dataSource, DataSourceType.Esql),
-    })
-      ? currentRowsPerPage
-      : appState.rowsPerPage;
+    savedSearch.rowsPerPage = appState.rowsPerPage;
 
     // save the custom value or reset it if it's invalid
     const appStateSampleSize = appState.sampleSize;

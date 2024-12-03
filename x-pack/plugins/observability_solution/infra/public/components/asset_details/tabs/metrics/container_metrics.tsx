@@ -14,6 +14,7 @@ import { MetricsTemplate } from './metrics_template';
 import { DockerCharts, KubernetesContainerCharts } from '../../charts';
 import { DOCKER_METRIC_TYPES, INTEGRATIONS, KUBERNETES_METRIC_TYPES } from '../../constants';
 import { useIntegrationCheck } from '../../hooks/use_integration_check';
+import { AddMetricsCallout } from '../../add_metrics_callout';
 
 export const ContainerMetrics = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -29,7 +30,7 @@ export const ContainerMetrics = () => {
   });
 
   if (!isDockerContainer && !isKubernetesContainer) {
-    return null;
+    return <AddMetricsCallout id="containerMetrics" />;
   }
 
   return (
