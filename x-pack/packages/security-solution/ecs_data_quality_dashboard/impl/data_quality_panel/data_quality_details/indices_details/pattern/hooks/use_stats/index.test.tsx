@@ -126,12 +126,18 @@ describe('useStats', () => {
     test('it returns the expected stats', async () => {
       const result = setup();
       await waitFor(() => {
+        expect(result.current.loading).toBe(false);
         expect(result.current.stats).toEqual(mockStatsAuditbeatIndex);
       });
     });
 
     test('it returns loading: false, because the data has loaded', async () => {
       const result = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
@@ -140,6 +146,7 @@ describe('useStats', () => {
     test('it returns a null error, because no errors occurred', async () => {
       const result = setup();
       await waitFor(() => {
+        expect(result.current.loading).toBe(false);
         expect(result.current.error).toBeNull();
       });
     });
@@ -168,12 +175,18 @@ describe('useStats', () => {
     test('it returns null stats, because an error occurred', async () => {
       const result = setup();
       await waitFor(() => {
+        expect(result.current.loading).toBe(false);
         expect(result.current.stats).toBeNull();
       });
     });
 
     test('it returns loading: false, because data loading reached a terminal state', async () => {
       const result = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
@@ -181,7 +194,9 @@ describe('useStats', () => {
 
     test('it returns the expected error', async () => {
       const result = setup();
+
       await waitFor(() => {
+        expect(result.current.loading).toBe(false);
         expect(result.current.error).toEqual(ERROR_LOADING_STATS(errorMessage));
       });
     });

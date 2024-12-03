@@ -98,12 +98,18 @@ describe('useIlmExplain', () => {
     test('it returns the expected ilmExplain map', async () => {
       const { result } = setup();
       await waitFor(() => {
+        expect(result.current.loading).toBe(false);
         expect(result.current.ilmExplain).toEqual(mockIlmExplain);
       });
     });
 
     test('it returns loading: false, because the data has loaded', async () => {
       const { result } = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
@@ -112,6 +118,7 @@ describe('useIlmExplain', () => {
     test('it returns a null error, because no errors occurred', async () => {
       const { result } = setup();
       await waitFor(() => {
+        expect(result.current.loading).toBe(false);
         expect(result.current.error).toBeNull();
       });
     });
@@ -128,12 +135,18 @@ describe('useIlmExplain', () => {
     test('it returns the expected ilmExplain map', async () => {
       const { result } = setup();
       await waitFor(() => {
+        expect(result.current.loading).toBe(false);
         expect(result.current.ilmExplain).toEqual(null);
       });
     });
 
     test('it returns loading: false, because the request is aborted', async () => {
       const { result } = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
@@ -151,13 +164,20 @@ describe('useIlmExplain', () => {
 
     test('it returns a null ilmExplain, because an error occurred', async () => {
       const { result } = setup();
+
       await waitFor(() => {
+        expect(result.current.loading).toBe(false);
         expect(result.current.ilmExplain).toBeNull();
       });
     });
 
     test('it returns loading: false, because data loading reached a terminal state', async () => {
       const { result } = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
@@ -166,6 +186,7 @@ describe('useIlmExplain', () => {
     test('it returns the expected error', async () => {
       const { result } = setup();
       await waitFor(() => {
+        expect(result.current.loading).toBe(false);
         expect(result.current.error).toEqual(ERROR_LOADING_ILM_EXPLAIN(errorMessage));
       });
     });
