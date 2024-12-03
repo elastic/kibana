@@ -9,7 +9,8 @@ import type { EntitiesESClient } from '../../../lib/helpers/create_es_client/cre
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getEntityLatestServices } from '../get_entity_latest_services';
 import { mergeEntities } from '../utils/merge_entities';
-import { MAX_NUMBER_OF_SERVICES } from './get_service_entities';
+
+const MAX_NUMBER_OF_SERVICES = 1_000;
 
 interface Params {
   entitiesESClient: EntitiesESClient;
