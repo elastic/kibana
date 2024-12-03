@@ -9,9 +9,7 @@ import { v4 } from 'uuid';
 import type OpenAI from 'openai';
 
 type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
-  choices: Array<
-    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'>
-  >;
+  choices: Array<Omit<OpenAI.ChatCompletionChunk.Choice, 'message'>>;
 };
 
 export function createOpenAiChunk(
