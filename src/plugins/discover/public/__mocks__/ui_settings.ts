@@ -11,7 +11,6 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import {
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   DEFAULT_COLUMNS_SETTING,
-  DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SAMPLE_ROWS_PER_PAGE_SETTING,
   SHOW_MULTIFIELDS,
@@ -27,8 +26,6 @@ export const uiSettingsMock = {
       return 100;
     } else if (key === DEFAULT_COLUMNS_SETTING) {
       return ['default_column'];
-    } else if (key === DOC_TABLE_LEGACY) {
-      return true;
     } else if (key === CONTEXT_TIE_BREAKER_FIELDS_SETTING) {
       return ['_doc'];
     } else if (key === SEARCH_FIELDS_FROM_SOURCE) {

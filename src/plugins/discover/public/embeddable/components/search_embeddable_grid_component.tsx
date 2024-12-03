@@ -15,7 +15,6 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
-  isLegacyTableEnabled,
 } from '@kbn/discover-utils';
 import {
   FetchContext,
@@ -28,7 +27,6 @@ import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
@@ -53,7 +51,6 @@ interface SavedSearchEmbeddableComponentProps {
   stateManager: SearchEmbeddableStateManager;
 }
 
-const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable);
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 
 export function SearchEmbeddableGridComponent({
@@ -105,14 +102,6 @@ export function SearchEmbeddableGridComponent({
     );
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
-  const useLegacyTable = useMemo(
-    () =>
-      isLegacyTableEnabled({
-        uiSettings: discoverServices.uiSettings,
-        isEsqlMode: isEsql,
-      }),
-    [discoverServices, isEsql]
-  );
 
   const sort = useMemo(() => {
     return getSortForEmbeddable(savedSearch.sort, dataView, discoverServices.uiSettings, isEsql);
@@ -232,19 +221,6 @@ export function SearchEmbeddableGridComponent({
     totalHitCount,
     useNewFieldsApi,
   };
-
-  if (useLegacyTable) {
-    return (
-      <DiscoverDocTableEmbeddableMemoized
-        {...sharedProps}
-        {...onStateEditedProps}
-        filters={savedSearchFilters}
-        isEsqlMode={isEsql}
-        isLoading={Boolean(loading)}
-        sharedItemTitle={panelTitle || savedSearchTitle}
-      />
-    );
-  }
 
   return (
     <DiscoverGridEmbeddableMemoized
