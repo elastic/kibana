@@ -8,7 +8,7 @@
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { GetSLOInstances, SLORepository } from '.';
+import { GetSLOGroupings, SLORepository } from '.';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import { SloDefinitionClient } from './slo_definition_client';
@@ -34,35 +34,60 @@ describe('Get SLO Instances', () => {
     );
   });
 
-  it("returns an empty results when the SLO has no 'groupBy' defined", async () => {
+  it('throws when the SLO is ungrouped', async () => {
     const slo = createSLO({ groupBy: ALL_VALUE });
     repositoryMock.findById.mockResolvedValue(slo);
 
-    const service = new GetSLOInstances(
+    const service = new GetSLOGroupings(
       definitionClient,
       esClientMock,
       DEFAULT_SETTINGS,
       'default'
     );
 
-    const result = await service.execute(slo.id, {});
-
-    expect(result).toEqual({ results: [] });
+    await expect(
+      service.execute(slo.id, {
+        instanceId: 'irrelevant',
+        groupingKey: 'irrelevant',
+      })
+    ).rejects.toThrowError('Ungrouped SLO cannot be queried for available groupings');
   });
 
-  it('returns an empty results when the groupingKey specified is not in the SLO groupBy', async () => {
-    const slo = createSLO({ groupBy: ['service.name'] });
+  it('throws when the provided groupingKey is not part of the SLO groupBy field', async () => {
+    const slo = createSLO({ groupBy: ['abc.efg', 'host.name'] });
     repositoryMock.findById.mockResolvedValue(slo);
 
-    const service = new GetSLOInstances(
+    const service = new GetSLOGroupings(
       definitionClient,
       esClientMock,
       DEFAULT_SETTINGS,
       'default'
     );
 
-    const result = await service.execute(slo.id, { groupingKey: 'transaction.name' });
+    await expect(
+      service.execute(slo.id, {
+        instanceId: 'irrelevant',
+        groupingKey: 'not.found',
+      })
+    ).rejects.toThrowError("Provided groupingKey doesn't match the SLO's groupBy field");
+  });
 
-    expect(result).toEqual({ results: [] });
+  it('throws when the provided instanceId cannot be matched against the SLO grouping keys', async () => {
+    const slo = createSLO({ groupBy: ['abc.efg', 'host.name'] });
+    repositoryMock.findById.mockResolvedValue(slo);
+
+    const service = new GetSLOGroupings(
+      definitionClient,
+      esClientMock,
+      DEFAULT_SETTINGS,
+      'default'
+    );
+
+    await expect(
+      service.execute(slo.id, {
+        instanceId: 'too,many,values',
+        groupingKey: 'host.name',
+      })
+    ).rejects.toThrowError('Provided instanceId does not match the number of grouping keys');
   });
 });

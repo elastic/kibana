@@ -20,7 +20,7 @@ import {
   findSloDefinitionsParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
-  getSLOInstancesParamsSchema,
+  getSLOGroupingsParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   putSLOServerlessSettingsParamsSchema,
@@ -49,7 +49,7 @@ import { FindSLODefinitions } from '../../services/find_slo_definitions';
 import { getBurnRates } from '../../services/get_burn_rates';
 import { getGlobalDiagnosis } from '../../services/get_diagnosis';
 import { GetPreviewData } from '../../services/get_preview_data';
-import { GetSLOInstances } from '../../services/get_slo_instances';
+import { GetSLOGroupings } from '../../services/get_slo_groupings';
 import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
 import { GetSLOsOverview } from '../../services/get_slos_overview';
 import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
@@ -598,15 +598,15 @@ const fetchHistoricalSummary = createSloServerRoute({
   },
 });
 
-const getSLOInstancesRoute = createSloServerRoute({
-  endpoint: 'GET /internal/observability/slos/{id}/_instances',
+const getSLOGroupingsRoute = createSloServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_groupings',
   options: { access: 'internal' },
   security: {
     authz: {
       requiredPrivileges: ['slo_read'],
     },
   },
-  params: getSLOInstancesParamsSchema,
+  params: getSLOGroupingsParamsSchema,
   handler: async ({ context, params, request, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
     const spaceId = await getSpaceId(plugins, request);
@@ -617,10 +617,10 @@ const getSLOInstancesRoute = createSloServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const definitionClient = new SloDefinitionClient(repository, esClient, logger);
 
-    const getSLOInstances = new GetSLOInstances(definitionClient, esClient, settings, spaceId);
+    const getSLOGroupings = new GetSLOGroupings(definitionClient, esClient, settings, spaceId);
 
     return await executeWithErrorHandler(() =>
-      getSLOInstances.execute(params.path.id, params.query ?? {})
+      getSLOGroupings.execute(params.path.id, params.query)
     );
   },
 });
@@ -825,7 +825,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getDiagnosisRoute,
     ...getSloBurnRates,
     ...getPreviewData,
-    ...getSLOInstancesRoute,
+    ...getSLOGroupingsRoute,
     ...resetSLORoute,
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,

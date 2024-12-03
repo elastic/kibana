@@ -8,12 +8,12 @@
 import { EuiButtonIcon, EuiComboBox, EuiComboBoxOptionOption, EuiCopy } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import useDebounce from 'react-use/lib/useDebounce';
 import { SLOS_BASE_PATH } from '../../../../../common/locators/paths';
-import { useFetchSloInstances } from '../../hooks/use_fetch_slo_instances';
+import { useFetchSloGroupings } from '../../hooks/use_fetch_slo_instances';
 import { useGetQueryParams } from '../../hooks/use_get_query_params';
 
 interface Props {
@@ -39,22 +39,21 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
   const [debouncedSearch, setDebouncedSearch] = useState<string | undefined>(undefined);
   useDebounce(() => setDebouncedSearch(search), 500, [search]);
 
-  const {
-    isLoading,
-    isError,
-    data: instances,
-  } = useFetchSloInstances({ sloId: slo.id, groupingKey, search: debouncedSearch, remoteName });
+  const { isLoading, isError, data } = useFetchSloGroupings({
+    sloId: slo.id,
+    groupingKey,
+    instanceId: slo.instanceId ?? ALL_VALUE,
+    search: debouncedSearch,
+    remoteName,
+  });
 
   useEffect(() => {
-    if (instances) {
-      const groupingValues = instances.results.find(
-        (grouping) => grouping.groupingKey === groupingKey
-      )?.values;
-      if (groupingValues) {
-        setOptions(groupingValues.map(toField));
-      }
+    if (data) {
+      setSearch(undefined);
+      setDebouncedSearch(undefined);
+      setOptions(data.values.map(toField));
     }
-  }, [groupingKey, instances]);
+  }, [data]);
 
   const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
     const newValue = selected[0].value;
@@ -119,7 +118,9 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
         truncation: 'end',
       }}
       onSearchChange={(searchValue: string) => {
-        setSearch(searchValue);
+        if (searchValue !== '') {
+          setSearch(searchValue);
+        }
       }}
     />
   );

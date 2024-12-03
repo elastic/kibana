@@ -5,42 +5,51 @@
  * 2.0.
  */
 
-import { GetSLOInstancesResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, GetSLOGroupingsResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 interface Params {
   sloId: string;
-  groupingKey?: string;
+  groupingKey: string;
+  instanceId: string;
   afterKey?: string;
   search?: string;
   remoteName?: string;
 }
 
-interface UseFetchSloInstancesResponse {
-  data: GetSLOInstancesResponse | undefined;
+interface UseFetchSloGroupingsResponse {
+  data: GetSLOGroupingsResponse | undefined;
   isLoading: boolean;
   isError: boolean;
 }
 
-export function useFetchSloInstances({
+export function useFetchSloGroupings({
   sloId,
   groupingKey,
+  instanceId,
   afterKey,
   search,
   remoteName,
-}: Params): UseFetchSloInstancesResponse {
+}: Params): UseFetchSloGroupingsResponse {
   const { sloClient } = usePluginContext();
 
   const { isLoading, isError, data } = useQuery({
-    queryKey: sloKeys.instances({ sloId, groupingKey, afterKey, search, remoteName }),
+    queryKey: sloKeys.groupings({ sloId, groupingKey, instanceId, afterKey, search, remoteName }),
     queryFn: async ({ signal }) => {
       try {
-        return await sloClient.fetch(`GET /internal/observability/slos/{id}/_instances`, {
+        return await sloClient.fetch(`GET /internal/observability/slos/{id}/_groupings`, {
           params: {
             path: { id: sloId },
-            query: { search, groupingKey, afterKey, excludeStale: true, remoteName },
+            query: {
+              search,
+              instanceId,
+              groupingKey,
+              afterKey,
+              excludeStale: true,
+              remoteName,
+            },
           },
           signal,
         });
@@ -48,6 +57,7 @@ export function useFetchSloInstances({
         throw new Error(`Something went wrong. Error: ${error}`);
       }
     },
+    enabled: Boolean(!!sloId && !!groupingKey && instanceId !== ALL_VALUE),
     staleTime: 60 * 1000,
     retry: false,
     refetchOnWindowFocus: false,
