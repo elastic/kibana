@@ -27,4 +27,4 @@ export type {
 } from './fixtures';
 
 // use to tag tests
-export { tags } from './constants';
+export { tags } from './tags';

@@ -18,17 +18,14 @@ import { loadServersConfig } from '../../config';
 import { silence } from '../../common';
 import { RunTestsOptions } from './flags';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
-import { tagsByMode } from '../constants';
+import { getPlaywrightGrepTag } from '../utils';
 
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/scout_test');
 
   const config = await loadServersConfig(options.mode, log);
-
-  const playwrightTag = config.get('serverless')
-    ? tagsByMode.serverless[config.get('projectType') as keyof typeof tagsByMode.serverless]
-    : tagsByMode.stateful;
+  const playwrightGrepTag = getPlaywrightGrepTag(config);
   const playwrightConfigPath = options.configPath;
 
   await withProcRunner(log, async (procs) => {
@@ -67,7 +64,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         args: [
           'test',
           `--config=${playwrightConfigPath}`,
-          `--grep=${playwrightTag}`,
+          `--grep=${playwrightGrepTag}`,
           ...(options.headed ? ['--headed'] : []),
         ],
         cwd: resolve(REPO_ROOT),
