@@ -69,7 +69,7 @@ export function redirectWhenMissing({
    */
   onBeforeRedirect?: (error: SavedObjectNotFound) => void;
   theme: ThemeServiceStart;
-  userProfile: UserProfileService;
+  userProfile?: UserProfileService;
 }) {
   let localMappingObject: Mapping;
 

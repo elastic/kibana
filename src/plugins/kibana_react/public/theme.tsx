@@ -40,5 +40,5 @@ type Theme = KbnThemeProviderProps['theme']['theme$'];
 export const wrapWithTheme = (
   node: React.ReactNode,
   theme$: Theme,
-  userProfile: UserProfileService
+  userProfile?: UserProfileService
 ) => kbnWrapWithTheme(node, { theme$ }, userProfile);
