@@ -9245,6 +9245,61 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.getLatestPackageInfo",
+            "type": "Function",
+            "tags": [],
+            "label": "getLatestPackageInfo",
+            "description": [],
+            "signature": [
+              "(packageName: string, prerelease?: boolean | undefined) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackageInfo",
+                "text": "PackageInfo"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.getLatestPackageInfo.$1",
+                "type": "string",
+                "tags": [],
+                "label": "packageName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.getLatestPackageInfo.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "prerelease",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.PackageClient.getPackages",
             "type": "Function",
             "tags": [],
