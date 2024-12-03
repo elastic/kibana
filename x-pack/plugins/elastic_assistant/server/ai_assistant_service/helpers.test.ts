@@ -16,9 +16,6 @@ const mockProductDocManager = {
   update: jest.fn(),
 };
 
-// Wait for all pending promises to resolve
-const flushPromises = () => new Promise(setImmediate);
-
 describe('helpers', () => {
   describe('ensureProductDocumentationInstalled', () => {
     beforeEach(() => {
@@ -36,7 +33,6 @@ describe('helpers', () => {
         'Installing product documentation for AIAssistantService'
       );
       expect(mockProductDocManager.install).toHaveBeenCalled();
-      await flushPromises();
       expect(mockLogger.debug).toHaveBeenNthCalledWith(
         2,
         'Successfully installed product documentation for AIAssistantService'
@@ -63,7 +59,6 @@ describe('helpers', () => {
       expect(mockProductDocManager.getStatus).toHaveBeenCalled();
       expect(mockProductDocManager.install).toHaveBeenCalled();
 
-      await flushPromises();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'Failed to install product documentation for AIAssistantService: Install failed'
       );
@@ -75,7 +70,6 @@ describe('helpers', () => {
       await ensureProductDocumentationInstalled(mockProductDocManager, mockLogger);
 
       expect(mockProductDocManager.getStatus).toHaveBeenCalled();
-      await flushPromises();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'Failed to get status of product documentation installation for AIAssistantService: Status check failed'
       );
