@@ -36,6 +36,17 @@ describe('useColumns', () => {
     expect(result.current.onSetColumns).toBeInstanceOf(Function);
   });
 
+  test('should skip _source column', () => {
+    const { result } = renderHook(() => {
+      return useColumns({
+        ...defaultProps,
+        columns: ['Time', '_source'],
+      });
+    });
+
+    expect(result.current.columns).toEqual(['Time']);
+  });
+
   test('should return empty columns array', () => {
     const { result } = renderHook(() => {
       return useColumns({
