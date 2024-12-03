@@ -13,7 +13,7 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { deleteMigrations, getIndexNameFromLoad } from '../../../../../utils';
+import { deleteMigrationsIfExists, getIndexNameFromLoad } from '../../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
@@ -84,10 +84,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await deleteMigrations({
+      await deleteMigrationsIfExists({
         kbnClient,
         ids: [createdMigration.migration_id],
       });
+      // we need to delete migrated index, otherwise create migration call(in beforeEach hook) will fail
+      await es.indices.delete({ index: createdMigration.migration_index });
       await deleteAllAlerts(supertest, log, es);
     });
 
@@ -99,6 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const deletedMigration = body.migrations[0];
+      expect(deletedMigration.error).to.eql(undefined);
       expect(deletedMigration.id).to.eql(createdMigration.migration_id);
       expect(deletedMigration.sourceIndex).to.eql(outdatedAlertsIndexName);
     });
