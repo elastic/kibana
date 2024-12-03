@@ -70,21 +70,14 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
     if (esql === '') return null;
 
     const els = esql.split('|').map((d) => d.trim());
-
-    if (Object.values(panelFilters).length > 0) {
-      const filter = Object.values(panelFilters).join(' AND ');
-      els.push(`WHERE ${filter}`);
-    }
-
     els.push(`STATS min = MIN(${field}),max = MAX(${field})`);
 
     return els.join('\n| ');
-  }, [esql, field, panelFilters]);
+  }, [esql, field]);
 
   const rangeDataWithFilters = useFetchESQL(rangeEsqlWithFilters);
 
   useEffect(() => {
-    console.log('rangeDataWithFilters', rangeDataWithFilters);
     if (rangeDataWithFilters) {
       setRange(rangeDataWithFilters.values[0]);
     }
