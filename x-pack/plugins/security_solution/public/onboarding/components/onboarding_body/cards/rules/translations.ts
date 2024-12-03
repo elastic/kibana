@@ -18,7 +18,7 @@ export const RULES_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.rulesCard.description',
   {
     defaultMessage:
-      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are met.',
+      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are  met.',
   }
 );
 
