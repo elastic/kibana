@@ -42,11 +42,14 @@ describe(
     },
   },
   () => {
-    let spaceId: string = '';
+    const loginUser = Cypress.env('IS_SERVERLESS')
+      ? ROLE.elastic_serverless
+      : ROLE.system_indices_superuser;
     const roleName = `test_${Math.random().toString().substring(2, 6)}`;
+    let spaceId: string = '';
 
     before(() => {
-      login(ROLE.system_indices_superuser);
+      login(loginUser);
       createSpace(`foo_${Math.random().toString().substring(2, 6)}`).then((response) => {
         spaceId = response.body.id;
       });
@@ -60,7 +63,7 @@ describe(
     });
 
     beforeEach(() => {
-      login(ROLE.system_indices_superuser);
+      login(loginUser);
       navigateToRolePage();
       setRoleName(roleName);
       openKibanaFeaturePrivilegesFlyout();
