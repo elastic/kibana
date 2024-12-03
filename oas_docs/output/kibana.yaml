@@ -12489,8 +12489,6 @@ paths:
                               maximum: 65353
                               minimum: 0
                               type: number
-                          required:
-                            - enabled
                         monitoring_output_id:
                           nullable: true
                           type: string
@@ -13020,8 +13018,6 @@ paths:
                       maximum: 65353
                       minimum: 0
                       type: number
-                  required:
-                    - enabled
                 monitoring_output_id:
                   nullable: true
                   type: string
@@ -13202,8 +13198,6 @@ paths:
                             maximum: 65353
                             minimum: 0
                             type: number
-                        required:
-                          - enabled
                       monitoring_output_id:
                         nullable: true
                         type: string
@@ -13755,8 +13749,6 @@ paths:
                               maximum: 65353
                               minimum: 0
                               type: number
-                          required:
-                            - enabled
                         monitoring_output_id:
                           nullable: true
                           type: string
@@ -14288,8 +14280,6 @@ paths:
                             maximum: 65353
                             minimum: 0
                             type: number
-                        required:
-                          - enabled
                       monitoring_output_id:
                         nullable: true
                         type: string
@@ -14818,8 +14808,6 @@ paths:
                       maximum: 65353
                       minimum: 0
                       type: number
-                  required:
-                    - enabled
                 monitoring_output_id:
                   nullable: true
                   type: string
@@ -15000,8 +14988,6 @@ paths:
                             maximum: 65353
                             minimum: 0
                             type: number
-                        required:
-                          - enabled
                       monitoring_output_id:
                         nullable: true
                         type: string
@@ -15553,8 +15539,6 @@ paths:
                             maximum: 65353
                             minimum: 0
                             type: number
-                        required:
-                          - enabled
                       monitoring_output_id:
                         nullable: true
                         type: string
@@ -17096,6 +17080,7 @@ paths:
                           type: array
                         upgrade_details:
                           additionalProperties: false
+                          nullable: true
                           type: object
                           properties:
                             action_id:
@@ -17560,6 +17545,7 @@ paths:
                         type: array
                       upgrade_details:
                         additionalProperties: false
+                        nullable: true
                         type: object
                         properties:
                           action_id:
@@ -17903,6 +17889,7 @@ paths:
                         type: array
                       upgrade_details:
                         additionalProperties: false
+                        nullable: true
                         type: object
                         properties:
                           action_id:
