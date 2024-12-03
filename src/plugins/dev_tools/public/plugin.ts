@@ -116,7 +116,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         const deepLinks: AppDeepLink[] = [...this.devTools.values()]
           .filter(
             // Some tools do not use a string title, so we filter those out
-            (tool) => !tool.enableRouting && !tool.isDisabled() && typeof tool.title === 'string'
+            (tool) => !tool.isDisabled() && typeof tool.title === 'string'
           )
           .map((tool) => {
             const deepLink: AppDeepLink = {
