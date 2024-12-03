@@ -6,15 +6,15 @@
  */
 
 import { parse, BasicPrettyPrinter } from '@kbn/esql-ast';
-import { applyTimespanLiteralsCorrections } from './timespan_literals';
+import { correctTimespanLiterals } from './timespan_literals';
 
-describe('getTimespanLiteralsCorrections', () => {
+describe('correctTimespanLiterals', () => {
   describe('with DATE_TRUNC', () => {
     it('replaces a timespan with a proper timespan literal', () => {
       const query = 'FROM logs | EVAL truncated = DATE_TRUNC("1 year", date)';
       const { root } = parse(query);
 
-      applyTimespanLiteralsCorrections(root);
+      correctTimespanLiterals(root);
 
       const output = BasicPrettyPrinter.print(root);
 
@@ -27,7 +27,7 @@ describe('getTimespanLiteralsCorrections', () => {
       const query = 'FROM logs | EVAL truncated = DATE_TRUNC("month", date)';
       const { root } = parse(query);
 
-      applyTimespanLiteralsCorrections(root);
+      correctTimespanLiterals(root);
 
       const output = BasicPrettyPrinter.print(root);
 
@@ -40,7 +40,7 @@ describe('getTimespanLiteralsCorrections', () => {
       const query = 'FROM logs | EVAL truncated = DATE_TRUNC("1 YEAR", date)';
       const { root } = parse(query);
 
-      applyTimespanLiteralsCorrections(root);
+      correctTimespanLiterals(root);
 
       const output = BasicPrettyPrinter.print(root);
 
@@ -53,7 +53,7 @@ describe('getTimespanLiteralsCorrections', () => {
       const query = 'FROM logs | EVAL truncated = DATE_TRUNC("1 year", date)';
       const { root } = parse(query);
 
-      const corrections = applyTimespanLiteralsCorrections(root);
+      const corrections = correctTimespanLiterals(root);
 
       expect(corrections).toHaveLength(1);
       expect(corrections[0]).toEqual({
@@ -70,7 +70,7 @@ describe('getTimespanLiteralsCorrections', () => {
       const query = 'FROM logs | STATS hires = COUNT(*) BY week = BUCKET(hire_date, "1 week")';
       const { root } = parse(query);
 
-      applyTimespanLiteralsCorrections(root);
+      correctTimespanLiterals(root);
 
       const output = BasicPrettyPrinter.print(root);
 
@@ -83,7 +83,7 @@ describe('getTimespanLiteralsCorrections', () => {
       const query = 'FROM logs | STATS hires = COUNT(*) BY hour = BUCKET(hire_date, "hour")';
       const { root } = parse(query);
 
-      applyTimespanLiteralsCorrections(root);
+      correctTimespanLiterals(root);
 
       const output = BasicPrettyPrinter.print(root);
 
@@ -96,7 +96,7 @@ describe('getTimespanLiteralsCorrections', () => {
       const query = 'FROM logs | STATS hires = COUNT(*) BY week = BUCKET(hire_date, "1 WEEK")';
       const { root } = parse(query);
 
-      applyTimespanLiteralsCorrections(root);
+      correctTimespanLiterals(root);
 
       const output = BasicPrettyPrinter.print(root);
 
@@ -109,7 +109,7 @@ describe('getTimespanLiteralsCorrections', () => {
       const query = 'FROM logs | STATS hires = COUNT(*) BY hour = BUCKET(hire_date, "hour")';
       const { root } = parse(query);
 
-      const corrections = applyTimespanLiteralsCorrections(root);
+      const corrections = correctTimespanLiterals(root);
 
       expect(corrections).toHaveLength(1);
       expect(corrections[0]).toEqual({
@@ -129,7 +129,7 @@ describe('getTimespanLiteralsCorrections', () => {
     | STATS hires = COUNT(*) BY hour = BUCKET(hire_date, "3 hour")`;
       const { root } = parse(query);
 
-      applyTimespanLiteralsCorrections(root);
+      correctTimespanLiterals(root);
 
       const output = BasicPrettyPrinter.print(root, { multiline: true, pipeTab: '' });
 
