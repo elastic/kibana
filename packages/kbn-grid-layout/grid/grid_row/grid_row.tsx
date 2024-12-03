@@ -219,7 +219,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             if (type === 'drop') {
               setInteractionEvent(undefined);
               // Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction.
-              // (not just grid positions, but also how the HTML is generated)
+              // the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility reasons (screen readers and focus management).
               syncPanelIds();
             } else {
               setInteractionEvent({
