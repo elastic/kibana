@@ -21,6 +21,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('cell renderers', () => {
       describe('host.name', () => {
+        describe('DataView mode', () => {
+          it('should open host.name flyout', async () => {
+            await PageObjects.common.navigateToActualUrl('discover', undefined, {
+              ensureCurrentUrl: false,
+            });
+            await dataViews.switchTo('my-example-logs');
+            await PageObjects.discover.waitUntilSearchingHasFinished();
+            await PageObjects.discover.dragFieldToTable('host.name');
+            expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+              '@timestamp, host.name'
+            );
+            // security host.name button
+            const hostName = await testSubjects.findAll('host-details-button', 2500);
+            expect(hostName).to.have.length(2);
+            await hostName[0].click();
+            await testSubjects.existOrFail('host-panel-header', { timeout: 2500 });
+            await testSubjects.existOrFail('asset-criticality-selector', { timeout: 2500 });
+            await testSubjects.existOrFail('observedEntity-accordion', { timeout: 2500 });
+          });
+        });
+
         describe('ES|QL mode', () => {
           it('should open host.name flyout', async () => {
             const state = kbnRison.encode({
@@ -33,30 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
             await PageObjects.discover.waitUntilSearchingHasFinished();
             await PageObjects.discover.dragFieldToTable('host.name');
-            expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-              '@timestamp, log.level, message, host.name'
-            );
-            // security host.name button
-            const hostName = await testSubjects.findAll('host-details-button', 2500);
-            expect(hostName).to.have.length(2);
-            await hostName[0].click();
-            await testSubjects.existOrFail('host-panel-header', { timeout: 2500 });
-            await testSubjects.existOrFail('asset-criticality-selector', { timeout: 2500 });
-            await testSubjects.existOrFail('observedEntity-accordion', { timeout: 2500 });
-          });
-        });
-
-        describe('DataView mode', () => {
-          it('should open host.name flyout', async () => {
-            await PageObjects.common.navigateToActualUrl('discover', undefined, {
-              ensureCurrentUrl: false,
-            });
-            await dataViews.switchTo('my-example-logs');
-            await PageObjects.discover.waitUntilSearchingHasFinished();
-            await PageObjects.discover.dragFieldToTable('host.name');
-            expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-              '@timestamp, log.level, message, host.name'
-            );
+            expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be('host.name');
             // security host.name button
             const hostName = await testSubjects.findAll('host-details-button', 2500);
             expect(hostName).to.have.length(2);
