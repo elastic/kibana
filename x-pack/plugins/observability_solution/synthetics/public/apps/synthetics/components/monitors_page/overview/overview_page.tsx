@@ -76,6 +76,7 @@ export const OverviewPage: React.FC = () => {
     <>
       <DisabledCallout total={absoluteTotal} />
       <AlertingCallout />
+      {/* <AlertMissingCallout /> */}
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />

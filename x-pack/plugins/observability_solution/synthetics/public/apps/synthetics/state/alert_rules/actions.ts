@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createAction } from '@reduxjs/toolkit';
 import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { createAsyncAction } from '../utils/actions';
 
@@ -12,9 +13,10 @@ export const getDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RE
   'getDefaultAlertingAction'
 );
 
-export const enableDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
-  'enableDefaultAlertingAction'
-);
+export const enableDefaultAlertingAction = createAsyncAction<
+  { enableTls: boolean; enableMonitorStatus: boolean },
+  DEFAULT_ALERT_RESPONSE
+>('enableDefaultAlertingAction');
 
 export const enableDefaultAlertingSilentlyAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
   'enableDefaultAlertingSilentlyAction'
@@ -23,3 +25,6 @@ export const enableDefaultAlertingSilentlyAction = createAsyncAction<void, DEFAU
 export const updateDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
   'updateDefaultAlertingAction'
 );
+
+export const getSyntheticsRules = createAction('getSyntheticsRules');
+export const putSyntheticsRules = createAction<any[]>('putSyntheticsRules');

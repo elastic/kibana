@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import { takeLeading } from 'redux-saga/effects';
+import { call, put, takeEvery, takeLeading } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
 import {
   enableDefaultAlertingAction,
   enableDefaultAlertingSilentlyAction,
   getDefaultAlertingAction,
+  getSyntheticsRules,
+  putSyntheticsRules,
   updateDefaultAlertingAction,
 } from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { enableDefaultAlertingAPI, getDefaultAlertingAPI, updateDefaultAlertingAPI } from './api';
+import {
+  enableDefaultAlertingAPI,
+  getActiveRulesAPI,
+  getDefaultAlertingAPI,
+  updateDefaultAlertingAPI,
+} from './api';
 
 export function* getDefaultAlertingEffect() {
   yield takeLeading(
+    // @ts-expect-error TODO: unsure why this is failing
     getDefaultAlertingAction.get,
     fetchEffectFactory(
       getDefaultAlertingAPI,
@@ -42,8 +50,22 @@ export function* enableDefaultAlertingEffect() {
   );
 }
 
+function* fetchLatestSyntheticsRulesData(): any {
+  const activeAlerts = yield call(getActiveRulesAPI) as any;
+  yield put(putSyntheticsRules(activeAlerts.data));
+}
+
+export function* fetchSyntheticsRules() {
+  yield takeEvery(getSyntheticsRules, fetchLatestSyntheticsRulesData);
+}
+
+export function* updateActiveRulesEffect(): Generator<any, void, any> {
+  yield takeEvery(enableDefaultAlertingAction.success, fetchLatestSyntheticsRulesData);
+}
+
 export function* enableDefaultAlertingSilentlyEffect() {
   yield takeLeading(
+    // @ts-expect-error TODO: unsure why this is failing
     enableDefaultAlertingSilentlyAction.get,
     fetchEffectFactory(
       enableDefaultAlertingAPI,

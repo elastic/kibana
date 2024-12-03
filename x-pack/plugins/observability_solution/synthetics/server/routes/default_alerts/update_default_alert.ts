@@ -8,7 +8,6 @@
 import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { savedObjectsAdapter } from '../../saved_objects';
 import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
 
 export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -22,11 +21,9 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
     savedObjectsClient,
   }): Promise<DEFAULT_ALERT_RESPONSE> => {
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-    const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } =
-      await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
 
-    const updateStatusRulePromise = defaultAlertService.updateStatusRule(defaultStatusRuleEnabled);
-    const updateTLSRulePromise = defaultAlertService.updateTlsRule(defaultTLSRuleEnabled);
+    const updateStatusRulePromise = defaultAlertService.updateStatusRule();
+    const updateTLSRulePromise = defaultAlertService.updateTlsRule();
 
     try {
       const [statusRule, tlsRule] = await Promise.all([
