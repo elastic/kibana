@@ -177,7 +177,7 @@ export const installTranslated = async ({
   const detectionRulesClient = securitySolutionContext.getDetectionRulesClient();
   const ruleMigrationsClient = securitySolutionContext.getSiemRuleMigrationsClient();
 
-  const rulesToInstall = await ruleMigrationsClient.data.rules.get({
+  const { data: rulesToInstall } = await ruleMigrationsClient.data.rules.get({
     migrationId,
     ids,
     installable: true,

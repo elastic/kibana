@@ -6,20 +6,15 @@
  */
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useGetMigrationRulesQuery } from '../api/hooks/use_get_migration_rules_query';
+import { useInstallTranslatedMigrationRulesMutation } from '../api/hooks/use_install_translated_migration_rules_mutation';
 import * as i18n from './translations';
 
-export const useGetMigrationRules = (params: {
-  migrationId: string;
-  page?: number;
-  perPage?: number;
-  searchTerm?: string;
-}) => {
+export const useInstallTranslatedMigrationRules = (migrationId: string) => {
   const { addError } = useAppToasts();
 
-  return useGetMigrationRulesQuery(params, {
+  return useInstallTranslatedMigrationRulesMutation(migrationId, {
     onError: (error) => {
-      addError(error, { title: i18n.GET_MIGRATION_RULES_FAILURE });
+      addError(error, { title: i18n.INSTALL_MIGRATION_RULES_FAILURE });
     },
   });
 };
