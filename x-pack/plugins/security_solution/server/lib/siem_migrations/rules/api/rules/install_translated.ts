@@ -46,7 +46,7 @@ export const registerSiemRuleMigrationsInstallTranslatedRoute = (
 
             const securitySolutionContext = ctx.securitySolution;
             const savedObjectsClient = ctx.core.savedObjects.client;
-            const rulesClient = ctx.alerting.getRulesClient();
+            const rulesClient = await ctx.alerting.getRulesClient();
 
             await installTranslated({
               migrationId,

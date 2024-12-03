@@ -36,7 +36,7 @@ export type {
 export { DEFAULT_AAD_CONFIG } from './types';
 export { RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
-export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { AlertingServerSetup, AlertingServerStart } from './plugin';
 export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
@@ -44,12 +44,13 @@ export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
 export type { AlertingRulesConfig } from './config';
 export {
-  ReadOperations,
   AlertingAuthorizationFilterType,
   AlertingAuthorization,
+  ReadOperations,
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+
 export {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,

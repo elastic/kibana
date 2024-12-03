@@ -52,7 +52,7 @@ describe('AlertSummaryWidget', () => {
       <IntlProvider locale="en">
         <AlertSummaryWidget
           chartProps={mockedChartProps}
-          featureIds={['apm', 'uptime', 'logs']}
+          ruleTypeIds={['apm', 'uptime', 'logs']}
           onClick={jest.fn}
           timeRange={mockedTimeRange}
           dependencies={dependencies}

@@ -9,12 +9,11 @@ import { useMemo, useCallback } from 'react';
 import { type AlertsGroupingProps, useAlertsGroupingState } from '@kbn/alerts-grouping';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsByGroupingAgg } from '../types';
 
 interface GetPersistentControlsParams {
   groupingId: string;
-  featureIds: AlertConsumers[];
+  ruleTypeIds: string[];
   maxGroupingLevels?: number;
   services: Pick<
     AlertsGroupingProps<AlertsByGroupingAgg>['services'],
@@ -25,7 +24,7 @@ interface GetPersistentControlsParams {
 export const getPersistentControlsHook =
   ({
     groupingId,
-    featureIds,
+    ruleTypeIds,
     maxGroupingLevels = 3,
     services: { dataViews, http, notifications },
   }: GetPersistentControlsParams) =>
@@ -43,7 +42,7 @@ export const getPersistentControlsHook =
     );
 
     const { dataView } = useAlertsDataView({
-      featureIds,
+      ruleTypeIds,
       dataViewsService: dataViews,
       http,
       toasts: notifications.toasts,

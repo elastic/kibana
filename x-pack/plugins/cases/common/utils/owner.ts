@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { OWNER_INFO } from '../constants';
 import type { Owner } from '../constants/types';
 
@@ -29,9 +30,12 @@ export const getOwnerFromRuleConsumerProducer = ({
     return OWNER_INFO.securitySolution.id;
   }
 
+  // Fallback to producer if the consumer is alerts
+  const consumerValue = consumer === AlertConsumers.ALERTS ? producer : consumer;
+
   for (const value of Object.values(OWNER_INFO)) {
     const foundConsumer = value.validRuleConsumers?.find(
-      (validConsumer) => validConsumer === consumer || validConsumer === producer
+      (validConsumer) => validConsumer === consumerValue || validConsumer === producer
     );
 
     if (foundConsumer) {

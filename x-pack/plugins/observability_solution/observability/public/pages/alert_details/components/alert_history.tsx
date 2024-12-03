@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -17,12 +16,10 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, type AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { convertTo } from '../../../../common/utils/formatters';
-import { useFetchRuleTypes } from '../../../hooks/use_fetch_rule_types';
-import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../../utils/kibana_react';
 import { TopAlert } from '../../..';
 import { getDefaultAlertSummaryTimeRange } from '../../../utils/alert_summary_widget';
@@ -43,19 +40,11 @@ export function AlertHistoryChart({ rule, alert }: Props) {
     notifications,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
   } = useKibana().services;
+
   const instanceId = alert.fields[ALERT_INSTANCE_ID];
-  const filteredRuleTypes = useGetFilteredRuleTypes();
-  const { ruleTypes } = useFetchRuleTypes({
-    filterByRuleTypeIds: filteredRuleTypes,
-  });
-  const ruleType = ruleTypes?.find((type) => type.id === rule?.ruleTypeId);
-  const featureIds =
-    rule?.consumer === ALERTING_FEATURE_ID && ruleType?.producer
-      ? [ruleType.producer as AlertConsumers]
-      : rule
-      ? [rule.consumer as AlertConsumers]
-      : [];
   const ruleId = alert.fields[ALERT_RULE_UUID];
+  const ruleTypeIds = [rule.ruleTypeId];
+  const consumers = [rule.consumer];
 
   const {
     data: { avgTimeToRecoverUS, totalTriggeredAlerts },
@@ -63,7 +52,8 @@ export function AlertHistoryChart({ rule, alert }: Props) {
     isError,
   } = useAlertsHistory({
     http,
-    featureIds,
+    ruleTypeIds,
+    consumers,
     ruleId: rule.id,
     dateRange,
     instanceId,
@@ -162,7 +152,8 @@ export function AlertHistoryChart({ rule, alert }: Props) {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <AlertSummaryWidget
-        featureIds={featureIds}
+        ruleTypeIds={ruleTypeIds}
+        consumers={consumers}
         timeRange={getDefaultAlertSummaryTimeRange()}
         fullSize
         hideStats
