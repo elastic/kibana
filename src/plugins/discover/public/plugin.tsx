@@ -414,7 +414,7 @@ export class DiscoverPlugin
       return this.getDiscoverServices(coreStart, deps, profilesManager, ebtManager);
     };
 
-    plugins.embeddable.registerReactEmbeddableSavedObject<SavedSearchAttributes>({
+    plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
         const services = await getDiscoverServicesForEmbeddable();
         const initialState = await deserializeState({
@@ -429,7 +429,6 @@ export class DiscoverPlugin
           initialState,
         });
       },
-      embeddableType: SEARCH_EMBEDDABLE_TYPE,
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
         defaultMessage: 'Saved search',

@@ -81,11 +81,11 @@ export const RegisterEmbeddable = () => {
       <EuiSpacer size="l" />
 
       <EuiText>
-        <h2>Saved object embeddables</h2>
+        <h2>Show saved object type in Add from library menu</h2>
         <p>
           Embeddable factories, such as Lens, Maps, Links, that can reference saved objects should
           register their saved object types using{' '}
-          <strong>registerReactEmbeddableSavedObject</strong>. The <em>Add from library</em> flyout
+          <strong>registerAddFromLibraryType</strong>. The <em>Add from library</em> flyout
           on Dashboards uses this registry to list saved objects. The example function below could
           be called from the public start contract for a plugin.
         </p>

@@ -14,14 +14,13 @@ const MY_SAVED_OBJECT_TYPE = 'mySavedObjectType';
 const APP_ICON = 'logoKibana';
 
 export const registerMyEmbeddableSavedObject = (embeddableSetup: EmbeddableSetup) =>
-  embeddableSetup.registerReactEmbeddableSavedObject({
+  embeddableSetup.registerAddFromLibraryType({
     onAdd: (container, savedObject) => {
       container.addNewPanel({
         panelType: MY_EMBEDDABLE_TYPE,
         initialState: savedObject.attributes,
       });
     },
-    embeddableType: MY_EMBEDDABLE_TYPE,
     savedObjectType: MY_SAVED_OBJECT_TYPE,
     savedObjectName: 'Some saved object',
     getIconForSavedObject: () => APP_ICON,

@@ -12,50 +12,47 @@ import { i18n } from '@kbn/i18n';
 import { CanAddNewPanel } from '@kbn/presentation-containers';
 import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
+import { useMemo } from 'react';
 
-type SOToEmbeddable<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = (
-  container: CanAddNewPanel,
-  savedObject: SavedObjectCommon<TSavedObjectAttributes>
-) => void;
-
-export type ReactEmbeddableSavedObject<
+export type RegistryItem<
   TSavedObjectAttributes extends FinderAttributes = FinderAttributes
 > = {
-  onAdd: SOToEmbeddable<TSavedObjectAttributes>;
+  onAdd: (
+    container: CanAddNewPanel,
+    savedObject: SavedObjectCommon<TSavedObjectAttributes>
+  ) => void;
   savedObjectMetaData: SavedObjectMetaData;
 };
 
-const registry: Map<string, ReactEmbeddableSavedObject<any>> = new Map();
+const registry: Map<string, RegistryItem<any>> = new Map();
 
-export const registerReactEmbeddableSavedObject = <
+export const registerAddFromLibraryType = <
   TSavedObjectAttributes extends FinderAttributes
 >({
   onAdd,
-  embeddableType,
   savedObjectType,
   savedObjectName,
   getIconForSavedObject,
   getSavedObjectSubType,
   getTooltipForSavedObject,
 }: {
-  onAdd: SOToEmbeddable<TSavedObjectAttributes>;
-  embeddableType: string;
+  onAdd: RegistryItem['onAdd'];
   savedObjectType: string;
   savedObjectName: string;
   getIconForSavedObject: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => IconType;
   getSavedObjectSubType?: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => string;
   getTooltipForSavedObject?: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => string;
 }) => {
-  if (registry.has(embeddableType)) {
+  if (registry.has(savedObjectType)) {
     throw new Error(
       i18n.translate('embeddableApi.embeddableSavedObjectRegistry.keyAlreadyExistsError', {
         defaultMessage: `Embeddable type {embeddableType} already exists in the registry.`,
-        values: { embeddableType },
+        values: { savedObjectType },
       })
     );
   }
 
-  registry.set(embeddableType, {
+  registry.set(savedObjectType, {
     onAdd,
     savedObjectMetaData: {
       name: savedObjectName,
@@ -67,10 +64,16 @@ export const registerReactEmbeddableSavedObject = <
   });
 };
 
-export const getReactEmbeddableSavedObjects = <
-  TSavedObjectAttributes extends FinderAttributes
->() => {
-  return registry.entries() as IterableIterator<
-    [string, ReactEmbeddableSavedObject<TSavedObjectAttributes>]
-  >;
+export function useAddFromLibraryTypes() {
+  const types = useMemo(() => {
+    return [...registry.entries()]
+    .map(([type, registryItem]) => registryItem.savedObjectMetaData)
+    .sort((a, b) => a.type.localeCompare(b.type));
+  }, []);
+
+  return { types, getAddFromLibraryType };
+}
+
+export const getAddFromLibraryType = (type: string) => {
+  return registry.get(type);
 };

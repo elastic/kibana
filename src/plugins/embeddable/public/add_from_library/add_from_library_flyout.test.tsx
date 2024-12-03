@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
-import { AddPanelFlyout } from './add_panel_flyout';
+import { AddPanelFlyout } from './add_from_library_flyout';
 import { core, embeddableStart, usageCollection } from '../kibana_services';
 import { ContactCardEmbeddableFactory } from '../lib/test_samples';
 import { Container, registerReactEmbeddableSavedObject } from '../lib';
