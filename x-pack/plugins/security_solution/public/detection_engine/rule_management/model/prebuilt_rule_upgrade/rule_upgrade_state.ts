@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PartialRuleDiff } from '../../../../../common/api/detection_engine';
 import {
   type DiffableRule,
   type RuleUpgradeInfoForReview,
@@ -17,11 +18,15 @@ export interface RuleUpgradeState extends RuleUpgradeInfoForReview {
    */
   finalRule: DiffableRule;
   /**
+   * Customizable fields diff. It's the same as diff but doesn't contain non customizable fields like `version`.
+   */
+  customizableFieldsDiff: PartialRuleDiff;
+  /**
    * Indicates whether there are conflicts blocking rule upgrading.
    */
   hasUnresolvedConflicts: boolean;
   /**
-   * Stores a record of field names mapped to field upgrade state.
+   * Stores a record of customizable field names mapped to field upgrade state.
    */
   fieldsUpgradeState: FieldsUpgradeState;
 }

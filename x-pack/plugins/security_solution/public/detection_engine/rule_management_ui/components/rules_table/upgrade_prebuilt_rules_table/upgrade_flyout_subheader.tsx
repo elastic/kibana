@@ -50,12 +50,16 @@ export const UpgradeFlyoutSubHeader = memo(function UpgradeFlyoutSubHeader({
   const customized = ruleUpgradeState.current_rule.rule_source.type === 'external' &&
     ruleUpgradeState.current_rule.rule_source.is_customized && <ModifiedBadge />;
 
-  const fieldUpdates = (
+  const fieldsNamesWithUpdates = Object.entries(ruleUpgradeState.customizableFieldsDiff.fields)
+    .filter(([, diff]) => diff.has_update)
+    .map(([fieldName]) => fieldName);
+
+  const fieldUpdates = fieldsNamesWithUpdates.length > 0 && (
     <EuiText size="s">
       <strong>
         {i18n.FIELD_UPDATES}
         {':'}{' '}
-        {Object.keys(ruleUpgradeState.diff.fields)
+        {fieldsNamesWithUpdates
           .map((fieldName) => fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName)))
           .join(', ')}
       </strong>
