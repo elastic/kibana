@@ -16,10 +16,10 @@ import * as vegaTooltip from 'vega-tooltip';
 
 import { EuiBadge } from '@elastic/eui';
 
-import type { ESQLSearchResponse } from '@kbn/es-types';
-
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 import { useFetchESQL } from '../hooks/use_fetch_esql';
+
+import { EsqlPopover } from './esql_popover';
 
 const height = 120;
 
@@ -201,6 +201,7 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
 
   return (
     <div css={{ position: 'relative' }}>
+      {esqlWithFilters !== null && <EsqlPopover esql={esqlWithFilters} />}
       {filters[iframeID] && (
         <div css={{ position: 'absolute', bottom: 0 }}>
           <EuiBadge
