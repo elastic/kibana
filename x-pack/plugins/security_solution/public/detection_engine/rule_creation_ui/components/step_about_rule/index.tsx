@@ -45,6 +45,7 @@ import { EsqlAutocomplete } from '../esql_autocomplete';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { MaxSignals } from '../max_signals';
+import { TooltipFormWrapper } from '../tooltip_form_wrapper';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -283,31 +284,41 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <EuiSpacer size="l" />
-            <CommonUseField
-              path="author"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleAuthor',
-                'data-test-subj': 'detectionEngineStepAboutRuleAuthor',
-                euiFieldProps: {
-                  fullWidth: true,
-                  isDisabled: isLoading || ruleSource?.type === 'external', // We don't allow "author" customization if this is a prebuilt rule
-                  placeholder: '',
-                },
-              }}
-            />
+            <TooltipFormWrapper
+              content={I18n.AUTHOR_IMMUTABLE_FIELD_TOOLTIP_TEXT}
+              shouldShowTooltip={ruleSource?.type === 'external'}
+            >
+              <CommonUseField
+                path="author"
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleAuthor',
+                  'data-test-subj': 'detectionEngineStepAboutRuleAuthor',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    isDisabled: isLoading || ruleSource?.type === 'external', // We don't allow "author" customization if this is a prebuilt rule
+                    placeholder: '',
+                  },
+                }}
+              />
+            </TooltipFormWrapper>
             <EuiSpacer size="l" />
-            <CommonUseField
-              path="license"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleLicense',
-                'data-test-subj': 'detectionEngineStepAboutRuleLicense',
-                euiFieldProps: {
-                  fullWidth: true,
-                  disabled: isLoading || ruleSource?.type === 'external', // We don't allow "license" customization if this is a prebuilt rule
-                  placeholder: '',
-                },
-              }}
-            />
+            <TooltipFormWrapper
+              content={I18n.LICENSE_IMMUTABLE_FIELD_TOOLTIP_TEXT}
+              shouldShowTooltip={ruleSource?.type === 'external'}
+            >
+              <CommonUseField
+                path="license"
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleLicense',
+                  'data-test-subj': 'detectionEngineStepAboutRuleLicense',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    disabled: isLoading || ruleSource?.type === 'external', // We don't allow "license" customization if this is a prebuilt rule
+                    placeholder: '',
+                  },
+                }}
+              />
+            </TooltipFormWrapper>
             <EuiSpacer size="l" />
             <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
               <CommonUseField
