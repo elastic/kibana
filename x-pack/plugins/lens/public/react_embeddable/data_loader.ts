@@ -334,7 +334,9 @@ export function loadEmbeddableData(
     // subscribe to the search context changes
     // will distill the output later on from the unifiedSearch$
     fetch$(api).subscribe((data) => {
-      const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+      const searchSessionId = apiPublishesSearchSession(parentApi)
+        ? data.searchSessionId ?? parentApi.searchSessionId$.getValue()
+        : '';
       unifiedSearch$.next({
         query: data.query,
         filters: data.filters,
