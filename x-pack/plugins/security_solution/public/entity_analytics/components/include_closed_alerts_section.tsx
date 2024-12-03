@@ -49,7 +49,7 @@ export const IncludeClosedAlertsSection = ({
 
   const [savedIncludeClosedAlerts, setSavedIncludeClosedAlerts] = useLocalStorage(
     'includeClosedAlerts',
-    includeClosedAlerts
+    includeClosedAlerts ?? false
   );
   const [savedStart, setSavedStart] = useLocalStorage('savedFrom', from);
   const [savedEnd, setSavedEnd] = useLocalStorage('savedto', to);
@@ -63,9 +63,9 @@ export const IncludeClosedAlertsSection = ({
   `;
 
   useEffect(() => {
-    if (savedIncludeClosedAlerts !== null) {
-      initialIncludeClosedAlerts.current = savedIncludeClosedAlerts ?? includeClosedAlerts;
-      setIncludeClosedAlerts(savedIncludeClosedAlerts ?? includeClosedAlerts);
+    if (savedIncludeClosedAlerts !== null && savedIncludeClosedAlerts !== undefined) {
+      initialIncludeClosedAlerts.current = savedIncludeClosedAlerts;
+      setIncludeClosedAlerts(savedIncludeClosedAlerts);
     }
     if (savedStart && savedEnd) {
       initialStart.current = savedStart;
@@ -73,7 +73,8 @@ export const IncludeClosedAlertsSection = ({
       setFrom(savedStart);
       setTo(savedEnd);
     }
-  }, [savedIncludeClosedAlerts, includeClosedAlerts, setIncludeClosedAlerts, savedStart, savedEnd]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedIncludeClosedAlerts, savedStart, savedEnd]);
 
   const onRefresh = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
     setFrom(newStart);
