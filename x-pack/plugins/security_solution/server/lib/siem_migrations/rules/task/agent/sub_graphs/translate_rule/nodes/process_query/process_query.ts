@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
 import type { RuleResourceRetriever } from '../../../../../util/rule_resource_retriever';
 import type { GraphNode } from '../../types';
-import { getReplaceQueryResourcesPrompt } from './prompts';
+import { REPLACE_QUERY_RESOURCE_PROMPT, getResourcesContext } from './prompts';
 
 interface GetProcessQueryNodeParams {
   model: ChatModel;
@@ -25,9 +25,19 @@ export const getProcessQueryNode = ({
     let query = state.original_rule.query;
     const resources = await resourceRetriever.getResources(state.original_rule);
     if (!isEmpty(resources)) {
-      const replaceQueryResourcesPrompt = getReplaceQueryResourcesPrompt(state, resources);
-      const stringParser = new StringOutputParser();
-      query = await model.pipe(stringParser).invoke(replaceQueryResourcesPrompt);
+      const replaceQueryParser = new StringOutputParser();
+      const replaceQueryResourcePrompt =
+        REPLACE_QUERY_RESOURCE_PROMPT.pipe(model).pipe(replaceQueryParser);
+      const resourceContext = getResourcesContext(resources);
+      const response = await replaceQueryResourcePrompt.invoke({
+        query: state.original_rule.query,
+        macros: resourceContext.macros,
+        lookup_tables: resourceContext.lists,
+      });
+      const splQuery = response.match(/```spl\n([\s\S]*?)\n```/)?.[1] ?? '';
+      if (splQuery) {
+        query = splQuery;
+      }
     }
     return { inline_query: query };
   };
