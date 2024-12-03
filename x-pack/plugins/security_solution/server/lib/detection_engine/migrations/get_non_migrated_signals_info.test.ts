@@ -12,7 +12,6 @@ import { getIndexVersionsByIndex } from './get_index_versions_by_index';
 import { getSignalVersionsByIndex } from './get_signal_versions_by_index';
 import { getLatestIndexTemplateVersion } from './get_latest_index_template_version';
 import { getIndexAliasPerSpace } from './get_index_alias_per_space';
-import { getOldestSignalTimestamp } from './get_oldest_signal_timestamp';
 
 jest.mock('./get_index_versions_by_index', () => ({ getIndexVersionsByIndex: jest.fn() }));
 jest.mock('./get_signal_versions_by_index', () => ({ getSignalVersionsByIndex: jest.fn() }));
@@ -20,16 +19,13 @@ jest.mock('./get_latest_index_template_version', () => ({
   getLatestIndexTemplateVersion: jest.fn(),
 }));
 jest.mock('./get_index_alias_per_space', () => ({ getIndexAliasPerSpace: jest.fn() }));
-jest.mock('./get_oldest_signal_timestamp', () => ({ getOldestSignalTimestamp: jest.fn() }));
 
 const getIndexVersionsByIndexMock = getIndexVersionsByIndex as jest.Mock;
 const getSignalVersionsByIndexMock = getSignalVersionsByIndex as jest.Mock;
 const getLatestIndexTemplateVersionMock = getLatestIndexTemplateVersion as jest.Mock;
 const getIndexAliasPerSpaceMock = getIndexAliasPerSpace as jest.Mock;
-const getOldestSignalTimestampMock = getOldestSignalTimestamp as jest.Mock;
 
 const TEMPLATE_VERSION = 77;
-const OLDEST_SIGNAL = '2020-03-03T00:00:00.000Z';
 
 describe('getNonMigratedSignalsInfo', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -58,7 +54,6 @@ describe('getNonMigratedSignalsInfo', () => {
         space: 'default',
       },
     });
-    getOldestSignalTimestampMock.mockReturnValue(OLDEST_SIGNAL);
   });
 
   it('returns empty results if no siem indices found', async () => {
@@ -132,7 +127,6 @@ describe('getNonMigratedSignalsInfo', () => {
     });
 
     expect(result).toEqual({
-      fromRange: OLDEST_SIGNAL,
       indices: ['.siem-signals-default-old-one'],
       isMigrationRequired: true,
       spaces: ['default'],
@@ -154,7 +148,6 @@ describe('getNonMigratedSignalsInfo', () => {
     });
 
     expect(result).toEqual({
-      fromRange: OLDEST_SIGNAL,
       indices: ['.siem-signals-another-1-legacy'],
       isMigrationRequired: true,
       spaces: ['another-1'],
@@ -176,7 +169,6 @@ describe('getNonMigratedSignalsInfo', () => {
     });
 
     expect(result).toEqual({
-      fromRange: OLDEST_SIGNAL,
       indices: ['.siem-signals-another-1-legacy', '.siem-signals-default-old-one'],
       isMigrationRequired: true,
       spaces: ['another-1', 'default'],

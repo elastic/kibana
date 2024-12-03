@@ -16,17 +16,15 @@ import {
 import { isOutdated as getIsOutdated, signalsAreOutdated } from './helpers';
 import { getLatestIndexTemplateVersion } from './get_latest_index_template_version';
 import { getIndexAliasPerSpace } from './get_index_alias_per_space';
-import { getOldestSignalTimestamp } from './get_oldest_signal_timestamp';
 
 interface OutdatedSpaces {
   isMigrationRequired: boolean;
   spaces: string[];
   indices: string[];
-  fromRange?: string;
 }
 
 /**
- * gets lists of spaces that have non-migrated signal indices and time of oldest non-migrated document, from which migration is required
+ * gets lists of spaces and non-migrated signal indices
  */
 export const getNonMigratedSignalsInfo = async ({
   esClient,
@@ -113,12 +111,6 @@ export const getNonMigratedSignalsInfo = async ({
 
     const outdatedIndexNames = outdatedIndices.map((outdatedIndex) => outdatedIndex.indexName);
 
-    const fromRange = await getOldestSignalTimestamp({
-      esClient,
-      logger,
-      index: outdatedIndexNames,
-    });
-
     // remove duplicated spaces
     const spaces = [...new Set<string>(outdatedIndices.map((indexStatus) => indexStatus.space))];
     const isMigrationRequired = outdatedIndices.length > 0;
@@ -134,7 +126,6 @@ export const getNonMigratedSignalsInfo = async ({
     return {
       isMigrationRequired,
       spaces,
-      fromRange,
       indices: outdatedIndexNames,
     };
   } catch (e) {
