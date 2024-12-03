@@ -42,11 +42,9 @@ describe(
         ],
         // This is not needed for this test, but it's a good example of
         // how to enable experimental features in the Cypress tests.
-        // kbnServerArgs: [
-        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        //     'featureFlagName',
-        //   ])}`,
-        // ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['featureFlagName'])}`,
+        ],
       },
     },
   },
