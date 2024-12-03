@@ -26,7 +26,7 @@ import type {
   RenderCellValue,
   EuiDataGridCellPopoverElementProps,
 } from '@elastic/eui';
-import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
@@ -490,7 +490,7 @@ export type AlertsTableProps = {
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  featureIds?: ValidFeatureId[];
+  ruleTypeIds?: string[];
   pageIndex: number;
   pageSize: number;
   sort: SortCombinations[];

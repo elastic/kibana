@@ -37,8 +37,6 @@ import {
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  HIDE_ANNOUNCEMENTS,
-  isLegacyTableEnabled,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -58,8 +56,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
-import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
-import { DocumentExplorerCallout } from '../document_explorer_callout';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
@@ -88,7 +84,6 @@ const progressStyle = css`
   z-index: 2;
 `;
 
-const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 // export needs for testing
@@ -146,11 +141,6 @@ function DiscoverDocumentsComponent({
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-  const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
-  const isLegacy = useMemo(
-    () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
-    [uiSettings, isEsqlMode]
-  );
   const documentState = useDataState(documents$);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
@@ -186,7 +176,6 @@ function DiscoverDocumentsComponent({
     columns: currentColumns,
     onAddColumn,
     onRemoveColumn,
-    onMoveColumn,
     onSetColumns,
   } = useColumns({
     capabilities,
@@ -417,115 +406,76 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <>
-      {isLegacy && (
-        <>
-          <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
-          {callouts}
-        </>
-      )}
-      <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
-        <EuiScreenReaderOnly>
-          <h2 id="documentsAriaLabel">
-            <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
-          </h2>
-        </EuiScreenReaderOnly>
-        {isLegacy && (
-          <>
-            {rows && rows.length > 0 && (
-              <>
-                {!hideAnnouncements && <DocumentExplorerCallout />}
-                <DocTableInfiniteMemoized
-                  columns={currentColumns}
-                  dataView={dataView}
-                  rows={rows}
-                  sort={sort || []}
-                  isLoading={isDataLoading}
-                  searchDescription={savedSearch.description}
-                  sharedItemTitle={savedSearch.title}
-                  isEsqlMode={isEsqlMode}
-                  onAddColumn={onAddColumn}
-                  onFilter={onAddFilter as DocViewFilterFn}
-                  onMoveColumn={onMoveColumn}
-                  onRemoveColumn={onRemoveColumn}
-                  onSort={!isEsqlMode ? onSort : undefined}
-                  useNewFieldsApi={useNewFieldsApi}
-                  dataTestSubj="discoverDocTable"
-                />
-              </>
-            )}
-            {loadingIndicator}
-          </>
-        )}
-        {!isLegacy && (
-          <div className="unifiedDataTable">
-            <CellActionsProvider
-              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-            >
-              <DiscoverGridMemoized
-                ariaLabelledBy="documentsAriaLabel"
-                columns={currentColumns}
-                columnsMeta={columnsMeta}
-                expandedDoc={expandedDoc}
-                dataView={dataView}
-                loadingState={
-                  isDataLoading
-                    ? DataLoadingState.loading
-                    : isMoreDataLoading
-                    ? DataLoadingState.loadingMore
-                    : DataLoadingState.loaded
-                }
-                rows={rows}
-                sort={(sort as SortOrder[]) || []}
-                searchDescription={savedSearch.description}
-                searchTitle={savedSearch.title}
-                setExpandedDoc={setExpandedDoc}
-                showTimeCol={showTimeCol}
-                settings={grid}
-                onFilter={onAddFilter as DocViewFilterFn}
-                onSetColumns={onSetColumns}
-                onSort={onSort}
-                onResize={onResizeDataGrid}
-                useNewFieldsApi={useNewFieldsApi}
-                configHeaderRowHeight={3}
-                headerRowHeightState={headerRowHeight}
-                onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
-                rowHeightState={rowHeight}
-                onUpdateRowHeight={onUpdateRowHeight}
-                isSortEnabled={true}
-                isPlainRecord={isEsqlMode}
-                isPaginationEnabled={!isEsqlMode}
-                rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
-                onUpdateRowsPerPage={onUpdateRowsPerPage}
-                maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
-                sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
-                onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
-                onFieldEdited={onFieldEdited}
-                configRowHeight={configRowHeight}
-                showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
-                maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-                renderDocumentView={renderDocumentView}
-                renderCustomToolbar={renderCustomToolbarWithElements}
-                services={services}
-                totalHits={totalHits}
-                onFetchMoreRecords={onFetchMoreRecords}
-                externalCustomRenderers={cellRenderers}
-                customGridColumnsConfiguration={customGridColumnsConfiguration}
-                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-                additionalFieldGroups={additionalFieldGroups}
-                dataGridDensityState={density}
-                onUpdateDataGridDensity={onUpdateDensity}
-                onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
-                query={query}
-                cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
-                cellActionsMetadata={cellActionsMetadata}
-                cellActionsHandling="append"
-              />
-            </CellActionsProvider>
-          </div>
-        )}
-      </EuiFlexItem>
-    </>
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
+      <EuiScreenReaderOnly>
+        <h2 id="documentsAriaLabel">
+          <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
+        </h2>
+      </EuiScreenReaderOnly>
+      <div className="unifiedDataTable">
+        <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
+          <DiscoverGridMemoized
+            ariaLabelledBy="documentsAriaLabel"
+            columns={currentColumns}
+            columnsMeta={columnsMeta}
+            expandedDoc={expandedDoc}
+            dataView={dataView}
+            loadingState={
+              isDataLoading
+                ? DataLoadingState.loading
+                : isMoreDataLoading
+                ? DataLoadingState.loadingMore
+                : DataLoadingState.loaded
+            }
+            rows={rows}
+            sort={(sort as SortOrder[]) || []}
+            searchDescription={savedSearch.description}
+            searchTitle={savedSearch.title}
+            setExpandedDoc={setExpandedDoc}
+            showTimeCol={showTimeCol}
+            settings={grid}
+            onFilter={onAddFilter as DocViewFilterFn}
+            onSetColumns={onSetColumns}
+            onSort={onSort}
+            onResize={onResizeDataGrid}
+            useNewFieldsApi={useNewFieldsApi}
+            configHeaderRowHeight={3}
+            headerRowHeightState={headerRowHeight}
+            onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
+            rowHeightState={rowHeight}
+            onUpdateRowHeight={onUpdateRowHeight}
+            isSortEnabled={true}
+            isPlainRecord={isEsqlMode}
+            isPaginationEnabled={!isEsqlMode}
+            rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
+            onUpdateRowsPerPage={onUpdateRowsPerPage}
+            maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
+            sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
+            onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
+            onFieldEdited={onFieldEdited}
+            configRowHeight={configRowHeight}
+            showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
+            maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+            renderDocumentView={renderDocumentView}
+            renderCustomToolbar={renderCustomToolbarWithElements}
+            services={services}
+            totalHits={totalHits}
+            onFetchMoreRecords={onFetchMoreRecords}
+            externalCustomRenderers={cellRenderers}
+            customGridColumnsConfiguration={customGridColumnsConfiguration}
+            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+            additionalFieldGroups={additionalFieldGroups}
+            dataGridDensityState={density}
+            onUpdateDataGridDensity={onUpdateDensity}
+            onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
+            query={query}
+            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+            cellActionsMetadata={cellActionsMetadata}
+            cellActionsHandling="append"
+          />
+        </CellActionsProvider>
+      </div>
+    </EuiFlexItem>
   );
 }
 

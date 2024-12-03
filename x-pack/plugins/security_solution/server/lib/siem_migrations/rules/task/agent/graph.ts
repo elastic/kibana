@@ -48,5 +48,5 @@ const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;
   }
-  return 'translation';
+  return 'translationSubGraph';
 };
