@@ -356,6 +356,32 @@ export function LayerPanel(props: LayerPanelProps) {
   );
   const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
+  const getHeader = () => {
+    return (
+      <header
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+          <EuiFlexItem grow={1}>
+            <span style={{ padding: '4px' }}>Layer {layerIndex}</span>
+          </EuiFlexItem>
+          {props.displayLayerSettings && (
+            <EuiFlexItem grow={false}>
+              <LayerActions
+                actions={compatibleActions}
+                layerIndex={layerIndex}
+                mountingPoint={layerActionsFlyoutRef.current}
+              />
+              <div ref={layerActionsFlyoutRef} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </header>
+    );
+  };
+
   return (
     <>
       <section
@@ -364,15 +390,22 @@ export function LayerPanel(props: LayerPanelProps) {
         className="lnsLayerPanel"
         data-test-subj={`lns-layerPanel-${layerIndex}`}
       >
-        <EuiAccordion
-          id={`lns-layerPanel-${layerIndex}`}
-          buttonContent={`Layer ${layerIndex}`}
-          paddingSize="xs"
-          initialIsOpen={true}
-          borders="none"
-        >
-          <EuiPanel paddingSize="none" hasShadow={true}>
-            <header className="lnsLayerPanel__layerHeader">
+        <style>{`
+          .lnsLayerPanel__layerSettingsAccordionButton {
+            width: 100%;
+          }
+        `}</style>
+        <EuiPanel paddingSize="none" hasShadow={true}>
+          <EuiAccordion
+            id={`lns-layerPanel-${layerIndex}`}
+            buttonContent={getHeader()}
+            buttonElement={'div'}
+            buttonContentClassName={'lnsLayerPanel__layerSettingsAccordionButton'}
+            paddingSize="xs"
+            initialIsOpen={true}
+            borders="none"
+          >
+            <header style={{ paddingBottom: '16px', borderBottom: '1px' }}>
               <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
                 <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
                   <LayerHeader
@@ -392,16 +425,6 @@ export function LayerPanel(props: LayerPanelProps) {
                     onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                   />
                 </EuiFlexItem>
-                {props.displayLayerSettings && (
-                  <EuiFlexItem grow={false}>
-                    <LayerActions
-                      actions={compatibleActions}
-                      layerIndex={layerIndex}
-                      mountingPoint={layerActionsFlyoutRef.current}
-                    />
-                    <div ref={layerActionsFlyoutRef} />
-                  </EuiFlexItem>
-                )}
               </EuiFlexGroup>
               {props.indexPatternService &&
                 !isTextBasedLanguage &&
@@ -437,7 +460,6 @@ export function LayerPanel(props: LayerPanelProps) {
                 />
               )}
             </header>
-
             {dimensionGroups
               .filter((group) => !group.isHidden)
               .map((group, groupIndex) => {
@@ -665,8 +687,8 @@ export function LayerPanel(props: LayerPanelProps) {
                   </EuiFormRow>
                 );
               })}
-          </EuiPanel>
-        </EuiAccordion>
+          </EuiAccordion>
+        </EuiPanel>
       </section>
       {(layerDatasource?.LayerSettingsComponent || activeVisualization?.LayerSettingsComponent) && (
         <FlyoutContainer
