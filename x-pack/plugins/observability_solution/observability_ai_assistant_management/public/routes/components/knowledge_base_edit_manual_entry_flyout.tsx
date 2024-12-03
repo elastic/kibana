@@ -63,7 +63,6 @@ export function KnowledgeBaseEditManualEntryFlyout({
         public: isPublic,
         role: KnowledgeBaseEntryRole.UserEntry,
         confidence: 'high',
-        is_correction: false,
         labels: {},
       },
     });

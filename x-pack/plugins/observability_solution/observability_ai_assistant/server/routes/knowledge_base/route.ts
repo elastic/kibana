@@ -191,7 +191,6 @@ const knowledgeBaseEntryRt = t.intersection([
   }),
   t.partial({
     confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
-    is_correction: toBooleanRt,
     public: toBooleanRt,
     labels: t.record(t.string, t.string),
     role: t.union([
@@ -221,7 +220,6 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
     return client.addKnowledgeBaseEntry({
       entry: {
         confidence: 'high',
-        is_correction: false,
         public: true,
         labels: {},
         role: KnowledgeBaseEntryRole.UserEntry,
@@ -281,7 +279,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
         return client.addKnowledgeBaseEntry({
           entry: {
             confidence: 'high',
-            is_correction: false,
+
             public: true,
             labels: {},
             role: KnowledgeBaseEntryRole.UserEntry,
