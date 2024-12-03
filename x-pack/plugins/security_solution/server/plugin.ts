@@ -128,6 +128,7 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { registerRiskScoreModulesDeprecation } from './deprecations/register_risk_score_modules_deprecation';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -438,6 +439,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.taskManager) {
       this.completeExternalResponseActionsTask.setup({ taskManager: plugins.taskManager });
     }
+
+    registerRiskScoreModulesDeprecation({
+      deprecationsService: core.deprecations,
+    });
 
     core
       .getStartServices()
