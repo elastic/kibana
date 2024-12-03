@@ -13,14 +13,14 @@ import { useDeps } from '../hooks/use_deps';
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 
 export const State: FC = () => {
-  const { plugins } = useDeps();
+  const { core, plugins } = useDeps();
   const { data: dataPlugin } = plugins;
   const state = useEventBusExampleState();
   const esql = state.useState((s) => s.esql);
 
-  // fetch data from ES
   useEffect(() => {
     const fetchData = async () => {
+      // get fields for UI from data view
       try {
         const index = esql.split('|')[0].trim().split(' ')[1];
         const resp = await dataPlugin.dataViews.find(index);
@@ -50,6 +50,34 @@ export const State: FC = () => {
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Failed to fetch index fields', e);
+      }
+
+      // get fields for AIOPS via endpoint
+      try {
+        const index = esql.split('|')[0].trim().split(' ')[1];
+        const resp = await core.http.post('/internal/aiops/log_rate_analysis/field_candidates', {
+          // signal: abortCtrl.current.signal,
+          version: '1',
+          // headers,
+          body: JSON.stringify({
+            start: 1731199142912,
+            end: 1736459126749,
+            searchQuery: '{"match_all":{}}',
+            timeFieldName: 'timestamp',
+            index,
+            grouping: false,
+            flushFix: true,
+            baselineMin: 1733097600000,
+            baselineMax: 1734652800000,
+            deviationMin: 1734739200000,
+            deviationMax: 1734825600000,
+            sampleProbability: 1,
+          }),
+        });
+        state.actions.setAiopsFieldCandidates(resp.keywordFieldCandidates);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch AIOps field candidates', e);
       }
     };
 

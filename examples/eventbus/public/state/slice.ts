@@ -15,6 +15,7 @@ type AllFields = Record<string, string>;
 interface EventBusExampleState {
   chartWidth: number;
   esql: string;
+  aiopsFieldCandidates: string[];
   allFields: AllFields;
   selectedFields: string[];
   filters: Record<string, string>;
@@ -27,7 +28,9 @@ interface SetCrossfilterActionPayload {
 
 function getDefaultState(): EventBusExampleState {
   return {
+    chartWidth: 0,
     esql: 'FROM kibana_sample_data_logs',
+    aiopsFieldCandidates: [],
     allFields: {},
     selectedFields: [],
     filters: {},
@@ -43,6 +46,9 @@ export const eventBusExampleSlice = createSlice({
     },
     setESQL: (state: EventBusExampleState, action: PayloadAction<string>) => {
       state.esql = action.payload;
+    },
+    setAiopsFieldCandidates: (state: EventBusExampleState, action: PayloadAction<string[]>) => {
+      state.aiopsFieldCandidates = action.payload;
     },
     setAllFields: (state: EventBusExampleState, action: PayloadAction<AllFields>) => {
       state.allFields = action.payload;
