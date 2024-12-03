@@ -21,7 +21,6 @@ import {
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
 } from '../event_based/events';
-import type { CommonPrefixesConfig } from '../collections_helpers';
 import { telemetryConfiguration } from '../configuration';
 import type {
   DataStream,
@@ -57,12 +56,6 @@ export function createTelemetryIndicesMetadataTaskConfig() {
 
       const taskConfig = telemetryConfiguration.indices_metadata_config;
 
-      const queryConfig: CommonPrefixesConfig = {
-        maxPrefixes: Number(taskConfig.max_prefixes),
-        maxGroupSize: Number(taskConfig.max_group_size),
-        minPrefixSize: Number(taskConfig.min_group_size),
-      };
-
       const publishDatastreamsStats = (stats: DataStream[]): number => {
         const events: DataStreams = {
           items: stats,
@@ -77,7 +70,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           items: [],
         };
 
-        for await (const stat of receiver.getIndicesStats(indices, queryConfig)) {
+        for await (const stat of receiver.getIndicesStats(indices)) {
           indicesStats.items.push(stat);
         }
         sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT, indicesStats);
@@ -91,7 +84,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           items: [],
         };
 
-        for await (const stat of receiver.getIlmsStats(indices, queryConfig)) {
+        for await (const stat of receiver.getIlmsStats(indices)) {
           if (stat.policy_name !== undefined) {
             ilmNames.add(stat.policy_name);
             ilmsStats.items.push(stat);
@@ -109,10 +102,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           items: [],
         };
 
-        for await (const policy of receiver.getIlmsPolicies(
-          Array.from(ilmNames.values()),
-          queryConfig
-        )) {
+        for await (const policy of receiver.getIlmsPolicies(Array.from(ilmNames.values()))) {
           ilmPolicies.items.push(policy);
         }
         sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT, ilmPolicies);

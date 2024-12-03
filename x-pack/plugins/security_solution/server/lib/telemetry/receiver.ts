@@ -101,7 +101,7 @@ import type {
   Index,
   IndexStats,
 } from './indices.metadata.types';
-import { type CommonPrefixesConfig, chunkStringsByMaxLength } from './collections_helpers';
+import { chunkStringsByMaxLength } from './collections_helpers';
 
 export interface ITelemetryReceiver {
   start(
@@ -256,18 +256,9 @@ export interface ITelemetryReceiver {
 
   getIndices(): Promise<string[]>;
   getDataStreams(): Promise<DataStream[]>;
-  getIndicesStats(
-    indices: string[],
-    config: CommonPrefixesConfig
-  ): AsyncGenerator<IndexStats, void, unknown>;
-  getIlmsStats(
-    indices: string[],
-    config: CommonPrefixesConfig
-  ): AsyncGenerator<IlmStats, void, unknown>;
-  getIlmsPolicies(
-    ilms: string[],
-    config: CommonPrefixesConfig
-  ): AsyncGenerator<IlmPolicy, void, unknown>;
+  getIndicesStats(indices: string[]): AsyncGenerator<IndexStats, void, unknown>;
+  getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
+  getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -1403,7 +1394,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       });
   }
 
-  public async *getIndicesStats(indices: string[], config: CommonPrefixesConfig) {
+  public async *getIndicesStats(indices: string[]) {
     const es = this.esClient();
 
     this.logger.l('Fetching indices stats', { indices } as LogMeta);
@@ -1449,7 +1440,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsStats(indices: string[], config: CommonPrefixesConfig) {
+  public async *getIlmsStats(indices: string[]) {
     const es = this.esClient();
 
     const groupedIndices = chunkStringsByMaxLength(indices);
@@ -1460,9 +1451,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     } as LogMeta);
 
     for (const group of groupedIndices) {
-      const indices = group.join(',');
       const request: IlmExplainLifecycleRequest = {
-        index: indices,
+        index: group.join(','),
         only_managed: false,
         filter_path: ['indices.*.phase', 'indices.*.age', 'indices.*.policy'],
       };
@@ -1487,7 +1477,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsPolicies(ilms: string[], config: CommonPrefixesConfig) {
+  public async *getIlmsPolicies(ilms: string[]) {
     const es = this.esClient();
 
     const phase = (obj: unknown): Nullable<IlmPhase> => {
@@ -1508,10 +1498,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     } as LogMeta);
 
     for (const group of groupedIlms) {
-      const ilms = group.join(',');
-      this.logger.l('Fetching ilm policies', { ilms } as LogMeta);
+      this.logger.l('Fetching ilm policies', { ilms: group } as LogMeta);
       const request: IlmGetLifecycleRequest = {
-        name: ilms,
+        name: group.join(','),
         filter_path: [
           '*.policy.phases.cold.min_age',
           '*.policy.phases.delete.min_age',

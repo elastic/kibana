@@ -28,9 +28,10 @@ class TelemetryConfigurationDTO {
   private readonly DEFAULT_INDICES_METADATA_CONFIG = {
     indices_threshold: 15000,
     datastreams_threshold: 1000,
-    max_prefixes: 10,
-    max_group_size: 100,
-    min_group_size: 5,
+
+    max_prefixes: 10, // @deprecated
+    max_group_size: 100, // @deprecated
+    min_group_size: 5, // @deprecated
   };
 
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
