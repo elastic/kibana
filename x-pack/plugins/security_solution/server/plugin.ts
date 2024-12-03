@@ -563,8 +563,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { packageService } = fleetStartServices;
 
     this.licensing$ = plugins.licensing.license$;
-    // Assistant Tool and Feature Registration
 
+    // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
