@@ -8,8 +8,28 @@
 import { Logger } from '@kbn/core/server';
 import { PackageClient } from '@kbn/fleet-plugin/server';
 import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
-import { PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
+import { PackageInfo, RegistryDataStream } from '@kbn/fleet-plugin/common';
 import { IntegrationType } from '../../../common/api_types';
+
+export async function getIntegration({
+  packageClient,
+  logger,
+  packageName,
+}: {
+  packageClient: PackageClient;
+  logger: Logger;
+  packageName: string;
+}): Promise<IntegrationType> {
+  const latestPackage = await packageClient.getLatestPackageInfo(packageName);
+
+  return {
+    name: latestPackage.name,
+    title: latestPackage.title,
+    version: latestPackage.version,
+    icons: latestPackage.icons,
+    datasets: await getDatasets({ packageClient, logger, pkg: latestPackage }),
+  };
+}
 
 export async function getIntegrations(options: {
   packageClient: PackageClient;
@@ -36,7 +56,7 @@ export async function getIntegrations(options: {
 const getDatasets = async (options: {
   packageClient: PackageClient;
   logger: Logger;
-  pkg: PackageListItem;
+  pkg: Pick<PackageInfo, 'name' | 'version' | 'data_streams'>;
 }) => {
   const { packageClient, logger, pkg } = options;
 

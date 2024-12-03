@@ -610,7 +610,6 @@ export class AlertingPlugin {
         logger,
       }),
       maxAlerts: this.config.rules.run.alerts.max,
-      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       rulesSettingsService: new RulesSettingsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
@@ -621,7 +620,6 @@ export class AlertingPlugin {
       savedObjects: core.savedObjects,
       share: plugins.share,
       spaceIdToNamespace,
-      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
       isServerless: this.isServerless,
