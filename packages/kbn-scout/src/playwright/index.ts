@@ -25,3 +25,6 @@ export type {
   ScoutPage,
   EsArchiverFixture,
 } from './fixtures';
+
+// use to tag tests
+export { tags } from './constants';
