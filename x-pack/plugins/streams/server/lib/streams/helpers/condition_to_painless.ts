@@ -54,13 +54,29 @@ function binaryToPainless(condition: BinaryFilterCondition) {
     case 'neq':
       return `${safePainlessField(condition)} != ${encodeValue(condition.value)}`;
     case 'lt':
-      return `${safePainlessField(condition)} < ${encodeValue(condition.value)}`;
+      return `((${safePainlessField(
+        condition
+      )} instanceof String && Float.parseFloat(${safePainlessField(condition)}) < ${encodeValue(
+        Number(condition.value)
+      )}) || ${safePainlessField(condition)} < ${encodeValue(Number(condition.value))})`;
     case 'lte':
-      return `${safePainlessField(condition)} <= ${encodeValue(condition.value)}`;
+      return `((${safePainlessField(
+        condition
+      )} instanceof String && Float.parseFloat(${safePainlessField(condition)}) <= ${encodeValue(
+        Number(condition.value)
+      )}) || ${safePainlessField(condition)} <= ${encodeValue(Number(condition.value))})`;
     case 'gt':
-      return `${safePainlessField(condition)} > ${encodeValue(condition.value)}`;
+      return `((${safePainlessField(
+        condition
+      )} instanceof String && Float.parseFloat(${safePainlessField(condition)}) > ${encodeValue(
+        Number(condition.value)
+      )}) || ${safePainlessField(condition)} > ${encodeValue(Number(condition.value))})`;
     case 'gte':
-      return `${safePainlessField(condition)} >= ${encodeValue(condition.value)}`;
+      return `((${safePainlessField(
+        condition
+      )} instanceof String && Float.parseFloat(${safePainlessField(condition)}) >= ${encodeValue(
+        Number(condition.value)
+      )}) || ${safePainlessField(condition)} >= ${encodeValue(Number(condition.value))})`;
     case 'startsWith':
       return `${safePainlessField(condition)}.startsWith(${encodeValue(condition.value)})`;
     case 'endsWith':

@@ -18,19 +18,23 @@ const operatorConditionAndResults = [
   },
   {
     condition: { field: 'http.response.status_code', operator: 'lt' as const, value: 500 },
-    result: '(ctx.http?.response?.status_code !== null && ctx.http?.response?.status_code < 500)',
+    result:
+      '(ctx.http?.response?.status_code !== null && ((ctx.http?.response?.status_code instanceof String && Float.parseFloat(ctx.http?.response?.status_code) < 500) || ctx.http?.response?.status_code < 500))',
   },
   {
     condition: { field: 'http.response.status_code', operator: 'lte' as const, value: 500 },
-    result: '(ctx.http?.response?.status_code !== null && ctx.http?.response?.status_code <= 500)',
+    result:
+      '(ctx.http?.response?.status_code !== null && ((ctx.http?.response?.status_code instanceof String && Float.parseFloat(ctx.http?.response?.status_code) <= 500) || ctx.http?.response?.status_code <= 500))',
   },
   {
     condition: { field: 'http.response.status_code', operator: 'gt' as const, value: 500 },
-    result: '(ctx.http?.response?.status_code !== null && ctx.http?.response?.status_code > 500)',
+    result:
+      '(ctx.http?.response?.status_code !== null && ((ctx.http?.response?.status_code instanceof String && Float.parseFloat(ctx.http?.response?.status_code) > 500) || ctx.http?.response?.status_code > 500))',
   },
   {
     condition: { field: 'http.response.status_code', operator: 'gte' as const, value: 500 },
-    result: '(ctx.http?.response?.status_code !== null && ctx.http?.response?.status_code >= 500)',
+    result:
+      '(ctx.http?.response?.status_code !== null && ((ctx.http?.response?.status_code instanceof String && Float.parseFloat(ctx.http?.response?.status_code) >= 500) || ctx.http?.response?.status_code >= 500))',
   },
   {
     condition: { field: 'log.logger', operator: 'startsWith' as const, value: 'nginx' },
@@ -61,6 +65,17 @@ describe('conditionToPainless', () => {
         test(`${setup.condition.operator}`, () => {
           expect(conditionToStatement(setup.condition)).toEqual(setup.result);
         });
+      });
+
+      test('ensure string values work as numbers', () => {
+        const condition = {
+          field: 'http.response.status_code',
+          operator: 'gt',
+          value: '500',
+        };
+        expect(conditionToStatement(condition)).toEqual(
+          '(ctx.http?.response?.status_code !== null && ((ctx.http?.response?.status_code instanceof String && Float.parseFloat(ctx.http?.response?.status_code) > 500) || ctx.http?.response?.status_code > 500))'
+        );
       });
     });
 
