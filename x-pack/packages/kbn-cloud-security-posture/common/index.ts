@@ -28,7 +28,9 @@ export * from './constants';
 export {
   extractErrorMessage,
   buildMutedRulesFilter,
-  buildEntityFlyoutPreviewQuery,
+  buildGenericEntityFlyoutPreviewQuery,
+  buildMisconfigurationEntityFlyoutPreviewQuery,
+  buildVulnerabilityEntityFlyoutPreviewQuery,
 } from './utils/helpers';
 export { getAbbreviatedNumber } from './utils/get_abbreviated_number';
 export { UiMetricService } from './utils/ui_metrics';
