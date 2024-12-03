@@ -36,8 +36,7 @@ export type {
 export { DEFAULT_AAD_CONFIG } from './types';
 export { RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
-export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
-export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { AlertingServerSetup, AlertingServerStart } from './plugin';
 export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
@@ -45,12 +44,13 @@ export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
 export type { AlertingRulesConfig } from './config';
 export {
-  ReadOperations,
   AlertingAuthorizationFilterType,
   AlertingAuthorization,
+  ReadOperations,
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+
 export {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
@@ -84,9 +84,9 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
     rules: { run: { alerts: { max: true } } },
   },
   deprecations: ({ renameFromRoot, deprecate }) => [
-    deprecate('maxEphemeralActionsPerAlert', 'a future version', {
+    deprecate('maxEphemeralActionsPerAlert', '9.0.0', {
       level: 'warning',
-      message: `Configuring "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and will be removed in a future version. Remove this setting to increase action execution resiliency.`,
+      message: `The setting "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and currently ignored by the system. Please remove this setting.`,
     }),
   ],
 };
