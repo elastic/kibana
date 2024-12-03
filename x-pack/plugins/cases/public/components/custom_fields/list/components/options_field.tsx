@@ -105,6 +105,7 @@ const OptionsFieldComponent = ({ field, idAria, maxOptions, ...rest }: Props) =>
   const onDragEnd = useCallback<OnDragEndResponder>(
     ({ source, destination }) => {
       if (source && destination) {
+        setFreshOption(null);
         const newOptions = euiDragDropReorder(currentOptions, source.index, destination.index);
         field.setValue(newOptions);
       }
