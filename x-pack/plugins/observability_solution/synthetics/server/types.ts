@@ -17,10 +17,7 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import {
-  PluginStartContract as AlertingPluginStart,
-  PluginSetupContract as AlertingPluginSetup,
-} from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -62,14 +59,14 @@ export interface SyntheticsServerSetup {
   basePath: IBasePath;
   isDev?: boolean;
   coreStart: CoreStart;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
   isElasticsearchServerless: boolean;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
   features: FeaturesPluginSetup;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
@@ -90,7 +87,7 @@ export interface SyntheticsPluginsStartDependencies {
   taskManager: TaskManagerStartContract;
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
-  alerting: AlertingPluginStart;
+  alerting: AlertingServerStart;
 }
 
 export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{

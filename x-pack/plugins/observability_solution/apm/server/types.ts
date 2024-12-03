@@ -24,7 +24,7 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ActionsPlugin } from '@kbn/actions-plugin/server';
-import { AlertingPlugin } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -78,7 +78,7 @@ export interface APMPluginSetupDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   // optional dependencies
   actions?: ActionsPlugin['setup'];
-  alerting?: AlertingPlugin['setup'];
+  alerting?: AlertingServerSetup;
   cloud?: CloudSetup;
   fleet?: FleetPluginSetup;
   home?: HomeServerPluginSetup;
@@ -105,7 +105,7 @@ export interface APMPluginStartDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   // optional dependencies
   actions?: ActionsPlugin['start'];
-  alerting?: AlertingPlugin['start'];
+  alerting?: AlertingServerStart;
   cloud?: undefined;
   fleet?: FleetPluginStart;
   home?: HomeServerPluginStart;
