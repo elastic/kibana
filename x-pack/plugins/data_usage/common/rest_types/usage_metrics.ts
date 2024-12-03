@@ -39,6 +39,18 @@ export const METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP = Object.freeze<Record<Met
   search_rate: 'Search Rate',
 });
 
+export const METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP = Object.freeze<Record<string, MetricTypes>>({
+  'Data Retained in Storage': 'storage_retained',
+  'Data Ingested': 'ingest_rate',
+  'Search VCU': 'search_vcu',
+  'Ingest VCU': 'ingest_vcu',
+  'ML VCU': 'ml_vcu',
+  'Index Latency': 'index_latency',
+  'Index Rate': 'index_rate',
+  'Search Latency': 'search_latency',
+  'Search Rate': 'search_rate',
+});
+
 // type guard for MetricTypes
 export const isMetricType = (type: string): type is MetricTypes =>
   METRIC_TYPE_VALUES.includes(type as MetricTypes);

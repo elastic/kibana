@@ -29,7 +29,6 @@ import {
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import type { IndicatorTypes } from '../../domain/models';
 import { executeWithErrorHandler } from '../../errors';
 import {
   CreateSLO,
@@ -60,28 +59,9 @@ import { SloDefinitionClient } from '../../services/slo_definition_client';
 import { getSloSettings, storeSloSettings } from '../../services/slo_settings';
 import { DefaultSummarySearchClient } from '../../services/summary_search_client';
 import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
-import {
-  ApmTransactionDurationTransformGenerator,
-  ApmTransactionErrorRateTransformGenerator,
-  HistogramTransformGenerator,
-  KQLCustomTransformGenerator,
-  MetricCustomTransformGenerator,
-  SyntheticsAvailabilityTransformGenerator,
-  TimesliceMetricTransformGenerator,
-  TransformGenerator,
-} from '../../services/transform_generators';
+import { createTransformGenerators } from '../../services/transform_generators';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { SLORoutesDependencies } from '../types';
-
-const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
-  'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
-  'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
-  'sli.synthetics.availability': new SyntheticsAvailabilityTransformGenerator(),
-  'sli.kql.custom': new KQLCustomTransformGenerator(),
-  'sli.metric.custom': new MetricCustomTransformGenerator(),
-  'sli.histogram.custom': new HistogramTransformGenerator(),
-  'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
-};
 
 const assertPlatinumLicense = async (plugins: SLORoutesDependencies['plugins']) => {
   const licensing = await plugins.licensing.start();
@@ -99,9 +79,11 @@ const getSpaceId = async (plugins: SLORoutesDependencies['plugins'], request: Ki
 
 const createSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: createSLOParamsSchema,
   handler: async ({ context, response, params, logger, request, plugins, corePlugins }) => {
@@ -120,13 +102,17 @@ const createSLORoute = createSloServerRoute({
       getSpaceId(plugins, request),
       dataViews.dataViewsServiceFactory(soClient, esClient),
     ]);
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      scopedClusterClient,
-      logger,
+
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
+    );
+
+    const transformManager = new DefaultTransformManager(
+      transformGenerators,
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -150,9 +136,11 @@ const createSLORoute = createSloServerRoute({
 
 const inspectSLORoute = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_inspect',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger, request, plugins, corePlugins }) => {
@@ -168,13 +156,16 @@ const inspectSLORoute = createSloServerRoute({
     const soClient = core.savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      scopedClusterClient,
-      logger,
+
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
+    );
+    const transformManager = new DefaultTransformManager(
+      transformGenerators,
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -199,9 +190,11 @@ const inspectSLORoute = createSloServerRoute({
 
 const updateSLORoute = createSloServerRoute({
   endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, request, params, logger, plugins, corePlugins }) => {
@@ -218,13 +211,16 @@ const updateSLORoute = createSloServerRoute({
     const soClient = core.savedObjects.client;
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      scopedClusterClient,
-      logger,
+
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
+    );
+    const transformManager = new DefaultTransformManager(
+      transformGenerators,
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -249,9 +245,11 @@ const updateSLORoute = createSloServerRoute({
 
 const deleteSLORoute = createSloServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id} 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: deleteSLOParamsSchema,
   handler: async ({ request, response, context, params, logger, plugins }) => {
@@ -271,14 +269,16 @@ const deleteSLORoute = createSloServerRoute({
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
 
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(
       transformGenerators,
       scopedClusterClient,
-      logger,
-      spaceId,
-      dataViewsService,
-      sloContext.isServerless
+      logger
     );
 
     const summaryTransformManager = new DefaultSummaryTransformManager(
@@ -303,9 +303,11 @@ const deleteSLORoute = createSloServerRoute({
 
 const getSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos/{id} 2023-10-31',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: getSLOParamsSchema,
   handler: async ({ request, context, params, logger, plugins }) => {
@@ -329,9 +331,11 @@ const getSLORoute = createSloServerRoute({
 
 const enableSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/enable 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: manageSLOParamsSchema,
   handler: async ({ request, response, context, params, logger, plugins }) => {
@@ -346,13 +350,17 @@ const enableSLORoute = createSloServerRoute({
     const esClient = core.elasticsearch.client.asCurrentUser;
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      scopedClusterClient,
-      logger,
+
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
+    );
+
+    const transformManager = new DefaultTransformManager(
+      transformGenerators,
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -370,9 +378,11 @@ const enableSLORoute = createSloServerRoute({
 
 const disableSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/disable 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: manageSLOParamsSchema,
   handler: async ({ response, request, context, params, logger, plugins }) => {
@@ -388,13 +398,16 @@ const disableSLORoute = createSloServerRoute({
     const esClient = core.elasticsearch.client.asCurrentUser;
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      scopedClusterClient,
-      logger,
+
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
+    );
+    const transformManager = new DefaultTransformManager(
+      transformGenerators,
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -411,9 +424,11 @@ const disableSLORoute = createSloServerRoute({
 
 const resetSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/_reset 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: resetSLOParamsSchema,
   handler: async ({ context, request, params, logger, plugins, corePlugins }) => {
@@ -430,13 +445,16 @@ const resetSLORoute = createSloServerRoute({
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      scopedClusterClient,
-      logger,
+
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
+    );
+    const transformManager = new DefaultTransformManager(
+      transformGenerators,
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -461,9 +479,11 @@ const resetSLORoute = createSloServerRoute({
 
 const findSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos 2023-10-31',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: findSLOParamsSchema,
   handler: async ({ context, request, params, logger, plugins }) => {
@@ -483,9 +503,11 @@ const findSLORoute = createSloServerRoute({
 
 const findSLOGroupsRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/_groups',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: findSLOGroupsParamsSchema,
   handler: async ({ context, request, params, logger, plugins }) => {
@@ -502,9 +524,11 @@ const findSLOGroupsRoute = createSloServerRoute({
 
 const getSLOSuggestionsRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/suggestions',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   handler: async ({ context, plugins }) => {
     await assertPlatinumLicense(plugins);
@@ -517,9 +541,11 @@ const getSLOSuggestionsRoute = createSloServerRoute({
 
 const deleteSloInstancesRoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_delete_instances 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: deleteSLOInstancesParamsSchema,
   handler: async ({ response, context, params, plugins }) => {
@@ -535,9 +561,11 @@ const deleteSloInstancesRoute = createSloServerRoute({
 
 const findSloDefinitionsRoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos/_definitions 2023-10-31',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: findSloDefinitionsParamsSchema,
   handler: async ({ context, params, logger, plugins }) => {
@@ -553,9 +581,11 @@ const findSloDefinitionsRoute = createSloServerRoute({
 
 const fetchHistoricalSummary = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params, plugins }) => {
@@ -570,9 +600,11 @@ const fetchHistoricalSummary = createSloServerRoute({
 
 const getSLOInstancesRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/{id}/_instances',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: getSLOInstancesParamsSchema,
   handler: async ({ context, params, logger, plugins }) => {
@@ -589,9 +621,12 @@ const getSLOInstancesRoute = createSloServerRoute({
 
 const getDiagnosisRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/_diagnosis',
-  options: {
-    tags: [],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'The endpoint is used to diagnose SLOs and does not require any specific privileges.',
+    },
   },
   params: undefined,
   handler: async ({ context, plugins }) => {
@@ -612,9 +647,11 @@ const getDiagnosisRoute = createSloServerRoute({
 
 const fetchSloHealthRoute = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_health',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: fetchSLOHealthParamsSchema,
   handler: async ({ context, params, logger, plugins }) => {
@@ -634,9 +671,11 @@ const fetchSloHealthRoute = createSloServerRoute({
 
 const getSloBurnRates = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/{id}/_burn_rates',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: getSLOBurnRatesParamsSchema,
   handler: async ({ request, context, params, logger, plugins }) => {
@@ -667,9 +706,11 @@ const getSloBurnRates = createSloServerRoute({
 
 const getPreviewData = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_preview',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: getPreviewDataParamsSchema,
   handler: async ({ request, context, params, plugins }) => {
@@ -688,9 +729,11 @@ const getPreviewData = createSloServerRoute({
 
 const getSloSettingsRoute = createSloServerRoute({
   endpoint: 'GET /internal/slo/settings',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   handler: async ({ context, plugins }) => {
     await assertPlatinumLicense(plugins);
@@ -704,9 +747,11 @@ const getSloSettingsRoute = createSloServerRoute({
 const putSloSettings = (isServerless?: boolean) =>
   createSloServerRoute({
     endpoint: 'PUT /internal/slo/settings',
-    options: {
-      tags: ['access:slo_write'],
-      access: 'internal',
+    options: { access: 'internal' },
+    security: {
+      authz: {
+        requiredPrivileges: ['slo_write'],
+      },
     },
     params: isServerless ? putSLOServerlessSettingsParamsSchema : putSLOSettingsParamsSchema,
     handler: async ({ context, params, plugins }) => {
@@ -721,9 +766,11 @@ const putSloSettings = (isServerless?: boolean) =>
 
 const getSLOsOverview = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/overview',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: getOverviewParamsSchema,
   handler: async ({ context, params, request, logger, plugins }) => {

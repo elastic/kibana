@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash/fp';
 import { RequestHandler } from '@kbn/core/server';
-import {
+import { momentDateParser } from '../../../common/utils';
+import type {
   MetricTypes,
   UsageMetricsAutoOpsResponseSchemaBody,
   UsageMetricsRequestBody,
@@ -30,9 +32,22 @@ export const getUsageMetricsHandler = (
       const core = await context.core;
 
       const esClient = core.elasticsearch.client.asCurrentUser;
+      const getDataStreams = (name: string[]) =>
+        esClient.indices.getDataStream({ name, expand_wildcards: 'all' });
 
       logger.debug(`Retrieving usage metrics`);
       const { from, to, metricTypes, dataStreams: requestDsNames } = request.body;
+
+      // parse date strings to validate
+      const parsedFrom = momentDateParser(from)?.toISOString();
+      const parsedTo = momentDateParser(to)?.toISOString();
+
+      if (!parsedFrom || !parsedTo) {
+        const customErrorMessage = `[request body.${
+          !parsedTo ? 'to' : 'from'
+        }] Invalid date range ${!parsedTo ? to : from} is out of range`;
+        return errorHandler(logger, response, new CustomHttpRequestError(customErrorMessage, 400));
+      }
 
       // redundant check as we don't allow making requests via UI without data streams,
       // but it's here to make sure the request body is validated before requesting metrics from auto-ops
@@ -43,15 +58,24 @@ export const getUsageMetricsHandler = (
           new CustomHttpRequestError('[request body.dataStreams]: no data streams selected', 400)
         );
       }
-      let dataStreamsResponse;
+
+      let dataStreamsResponse: Array<{ name: string }>;
 
       try {
-        // Attempt to fetch data streams
-        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
-          name: requestDsNames,
-          expand_wildcards: 'all',
-        });
-        dataStreamsResponse = dataStreams;
+        if (requestDsNames.length <= 50) {
+          logger.debug(`Retrieving usage metrics`);
+          const { data_streams: dataStreams } = await getDataStreams(requestDsNames);
+          dataStreamsResponse = dataStreams;
+        } else {
+          logger.debug(`Retrieving usage metrics in chunks of 50`);
+          // Attempt to fetch data streams in chunks of 50
+          const dataStreamsChunks = Math.ceil(requestDsNames.length / 50);
+          const chunkedDsLists = chunk(dataStreamsChunks, requestDsNames);
+          const chunkedDataStreams = await Promise.all(
+            chunkedDsLists.map((dsList) => getDataStreams(dsList))
+          );
+          dataStreamsResponse = chunkedDataStreams.flatMap((ds) => ds.data_streams);
+        }
       } catch (error) {
         return errorHandler(
           logger,
@@ -62,8 +86,8 @@ export const getUsageMetricsHandler = (
 
       const dataUsageService = new DataUsageService(logger);
       const metrics = await dataUsageService.getMetrics({
-        from,
-        to,
+        from: parsedFrom,
+        to: parsedTo,
         metricTypes: formatStringParams(metricTypes) as MetricTypes[],
         dataStreams: formatStringParams(dataStreamsResponse.map((ds) => ds.name)),
       });

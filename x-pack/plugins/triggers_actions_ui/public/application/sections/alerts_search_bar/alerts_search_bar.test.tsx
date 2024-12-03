@@ -12,14 +12,10 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
-import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { AlertsSearchBar } from './alerts_search_bar';
 
 const mockDataPlugin = dataPluginMock.createStartContract();
 jest.mock('@kbn/kibana-utils-plugin/public');
-jest.mock('../../hooks/use_load_rule_types_query');
-jest.mock('../../hooks/use_rule_aad_fields');
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -41,52 +37,33 @@ jest.mocked(useAlertsDataView).mockReturnValue({
   },
 });
 
-jest.mocked(useLoadRuleTypesQuery).mockReturnValue({
-  ruleTypesState: {
-    initialLoad: false,
-    data: new Map(),
-    isLoading: false,
-    error: undefined,
-  },
-  authorizedToReadAnyRules: false,
-  hasAnyAuthorizedRuleType: false,
-  authorizedRuleTypes: [],
-  authorizedToCreateAnyRules: false,
-  isSuccess: false,
-});
-
-jest.mocked(useRuleAADFields).mockReturnValue({
-  aadFields: [],
-  loading: false,
-});
-
 const mockUseKibana = useKibana as jest.Mock;
+
+const unifiedSearchBarMock = jest.fn().mockImplementation((props) => (
+  <button
+    data-test-subj="querySubmitButton"
+    onClick={() => props.onQuerySubmit({ dateRange: { from: 'now', to: 'now' } })}
+    type="button"
+  >
+    {'Hello world'}
+  </button>
+));
 
 describe('AlertsSearchBar', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
     mockUseKibana.mockReturnValue({
       services: {
         data: mockDataPlugin,
         unifiedSearch: {
           ui: {
-            SearchBar: jest.fn().mockImplementation((props) => (
-              <button
-                data-test-subj="querySubmitButton"
-                onClick={() => props.onQuerySubmit({ dateRange: { from: 'now', to: 'now' } })}
-                type="button"
-              >
-                {'Hello world'}
-              </button>
-            )),
+            SearchBar: unifiedSearchBarMock,
           },
         },
         notifications: { toasts: { addWarning: jest.fn() } } as unknown as NotificationsStart,
       },
     });
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
@@ -100,7 +77,6 @@ describe('AlertsSearchBar', () => {
         onSavedQueryUpdated={jest.fn()}
         onClearSavedQuery={jest.fn()}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
     expect(await screen.findByTestId('querySubmitButton')).toBeInTheDocument();
@@ -119,7 +95,6 @@ describe('AlertsSearchBar', () => {
         onSavedQueryUpdated={jest.fn()}
         onClearSavedQuery={jest.fn()}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
 
@@ -176,7 +151,6 @@ describe('AlertsSearchBar', () => {
         onSavedQueryUpdated={jest.fn()}
         onClearSavedQuery={jest.fn()}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
 
@@ -185,6 +159,138 @@ describe('AlertsSearchBar', () => {
     await waitFor(() => {
       expect(onFiltersUpdatedMock).toHaveBeenCalledWith(filters);
       expect(mockDataPlugin.query.filterManager.setFilters).toHaveBeenCalledWith(filters);
+    });
+  });
+
+  it('calls the unifiedSearchBar correctly for security rule types', async () => {
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+        ruleTypeIds={['siem.esqlRuleType', '.esQuery']}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          suggestionsAbstraction: undefined,
+        }),
+        {}
+      );
+    });
+  });
+
+  it('calls the unifiedSearchBar correctly for NON security rule types', async () => {
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+        ruleTypeIds={['.esQuery']}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          suggestionsAbstraction: { type: 'alerts', fields: {} },
+        }),
+        {}
+      );
+    });
+  });
+
+  it('calls the unifiedSearchBar with correct index patters', async () => {
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+        ruleTypeIds={['.esQuery', 'apm.anomaly']}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexPatterns: [
+            {
+              fields: [
+                { aggregatable: true, name: 'event.action', searchable: true, type: 'string' },
+              ],
+              title: '.esQuery,apm.anomaly',
+            },
+          ],
+        }),
+        {}
+      );
+    });
+  });
+
+  it('calls the unifiedSearchBar with correct index patters without rule types', async () => {
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexPatterns: [
+            {
+              fields: [
+                { aggregatable: true, name: 'event.action', searchable: true, type: 'string' },
+              ],
+              title: '.alerts-*',
+            },
+          ],
+        }),
+        {}
+      );
+    });
+  });
+
+  it('calls the unifiedSearchBar with correct index patters without data views', async () => {
+    jest.mocked(useAlertsDataView).mockReturnValue({
+      isLoading: false,
+      dataView: undefined,
+    });
+
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexPatterns: [],
+        }),
+        {}
+      );
     });
   });
 });

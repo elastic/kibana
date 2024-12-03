@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 import useThrottle from 'react-use/lib/useThrottle';
@@ -17,10 +17,9 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -53,38 +52,10 @@ interface CreateSearchApplicationButtonProps {
 export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButtonProps> = ({
   disabled,
 }) => {
-  const [showPopover, setShowPopover] = useState<boolean>(false);
-
   return (
-    <EuiPopover
-      isOpen={showPopover}
-      closePopover={() => setShowPopover(false)}
-      button={
-        <div
-          data-test-subj="create-search-application-button-hover-target"
-          onMouseEnter={() => setShowPopover(true)}
-          onMouseLeave={() => setShowPopover(false)}
-          tabIndex={0}
-        >
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            data-test-subj="enterprise-search-search-applications-creation-button"
-            data-telemetry-id="entSearchApplications-list-createSearchApplication"
-            isDisabled={disabled}
-            onClick={() => KibanaLogic.values.navigateToUrl(SEARCH_APPLICATION_CREATION_PATH)}
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.list.createSearchApplicationButton.label',
-              {
-                defaultMessage: 'Create',
-              }
-            )}
-          </EuiButton>
-        </div>
-      }
-    >
-      <EuiPopoverTitle>
+    <EuiToolTip
+      position="top"
+      title={
         <EuiFlexGroup justifyContent="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiIcon type="beaker" />
@@ -96,23 +67,35 @@ export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButt
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPopoverTitle>
-      <div
-        style={{ width: '300px' }}
-        data-test-subj="create-search-application-button-popover-content"
+      }
+      content={
+        <EuiText size="s" data-test-subj="create-search-application-button-popover-content">
+          <FormattedMessage
+            id="xpack.enterpriseSearch.searchApplications.list.createSearchApplicationTechnicalPreviewPopover.body"
+            defaultMessage="This functionality may be changed or removed completely in a future release."
+          />
+        </EuiText>
+      }
+    >
+      <EuiButton
+        fill
+        iconType="plusInCircle"
+        data-test-subj="enterprise-search-search-applications-creation-button"
+        data-telemetry-id="entSearchApplications-list-createSearchApplication"
+        isDisabled={disabled}
+        onClick={() => KibanaLogic.values.navigateToUrl(SEARCH_APPLICATION_CREATION_PATH)}
       >
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.enterpriseSearch.searchApplications.list.createSearchApplicationTechnicalPreviewPopover.body"
-              defaultMessage="This functionality may be changed or removed completely in a future release."
-            />
-          </EuiText>
-        </EuiFlexGroup>
-      </div>
-    </EuiPopover>
+        {i18n.translate(
+          'xpack.enterpriseSearch.searchApplications.list.createSearchApplicationButton.label',
+          {
+            defaultMessage: 'Create',
+          }
+        )}
+      </EuiButton>
+    </EuiToolTip>
   );
 };
+
 interface ListProps {
   createSearchApplicationFlyoutOpen?: boolean;
 }
@@ -223,6 +206,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
           <>
             <div>
               <EuiFieldSearch
+                data-test-subj="enterpriseSearchSearchApplicationsListFieldSearch"
                 value={searchQuery}
                 placeholder={i18n.translate(
                   'xpack.enterpriseSearch.searchApplications.list.searchBar.placeholder',
