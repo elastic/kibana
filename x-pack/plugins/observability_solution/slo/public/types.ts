@@ -15,6 +15,7 @@ import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/pub
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -47,6 +48,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLOPlugin } from './plugin';
 
@@ -65,6 +67,7 @@ export interface SLOPublicPluginsSetup {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface SLOPublicPluginsStart {
@@ -80,6 +83,7 @@ export interface SLOPublicPluginsStart {
   discover?: DiscoverStart;
   discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -94,6 +98,7 @@ export interface SLOPublicPluginsStart {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
+  security?: SecurityPluginStart;
 }
 
 export type SLOPublicSetup = ReturnType<SLOPlugin['setup']>;

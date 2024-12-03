@@ -6,65 +6,73 @@
  */
 
 import { z } from '@kbn/zod';
+import { notFound, internal } from '@hapi/boom';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { listStreams } from '../../lib/streams/stream_crud';
+import { StreamDefinition } from '../../../common';
 
 export const listStreamsRoute = createServerRoute({
-  endpoint: 'GET /api/streams 2023-10-31',
+  endpoint: 'GET /api/streams',
   options: {
-    access: 'public',
-    availability: {
-      stability: 'experimental',
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
-      },
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   params: z.object({}),
-  handler: async ({ response, request, getScopedClients }) => {
+  handler: async ({
+    response,
+    request,
+    getScopedClients,
+  }): Promise<{ definitions: StreamDefinition[]; trees: StreamTree[] }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
-      const definitions = await listStreams({ scopedClusterClient });
+      const { definitions } = await listStreams({ scopedClusterClient });
 
       const trees = asTrees(definitions);
 
-      return response.ok({ body: { streams: trees } });
+      return { definitions, trees };
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
-        return response.notFound({ body: e });
+        throw notFound(e);
       }
 
-      return response.customError({ body: e, statusCode: 500 });
+      throw internal(e);
     }
   },
 });
 
-interface ListStreamDefinition {
+export interface StreamTree {
   id: string;
-  children: ListStreamDefinition[];
+  children: StreamTree[];
 }
 
-function asTrees(definitions: Array<{ id: string[] }>) {
-  const trees: ListStreamDefinition[] = [];
-  definitions.forEach((definition) => {
-    const path = definition.id[0].split('.');
+function asTrees(definitions: Array<{ id: string; managed?: boolean }>) {
+  const trees: StreamTree[] = [];
+  const ids = definitions
+    .filter((definition) => definition.managed)
+    .map((definition) => definition.id);
+
+  ids.sort((a, b) => a.split('.').length - b.split('.').length);
+
+  ids.forEach((id) => {
     let currentTree = trees;
-    path.forEach((_id, index) => {
-      const partialPath = path.slice(0, index + 1).join('.');
-      const existingNode = currentTree.find((node) => node.id === partialPath);
-      if (existingNode) {
-        currentTree = existingNode.children;
-      } else {
-        const newNode = { id: partialPath, children: [] };
-        currentTree.push(newNode);
-        currentTree = newNode.children;
-      }
-    });
+    let existingNode: StreamTree | undefined;
+    // traverse the tree following the prefix of the current id.
+    // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
+    while ((existingNode = currentTree.find((node) => id.startsWith(node.id)))) {
+      currentTree = existingNode.children;
+    }
+    if (!existingNode) {
+      const newNode = { id, children: [] };
+      currentTree.push(newNode);
+    }
   });
+
   return trees;
 }
