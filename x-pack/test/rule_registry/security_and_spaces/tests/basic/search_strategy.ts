@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return alerts from different rules', async () => {
         const ruleTypeIds = [...apmRuleTypeIds, 'logs.alert.document.count'];
 
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -258,7 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should filter alerts by rule type IDs with consumers', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -283,7 +283,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should filter alerts by consumers with rule type IDs', async () => {
         const ruleTypeIds = [...apmRuleTypeIds, 'logs.alert.document.count'];
 
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -312,7 +312,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not by pass our RBAC authz filter with a should filter for rule type ids', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -355,7 +355,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not by pass our RBAC authz filter with a should filter for consumers', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -398,7 +398,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return an empty response with must filter and our RBAC authz filter for rule type ids', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -439,7 +439,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return an empty response with must filter and our RBAC authz filter for consumers', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -480,7 +480,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not by pass our RBAC authz filter with must_not filter for rule type ids', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -523,7 +523,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not by pass our RBAC authz filter with must_not filter for consumers', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -573,7 +573,7 @@ export default ({ getService }: FtrProviderContext) => {
           '.es-query',
         ];
 
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             /**
@@ -608,7 +608,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not return any alerts if the user does not have access to any alerts', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponseWithErrors>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -628,7 +628,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not return alerts that the user does not have access to', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -649,7 +649,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not return alerts if the user does not have access to using a filter', async () => {
-        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
