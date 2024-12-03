@@ -62,7 +62,7 @@ const convertFormat = (row: SplunkRow): OriginalRule => {
     title: row.result.title,
     query: row.result.search,
     query_language: 'spl',
-    description: row.result['action.escu.eli5'] || row.result.description,
+    description: row.result['action.escu.eli5']?.trim() || row.result.description,
   };
 
   if (row.result['action.correlationsearch.annotations']) {

@@ -11,6 +11,25 @@ export const START_MIGRATION_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.title',
   { defaultMessage: 'Translate your existing SIEM Rules to Elastic' }
 );
+export const START_MIGRATION_CARD_FOOTER_NOTE = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.footerNote',
+  {
+    defaultMessage:
+      'Splunk and related marks are trademarks or registered trademarks of Splunk LLC in the United States and other countries.',
+  }
+);
+export const START_MIGRATION_CARD_CONNECTOR_MISSING_TEXT = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.connectorMissingText',
+  {
+    defaultMessage: 'Rule migrations require an AI connector to be configured.',
+  }
+);
+export const START_MIGRATION_CARD_CONNECTOR_MISSING_BUTTON = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.connectorMissingText',
+  {
+    defaultMessage: 'AI provider step',
+  }
+);
 
 export const START_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.upload.title',

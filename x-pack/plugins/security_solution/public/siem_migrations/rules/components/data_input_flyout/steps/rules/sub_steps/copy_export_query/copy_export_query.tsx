@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RULES_SPL_QUERY } from '../../../../constants';
+import { RULES_SPLUNK_QUERY } from '../../../../constants';
 import * as i18n from './translations';
 
 interface CopyExportQueryProps {
@@ -33,7 +33,7 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
       <div onClick={onClick}>
         {/* onCopy react event is dispatched when the user copies text manually */}
         <EuiCodeBlock language="text" fontSize="m" paddingSize="m" isCopyable onCopy={onCopied}>
-          {RULES_SPL_QUERY}
+          {RULES_SPLUNK_QUERY}
         </EuiCodeBlock>
       </div>
       <EuiSpacer size="m" />
