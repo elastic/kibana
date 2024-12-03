@@ -1018,9 +1018,6 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    /**
-     * Get the details of an existing saved Timeline or Timeline template.
-     */
     getTimeline(props: GetTimelineProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/timeline', kibanaSpace))

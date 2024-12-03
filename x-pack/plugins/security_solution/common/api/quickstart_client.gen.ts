@@ -1523,9 +1523,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  /**
-   * Get the details of an existing saved Timeline or Timeline template.
-   */
   async getTimeline(props: GetTimelineProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetTimeline`);
     return this.kbnClient
