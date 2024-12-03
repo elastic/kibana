@@ -26,16 +26,12 @@ interface IUserProfile {
   getUserProfile$: () => Rx.Observable<Record<string, unknown> | null>;
 }
 
-interface UserSettings {
-  contrastMode: 'high' | 'standard';
-}
-
 /**
  * Props for the KibanaEuiProvider.
  */
 export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
-  userProfile?: IUserProfile;
+  userProfile?: IUserProfile; // TODO: use this to access a "high contrast mode" flag from user settings. Pass the flag to EuiProvider, when it is supported in EUI.
   globalStyles?: boolean;
 }
 
@@ -74,7 +70,6 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
  */
 export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = ({
   theme: { theme$ },
-  userProfile,
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
   modify,
@@ -92,12 +87,6 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   // colorMode provided by the `theme`.
   const colorMode = colorModeProp || themeColorMode;
 
-  const getUserProfile$ = userProfile?.getUserProfile$ ?? Rx.of;
-  const userProfileData = useObservable(getUserProfile$());
-
-  const userSettings = userProfileData?.userSettings as UserSettings | undefined;
-  const highContrastMode = userSettings?.contrastMode === 'high';
-
   // This logic was drawn from the Core theme provider, and wasn't present (or even used)
   // elsewhere.  Should be a passive addition to anyone using the older theme provider(s).
   const globalStyles = globalStylesProp === false ? false : undefined;
@@ -110,7 +99,6 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         colorMode,
         globalStyles,
         utilityClasses: globalStyles,
-        highContrastMode,
         theme,
       }}
     >
