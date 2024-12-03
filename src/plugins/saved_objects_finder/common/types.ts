@@ -14,4 +14,5 @@ export type SavedObjectCommon<T extends FinderAttributes = FinderAttributes> = S
 export interface FinderAttributes {
   title?: string;
   name?: string;
+  description?: string;
 }

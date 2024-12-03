@@ -46,6 +46,7 @@ const prepareTest = () => {
                   canUnIsolateHost: true,
                   loading: false,
                 },
+                platform: 'linux',
               }),
             },
           };

@@ -54,12 +54,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
         });
 
-        it.skip('should show api key', async () => {
-          await pageObjects.svlApiKeys.deleteAPIKeys();
-          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-          await pageObjects.svlApiKeys.expectAPIKeyAvailable();
-          const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
-          await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
+        describe.skip('API key details', () => {
+          // Flaky test related with deleting API keys
+          it('should show api key', async () => {
+            await pageObjects.svlApiKeys.deleteAPIKeys();
+            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+            const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
+            await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
+          });
         });
 
         it('should have quick stats', async () => {
@@ -107,11 +110,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/197144
-        describe.skip('With data', () => {
+        describe('With data', () => {
           before(async () => {
             await es.index({
               index: indexName,
+              refresh: true,
               body: {
                 my_field: [1, 0, 1],
               },
@@ -304,6 +307,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToBeDisabled();
+        });
+        it('show no privileges to create api key', async () => {
+          await pageObjects.svlApiKeys.expectAPIKeyNoPrivileges();
         });
       });
     });
