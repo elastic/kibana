@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import type { MlSummaryJob } from '@kbn/ml-plugin/common';
-import React, { memo } from 'react';
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import * as i18n from './translations';
@@ -33,15 +33,17 @@ const JobsUL = styled.ul`
   }
 `;
 
-export interface MlJobUpgradeModalProps {
+interface OutdatedMlJobsUpgradeModalProps {
   jobs: MlSummaryJob[];
-  onCancel: (
-    event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
-  ) => void;
-  onConfirm?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onCancel: () => void;
+  onConfirm: () => void;
 }
 
-const MlJobUpgradeModalComponent = ({ jobs, onCancel, onConfirm }: MlJobUpgradeModalProps) => {
+export const OutdatedMlJobsUpgradeModal = memo(function LegacyMlJobsUpgradeModal({
+  jobs,
+  onCancel,
+  onConfirm,
+}: OutdatedMlJobsUpgradeModalProps): JSX.Element {
   return (
     <EuiConfirmModal
       title={i18n.ML_JOB_UPGRADE_MODAL_TITLE}
@@ -61,6 +63,4 @@ const MlJobUpgradeModalComponent = ({ jobs, onCancel, onConfirm }: MlJobUpgradeM
       </JobsUL>
     </EuiConfirmModal>
   );
-};
-
-export const MlJobUpgradeModal = memo(MlJobUpgradeModalComponent);
+});

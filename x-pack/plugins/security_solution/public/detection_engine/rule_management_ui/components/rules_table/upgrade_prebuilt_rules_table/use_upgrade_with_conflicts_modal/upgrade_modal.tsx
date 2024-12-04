@@ -9,14 +9,15 @@ import { EuiConfirmModal, EuiText } from '@elastic/eui';
 import React, { memo } from 'react';
 import * as i18n from './translations';
 
-export interface UpgradeConflictsModalProps {
-  onCancel: (
-    event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
-  ) => void;
-  onConfirm?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+interface UpgradeWithConflictsModalProps {
+  onCancel: () => void;
+  onConfirm: () => void;
 }
 
-const UpgradeConflictsModalComponent = ({ onCancel, onConfirm }: UpgradeConflictsModalProps) => {
+export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflictsModal({
+  onCancel,
+  onConfirm,
+}: UpgradeWithConflictsModalProps): JSX.Element {
   return (
     <EuiConfirmModal
       title={i18n.UPGRADE_CONFLICTS_MODAL_TITLE}
@@ -26,11 +27,9 @@ const UpgradeConflictsModalComponent = ({ onCancel, onConfirm }: UpgradeConflict
       confirmButtonText={i18n.UPGRADE_CONFLICTS_MODAL_CONFIRM}
       buttonColor="primary"
       defaultFocusedButton="confirm"
-      data-test-subj="upgradeConflictsModal"
+      data-test-subj="confirmUpgradeWithConflictsModal"
     >
       <EuiText>{i18n.UPGRADE_CONFLICTS_MODAL_BODY}</EuiText>
     </EuiConfirmModal>
   );
-};
-
-export const UpgradeConflictsModal = memo(UpgradeConflictsModalComponent);
+});
