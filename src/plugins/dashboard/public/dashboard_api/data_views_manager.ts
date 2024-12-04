@@ -44,7 +44,7 @@ export function initializeDataViewsManager(
     .pipe(
       switchMap(async ([controlGroupDataViews, childDataViews]) => {
         const allDataViews = [
-          ...(controlGroupDataViews ? controlGroupDataViews : []),
+          ...(controlGroupDataViews ?? []),
           ...childDataViews,
         ];
         if (allDataViews.length === 0) {
