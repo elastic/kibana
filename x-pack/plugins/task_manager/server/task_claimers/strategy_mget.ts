@@ -13,7 +13,8 @@
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
 
-import apm, { Logger } from 'elastic-apm-node';
+import apm from 'elastic-apm-node';
+import type { Logger } from '@kbn/core/server';
 import { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
@@ -153,8 +154,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const tasksToRun: ConcreteTaskInstance[] = [];
   const leftOverTasks: ConcreteTaskInstance[] = [];
 
-  // eslint-disable-next-line no-console
-  console.log(`tasksToRun ${JSON.stringify(tasksToRun)}`);
+  logger.info(`tasksToRun ${JSON.stringify(tasksToRun)}`);
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
