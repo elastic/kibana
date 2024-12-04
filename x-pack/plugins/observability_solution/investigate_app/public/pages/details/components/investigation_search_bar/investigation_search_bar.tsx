@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import type { SearchBar } from '@kbn/unified-search-plugin/public';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -42,14 +43,29 @@ export function InvestigationSearchBar({
       direction="row"
       gutterSize="s"
       alignItems="flexStart"
-      justifyContent="flexEnd"
+      justifyContent="spaceBetween"
+      responsive
       css={css`
+        padding-left: 8px;
+        padding-right: 8px;
+        padding-top: 8px;
         max-height: fit-content;
       `}
     >
-      <EuiFlexItem grow={false}>
-        <InvestigationEventTypesFilter onSelected={onEventTypesSelected} />
-      </EuiFlexItem>
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <h5>
+              {i18n.translate('xpack.investigateApp.investigationSearchBar.eventsTitleLabel', {
+                defaultMessage: 'Events',
+              })}
+            </h5>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <InvestigationEventTypesFilter onSelected={onEventTypesSelected} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiFlexItem grow={false}>
         <SearchBar

@@ -5,55 +5,32 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useState } from 'react';
-import { EventsTimeline } from '../events_timeline/events_timeline';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { AddInvestigationItem } from '../add_investigation_item/add_investigation_item';
-import { InvestigationItemsList } from '../investigation_items_list/investigation_items_list';
-import { InvestigationSearchBar } from '../investigation_search_bar/investigation_search_bar';
 import { AssistantHypothesis } from '../assistant_hypothesis/assistant_hypothesis';
+import { InvestigationItemsList } from '../investigation_items_list/investigation_items_list';
+import { InvestigationTimeline } from '../investigation_timeline/investigation_timeline';
 
 export function InvestigationItems() {
-  const { globalParams, updateInvestigationParams, investigation } = useInvestigation();
-  const [eventTypes, setEventTypes] = useState<string[]>([]);
+  const { investigation } = useInvestigation();
 
   return (
-    <>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <InvestigationSearchBar
-          onEventTypesSelected={(selected: string[]) => setEventTypes(selected)}
-          dateRangeFrom={globalParams.timeRange.from}
-          dateRangeTo={globalParams.timeRange.to}
-          onQuerySubmit={async ({ dateRange }) => {
-            const nextTimeRange = {
-              from: datemath.parse(dateRange.from)!.toISOString(),
-              to: datemath.parse(dateRange.to)!.toISOString(),
-            };
+    <EuiFlexGroup direction="column" gutterSize="s" responsive>
+      <InvestigationTimeline />
 
-            updateInvestigationParams({ timeRange: nextTimeRange });
-          }}
-        />
-
+      {investigation?.id && (
         <EuiFlexItem grow={false}>
-          <EventsTimeline eventTypes={eventTypes} />
+          <AssistantHypothesis investigationId={investigation.id} />
         </EuiFlexItem>
+      )}
 
-        {investigation?.id && (
-          <EuiFlexItem grow={false}>
-            <AssistantHypothesis investigationId={investigation.id} />
-          </EuiFlexItem>
-        )}
-
-        <EuiFlexItem grow={false}>
-          <InvestigationItemsList />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
+      <EuiFlexItem grow={false}>
+        <InvestigationItemsList />
+      </EuiFlexItem>
 
       <AddInvestigationItem />
-    </>
+    </EuiFlexGroup>
   );
 }

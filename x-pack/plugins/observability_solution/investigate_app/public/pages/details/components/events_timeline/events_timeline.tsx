@@ -70,7 +70,7 @@ export const EventsTimeline = ({ eventTypes }: Props) => {
   }
 
   return (
-    <Chart size={['100%', 100]} ref={chartRef}>
+    <Chart size={['100%', 64]} ref={chartRef}>
       <Settings
         xDomain={{
           min: moment(globalParams.timeRange.from).valueOf(),
