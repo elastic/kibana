@@ -50,6 +50,8 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
     totalAvailableRules.forEach((rule) => {
       filteredRules.push({
         ...rule,
+        mitre_attack_ids:
+          rule?.threat?.flatMap((t) => t.technique?.map((tech) => tech.id) ?? []) ?? [],
         elser_embedding: `${rule.name} - ${rule.description}`,
       });
     });
@@ -83,7 +85,10 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
   }
 
   /** Based on a LLM generated semantic string, returns the 5 best results with a score above 40 */
-  async retrieveRules(semanticString: string): Promise<RuleMigrationPrebuiltRule[]> {
+  async retrieveRules(
+    semanticString: string,
+    techniqueIds: string
+  ): Promise<RuleMigrationPrebuiltRule[]> {
     const index = await this.getIndexName();
     const query = {
       bool: {
@@ -100,6 +105,13 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
               query: semanticString,
               fields: ['name^2', 'description'],
               boost: 3,
+            },
+          },
+          {
+            multi_match: {
+              query: techniqueIds,
+              fields: ['mitre_attack_ids'],
+              boost: 2,
             },
           },
         ],

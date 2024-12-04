@@ -28,4 +28,5 @@ export interface RuleMigrationPrebuiltRule {
   name: string;
   description: string;
   elser_embedding: string;
+  mitre_attack_ids?: string[];
 }

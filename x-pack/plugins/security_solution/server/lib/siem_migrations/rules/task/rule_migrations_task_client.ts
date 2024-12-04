@@ -65,13 +65,11 @@ export class RuleMigrationsTaskClient {
 
     const abortController = new AbortController();
 
-    // Await the preparation to make sure the agent is created properly so the task can run
+    // Retrieve agent from prepare and pass it to run right after without awaiting but using .then
     this.prepare({ ...params, abortController })
-      .then((agent) => {
-        this.run({ ...params, agent, abortController });
-      })
+      .then((agent) => this.run({ ...params, agent, abortController }))
       .catch((error) => {
-        this.logger.error(`Error preparing migration ID:${migrationId}`, error);
+        this.logger.error(`Error starting migration ID:${migrationId}`, error);
       });
 
     return { exists: true, started: true };

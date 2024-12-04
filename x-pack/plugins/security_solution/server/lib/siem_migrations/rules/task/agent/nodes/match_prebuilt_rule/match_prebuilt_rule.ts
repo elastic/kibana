@@ -25,7 +25,11 @@ export const getMatchPrebuiltRuleNode =
   ({ model, ruleMigrationsRetriever }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
   async (state) => {
     const query = state.semantic_query;
-    const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.getRules(query);
+    const techniqueIds = state.original_rule.mitre_attack_ids || [];
+    const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.getRules(
+      query,
+      techniqueIds.join(',')
+    );
 
     const outputParser = new JsonOutputParser();
     const matchPrebuiltRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
