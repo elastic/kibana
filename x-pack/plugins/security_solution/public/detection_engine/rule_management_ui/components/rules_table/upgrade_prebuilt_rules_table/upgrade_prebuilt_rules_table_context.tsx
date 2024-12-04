@@ -14,10 +14,7 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import type {
-  RuleUpgradeState,
-  RulesUpgradeState,
-} from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { RuleUpgradeTab } from '../../../../rule_management/components/rule_details/three_way_diff';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
@@ -47,7 +44,7 @@ export interface UpgradePrebuiltRulesTableState {
   /**
    * Rule upgrade state after applying `filterOptions`
    */
-  rulesUpgradeState: RulesUpgradeState;
+  ruleUpgradeStates: RuleUpgradeState[];
   /**
    * Currently selected table filter
    */
@@ -142,12 +139,13 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     refetchInterval: false, // Disable automatic refetching since request is expensive
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
-  const filteredRuleUpgradeInfos = useFilterPrebuiltRulesToUpgrade({
-    filterOptions,
-    rules: ruleUpgradeInfos,
-  });
   const { rulesUpgradeState, setRuleFieldResolvedValue } =
-    usePrebuiltRulesUpgradeState(filteredRuleUpgradeInfos);
+    usePrebuiltRulesUpgradeState(ruleUpgradeInfos);
+  const ruleUpgradeStates = useMemo(() => Object.values(rulesUpgradeState), [rulesUpgradeState]);
+  const filteredRuleUpgradeStates = useFilterPrebuiltRulesToUpgrade({
+    filterOptions,
+    data: ruleUpgradeStates,
+  });
 
   const {
     isVisible: isLegacyMLJobsModalVisible,
@@ -375,8 +373,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     [rulesUpgradeState, setRuleFieldResolvedValue, isPrebuiltRulesCustomizationEnabled]
   );
   const filteredRules = useMemo(
-    () => filteredRuleUpgradeInfos.map((rule) => rule.target_rule),
-    [filteredRuleUpgradeInfos]
+    () => filteredRuleUpgradeStates.map(({ target_rule: targetRule }) => targetRule),
+    [filteredRuleUpgradeStates]
   );
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
     rules: filteredRules,
@@ -403,7 +401,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(
     () => ({
       state: {
-        rulesUpgradeState,
+        ruleUpgradeStates: filteredRuleUpgradeStates,
         hasRulesToUpgrade: isFetched && ruleUpgradeInfos.length > 0,
         filterOptions,
         tags,
@@ -419,7 +417,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     }),
     [
       ruleUpgradeInfos.length,
-      rulesUpgradeState,
+      filteredRuleUpgradeStates,
       filterOptions,
       tags,
       isFetched,
