@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntitySource } from '.';
+import { EntitySourceDefinition } from '../types';
 import { mergeEntitiesList } from './utils';
 
 describe('mergeEntitiesList', () => {
@@ -68,7 +68,7 @@ describe('mergeEntitiesList', () => {
           {
             metadata_fields: ['host.name', 'agent.name', 'service.environment', 'only_in_record_2'],
           },
-        ] as EntitySource[],
+        ] as EntitySourceDefinition[],
         entities
       );
       expect(mergedEntities.length).toEqual(1);
@@ -124,7 +124,7 @@ describe('mergeEntitiesList', () => {
           {
             metadata_fields: ['host.name'],
           },
-        ] as EntitySource[],
+        ] as EntitySourceDefinition[],
         entities
       );
       expect(mergedEntities.length).toEqual(1);
@@ -154,7 +154,10 @@ describe('mergeEntitiesList', () => {
       ];
 
       const mergedEntities = mergeEntitiesList(
-        [{ metadata_fields: ['host.name'] }, { metadata_fields: ['host.name'] }] as EntitySource[],
+        [
+          { metadata_fields: ['host.name'] },
+          { metadata_fields: ['host.name'] },
+        ] as EntitySourceDefinition[],
         entities
       );
       expect(mergedEntities.length).toEqual(1);
@@ -199,7 +202,7 @@ describe('mergeEntitiesList', () => {
           {
             metadata_fields: ['host.name'],
           },
-        ] as EntitySource[],
+        ] as EntitySourceDefinition[],
         entities
       );
       expect(mergedEntities.length).toEqual(1);
