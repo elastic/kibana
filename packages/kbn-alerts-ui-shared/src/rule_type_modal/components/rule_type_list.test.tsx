@@ -31,6 +31,7 @@ const ruleTypes: RuleTypeWithDescription[] = [
       name: 'default',
     },
     defaultActionGroupId: '1',
+    category: 'my-category-1',
   },
   {
     id: '2',
@@ -49,6 +50,7 @@ const ruleTypes: RuleTypeWithDescription[] = [
       name: 'default',
     },
     defaultActionGroupId: '2',
+    category: 'my-category-2',
   },
   {
     id: '3',
@@ -67,6 +69,7 @@ const ruleTypes: RuleTypeWithDescription[] = [
       name: 'default',
     },
     defaultActionGroupId: '3',
+    category: 'my-category-3',
   },
 ];
 

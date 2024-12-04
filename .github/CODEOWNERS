@@ -51,6 +51,7 @@ packages/kbn-apm-types @elastic/obs-ux-infra_services-team
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
+x-pack/plugins/asset_inventory @elastic/kibana-cloud-security-posture
 x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 packages/kbn-avc-banner @elastic/security-defend-workflows
 packages/kbn-axe-config @elastic/kibana-qa
@@ -1183,6 +1184,8 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/plugins/observability_solution/infra/server/services @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/server/usage @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/server/utils @elastic/obs-ux-infra_services-team
+/x-pack/test_serverless/functional/test_suites/observability/infra @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/services/infraops_source_configuration.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/pull/34916
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
@@ -1849,6 +1852,9 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 
 ## Security Solution sub teams - GenAI
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
+
+## Security Solution sub teams - Automatic Import
+x-pack/test/automatic_import_api_integration @elastic/security-scalability
 
 # Security Defend Workflows - OSQuery Ownership
 x-pack/plugins/osquery @elastic/security-defend-workflows

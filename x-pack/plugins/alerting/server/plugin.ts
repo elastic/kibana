@@ -133,7 +133,7 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
 };
 
-export interface PluginSetupContract {
+export interface AlertingServerSetup {
   registerConnectorAdapter<
     RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
     ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
@@ -168,19 +168,15 @@ export interface PluginSetupContract {
   getDataStreamAdapter: () => DataStreamAdapter;
 }
 
-export interface PluginStartContract {
+export interface AlertingServerStart {
   listTypes: RuleTypeRegistry['list'];
-
   getAllTypes: RuleTypeRegistry['getAllTypes'];
   getType: RuleTypeRegistry['get'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
-
-  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
-
+  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
-  ): PublicMethodsOf<AlertingAuthorization>;
-
+  ): Promise<PublicMethodsOf<AlertingAuthorization>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 
@@ -260,7 +256,7 @@ export class AlertingPlugin {
   public setup(
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
-  ): PluginSetupContract {
+  ): AlertingServerSetup {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
@@ -491,7 +487,7 @@ export class AlertingPlugin {
     };
   }
 
-  public start(core: CoreStart, plugins: AlertingPluginsStart): PluginStartContract {
+  public start(core: CoreStart, plugins: AlertingPluginsStart): AlertingServerStart {
     const {
       isESOCanEncrypt,
       logger,
@@ -518,7 +514,6 @@ export class AlertingPlugin {
 
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
-      securityPluginSetup: security,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getActiveSpace(request);
@@ -572,7 +567,7 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
     });
 
-    const getRulesClientWithRequest = (request: KibanaRequest) => {
+    const getRulesClientWithRequest = async (request: KibanaRequest) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
@@ -581,7 +576,7 @@ export class AlertingPlugin {
       return rulesClientFactory!.create(request, core.savedObjects);
     };
 
-    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
+    const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
@@ -633,11 +628,13 @@ export class AlertingPlugin {
     });
 
     this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {
-      const client = getRulesClientWithRequest(request);
-      return (objects?: SavedObjectsBulkGetObject[]) =>
-        objects
+      return async (objects?: SavedObjectsBulkGetObject[]) => {
+        const client = await getRulesClientWithRequest(request);
+
+        return objects
           ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
           : Promise.resolve([]);
+      };
     });
 
     this.eventLogService!.isEsContextReady()
