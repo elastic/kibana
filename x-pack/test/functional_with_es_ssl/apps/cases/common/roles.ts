@@ -59,8 +59,8 @@ export const casesNoDelete: Role = {
   },
 };
 
-export const casesReadSettings: Role = {
-  name: 'cases_read_settings',
+export const casesReadAndEditSettings: Role = {
+  name: 'cases_read_and_edit_settings',
   privileges: {
     elasticsearch: {
       indices: [
@@ -107,4 +107,4 @@ export const casesAll: Role = {
   },
 };
 
-export const roles = [casesReadDelete, casesNoDelete, casesAll, casesReadSettings];
+export const roles = [casesReadDelete, casesNoDelete, casesAll, casesReadAndEditSettings];

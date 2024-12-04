@@ -13,7 +13,7 @@ import {
   casesReadDeleteUser,
   casesAllUser,
   casesNoDeleteUser,
-  casesReadSettingsUser,
+  casesReadAndEditSettingsUser,
 } from '../common';
 import {
   createUsersAndRoles,
@@ -130,15 +130,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('cases_settings', () => {
-      beforeEach(async () => {
-        await cases.api.createNthRandomCases(2);
-      });
-
       afterEach(async () => {
         await cases.api.deleteAllCases();
       });
-
-      for (const user of [casesReadSettingsUser, casesAllUser]) {
+      for (const user of [casesReadAndEditSettingsUser, casesAllUser]) {
         describe(`logging in with user ${user.username}`, () => {
           before(async () => {
             await PageObjects.security.login(user.username, user.password);
