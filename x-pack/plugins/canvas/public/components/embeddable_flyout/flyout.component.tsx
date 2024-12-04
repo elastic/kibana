@@ -11,10 +11,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 
 import { useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import {
-  contentManagementService,
-  coreServices,
-} from '../../services/kibana_services';
+import { contentManagementService, coreServices } from '../../services/kibana_services';
 
 const strings = {
   getNoItemsText: () =>
@@ -45,11 +42,11 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   const canvasOnlyLibraryTypes = useMemo(() => {
     // Links panels are not supported in Canvas
     return libraryTypes.filter(({ type }) => type !== 'links');
-  }, [libraryTypes])
+  }, [libraryTypes]);
 
   const onAddPanel = useCallback(
     (id: string, savedObjectType: string) => {
-        onSelect(id, savedObjectType, isByValueEnabled);
+      onSelect(id, savedObjectType, isByValueEnabled);
     },
     [isByValueEnabled, onSelect]
   );
