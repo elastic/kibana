@@ -6,7 +6,10 @@
  */
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_load_rule_aggregations_query';
+import {
+  UseLoadRuleAggregationsQueryProps,
+  useLoadRuleAggregationsQuery as useLoadRuleAggregations,
+} from './use_load_rule_aggregations_query';
 import { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
@@ -59,10 +62,9 @@ describe('useLoadRuleAggregations', () => {
   });
 
   it('should call loadRuleAggregations API and handle result', async () => {
-    const params = {
+    const params: UseLoadRuleAggregationsQueryProps = {
       filters: {
         searchText: '',
-        types: [],
         actionTypes: [],
         ruleExecutionStatuses: [],
         ruleLastRunOutcomes: [],
@@ -72,6 +74,8 @@ describe('useLoadRuleAggregations', () => {
       },
       enabled: true,
       refresh: undefined,
+      ruleTypeIds: [],
+      consumers: [],
     };
 
     const { rerender, result } = renderHook(
@@ -87,12 +91,13 @@ describe('useLoadRuleAggregations', () => {
       expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
         expect.objectContaining({
           searchText: '',
-          typesFilter: [],
           actionTypesFilter: [],
           ruleExecutionStatusesFilter: [],
           ruleLastRunOutcomesFilter: [],
           ruleStatusesFilter: [],
           tagsFilter: [],
+          ruleTypeIds: [],
+          consumers: [],
         })
       );
       expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
@@ -100,10 +105,9 @@ describe('useLoadRuleAggregations', () => {
   });
 
   it('should call loadRuleAggregation API with params and handle result', async () => {
-    const params = {
+    const params: UseLoadRuleAggregationsQueryProps = {
       filters: {
         searchText: 'test',
-        types: ['type1', 'type2'],
         actionTypes: ['action1', 'action2'],
         ruleExecutionStatuses: ['status1', 'status2'],
         ruleParams: {},
@@ -113,6 +117,8 @@ describe('useLoadRuleAggregations', () => {
       },
       enabled: true,
       refresh: undefined,
+      ruleTypeIds: ['foo'],
+      consumers: ['bar'],
     };
 
     const { rerender, result } = renderHook(() => useLoadRuleAggregations(params), {
@@ -125,12 +131,13 @@ describe('useLoadRuleAggregations', () => {
       expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
         expect.objectContaining({
           searchText: 'test',
-          typesFilter: ['type1', 'type2'],
           actionTypesFilter: ['action1', 'action2'],
           ruleExecutionStatusesFilter: ['status1', 'status2'],
           ruleStatusesFilter: ['enabled', 'snoozed'] as RuleStatus[],
           tagsFilter: ['tag1', 'tag2'],
           ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
+          ruleTypeIds: ['foo'],
+          consumers: ['bar'],
         })
       );
       expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
