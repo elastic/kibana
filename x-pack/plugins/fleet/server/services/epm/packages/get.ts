@@ -98,7 +98,7 @@ export async function getPackages(
   } = options;
 
   const registryItems = await Registry.fetchList({ category, prerelease }).then((items) => {
-    return (items ?? []).map((item) =>
+    return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );
   });
