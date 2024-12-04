@@ -56,7 +56,8 @@
       "serverless",
       "guidedOnboarding",
       "observabilityAIAssistant",
-      "investigate"
+      "investigate",
+      "streams"
     ],
     "requiredBundles": [
       "data",

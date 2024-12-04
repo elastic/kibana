@@ -9,12 +9,10 @@
 
 import type { UnifiedHistogramState } from '../services/state_service';
 
-export const breakdownFieldSelector = (state: UnifiedHistogramState) => state.breakdownField;
 export const chartHiddenSelector = (state: UnifiedHistogramState) => state.chartHidden;
 export const timeIntervalSelector = (state: UnifiedHistogramState) => state.timeInterval;
 export const topPanelHeightSelector = (state: UnifiedHistogramState) => state.topPanelHeight;
 export const totalHitsResultSelector = (state: UnifiedHistogramState) => state.totalHitsResult;
 export const totalHitsStatusSelector = (state: UnifiedHistogramState) => state.totalHitsStatus;
 export const lensAdaptersSelector = (state: UnifiedHistogramState) => state.lensAdapters;
-export const lensEmbeddableOutputSelector$ = (state: UnifiedHistogramState) =>
-  state.lensEmbeddableOutput$;
+export const lensDataLoadingSelector$ = (state: UnifiedHistogramState) => state.dataLoading$;

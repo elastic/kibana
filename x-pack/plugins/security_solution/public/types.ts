@@ -61,6 +61,7 @@ import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -94,6 +95,7 @@ import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingService } from './onboarding/service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
+import type { SiemMigrationsService } from './siem_migrations/service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -106,6 +108,7 @@ export interface SetupPlugins {
   ml?: MlPluginSetup;
   cases?: CasesPublicSetup;
   data: DataPublicPluginSetup;
+  discoverShared: DiscoverSharedPublicStart;
 }
 
 /**
@@ -137,7 +140,7 @@ export interface StartPlugins {
   uiActions: UiActionsStart;
   maps: MapsStartApi;
   ml?: MlPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
@@ -193,6 +196,7 @@ export type StartServices = CoreStart &
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
     timelineDataService: DataPublicPluginStart;
+    siemMigrations: SiemMigrationsService;
   };
 
 export type StartRenderServices = Pick<

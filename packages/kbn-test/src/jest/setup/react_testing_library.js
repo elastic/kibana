@@ -45,7 +45,9 @@ jest.mock('@testing-library/react', () => {
 const originalConsoleError = console.error;
 console.error = (...args) => {
   if (global.IS_REACT_ACT_ENVIRONMENT === false) {
-    if (args[0].includes('Warning: An update to %s inside a test was not wrapped in act')) {
+    if (
+      args[0].toString().includes('Warning: An update to %s inside a test was not wrapped in act')
+    ) {
       return;
     }
   }

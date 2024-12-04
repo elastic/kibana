@@ -16,6 +16,7 @@ import { FetchStatus } from '../../types';
 import { DataDocuments$ } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
+import { omit } from 'lodash';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -178,6 +179,7 @@ describe('test getDataStateContainer', () => {
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: true,
       rowHeight: true,
+      breakdownField: true,
     });
 
     dataState.data$.totalHits$.next({
@@ -189,9 +191,10 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+    expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     expect(stateContainer.appState.get().columns).toEqual(['message', 'extension']);
     expect(stateContainer.appState.get().rowHeight).toEqual(3);
@@ -209,6 +212,7 @@ describe('test getDataStateContainer', () => {
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     dataState.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -218,9 +222,10 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+    expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     expect(stateContainer.appState.get().columns).toEqual(['default_column']);
     expect(stateContainer.appState.get().rowHeight).toBeUndefined();
