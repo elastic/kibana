@@ -28,13 +28,13 @@ import {
   type AlertStatus,
 } from '@kbn/rule-data-utils';
 import useObservable from 'react-use/lib/useObservable';
-import { ML_VALID_CONSUMERS } from '../../../../common/constants/alerts';
-import { ML_RULE_TYPE_IDS } from '../../../../common';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { ML_RULE_TYPE_IDS } from '../../../../common';
+import { ML_VALID_CONSUMERS } from '../../../../common/constants/alerts';
 import { AlertActions } from '../../../alerting/anomaly_detection_alerts_table/alert_actions';
 import { AlertsTableFlyoutBody } from '../../../alerting/anomaly_detection_alerts_table/flyout_body';
 import { CollapsiblePanel } from '../../components/collapsible_panel';

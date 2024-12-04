@@ -37,7 +37,8 @@ export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTablePro
   return (
     <AlertsTable<ObservabilityAlertsTableContext>
       columns={columns}
-      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}initialSort={initialSort}
+      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+      initialSort={initialSort}
       casesConfiguration={{ featureId: casesFeatureId, owner: [observabilityFeatureId] }}
       additionalContext={{ observabilityRuleTypeRegistry, config }}
       renderCellValue={AlertsTableCellValue}
