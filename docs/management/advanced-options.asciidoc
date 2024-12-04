@@ -317,7 +317,7 @@ When disabled, *Discover* loads fields using the {es} search API's
 
 [[discover-searchonpageload]]`discover:searchOnPageLoad`::
 Controls whether a search is executed when *Discover* first loads. This setting
-does not have an effect when loading a saved search.
+does not have an effect when loading a saved Discover Session.
 
 [[discover:showFieldStatistics]]`discover:showFieldStatistics`::
 beta[] Enables the Field statistics view. Examine details such as
@@ -330,10 +330,10 @@ Controls the display of multi-fields in the expanded document view.
 The default sort direction for time-based data views.
 
 [[doctable-hidetimecolumn]]`doc_table:hideTimeColumn`::
-Hides the "Time" column in *Discover* and in all saved searches on dashboards.
+Hides the "Time" column in *Discover* and in all Discover Session panels on dashboards.
 
 [[doctable-highlight]]`doc_table:highlight`::
-Highlights results in *Discover* and saved searches on dashboards. Highlighting
+Highlights search results in tables on *Discover* and *Dashboard* pages. Highlighting
 slows requests when working on big documents.
 
 

@@ -92,10 +92,10 @@ status:[400 TO 499] AND (extension:php OR extension:html)
 
 
 [[save-open-search]]
-=== Save a search
-A saved search persists your current view of Discover for later retrieval and reuse. You can reload a saved search into Discover, add it to a dashboard, and use it as the basis for a visualization.
+=== Save a Discover Session
+A saved Discover Session persists your current view of Discover for later retrieval and reuse. You can reload a saved session into Discover, add it to a dashboard, and use it as the basis for a visualization.
 
-A saved search includes the query text, filters, and optionally, the time filter. A saved search also includes the selected columns in the document table, the sort order, and the current index pattern.
+A saved Discover Session includes the query text, filters, and optionally, the time filter. A saved Discover Session also includes the selected columns in the document table, the sort order, and the current index pattern.
 
 [role="xpack"]
 [[discover-read-only-access]]
@@ -107,23 +107,23 @@ Kibana see <<xpack-security-authorization>>.
 [role="screenshot"]
 image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 
-==== Save a search
-To save the current search:
+==== Save a Discover Session
+To save the current session:
 
 . Click *Save* in the toolbar.
-. Enter a name for the search and click *Save*.
+. Enter a name for the session and click *Save*.
 
-To import, export, and delete saved searches, go to the *Saved Objects* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
+To import, export, and delete saved Discover Sessions, go to the *Saved Objects* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
-==== Open a saved search
-To load a saved search into Discover:
+==== Open a saved Discover Session
+To load a saved session into Discover:
 
 . Click *Open* in the toolbar.
-. Select the search you want to open.
+. Select the session you want to open.
 
-If the saved search is associated with a different index pattern than is currently
-selected, opening the saved search changes the selected index pattern. The query language
-used for the saved search will also be automatically selected.
+If the saved Discover Session is associated with a different index pattern than is currently
+selected, opening the saved Discover Session changes the selected index pattern. The query language
+used for the saved Discover Session will also be automatically selected.
 
 [[save-load-delete-query]]
 === Save a query
@@ -133,7 +133,7 @@ A saved query is a portable collection of query text and filters that you can re
 * View the results of the same query in multiple apps
 * Share your query
 
-Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved search>> instead.
+Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved Discover Session>> instead.
 
 [role="xpack"]
 ==== Read-only access

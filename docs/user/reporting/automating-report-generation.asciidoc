@@ -24,7 +24,7 @@ To create the POST URL for CSV reports:
 
 . Go to *Discover*.
 
-. Open the saved search you want to share.
+. Open the saved Discover Session you want to share.
 
 . In the toolbar, click *Share > Export > Copy POST URL*.
 

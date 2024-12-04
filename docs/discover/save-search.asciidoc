@@ -1,9 +1,9 @@
 [[save-open-search]]
 == Save a search for reuse
 
-A saved search is a convenient way to reuse a search
+A saved Discover Session is a convenient way to reuse a search
 that you've created in *Discover*.
-Saved searches are good for adding search results to a dashboard,
+Saved Discover Sessions are good for returning to them later or adding search results to a dashboard,
 and can also serve as a foundation for building visualizations.
 
 [role="xpack"]
@@ -16,27 +16,27 @@ displayed and the *Save* button is not visible. For more information, refer to <
 [role="screenshot"]
 image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 [float]
-=== Save a search
+=== Save a Discover Session
 
-By default, a saved search stores the query text, filters, and
+By default, a saved Discover Session stores the query text, filters, and
 current view of *Discover*, including the columns and sort order in the document table, and the {data-source}.
 
 . Once you've created a search worth saving, click *Save* in the toolbar.
-. Enter a name for the search.
-. Optionally store <<managing-tags,tags>> and the time range with the search.
+. Enter a name for the session.
+. Optionally store <<managing-tags,tags>> and the time range with the session.
 . Click *Save*.
 . To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
 +
-If the saved search is associated with a different {data-source} than is currently
-selected, opening the saved search changes the selected {data-source}. The query language
-used for the saved search is also automatically selected.
+If the saved Discover Session is associated with a different {data-source} than is currently
+selected, opening the saved Discover Session changes the selected {data-source}. The query language
+used for the saved Discover Session is also automatically selected.
 
 [float]
-=== Duplicate a search
-. In **Discover**, open the search that you want to duplicate.
+=== Duplicate a Discover Session
+. In **Discover**, open the Discover Session that you want to duplicate.
 . In the toolbar, click *Save*.
-. Give the search a new name.
-. Turn on **Save as new search**.
+. Give the session a new name.
+. Turn on **Save as new Discover Session**.
 . Click *Save*.
 
 
@@ -46,5 +46,5 @@ used for the saved search is also automatically selected.
 . Go to *Dashboards*.
 . Open or create the dashboard, then click *Edit*.
 . Click *Add from library*.
-. From the *Types* dropdown, select *Saved search*.
-. Select the saved search that you want to visualize, then click *X* to close the list.
+. From the *Types* dropdown, select *Discover Session*.
+. Select the saved Discover Session that you want to visualize, then click *X* to close the list.

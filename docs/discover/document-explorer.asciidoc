@@ -36,7 +36,7 @@ In the pop-up, drag the column names to their new order.
 
 * To resize a column, drag the right edge of the column header until the column is the width that you want.
 +
-Column widths are stored with a saved search.  When you visualize saved searches on dashboards, the saved search appears the same as in **Discover**.
+Column widths are stored with a saved Discover Session. When you add the Discover Session as a panel to dashboards, it appears the same as in **Discover**.
 
 [float]
 [[document-explorer-density]]

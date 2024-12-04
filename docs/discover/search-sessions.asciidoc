@@ -52,7 +52,7 @@ image::images/search-session-awhile.png[Search Session indicator displaying the 
 Once you save a search session, you can start a new search,
 navigate to a different application, or close the browser.
 
-. To view your saved searches, go to the
+. To view your saved search sessions, go to the
 *Search Sessions* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 For a saved or completed session, you can also open this view from the search sessions popup.
 
