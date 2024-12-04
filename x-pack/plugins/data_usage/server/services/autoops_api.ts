@@ -24,6 +24,7 @@ import { AutoOpsConfig } from '../types';
 import { AutoOpsError } from './errors';
 import { appContextService } from './app_context';
 
+const AUTO_OPS_FAILED_ERROR = 'AutoOps API request failed';
 const AUTO_OPS_REQUEST_PREFIX = '[AutoOps API] Request failed';
 const AUTO_OPS_MISSING_CONFIG_ERROR = 'Missing autoops configuration';
 
@@ -144,7 +145,7 @@ export class AutoOpsAPIService {
               },
             }
           );
-          throw new AutoOpsError(withRequestIdMessage(AUTO_OPS_REQUEST_PREFIX));
+          throw new AutoOpsError(withRequestIdMessage(AUTO_OPS_FAILED_ERROR));
         } else if (error.request) {
           // The request was made but no response was received
           this.logger.error(
@@ -159,7 +160,7 @@ export class AutoOpsAPIService {
             errorMetadataWithRequestConfig
           );
           throw new AutoOpsError(
-            withRequestIdMessage(`${AUTO_OPS_REQUEST_PREFIX}, ${error.message}`)
+            withRequestIdMessage(`${AUTO_OPS_FAILED_ERROR}, ${error.message}`)
           );
         }
       }
