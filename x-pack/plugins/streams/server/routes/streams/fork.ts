@@ -18,6 +18,7 @@ import { conditionSchema, streamDefinitonWithoutChildrenSchema } from '../../../
 import { syncStream, readStream, validateAncestorFields } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { isChildOf } from '../../lib/streams/helpers/hierarchy';
+import { validateCondition } from '../../lib/streams/helpers/condition_fields';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/_fork',
@@ -48,6 +49,8 @@ export const forkStreamsRoute = createServerRoute({
         throw new ForkConditionMissing('You must provide a condition to fork a stream');
       }
 
+      validateCondition(params.body.condition);
+
       const { scopedClusterClient } = await getScopedClients({ request });
 
       const { definition: rootDefinition } = await readStream({
@@ -55,7 +58,7 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
-      const childDefinition = { ...params.body.stream, children: [] };
+      const childDefinition = { ...params.body.stream, children: [], managed: true };
 
       // check whether root stream has a child of the given name already
       if (rootDefinition.children.some((child) => child.id === childDefinition.id)) {

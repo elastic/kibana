@@ -48,10 +48,6 @@
       ],
       "request_cache": "__flag__",
       "routing": "",
-      "scroll": [
-        "-1",
-        "0"
-      ],
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"
