@@ -68,9 +68,10 @@ export function getCodeOwnersForFile(
 ): { path: string; teams: string } | undefined {
   const pathsWithOwners = reversedCodeowners ?? getPathsWithOwnersReversed();
   const match = pathsWithOwners.find((p) => p.ignorePattern.test(filePath).ignored);
-  return { path: match?.path, teams: match?.teams };
+  if (match?.path && match.teams) return { path: match.path, teams: match.teams };
+  return;
 }
-
+const trimFrontSlash = (x: string): string => x.replace(/^\//, '');
 /**
  * Run the getCodeOwnersForFile() method above.
  * Report back to the cli with either success and the owner(s), or a failure.
@@ -85,8 +86,11 @@ export async function runGetOwnersForFileCli() {
       if (!targetFile) throw createFlagError(`Missing --file argument`);
       existOrThrow(targetFile); // This call is duplicated in getPathsWithOwnersReversed(), so this is a short circuit
       const result = getCodeOwnersForFile(targetFile);
-      if (result) log.success(result);
-      else log.error(`Ownership of file [${targetFile}] is UNKNOWN`);
+      if (result) {
+        const path = result.path.includes('/', 0) ? trimFrontSlash(result.path) : result.path;
+        log.success(`Found matching entry in .github/CODEOWNERS:
+${path} ${result.teams}`);
+      } else log.error(`Ownership of file [${targetFile}] is UNKNOWN`);
     },
     {
       description: 'Report file ownership from GitHub CODEOWNERS file.',
