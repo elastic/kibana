@@ -13,7 +13,7 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 import {
-  CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG,
+  CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
   CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG,
 } from '../feature';
 import { forEach } from 'lodash';
@@ -22,7 +22,7 @@ const request = {} as KibanaRequest;
 
 const mockAuthorizationAction = (type: string, operation: string) => `${type}/${operation}`;
 const BASIC_EXECUTE_AUTHZ = `api:${CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG}`;
-const ADVANCED_EXECUTE_AUTHZ = `api:${CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG}`;
+const ADVANCED_EXECUTE_AUTHZ = `api:${CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG}`;
 
 function mockSecurity() {
   const security = securityMock.createSetup();
