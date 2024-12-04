@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { LogEntry } from '../../common/log_entry';
 import { LogViewColumnConfiguration } from '../../common/log_views';
 
@@ -60,15 +60,15 @@ export function generateFakeEntries(
 function fakeColumnValue(field: string): string {
   switch (field) {
     case 'message':
-      return faker.fake(
-        '{{internet.ip}} - [{{date.past}}] "GET {{internet.url}} HTTP/1.1" 200 {{random.number}} "-" "{{internet.userAgent}}"'
+      return faker.helpers.fake(
+        '{{internet.ip}} - [{{date.past}}] "GET {{internet.url}} HTTP/1.1" 200 {{number.int}} "-" "{{internet.userAgent}}"'
       );
     case 'event.dataset':
-      return faker.fake('{{hacker.noun}}.{{hacker.noun}}');
+      return faker.helpers.fake('{{hacker.noun}}.{{hacker.noun}}');
     case 'log.file.path':
       return faker.system.filePath();
     case 'log.level':
-      return faker.random.arrayElement(['debug', 'info', 'warn', 'error']);
+      return faker.helpers.arrayElement(['debug', 'info', 'warn', 'error']);
     case 'host.name':
       return faker.hacker.noun();
     default:
