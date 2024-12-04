@@ -6476,7 +6476,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-e2e@link:x-pack/solutions/observability/solutions/observability/plugins/observability_solution/observability_onboarding/e2e":
+"@kbn/observability-onboarding-e2e@link:x-pack/solutions/observability/plugins/observability_solution/observability_onboarding/e2e":
   version "0.0.0"
   uid ""
 
