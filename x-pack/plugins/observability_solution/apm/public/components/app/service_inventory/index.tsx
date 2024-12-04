@@ -7,6 +7,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { getDateISORange } from '@kbn/timerange';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -124,6 +125,7 @@ function useServicesDetailedStatisticsFetcher({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  console.log('start', start);
   const dataSourceOptions = usePreferredDataSourceAndBucketSize({
     start,
     end,
@@ -180,6 +182,10 @@ export function ServiceInventory() {
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
 
@@ -285,9 +291,12 @@ export function ServiceInventory() {
       mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
       comparisonFetch.status === FETCH_STATUS.SUCCESS
     ) {
-      onPageReady();
+      const { startDate, endDate } = getDateISORange({ from: start, to: end });
+      onPageReady({
+        meta: { rangeFrom: startDate, rangeTo: endDate },
+      });
     }
-  }, [mainStatisticsStatus, comparisonFetch.status, onPageReady]);
+  }, [mainStatisticsStatus, comparisonFetch.status, onPageReady, end, start]);
 
   return (
     <>

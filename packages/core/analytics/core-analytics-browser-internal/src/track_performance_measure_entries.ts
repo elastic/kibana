@@ -9,6 +9,7 @@
 
 import type { AnalyticsClient } from '@elastic/ebt/client';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { getTimestampRangeInSeconds } from './get_timerange_in_seconds';
 
 const MAX_CUSTOM_METRICS = 9;
 // The keys and values for the custom metrics are limited to 9 pairs
@@ -27,6 +28,7 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
       if (entry.entryType === 'measure' && entry.detail?.type === 'kibana:performance') {
         const target = entry?.name;
         const duration = entry.duration;
+        const meta = entry.detail?.meta;
         const customMetrics = Object.keys(entry.detail?.customMetrics ?? {}).reduce(
           (acc, metric) => {
             if (ALLOWED_CUSTOM_METRICS_KEYS_VALUES.includes(metric)) {
@@ -72,6 +74,9 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
             ...customMetrics,
             meta: {
               target,
+              query_range_secs: meta
+                ? getTimestampRangeInSeconds(meta.rangeFrom, meta.rangeTo, isDevMode)
+                : undefined,
             },
           });
         } catch (error) {

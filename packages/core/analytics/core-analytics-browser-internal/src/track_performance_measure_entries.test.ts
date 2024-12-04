@@ -128,4 +128,57 @@ describe('trackPerformanceMeasureEntries', () => {
       value1: 'value1',
     });
   });
+
+  test('reports an analytics event with query metadata', () => {
+    setupMockPerformanceObserver([
+      {
+        name: '/',
+        entryType: 'measure',
+        startTime: 100,
+        duration: 1000,
+        detail: {
+          eventName: 'kibana:plugin_render_time',
+          type: 'kibana:performance',
+          meta: {
+            rangeFrom: 1704067200000, // 01/01/2024 @ 00:00am
+            rangeTo: 1704153600000, // 01/02/2024 @ 00:00am
+          },
+        },
+      },
+    ]);
+    trackPerformanceMeasureEntries(analyticsClientMock, true);
+
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledWith('performance_metric', {
+      duration: 1000,
+      eventName: 'kibana:plugin_render_time',
+      meta: { target: '/', query_range_secs: 86400 },
+    });
+  });
+  test('reports undefined query_range_secs when rangeFrom is greater than rangeTo', () => {
+    setupMockPerformanceObserver([
+      {
+        name: '/',
+        entryType: 'measure',
+        startTime: 100,
+        duration: 1000,
+        detail: {
+          eventName: 'kibana:plugin_render_time',
+          type: 'kibana:performance',
+          meta: {
+            rangeTo: 1704067200000, // 01/01/2024 @ 00:00am
+            rangeFrom: 1704153600000, // 01/02/2024 @ 00:00am
+          },
+        },
+      },
+    ]);
+    trackPerformanceMeasureEntries(analyticsClientMock, true);
+
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledWith('performance_metric', {
+      duration: 1000,
+      eventName: 'kibana:plugin_render_time',
+      meta: { target: '/', query_range_secs: undefined },
+    });
+  });
 });
