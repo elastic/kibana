@@ -1031,8 +1031,8 @@ const updateExistingDataStream = async ({
   const existingDsConfig = Object.values(existingDs);
   const currentBackingIndexConfig = existingDsConfig.at(-1);
   const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
-  // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
-  const currentSourceType = currentBackingIndexConfig.mappings?._source?.mode;
+  // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
+  const currentSourceType = currentBackingIndexConfig?.settings?.index?.mapping?.source?.mode;
 
   let settings: IndicesIndexSettings;
   let mappings: MappingTypeMapping = {};
@@ -1084,6 +1084,10 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
+    subobjectsFieldChanged =
+      subobjectsFieldChanged ||
+      (err.body?.error?.type === 'mapper_exception' &&
+        err.body?.error?.reason?.includes('subobjects'));
     if (
       (isResponseError(err) &&
         err.statusCode === 400 &&
@@ -1137,7 +1141,7 @@ const updateExistingDataStream = async ({
   // Trigger a rollover if the index mode or source type has changed
   if (
     currentIndexMode !== settings?.index?.mode ||
-    currentSourceType !== mappings?._source?.mode ||
+    currentSourceType !== settings?.index?.source?.mode ||
     dynamicDimensionMappingsChanged
   ) {
     if (options?.skipDataStreamRollover === true) {

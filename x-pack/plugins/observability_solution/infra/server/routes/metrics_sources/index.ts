@@ -208,7 +208,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const modules = castArray(request.query.modules);
+        const modules = request.query.modules ? castArray(request.query.modules) : [];
 
         if (modules.length > MAX_MODULES) {
           throw Boom.badRequest(
