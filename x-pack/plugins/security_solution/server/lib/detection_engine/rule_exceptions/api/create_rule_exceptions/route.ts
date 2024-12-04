@@ -63,7 +63,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             'licensing',
             'lists',
           ]);
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const listsClient = ctx.securitySolution.getExceptionListClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
