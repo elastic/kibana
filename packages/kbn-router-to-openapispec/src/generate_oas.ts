@@ -8,6 +8,7 @@
  */
 
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
+import { BASE_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import { OasConverter } from './oas_converter';
 import { processRouter } from './process_router';
@@ -19,8 +20,13 @@ export const openApiVersion = '3.0.0';
 export interface GenerateOpenApiDocumentOptionsFilters {
   pathStartsWith?: string[];
   excludePathsMatching?: string[];
-  access?: 'public' | 'internal';
-  version?: string;
+  /** @default 'public' */
+  access: 'public' | 'internal';
+  /**
+   * We generate spec for one version at a time
+   * @default '2023-10-31'
+   */
+  version: string;
 }
 
 export interface GenerateOpenApiDocumentOptions {
@@ -37,7 +43,7 @@ export const generateOpenApiDocument = (
   appRouters: { routers: Router[]; versionedRouters: CoreVersionedRouter[] },
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document => {
-  const { filters } = opts;
+  const { filters = { access: 'public', version: SERVERLESS_VERSION_2023_10_31 } } = opts;
   const converter = new OasConverter();
   const paths: OpenAPIV3.PathsObject = {};
   const getOpId = createOpIdGenerator();

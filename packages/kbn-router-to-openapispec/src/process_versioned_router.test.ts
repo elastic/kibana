@@ -24,124 +24,27 @@ beforeEach(() => {
   oasConverter = new OasConverter();
 });
 
-describe('extractVersionedRequestBodies', () => {
-  test('handles full request config as expected', () => {
-    expect(
-      extractVersionedRequestBodies(createTestRoute(), oasConverter, ['application/json'])
-    ).toEqual({
-      'application/json; Elastic-Api-Version=2023-10-31': {
-        schema: {
-          additionalProperties: false,
-          properties: {
-            foo: {
-              type: 'string',
-            },
-          },
-          required: ['foo'],
-          type: 'object',
-        },
-      },
-      'application/json; Elastic-Api-Version=2024-12-31': {
-        schema: {
-          additionalProperties: false,
-          properties: {
-            foo2: {
-              type: 'string',
-            },
-          },
-          required: ['foo2'],
-          type: 'object',
-        },
-      },
-    });
-  });
-});
-
-describe('extractVersionedResponses', () => {
-  test('handles full response config as expected', () => {
-    expect(
-      extractVersionedResponses(createTestRoute(), oasConverter, ['application/test+json'])
-    ).toEqual({
-      200: {
-        description: 'OK response 2023-10-31\nOK response 2024-12-31', // merge multiple version descriptions
-        content: {
-          'application/test+json; Elastic-Api-Version=2023-10-31': {
-            schema: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                bar: { type: 'number', minimum: 1, maximum: 99 },
-              },
-              required: ['bar'],
-            },
-          },
-          'application/test+json; Elastic-Api-Version=2024-12-31': {
-            schema: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                bar2: { type: 'number', minimum: 1, maximum: 99 },
-              },
-              required: ['bar2'],
-            },
-          },
-        },
-      },
-      404: {
-        description: 'Not Found response 2023-10-31',
-        content: {
-          'application/test2+json; Elastic-Api-Version=2023-10-31': {
-            schema: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                ok: { type: 'boolean', enum: [false] },
-              },
-              required: ['ok'],
-            },
-          },
-        },
-      },
-      500: {
-        content: {
-          'application/test2+json; Elastic-Api-Version=2024-12-31': {
-            schema: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                ok: { type: 'boolean', enum: [false] },
-              },
-              required: ['ok'],
-            },
-          },
-        },
-      },
-    });
-  });
-});
-
 describe('processVersionedRouter', () => {
   it('correctly extracts the version based on the version filter', () => {
     const baseCase = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
       createOpIdGenerator(),
-      {}
+      { access: 'public', version: '2023-10-31' }
     );
 
     expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
-      'application/test+json; Elastic-Api-Version=2023-10-31',
-      'application/test+json; Elastic-Api-Version=2024-12-31',
+      'application/test+json',
     ]);
 
     const filteredCase = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
       createOpIdGenerator(),
-      { version: '2023-10-31' }
+      { version: '2024-12-31', access: 'public' }
     );
     expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
-      'application/test+json; Elastic-Api-Version=2023-10-31',
+      'application/test+json',
     ]);
   });
 
@@ -150,7 +53,7 @@ describe('processVersionedRouter', () => {
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
       createOpIdGenerator(),
-      {}
+      { version: '2023-10-31', access: 'public' }
     );
     expect(results.paths['/foo']).toBeDefined();
 

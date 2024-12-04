@@ -78,9 +78,15 @@ export const extractContentType = (body: undefined | RouteConfigOptionsBody) => 
 
 export const getVersionedContentTypeString = (
   version: string,
+  access: 'public' | 'internal',
   acceptedContentTypes: string[]
 ): string => {
-  return `${acceptedContentTypes.join('; ')}; Elastic-Api-Version=${version}`;
+  if (access === 'internal') {
+    return `${acceptedContentTypes.join('; ')}; Elastic-Api-Version=${version}`;
+  }
+  // Exclude Elastic-Api-Version header for public routes for now, this means public routes
+  // can only generate spec for one version at a time.
+  return `${acceptedContentTypes.join('; ')}`;
 };
 
 export const extractValidationSchemaFromRoute = (
@@ -108,7 +114,7 @@ export const prepareRoutes = <
   R extends { path: string; options: { access?: 'public' | 'internal'; excludeFromOAS?: boolean } }
 >(
   routes: R[],
-  filters: GenerateOpenApiDocumentOptionsFilters = {}
+  filters: GenerateOpenApiDocumentOptionsFilters
 ): R[] => {
   if (Object.getOwnPropertyNames(filters).length === 0) return routes;
   return routes.filter((route) => {
