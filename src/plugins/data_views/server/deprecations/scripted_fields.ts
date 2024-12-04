@@ -19,7 +19,7 @@ import type { DocLinks } from '@kbn/doc-links';
 import type { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
 import type { DataViewAttributes } from '../../common';
 
-type DataViewAttributesWithFields = Pick<DataViewAttributes, 'title' | 'fields'>;
+type DataViewAttributesWithFields = Pick<DataViewAttributes, 'name' | 'title' | 'fields'>;
 
 export const createScriptedFieldsDeprecationsConfig: (
   core: CoreSetup
@@ -29,7 +29,7 @@ export const createScriptedFieldsDeprecationsConfig: (
       {
         type: 'index-pattern',
         perPage: 1000,
-        fields: ['title', 'fields'],
+        fields: ['name', 'title', 'fields'],
         namespaces: ['*'],
       }
     );
@@ -96,10 +96,10 @@ const dataViewIdLabel = i18n.translate('dataViews.deprecations.scriptedFields.da
   defaultMessage: 'ID',
 });
 
-const dataViewTitleLabel = i18n.translate(
-  'dataViews.deprecations.scriptedFields.dataViewTitleLabel',
+const dataViewNameLabel = i18n.translate(
+  'dataViews.deprecations.scriptedFields.dataViewNameLabel',
   {
-    defaultMessage: 'Title',
+    defaultMessage: 'Name',
   }
 );
 
@@ -113,7 +113,11 @@ const dataViewSpacesLabel = i18n.translate(
 const buildDataViewsListEntry = (
   so: SavedObjectsFindResult<DataViewAttributesWithFields>
 ) => `- **${dataViewIdLabel}:** ${so.id}
-  - **${dataViewTitleLabel}:** ${so.attributes.title}
+  - **${dataViewNameLabel}:** ${
+  so.attributes.name
+    ? `!{tooltip[${so.attributes.name}](${so.attributes.title})}`
+    : so.attributes.title
+}
   - **${dataViewSpacesLabel}:** ${so.namespaces?.join(', ')}`;
 
 const buildMessage = ({
