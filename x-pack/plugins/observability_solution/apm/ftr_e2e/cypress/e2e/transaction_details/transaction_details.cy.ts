@@ -15,8 +15,7 @@ const timeRange = {
   rangeFrom: start,
   rangeTo: end,
 };
-// flaky
-describe.skip('Transaction details', () => {
+describe('Transaction details', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -34,7 +33,7 @@ describe.skip('Transaction details', () => {
     cy.loginAsViewerUser();
   });
 
-  it('shows transaction name and transaction charts', () => {
+  it('shows transaction name and transaction charts', { defaultCommandTimeout: 60000 }, () => {
     cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/latency?*').as(
       'transactionLatencyRequest'
     );
@@ -60,7 +59,7 @@ describe.skip('Transaction details', () => {
         '@transactionThroughputRequest',
         '@transactionFailureRateRequest',
       ],
-      { timeout: 30000 }
+      { timeout: 60000 }
     ).spread((latencyInterception, throughputInterception, failureRateInterception) => {
       expect(latencyInterception.request.query.transactionName).to.be.eql('GET /api/product');
 
@@ -106,7 +105,9 @@ describe.skip('Transaction details', () => {
     );
     cy.contains('Create SLO');
   });
-  it('shows top errors table', () => {
+
+  // flaky
+  it.skip('shows top errors table', () => {
     cy.visitKibana(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,

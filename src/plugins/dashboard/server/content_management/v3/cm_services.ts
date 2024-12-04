@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { schema, Type } from '@kbn/config-schema';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
@@ -50,10 +49,11 @@ export const controlGroupInputSchema = schema.object({
       {
         type: schema.string({ meta: { description: 'The type of the control panel.' } }),
         controlConfig: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-        id: schema.string({
-          defaultValue: uuidv4(),
-          meta: { description: 'The unique ID of the control.' },
-        }),
+        id: schema.maybe(
+          schema.string({
+            meta: { description: 'The unique ID of the control.' },
+          })
+        ),
         order: schema.number({
           meta: {
             description: 'The order of the control panel in the control group.',
@@ -243,10 +243,11 @@ export const gridDataSchema = schema.object({
     min: 1,
     meta: { description: 'The height of the panel in grid units' },
   }),
-  i: schema.string({
-    meta: { description: 'The unique identifier of the panel' },
-    defaultValue: uuidv4(),
-  }),
+  i: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique identifier of the panel' },
+    })
+  ),
 });
 
 export const panelSchema = schema.object({
@@ -284,10 +285,11 @@ export const panelSchema = schema.object({
   type: schema.string({ meta: { description: 'The embeddable type' } }),
   panelRefName: schema.maybe(schema.string()),
   gridData: gridDataSchema,
-  panelIndex: schema.string({
-    meta: { description: 'The unique ID of the panel.' },
-    defaultValue: schema.siblingRef('gridData.i'),
-  }),
+  panelIndex: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique ID of the panel.' },
+    })
+  ),
   title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
   version: schema.maybe(
     schema.string({
@@ -409,6 +411,19 @@ export const referenceSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
+const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
+  panels: schema.arrayOf(
+    panelSchema.extends({
+      // Responses always include the panel index and gridData.i
+      panelIndex: schema.string(),
+      gridData: gridDataSchema.extends({
+        i: schema.string(),
+      }),
+    }),
+    { defaultValue: [] }
+  ),
+});
+
 export const dashboardItemSchema = schema.object(
   {
     id: schema.string(),
@@ -420,7 +435,7 @@ export const dashboardItemSchema = schema.object(
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),
     error: schema.maybe(apiError),
-    attributes: dashboardAttributesSchema,
+    attributes: dashboardAttributesSchemaResponse,
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),
