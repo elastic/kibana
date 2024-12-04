@@ -125,6 +125,26 @@ export const chatCompleteSuite = (
         expect(tokens.completion).to.be.greaterThan(0);
         expect(tokens.total).eql(tokens.prompt + tokens.completion);
       });
+
+      it('returns an error with the expected shape in case of error', async () => {
+        const response = await supertest
+          .post(`/internal/inference/chat_complete`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            connectorId: 'do-not-exist',
+            system: 'Please answer the user question',
+            messages: [{ role: 'user', content: '2+2 ?' }],
+          })
+          .expect(400);
+
+        const message = response.body;
+
+        expect(message).to.eql({
+          type: 'error',
+          code: 'requestError',
+          message: "No connector found for id 'do-not-exist'",
+        });
+      });
     });
 
     describe('streaming enabled', () => {
@@ -208,6 +228,35 @@ export const chatCompleteSuite = (
         expect(tokenEvent.tokens.total).to.be(
           tokenEvent.tokens.prompt + tokenEvent.tokens.completion
         );
+      });
+
+      it('returns an error with the expected shape in case of error', async () => {
+        const response = supertest
+          .post(`/internal/inference/chat_complete/stream`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            connectorId: 'do-not-exist',
+            system: 'Please answer the user question',
+            messages: [{ role: 'user', content: '2+2 ?' }],
+          })
+          .expect(200);
+
+        const observable = supertestToObservable(response);
+
+        const events = await lastValueFrom(observable.pipe(toArray()));
+
+        expect(events).to.eql([
+          {
+            type: 'error',
+            error: {
+              code: 'requestError',
+              message: "No connector found for id 'do-not-exist'",
+              meta: {
+                status: 400,
+              },
+            },
+          },
+        ]);
       });
     });
   });

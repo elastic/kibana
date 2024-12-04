@@ -34,10 +34,10 @@ export function supertestToObservable<T = any>(response: supertest.Test): Observ
   response.pipe(stream);
 
   return new Observable<T>((subscriber) => {
-    const parser = createParser((event) => {
-      if (event.type === 'event') {
+    const parser = createParser({
+      onEvent: (event) => {
         subscriber.next(JSON.parse(event.data));
-      }
+      },
     });
 
     const readStream = async () => {
