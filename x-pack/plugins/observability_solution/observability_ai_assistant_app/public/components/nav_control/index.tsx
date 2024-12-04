@@ -24,12 +24,14 @@ interface NavControlWithProviderDeps {
   appService: AIAssistantAppService;
   coreStart: CoreStart;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+  isServerless?: boolean;
 }
 
 export const NavControlWithProvider = ({
   appService,
   coreStart,
   pluginsStart,
+  isServerless,
 }: NavControlWithProviderDeps) => {
   return (
     <SharedProviders
@@ -38,12 +40,12 @@ export const NavControlWithProvider = ({
       service={appService}
       theme$={coreStart.theme.theme$}
     >
-      <NavControl />
+      <NavControl isServerless={isServerless} />
     </SharedProviders>
   );
 };
 
-export function NavControl() {
+export function NavControl({ isServerless }: { isServerless?: boolean }) {
   const service = useAIAssistantAppService();
 
   const {
@@ -54,7 +56,6 @@ export function NavControl() {
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
-          serverless,
         },
       },
     },
@@ -141,7 +142,7 @@ export function NavControl() {
   return (
     <>
       <EuiToolTip content={buttonLabel}>
-        {serverless ? (
+        {isServerless ? (
           <EuiButtonEmpty
             aria-label={buttonLabel}
             data-test-subj="observabilityAiAssistantAppNavControlButton"

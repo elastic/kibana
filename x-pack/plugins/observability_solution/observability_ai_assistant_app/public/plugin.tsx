@@ -111,6 +111,7 @@ export class ObservabilityAIAssistantAppPlugin
               appService={appService}
               coreStart={coreStart}
               pluginsStart={pluginsStart}
+              isServerless={!!pluginsStart.serverless}
             />,
             element,
             () => {}
