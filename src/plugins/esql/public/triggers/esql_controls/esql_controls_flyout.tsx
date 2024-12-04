@@ -28,6 +28,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import ESQLEditor from '@kbn/esql-editor';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -39,6 +40,7 @@ import {
 import { type ESQLColumn, parse, walk } from '@kbn/esql-ast';
 import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { esqlVariablesService } from '../../../common';
 import { EsqlControlFlyoutType, type ESQLControlState } from './types';
 
 interface ESQLControlsFlyoutProps {
@@ -50,13 +52,6 @@ interface ESQLControlsFlyoutProps {
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   closeFlyout: () => void;
-  addToESQLVariablesService: (
-    variable: string,
-    variableValue: string,
-    controlType: EsqlControlType,
-    query: string
-  ) => void;
-  openEditFlyout: (embeddable: unknown) => Promise<void>;
 }
 
 const getControlFlyoutType = (controlType: EsqlControlType) => {
@@ -159,9 +154,7 @@ export function ESQLControlsFlyout({
   panelId,
   cursorPosition,
   initialState,
-  addToESQLVariablesService,
   closeFlyout,
-  openEditFlyout,
 }: ESQLControlsFlyoutProps) {
   const isControlInEditMode = initialState !== undefined;
   const flyoutType = getControlFlyoutType(controlType);
@@ -235,7 +228,19 @@ export function ESQLControlsFlyout({
     setMinimumWidth(optionId);
   }, []);
 
-  const createVariableControl = useCallback(async () => {
+  const addToESQLVariablesService = useCallback(
+    (varName: string, variableValue: string, variableType: EsqlControlType, query: string) => {
+      esqlVariablesService.addVariable({
+        key: varName,
+        value: variableValue,
+        type: variableType,
+      });
+      esqlVariablesService.setEsqlQueryWithVariables(query);
+    },
+    []
+  );
+
+  const onCreateVariableControl = useCallback(async () => {
     const availableOptions =
       controlType === EsqlControlType.TIME_LITERAL || controlType === EsqlControlType.VALUES
         ? values?.split(',').map((value) => value.trim()) ?? []
@@ -273,7 +278,7 @@ export function ESQLControlsFlyout({
       addToESQLVariablesService(varName, availableOptions[0], controlType, query);
       const embeddable = dashboardPanels[panelId!];
       // open the edit flyout to continue editing
-      await openEditFlyout(embeddable);
+      await (embeddable as { onEdit: () => Promise<void> }).onEdit();
     } else if (isControlInEditMode && panelId && availableOptions.length) {
       // edit an existing control
       controlGroupApi?.replacePanel(panelId, {
@@ -299,8 +304,16 @@ export function ESQLControlsFlyout({
     queryString,
     addToESQLVariablesService,
     dashboardPanels,
-    openEditFlyout,
   ]);
+
+  const onCancel = useCallback(() => {
+    closeFlyout();
+    // remove the variable from the service
+    esqlVariablesService.removeVariable(variableName);
+
+    const overlayTracker = tracksOverlays(dashboardApi) ? dashboardApi : undefined;
+    overlayTracker?.clearOverlays();
+  }, [closeFlyout, dashboardApi, variableName]);
 
   useEffect(() => {
     if (controlType === EsqlControlType.FIELDS && !availableFieldsOptions.length) {
@@ -326,16 +339,17 @@ export function ESQLControlsFlyout({
   }, [availableFieldsOptions.length, controlType, queryString, search]);
 
   useEffect(() => {
+    const variableExists = esqlVariablesService.variableExists(variableName.replace('?', ''));
     if (controlType === EsqlControlType.FIELDS) {
-      setFormIsInvalid(!selectedFields.length || !variableName);
+      setFormIsInvalid(!selectedFields.length || !variableName || variableExists);
     }
 
     if (controlType === EsqlControlType.TIME_LITERAL) {
-      setFormIsInvalid(!values || !variableName);
+      setFormIsInvalid(!values || !variableName || variableExists);
     }
 
     if (controlType === EsqlControlType.VALUES) {
-      setFormIsInvalid(!valuesQuery || !variableName);
+      setFormIsInvalid(!valuesQuery || !variableName || variableExists);
     }
   }, [controlType, selectedFields.length, values, valuesQuery, variableName]);
 
@@ -434,11 +448,17 @@ export function ESQLControlsFlyout({
           })}
           fullWidth
           autoFocus
-          isInvalid={!variableName}
+          isInvalid={
+            !variableName || esqlVariablesService.variableExists(variableName.replace('?', ''))
+          }
           error={
             !variableName
               ? i18n.translate('esql.flyout.variableName.error', {
                   defaultMessage: 'Variable name is required',
+                })
+              : esqlVariablesService.variableExists(variableName.replace('?', ''))
+              ? i18n.translate('esql.flyout.variableNameExists.error', {
+                  defaultMessage: 'Variable name already exists',
                 })
               : undefined
           }
@@ -628,7 +648,7 @@ export function ESQLControlsFlyout({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               id="lnsCancelEditOnFlyFlyout"
-              onClick={closeFlyout}
+              onClick={onCancel}
               flush="left"
               aria-label={i18n.translate('esql.flyout..cancelFlyoutAriaLabel', {
                 defaultMessage: 'Cancel applied changes',
@@ -642,7 +662,7 @@ export function ESQLControlsFlyout({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={createVariableControl}
+              onClick={onCreateVariableControl}
               fill
               aria-label={i18n.translate('esql.flyout..applyFlyoutAriaLabel', {
                 defaultMessage: 'Apply changes',

@@ -19,7 +19,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { monaco } from '@kbn/monaco';
 import { ESQLControlsFlyout } from './esql_controls_flyout';
-import { esqlVariablesService } from '../../../common';
 import { untilPluginStartServicesReady } from '../../kibana_services';
 import type { ESQLControlState } from './types';
 
@@ -58,23 +57,6 @@ export async function executeAction({
     throw new IncompatibleActionError();
   }
 
-  const openEditFlyout = async (embeddable: unknown) => {
-    await (embeddable as { onEdit: () => Promise<void> }).onEdit();
-  };
-
-  const addToESQLVariablesService = (
-    variableName: string,
-    variableValue: string,
-    variableType: EsqlControlType,
-    query: string
-  ) => {
-    esqlVariablesService.addVariable({
-      key: variableName,
-      value: variableValue,
-      type: variableType,
-    });
-    esqlVariablesService.setEsqlQueryWithVariables(query);
-  };
   const deps = await untilPluginStartServicesReady();
   const handle = core.overlays.openFlyout(
     toMountPoint(
@@ -95,8 +77,6 @@ export async function executeAction({
               dashboardApi={dashboardApi}
               panelId={panelId}
               cursorPosition={cursorPosition}
-              openEditFlyout={openEditFlyout}
-              addToESQLVariablesService={addToESQLVariablesService}
               initialState={initialState}
             />
           </KibanaContextProvider>
