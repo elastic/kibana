@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, skipWhile, switchMap } from 'rxjs';
-import type { PageUrlStateService } from '@kbn/ml-url-state';
+import type { UrlStateService } from '@kbn/ml-url-state';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
@@ -29,7 +29,7 @@ export class AnomalyChartsStateService extends StateService {
     private _anomalyTimelineStateServices: AnomalyTimelineStateService,
     private _anomalyExplorerChartsService: AnomalyExplorerChartsService,
     private _anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService,
-    private _tableSeverityState: PageUrlStateService<TableSeverity>
+    private _tableSeverityState: UrlStateService<TableSeverity>
   ) {
     super();
     this._init();
@@ -40,7 +40,7 @@ export class AnomalyChartsStateService extends StateService {
 
     subscription.add(
       this._anomalyExplorerUrlStateService
-        .getPageUrlState$()
+        .getUrlState$()
         .pipe(
           map((urlState) => urlState?.mlShowCharts ?? true),
           distinctUntilChanged()
@@ -60,7 +60,7 @@ export class AnomalyChartsStateService extends StateService {
       this._anomalyTimelineStateServices.getContainerWidth$().pipe(skipWhile((v) => v === 0)),
       this._anomalyTimelineStateServices.getSelectedCells$(),
       this._anomalyTimelineStateServices.getViewBySwimlaneFieldName$(),
-      this._tableSeverityState.getPageUrlState$(),
+      this._tableSeverityState.getUrlState$(),
     ])
       .pipe(
         switchMap(

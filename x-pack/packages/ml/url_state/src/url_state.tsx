@@ -211,27 +211,26 @@ export const useUrlState = (
 /**
  * Service for managing URL state of particular page.
  */
-export class PageUrlStateService<T> {
-  private _pageUrlState$ = new BehaviorSubject<T | null>(null);
-  private _pageUrlStateCallback: ((update: Partial<T>, replaceState?: boolean) => void) | null =
-    null;
+export class UrlStateService<T> {
+  private _urlState$ = new BehaviorSubject<T | null>(null);
+  private _urlStateCallback: ((update: Partial<T>, replaceState?: boolean) => void) | null = null;
 
   /**
    * Provides updates for the page URL state.
    */
-  public getPageUrlState$(): Observable<T> {
-    return this._pageUrlState$.pipe(distinctUntilChanged(isEqual));
+  public getUrlState$(): Observable<T> {
+    return this._urlState$.pipe(distinctUntilChanged(isEqual));
   }
 
-  public getPageUrlState(): T | null {
-    return this._pageUrlState$.getValue();
+  public getUrlState(): T | null {
+    return this._urlState$.getValue();
   }
 
   public updateUrlState(update: Partial<T>, replaceState?: boolean): void {
-    if (!this._pageUrlStateCallback) {
+    if (!this._urlStateCallback) {
       throw new Error('Callback has not been initialized.');
     }
-    this._pageUrlStateCallback(update, replaceState);
+    this._urlStateCallback(update, replaceState);
   }
 
   /**
@@ -239,7 +238,7 @@ export class PageUrlStateService<T> {
    * @param currentState
    */
   public setCurrentState(currentState: T): void {
-    this._pageUrlState$.next(currentState);
+    this._urlState$.next(currentState);
   }
 
   /**
@@ -247,7 +246,7 @@ export class PageUrlStateService<T> {
    * @param callback
    */
   public setUpdateCallback(callback: (update: Partial<T>, replaceState?: boolean) => void): void {
-    this._pageUrlStateCallback = callback;
+    this._urlStateCallback = callback;
   }
 }
 
@@ -256,32 +255,45 @@ export interface PageUrlState {
   pageUrlState: object;
 }
 
-/**
- * Hook for managing the URL state of the page.
- */
-export const usePageUrlState = <T extends PageUrlState>(
-  pageKey: T['pageKey'],
-  defaultState?: T['pageUrlState']
-): [
-  T['pageUrlState'],
-  (update: Partial<T['pageUrlState']>, replaceState?: boolean) => void,
-  PageUrlStateService<T['pageUrlState']>
-] => {
-  const [appState, setAppState] = useUrlState('_a');
-  const pageState = appState?.[pageKey];
+interface AppStateOptions<T> {
+  pageKey: string;
+  defaultState?: T;
+}
 
-  const setCallback = useRef<typeof setAppState>();
+interface GlobalStateOptions<T> {
+  defaultState?: T;
+}
+
+type UrlStateOptions<K extends Accessor, T> = K extends '_a'
+  ? AppStateOptions<T>
+  : GlobalStateOptions<T>;
+
+function isAppStateOptions<T>(
+  _stateKey: Accessor,
+  options: Partial<AppStateOptions<T>>
+): options is AppStateOptions<T> {
+  return 'pageKey' in options;
+}
+
+export const useUrlStateService = <K extends Accessor, T>(
+  stateKey: K,
+  options: UrlStateOptions<K, T>
+): [T, (update: Partial<T>, replaceState?: boolean) => void, UrlStateService<T>] => {
+  const [state, setState] = useUrlState(stateKey);
+  const urlState = isAppStateOptions<T>(stateKey, options) ? state?.[options.pageKey] : state;
+
+  const setCallback = useRef<typeof setState>();
 
   useEffect(() => {
-    setCallback.current = setAppState;
-  }, [setAppState]);
+    setCallback.current = setState;
+  }, [setState]);
 
-  const prevPageState = useRef<T['pageUrlState'] | undefined>();
+  const prevPageState = useRef<T | undefined>();
 
-  const resultPageState: T['pageUrlState'] = useMemo(() => {
+  const resultState: T = useMemo(() => {
     const result = {
-      ...(defaultState ?? {}),
-      ...(pageState ?? {}),
+      ...(options.defaultState ?? {}),
+      ...(urlState ?? {}),
     };
 
     if (isEqual(result, prevPageState.current)) {
@@ -301,37 +313,78 @@ export const usePageUrlState = <T extends PageUrlState>(
 
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageState]);
+  }, [urlState]);
 
   const onStateUpdate = useCallback(
-    (update: Partial<T['pageUrlState']>, replaceState?: boolean) => {
+    (update: Partial<T>, replaceState?: boolean) => {
       if (!setCallback?.current) {
         throw new Error('Callback for URL state update has not been initialized.');
       }
-
-      setCallback.current(
-        pageKey,
-        {
-          ...resultPageState,
-          ...update,
-        },
-        replaceState
-      );
+      if (isAppStateOptions<T>(stateKey, options)) {
+        setCallback.current(
+          options.pageKey,
+          {
+            ...resultState,
+            ...update,
+          },
+          replaceState
+        );
+      } else {
+        setCallback.current({ ...resultState, ...update });
+      }
     },
-    [pageKey, resultPageState]
+    [stateKey, options, resultState]
   );
 
-  const pageUrlStateService = useMemo(() => new PageUrlStateService<T['pageUrlState']>(), []);
+  const urlStateService = useMemo(() => new UrlStateService<T>(), []);
 
   useEffect(
-    function updatePageUrlService() {
-      pageUrlStateService.setCurrentState(resultPageState);
-      pageUrlStateService.setUpdateCallback(onStateUpdate);
+    function updateUrlStateService() {
+      urlStateService.setCurrentState(resultState);
+      urlStateService.setUpdateCallback(onStateUpdate);
     },
-    [pageUrlStateService, onStateUpdate, resultPageState]
+    [urlStateService, onStateUpdate, resultState]
   );
 
-  return useMemo(() => {
-    return [resultPageState, onStateUpdate, pageUrlStateService];
-  }, [resultPageState, onStateUpdate, pageUrlStateService]);
+  return useMemo(
+    () => [resultState, onStateUpdate, urlStateService],
+    [resultState, onStateUpdate, urlStateService]
+  );
+};
+
+/**
+ * Hook for managing the URL state of the page.
+ */
+export const usePageUrlState = <T extends PageUrlState>(
+  pageKey: T['pageKey'],
+  defaultState?: T['pageUrlState']
+): [
+  T['pageUrlState'],
+  (update: Partial<T['pageUrlState']>, replaceState?: boolean) => void,
+  UrlStateService<T['pageUrlState']>
+] => {
+  return useUrlStateService<'_a', T['pageUrlState']>('_a', { pageKey, defaultState });
+};
+
+export interface GlobalState {
+  ml: {
+    jobIds: string[];
+  };
+  time?: {
+    from: string;
+    to: string;
+  };
+}
+
+/**
+ * Hook for managing the global URL state.
+ */
+export const useGlobalUrlState = (
+  defaultState?: GlobalState
+): [
+  GlobalState,
+  (update: Partial<GlobalState>, replaceState?: boolean) => void,
+  UrlStateService<GlobalState>
+] => {
+  return useUrlStateService<'_g', GlobalState>('_g', { defaultState });
 };
