@@ -1586,6 +1586,8 @@
       "@kbn/search-response-warnings/*": ["packages/kbn-search-response-warnings/*"],
       "@kbn/search-shared-ui": ["x-pack/packages/search/shared_ui"],
       "@kbn/search-shared-ui/*": ["x-pack/packages/search/shared_ui/*"],
+      "@kbn/search-synonyms": ["x-pack/plugins/search_synonyms"],
+      "@kbn/search-synonyms/*": ["x-pack/plugins/search_synonyms/*"],
       "@kbn/search-types": ["packages/kbn-search-types"],
       "@kbn/search-types/*": ["packages/kbn-search-types/*"],
       "@kbn/searchprofiler-plugin": ["x-pack/plugins/searchprofiler"],

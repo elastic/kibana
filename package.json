@@ -810,6 +810,7 @@
     "@kbn/search-playground": "link:x-pack/plugins/search_playground",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/search-shared-ui": "link:x-pack/packages/search/shared_ui",
+    "@kbn/search-synonyms": "link:x-pack/plugins/search_synonyms",
     "@kbn/search-types": "link:packages/kbn-search-types",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",
     "@kbn/security-api-key-management": "link:x-pack/packages/security/api_key_management",

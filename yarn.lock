@@ -6980,6 +6980,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-synonyms@link:x-pack/plugins/search_synonyms":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-types@link:packages/kbn-search-types":
   version "0.0.0"
   uid ""
