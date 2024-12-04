@@ -25,6 +25,12 @@ import { ChartLoadError } from './chart_load_error';
 import { HOST_MISSING_FIELDS } from '../../common/visualizations/constants';
 
 const MIN_HEIGHT = 300;
+const DEFAULT_DISABLED_ACTIONS = [
+  'ACTION_CUSTOMIZE_PANEL',
+  'ACTION_EXPORT_CSV',
+  'embeddable_addToExistingCase',
+  'create-ml-ad-job-action',
+];
 
 export type LensChartProps = BaseChartProps &
   Pick<EuiPanelProps, 'borderRadius'> & {
@@ -33,6 +39,8 @@ export type LensChartProps = BaseChartProps &
     description?: string;
   } & {
     lensAttributes: UseLensAttributesParams;
+    withDefaultActions?: boolean;
+    disabledActions?: string[];
   };
 
 export const LensChart = React.memo(
@@ -52,6 +60,8 @@ export const LensChart = React.memo(
     height = MIN_HEIGHT,
     loading = false,
     lensAttributes,
+    withDefaultActions = true,
+    disabledActions = DEFAULT_DISABLED_ACTIONS,
   }: LensChartProps) => {
     const { formula, attributes, getExtraActions, error } = useLensAttributes(lensAttributes);
 
@@ -122,6 +132,8 @@ export const LensChart = React.memo(
         dateRange={dateRange}
         disableTriggers={disableTriggers}
         extraActions={extraActions}
+        withDefaultActions={withDefaultActions}
+        disabledActions={disabledActions}
         filters={filters}
         hidePanelTitles={hidePanelTitles}
         loading={isLoading}
