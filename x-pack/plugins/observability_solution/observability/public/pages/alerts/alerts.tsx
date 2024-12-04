@@ -37,8 +37,11 @@ import {
 } from '../../components/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
-import { observabilityAlertFeatureIds } from '../../../common/constants';
-import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
+import {
+  ALERTS_URL_STORAGE_KEY,
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+  observabilityAlertFeatureIds,
+} from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
@@ -177,8 +180,8 @@ function InternalAlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
-        typesFilter: filteredRuleTypes,
-        filterConsumers: observabilityAlertFeatureIds,
+        ruleTypeIds: filteredRuleTypes,
+        consumers: observabilityAlertFeatureIds,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
@@ -250,7 +253,8 @@ function InternalAlertsPage() {
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertSummaryWidget
-              featureIds={observabilityAlertFeatureIds}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+              consumers={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
@@ -260,7 +264,8 @@ function InternalAlertsPage() {
           <EuiFlexItem>
             {esQuery && (
               <AlertsGrouping<AlertsByGroupingAgg>
-                featureIds={observabilityAlertFeatureIds}
+                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                consumers={observabilityAlertFeatureIds}
                 defaultFilters={
                   ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS
                 }
@@ -286,7 +291,8 @@ function InternalAlertsPage() {
                   return (
                     <AlertsStateTable
                       id={ALERTS_TABLE_ID}
-                      featureIds={observabilityAlertFeatureIds}
+                      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                      consumers={observabilityAlertFeatureIds}
                       configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                       query={mergeBoolQueries(esQuery, groupQuery)}
                       showAlertStatusWithFlapping
