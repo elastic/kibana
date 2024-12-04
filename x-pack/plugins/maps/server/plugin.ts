@@ -18,7 +18,7 @@ import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
 
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
@@ -169,12 +169,7 @@ export class MapsPlugin implements Plugin {
       registerIntegrations(core, customIntegrations);
     }
 
-    features.registerKibanaFeature({
-      id: APP_ID,
-      name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
-        defaultMessage: 'Maps',
-      }),
-      order: 400,
+    const baseMapsFeature: Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> = {
       category: DEFAULT_APP_CATEGORIES.kibana,
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [APP_ID, 'kibana'],
@@ -199,6 +194,31 @@ export class MapsPlugin implements Plugin {
           ui: ['show'],
         },
       },
+    };
+
+    features.registerKibanaFeature({
+      deprecated: {
+        notice: i18n.translate('xpack.maps.featureRegistry.mapsFeatureDeprecationNotice', {
+          defaultMessage:
+            'The Maps V1 privilege has been deprecated and replaced with a Maps V2 privilege in order to improve saved query management. See {link} for more details.',
+          values: { link: 'https://github.com/elastic/kibana/pull/202863' },
+        }),
+      },
+      id: APP_ID,
+      name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
+        defaultMessage: 'Maps (DEPRECATED)',
+      }),
+      order: 400,
+      ...baseMapsFeature,
+    });
+
+    features.registerKibanaFeature({
+      id: 'maps_v2',
+      name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureNameV2', {
+        defaultMessage: 'Maps',
+      }),
+      order: 401,
+      ...baseMapsFeature,
     });
 
     setupSavedObjects(core, getFilterMigrations, getDataViewMigrations);
