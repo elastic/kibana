@@ -8,7 +8,9 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/logs_explorer'],
+  roots: [
+    '<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/logs_explorer',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/logs_explorer',
   coverageReporters: ['text', 'html'],
