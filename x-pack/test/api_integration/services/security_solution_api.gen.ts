@@ -96,6 +96,7 @@ import {
   GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import { GetRuleMigrationPrebuiltRulesRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
@@ -950,6 +951,27 @@ finalize it.
         .query(props.query);
     },
     /**
+     * Retrieves all available prebuilt rules (installed and installable)
+     */
+    getRuleMigrationPrebuiltRules(
+      props: GetRuleMigrationPrebuiltRulesProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .get(
+          routeWithNamespace(
+            replaceParams(
+              '/internal/siem_migrations/rules/{migration_id}/prebuilt_rules',
+              props.params
+            ),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Retrieves resources for an existing SIEM rules migration
      */
     getRuleMigrationResources(
@@ -1721,6 +1743,9 @@ export interface GetRuleExecutionResultsProps {
 export interface GetRuleMigrationProps {
   query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
+}
+export interface GetRuleMigrationPrebuiltRulesProps {
+  params: GetRuleMigrationPrebuiltRulesRequestParamsInput;
 }
 export interface GetRuleMigrationResourcesProps {
   query: GetRuleMigrationResourcesRequestQueryInput;
