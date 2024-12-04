@@ -85,6 +85,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab overview',
           },
           {
+            id: 'datavisualizer',
+            name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
+              defaultMessage: 'Data Visualizer',
+            }),
+            disabled: false,
+            pathId: ML_PAGES.DATA_VISUALIZER,
+            testSubj: 'mlMainTab dataVisualizer',
+          },
+          {
             id: 'notifications',
             pathId: ML_PAGES.NOTIFICATIONS,
             name: disableLinks ? (
@@ -217,57 +226,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab trainedModels',
-          },
-        ],
-      },
-      {
-        id: 'datavisualizer',
-        name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
-          defaultMessage: 'Data Visualizer',
-        }),
-        disabled: false,
-        pathId: ML_PAGES.DATA_VISUALIZER,
-        testSubj: 'mlMainTab dataVisualizer',
-        items: [
-          {
-            id: 'filedatavisualizer',
-            pathId: ML_PAGES.DATA_VISUALIZER_FILE,
-            name: i18n.translate('xpack.ml.navMenu.fileDataVisualizerLinkText', {
-              defaultMessage: 'File',
-            }),
-            disabled: false,
-            testSubj: 'mlMainTab fileDataVisualizer',
-          },
-          {
-            id: 'data_view_datavisualizer',
-            pathId: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
-            name: i18n.translate('xpack.ml.navMenu.dataViewDataVisualizerLinkText', {
-              defaultMessage: 'Data View',
-            }),
-            disabled: false,
-            testSubj: 'mlMainTab indexDataVisualizer',
-            relatedRouteIds: ['data_view_datavisualizer'],
-          },
-          {
-            id: 'esql_datavisualizer',
-            pathId: ML_PAGES.DATA_VISUALIZER_ESQL,
-            name: i18n.translate('xpack.ml.navMenu.esqlDataVisualizerLinkText', {
-              defaultMessage: 'ES|QL',
-            }),
-            disabled: false,
-            testSubj: 'mlMainTab esqlDataVisualizer',
-            relatedRouteIds: ['data_view_datavisualizer_esql'],
-          },
-
-          {
-            id: 'data_drift',
-            pathId: ML_PAGES.DATA_DRIFT_INDEX_SELECT,
-            name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
-              defaultMessage: 'Data Drift',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab dataDrift',
-            relatedRouteIds: ['data_drift'],
           },
         ],
       },

@@ -27,8 +27,6 @@ import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useMlLink } from '../contexts/kibana';
 import { NodesList } from '../memory_usage/nodes_overview';
-import { MlPageHeader } from '../components/page_header';
-import { PageTitle } from '../components/page_title';
 import { getMlNodesCount } from '../ml_nodes_check/check_ml_nodes';
 
 export const overviewPanelDefaultState = Object.freeze({
@@ -62,13 +60,6 @@ export const OverviewPage: FC = () => {
 
   return (
     <div>
-      <MlPageHeader>
-        <PageTitle
-          title={i18n.translate('xpack.ml.overview.overviewLabel', {
-            defaultMessage: 'Overview',
-          })}
-        />
-      </MlPageHeader>
       <NodeAvailableWarning />
       <JobsAwaitingNodeWarning jobCount={adLazyJobCount + dfaLazyJobCount} />
       <SavedObjectsWarning
@@ -82,7 +73,6 @@ export const OverviewPage: FC = () => {
         }}
       />
       <UpgradeWarning />
-
       {canViewMlNodes ? (
         <>
           <CollapsiblePanel
@@ -121,7 +111,6 @@ export const OverviewPage: FC = () => {
           <EuiSpacer size="m" />
         </>
       ) : null}
-
       <OverviewContent
         createAnomalyDetectionJobDisabled={disableCreateAnomalyDetectionJob}
         setAdLazyJobCount={setAdLazyJobCount}
