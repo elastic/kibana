@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.createModelAlias('dfa_regression_model_n_0', 'dfa_regression_model_alias');
       await ml.api.createIngestPipeline('dfa_regression_model_alias');
 
-      // Creating an indices that are tied to modelId: dfa_regression_model_n_1
+      // Creating an index that is tied to modelId: dfa_regression_model_n_1
       await ml.api.createIndex(`user-index_dfa_regression_model_n_1`, undefined, {
         index: { default_pipeline: `pipeline_dfa_regression_model_n_1` },
       });

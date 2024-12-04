@@ -67,7 +67,7 @@ export function trainedModelsRoutes(
       },
       summary: 'Get trained models list',
       description:
-        'Retrieves a complete list if trained models with stats, pipelines, and indices.',
+        'Retrieves a complete list of trained models with stats, pipelines, and indices.',
     })
     .addVersion(
       {

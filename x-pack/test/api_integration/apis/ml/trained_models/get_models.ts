@@ -22,24 +22,10 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.initSavedObjects();
       await ml.testResources.setKibanaTimeZoneToUTC();
       testModelIds = await ml.api.createTestTrainedModels('regression', 5, true);
-      await ml.api.createModelAlias('dfa_regression_model_n_0', 'dfa_regression_model_alias');
-      await ml.api.createIngestPipeline('dfa_regression_model_alias');
-
-      // Creating an indices that are tied to modelId: dfa_regression_model_n_1
-      await ml.api.createIndex(`user-index_dfa_regression_model_n_1`, undefined, {
-        index: { default_pipeline: `pipeline_dfa_regression_model_n_1` },
-      });
     });
 
     after(async () => {
       await esDeleteAllIndices('user-index_dfa*');
-
-      // delete created ingest pipelines
-      await Promise.all(
-        ['dfa_regression_model_alias', ...testModelIds].map((modelId) =>
-          ml.api.deleteIngestPipeline(modelId)
-        )
-      );
       await ml.testResources.cleanMLSavedObjects();
       await ml.api.cleanMlIndices();
     });
@@ -66,8 +52,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       const sampleModel = body[0];
       expect(sampleModel.model_id).to.eql('dfa_regression_model_n_1');
-      expect(sampleModel.pipelines).to.eql(undefined);
-      expect(sampleModel.indices).to.eql(undefined);
     });
 
     it('returns 404 if requested trained model does not exist', async () => {
