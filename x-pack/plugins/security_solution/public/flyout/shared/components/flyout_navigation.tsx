@@ -22,7 +22,8 @@ import {
 } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { FlyoutHistory, getProcessedHistory } from './flyout_history';
+import { FlyoutHistory } from './flyout_history';
+import { getProcessedHistory } from '../utils/history_utils';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   HEADER_ACTIONS_TEST_ID,

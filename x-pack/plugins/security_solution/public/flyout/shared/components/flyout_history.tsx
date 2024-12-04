@@ -21,10 +21,6 @@ export interface HistoryProps {
    * A list of flyouts that have been opened
    */
   history: FlyoutPanelProps[];
-  /**
-   * Maximum number of flyouts to show in history
-   */
-  maxCount?: number;
 }
 
 /**
@@ -74,27 +70,3 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
 });
 
 FlyoutHistory.displayName = 'FlyoutHistory';
-
-/**
- * Helper function that reverses the history array,
- * removes duplicates and the most recent item
- * @returns a history array of maxCount length
- */
-export const getProcessedHistory = ({
-  history,
-  maxCount,
-}: {
-  history: FlyoutPanelProps[];
-  maxCount: number;
-}): FlyoutPanelProps[] => {
-  // Step 1: reverse history so the most recent is first
-  const reversedHistory = history.slice().reverse();
-
-  // Step 2: remove duplicates
-  const historyArray = Array.from(new Set(reversedHistory.map((i) => JSON.stringify(i)))).map((i) =>
-    JSON.parse(i)
-  );
-
-  // Omit the first (current) entry and return array of maxCount length
-  return historyArray.slice(1, maxCount + 1);
-};

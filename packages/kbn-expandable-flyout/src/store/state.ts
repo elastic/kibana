@@ -23,7 +23,7 @@ export interface FlyoutPanels {
    */
   preview: FlyoutPanelProps[] | undefined;
   /*
-   * History of the right panel that were opened
+   * History of the right panels that were opened
    */
   history: FlyoutPanelProps[];
 }

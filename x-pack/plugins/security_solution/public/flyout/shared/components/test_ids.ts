@@ -46,4 +46,7 @@ export const FLYOUT_HISTORY_CONTEXT_PANEL_TEST_ID =
 export const DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID =
   `${FLYOUT_HISTORY_TEST_ID}DocumentDetailsRow` as const;
 export const RULE_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}RuleRow` as const;
+export const HOST_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}HostRow` as const;
+export const USER_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}UserRow` as const;
+export const NETWORK_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}NetworkRow` as const;
 export const GENERIC_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}GenericRow` as const;

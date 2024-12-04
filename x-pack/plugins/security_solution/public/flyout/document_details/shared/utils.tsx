@@ -6,7 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
-import { EVENT_CATEGORY_TO_FIELD } from '../right/utils/event_utils';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 
 /**
@@ -38,7 +37,32 @@ export const getFieldArray = (field: unknown | unknown[]) => {
   return [];
 };
 
-export const getAlertTitle = ({ ruleName }: { ruleName: string | undefined }) => {
+// mapping of event category to the field displayed as title
+export const EVENT_CATEGORY_TO_FIELD: Record<string, string> = {
+  authentication: 'user.name',
+  configuration: '',
+  database: '',
+  driver: '',
+  email: '',
+  file: 'file.name',
+  host: 'host.name',
+  iam: '',
+  intrusion_detection: '',
+  malware: '',
+  network: '',
+  package: '',
+  process: 'process.name',
+  registry: '',
+  session: '',
+  threat: '',
+  vulnerability: '',
+  web: '',
+};
+
+/**
+ * Helper function to retrieve the alert title
+ */
+export const getAlertTitle = ({ ruleName }: { ruleName?: string | null }) => {
   const defaultAlertTitle = i18n.translate(
     'xpack.securitySolution.flyout.right.header.headerTitle',
     { defaultMessage: 'Document details' }
@@ -46,6 +70,9 @@ export const getAlertTitle = ({ ruleName }: { ruleName: string | undefined }) =>
   return ruleName ?? defaultAlertTitle;
 };
 
+/**
+ * Helper function to retrieve the event title
+ */
 export const getEventTitle = ({
   eventKind,
   eventCategory,

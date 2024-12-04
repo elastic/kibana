@@ -11,7 +11,6 @@ import { EuiContextMenuItem, type EuiIconProps } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
-import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
 import { getField, getAlertTitle, getEventTitle } from '../../document_details/shared/utils';
@@ -24,6 +23,9 @@ import {
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,
   RULE_HISTORY_ROW_TEST_ID,
   GENERIC_HISTORY_ROW_TEST_ID,
+  HOST_HISTORY_ROW_TEST_ID,
+  USER_HISTORY_ROW_TEST_ID,
+  NETWORK_HISTORY_ROW_TEST_ID,
 } from './test_ids';
 
 export interface FlyoutHistoryRowProps {
@@ -54,6 +56,7 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
           title={String(item?.params?.hostName)}
           icon={'storage'}
           name={'Host'}
+          dataTestSubj={HOST_HISTORY_ROW_TEST_ID}
         />
       );
     case UserPanelKey:
@@ -64,6 +67,7 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
           title={String(item?.params?.userName)}
           icon={'user'}
           name={'User'}
+          dataTestSubj={USER_HISTORY_ROW_TEST_ID}
         />
       );
     case NetworkPanelKey:
@@ -74,48 +78,43 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
           title={String(item?.params?.ip)}
           icon={'globe'}
           name={'Network'}
+          dataTestSubj={NETWORK_HISTORY_ROW_TEST_ID}
         />
       );
+    default:
+      return null;
   }
-  return null;
 });
 
 /**
  * Row item for a document details
  */
 export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
   const { dataFormattedForFieldBrowser, getFieldsData } = useEventDetails({
     eventId: String(item?.params?.id),
     indexName: String(item?.params?.indexName),
   });
-  const { ruleId, isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
-  const eventKind = getField(getFieldsData('event.kind'));
-  const eventCategory = getField(getFieldsData('event.category'));
+  const { ruleName, isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const eventKind = useMemo(() => getField(getFieldsData('event.kind')), [getFieldsData]);
+  const eventCategory = useMemo(() => getField(getFieldsData('event.category')), [getFieldsData]);
 
   const title = useMemo(
     () =>
       isAlert
-        ? getAlertTitle({ ruleName: maybeRule?.name })
+        ? getAlertTitle({ ruleName })
         : getEventTitle({ eventKind, eventCategory, getFieldsData }),
-    [isAlert, maybeRule, eventKind, eventCategory, getFieldsData]
+    [isAlert, ruleName, eventKind, eventCategory, getFieldsData]
   );
 
-  const onClick = useCallback(() => {
-    openFlyout({ right: item });
-  }, [openFlyout, item]);
-
   return (
-    <EuiContextMenuItem
+    <GenericHistoryRow
+      item={item}
+      index={index}
+      title={title}
       icon={isAlert ? 'warning' : 'analyzeEvent'}
-      key={index}
-      onClick={onClick}
-      data-test-subj={`${index}-${DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID}`}
-    >
-      {isAlert ? <i>{'Alert: '}</i> : <i>{'Event: '}</i>}
-      {title}
-    </EuiContextMenuItem>
+      name={isAlert ? 'Alert' : 'Event'}
+      dataTestSubj={DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID}
+    />
   );
 });
 
@@ -123,24 +122,18 @@ export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item
  * Row item for a rule details flyout
  */
 export const RuleHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
   const ruleId = String(item?.params?.ruleId);
   const { rule } = useRuleDetails({ ruleId });
 
-  const onClick = useCallback(() => {
-    openFlyout({ right: item });
-  }, [openFlyout, item]);
-
   return (
-    <EuiContextMenuItem
-      key={index}
-      onClick={onClick}
+    <GenericHistoryRow
+      item={item}
+      index={index}
+      title={rule?.name ?? ''}
       icon={'indexSettings'}
-      data-test-subj={`${index}-${RULE_HISTORY_ROW_TEST_ID}`}
-    >
-      <i>{'Rule: '}</i>
-      {rule?.name}
-    </EuiContextMenuItem>
+      name={'Rule'}
+      dataTestSubj={RULE_HISTORY_ROW_TEST_ID}
+    />
   );
 });
 
@@ -157,13 +150,17 @@ interface GenericHistoryRowProps extends FlyoutHistoryRowProps {
    * Name to display
    */
   name: string;
+  /**
+   * Data test subject
+   */
+  dataTestSubj?: string;
 }
 
 /**
  * Row item for a generic history row where the title is accessible in flyout params
  */
 export const GenericHistoryRow: FC<GenericHistoryRowProps> = memo(
-  ({ item, index, title, icon, name }) => {
+  ({ item, index, title, icon, name, dataTestSubj }) => {
     const { openFlyout } = useExpandableFlyoutApi();
     const onClick = useCallback(() => {
       openFlyout({ right: item });
@@ -174,7 +171,7 @@ export const GenericHistoryRow: FC<GenericHistoryRowProps> = memo(
         key={index}
         onClick={onClick}
         icon={icon}
-        data-test-subj={`${index}-${GENERIC_HISTORY_ROW_TEST_ID}`}
+        data-test-subj={`${index}-${dataTestSubj ?? GENERIC_HISTORY_ROW_TEST_ID}`}
       >
         <i>{`${name}: `}</i>
         {title}
