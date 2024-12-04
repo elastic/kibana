@@ -14,12 +14,8 @@ import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/bre
 
 import { CreatePolicyWizard } from './create_policy_wizard';
 import { CreatePolicyContextProvider } from './create_policy_context';
-import {
-  EnrichPoliciesAuthProvider,
-  EnrichPoliciesWithPrivileges,
-} from '../../components/enrich_policies';
 
-const CreateView: React.FunctionComponent<RouteComponentProps> = () => {
+export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = () => {
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.enrichPoliciesCreate);
   }, []);
@@ -64,11 +60,3 @@ const CreateView: React.FunctionComponent<RouteComponentProps> = () => {
     </CreatePolicyContextProvider>
   );
 };
-
-export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = (props) => (
-  <EnrichPoliciesAuthProvider>
-    <EnrichPoliciesWithPrivileges>
-      <CreateView {...props} />
-    </EnrichPoliciesWithPrivileges>
-  </EnrichPoliciesAuthProvider>
-);

@@ -17,6 +17,7 @@ const createClientMock = (): jest.Mocked<PackageClient> => ({
   fetchFindLatestPackage: jest.fn(),
   readBundledPackage: jest.fn(),
   getAgentPolicyConfigYAML: jest.fn(),
+  getLatestPackageInfo: jest.fn(),
   getPackage: jest.fn(),
   getPackageFieldsMetadata: jest.fn(),
   getPackages: jest.fn(),
