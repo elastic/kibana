@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   analyticsServiceMock,

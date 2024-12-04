@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { DeepPartial, Mutable } from 'utility-types';
 import { merge } from 'lodash';
 import type { SearchResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
@@ -97,7 +95,6 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
 
     hit.inner_hits = {
       first_found: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         hits: { hits: [this.toEsSearchHit(hit._source!, hit._index)] },
       },
     };

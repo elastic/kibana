@@ -125,7 +125,7 @@ export const RuleFeatureTour: FC = () => {
        * children={undefined} is needed to narrow down EuiTourStepProps. Without
        * it we get a TS error: Types of property 'anchor' are incompatible.
        */
-      // eslint-disable-next-line react/no-children-prop
+
       children={undefined}
       anchor={`#${PER_FIELD_UPGRADE_TOUR_ANCHOR}`}
       anchorPosition="downCenter"

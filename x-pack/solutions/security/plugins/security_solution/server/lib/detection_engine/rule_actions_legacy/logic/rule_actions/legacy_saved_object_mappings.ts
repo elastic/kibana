@@ -7,7 +7,7 @@
 
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
-// eslint-disable-next-line no-restricted-imports
+
 import { legacyRuleActionsSavedObjectMigration } from './legacy_migrations';
 
 /**

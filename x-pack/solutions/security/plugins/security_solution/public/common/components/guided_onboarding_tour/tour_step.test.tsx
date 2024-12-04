@@ -48,7 +48,7 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     EuiTourStep: (props: any) => mockTourStep(props),
   };
 });

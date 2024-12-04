@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export type PossibleArgDataTypes = string | boolean;
 export type ParsedArgData<T = PossibleArgDataTypes> = Array<
   T extends PossibleArgDataTypes ? T : never

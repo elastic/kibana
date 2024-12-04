@@ -15,7 +15,7 @@ export const buildThresholdMultiBucketAggregation = ({
 }: {
   threshold: ThresholdNormalized;
   aggregatableTimestampField: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   sortKeys: Record<string, any> | undefined;
 }) => {
   return {

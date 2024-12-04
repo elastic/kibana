@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-nodejs-modules
 import fs from 'fs';
 
 // makes sure we save videos just for failed specs

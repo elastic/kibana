@@ -730,7 +730,6 @@ describe('telemetry tasks', () => {
     });
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function getEndpointMetaRequests(atLeast: number = 1): Promise<any[]> {
     return eventually(async () => {
       const found = mockedAxiosPost.mock.calls.filter(([url]) => {
@@ -752,7 +751,6 @@ describe('telemetry tasks', () => {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function getAlertsDetectionsRequests(atLeast: number = 1): Promise<any[]> {
     return eventually(async () => {
       const found = mockedAxiosPost.mock.calls.filter(([url]) => {

@@ -29,7 +29,7 @@ main();
 function handleErr(err: unknown) {
   if (err instanceof errors.ResponseError && err.statusCode !== 404) {
     console.log(JSON.stringify(err, null, 2));
-    // eslint-disable-next-line no-process-exit
+
     process.exit(1);
   }
 }
@@ -313,7 +313,7 @@ async function main() {
     logger.error(
       'Please use the --withNewUser=username:password flag to add a custom user with required roles when --fleet is enabled!'
     );
-    // eslint-disable-next-line no-process-exit
+
     process.exit(0);
   }
 

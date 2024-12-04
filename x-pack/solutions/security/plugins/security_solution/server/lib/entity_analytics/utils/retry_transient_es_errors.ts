@@ -20,7 +20,6 @@ const isRetryableError = (e: Error) =>
   e instanceof EsErrors.NoLivingConnectionsError ||
   e instanceof EsErrors.ConnectionError ||
   e instanceof EsErrors.TimeoutError ||
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   (e instanceof EsErrors.ResponseError && retryResponseStatuses.includes(e?.statusCode!));
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

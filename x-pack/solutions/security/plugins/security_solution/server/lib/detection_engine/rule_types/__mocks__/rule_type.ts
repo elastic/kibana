@@ -31,7 +31,6 @@ export const createRuleTypeMocks = (
   ruleType: string = 'query',
   ruleParams: Partial<RuleParams> = {}
 ) => {
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   let alertExecutor: (...args: any[]) => Promise<any>;
 
   const mockedConfig$ = of({} as ConfigType);

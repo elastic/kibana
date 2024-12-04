@@ -213,7 +213,6 @@ export const persistTimeline = async ({
   try {
     if (isEmpty(timelineId) && timeline.status === TimelineStatusEnum.draft && timeline) {
       const temp: CleanDraftTimelinesResponse | TimelineErrorResponse = await cleanDraftTimeline({
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineType: timeline.timelineType!,
         templateTimelineId: timeline.templateTimelineId ?? undefined,
         templateTimelineVersion: timeline.templateTimelineVersion ?? undefined,

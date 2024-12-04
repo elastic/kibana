@@ -7,8 +7,6 @@
 
 // / <reference types="cypress" />
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
 import type {

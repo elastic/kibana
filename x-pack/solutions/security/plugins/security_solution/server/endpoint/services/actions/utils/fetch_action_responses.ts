@@ -98,7 +98,6 @@ export const fetchEndpointActionResponses = async <
     .catch(catchAndWrapError);
 
   return (searchResponse?.hits?.hits ?? []).map((esHit) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return esHit._source!;
   });
 };
@@ -126,7 +125,6 @@ export const fetchFleetActionResponses = async ({
     .catch(catchAndWrapError);
 
   return (searchResponse?.hits?.hits ?? []).map((esHit) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return esHit._source!;
   });
 };

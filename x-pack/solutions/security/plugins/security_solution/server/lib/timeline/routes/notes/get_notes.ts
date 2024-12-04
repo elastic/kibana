@@ -29,7 +29,6 @@ import { getAllSavedNote } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { GetNotesRequestQuery, type GetNotesResponse } from '../../../../../common/api/timeline';
 
-/* eslint-disable complexity */
 export const getNotesRoute = (
   router: SecuritySolutionPluginRouter,
   startServices: StartServicesAccessor<StartPlugins>

@@ -258,7 +258,7 @@ export const cli = () => {
         log.error(
           'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the API key.'
         );
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(1);
       }
 
@@ -286,7 +286,7 @@ export const cli = () => {
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
         log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(1);
       }
 
@@ -366,7 +366,7 @@ ${JSON.stringify(argv, null, 2)}
       if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
         createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
       }
-      // eslint-disable-next-line require-atomic-updates
+
       log = prefixedOutputLogger('cy.parallel(svl)', createToolingLogger());
 
       const tier: string = argv.tier;
@@ -414,7 +414,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       // This can take so much time that the job can fail by timeout in CI.
       if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(0);
       }
 
@@ -428,7 +428,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (!files?.length) {
         log.info('No tests found');
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(0);
       }
 
@@ -461,7 +461,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               if (!project) {
                 log.error('Failed to create project.');
-                // eslint-disable-next-line no-process-exit
+
                 return process.exit(1);
               }
 
@@ -493,7 +493,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               if (!credentials) {
                 log.error('Credentials could not be reset.');
-                // eslint-disable-next-line no-process-exit
+
                 return process.exit(1);
               }
 
@@ -598,7 +598,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
                 } catch (error) {
                   // False positive
-                  // eslint-disable-next-line require-atomic-updates
+
                   result = error;
                   failedSpecFilePaths.push(filePath);
                   log.error(`Cypress runner failed: ${error}`);

@@ -25,7 +25,6 @@ import type { PolicyConfig } from '../../../../common/endpoint/types';
 const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): PackagePolicy => {
   const packagePolicy = createPackagePolicyMock();
   if (!cb) {
-    // eslint-disable-next-line no-param-reassign
     cb = (p) => p;
   }
   const policyConfig = cb(policyFactory());

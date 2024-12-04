@@ -21,7 +21,7 @@ jest.mock('../../../common/containers/query_toggle');
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   return { ...r, memo: (x: any) => x };
 });
 
@@ -234,7 +234,7 @@ describe('Paginated Table Component', () => {
       // so we make a component to pass it the props context
       // ComponentWithContext will pass the changed props to Component
       // https://github.com/airbnb/enzyme/issues/1853#issuecomment-443475903
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const ComponentWithContext = (props: BasicTableProps<any>) => {
         return (
           <ThemeProvider theme={mockTheme}>

@@ -58,7 +58,7 @@ export function sendAlertTelemetryEvents(
   if (selectedEvents.length > 0) {
     // Create map of ancenstor_id -> alert_id
     let signalIdMap = new Map<CreatedSignalId, AlertId>();
-    /* eslint-disable no-param-reassign */
+
     signalIdMap = createdEvents.reduce((signalMap, obj) => {
       const ancestorId = obj['kibana.alert.original_event.id']?.toString();
       const alertId = obj._id?.toString();

@@ -107,7 +107,7 @@ export const buildFleetAgentBulkCreateOperations = ({
       { create: { _index: agentDoc._index, _id: agentDoc._id } },
       agentDoc._source
     );
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     response.agents.push(agentDoc._source!);
   }
 
@@ -176,7 +176,7 @@ export const indexFleetServerAgent = async (
 
   return {
     fleetAgentsIndex: doc._index,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     agents: [doc._source!],
   };
 };

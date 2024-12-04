@@ -111,7 +111,7 @@ export const hasTimestampFields = async (args: {
   timestampField: string;
   // any is derived from here
   // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -846,7 +846,7 @@ export const mergeSearchResults = <
       aggregations: newAggregations,
       hits: {
         total: calculateTotal(prev.hits.total, next.hits.total),
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         max_score: Math.max(newHits.max_score!, existingHits.max_score!),
         hits: [...existingHits.hits, ...newHits.hits],
       },

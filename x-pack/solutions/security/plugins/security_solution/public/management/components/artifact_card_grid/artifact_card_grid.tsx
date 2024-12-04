@@ -141,7 +141,6 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
 
     const handleItemComponentProps = useCallback(
       (item: AnyArtifact): ArtifactEntryCollapsibleCardProps => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return fullCardProps.get(item)!;
       },
       [fullCardProps]

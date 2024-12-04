@@ -32,7 +32,6 @@ export const getFakeHttpService = () => {
 };
 
 export const renderQuery = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hook: () => any,
   waitForHook: 'isSuccess' | 'isLoading' | 'isError' = 'isSuccess'
 ) => {
@@ -46,10 +45,7 @@ export const renderQuery = async (
   return resultHook.current;
 };
 
-export const renderMutation = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hook: () => any
-) => {
+export const renderMutation = async (hook: () => any) => {
   const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
     <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
   );

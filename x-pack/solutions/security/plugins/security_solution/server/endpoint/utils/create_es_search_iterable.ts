@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import type * as estypes from '@kbn/es-types';
@@ -89,7 +87,6 @@ export const createEsSearchIterable = <TDocument = unknown>({
     value = resultsMapper ? resultsMapper(searchResponse) : searchResponse;
 
     if (value && 'then' in value && typeof value.then === 'function') {
-      // eslint-disable-next-line require-atomic-updates
       value = await value;
     }
   };
@@ -136,9 +133,8 @@ export const createEsSearchIterable = <TDocument = unknown>({
       return;
     }
 
-    // eslint-disable-next-line require-atomic-updates
     searchAfterValue = lastSearchHit.sort;
-    // eslint-disable-next-line require-atomic-updates
+
     pointInTime = Promise.resolve({ id: searchResult.pit_id ?? '' });
     await setValue(searchResult);
 

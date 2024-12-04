@@ -146,7 +146,6 @@ export const cyLoadEndpointDataHandler = async (
     await startTransform(esClient, log, METADATA_UNITED_TRANSFORM);
     await startTransform(esClient, log, METADATA_UNITED_TRANSFORM_V2);
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
     await waitForEndpoints(esClient, log, 'united_index', agentIds);
   }

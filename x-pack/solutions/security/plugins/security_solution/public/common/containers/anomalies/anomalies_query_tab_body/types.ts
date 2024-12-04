@@ -19,7 +19,7 @@ interface QueryTabBodyProps {
 
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   anomaliesFilterQuery?: object;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   AnomaliesTableComponent: React.NamedExoticComponent<any>;
   deleteQuery?: ({ id }: { id: string }) => void;
   endDate: GlobalTimeArgs['to'];

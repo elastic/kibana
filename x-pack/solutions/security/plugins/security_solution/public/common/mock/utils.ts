@@ -16,9 +16,8 @@ import { createSecuritySolutionStorageMock } from './mock_local_storage';
 
 type GlobalThis = typeof globalThis;
 interface Global extends GlobalThis {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   window: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   document: any;
 }
 

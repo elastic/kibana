@@ -45,7 +45,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
     return {
       type: idPieces[1],
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       decodedSha256: idPieces.pop()!,
       identifier: idPieces.join('-'),
     };
@@ -105,7 +105,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
   async deleteArtifact(id: string) {
     // Ignoring the `id` not being in the type until we can refactor the types in endpoint.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const artifactId = (await this.getArtifact(id))?.id!;
     return this.fleetArtifacts.deleteArtifact(artifactId);
   }

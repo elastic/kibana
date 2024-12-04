@@ -17,7 +17,7 @@ import { networkTopNFlow, networkTopNFlowCount } from './top_n_flow';
 import { networkUsers } from './users';
 
 // TODO: add safer type for the strategy map
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export const networkFactory: Record<NetworkQueries, any> = {
   [NetworkQueries.details]: networkDetails,
   [NetworkQueries.dns]: networkDns,

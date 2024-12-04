@@ -67,7 +67,6 @@ export interface EventCollectionCardProps<T extends OperatingSystem = OperatingS
   supplementalOptions?: ReadonlyArray<SupplementalEventFormOption<T>>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ANY = any;
 interface EventCollectionCardComponent {
   <T extends OperatingSystem>(props: EventCollectionCardProps<T>, context?: ANY): ReactElement<

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export interface S1ListResponse<D = any> {
   data: D;
   pagination: {

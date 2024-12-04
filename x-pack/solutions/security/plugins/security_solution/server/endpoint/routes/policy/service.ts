@@ -93,7 +93,6 @@ export async function agentVersionsMap(
     queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         result.set(agentVersion, result.get(agentVersion)! + 1);
       } else {
         result.set(agentVersion, 1);

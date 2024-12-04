@@ -26,7 +26,7 @@ describe('transformControlColumns', () => {
     onSelectPage: jest.fn(),
     pageSize: 0,
     sort: [],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     theme: {} as any,
   };
   test('displays loader when id is included on loadingEventIds', () => {

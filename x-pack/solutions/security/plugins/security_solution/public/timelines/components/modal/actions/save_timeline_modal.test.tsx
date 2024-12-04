@@ -22,7 +22,7 @@ jest.mock('react-redux', () => {
   return {
     ...actual,
     useDispatch: jest.fn(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     useSelector: (selector: any) =>
       selector({
         timeline: {

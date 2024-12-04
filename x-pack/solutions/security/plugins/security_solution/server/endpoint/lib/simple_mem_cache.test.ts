@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { SimpleMemCache } from './simple_mem_cache';
 
 describe('SimpleMemCache class', () => {

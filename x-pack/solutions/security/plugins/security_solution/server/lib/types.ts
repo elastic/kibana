@@ -46,9 +46,9 @@ export interface SearchHits<T> {
       _score?: number;
       _version?: number;
       _explanation?: Explanation;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       highlight?: any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       inner_hits?: any;
       matched_queries?: string[];
       sort?: string[];
@@ -65,7 +65,7 @@ export interface SearchResponse<T> extends BaseSearchResponse<T> {
   timed_out: boolean;
   _scroll_id?: string;
   _shards: ShardsResponse;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   aggregations?: any;
 }
 

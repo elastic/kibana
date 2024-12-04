@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ServerRoute } from '@hapi/hapi';
 import Hapi from '@hapi/hapi';
 import type { ToolingLog } from '@kbn/tooling-log';

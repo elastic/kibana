@@ -29,7 +29,7 @@ const EMPTY_TABLE = {} as {
 /**
  * Migrates the values of the data table from the legacy timelines key to the securityDataTable key
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: any) => {
   if (!legacyTimelineTables) {
     return EMPTY_TABLE;
@@ -250,7 +250,6 @@ export const addAssigneesSpecsToSecurityDataTableIfNeeded = (
   for (const [tableId, tableModel] of Object.entries(dataTableState)) {
     // Only add "Assignees" column specs to alerts tables
     if (tableEntity[tableId as TableId] !== TableEntityType.alert) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 

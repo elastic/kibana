@@ -122,7 +122,7 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
       },
     ],
   ],
-] as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+] as any;
 
 const mockConfig = {
   series: {

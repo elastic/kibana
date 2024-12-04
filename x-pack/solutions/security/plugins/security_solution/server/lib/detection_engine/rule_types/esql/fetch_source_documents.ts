@@ -78,7 +78,6 @@ export const fetchSourceDocuments = async ({
 
   return response.hits.hits.reduce<Record<string, { fields: estypes.SearchHit['fields'] }>>(
     (acc, hit) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       acc[hit._id!] = { fields: hit.fields };
       return acc;
     },

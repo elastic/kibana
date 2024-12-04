@@ -61,11 +61,7 @@ export interface UseConsoleActionSubmitterOptions<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > extends Pick<
-    CommandExecutionComponentProps<
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      any,
-      CommandResponseActionApiState<TOutputContent, TParameters>
-    >,
+    CommandExecutionComponentProps<any, CommandResponseActionApiState<TOutputContent, TParameters>>,
     'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
   > {
   actionCreator: UseMutationResult<ResponseActionApiResponse, IHttpFetchError, TReqBody>;

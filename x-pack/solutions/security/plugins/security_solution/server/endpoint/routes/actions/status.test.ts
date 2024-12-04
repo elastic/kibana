@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,

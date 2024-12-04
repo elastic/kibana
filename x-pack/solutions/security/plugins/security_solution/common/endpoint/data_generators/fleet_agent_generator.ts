@@ -65,7 +65,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
         // Casting here is needed because several of the attributes in `FleetServerAgent` are
         // defined as optional, but required in `Agent` type.
         ...(hit._source as Agent),
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         id: hit._id!,
         policy_revision: hit._source?.policy_revision_idx,
         access_api_key: undefined,
@@ -202,7 +202,6 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
     // Basically: reverse engineer the Fleet agent status runtime field:
     // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/server/services/agents/build_status_runtime_field.ts
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const fleetServerAgent = esHit._source!;
 
     // Reset the `last_checkin_status since we're controlling the agent status here

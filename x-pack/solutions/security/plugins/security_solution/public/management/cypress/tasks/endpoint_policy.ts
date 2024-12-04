@@ -40,7 +40,7 @@ export const enableAllPolicyProtections = (
     } = endpointPolicy;
 
     const updatedEndpointPolicy: UpdatePackagePolicy = restOfPolicy;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const policy = updatedEndpointPolicy!.inputs[0]!.config!.policy.value;
 
     policy.mac.malware.mode = ProtectionModes.prevent;
@@ -91,7 +91,7 @@ export const setCustomProtectionUpdatesManifestVersion = (
     } = endpointPolicy;
 
     const updatedEndpointPolicy: UpdatePackagePolicy = restOfPolicy;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const policy = updatedEndpointPolicy!.inputs[0]!.config!.policy.value;
 
     policy.global_manifest_version = manifestVersion;

@@ -217,7 +217,7 @@ export const ensureResponseActionAuthzAccess = (
   password: string
 ): Cypress.Chainable => {
   let url: string = '';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   let apiPayload: any = {
     endpoint_ids: ['some-id'],
   };

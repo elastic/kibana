@@ -11,7 +11,7 @@ import React from 'react';
  * A component that renders an element with breaking opportunities (`<wbr>`s)
  * spliced into text children at word boundaries.
  */
-// eslint-disable-next-line react/display-name
+
 export const GeneratedText = React.memo<React.PropsWithChildren<{}>>(function ({ children }) {
   return <>{processedValue()}</>;
 

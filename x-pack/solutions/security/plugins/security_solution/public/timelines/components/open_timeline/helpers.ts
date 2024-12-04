@@ -174,11 +174,10 @@ const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) => 
   if (dataProvider.type === DataProviderTypeEnum.template) {
     return deepMerge(dataProvider, {
       type: DataProviderTypeEnum.default,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       enabled: dataProvider.queryMatch!.operator !== IS_OPERATOR,
       queryMatch: {
         value:
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           dataProvider.queryMatch!.operator === IS_OPERATOR ? '' : dataProvider.queryMatch!.value,
       },
     });

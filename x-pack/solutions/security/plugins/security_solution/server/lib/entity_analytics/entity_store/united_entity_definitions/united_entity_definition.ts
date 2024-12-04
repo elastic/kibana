@@ -54,7 +54,7 @@ export class UnitedEntityDefinition {
     const identityField = getIdentityFieldForEntityType(this.entityType);
     const metadata = this.fields
       .filter((field) => field.definition)
-      .map((field) => field.definition!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      .map((field) => field.definition!);
 
     return entityDefinitionSchema.parse({
       id: buildEntityDefinitionId(entityType, namespace),

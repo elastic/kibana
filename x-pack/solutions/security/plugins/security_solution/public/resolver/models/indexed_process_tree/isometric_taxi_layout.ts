@@ -194,7 +194,6 @@ function calculateEdgeLineSegments(
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
     if (metadata.parent === null) {
-      // eslint-disable-next-line no-continue
       continue;
     }
     const { node, parent, parentWidth } = metadata;

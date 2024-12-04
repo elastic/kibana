@@ -34,7 +34,7 @@ export const getPainlessScripts = async (): Promise<PainlessScripts> => {
 
   // The cache will only ever have one value, so we can safely update it
   // un-atomicly without worrying about lost updates.
-  // eslint-disable-next-line require-atomic-updates
+
   cache = { init, map, combine, reduce };
   return cache;
 };

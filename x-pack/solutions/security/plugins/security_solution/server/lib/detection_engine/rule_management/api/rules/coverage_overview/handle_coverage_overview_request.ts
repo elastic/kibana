@@ -119,7 +119,6 @@ function extractRuleMitreCategories(rule: SanitizedRule<CoverageOverviewRulePara
 
   for (const threatItem of rule.params.threat) {
     if (threatItem.framework !== 'MITRE ATT&CK') {
-      // eslint-disable-next-line no-continue
       continue;
     }
 

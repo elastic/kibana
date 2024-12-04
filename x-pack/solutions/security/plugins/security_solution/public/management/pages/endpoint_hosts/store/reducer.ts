@@ -43,7 +43,6 @@ const handleMetadataTransformStatsChanged: CaseReducer<MetadataTransformStatsCha
   metadataTransformStats: action.payload,
 });
 
-/* eslint-disable-next-line complexity */
 export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
   if (action.type === 'serverReturnedEndpointList') {
     const { data, total, page, pageSize, sortDirection, sortField } = action.payload;
@@ -220,7 +219,6 @@ const handleEndpointIsolationRequestStateChanged: ImmutableReducer<
   AppAction & { type: 'endpointIsolationRequestStateChange' }
 > = (state, action) => {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ...state!,
     isolationRequestState: action.payload,
   };

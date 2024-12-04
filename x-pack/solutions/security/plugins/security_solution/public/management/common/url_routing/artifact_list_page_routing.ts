@@ -6,7 +6,7 @@
  */
 
 // FIXME: Remove references to `querystring`
-// eslint-disable-next-line import/no-nodejs-modules
+
 import querystring from 'querystring';
 import type { ArtifactListPageUrlParams } from '../../components/artifact_list_page';
 import {

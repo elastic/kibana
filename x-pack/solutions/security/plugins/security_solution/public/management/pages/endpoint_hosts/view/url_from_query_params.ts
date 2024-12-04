@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 
 import type { EndpointIndexUIQueryParams } from '../types';

@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 // FIXME: Remove references to `querystring`
-// eslint-disable-next-line import/no-nodejs-modules
+
 import querystring from 'querystring';
 import { generatePath } from 'react-router-dom';
 import { appendSearch } from '../../common/components/link_to/helpers';

@@ -8,9 +8,8 @@
 import React from 'react';
 
 interface HookWrapperProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hook: (args?: any) => any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   hookProps?: any;
 }
 

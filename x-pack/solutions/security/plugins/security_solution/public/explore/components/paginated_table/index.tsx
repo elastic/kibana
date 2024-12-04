@@ -358,7 +358,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
 
 export const PaginatedTable = memo(PaginatedTableComponent);
 
-type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+type BasicTableType = ComponentType<EuiBasicTableProps<any>>;
 const BasicTable = styled(EuiBasicTable as BasicTableType)`
   tbody {
     th,
@@ -370,7 +370,7 @@ const BasicTable = styled(EuiBasicTable as BasicTableType)`
       display: block;
     }
   }
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as any;
 
 BasicTable.displayName = 'BasicTable';
 

@@ -246,7 +246,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onSetColumns,
   } = useColumns({
     capabilities,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     dataView: dataView!,
     dataViews,
     setAppState,

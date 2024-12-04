@@ -13,7 +13,7 @@ import { useColors } from '../use_colors';
 /**
  * Breadcrumb menu
  */
-// eslint-disable-next-line react/display-name
+
 export const Breadcrumbs = memo(function ({ breadcrumbs }: { breadcrumbs: EuiBreadcrumb[] }) {
   // Just tagging the last crumb with `data-test-subj` for testing
   const crumbsWithLastSubject: EuiBreadcrumb[] = useMemo(() => {

@@ -56,8 +56,7 @@ export const normalizeThresholdField = (
     ? thresholdField
     : isEmpty(thresholdField)
     ? []
-    : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      [thresholdField!];
+    : [thresholdField!];
 };
 
 export const isEqlSequenceQuery = (ruleQuery: string | undefined): boolean =>

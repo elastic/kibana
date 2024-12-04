@@ -38,7 +38,6 @@ interface CommonRuleFieldReadOnlyProps {
   finalDiffableRule: DiffableRule;
 }
 
-// eslint-disable-next-line complexity
 export function CommonRuleFieldReadOnly({
   fieldName,
   finalDiffableRule,

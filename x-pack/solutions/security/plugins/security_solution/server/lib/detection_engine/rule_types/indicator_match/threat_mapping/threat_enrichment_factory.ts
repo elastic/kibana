@@ -30,7 +30,7 @@ export const threatEnrichmentFactory = ({
   const threatEnrichment = (signals: SignalSourceHit[]): Promise<SignalSourceHit[]> => {
     const getThreats = async () => {
       const threatIds = signals
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         .map((s) => s._id!)
         .reduce<string[]>((acc, id) => {
           return [

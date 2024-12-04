@@ -22,7 +22,7 @@ describe('useNavigateByRouterEventHandler hook', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let linkEle: HTMLAnchorElement;
   let clickHandlerSpy: ClickHandlerMock;
-  // eslint-disable-next-line react/display-name
+
   const Link = React.memo<{
     routeTo: Parameters<typeof useNavigateByRouterEventHandler>[0];
     onClick?: Parameters<typeof useNavigateByRouterEventHandler>[1];

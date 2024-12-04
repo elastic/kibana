@@ -37,7 +37,7 @@ export interface LegacyRuleAlertSavedObjectAction {
  * needed then it will be safe to remove this saved object and all its migrations.
  * @deprecated Remove this once the legacy notification/side car is gone
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export interface LegacyIRuleActionsAttributes extends Record<string, any> {
   actions: LegacyRuleAlertSavedObjectAction[];
   ruleThrottle: string;

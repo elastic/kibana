@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const loop = (count: number, callback: (instance: number) => any): void => {
   let done = 1;
 

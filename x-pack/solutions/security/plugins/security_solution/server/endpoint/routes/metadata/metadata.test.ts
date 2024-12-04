@@ -74,7 +74,7 @@ describe('test endpoint routes', () => {
   let mockClusterClient: ClusterClientMock;
   let mockScopedClient: ScopedClusterClientMock;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   let routeHandler: RequestHandler<any, any, any, any>;
   let routeConfig: VersionedRouteConfig<RouteMethod>;
   let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;

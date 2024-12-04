@@ -18,7 +18,7 @@ import { userSelectedResolverNode } from '../store/actions';
  * A Submenu that displays a collection of "pills" for each related event
  * category it has events for.
  */
-// eslint-disable-next-line react/display-name
+
 export const NodeSubMenuComponents = React.memo(
   ({
     id,
@@ -29,7 +29,7 @@ export const NodeSubMenuComponents = React.memo(
   }: {
     id: string;
     className?: string;
-    // eslint-disable-next-line react/no-unused-prop-types
+
     buttonFill: string;
     /**
      * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.

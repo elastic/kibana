@@ -51,18 +51,14 @@ export const indexAlerts = usageTracker.track(
         result = alertGenerator.next();
         k++;
       }
-      const body = resolverDocs.reduce(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (array: Array<Record<string, any>>, doc) => {
-          let index = eventIndex;
-          if (firstNonNullValue(doc.event?.kind) === 'alert') {
-            index = alertIndex;
-          }
-          array.push({ create: { _index: index } }, doc);
-          return array;
-        },
-        []
-      );
+      const body = resolverDocs.reduce((array: Array<Record<string, any>>, doc) => {
+        let index = eventIndex;
+        if (firstNonNullValue(doc.event?.kind) === 'alert') {
+          index = alertIndex;
+        }
+        array.push({ create: { _index: index } }, doc);
+        return array;
+      }, []);
       await client.bulk({ body, refresh: 'wait_for' });
     }
 

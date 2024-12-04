@@ -7,9 +7,9 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
-// eslint-disable-next-line no-restricted-imports
+
 import type { LegacyRulesNotificationParams } from '../legacy_types';
-// eslint-disable-next-line no-restricted-imports
+
 import { legacyExtractRuleId } from './legacy_extract_rule_id';
 
 /**

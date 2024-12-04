@@ -677,7 +677,7 @@ describe('utils', () => {
   describe('hasTimestampFields', () => {
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
@@ -703,7 +703,6 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['myfa*'],
@@ -720,7 +719,7 @@ describe('utils', () => {
 
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
@@ -746,7 +745,6 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['myfa*'],
@@ -763,7 +761,7 @@ describe('utils', () => {
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: [],
@@ -778,7 +776,6 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
@@ -795,7 +792,7 @@ describe('utils', () => {
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: [],
@@ -811,7 +808,6 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['logs-endpoint.alerts-*'],

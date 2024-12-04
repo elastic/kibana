@@ -178,7 +178,7 @@ export class EndpointMetadataService {
    * @param _endpointPackagePolicy
    * @private
    */
-  // eslint-disable-next-line complexity
+
   private async enrichHostMetadata(
     endpointMetadata: HostMetadata,
     /**
@@ -257,8 +257,7 @@ export class EndpointMetadataService {
     return {
       metadata: endpointMetadata,
       host_status: fleetAgent
-        ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          fleetAgentStatusToEndpointHostStatus(fleetAgent.status!)
+        ? fleetAgentStatusToEndpointHostStatus(fleetAgent.status!)
         : DEFAULT_ENDPOINT_HOST_STATUS,
       policy_info: {
         agent: {
@@ -415,9 +414,8 @@ export class EndpointMetadataService {
       if (endpoint && _agent) {
         const metadata = mapToHostMetadata(endpoint);
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const agentPolicy = agentPoliciesMap[_agent.policy_id!];
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
         const runtimeFields: Partial<typeof _agent> = {
           status: doc?.fields?.status?.[0],

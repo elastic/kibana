@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type HapiTypes from '@hapi/hapi';
 
 export interface EmulatorServerPluginRegisterOptions<TServices extends Record<string, any> = {}> {

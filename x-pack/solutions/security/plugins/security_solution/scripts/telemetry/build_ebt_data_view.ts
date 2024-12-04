@@ -154,7 +154,6 @@ function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
   const result: { [key: string]: string } = {};
   const queue: Array<{ obj: NestedObject; prefix: string }> = [{ obj: inputObj, prefix: '' }];
   while (queue.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { obj, prefix } = queue.shift()!;
     for (const key in obj) {
       if (typeof obj[key] === 'object' && obj[key] !== null) {

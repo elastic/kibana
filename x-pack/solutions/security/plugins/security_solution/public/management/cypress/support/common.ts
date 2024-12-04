@@ -13,7 +13,6 @@ const RUNTIME_SERVICES_CACHE = new WeakMap<Cypress.PluginConfigOptions, RuntimeS
 
 export const setupStackServicesUsingCypressConfig = async (config: Cypress.PluginConfigOptions) => {
   if (RUNTIME_SERVICES_CACHE.has(config)) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return RUNTIME_SERVICES_CACHE.get(config)!;
   }
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Dispatch, Reducer } from 'react';
 import type { ParsedCommandInterface } from '../../service/types';
 import type { CommandInputProps } from '../command_input';

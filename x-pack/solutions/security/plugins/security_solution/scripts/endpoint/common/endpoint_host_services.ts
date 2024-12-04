@@ -80,7 +80,7 @@ export const createAndEnrollEndpointHost = async ({
         type: 'vagrant',
         name: vmName,
         log,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         agentDownload: agentDownload!,
         disk,
         cpus,

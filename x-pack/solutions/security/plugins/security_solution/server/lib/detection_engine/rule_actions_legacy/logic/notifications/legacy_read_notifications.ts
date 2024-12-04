@@ -6,11 +6,11 @@
  */
 
 import type { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
-// eslint-disable-next-line no-restricted-imports
+
 import type { LegacyReadNotificationParams } from './legacy_types';
-// eslint-disable-next-line no-restricted-imports
+
 import { isLegacyRuleType } from './legacy_types';
-// eslint-disable-next-line no-restricted-imports
+
 import { legacyFindNotifications } from './legacy_find_notifications';
 
 /**

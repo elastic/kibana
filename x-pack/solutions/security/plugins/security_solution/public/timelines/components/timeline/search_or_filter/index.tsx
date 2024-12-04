@@ -259,19 +259,19 @@ const makeMapStateToProps = () => {
     const policy: inputsModel.Policy = getInputsPolicy(state);
     return {
       dataProviders: timeline.dataProviders,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       filterQuery: getKqlFilterQuery(state, timelineId)!,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       filters: timeline.filters!,
       from: input.timerange.from,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       fromStr: input.timerange.fromStr!,
       isRefreshPaused: policy.kind === 'manual',
       kqlMode: getOr('filter', 'kqlMode', timeline),
       refreshInterval: policy.duration,
       savedQueryId: getOr(null, 'savedQueryId', timeline),
       to: input.timerange.to,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       toStr: input.timerange.toStr!,
       timelineType: timeline.timelineType,
     };

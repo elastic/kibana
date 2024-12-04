@@ -131,7 +131,7 @@ export interface OnboardingCardConfig<TMetadata extends {} = {}>
 export interface OnboardingGroupConfig {
   title: string;
   // It's not possible to type the cards array with the generic type for all the cards metadata
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   cards: Array<OnboardingCardConfig<any>>;
 }
 

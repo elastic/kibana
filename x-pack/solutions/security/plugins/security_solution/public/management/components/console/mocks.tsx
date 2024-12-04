@@ -201,7 +201,6 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
       throw new Error(`no 'dataTestSubj' provided to 'render()'!`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     selectors = getConsoleSelectorsAndActionMock(renderResult, user, testSubj!);
   };
 

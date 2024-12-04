@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable require-atomic-updates */
-
 import { blue, green } from 'chalk';
 import type { DistinctQuestion } from 'inquirer';
 import type { LoadEndpointsConfig } from '../types';

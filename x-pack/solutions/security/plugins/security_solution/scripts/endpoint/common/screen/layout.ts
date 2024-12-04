@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { DataFormatter } from './data_formatter';
 
 class LayoutFormatter extends DataFormatter {

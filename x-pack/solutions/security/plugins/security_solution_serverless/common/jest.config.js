@@ -8,7 +8,9 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution_serverless/common'],
+  roots: [
+    '<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution_serverless/common',
+  ],
   testMatch: [
     '<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution_serverless/common/**/*.test.{js,mjs,ts,tsx}',
   ],

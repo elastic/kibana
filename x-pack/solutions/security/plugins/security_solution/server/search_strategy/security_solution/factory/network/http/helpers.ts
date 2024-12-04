@@ -19,7 +19,6 @@ export const getHttpEdges = (response: IEsSearchResponse<unknown>): NetworkHttpE
 
 const formatHttpEdges = (buckets: NetworkHttpBuckets[]): NetworkHttpEdges[] =>
   buckets.map((bucket: NetworkHttpBuckets) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const getKey = ({ key }: any) => firstNonNullValue(key);
     const bucketKey = firstNonNullValue(bucket.key);
     return {

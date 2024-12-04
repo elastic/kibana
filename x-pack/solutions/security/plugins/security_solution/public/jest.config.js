@@ -9,8 +9,12 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
   /** all nested directories have their own Jest config file */
-  testMatch: ['<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution/public/*.test.{js,mjs,ts,tsx}'],
-  roots: ['<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution/public'],
+  testMatch: [
+    '<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution/public/*.test.{js,mjs,ts,tsx}',
+  ],
+  roots: [
+    '<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution/public',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/solutions/security/plugins/security_solution/public',
   coverageReporters: ['text', 'html'],

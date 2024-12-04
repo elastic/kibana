@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export const logger = Object.freeze({
   info: (...data: any): Cypress.Chainable<null> => {
     return cy.task('logIt', { level: 'info', data });

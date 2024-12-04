@@ -57,7 +57,7 @@ export const responseActionTasks = (
           data: tamperedDataString,
         },
       };
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       return updateActionDoc(esClient, newActionDoc._id!, tamperedDoc);
     },
   });

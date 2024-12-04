@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { basename } from 'path';
@@ -180,8 +178,7 @@ export const sendEndpointActionResponse = async (
       const filePath =
         action.command === 'execute'
           ? '/execute/file/path'
-          : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            (
+          : (
               action as unknown as ActionDetails<
                 ResponseActionGetFileOutputContent,
                 ResponseActionGetFileParameters

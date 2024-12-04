@@ -20,7 +20,6 @@ import { getRuleIdToEnabledMap } from './transform_utils/get_rule_id_to_enabled_
 import { getRuleObjectCorrelations } from './transform_utils/get_rule_object_correlations';
 import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_and_status';
 
-// eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
 
 export interface GetRuleMetricsOptions {

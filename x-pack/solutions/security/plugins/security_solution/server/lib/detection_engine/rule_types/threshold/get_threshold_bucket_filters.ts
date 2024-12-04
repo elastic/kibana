@@ -40,7 +40,6 @@ export const getThresholdBucketFilters = async ({
       // Terms to filter out events older than `lastSignalTimestamp`.
       bucket.terms.forEach((term) => {
         if (term.field != null) {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           (filter.bool!.filter as ESFilter[]).push({
             term: {
               [term.field]: `${term.value}`,

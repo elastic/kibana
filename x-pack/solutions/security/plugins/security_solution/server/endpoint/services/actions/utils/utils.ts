@@ -486,12 +486,12 @@ export const categorizeResponseResults = ({
         return isResponseDoc
           ? {
               type: ActivityLogItemTypes.RESPONSE,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
               item: { id: e._id!, data: e._source as LogsEndpointActionResponse },
             }
           : {
               type: ActivityLogItemTypes.FLEET_RESPONSE,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
               item: { id: e._id!, data: e._source as EndpointActionResponse },
             };
       })
@@ -512,12 +512,12 @@ export const categorizeActionResults = ({
         return isActionDoc
           ? {
               type: ActivityLogItemTypes.ACTION,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
               item: { id: e._id!, data: e._source as LogsEndpointAction },
             }
           : {
               type: ActivityLogItemTypes.FLEET_ACTION,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
               item: { id: e._id!, data: e._source as EndpointAction },
             };
       })
@@ -533,7 +533,7 @@ export const formatEndpointActionResults = (
     ? results?.map((e) => {
         return {
           type: ActivityLogItemTypes.ACTION,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
           item: { id: e._id!, data: e._source as LogsEndpointAction },
         };
       })

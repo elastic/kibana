@@ -15,7 +15,6 @@ interface ErrorWithStringMessage {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isErrorWithStringMessage(error: any): error is ErrorWithStringMessage {
   const errorBodyError = error.body?.error;
   const errorBodyMessage = error.body?.message;
@@ -37,7 +36,6 @@ interface ErrorWithStructuredMessage {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isErrorWithStructuredMessage(error: any): error is ErrorWithStructuredMessage {
   const errorBodyMessageError = error.body?.message?.error;
   const errorBodyStatusCode = error.body?.status_code;

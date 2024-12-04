@@ -55,7 +55,7 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     EuiFieldText: (props: any) => {
       const { isInvalid, isLoading, fullWidth, inputRef, isDisabled, ...validInputProps } = props;
       return <input {...validInputProps} />;

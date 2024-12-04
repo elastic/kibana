@@ -9,7 +9,7 @@ import type { CoreSetup } from '@kbn/core/server';
 
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
-// eslint-disable-next-line no-restricted-imports
+
 import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule_actions_legacy';
 import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';

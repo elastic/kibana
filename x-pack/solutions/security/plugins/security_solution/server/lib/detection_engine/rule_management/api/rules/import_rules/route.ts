@@ -29,7 +29,7 @@ import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { createRuleSourceImporter } from '../../../logic/import/rule_source_importer';
 import { importRules } from '../../../logic/import/import_rules';
-// eslint-disable-next-line no-restricted-imports
+
 import { importRulesLegacy } from '../../../logic/import/import_rules_legacy';
 import { createPromiseFromRuleImportStream } from '../../../logic/import/create_promise_from_rule_import_stream';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';

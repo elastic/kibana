@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Subject } from 'rxjs';
 
@@ -1203,7 +1202,7 @@ describe('Response actions', () => {
       } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
 
       // Set the esClient to be used in the handler context
-      // eslint-disable-next-line require-atomic-updates
+
       httpHandlerContextMock.core = Promise.resolve(
         set(
           await httpHandlerContextMock.core,

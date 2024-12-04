@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export interface SimpleMemCacheInterface {
   /** Store a piece of data in cache */
   set(

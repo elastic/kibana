@@ -8,8 +8,6 @@
 import { AxiosError } from 'axios';
 import { EndpointError } from './errors';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export class FormattedAxiosError extends EndpointError {
   public readonly request: {
     method: string;

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from '@kbn/core/public';
 import { merge } from 'lodash';
 import { act } from '@testing-library/react';

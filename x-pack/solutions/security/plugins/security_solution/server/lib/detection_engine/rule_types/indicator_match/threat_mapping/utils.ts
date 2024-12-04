@@ -245,7 +245,7 @@ export const getSignalValueMap = ({
       if (!acc[field][fieldValue]) {
         acc[field][fieldValue] = [];
       }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       acc[field][fieldValue].push(event._id!);
     });
     return acc;

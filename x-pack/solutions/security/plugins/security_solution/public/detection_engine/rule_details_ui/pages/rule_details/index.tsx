@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
@@ -118,7 +117,7 @@ import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 import { RuleDetailsContextProvider } from './rule_details_context';
-// eslint-disable-next-line no-restricted-imports
+
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
@@ -143,7 +142,7 @@ import { RuleScheduleSection } from '../../../rule_management/components/rule_de
 import { CustomizedPrebuiltRuleBadge } from '../../../rule_management/components/rule_details/customized_prebuilt_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
-// eslint-disable-next-line no-restricted-imports
+
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 

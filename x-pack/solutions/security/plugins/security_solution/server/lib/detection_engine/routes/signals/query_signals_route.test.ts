@@ -31,7 +31,6 @@ describe('query for signal', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getEmptySignalsResponse() as any
     );
 

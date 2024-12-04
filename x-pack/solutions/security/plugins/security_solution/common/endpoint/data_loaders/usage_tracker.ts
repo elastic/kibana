@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file,@typescript-eslint/no-explicit-any */
+/* eslint-disable max-classes-per-file */
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { isPromise } from '@kbn/std';

@@ -104,7 +104,6 @@ export const getMachineLearningJobId = (rule: RuleResponse): string[] | undefine
   return undefined;
 };
 
-/* eslint-disable complexity */
 export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
   ruleType: rule.type,
   anomalyThreshold: 'anomaly_threshold' in rule ? rule.anomaly_threshold : 50,
@@ -271,7 +270,7 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     timestampOverrideFallbackDisabled,
     name,
     description,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     note: note!,
     references,
     severity: {

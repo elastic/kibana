@@ -8,7 +8,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { mount } from 'enzyme';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type WrapperOf<F extends (...args: any) => any> = (...args: Parameters<F>) => ReturnType<F>;
 export type MountAppended = WrapperOf<typeof mount>;
 

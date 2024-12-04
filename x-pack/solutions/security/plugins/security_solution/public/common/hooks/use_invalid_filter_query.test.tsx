@@ -39,7 +39,6 @@ const getProps = () => ({
 });
 
 const getWrapper = <P,>(store: Store): React.FC<React.PropsWithChildren<P>> => {
-  // eslint-disable-next-line react/display-name
   return ({ children }) => (
     <TestProviders store={store} startServices={kibanaMock}>
       {children}

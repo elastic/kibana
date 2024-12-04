@@ -123,7 +123,6 @@ export const GraphControls = React.memo(
       });
     }, [dispatch, timestamp, id]);
 
-    /* eslint-disable react/button-has-type */
     return (
       <StyledGraphControls
         className={className}

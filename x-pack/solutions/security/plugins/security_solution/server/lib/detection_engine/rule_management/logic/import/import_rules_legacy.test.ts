@@ -13,7 +13,6 @@ import { requestContextMock } from '../../../routes/__mocks__';
 
 import { createRuleImportErrorObject } from './errors';
 
-// eslint-disable-next-line no-restricted-imports
 import { importRulesLegacy } from './import_rules_legacy';
 
 describe('importRulesLegacy', () => {

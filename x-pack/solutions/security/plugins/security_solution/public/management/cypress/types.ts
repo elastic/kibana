@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ActionDetails } from '../../../common/endpoint/types';

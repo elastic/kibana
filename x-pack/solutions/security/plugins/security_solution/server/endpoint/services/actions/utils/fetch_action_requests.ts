@@ -138,7 +138,6 @@ export const fetchActionRequests = async ({
 
   return {
     data: (actionRequests?.hits?.hits ?? []).map((esHit) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return esHit._source!;
     }),
     size,

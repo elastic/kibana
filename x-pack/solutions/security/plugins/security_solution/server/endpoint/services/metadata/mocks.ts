@@ -118,7 +118,7 @@ export const applyMetadataMocks = (
   const integrationPolicies = [
     fleetIntegrationPolicyGenerator.generateEndpointPackagePolicy({
       id: unitedMetadata.united.endpoint.Endpoint.policy.applied.id,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       policy_ids: [unitedMetadata.united.agent.policy_id!],
     }),
   ];

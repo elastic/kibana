@@ -27,7 +27,6 @@ type EndpointRuleAlert = Pick<
   HostMetadata,
   'Endpoint' | 'agent' | 'elastic' | 'host' | 'data_stream'
 > & {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
 

@@ -166,7 +166,6 @@ export const indexEndpointHostDocs = usageTracker.track(
 
           mergeAndAppendArrays(response, createdPolicies);
 
-          // eslint-disable-next-line require-atomic-updates
           realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
         }
 

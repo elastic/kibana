@@ -84,7 +84,6 @@ const SearchBarContainer = styled.div`
   }
 `;
 
-// eslint-disable-next-line react/display-name
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({
     dataProviders,

@@ -62,7 +62,8 @@ export const storybookAliases = {
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   esql_editor: 'packages/kbn-esql-editor/.storybook',
-  security_solution: 'x-pack/solutions/security/solutions/security/plugins/security_solution/.storybook',
+  security_solution:
+    'x-pack/solutions/security/solutions/security/plugins/security_solution/.storybook',
   security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
   serverless: 'packages/serverless/storybook/config',
   shared_ux: 'packages/shared-ux/storybook/config',

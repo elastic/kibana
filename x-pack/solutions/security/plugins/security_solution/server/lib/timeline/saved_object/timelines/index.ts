@@ -325,7 +325,7 @@ export const persistFavorite = async (
       version,
       ...savedTimeline
     } = await getBasicSavedTimeline(request, timelineId);
-    timelineId = savedObjectId; // eslint-disable-line no-param-reassign
+    timelineId = savedObjectId;
     timeline = savedTimeline;
   }
 

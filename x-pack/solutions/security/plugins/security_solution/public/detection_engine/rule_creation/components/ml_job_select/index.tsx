@@ -68,9 +68,7 @@ interface MlJobSelectProps {
 
 const renderJobOption = (option: MlJobOption) => (
   <JobDisplay
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     id={option.value!.id}
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     description={option.value!.description}
     name={option.value?.name}
   />
@@ -84,7 +82,6 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
   const mlUrl = getUrlForApp('ml');
   const handleJobSelect = useCallback(
     (selectedJobOptions: MlJobOption[]): void => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const selectedJobIds = selectedJobOptions.map((option) => option.value!.id);
       field.setValue(selectedJobIds);
     },

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ComponentType, ReactNode } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import type { ParsedArgData, ParsedCommandInterface, PossibleArgDataTypes } from './service/types';

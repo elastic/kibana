@@ -9,11 +9,7 @@ import { deepObjectEntries } from './deep_object_entries';
 
 describe('deepObjectEntries', () => {
   const valuesAndExpected: Array<
-    [
-      objectValue: object,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expected: Array<[path: Array<keyof any>, fieldValue: unknown]>
-    ]
+    [objectValue: object, expected: Array<[path: Array<keyof any>, fieldValue: unknown]>]
   > = [
     [{}, []], // No 'field' values found
     [{ a: {} }, []], // No 'field' values found

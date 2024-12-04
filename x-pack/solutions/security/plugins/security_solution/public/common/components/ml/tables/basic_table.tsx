@@ -11,7 +11,7 @@ import { EuiInMemoryTable } from '@elastic/eui';
 
 type BasicTableType<T extends object> = React.ComponentType<EuiInMemoryTableProps<T>>;
 export const BasicTable: typeof EuiInMemoryTable & { displayName: string } = styled(
-  EuiInMemoryTable as BasicTableType<any> // eslint-disable-line @typescript-eslint/no-explicit-any
+  EuiInMemoryTable as BasicTableType<any>
 )`
   tbody {
     th,
@@ -23,6 +23,6 @@ export const BasicTable: typeof EuiInMemoryTable & { displayName: string } = sty
       display: block;
     }
   }
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as any;
 
 BasicTable.displayName = 'BasicTable';

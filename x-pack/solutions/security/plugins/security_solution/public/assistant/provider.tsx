@@ -59,7 +59,6 @@ export const createConversations = async (
 
   if (conversations && Object.keys(conversations).length > 0) {
     const conversationsToCreate = Object.values(conversations).filter(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (c: any) => c.messages && c.messages.length > 0
     );
 
@@ -76,7 +75,6 @@ export const createConversations = async (
     const bulkResult = await bulkUpdateConversations(
       http,
       {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         create: conversationsToCreate.reduce((res: Record<string, Conversation>, c: any) => {
           // ensure actionTypeId is added to apiConfig from legacy conversation data
           if (c.apiConfig && !c.apiConfig.actionTypeId) {

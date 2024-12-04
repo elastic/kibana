@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
@@ -459,7 +457,7 @@ const createThresholdTimeline = async (
           ...acc,
           {
             ...formatAlertToEcsSignal(_source),
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
             _id: _id!,
             _index,
             timestamp: _source['@timestamp'],
@@ -619,7 +617,7 @@ const createNewTermsTimeline = async (
           ...acc,
           {
             ...formatAlertToEcsSignal(_source),
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
             _id: _id!,
             _index,
             timestamp: _source['@timestamp'],
@@ -787,7 +785,7 @@ const createSuppressedTimeline = async (
           ...acc,
           {
             ...formatAlertToEcsSignal(_source),
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
             _id: _id!,
             _index,
             timestamp: _source['@timestamp'],

@@ -21,7 +21,6 @@ export const securitySolutionSearchStrategyProvider = (
   endpointContext: EndpointAppContext,
   getSpaceId?: (request: KibanaRequest) => string,
   ruleDataClient?: IRuleDataClient | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): ISearchStrategy<z.input<typeof searchStrategyRequestSchema>, any> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 

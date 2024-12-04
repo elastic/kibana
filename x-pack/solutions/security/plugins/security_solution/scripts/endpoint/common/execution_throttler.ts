@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 

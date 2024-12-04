@@ -26,7 +26,6 @@ export const getTimelinesToUpdate = (
     installedTimelines.some((installedTimeline) => {
       return (
         timeline.templateTimelineId === installedTimeline.templateTimelineId &&
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timeline.templateTimelineVersion! > installedTimeline.templateTimelineVersion!
       );
     })

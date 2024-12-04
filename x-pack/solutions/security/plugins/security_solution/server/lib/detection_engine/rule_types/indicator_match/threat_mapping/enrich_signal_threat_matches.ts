@@ -13,7 +13,6 @@ import type { ThreatEnrichment, ThreatListItem, ThreatMatchNamedQuery } from './
 
 export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const getSignalId = (signal: SignalSourceHit): string => signal._id!;
 
 export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): SignalSourceHit[] => {
@@ -87,7 +86,7 @@ const enrichSignalWithThreatMatches = (
   // new issues.
   const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
   const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
   const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[signalHit._id!] ?? [];
   const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
     ...enrichment,
@@ -128,10 +127,9 @@ export const enrichSignalThreatMatchesFromSignalsMap = async (
   const enrichmentsWithoutAtomic: Record<string, ThreatEnrichment[]> = {};
 
   uniqueHits.forEach((hit) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     enrichmentsWithoutAtomic[hit._id!] = buildEnrichments({
       indicatorPath,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       queries: signalsMap.get(hit._id!) ?? [],
       threats: matchedThreats,
     });

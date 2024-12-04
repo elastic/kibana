@@ -19,7 +19,7 @@ export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
   deepLinkId?: string;
   /** Any app specific path (route) */
   appPath?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   appState?: any;
   onClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
   /** Uses an EuiButton element for styling */
@@ -30,7 +30,7 @@ export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
  * An `EuiLink` that will use Kibana's `.application.navigateToApp()` to redirect the user to the
  * a given app without causing a full browser refresh
  */
-// eslint-disable-next-line react/display-name
+
 export const LinkToApp = memo<LinkToAppProps>(
   ({
     appId = APP_UI_ID,

@@ -119,7 +119,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       // This can take so much time that the job can fail by timeout in CI.
       if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(0);
       }
 
@@ -154,7 +154,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (!files?.length) {
         log.info('No tests found');
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(0);
       }
 

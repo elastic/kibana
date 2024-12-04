@@ -37,12 +37,11 @@ const MitreAttackContainer = styled.div`
 
 interface AddItemProps {
   field: FieldHook;
-  dataTestSubj: string; // eslint-disable-line react/no-unused-prop-types
+  dataTestSubj: string;
   idAria: string;
   isDisabled: boolean;
 }
 
-// eslint-disable-next-line react/display-name
 export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
   const removeTactic = useCallback(
     (index: number) => {

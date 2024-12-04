@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-nodejs-modules
 import { parse } from 'querystring';
 import { fullPolicy, isOnPolicyDetailsPage, license } from '../selectors/policy_settings_selectors';
 import type {

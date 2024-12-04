@@ -20,7 +20,6 @@ import type { State } from '../../../common/store/types';
  * Show the panel that matches the `panelViewAndParameters` (derived from the browser's location.search)
  */
 
-// eslint-disable-next-line react/display-name
 export const PanelRouter = memo(function ({
   id,
   nodeEventOnClick,

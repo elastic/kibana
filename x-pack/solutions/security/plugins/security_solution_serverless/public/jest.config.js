@@ -12,7 +12,9 @@ module.exports = {
   testMatch: [
     '<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution_serverless/public/**/*.test.{js,mjs,ts,tsx}',
   ],
-  roots: ['<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution_serverless/public'],
+  roots: [
+    '<rootDir>/x-pack/solutions/security/solutions/security/plugins/security_solution_serverless/public',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/solutions/security/plugins/security_solution_serverless/public',
   coverageReporters: ['text', 'html'],

@@ -517,7 +517,7 @@ describe('unified timeline', () => {
       let TestProviderWithNewStore: FC<PropsWithChildren<unknown>>;
       beforeEach(() => {
         const freshStore = createMockStore();
-        // eslint-disable-next-line react/display-name
+
         TestProviderWithNewStore = ({ children }) => {
           return <TestProviders store={freshStore}>{children}</TestProviders>;
         };

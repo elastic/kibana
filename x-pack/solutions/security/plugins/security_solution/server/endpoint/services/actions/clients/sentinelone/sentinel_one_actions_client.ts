@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
@@ -1262,7 +1260,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         if (isolateActivityResponseDoc && isolateActivityResponseDoc._source) {
           const s1ActivityData = isolateActivityResponseDoc._source.sentinel_one.activity;
 
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const elasticDocId = isolateActivityResponseDoc._id!;
           const s1AgentId = s1ActivityData.agent.id;
           const activityLogEntryId = s1ActivityData.id;
@@ -1565,7 +1562,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                 error,
                 meta: {
                   activityLogEntryId,
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
                   elasticDocId: s1Hit._id!,
                   downloadUrl,
                   createdAt: s1ActivityDoc?.sentinel_one.activity.updated_at ?? '',

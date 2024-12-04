@@ -109,7 +109,6 @@ export const createStoreFactory = async (
 
   const timelineInitialState = {
     timeline: {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       ...subPlugins.timelines.store.initialState.timeline!,
       timelineById: {
         ...subPlugins.timelines.store.initialState.timeline.timelineById,
@@ -129,14 +128,12 @@ export const createStoreFactory = async (
   const dataTableInitialState = {
     dataTable: {
       tableById: {
-        /* eslint-disable @typescript-eslint/no-non-null-assertion */
         ...subPlugins.alerts.storageDataTables!.tableById,
         ...subPlugins.rules.storageDataTables!.tableById,
         ...subPlugins.exceptions.storageDataTables!.tableById,
         ...subPlugins.explore.exploreDataTables!.hosts.tableById,
         ...subPlugins.explore.exploreDataTables!.network.tableById,
         ...subPlugins.explore.exploreDataTables!.users.tableById,
-        /* eslint-enable @typescript-eslint/no-non-null-assertion */
       },
     },
   };

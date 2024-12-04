@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import { inspect } from 'util';

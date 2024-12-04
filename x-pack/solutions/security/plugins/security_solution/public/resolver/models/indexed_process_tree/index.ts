@@ -162,7 +162,6 @@ export function root(tree: IndexedProcessTree) {
 
   // iteratively swap current w/ its parent
   while (parent(tree, current) !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     current = parent(tree, current)!;
   }
   return current;

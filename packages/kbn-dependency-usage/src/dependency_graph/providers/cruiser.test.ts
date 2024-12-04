@@ -19,15 +19,21 @@ const codeOwners: Record<string, string[]> = {
   'plugins/data_charts': ['team_visualization'],
   'plugins/analytics': ['team_analytics'],
   'plugins/notification': ['team_alerts', 'team_notifications'],
-  'solutions/security/plugins/security_solution/public/entity_analytics/components': ['team_security_analytics'],
+  'solutions/security/plugins/security_solution/public/entity_analytics/components': [
+    'team_security_analytics',
+  ],
   'solutions/security/plugins/security_solution/public/entity_analytics/components/componentA.ts': [
     'team_security_analytics',
   ],
   'solutions/security/plugins/security_solution/public/entity_analytics/components/componentB.ts': [
     'team_security_analytics',
   ],
-  'solutions/security/plugins/security_solution/server/lib/analytics/analytics.ts': ['team_security_analytics'],
-  'solutions/security/plugins/security_solution/common/api/detection_engine': ['team_security_solution'],
+  'solutions/security/plugins/security_solution/server/lib/analytics/analytics.ts': [
+    'team_security_analytics',
+  ],
+  'solutions/security/plugins/security_solution/common/api/detection_engine': [
+    'team_security_solution',
+  ],
 };
 
 jest.mock('dependency-cruiser', () => ({

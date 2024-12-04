@@ -106,7 +106,6 @@ const shouldSkipInvestigationFieldsBulkAction = (
   return false;
 };
 
-// eslint-disable-next-line complexity
 const applyBulkActionEditToRuleParams = (
   existingRuleParams: RuleAlertType['params'],
   action: BulkActionEditForRuleParams,

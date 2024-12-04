@@ -260,7 +260,6 @@ export const Tags = ({ tags }: TagsProps) => (
   <BadgeList badges={tags} data-test-subj="tagsPropertyValue" />
 );
 
-// eslint-disable-next-line complexity
 const prepareAboutSectionListItems = (
   rule: Partial<RuleResponse>,
   hideName?: boolean,

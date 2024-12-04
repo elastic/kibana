@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { IUnsecuredActionsClient, ActionsClient } from '@kbn/actions-plugin/server';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { Logger } from '@kbn/logging';

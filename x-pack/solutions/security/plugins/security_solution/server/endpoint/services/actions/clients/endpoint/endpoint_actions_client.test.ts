@@ -350,7 +350,6 @@ describe('EndpointActionsClient', () => {
     'processPendingActions' | 'getFileDownload' | 'getFileInfo'
   >;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const responseActionMethods: Record<ResponseActionsMethodsOnly, any> = {
     isolate: responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions()),
 

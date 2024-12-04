@@ -314,7 +314,6 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
     secondChildID,
   });
   const parentEntityID = nodeModel.parentId(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     resolverTree.nodes.find((node) => node.id === originID)!
   );
   const relatedEvents = [

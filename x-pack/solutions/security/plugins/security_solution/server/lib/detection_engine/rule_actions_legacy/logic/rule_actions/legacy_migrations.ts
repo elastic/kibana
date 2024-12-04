@@ -13,13 +13,12 @@ import type {
   SavedObjectReference,
 } from '@kbn/core/server';
 
-// eslint-disable-next-line no-restricted-imports
 import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
   LegacyRuleAlertSavedObjectAction,
 } from './legacy_types';
-// eslint-disable-next-line no-restricted-imports
+
 import {
   legacyGetActionReference,
   legacyGetRuleReference,

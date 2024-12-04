@@ -180,8 +180,7 @@ describe('createConversations', () => {
       );
       expect(
         http.fetch.mock.calls[0].length > 1
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            JSON.parse((http.fetch.mock.calls[0] as any[])[1]?.body).create.length
+          ? JSON.parse((http.fetch.mock.calls[0] as any[])[1]?.body).create.length
           : 0
       ).toBe(2);
     });
@@ -202,8 +201,7 @@ describe('createConversations', () => {
       );
       const createdConversations =
         http.fetch.mock.calls[0].length > 1
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            JSON.parse((http.fetch.mock.calls[0] as any[])[1]?.body)?.create
+          ? JSON.parse((http.fetch.mock.calls[0] as any[])[1]?.body)?.create
           : [];
       expect(createdConversations[0].apiConfig.actionTypeId).toEqual('.bedrock');
       expect(createdConversations[1].apiConfig.actionTypeId).toEqual('.gen-ai');

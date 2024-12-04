@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export type PromiseResolvedValue<T extends Promise<any>> = T extends Promise<infer Value>
   ? Value
   : never;

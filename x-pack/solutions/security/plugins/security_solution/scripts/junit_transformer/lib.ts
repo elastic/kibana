@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable no-continue */
-
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { RunContext } from '@kbn/dev-cli-runner';
 import { Builder, parseStringPromise } from 'xml2js';
@@ -20,7 +18,7 @@ import del from 'del';
 
 // Function to remove specific fields from an XML object in order to
 // compare them as strings.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 function removeFields(obj: any, fieldsToRemove: string[]): any {
   for (const key in obj) {
     if (fieldsToRemove.includes(key)) {

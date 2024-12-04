@@ -1428,7 +1428,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         lineage.length === opts.generations + 1
       ) {
         lineage.pop();
-        // eslint-disable-next-line no-continue
+
         continue;
       }
       // Otherwise, add a child and any nodes associated with it

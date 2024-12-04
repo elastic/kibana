@@ -772,7 +772,6 @@ describe('ruleParamsModifier', () => {
         mockExperimentalFeatures
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((modifiedParams as any).interval).toBeUndefined();
       expect(modifiedParams.meta).toStrictEqual({
         from: '1m',

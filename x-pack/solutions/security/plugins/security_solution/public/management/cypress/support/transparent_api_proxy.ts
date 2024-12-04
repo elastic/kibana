@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-nodejs-modules
 import fs from 'fs';
-// eslint-disable-next-line import/no-nodejs-modules
+
 import type { IncomingMessage, ServerResponse } from 'http';
 import DebugProxy from '@cypress/debugging-proxy';
 import { ES_CERT_PATH, ES_KEY_PATH } from '@kbn/dev-utils';

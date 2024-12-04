@@ -427,7 +427,6 @@ export const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps
   );
 };
 
-// eslint-disable-next-line complexity
 const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,

@@ -31,7 +31,6 @@ import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import type { ArtifactEntryCardDecoratorProps } from '../artifact_entry_card';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
 
 export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> extends CommonProps {
@@ -221,7 +220,6 @@ export const PaginatedContent = memo(
             key = item[itemId] as unknown as Key;
           } else {
             if (itemKeys.has(item)) {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               key = itemKeys.get(item)!;
             } else {
               key = generateUUI();

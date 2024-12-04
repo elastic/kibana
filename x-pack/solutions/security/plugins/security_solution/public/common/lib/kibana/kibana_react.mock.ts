@@ -256,7 +256,6 @@ export const createStartServicesMock = (
 export const createWithKibanaMock = () => {
   const services = createStartServicesMock();
 
-  // eslint-disable-next-line react/display-name
   return (Component: unknown) => (props: unknown) => {
     return React.createElement(Component as string, { ...(props as object), kibana: { services } });
   };
@@ -265,7 +264,6 @@ export const createWithKibanaMock = () => {
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
-  // eslint-disable-next-line react/display-name
   return ({
     children,
     startServices: startServicesMock,

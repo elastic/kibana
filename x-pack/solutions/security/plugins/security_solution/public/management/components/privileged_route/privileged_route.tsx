@@ -23,7 +23,6 @@ export const PrivilegedRoute = memo(({ component, hasPrivilege, path }: Privileg
 
   const componentToRender = useMemo(() => {
     if (!hasPrivilege) {
-      // eslint-disable-next-line react/display-name
       return () => <NoPrivilegesPage docLinkSelector={docLinkSelector} />;
     }
 

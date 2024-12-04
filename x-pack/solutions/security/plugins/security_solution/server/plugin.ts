@@ -82,7 +82,7 @@ import previewPolicy from './lib/detection_engine/routes/index/preview_policy.js
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import type { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
-// eslint-disable-next-line no-restricted-imports
+
 import {
   isLegacyNotificationRuleExecutor,
   legacyRulesNotificationRuleType,
@@ -431,7 +431,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.lists = plugins.lists;
       this.manifestTask = new ManifestTask({
         endpointAppContext: this.endpointContext,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         taskManager: plugins.taskManager!,
       });
     }
@@ -518,7 +518,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
       endpointAppContext: this.endpointContext,
       core,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       taskManager: plugins.taskManager!,
     });
 
@@ -547,7 +547,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const exceptionListClient = this.lists!.getExceptionListClient(
       savedObjectsClient,
       'kibana',
@@ -557,7 +557,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       // from where authz can be derived)
       false
     );
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const fleetStartServices = plugins.fleet!;
 
     const { packageService } = fleetStartServices;

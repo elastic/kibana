@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-// eslint-disable-next-line no-restricted-imports
+
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import { render, screen } from '@testing-library/react';
 import type { Rule } from '../../../rule_management/logic';

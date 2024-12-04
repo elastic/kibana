@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsFindResult } from '@kbn/core/server';
-// eslint-disable-next-line no-restricted-imports
+
 import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from '../../../../lib/detection_engine/rule_actions_legacy';
 
 export const getRuleIdToEnabledMap = (
