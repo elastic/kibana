@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const AI_ASSISTANT_ROLE_NAME = 'ai_assistant_role';
-
 // Example role:
 // export const allAccessRole: Role = {
 //   name: 'all_access',
