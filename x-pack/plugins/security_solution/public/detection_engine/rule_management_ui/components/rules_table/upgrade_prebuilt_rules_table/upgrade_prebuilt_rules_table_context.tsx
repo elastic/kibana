@@ -29,12 +29,11 @@ import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/field_upgrade_state';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
-import { MlJobUpgradeModal } from './modals/ml_job_upgrade_modal';
-import { UpgradeConflictsModal } from './modals/upgrade_conflicts_modal';
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
-import { useMlJobUpgradeModal, useUpgradeConflictsModal } from './use_upgrade_modals';
+import { useOutdatedMlJobsUpgradeModal } from './use_ml_jobs_upgrade_modal';
+import { useUpgradeWithConflictsModal } from './use_upgrade_with_conflicts_modal';
 import { RuleTypeChangeCallout } from './rule_type_change_callout';
 import { UpgradeFlyoutSubHeader } from './upgrade_flyout_subheader';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
@@ -148,20 +147,11 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   });
 
   const {
-    isVisible: isLegacyMLJobsModalVisible,
-    legacyJobsInstalled,
+    modal: confirmLegacyMlJobsUpgradeModal,
     confirmLegacyMLJobs,
-    handleConfirm: handleLegacyMLJobsConfirm,
-    handleCancel: handleLegacyMLJobsCancel,
-    loadingJobs,
-  } = useMlJobUpgradeModal();
-
-  const {
-    isVisible: isConflictsModalVisible,
-    confirmConflictsUpgrade,
-    handleConfirm: handleConflictsConfirm,
-    handleCancel: handleConflictsCancel,
-  } = useUpgradeConflictsModal();
+    isLoading: areMlJobsLoading,
+  } = useOutdatedMlJobsUpgradeModal();
+  const { modal: upgradeConflictsModal, confirmConflictsUpgrade } = useUpgradeWithConflictsModal();
 
   const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
 
@@ -406,7 +396,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         filterOptions,
         tags,
         isFetched,
-        isLoading: isLoading || loadingJobs,
+        isLoading: isLoading || areMlJobsLoading,
         isRefetching,
         isUpgradingSecurityPackages,
         loadingRules,
@@ -422,7 +412,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       tags,
       isFetched,
       isLoading,
-      loadingJobs,
+      areMlJobsLoading,
       isRefetching,
       isUpgradingSecurityPackages,
       loadingRules,
@@ -435,19 +425,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
       <>
-        {isLegacyMLJobsModalVisible && (
-          <MlJobUpgradeModal
-            jobs={legacyJobsInstalled}
-            onCancel={handleLegacyMLJobsCancel}
-            onConfirm={handleLegacyMLJobsConfirm}
-          />
-        )}
-        {isConflictsModalVisible && (
-          <UpgradeConflictsModal
-            onCancel={handleConflictsCancel}
-            onConfirm={handleConflictsConfirm}
-          />
-        )}
+        {confirmLegacyMlJobsUpgradeModal}
+        {upgradeConflictsModal}
         {children}
         {rulePreviewFlyout}
       </>
