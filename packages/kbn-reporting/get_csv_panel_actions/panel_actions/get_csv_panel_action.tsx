@@ -72,7 +72,6 @@ interface Params {
   csvConfig: ClientConfigType['csv'];
   core: CoreSetup;
   startServices$: Observable<StartServices>;
-  usesUiCapabilities: boolean;
 }
 
 interface ExecutionParams {
@@ -104,15 +103,13 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   private readonly apiClient: ReportingAPIClient;
   private readonly theme: ThemeServiceSetup;
   private readonly startServices$: Params['startServices$'];
-  private readonly usesUiCapabilities: boolean;
 
-  constructor({ core, csvConfig, apiClient, startServices$, usesUiCapabilities }: Params) {
+  constructor({ core, apiClient, startServices$ }: Params) {
     this.isDownloading = false;
     this.apiClient = apiClient;
     this.notifications = core.notifications;
     this.theme = core.theme;
     this.startServices$ = startServices$;
-    this.usesUiCapabilities = usesUiCapabilities;
     this.i18nStrings = getI18nStrings(apiClient);
   }
 
@@ -142,10 +139,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     const licenseHasCsvReporting = checkLicense(license.check('reporting', 'basic')).showLinks;
 
     // NOTE: For historical reasons capability identifier is called `downloadCsv. It can not be renamed.
-    const capabilityHasCsvReporting = this.usesUiCapabilities
-      ? application.capabilities.dashboard?.downloadCsv === true
-      : true; // if we're using the deprecated "xpack.reporting.roles.enabled=true" setting, the panel action is always visible
-
+    const capabilityHasCsvReporting = application.capabilities.dashboard?.downloadCsv === true;
     if (!licenseHasCsvReporting || !capabilityHasCsvReporting) {
       return false;
     }
