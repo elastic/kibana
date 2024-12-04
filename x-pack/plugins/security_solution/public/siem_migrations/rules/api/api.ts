@@ -19,7 +19,6 @@ import {
   SIEM_RULE_MIGRATION_START_PATH,
   SIEM_RULE_MIGRATION_STATS_PATH,
   SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
-  SIEM_RULE_MIGRATION_CREATE_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationRequestBody,
@@ -33,17 +32,17 @@ import type {
   GetRuleMigrationStatsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
-export interface GetRuleMigrationsStatsParams {
+export interface GetRuleMigrationStatsParams {
   /** `id` of the migration to get stats for */
   migrationId: string;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
 /** Retrieves the stats for all the existing migrations, aggregated by `migration_id`. */
-export const getRuleMigrationsStats = async ({
+export const getRuleMigrationStats = async ({
   migrationId,
   signal,
-}: GetRuleMigrationsStatsParams): Promise<GetRuleMigrationStatsResponse> => {
+}: GetRuleMigrationStatsParams): Promise<GetRuleMigrationStatsResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationStatsResponse>(
     replaceParams(SIEM_RULE_MIGRATION_STATS_PATH, { migration_id: migrationId }),
     { version: '1', signal }

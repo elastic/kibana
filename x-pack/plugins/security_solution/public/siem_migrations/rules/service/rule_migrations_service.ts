@@ -7,6 +7,12 @@
 
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
+import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
+import {
+  DEFAULT_ASSISTANT_NAMESPACE,
+  TRACE_OPTIONS_SESSION_STORAGE_KEY,
+} from '@kbn/elastic-assistant/impl/assistant_context/constants';
+import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
   CreateRuleMigrationRequestBody,
@@ -20,7 +26,7 @@ import { licenseService } from '../../../common/hooks/use_license';
 import type { GetRuleMigrationsStatsAllParams } from '../api/api';
 import {
   createRuleMigration,
-  getRuleMigrationsStats,
+  getRuleMigrationStats,
   getRuleMigrationsStatsAll,
   startRuleMigration,
 } from '../api/api';
@@ -29,13 +35,21 @@ import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
 
+// use the default assistant namespace since it's the only one we use
+const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
+  `${DEFAULT_ASSISTANT_NAMESPACE}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}` as const;
+
 const REQUEST_POLLING_INTERVAL_MS = 5000 as const;
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50 as const;
 
 export class SiemRulesMigrationsService {
   private readonly latestStats$: BehaviorSubject<RuleMigrationStats[]>;
   private isPolling = false;
-  public connectorIdStorage = new RuleMigrationsStorage('connectorId');
+  public connectorIdStorage = new RuleMigrationsStorage<string>('connectorId');
+  public traceOptionsStorage = new RuleMigrationsStorage<TraceOptions>('traceOptions', {
+    customKey: NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY,
+    storageType: 'session',
+  });
 
   constructor(
     private readonly core: CoreStart,
@@ -71,23 +85,7 @@ export class SiemRulesMigrationsService {
       });
   }
 
-  public async getRuleMigrationTasksStats(
-    params: GetRuleMigrationsStatsAllParams = {}
-  ): Promise<RuleMigrationStats[]> {
-    const allStats = await this.getRuleMigrationsTaskStatsAll(params);
-    const results = allStats.map(
-      // the array order (by creation) is guaranteed by the API
-      (stats, index) => ({ ...stats, number: index + 1 } as RuleMigrationStats) // needs cast because of the `status` enum override
-    );
-    this.latestStats$.next(results); // Always update the latest stats
-    return results;
-  }
-
   public async createRuleMigration(body: CreateRuleMigrationRequestBody): Promise<string> {
-    const connectorId = this.connectorIdStorage.get();
-    if (!connectorId) {
-      throw new Error(i18n.MISSING_CONNECTOR_ERROR);
-    }
     if (body.length === 0) {
       throw new Error(i18n.EMPTY_RULES_ERROR);
     }
@@ -101,22 +99,43 @@ export class SiemRulesMigrationsService {
     return migrationId as string;
   }
 
-  public async getRuleMigrationsStats(migrationId: string): Promise<GetRuleMigrationStatsResponse> {
-    return getRuleMigrationsStats({ migrationId });
-  }
-
   public async startRuleMigration(migrationId: string): Promise<GetAllStatsRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
       throw new Error(i18n.MISSING_CONNECTOR_ERROR);
     }
-    // TODO: add langsmith options from local storage
-    const result = await startRuleMigration({ migrationId, connectorId });
+
+    const langSmithSettings = this.traceOptionsStorage.get();
+    let langSmithOptions: LangSmithOptions | undefined;
+    if (langSmithSettings) {
+      langSmithOptions = {
+        project_name: langSmithSettings.langSmithProject,
+        api_key: langSmithSettings.langSmithApiKey,
+      };
+    }
+
+    const result = await startRuleMigration({ migrationId, connectorId, langSmithOptions });
     this.startPolling();
     return result;
   }
 
-  public async getRuleMigrationsTaskStatsAll(
+  public async getRuleMigrationStats(migrationId: string): Promise<GetRuleMigrationStatsResponse> {
+    return getRuleMigrationStats({ migrationId });
+  }
+
+  public async getRuleMigrationsStats(
+    params: GetRuleMigrationsStatsAllParams = {}
+  ): Promise<RuleMigrationStats[]> {
+    const allStats = await this.getRuleMigrationsStatsWithRetry(params);
+    const results = allStats.map(
+      // the array order (by creation) is guaranteed by the API
+      (stats, index) => ({ ...stats, number: index + 1 } as RuleMigrationStats) // needs cast because of the `status` enum override
+    );
+    this.latestStats$.next(results); // Always update the latest stats
+    return results;
+  }
+
+  private async getRuleMigrationsStatsWithRetry(
     params: GetRuleMigrationsStatsAllParams = {},
     sleepSecs?: number
   ): Promise<RuleMigrationTaskStats[]> {
@@ -125,23 +144,23 @@ export class SiemRulesMigrationsService {
     }
 
     return getRuleMigrationsStatsAll(params).catch((e) => {
-      // Retry only on network errors and 503s, otherwise throw
-      if (e.message !== 'Failed to fetch' && e.status !== 503) {
+      // Retry only on network errors (no status) and 503s, otherwise throw
+      if (e.status && e.status !== 503) {
         throw e;
       }
-      const nextSleepSecs = sleepSecs ? sleepSecs * 3 : 1;
-      if (nextSleepSecs > 60 * 2) {
-        // Wait for 2 minutes max for the API to be available again
+      const nextSleepSecs = sleepSecs ? sleepSecs * 2 : 1; // Exponential backoff
+      if (nextSleepSecs > 60) {
+        // Wait for a minutes max (two minutes total) for the API to be available again
         throw e;
       }
-      return this.getRuleMigrationsTaskStatsAll(params, nextSleepSecs);
+      return this.getRuleMigrationsStatsWithRetry(params, nextSleepSecs);
     });
   }
 
   private async startTaskStatsPolling(): Promise<void> {
     let pendingMigrationIds: string[] = [];
     do {
-      const results = await this.getRuleMigrationTasksStats();
+      const results = await this.getRuleMigrationsStats();
 
       if (pendingMigrationIds.length > 0) {
         // send notifications for finished migrations

@@ -10,7 +10,7 @@ import type { OnboardingCardCheckComplete } from '../../../../../types';
 export const checkStartMigrationCardComplete: OnboardingCardCheckComplete = async ({
   siemMigrations,
 }) => {
-  const migrationsStats = await siemMigrations.rules.getRuleMigrationTasksStats();
+  const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
   const isComplete = migrationsStats.length > 0;
   return isComplete;
 };

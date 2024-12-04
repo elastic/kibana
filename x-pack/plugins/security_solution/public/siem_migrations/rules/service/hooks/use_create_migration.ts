@@ -34,7 +34,7 @@ export const useCreateMigration = (onSuccess: OnSuccess) => {
         try {
           dispatch({ type: 'start' });
           const migrationId = await siemMigrations.rules.createRuleMigration(data);
-          const stats = await siemMigrations.rules.getRuleMigrationsStats(migrationId);
+          const stats = await siemMigrations.rules.getRuleMigrationStats(migrationId);
 
           notifications.toasts.addSuccess(RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS);
           onSuccess(stats);
