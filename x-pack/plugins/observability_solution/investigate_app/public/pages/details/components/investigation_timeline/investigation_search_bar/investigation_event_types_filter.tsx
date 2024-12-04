@@ -9,6 +9,7 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
+  EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableOption,
   useGeneratedHtmlId,
@@ -25,22 +26,16 @@ export function InvestigationEventTypesFilter({ onSelected }: Props) {
   const [items, setItems] = useState<EuiSelectableOption[]>([
     {
       key: 'alert',
-      label: i18n.translate(
-        'xpack.investigateApp.investigationEventTypesFilter.alertEventTypeLabel',
-        {
-          defaultMessage: 'Alert',
-        }
-      ),
+      label: i18n.translate('xpack.investigateApp.investigationEventTypesFilter.alertLabel', {
+        defaultMessage: 'Alert',
+      }),
       checked: 'on',
     },
     {
       key: 'annotation',
-      label: i18n.translate(
-        'xpack.investigateApp.investigationEventTypesFilter.annotationEventTypeLabel',
-        {
-          defaultMessage: 'Annotation',
-        }
-      ),
+      label: i18n.translate('xpack.investigateApp.investigationEventTypesFilter.annotationLabel', {
+        defaultMessage: 'Annotation',
+      }),
       checked: 'on',
     },
   ]);
@@ -93,7 +88,17 @@ export function InvestigationEventTypesFilter({ onSelected }: Props) {
         panelPaddingSize="none"
       >
         <EuiSelectable options={items} onChange={handleChange}>
-          {(list) => <div style={{ width: 200 }}>{list}</div>}
+          {(list) => (
+            <div style={{ width: 200 }}>
+              <EuiPopoverTitle paddingSize="s">
+                {i18n.translate(
+                  'xpack.investigateApp.investigationEventTypesFilter.filterEventTypePopoverTitleLabel',
+                  { defaultMessage: 'Filter event type' }
+                )}
+              </EuiPopoverTitle>
+              {list}
+            </div>
+          )}
         </EuiSelectable>
       </EuiPopover>
     </EuiFilterGroup>

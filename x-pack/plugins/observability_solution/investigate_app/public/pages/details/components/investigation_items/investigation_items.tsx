@@ -5,31 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import { useInvestigation } from '../../contexts/investigation_context';
 import { AddInvestigationItem } from '../add_investigation_item/add_investigation_item';
 import { AssistantHypothesis } from '../assistant_hypothesis/assistant_hypothesis';
 import { InvestigationItemsList } from '../investigation_items_list/investigation_items_list';
 import { InvestigationTimeline } from '../investigation_timeline/investigation_timeline';
 
 export function InvestigationItems() {
-  const { investigation } = useInvestigation();
-
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" responsive>
+    <EuiFlexGroup direction="column" gutterSize="m" responsive>
       <InvestigationTimeline />
-
-      {investigation?.id && (
-        <EuiFlexItem grow={false}>
-          <AssistantHypothesis investigationId={investigation.id} />
-        </EuiFlexItem>
-      )}
-
-      <EuiFlexItem grow={false}>
-        <InvestigationItemsList />
-      </EuiFlexItem>
-
+      <AssistantHypothesis />
+      <InvestigationItemsList />
       <AddInvestigationItem />
     </EuiFlexGroup>
   );
