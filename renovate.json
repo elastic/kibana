@@ -401,26 +401,6 @@
       "minimumReleaseAge": "7 days"
     },
     {
-      "groupName": "@elastic/kibana-visualizations test dependencies",
-      "matchDepNames": [
-        "@types/faker",
-        "faker"
-      ],
-      "reviewers": [
-        "team:visualizations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
-      ],
-      "enabled": true,
-      "minimumReleaseAge": "7 days"
-    },
-    {
       "groupName": "@elastic/charts",
       "matchDepNames": [
         "@elastic/charts"
