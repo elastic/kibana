@@ -26,13 +26,12 @@ describe('Differential Functions page', () => {
     it('shows only the baseline values when comparison data is not available', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', { rangeFrom, rangeTo });
-      // wait for both apis to finisto move on
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '74.52 lbs / 33.8 kg' },
-        { id: 'annualizedCost', value: '$318.32' },
+        { id: 'annualizedCo2', value: '78.48 lbs / 35.6 kg' },
+        { id: 'annualizedCost', value: '$335.07' },
         { id: 'totalNumberOfSamples', value: '513' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
@@ -50,8 +49,8 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '74.52 lbs / 33.8 kg' },
-        { id: 'annualizedCost', value: '$0', comparisonValue: '$318.32' },
+        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '78.48 lbs / 35.6 kg' },
+        { id: 'annualizedCost', value: '$0', comparisonValue: '$335.07' },
         { id: 'totalNumberOfSamples', value: '0', comparisonValue: '15,390' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
@@ -69,21 +68,20 @@ describe('Differential Functions page', () => {
         comparisonRangeFrom,
         comparisonRangeTo,
       });
-      // wait for both apis to finisto move on
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '65.89%', icon: 'sortUp_success' },
         {
           id: 'annualizedCo2',
-          value: '74.52 lbs / 33.8 kg',
-          comparisonValue: '25.35 lbs / 11.5 kg (65.98%)',
+          value: '78.48 lbs / 35.6 kg',
+          comparisonValue: '26.68 lbs / 12.1 kg (66.01%)',
           icon: 'comparison_sortUp_success',
         },
         {
           id: 'annualizedCost',
-          value: '$318.32',
-          comparisonValue: '$108.59 (65.89%)',
+          value: '$335.07',
+          comparisonValue: '$114.3 (65.89%)',
           icon: 'comparison_sortUp_success',
         },
         {
@@ -109,21 +107,20 @@ describe('Differential Functions page', () => {
         comparisonRangeFrom: rangeFrom,
         comparisonRangeTo: rangeTo,
       });
-      // wait for both apis to finisto move on
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '193.14%', icon: 'sortDown_danger' },
         {
           id: 'annualizedCo2',
-          value: '25.35 lbs / 11.5 kg',
-          comparisonValue: '74.52 lbs / 33.8 kg (193.91%)',
+          value: '26.68 lbs / 12.1 kg',
+          comparisonValue: '78.48 lbs / 35.6 kg (194.21%)',
           icon: 'comparison_sortDown_danger',
         },
         {
           id: 'annualizedCost',
-          value: '$108.59',
-          comparisonValue: '$318.32 (193.14%)',
+          value: '$114.3',
+          comparisonValue: '$335.07 (193.14%)',
           icon: 'comparison_sortDown_danger',
         },
         {
@@ -143,7 +140,6 @@ describe('Differential Functions page', () => {
     it('show empty summary when no data is availble', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential');
-      // wait for both apis to finisto move on
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
