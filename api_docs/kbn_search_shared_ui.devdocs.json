@@ -13,7 +13,7 @@
         "signature": [
           "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, }: FormInfoFieldProps) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
+        "path": "x-pack/solutions/search/solutions/search/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "FormInfoFieldProps"
             ],
-            "path": "x-pack/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
+            "path": "x-pack/solutions/search/solutions/search/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

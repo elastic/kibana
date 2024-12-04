@@ -6333,15 +6333,15 @@
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+            "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+            "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+            "path": "x-pack/solutions/search/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
           {
             "plugin": "securitySolution",

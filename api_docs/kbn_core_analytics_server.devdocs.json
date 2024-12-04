@@ -908,7 +908,7 @@
               },
               {
                 "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
+                "path": "x-pack/solutions/search/solutions/search/plugins/search_playground/server/routes.ts"
               },
               {
                 "plugin": "securitySolutionServerless",

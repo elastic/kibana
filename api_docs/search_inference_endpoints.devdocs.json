@@ -16,7 +16,7 @@
         "signature": [
           "\"inferenceEndpointsUi:enabled\""
         ],
-        "path": "x-pack/plugins/search_inference_endpoints/public/index.ts",
+        "path": "x-pack/solutions/search/solutions/search/plugins/search_inference_endpoints/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -30,7 +30,7 @@
       "tags": [],
       "label": "SearchInferenceEndpointsPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_inference_endpoints/public/types.ts",
+      "path": "x-pack/solutions/search/solutions/search/plugins/search_inference_endpoints/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -44,7 +44,7 @@
       "tags": [],
       "label": "SearchInferenceEndpointsPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_inference_endpoints/public/types.ts",
+      "path": "x-pack/solutions/search/solutions/search/plugins/search_inference_endpoints/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -60,7 +60,7 @@
             "InferenceEndpointsProviderProps",
             " & { children?: React.ReactNode; }>"
           ],
-          "path": "x-pack/plugins/search_inference_endpoints/public/types.ts",
+          "path": "x-pack/solutions/search/solutions/search/plugins/search_inference_endpoints/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -105,7 +105,7 @@
           "signature": [
             "React.FunctionComponent<{}>"
           ],
-          "path": "x-pack/plugins/search_inference_endpoints/public/types.ts",
+          "path": "x-pack/solutions/search/solutions/search/plugins/search_inference_endpoints/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -159,7 +159,7 @@
       "tags": [],
       "label": "SearchInferenceEndpointsPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_inference_endpoints/server/types.ts",
+      "path": "x-pack/solutions/search/solutions/search/plugins/search_inference_endpoints/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -173,7 +173,7 @@
       "tags": [],
       "label": "SearchInferenceEndpointsPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_inference_endpoints/server/types.ts",
+      "path": "x-pack/solutions/search/solutions/search/plugins/search_inference_endpoints/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
