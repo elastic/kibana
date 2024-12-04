@@ -89,9 +89,6 @@ export const explorerServiceFactory = (
   setExplorerData: (payload: DeepPartial<ExplorerState>) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_EXPLORER_DATA, payload });
   },
-  setChartsDataLoading: () => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS_DATA_LOADING });
-  },
 });
 
 export type ExplorerService = ReturnType<typeof explorerServiceFactory>;

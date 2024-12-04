@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from '../../explorer_constants';
 import type { ExplorerActionPayloads, ExplorerActions } from '../../explorer_dashboard_service';
 import { getClearedSelectedAnomaliesState } from '../../explorer_utils';
@@ -48,14 +47,6 @@ export const explorerReducer = (
         state,
         payload as ExplorerActionPayloads[typeof EXPLORER_ACTION.JOB_SELECTION_CHANGE]
       );
-      break;
-
-    case EXPLORER_ACTION.SET_CHARTS_DATA_LOADING:
-      nextState = {
-        ...state,
-        anomalyChartsDataLoading: true,
-        chartsData: getDefaultChartsData(),
-      };
       break;
 
     case EXPLORER_ACTION.SET_EXPLORER_DATA:
