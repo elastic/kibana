@@ -35,10 +35,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       });
       await observability.alerts.common.navigateToRulesPage();
       // TODO Remove when it's fixed https://github.com/elastic/kibana/issues/201805
-      await common.sleep(1000);
-      if (await testSubjects.exists('toastCloseButton')) {
-        await testSubjects.click('toastCloseButton');
-      }
     });
 
     after(async () => {
