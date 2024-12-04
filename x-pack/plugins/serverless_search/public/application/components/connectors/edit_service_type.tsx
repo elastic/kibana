@@ -246,7 +246,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
             size="l"
           />
         }
-        singleSelection
+        singleSelection={{ asPlainText: true }}
         fullWidth
         placeholder={i18n.translate(
           'xpack.serverlessSearch.connectors.chooseConnectorSelectable.placeholder.text',
