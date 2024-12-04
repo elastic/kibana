@@ -10,12 +10,13 @@ import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
+import type { RuleMigrationTask } from '../../types';
 
 export interface HeaderButtonsProps {
   /**
-   * Available rule migrations ids
+   * Available rule migrations stats
    */
-  migrationsIds: string[];
+  ruleMigrationsStats: RuleMigrationTask[];
 
   /**
    * Selected rule migration id
@@ -30,55 +31,53 @@ export interface HeaderButtonsProps {
   onMigrationIdChange: (selectedId?: string) => void;
 }
 
-const HeaderButtonsComponent: React.FC<HeaderButtonsProps> = ({
-  migrationsIds,
-  selectedMigrationId,
-  onMigrationIdChange,
-}) => {
-  const migrationOptions = useMemo(() => {
-    const options: Array<EuiComboBoxOptionOption<string>> = migrationsIds.map((id, index) => ({
-      value: id,
-      'data-test-subj': `migrationSelectionOption-${index}`,
-      label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(index + 1),
-    }));
-    return options;
-  }, [migrationsIds]);
-  const selectedMigrationOption = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-    const index = migrationsIds.findIndex((id) => id === selectedMigrationId);
-    return index !== -1
-      ? [
-          {
-            value: selectedMigrationId,
-            'data-test-subj': `migrationSelectionOption-${index}`,
-            label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(index + 1),
-          },
-        ]
-      : [];
-  }, [migrationsIds, selectedMigrationId]);
+export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
+  ({ ruleMigrationsStats, selectedMigrationId, onMigrationIdChange }) => {
+    const migrationOptions = useMemo(() => {
+      const options: Array<EuiComboBoxOptionOption<string>> = ruleMigrationsStats.map(
+        ({ id, number }) => ({
+          value: id,
+          'data-test-subj': `migrationSelectionOption-${number}`,
+          label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(number),
+        })
+      );
+      return options;
+    }, [ruleMigrationsStats]);
+    const selectedMigrationOption = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
+      const stats = ruleMigrationsStats.find(({ id }) => id === selectedMigrationId);
+      return stats
+        ? [
+            {
+              value: selectedMigrationId,
+              'data-test-subj': `migrationSelectionOption-${stats.number}`,
+              label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(stats.number),
+            },
+          ]
+        : [];
+    }, [ruleMigrationsStats, selectedMigrationId]);
 
-  const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
-    onMigrationIdChange(selected[0].value);
-  };
+    const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
+      onMigrationIdChange(selected[0].value);
+    };
 
-  if (!migrationsIds.length) {
-    return null;
+    if (!ruleMigrationsStats.length) {
+      return null;
+    }
+
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiComboBox
+            aria-label={i18n.SIEM_MIGRATIONS_OPTION_AREAL_LABEL}
+            onChange={onChange}
+            options={migrationOptions}
+            selectedOptions={selectedMigrationOption}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-      <EuiFlexItem grow={false}>
-        <EuiComboBox
-          aria-label={i18n.SIEM_MIGRATIONS_OPTION_AREAL_LABEL}
-          onChange={onChange}
-          options={migrationOptions}
-          selectedOptions={selectedMigrationOption}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-export const HeaderButtons = React.memo(HeaderButtonsComponent);
+);
 HeaderButtons.displayName = 'HeaderButtons';

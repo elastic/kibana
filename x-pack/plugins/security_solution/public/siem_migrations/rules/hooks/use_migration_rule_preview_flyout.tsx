@@ -9,28 +9,28 @@ import type { ReactNode } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import { TranslationDetailsFlyout } from '../components/translation_details_flyout';
+import { MigrationRuleDetailsFlyout } from '../components/rule_details_flyout';
 
-interface UseRulePreviewFlyoutParams {
+interface UseMigrationRuleDetailsFlyoutParams {
   ruleActionsFactory: (ruleMigration: RuleMigration, closeRulePreview: () => void) => ReactNode;
   extraTabsFactory?: (ruleMigration: RuleMigration) => EuiTabbedContentTab[];
 }
 
-interface UseRulePreviewFlyoutResult {
-  rulePreviewFlyout: ReactNode;
-  openRulePreview: (rule: RuleMigration) => void;
-  closeRulePreview: () => void;
+interface UseMigrationRuleDetailsFlyoutResult {
+  migrationRuleDetailsFlyout: ReactNode;
+  openMigrationRuleDetails: (rule: RuleMigration) => void;
+  closeMigrationRuleDetails: () => void;
 }
 
-export function useRulePreviewFlyout({
+export function useMigrationRuleDetailsFlyout({
   extraTabsFactory,
   ruleActionsFactory,
-}: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
-  const [ruleMigration, setRuleMigrationForPreview] = useState<RuleMigration | undefined>();
-  const closeRulePreview = useCallback(() => setRuleMigrationForPreview(undefined), []);
+}: UseMigrationRuleDetailsFlyoutParams): UseMigrationRuleDetailsFlyoutResult {
+  const [ruleMigration, setMigrationRuleForPreview] = useState<RuleMigration | undefined>();
+  const closeMigrationRuleDetails = useCallback(() => setMigrationRuleForPreview(undefined), []);
   const ruleActions = useMemo(
-    () => ruleMigration && ruleActionsFactory(ruleMigration, closeRulePreview),
-    [ruleMigration, ruleActionsFactory, closeRulePreview]
+    () => ruleMigration && ruleActionsFactory(ruleMigration, closeMigrationRuleDetails),
+    [ruleMigration, ruleActionsFactory, closeMigrationRuleDetails]
   );
   const extraTabs = useMemo(
     () => (ruleMigration && extraTabsFactory ? extraTabsFactory(ruleMigration) : []),
@@ -38,18 +38,18 @@ export function useRulePreviewFlyout({
   );
 
   return {
-    rulePreviewFlyout: ruleMigration && (
-      <TranslationDetailsFlyout
+    migrationRuleDetailsFlyout: ruleMigration && (
+      <MigrationRuleDetailsFlyout
         ruleMigration={ruleMigration}
         size="l"
-        closeFlyout={closeRulePreview}
+        closeFlyout={closeMigrationRuleDetails}
         ruleActions={ruleActions}
         extraTabs={extraTabs}
       />
     ),
-    openRulePreview: useCallback((rule: RuleMigration) => {
-      setRuleMigrationForPreview(rule);
+    openMigrationRuleDetails: useCallback((rule: RuleMigration) => {
+      setMigrationRuleForPreview(rule);
     }, []),
-    closeRulePreview,
+    closeMigrationRuleDetails,
   };
 }
