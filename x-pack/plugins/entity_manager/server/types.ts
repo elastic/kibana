@@ -12,6 +12,7 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { EntityManagerConfig } from '../common/config';
 
 export interface EntityManagerServerSetup {
@@ -29,6 +30,7 @@ export interface ElasticsearchAccessorOptions {
 
 export interface EntityManagerPluginSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface EntityManagerPluginStartDependencies {

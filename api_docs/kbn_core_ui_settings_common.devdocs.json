@@ -609,10 +609,6 @@
                 "path": "src/plugins/discover/server/ui_settings.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/server/ui_settings.ts"
-              },
-              {
                 "plugin": "@kbn/management-settings-field-definition",
                 "path": "packages/kbn-management/settings/field_definition/get_definition.ts"
               }

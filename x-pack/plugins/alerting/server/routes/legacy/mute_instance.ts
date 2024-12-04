@@ -58,7 +58,8 @@ export const muteAlertInstanceRoute = (
 
       trackLegacyRouteUsage('muteInstance', usageCounter);
 
-      const rulesClient = (await context.alerting).getRulesClient();
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
 
       const renameMap = {
         alert_id: 'alertId',
