@@ -7,20 +7,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
-import type { FormHook, ValidationError } from '../../../shared_imports';
+import type { FormHook } from '../../../shared_imports';
 import { useForm, type FormConfig, type FormData } from '../../../shared_imports';
 import type { FormHookWithWarn } from './form_hook_with_warn';
 import { extractValidationResults } from './extract_validation_results';
-
-interface SubmitHandlerWithWarnExtras {
-  errors: ValidationError[];
-  warnings: ValidationError[];
-}
+import type { ValidationResults } from './validation_results';
 
 export type FormWithWarnSubmitHandler<T extends FormData = FormData> = (
   formData: T,
   isValid: boolean,
-  extras: SubmitHandlerWithWarnExtras
+  validationResults: ValidationResults
 ) => Promise<void>;
 
 interface FormWithWarnConfig<T extends FormData = FormData, I extends FormData = T>
@@ -53,8 +49,10 @@ export function useFormWithWarn<T extends FormData = FormData, I extends FormDat
   const { form } = useForm(formConfig as FormConfig<T, I>);
   const { validate: originalValidate, getFormData, getFields } = form;
 
-  const errorsRef = useRef<ValidationError[]>([]);
-  const warningsRef = useRef<ValidationError[]>([]);
+  const validationResultsRef = useRef<ValidationResults>({
+    errors: [],
+    warnings: [],
+  });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [isValid, setIsValid] = useState<boolean>();
@@ -63,20 +61,17 @@ export function useFormWithWarn<T extends FormData = FormData, I extends FormDat
   const validate: FormHook<T, I>['validate'] = useCallback(async () => {
     await originalValidate();
 
-    const validationResult = extractValidationResults(
+    validationResultsRef.current = extractValidationResults(
       Object.values(getFields()),
       warningValidationCodes
     );
 
-    errorsRef.current = validationResult.errors;
-    warningsRef.current = validationResult.warnings;
-
-    const isFormValid = isEmpty(errorsRef.current);
+    const isFormValid = isEmpty(validationResultsRef.current.errors);
 
     setIsValid(isFormValid);
 
     return isFormValid;
-  }, [originalValidate, getFields, warningValidationCodes, errorsRef, warningsRef]);
+  }, [originalValidate, getFields, warningValidationCodes, validationResultsRef]);
 
   const submit: FormHook<T, I>['submit'] = useCallback(
     async (e) => {
@@ -91,10 +86,7 @@ export function useFormWithWarn<T extends FormData = FormData, I extends FormDat
       const formData = isFormValid ? getFormData() : ({} as T);
 
       if (onSubmit) {
-        await onSubmit(formData, isFormValid, {
-          errors: errorsRef.current,
-          warnings: warningsRef.current,
-        });
+        await onSubmit(formData, isFormValid, validationResultsRef.current);
       }
 
       if (isMounted.current) {
@@ -103,7 +95,7 @@ export function useFormWithWarn<T extends FormData = FormData, I extends FormDat
 
       return { data: formData, isValid: isFormValid };
     },
-    [validate, getFormData, onSubmit, errorsRef, warningsRef]
+    [validate, getFormData, onSubmit, validationResultsRef]
   );
 
   // Track form's mounted state
@@ -124,10 +116,10 @@ export function useFormWithWarn<T extends FormData = FormData, I extends FormDat
         isSubmitting,
         validate,
         submit,
-        getErrors: () => errorsRef.current.map((x) => x.message),
-        getValidationWarnings: () => warningsRef.current,
+        getErrors: () => validationResultsRef.current.errors.map((x) => x.message),
+        getValidationWarnings: () => validationResultsRef.current.warnings,
       },
     }),
-    [form, validate, submit, isSubmitted, isSubmitting, isValid, errorsRef, warningsRef]
+    [form, validate, submit, isSubmitted, isSubmitting, isValid, validationResultsRef]
   );
 }

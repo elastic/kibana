@@ -6,16 +6,12 @@
  */
 
 import type { FieldHook, ValidationError } from '../../../shared_imports';
-
-interface ExtractValidationResultsResult {
-  errors: ValidationError[];
-  warnings: ValidationError[];
-}
+import type { ValidationResults } from './validation_results';
 
 export function extractValidationResults(
   formFields: Readonly<FieldHook[]>,
   warningValidationCodes: Readonly<string[]>
-): ExtractValidationResultsResult {
+): ValidationResults {
   const warningValidationCodesSet = new Set(warningValidationCodes);
   const errors: ValidationError[] = [];
   const warnings: ValidationError[] = [];
