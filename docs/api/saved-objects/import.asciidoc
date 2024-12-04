@@ -4,7 +4,7 @@
 <titleabbrev>Import objects</titleabbrev>
 ++++
 
-experimental[] Create sets of {kib} saved objects from a file created by the export API.
+Create sets of {kib} saved objects from a file created by the export API.
 
 [NOTE]
 ====
