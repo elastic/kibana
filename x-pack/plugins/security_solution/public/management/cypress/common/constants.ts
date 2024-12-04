@@ -18,4 +18,5 @@ export const KIBANA_KNOWN_DEFAULT_ACCOUNTS = {
   elastic: 'elastic',
   elastic_serverless: 'elastic_serverless',
   system_indices_superuser: 'system_indices_superuser',
+  admin: 'admin',
 } as const;

@@ -42,9 +42,7 @@ describe(
     },
   },
   () => {
-    const loginUser = Cypress.env('IS_SERVERLESS')
-      ? ROLE.elastic_serverless
-      : ROLE.system_indices_superuser;
+    const loginUser = Cypress.env('IS_SERVERLESS') ? ROLE.admin : ROLE.system_indices_superuser;
     const roleName = `test_${Math.random().toString().substring(2, 6)}`;
     let spaceId: string = '';
 
