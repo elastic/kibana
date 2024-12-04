@@ -35,20 +35,17 @@ export function crowdStrikeActionRequestHandler<T extends CrowdStrikeActionsRunS
   CrowdstrikeActionsRequestBody,
   SecuritySolutionRequestHandlerContext
 > {
-  const isCrowdstrikeFeatureEnabled = (
+  const isCrowdstrikeFeatureDisabled = (
     agentType: ResponseActionAgentType | undefined,
     experimentalFeatures: EndpointAppContext['experimentalFeatures']
   ): boolean => {
-    return (
-      agentType === 'crowdstrike' &&
-      experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled
-    );
+    return agentType === 'crowdstrike' && !experimentalFeatures.crowdstrikeRunScriptEnabled;
   };
 
   return createBaseActionRequestHandler<'crowdstrike'>(
     endpointContext,
     command,
-    isCrowdstrikeFeatureEnabled, // Custom validation
+    isCrowdstrikeFeatureDisabled, // Custom validation
     handleCrowdstrikeActionCreation // Custom action creation
   );
 }

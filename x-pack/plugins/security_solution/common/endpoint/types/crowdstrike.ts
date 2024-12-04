@@ -32,6 +32,8 @@ export type CrowdStrikeActionsRunScriptParameters = AtLeastOne<
   'Raw' | 'HostPath' | 'CloudFile' | 'CommandLine'
 >;
 
+export type CrowdStrikeActionDataParameterTypes = CrowdStrikeActionsRunScriptParameters;
+
 export type CrowdStrikeActionResponseDataOutput =
   | Record<string, never> // Empty object
   | CrowdStrikeActionRunScriptOutputContent;

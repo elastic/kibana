@@ -48,11 +48,11 @@ export function createBaseActionRequestHandler<
 >(
   endpointContext: EndpointAppContext,
   command: EDRActionsApiCommandNames<TAgentType>,
-  featureValidationFn: (
+  isFeatureDisabled: (
     agentType: ResponseActionAgentType | undefined,
     experimentalFeatures: EndpointAppContext['experimentalFeatures']
   ) => boolean,
-  actionCreationFn: (
+  createActionRequestHandler: (
     command: EDRActionsApiCommandNames<TAgentType>,
     body: ActionsRequestBody[TAgentType],
     responseActionsClient: ResponseActionsClient
@@ -71,7 +71,7 @@ export function createBaseActionRequestHandler<
     const experimentalFeatures = endpointContext.experimentalFeatures;
 
     // Validate feature availability
-    if (!featureValidationFn(req.body.agent_type, experimentalFeatures)) {
+    if (isFeatureDisabled(req.body.agent_type, experimentalFeatures)) {
       return errorHandler(
         logger,
         res,
@@ -96,7 +96,7 @@ export function createBaseActionRequestHandler<
     );
 
     try {
-      const action: SupportedActionsDetails = await actionCreationFn(
+      const action: SupportedActionsDetails = await createActionRequestHandler(
         command,
         req.body as ActionsRequestBody[TAgentType],
         responseActionsClient
