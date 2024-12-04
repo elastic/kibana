@@ -46,3 +46,11 @@ export enum SiemMigrationRuleTranslationResult {
 
 export const DEFAULT_TRANSLATION_RISK_SCORE = 21;
 export const DEFAULT_TRANSLATION_SEVERITY: Severity = 'low';
+
+export const DEFAULT_TRANSLATION_FIELDS = {
+  risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
+  severity: DEFAULT_TRANSLATION_SEVERITY,
+  from: 'now-360s',
+  to: 'now',
+  interval: '5m',
+} as const;
