@@ -66,13 +66,13 @@ export class RuleMigrationsTaskClient {
     const abortController = new AbortController();
 
     // Await the preparation to make sure the agent is created properly so the task can run
-    const agent = await this.prepare({ ...params, abortController });
-
-    // not awaiting the `run` promise to execute the task in the background
-    this.run({ ...params, agent, abortController }).catch((err) => {
-      // All errors in the `run` method are already catch, this should never happen, but just in case
-      this.logger.error(`Unexpected error running the migration ID:${migrationId}`, err);
-    });
+    this.prepare({ ...params, abortController })
+      .then((agent) => {
+        this.run({ ...params, agent, abortController });
+      })
+      .catch((error) => {
+        this.logger.error(`Error preparing migration ID:${migrationId}`, error);
+      });
 
     return { exists: true, started: true };
   }
@@ -86,12 +86,18 @@ export class RuleMigrationsTaskClient {
     soClient,
     abortController,
   }: RuleMigrationTaskPrepareParams): Promise<MigrationAgent> {
-    // Populates the indices used for RAG searches on prebuilt rules and integrations.
-    await this.data.prebuiltRules.create({ rulesClient, soClient });
-    // Will use Fleet API client for integration retrieval as an argument once feature is available
-    await this.data.integrations.create();
+    await Promise.all([
+      // Populates the indices used for RAG searches on prebuilt rules and integrations.
+      await this.data.prebuiltRules.create({ rulesClient, soClient }),
+      // Will use Fleet API client for integration retrieval as an argument once feature is available
+      await this.data.integrations.create(),
+    ]).catch((error) => {
+      this.logger.error(`Error preparing RAG indices for migration ID:${migrationId}`, error);
+      throw error;
+    });
 
     const ruleMigrationsRetriever = new RuleMigrationsRetriever(this.data, migrationId);
+
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
       signal: abortController.signal,

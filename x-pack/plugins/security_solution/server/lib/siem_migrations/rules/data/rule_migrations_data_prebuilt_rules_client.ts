@@ -10,14 +10,9 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
+import { getRuleGroups } from '../../../detection_engine/prebuilt_rules/model/rule_groups/get_rule_groups';
 import type { PrebuiltRuleQueryResponse } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
-
-/* The minimum score required for a integration to be considered correct, might need to change this later */
-const MIN_SCORE = 40 as const;
-/* The number of integrations the RAG will return, sorted by score */
-const RETURNED_RULES = 5 as const;
-const BULK_MAX_SIZE = 500 as const;
 
 interface RetrievePrebuiltRulesParams {
   soClient: SavedObjectsClientContract;
@@ -25,54 +20,59 @@ interface RetrievePrebuiltRulesParams {
 }
 
 interface FilteredRule {
-  rule_id: string;
+  ruleId: string;
   name: string;
   description: string;
   elser_embedding: string;
 }
 
+/* The minimum score required for a integration to be considered correct, might need to change this later */
+const MIN_SCORE = 40 as const;
+/* The number of integrations the RAG will return, sorted by score */
+const RETURNED_RULES = 5 as const;
+
+const NO_RULES_FOUND_MESSAGE = 'No prebuilt rules was found during SIEM Migration task';
+
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
+const BULK_MAX_SIZE = 500 as const;
+
 export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBaseClient {
   /** Indexes an array of integrations to be used with ELSER semantic search queries */
   async create({ soClient, rulesClient }: RetrievePrebuiltRulesParams): Promise<void> {
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-    const rules = await fetchRuleVersionsTriad({
+    const ruleVersionsMap = await fetchRuleVersionsTriad({
       ruleAssetsClient,
       ruleObjectsClient,
     });
 
+    const { totalAvailableRules } = getRuleGroups(ruleVersionsMap);
+    if (totalAvailableRules.length === 0) {
+      throw new Error(NO_RULES_FOUND_MESSAGE);
+    }
     const filteredRules: FilteredRule[] = [];
-    rules.forEach((ruleVersions) => {
-      const currentRule = ruleVersions.target || ruleVersions.current;
-      if (currentRule) {
-        const { rule_id, name, description } = currentRule;
-        filteredRules.push({
-          rule_id,
-          name,
-          description,
-          elser_embedding: `${name} - ${description}`,
-        });
-      }
+    totalAvailableRules.forEach((rule) => {
+      filteredRules.push({
+        ruleId: rule.rule_id,
+        name: rule.name,
+        description: rule.description,
+        elser_embedding: `${rule.name} - ${rule.description}`,
+      });
     });
 
     const index = await this.getIndexName();
     const createdAt = new Date().toISOString();
     let prebuiltRuleSlice: FilteredRule[];
-    let currentLength = 0;
-    const totalLength = filteredRules.length;
     while ((prebuiltRuleSlice = filteredRules.splice(0, BULK_MAX_SIZE)).length) {
-      currentLength += prebuiltRuleSlice.length;
-      this.logger.info(`Indexing ${currentLength}/${totalLength} prebuilt rules for ELSER`);
       await this.esClient
         .bulk(
           {
             refresh: 'wait_for',
             operations: prebuiltRuleSlice.flatMap((prebuiltRule) => [
-              { update: { _index: index, _id: prebuiltRule.rule_id } },
+              { update: { _index: index, _id: prebuiltRule.ruleId } },
               {
                 doc: {
                   ...prebuiltRule,
@@ -85,7 +85,7 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
           { requestTimeout: 10 * 60 * 1000 }
         )
         .catch((error) => {
-          this.logger.error(`Error indexing prebuilt rules for ELSER: ${error.message}`);
+          this.logger.error(`Error preparing prebuilt rules for SIEM migration: ${error.message}`);
           throw error;
         });
     }

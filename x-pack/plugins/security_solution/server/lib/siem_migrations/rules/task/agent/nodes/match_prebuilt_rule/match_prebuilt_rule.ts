@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import type { GraphNode } from '../../types';
@@ -15,7 +15,6 @@ import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
-  logger: Logger;
 }
 
 interface GetMatchedRuleResponse {
@@ -23,7 +22,7 @@ interface GetMatchedRuleResponse {
 }
 
 export const getMatchPrebuiltRuleNode =
-  ({ model, ruleMigrationsRetriever, logger }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
+  ({ model, ruleMigrationsRetriever }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
   async (state) => {
     const query = state.semantic_query;
     const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.getRules(query);
@@ -31,18 +30,29 @@ export const getMatchPrebuiltRuleNode =
     const outputParser = new JsonOutputParser();
     const matchPrebuiltRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
 
-    const elasticSecurityRules = prebuiltRules
-      .map((rule) => `${rule.name} ${rule.description}`)
-      .join('\n');
+    const elasticSecurityRules = prebuiltRules.map((rule) => {
+      return {
+        name: rule.name,
+        description: rule.description,
+      };
+    });
 
     const response = (await matchPrebuiltRule.invoke({
-      elasticSecurityRules,
+      rules: JSON.stringify(elasticSecurityRules, null, 2),
       ruleTitle: state.original_rule.title,
     })) as GetMatchedRuleResponse;
     if (response.match) {
-      logger.info(`Matched prebuilt rule: ${response.match}`);
-      const name = response.match;
-      return { elastic_rule: { title: name, prebuilt_rule_id: name } };
+      const rule = prebuiltRules.find((r) => r.name === response.match);
+      if (rule) {
+        return {
+          elastic_rule: {
+            title: rule.name,
+            description: rule.description,
+            prebuilt_rule_id: rule.rule_id,
+          },
+          translation_result: SiemMigrationRuleTranslationResult.FULL,
+        };
+      }
     }
     return {};
   };

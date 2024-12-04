@@ -26,24 +26,27 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
   async create(): Promise<void> {
     const index = await this.getIndexName();
     await this.esClient
-      .bulk({
-        refresh: 'wait_for',
-        operations: INTEGRATIONS.flatMap((integration) => [
-          { update: { _index: index, _id: integration.id } },
-          {
-            doc: {
-              title: integration.title,
-              description: integration.description,
-              data_streams: integration.data_streams,
-              elser_embedding: integration.elser_embedding,
-              '@timestamp': new Date().toISOString(),
+      .bulk(
+        {
+          refresh: 'wait_for',
+          operations: INTEGRATIONS.flatMap((integration) => [
+            { update: { _index: index, _id: integration.id } },
+            {
+              doc: {
+                title: integration.title,
+                description: integration.description,
+                data_streams: integration.data_streams,
+                elser_embedding: integration.elser_embedding,
+                '@timestamp': new Date().toISOString(),
+              },
+              doc_as_upsert: true,
             },
-            doc_as_upsert: true,
-          },
-        ]),
-      })
+          ]),
+        },
+        { requestTimeout: 10 * 60 * 1000 }
+      )
       .catch((error) => {
-        this.logger.error(`Error indexing integration details for ELSER: ${error.message}`);
+        this.logger.error(`Error preparing integrations for SIEM migration ${error.message}`);
         throw error;
       });
   }
