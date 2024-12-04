@@ -21,6 +21,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export type { SLOConfig } from '../common/config';
 
@@ -41,6 +42,7 @@ export interface SLOPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   dataViews: DataViewsServerPluginStart;
+  security: SecurityPluginStart;
 }
 
 export interface SLOPluginStartDependencies {

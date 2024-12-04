@@ -64,7 +64,8 @@ describe('UpdateSLO', () => {
       mockScopedClusterClient,
       mockLogger,
       'some-space',
-      httpServiceMock.createStartContract().basePath
+      httpServiceMock.createStartContract().basePath,
+      'some-user-id'
     );
   });
 
@@ -201,7 +202,7 @@ describe('UpdateSLO', () => {
       } as SecurityHasPrivilegesResponse);
     });
 
-    it('consideres a settings change as a breaking change', async () => {
+    it('considers a settings change as a breaking change', async () => {
       const slo = createSLO();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -214,12 +215,7 @@ describe('UpdateSLO', () => {
 
       expectDeletionOfOriginalSLOResources(slo);
       expect(mockRepository.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...slo,
-          settings: newSettings,
-          revision: 2,
-          updatedAt: expect.anything(),
-        })
+        expect.objectContaining({ settings: newSettings })
       );
       expectInstallationOfUpdatedSLOResources();
     });

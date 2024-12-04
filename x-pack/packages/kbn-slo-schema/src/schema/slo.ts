@@ -77,23 +77,29 @@ function isValidId(id: string): boolean {
   return validLength && /^[a-z0-9-_]+$/.test(id);
 }
 
-const sloDefinitionSchema = t.type({
-  id: sloIdSchema,
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  timeWindow: timeWindowSchema,
-  budgetingMethod: budgetingMethodSchema,
-  objective: objectiveSchema,
-  settings: settingsSchema,
-  revision: t.number,
-  enabled: t.boolean,
-  tags: tagsSchema,
-  createdAt: dateType,
-  updatedAt: dateType,
-  groupBy: groupBySchema,
-  version: t.number,
-});
+const sloDefinitionSchema = t.intersection([
+  t.type({
+    id: sloIdSchema,
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    timeWindow: timeWindowSchema,
+    budgetingMethod: budgetingMethodSchema,
+    objective: objectiveSchema,
+    settings: settingsSchema,
+    revision: t.number,
+    enabled: t.boolean,
+    tags: tagsSchema,
+    createdAt: dateType,
+    updatedAt: dateType,
+    groupBy: groupBySchema,
+    version: t.number,
+  }),
+  t.partial({
+    addedBy: t.string,
+    updatedBy: t.string,
+  }),
+]);
 
 export {
   budgetingMethodSchema,

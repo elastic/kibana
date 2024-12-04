@@ -7,7 +7,7 @@ Array [
       "description": "Ingest pipeline for SLO rollup data",
       "managed": true,
       "managed_by": "observability",
-      "version": 3.3,
+      "version": 3.4,
     },
     "description": "Ingest pipeline for SLO rollup data [id: unique-id, revision: 1]",
     "id": ".slo-observability.sli.pipeline-unique-id-1",
@@ -45,7 +45,7 @@ Array [
           ],
           "date_rounding": "M",
           "field": "@timestamp",
-          "index_name_prefix": ".slo-observability.sli-v3.3.",
+          "index_name_prefix": ".slo-observability.sli-v3.4.",
         },
       },
       Object {
@@ -118,6 +118,7 @@ Array [
       },
       "sliValue": -1,
       "slo": Object {
+        "addedBy": "some-user-id",
         "budgetingMethod": "occurrences",
         "createdAt": "2024-01-01T00:00:00.000Z",
         "description": "irrelevant",
@@ -148,6 +149,7 @@ Array [
           "type": "rolling",
         },
         "updatedAt": "2024-01-01T00:00:00.000Z",
+        "updatedBy": "some-user-id",
       },
       "spaceId": "some-space",
       "status": "NO_DATA",
@@ -160,7 +162,7 @@ Array [
       },
     },
     "id": "slo-unique-id",
-    "index": ".slo-observability.summary-v3.3.temp",
+    "index": ".slo-observability.summary-v3.4.temp",
     "refresh": true,
   },
 ]

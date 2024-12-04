@@ -58,6 +58,8 @@ describe('FindSLO', () => {
             id: slo.id,
             name: 'irrelevant',
             description: 'irrelevant',
+            addedBy: 'irrelevant',
+            updatedBy: 'irrelevant',
             budgetingMethod: 'occurrences',
             indicator: {
               params: {
