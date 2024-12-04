@@ -23,14 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-es",
-  "implicitDependencies": [
-    "@kbn/tooling-log",
-    "@kbn/dev-utils",
-    "@kbn/dev-proc-runner",
-    "@kbn/ci-stats-reporter",
-    "@kbn/mock-idp-utils",
-    "@kbn/jest-serializers",
-    "@kbn/repo-info"
-  ]
+  "sourceRoot": "packages/kbn-es"
 }

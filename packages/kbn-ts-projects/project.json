@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-ts-projects",
-  "implicitDependencies": [
-    "@kbn/repo-info",
-    "@kbn/repo-packages",
-    "@kbn/picomatcher",
-    "@kbn/dev-cli-errors"
-  ]
+  "sourceRoot": "packages/kbn-ts-projects"
 }

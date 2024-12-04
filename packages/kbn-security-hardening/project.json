@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-security-hardening",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-security-hardening"
 }

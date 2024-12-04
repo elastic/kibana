@@ -22,14 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security-solution/features",
-  "implicitDependencies": [
-    "@kbn/features-plugin",
-    "@kbn/utility-types",
-    "@kbn/i18n",
-    "@kbn/core-application-common",
-    "@kbn/cases-plugin",
-    "@kbn/securitysolution-rules",
-    "@kbn/securitysolution-list-constants"
-  ]
+  "sourceRoot": "x-pack/packages/security-solution/features"
 }

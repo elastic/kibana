@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/doc-links/core-doc-links-server-internal",
-  "implicitDependencies": [
-    "@kbn/doc-links",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-base-server-mocks",
-    "@kbn/core-doc-links-server"
-  ]
+  "sourceRoot": "packages/core/doc-links/core-doc-links-server-internal"
 }

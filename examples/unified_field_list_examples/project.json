@@ -25,23 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/unified_field_list_examples",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/navigation-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/unified-search-plugin",
-    "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/dom-drag-drop",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/charts-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/data-view-field-editor-plugin",
-    "@kbn/unified-field-list",
-    "@kbn/ui-actions-plugin",
-    "@kbn/react-kibana-context-theme"
-  ]
+  "sourceRoot": "examples/unified_field_list_examples"
 }

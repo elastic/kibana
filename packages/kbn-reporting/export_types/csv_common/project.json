@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-reporting/export_types/csv_common",
-  "implicitDependencies": [
-    "@kbn/data-plugin",
-    "@kbn/reporting-common",
-    "@kbn/data-views-plugin"
-  ]
+  "sourceRoot": "packages/kbn-reporting/export_types/csv_common"
 }

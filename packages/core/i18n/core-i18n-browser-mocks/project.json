@@ -22,11 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/i18n/core-i18n-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-i18n-browser-internal",
-    "@kbn/i18n-react"
-  ]
+  "sourceRoot": "packages/core/i18n/core-i18n-browser-mocks"
 }

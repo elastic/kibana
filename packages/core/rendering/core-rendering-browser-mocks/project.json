@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/rendering/core-rendering-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-rendering-browser-internal"
-  ]
+  "sourceRoot": "packages/core/rendering/core-rendering-browser-mocks"
 }

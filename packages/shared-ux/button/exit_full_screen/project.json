@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/button/exit_full_screen",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/shared-ux-storybook-mock",
-    "@kbn/core-custom-branding-common"
-  ]
+  "sourceRoot": "packages/shared-ux/button/exit_full_screen"
 }

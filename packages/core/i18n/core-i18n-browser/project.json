@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/i18n/core-i18n-browser",
-  "implicitDependencies": []
+  "sourceRoot": "packages/core/i18n/core-i18n-browser"
 }

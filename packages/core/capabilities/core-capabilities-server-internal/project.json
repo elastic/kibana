@@ -21,18 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/capabilities/core-capabilities-server-internal",
-  "implicitDependencies": [
-    "@kbn/apm-utils",
-    "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-http-server",
-    "@kbn/core-http-server-internal",
-    "@kbn/core-capabilities-common",
-    "@kbn/core-capabilities-server",
-    "@kbn/core-base-server-mocks",
-    "@kbn/core-http-router-server-mocks",
-    "@kbn/core-http-server-mocks"
-  ]
+  "sourceRoot": "packages/core/capabilities/core-capabilities-server-internal"
 }

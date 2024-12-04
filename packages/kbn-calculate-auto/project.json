@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-calculate-auto",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-calculate-auto"
 }

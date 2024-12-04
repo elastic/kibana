@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/file/mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types-jest",
-    "@kbn/shared-ux-file-types"
-  ]
+  "sourceRoot": "packages/shared-ux/file/mocks"
 }

@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/base/core-base-server-internal",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/utility-types",
-    "@kbn/core-base-common-internal"
-  ]
+  "sourceRoot": "packages/core/base/core-base-server-internal"
 }

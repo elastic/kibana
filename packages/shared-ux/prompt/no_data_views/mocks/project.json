@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/prompt/no_data_views/mocks",
-  "implicitDependencies": [
-    "@kbn/shared-ux-prompt-no-data-views-types",
-    "@kbn/shared-ux-storybook-mock"
-  ]
+  "sourceRoot": "packages/shared-ux/prompt/no_data_views/mocks"
 }

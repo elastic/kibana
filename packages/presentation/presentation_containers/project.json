@@ -22,11 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/presentation/presentation_containers",
-  "implicitDependencies": [
-    "@kbn/presentation-publishing",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/content-management-utils",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/presentation/presentation_containers"
 }

@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/deeplinks/security",
-  "implicitDependencies": []
+  "sourceRoot": "packages/deeplinks/security"
 }

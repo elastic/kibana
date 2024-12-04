@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-shared-svg",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-shared-svg"
 }

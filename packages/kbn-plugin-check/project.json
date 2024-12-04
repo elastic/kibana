@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-plugin-check",
-  "implicitDependencies": [
-    "@kbn/tooling-log",
-    "@kbn/docs-utils",
-    "@kbn/dev-cli-runner"
-  ]
+  "sourceRoot": "packages/kbn-plugin-check"
 }

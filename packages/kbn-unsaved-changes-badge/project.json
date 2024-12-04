@@ -23,9 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-unsaved-changes-badge",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/navigation-plugin"
-  ]
+  "sourceRoot": "packages/kbn-unsaved-changes-badge"
 }

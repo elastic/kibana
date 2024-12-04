@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/status/core-status-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-status-server",
-    "@kbn/core-status-server-internal",
-    "@kbn/core-status-common"
-  ]
+  "sourceRoot": "packages/core/status/core-status-server-mocks"
 }

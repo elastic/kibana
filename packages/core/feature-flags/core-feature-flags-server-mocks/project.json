@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/feature-flags/core-feature-flags-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-feature-flags-server",
-    "@kbn/core-feature-flags-server-internal"
-  ]
+  "sourceRoot": "packages/core/feature-flags/core-feature-flags-server-mocks"
 }

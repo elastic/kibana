@@ -23,6 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/translations",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/plugins/translations"
 }

@@ -26,20 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/security_solution_ess",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/security-solution-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/security-solution-features",
-    "@kbn/cases-plugin",
-    "@kbn/security-solution-navigation",
-    "@kbn/licensing-plugin",
-    "@kbn/security-solution-upselling",
-    "@kbn/i18n",
-    "@kbn/navigation-plugin",
-    "@kbn/management-plugin",
-    "@kbn/core-chrome-browser"
-  ]
+  "sourceRoot": "x-pack/plugins/security_solution_ess"
 }

@@ -25,24 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/navigation",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/unified-search-plugin",
-    "@kbn/es-query",
-    "@kbn/i18n-react",
-    "@kbn/test-jest-helpers",
-    "@kbn/react-kibana-mount",
-    "@kbn/core-chrome-browser",
-    "@kbn/core-chrome-browser-internal",
-    "@kbn/shared-ux-chrome-navigation",
-    "@kbn/cloud-plugin",
-    "@kbn/config",
-    "@kbn/spaces-plugin",
-    "@kbn/core-ui-settings-common",
-    "@kbn/config-schema",
-    "@kbn/i18n",
-    "@kbn/std",
-    "@kbn/ui-theme"
-  ]
+  "sourceRoot": "src/plugins/navigation"
 }

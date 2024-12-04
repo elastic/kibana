@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-cypress-config",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-cypress-config"
 }

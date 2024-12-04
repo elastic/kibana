@@ -22,11 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/content-management/user_profiles",
-  "implicitDependencies": [
-    "@kbn/user-profile-components",
-    "@kbn/core-user-profile-browser",
-    "@kbn/i18n",
-    "@kbn/i18n-react"
-  ]
+  "sourceRoot": "packages/content-management/user_profiles"
 }

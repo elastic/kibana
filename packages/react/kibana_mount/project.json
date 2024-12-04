@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/react/kibana_mount",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/core-i18n-browser-mocks",
-    "@kbn/react-kibana-context-render",
-    "@kbn/core-analytics-browser-mocks"
-  ]
+  "sourceRoot": "packages/react/kibana_mount"
 }

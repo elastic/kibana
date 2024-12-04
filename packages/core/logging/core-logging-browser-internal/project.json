@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/logging/core-logging-browser-internal",
-  "implicitDependencies": [
-    "@kbn/logging",
-    "@kbn/core-logging-common-internal",
-    "@kbn/security-hardening"
-  ]
+  "sourceRoot": "packages/core/logging/core-logging-browser-internal"
 }

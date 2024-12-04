@@ -22,12 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/security_api_integration/plugins/user_profiles_consumer",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/features-plugin",
-    "@kbn/security-plugin",
-    "@kbn/spaces-plugin",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "x-pack/test/security_api_integration/plugins/user_profiles_consumer"
 }

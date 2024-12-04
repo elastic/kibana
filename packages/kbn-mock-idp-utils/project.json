@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-mock-idp-utils",
-  "implicitDependencies": [
-    "@kbn/dev-utils"
-  ]
+  "sourceRoot": "packages/kbn-mock-idp-utils"
 }

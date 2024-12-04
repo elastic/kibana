@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/react/kibana_context/styled",
-  "implicitDependencies": [
-    "@kbn/ui-theme"
-  ]
+  "sourceRoot": "packages/react/kibana_context/styled"
 }

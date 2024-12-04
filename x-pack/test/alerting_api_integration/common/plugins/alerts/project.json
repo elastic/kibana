@@ -23,22 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/alerts",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/actions-plugin",
-    "@kbn/alerting-plugin",
-    "@kbn/task-manager-plugin",
-    "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/features-plugin",
-    "@kbn/spaces-plugin",
-    "@kbn/security-plugin",
-    "@kbn/rule-registry-plugin",
-    "@kbn/event-log-plugin",
-    "@kbn/notifications-plugin",
-    "@kbn/core-saved-objects-server",
-    "@kbn/logging",
-    "@kbn/alerting-api-integration-helpers"
-  ]
+  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/alerts"
 }

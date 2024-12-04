@@ -23,8 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/node_roles_functional/plugins/core_plugin_initializer_context",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "test/node_roles_functional/plugins/core_plugin_initializer_context"
 }

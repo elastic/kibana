@@ -23,11 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-search-api-keys-server",
-  "implicitDependencies": [
-    "@kbn/core-elasticsearch-server",
-    "@kbn/logging",
-    "@kbn/core",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "packages/kbn-search-api-keys-server"
 }

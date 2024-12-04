@@ -29,17 +29,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/ai_infra/product_doc_base",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/logging",
-    "@kbn/config-schema",
-    "@kbn/product-doc-common",
-    "@kbn/core-saved-objects-server",
-    "@kbn/utils",
-    "@kbn/core-http-browser",
-    "@kbn/logging-mocks",
-    "@kbn/licensing-plugin",
-    "@kbn/task-manager-plugin"
-  ]
+  "sourceRoot": "x-pack/plugins/ai_infra/product_doc_base"
 }

@@ -21,20 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-lint-ts-projects-cli",
-  "implicitDependencies": [
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
-    "@kbn/repo-path",
-    "@kbn/get-repo-files",
-    "@kbn/ts-projects",
-    "@kbn/repo-packages",
-    "@kbn/repo-info",
-    "@kbn/repo-linter",
-    "@kbn/json-ast",
-    "@kbn/std",
-    "@kbn/import-locator",
-    "@kbn/repo-file-maps",
-    "@kbn/some-dev-log"
-  ]
+  "sourceRoot": "packages/kbn-lint-ts-projects-cli"
 }

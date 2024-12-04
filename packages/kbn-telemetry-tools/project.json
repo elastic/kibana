@@ -21,15 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-telemetry-tools",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
-    "@kbn/repo-info",
-    "@kbn/import-resolver",
-    "@kbn/usage-collection-plugin",
-    "@kbn/config-schema",
-    "@kbn/safer-lodash-set"
-  ]
+  "sourceRoot": "packages/kbn-telemetry-tools"
 }

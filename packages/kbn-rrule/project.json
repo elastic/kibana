@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-rrule",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-rrule"
 }

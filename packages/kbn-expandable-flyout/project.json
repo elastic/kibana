@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-expandable-flyout",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/i18n-react"
-  ]
+  "sourceRoot": "packages/kbn-expandable-flyout"
 }

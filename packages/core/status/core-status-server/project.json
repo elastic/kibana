@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/status/core-status-server",
-  "implicitDependencies": [
-    "@kbn/core-status-common"
-  ]
+  "sourceRoot": "packages/core/status/core-status-server"
 }

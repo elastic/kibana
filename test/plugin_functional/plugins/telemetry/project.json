@@ -23,9 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/telemetry",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/telemetry-plugin"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/telemetry"
 }

@@ -22,9 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/cloud_integration/plugins/saml_provider",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/dev-utils"
-  ]
+  "sourceRoot": "x-pack/test/cloud_integration/plugins/saml_provider"
 }

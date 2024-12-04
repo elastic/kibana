@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-panel-loader",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-panel-loader"
 }

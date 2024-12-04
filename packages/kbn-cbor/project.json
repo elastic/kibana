@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-cbor",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-cbor"
 }

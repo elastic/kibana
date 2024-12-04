@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/security/core-security-browser-internal",
-  "implicitDependencies": [
-    "@kbn/core-security-browser",
-    "@kbn/logging",
-    "@kbn/core-base-browser-internal",
-    "@kbn/logging-mocks",
-    "@kbn/core-base-browser-mocks"
-  ]
+  "sourceRoot": "packages/core/security/core-security-browser-internal"
 }

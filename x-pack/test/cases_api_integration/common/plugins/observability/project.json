@@ -23,12 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/cases_api_integration/common/plugins/observability",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/files-plugin",
-    "@kbn/features-plugin",
-    "@kbn/spaces-plugin",
-    "@kbn/security-plugin"
-  ]
+  "sourceRoot": "x-pack/test/cases_api_integration/common/plugins/observability"
 }

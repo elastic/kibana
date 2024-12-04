@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-dev-proc-runner",
-  "implicitDependencies": [
-    "@kbn/dev-cli-errors",
-    "@kbn/tooling-log",
-    "@kbn/stdio-dev-helpers"
-  ]
+  "sourceRoot": "packages/kbn-dev-proc-runner"
 }

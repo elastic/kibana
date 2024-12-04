@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/page/kibana_template/impl",
-  "implicitDependencies": [
-    "@kbn/shared-ux-page-no-data-config",
-    "@kbn/shared-ux-page-kibana-template-mocks",
-    "@kbn/shared-ux-page-solution-nav",
-    "@kbn/shared-ux-page-no-data-types",
-    "@kbn/shared-ux-page-kibana-template-types"
-  ]
+  "sourceRoot": "packages/shared-ux/page/kibana_template/impl"
 }

@@ -26,33 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/watcher",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/home-plugin",
-    "@kbn/management-plugin",
-    "@kbn/charts-plugin",
-    "@kbn/data-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/es-ui-shared-plugin",
-    "@kbn/license-api-guard-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/features-plugin",
-    "@kbn/core-doc-links-browser-mocks",
-    "@kbn/core-execution-context-browser-mocks",
-    "@kbn/test-jest-helpers",
-    "@kbn/i18n",
-    "@kbn/safer-lodash-set",
-    "@kbn/config-schema",
-    "@kbn/datemath",
-    "@kbn/field-formats-plugin",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-router",
-    "@kbn/license-management-plugin",
-    "@kbn/share-plugin",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/code-editor",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "x-pack/plugins/watcher"
 }

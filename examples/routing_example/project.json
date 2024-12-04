@@ -26,12 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/routing_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/developer-examples-plugin",
-    "@kbn/core-http-browser",
-    "@kbn/config-schema",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "examples/routing_example"
 }

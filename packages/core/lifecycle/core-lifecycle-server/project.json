@@ -21,30 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/lifecycle/core-lifecycle-server",
-  "implicitDependencies": [
-    "@kbn/core-analytics-server",
-    "@kbn/core-capabilities-server",
-    "@kbn/core-deprecations-server",
-    "@kbn/core-doc-links-server",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/core-execution-context-server",
-    "@kbn/core-http-server",
-    "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-http-resources-server",
-    "@kbn/core-i18n-server",
-    "@kbn/core-logging-server",
-    "@kbn/core-metrics-server",
-    "@kbn/core-preboot-server",
-    "@kbn/core-saved-objects-server",
-    "@kbn/core-status-server",
-    "@kbn/core-ui-settings-server",
-    "@kbn/core-usage-data-server",
-    "@kbn/core-custom-branding-server",
-    "@kbn/core-user-settings-server",
-    "@kbn/core-plugins-contracts-server",
-    "@kbn/core-security-server",
-    "@kbn/core-user-profile-server",
-    "@kbn/core-feature-flags-server"
-  ]
+  "sourceRoot": "packages/core/lifecycle/core-lifecycle-server"
 }

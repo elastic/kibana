@@ -26,20 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/examples/alerting_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/charts-plugin",
-    "@kbn/data-plugin",
-    "@kbn/alerting-plugin",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/features-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/i18n",
-    "@kbn/core-application-common",
-    "@kbn/shared-ux-router",
-    "@kbn/config-schema",
-    "@kbn/alerts-as-data-utils"
-  ]
+  "sourceRoot": "x-pack/examples/alerting_example"
 }

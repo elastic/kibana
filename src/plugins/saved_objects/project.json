@@ -23,15 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/saved_objects",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/i18n",
-    "@kbn/data-views-plugin",
-    "@kbn/i18n-react",
-    "@kbn/ui-theme",
-    "@kbn/react-kibana-mount",
-    "@kbn/test-jest-helpers"
-  ]
+  "sourceRoot": "src/plugins/saved_objects"
 }

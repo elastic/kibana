@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-actions-types",
-  "implicitDependencies": [
-    "@kbn/licensing-plugin"
-  ]
+  "sourceRoot": "packages/kbn-actions-types"
 }

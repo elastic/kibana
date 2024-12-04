@@ -26,11 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/search_connectors",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/core-http-browser",
-    "@kbn/search-connectors"
-  ]
+  "sourceRoot": "x-pack/plugins/search_connectors"
 }

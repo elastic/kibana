@@ -24,10 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/partial_results_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/developer-examples-plugin",
-    "@kbn/expressions-plugin"
-  ]
+  "sourceRoot": "examples/partial_results_example"
 }

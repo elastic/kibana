@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-management/settings/section_registry",
-  "implicitDependencies": [
-    "@kbn/core-notifications-browser",
-    "@kbn/core-ui-settings-common"
-  ]
+  "sourceRoot": "packages/kbn-management/settings/section_registry"
 }

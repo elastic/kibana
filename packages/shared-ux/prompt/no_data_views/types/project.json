@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/prompt/no_data_views/types",
-  "implicitDependencies": [
-    "@kbn/share-plugin"
-  ]
+  "sourceRoot": "packages/shared-ux/prompt/no_data_views/types"
 }

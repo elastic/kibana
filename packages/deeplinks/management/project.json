@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/deeplinks/management",
-  "implicitDependencies": []
+  "sourceRoot": "packages/deeplinks/management"
 }

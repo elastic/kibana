@@ -25,10 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/core_plugin_deprecations",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/config"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/core_plugin_deprecations"
 }

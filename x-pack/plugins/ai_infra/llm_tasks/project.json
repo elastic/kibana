@@ -29,15 +29,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/ai_infra/llm_tasks",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/logging",
-    "@kbn/config-schema",
-    "@kbn/product-doc-common",
-    "@kbn/inference-plugin",
-    "@kbn/product-doc-base-plugin",
-    "@kbn/logging-mocks",
-    "@kbn/inference-common"
-  ]
+  "sourceRoot": "x-pack/plugins/ai_infra/llm_tasks"
 }

@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/test/alerting_api_integration/packages/helpers",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/test/alerting_api_integration/packages/helpers"
 }

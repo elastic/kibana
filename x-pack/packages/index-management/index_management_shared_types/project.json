@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/index-management/index_management_shared_types",
-  "implicitDependencies": [
-    "@kbn/core-application-browser",
-    "@kbn/utility-types",
-    "@kbn/share-plugin"
-  ]
+  "sourceRoot": "x-pack/packages/index-management/index_management_shared_types"
 }

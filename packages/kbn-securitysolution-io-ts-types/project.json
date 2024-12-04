@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-io-ts-types",
-  "implicitDependencies": [
-    "@kbn/securitysolution-io-ts-utils"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-io-ts-types"
 }

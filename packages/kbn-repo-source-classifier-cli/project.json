@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-repo-source-classifier-cli",
-  "implicitDependencies": [
-    "@kbn/dev-cli-runner",
-    "@kbn/import-resolver",
-    "@kbn/repo-source-classifier",
-    "@kbn/get-repo-files",
-    "@kbn/repo-info"
-  ]
+  "sourceRoot": "packages/kbn-repo-source-classifier-cli"
 }

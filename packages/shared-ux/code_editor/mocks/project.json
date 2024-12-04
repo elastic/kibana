@@ -23,8 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/code_editor/mocks",
-  "implicitDependencies": [
-    "@kbn/monaco"
-  ]
+  "sourceRoot": "packages/shared-ux/code_editor/mocks"
 }

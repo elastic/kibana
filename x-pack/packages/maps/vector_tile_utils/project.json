@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/maps/vector_tile_utils",
-  "implicitDependencies": [
-    "@kbn/rison"
-  ]
+  "sourceRoot": "x-pack/packages/maps/vector_tile_utils"
 }

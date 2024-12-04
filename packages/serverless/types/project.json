@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/serverless/types",
-  "implicitDependencies": []
+  "sourceRoot": "packages/serverless/types"
 }

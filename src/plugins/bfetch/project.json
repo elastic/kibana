@@ -24,16 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/bfetch",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/i18n",
-    "@kbn/config-schema",
-    "@kbn/std",
-    "@kbn/core-http-common",
-    "@kbn/bfetch-error",
-    "@kbn/ebt-tools",
-    "@kbn/item-buffer"
-  ]
+  "sourceRoot": "src/plugins/bfetch"
 }

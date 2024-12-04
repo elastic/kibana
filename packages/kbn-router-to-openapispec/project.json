@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-router-to-openapispec",
-  "implicitDependencies": [
-    "@kbn/core-http-router-server-internal",
-    "@kbn/core-http-server",
-    "@kbn/config-schema",
-    "@kbn/zod"
-  ]
+  "sourceRoot": "packages/kbn-router-to-openapispec"
 }

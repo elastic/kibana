@@ -26,12 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/field_formats",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/field-types",
-    "@kbn/utility-types",
-    "@kbn/i18n",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "src/plugins/field_formats"
 }

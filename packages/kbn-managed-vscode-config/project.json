@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-managed-vscode-config",
-  "implicitDependencies": [
-    "@kbn/kibana-manifest-schema"
-  ]
+  "sourceRoot": "packages/kbn-managed-vscode-config"
 }

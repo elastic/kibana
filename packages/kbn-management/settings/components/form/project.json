@@ -22,24 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-management/settings/components/form",
-  "implicitDependencies": [
-    "@kbn/management-settings-types",
-    "@kbn/management-settings-field-definition",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/management-settings-components-field-row",
-    "@kbn/react-kibana-context-root",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/core-i18n-browser",
-    "@kbn/react-kibana-mount",
-    "@kbn/core-notifications-browser",
-    "@kbn/core-theme-browser",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/management-settings-components-field-input",
-    "@kbn/management-settings-components-field-category",
-    "@kbn/management-settings-utilities",
-    "@kbn/core-analytics-browser-mocks",
-    "@kbn/core-ui-settings-common"
-  ]
+  "sourceRoot": "packages/kbn-management/settings/components/form"
 }

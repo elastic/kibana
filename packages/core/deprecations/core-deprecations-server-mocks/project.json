@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/deprecations/core-deprecations-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-deprecations-server",
-    "@kbn/core-deprecations-server-internal"
-  ]
+  "sourceRoot": "packages/core/deprecations/core-deprecations-server-mocks"
 }

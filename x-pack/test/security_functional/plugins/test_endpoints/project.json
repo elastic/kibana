@@ -22,12 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/security_functional/plugins/test_endpoints",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/security-plugin",
-    "@kbn/task-manager-plugin",
-    "@kbn/config-schema",
-    "@kbn/security-plugin-types-server"
-  ]
+  "sourceRoot": "x-pack/test/security_functional/plugins/test_endpoints"
 }

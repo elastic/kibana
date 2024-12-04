@@ -23,18 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/charts",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/expressions-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/coloring",
-    "@kbn/i18n",
-    "@kbn/utility-types",
-    "@kbn/i18n-react",
-    "@kbn/ui-theme",
-    "@kbn/shared-ux-utility",
-    "@kbn/config-schema",
-    "@kbn/data-plugin"
-  ]
+  "sourceRoot": "src/plugins/charts"
 }

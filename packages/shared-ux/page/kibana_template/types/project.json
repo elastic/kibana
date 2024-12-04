@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/page/kibana_template/types",
-  "implicitDependencies": [
-    "@kbn/shared-ux-page-solution-nav",
-    "@kbn/shared-ux-page-no-data-config-types"
-  ]
+  "sourceRoot": "packages/shared-ux/page/kibana_template/types"
 }

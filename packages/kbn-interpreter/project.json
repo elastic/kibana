@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-interpreter",
-  "implicitDependencies": [
-    "@kbn/safer-lodash-set"
-  ]
+  "sourceRoot": "packages/kbn-interpreter"
 }

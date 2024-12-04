@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/page/no_data_config/impl",
-  "implicitDependencies": [
-    "@kbn/shared-ux-page-solution-nav",
-    "@kbn/shared-ux-page-no-data",
-    "@kbn/shared-ux-page-no-data-config-types",
-    "@kbn/shared-ux-page-no-data-config-mocks",
-    "@kbn/test-jest-helpers"
-  ]
+  "sourceRoot": "packages/shared-ux/page/no_data_config/impl"
 }

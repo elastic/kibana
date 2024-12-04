@@ -22,23 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-elastic-assistant",
-  "implicitDependencies": [
-    "@kbn/elastic-assistant-common",
-    "@kbn/core-http-browser",
-    "@kbn/i18n",
-    "@kbn/stack-connectors-plugin",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/cases-plugin",
-    "@kbn/actions-plugin",
-    "@kbn/core-notifications-browser",
-    "@kbn/i18n-react",
-    "@kbn/ui-theme",
-    "@kbn/core-doc-links-browser",
-    "@kbn/core",
-    "@kbn/zod",
-    "@kbn/data-views-plugin",
-    "@kbn/user-profile-components"
-  ]
+  "sourceRoot": "x-pack/packages/kbn-elastic-assistant"
 }

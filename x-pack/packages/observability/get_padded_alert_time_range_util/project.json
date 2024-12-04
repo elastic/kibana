@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/observability/get_padded_alert_time_range_util",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/packages/observability/get_padded_alert_time_range_util"
 }

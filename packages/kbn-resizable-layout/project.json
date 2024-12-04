@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-resizable-layout",
-  "implicitDependencies": [
-    "@kbn/shared-ux-utility"
-  ]
+  "sourceRoot": "packages/kbn-resizable-layout"
 }

@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-grid-layout",
-  "implicitDependencies": [
-    "@kbn/ui-theme",
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "packages/kbn-grid-layout"
 }

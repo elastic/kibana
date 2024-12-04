@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-get-repo-files",
-  "implicitDependencies": [
-    "@kbn/repo-info",
-    "@kbn/repo-path",
-    "@kbn/repo-packages"
-  ]
+  "sourceRoot": "packages/kbn-get-repo-files"
 }

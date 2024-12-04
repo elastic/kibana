@@ -22,18 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/advanced_settings",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/management-plugin",
-    "@kbn/home-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/i18n",
-    "@kbn/config-schema",
-    "@kbn/core-plugins-server",
-    "@kbn/management-settings-section-registry",
-    "@kbn/react-kibana-context-render",
-    "@kbn/shared-ux-utility",
-    "@kbn/management-settings-application"
-  ]
+  "sourceRoot": "src/plugins/advanced_settings"
 }

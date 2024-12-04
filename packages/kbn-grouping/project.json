@@ -22,15 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-grouping",
-  "implicitDependencies": [
-    "@kbn/data-views-plugin",
-    "@kbn/es-query",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/kibana-react-plugin",
-    "@kbn/shared-svg",
-    "@kbn/ui-theme",
-    "@kbn/analytics"
-  ]
+  "sourceRoot": "packages/kbn-grouping"
 }

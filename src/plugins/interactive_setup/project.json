@@ -23,23 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/interactive_setup",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/ui-theme",
-    "@kbn/core-http-browser",
-    "@kbn/core-status-common",
-    "@kbn/safer-lodash-set",
-    "@kbn/test-jest-helpers",
-    "@kbn/config-schema",
-    "@kbn/utility-types",
-    "@kbn/std",
-    "@kbn/utils",
-    "@kbn/core-logging-server-mocks",
-    "@kbn/core-preboot-server",
-    "@kbn/security-hardening",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "src/plugins/interactive_setup"
 }

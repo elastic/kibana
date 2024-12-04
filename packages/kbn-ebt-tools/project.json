@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-ebt-tools",
-  "implicitDependencies": [
-    "@kbn/logging-mocks"
-  ]
+  "sourceRoot": "packages/kbn-ebt-tools"
 }

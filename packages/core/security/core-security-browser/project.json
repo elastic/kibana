@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/security/core-security-browser",
-  "implicitDependencies": [
-    "@kbn/core-security-common"
-  ]
+  "sourceRoot": "packages/core/security/core-security-browser"
 }

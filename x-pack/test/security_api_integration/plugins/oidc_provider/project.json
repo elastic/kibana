@@ -22,10 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/security_api_integration/plugins/oidc_provider",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/security-api-integration-helpers"
-  ]
+  "sourceRoot": "x-pack/test/security_api_integration/plugins/oidc_provider"
 }

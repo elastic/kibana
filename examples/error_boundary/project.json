@@ -25,11 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/error_boundary",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/developer-examples-plugin",
-    "@kbn/shared-ux-error-boundary",
-    "@kbn/shared-ux-page-kibana-template"
-  ]
+  "sourceRoot": "examples/error_boundary"
 }

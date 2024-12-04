@@ -25,9 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/developer_examples",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "examples/developer_examples"
 }

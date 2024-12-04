@@ -22,17 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-reporting/export_types/csv",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/reporting-common",
-    "@kbn/discover-plugin",
-    "@kbn/data-plugin",
-    "@kbn/generate-csv",
-    "@kbn/reporting-server",
-    "@kbn/reporting-export-types-csv-common",
-    "@kbn/reporting-mocks-server",
-    "@kbn/core-http-request-handler-context-server",
-    "@kbn/field-formats-plugin"
-  ]
+  "sourceRoot": "packages/kbn-reporting/export_types/csv"
 }

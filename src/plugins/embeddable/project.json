@@ -25,32 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/embeddable",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/inspector-plugin",
-    "@kbn/saved-objects-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/ui-actions-plugin",
-    "@kbn/i18n-react",
-    "@kbn/storybook",
-    "@kbn/utility-types",
-    "@kbn/es-query",
-    "@kbn/core-theme-browser",
-    "@kbn/i18n",
-    "@kbn/std",
-    "@kbn/expressions-plugin",
-    "@kbn/saved-objects-management-plugin",
-    "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/saved-objects-finder-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/content-management-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/presentation-panel-plugin",
-    "@kbn/presentation-publishing",
-    "@kbn/presentation-containers",
-    "@kbn/react-kibana-mount",
-    "@kbn/analytics"
-  ]
+  "sourceRoot": "src/plugins/embeddable"
 }

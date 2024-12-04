@@ -23,18 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/file_upload",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/security-plugin",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/kibana-react-plugin",
-    "@kbn/ml-is-populated-object",
-    "@kbn/config-schema",
-    "@kbn/code-editor",
-    "@kbn/datemath"
-  ]
+  "sourceRoot": "x-pack/plugins/file_upload"
 }

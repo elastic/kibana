@@ -21,13 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/feature-flags/core-feature-flags-server-internal",
-  "implicitDependencies": [
-    "@kbn/core-base-server-internal",
-    "@kbn/core-feature-flags-server",
-    "@kbn/logging",
-    "@kbn/core-base-server-mocks",
-    "@kbn/config-schema",
-    "@kbn/config-mocks"
-  ]
+  "sourceRoot": "packages/core/feature-flags/core-feature-flags-server-internal"
 }

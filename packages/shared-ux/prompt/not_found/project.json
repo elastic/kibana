@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/prompt/not_found",
-  "implicitDependencies": [
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "packages/shared-ux/prompt/not_found"
 }

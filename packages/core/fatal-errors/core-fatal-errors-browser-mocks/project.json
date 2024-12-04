@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/fatal-errors/core-fatal-errors-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/core-fatal-errors-browser",
-    "@kbn/core-fatal-errors-browser-internal",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/core/fatal-errors/core-fatal-errors-browser-mocks"
 }

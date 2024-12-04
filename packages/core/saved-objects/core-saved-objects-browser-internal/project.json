@@ -21,16 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/saved-objects/core-saved-objects-browser-internal",
-  "implicitDependencies": [
-    "@kbn/safer-lodash-set",
-    "@kbn/core-base-browser-internal",
-    "@kbn/core-http-browser",
-    "@kbn/core-saved-objects-common",
-    "@kbn/core-saved-objects-browser",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-api-browser",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/core-http-browser-internal"
-  ]
+  "sourceRoot": "packages/core/saved-objects/core-saved-objects-browser-internal"
 }

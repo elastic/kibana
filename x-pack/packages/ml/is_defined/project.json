@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/is_defined",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/packages/ml/is_defined"
 }

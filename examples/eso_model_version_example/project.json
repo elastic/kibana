@@ -26,16 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/eso_model_version_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/security-plugin",
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/features-plugin",
-    "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/config-schema",
-    "@kbn/spaces-plugin"
-  ]
+  "sourceRoot": "examples/eso_model_version_example"
 }

@@ -23,11 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/no_data_page",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/core-plugins-browser",
-    "@kbn/core-plugins-server",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "src/plugins/no_data_page"
 }

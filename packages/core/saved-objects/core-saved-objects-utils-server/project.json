@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/saved-objects/core-saved-objects-utils-server",
-  "implicitDependencies": [
-    "@kbn/core-saved-objects-server",
-    "@kbn/core-saved-objects-api-server"
-  ]
+  "sourceRoot": "packages/core/saved-objects/core-saved-objects-utils-server"
 }

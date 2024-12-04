@@ -25,10 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/ui_action_examples",
-  "implicitDependencies": [
-    "@kbn/ui-actions-plugin",
-    "@kbn/core",
-    "@kbn/react-kibana-mount"
-  ]
+  "sourceRoot": "examples/ui_action_examples"
 }

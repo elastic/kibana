@@ -28,20 +28,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/kubernetes_security",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/rule-registry-plugin",
-    "@kbn/session-view-plugin",
-    "@kbn/i18n",
-    "@kbn/timelines-plugin",
-    "@kbn/es-query",
-    "@kbn/ui-theme",
-    "@kbn/i18n-react",
-    "@kbn/config-schema",
-    "@kbn/shared-ux-router",
-    "@kbn/securitysolution-es-utils"
-  ]
+  "sourceRoot": "x-pack/plugins/kubernetes_security"
 }

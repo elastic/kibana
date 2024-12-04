@@ -21,13 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-generate",
-  "implicitDependencies": [
-    "@kbn/sort-package-json",
-    "@kbn/dev-cli-runner",
-    "@kbn/repo-info",
-    "@kbn/dev-cli-errors",
-    "@kbn/tooling-log",
-    "@kbn/repo-packages"
-  ]
+  "sourceRoot": "packages/kbn-generate"
 }

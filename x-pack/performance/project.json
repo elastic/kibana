@@ -22,15 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/performance",
-  "implicitDependencies": [
-    "@kbn/journeys",
-    "@kbn/test-subj-selector",
-    "@kbn/tooling-log",
-    "@kbn/test",
-    "@kbn/expect",
-    "@kbn/dev-utils",
-    "@kbn/apm-synthtrace-client",
-    "@kbn/test-suites-src"
-  ]
+  "sourceRoot": "x-pack/performance"
 }

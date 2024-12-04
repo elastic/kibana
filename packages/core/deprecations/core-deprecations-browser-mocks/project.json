@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/deprecations/core-deprecations-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-deprecations-browser",
-    "@kbn/core-deprecations-browser-internal"
-  ]
+  "sourceRoot": "packages/core/deprecations/core-deprecations-browser-mocks"
 }

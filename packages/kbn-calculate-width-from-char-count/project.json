@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-calculate-width-from-char-count",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-calculate-width-from-char-count"
 }

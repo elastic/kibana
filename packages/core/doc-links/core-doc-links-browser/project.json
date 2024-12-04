@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/doc-links/core-doc-links-browser",
-  "implicitDependencies": [
-    "@kbn/doc-links"
-  ]
+  "sourceRoot": "packages/core/doc-links/core-doc-links-browser"
 }

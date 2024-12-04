@@ -22,13 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-search-errors",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/core",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/bfetch-error",
-    "@kbn/search-types"
-  ]
+  "sourceRoot": "packages/kbn-search-errors"
 }

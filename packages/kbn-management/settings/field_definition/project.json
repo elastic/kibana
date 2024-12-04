@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-management/settings/field_definition",
-  "implicitDependencies": [
-    "@kbn/management-settings-types",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/management-settings-utilities"
-  ]
+  "sourceRoot": "packages/kbn-management/settings/field_definition"
 }

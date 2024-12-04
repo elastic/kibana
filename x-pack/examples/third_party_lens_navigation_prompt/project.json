@@ -23,12 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/examples/third_party_lens_navigation_prompt",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-views-plugin",
-    "@kbn/lens-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/data-plugin"
-  ]
+  "sourceRoot": "x-pack/examples/third_party_lens_navigation_prompt"
 }

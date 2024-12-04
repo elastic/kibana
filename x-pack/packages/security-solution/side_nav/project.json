@@ -22,11 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security-solution/side_nav",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/analytics",
-    "@kbn/shared-ux-page-solution-nav",
-    "@kbn/security-solution-navigation"
-  ]
+  "sourceRoot": "x-pack/packages/security-solution/side_nav"
 }

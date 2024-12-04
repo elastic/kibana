@@ -24,14 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/kibana_usage_collection",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/usage-collection-plugin",
-    "@kbn/i18n",
-    "@kbn/logging",
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/core-usage-data-server",
-    "@kbn/core-saved-objects-api-server"
-  ]
+  "sourceRoot": "src/plugins/kibana_usage_collection"
 }

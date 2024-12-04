@@ -21,17 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/plugins/core-plugins-server",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/config-schema",
-    "@kbn/utility-types",
-    "@kbn/utils",
-    "@kbn/logging",
-    "@kbn/core-base-common",
-    "@kbn/core-node-server",
-    "@kbn/core-elasticsearch-server-internal",
-    "@kbn/core-saved-objects-base-server-internal",
-    "@kbn/core-lifecycle-server"
-  ]
+  "sourceRoot": "packages/core/plugins/core-plugins-server"
 }

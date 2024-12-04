@@ -25,8 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/core_dynamic_resolving_b",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/core_dynamic_resolving_b"
 }

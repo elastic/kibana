@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/file/image/impl",
-  "implicitDependencies": [
-    "@kbn/shared-ux-file-util",
-    "@kbn/shared-ux-file-types",
-    "@kbn/shared-ux-file-image-mocks"
-  ]
+  "sourceRoot": "packages/shared-ux/file/image/impl"
 }

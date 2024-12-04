@@ -22,18 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-management/settings/components/field_row",
-  "implicitDependencies": [
-    "@kbn/management-settings-types",
-    "@kbn/management-settings-field-definition",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/management-settings-utilities",
-    "@kbn/management-settings-components-field-input",
-    "@kbn/core-doc-links-browser",
-    "@kbn/react-kibana-context-root",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-analytics-browser-mocks"
-  ]
+  "sourceRoot": "packages/kbn-management/settings/components/field_row"
 }

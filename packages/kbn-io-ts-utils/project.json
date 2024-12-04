@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-io-ts-utils",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/datemath"
-  ]
+  "sourceRoot": "packages/kbn-io-ts-utils"
 }

@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-crypto",
-  "implicitDependencies": [
-    "@kbn/dev-utils"
-  ]
+  "sourceRoot": "packages/kbn-crypto"
 }

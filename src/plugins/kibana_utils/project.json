@@ -26,18 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/kibana_utils",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/expect",
-    "@kbn/utility-types",
-    "@kbn/i18n",
-    "@kbn/utility-types-jest",
-    "@kbn/test-jest-helpers",
-    "@kbn/rison",
-    "@kbn/crypto-browser",
-    "@kbn/core-notifications-browser-mocks",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/core-theme-browser"
-  ]
+  "sourceRoot": "src/plugins/kibana_utils"
 }

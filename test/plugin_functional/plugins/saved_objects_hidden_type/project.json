@@ -23,8 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/saved_objects_hidden_type",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/saved_objects_hidden_type"
 }

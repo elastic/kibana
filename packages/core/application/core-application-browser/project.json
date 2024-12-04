@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/application/core-application-browser",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-theme-browser",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/core-capabilities-common",
-    "@kbn/core-application-common"
-  ]
+  "sourceRoot": "packages/core/application/core-application-browser"
 }

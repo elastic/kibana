@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/security/core-security-server-mocks",
-  "implicitDependencies": [
-    "@kbn/core-security-server",
-    "@kbn/core-security-server-internal",
-    "@kbn/core-http-server",
-    "@kbn/core-security-common"
-  ]
+  "sourceRoot": "packages/core/security/core-security-server-mocks"
 }

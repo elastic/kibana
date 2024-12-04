@@ -25,10 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/analytics/plugins/analytics_ftr_helpers",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/std",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "test/analytics/plugins/analytics_ftr_helpers"
 }

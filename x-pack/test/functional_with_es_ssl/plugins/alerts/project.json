@@ -22,13 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/functional_with_es_ssl/plugins/alerts",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/features-plugin",
-    "@kbn/alerting-plugin",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/shared-ux-router",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "x-pack/test/functional_with_es_ssl/plugins/alerts"
 }

@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/content-management/content_insights/content_insights_server",
-  "implicitDependencies": [
-    "@kbn/usage-collection-plugin",
-    "@kbn/core",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "packages/content-management/content_insights/content_insights_server"
 }

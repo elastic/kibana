@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/http/core-http-router-server-mocks",
-  "implicitDependencies": [
-    "@kbn/hapi-mocks",
-    "@kbn/config-schema",
-    "@kbn/core-http-server",
-    "@kbn/core-http-server-utils"
-  ]
+  "sourceRoot": "packages/core/http/core-http-router-server-mocks"
 }

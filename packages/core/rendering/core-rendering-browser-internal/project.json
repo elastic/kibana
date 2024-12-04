@@ -22,22 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/rendering/core-rendering-browser-internal",
-  "implicitDependencies": [
-    "@kbn/core-application-common",
-    "@kbn/core-application-browser-internal",
-    "@kbn/core-overlays-browser",
-    "@kbn/core-chrome-browser-internal",
-    "@kbn/core-application-browser-mocks",
-    "@kbn/core-chrome-browser-mocks",
-    "@kbn/core-overlays-browser-mocks",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/core-i18n-browser-mocks",
-    "@kbn/react-kibana-context-root",
-    "@kbn/core-analytics-browser-mocks",
-    "@kbn/core-analytics-browser",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-theme-browser",
-    "@kbn/core-rendering-browser"
-  ]
+  "sourceRoot": "packages/core/rendering/core-rendering-browser-internal"
 }

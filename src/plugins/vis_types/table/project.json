@@ -24,24 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/vis_types/table",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/visualizations-plugin",
-    "@kbn/share-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/vis-default-editor-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/analytics",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/ui-theme",
-    "@kbn/config-schema",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "src/plugins/vis_types/table"
 }

@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/logging/core-logging-common-internal",
-  "implicitDependencies": [
-    "@kbn/logging"
-  ]
+  "sourceRoot": "packages/core/logging/core-logging-common-internal"
 }

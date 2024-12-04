@@ -25,17 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/event_log",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/spaces-plugin",
-    "@kbn/es-query",
-    "@kbn/config-schema",
-    "@kbn/i18n",
-    "@kbn/utility-types",
-    "@kbn/std",
-    "@kbn/safer-lodash-set",
-    "@kbn/serverless",
-    "@kbn/core-test-helpers-kbn-server"
-  ]
+  "sourceRoot": "x-pack/plugins/event_log"
 }

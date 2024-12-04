@@ -21,14 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/preboot/core-preboot-server-internal",
-  "implicitDependencies": [
-    "@kbn/logging",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-base-common",
-    "@kbn/config",
-    "@kbn/config-mocks",
-    "@kbn/core-logging-server-mocks",
-    "@kbn/repo-info"
-  ]
+  "sourceRoot": "packages/core/preboot/core-preboot-server-internal"
 }

@@ -24,15 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/discover_customization_examples",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/discover-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/controls-plugin",
-    "@kbn/shared-ux-router",
-    "@kbn/i18n-react",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/data-plugin"
-  ]
+  "sourceRoot": "examples/discover_customization_examples"
 }

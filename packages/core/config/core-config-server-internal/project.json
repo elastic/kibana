@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/config/core-config-server-internal",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/config-mocks",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-test-helpers-deprecations-getters"
-  ]
+  "sourceRoot": "packages/core/config/core-config-server-internal"
 }

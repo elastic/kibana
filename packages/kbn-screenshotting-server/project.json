@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-screenshotting-server",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/safer-lodash-set",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "packages/kbn-screenshotting-server"
 }

@@ -27,28 +27,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/threat_intelligence",
-  "implicitDependencies": [
-    "@kbn/cases-plugin",
-    "@kbn/timelines-plugin",
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/unified-search-plugin",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/i18n-react",
-    "@kbn/data-views-plugin",
-    "@kbn/es-query",
-    "@kbn/rule-registry-plugin",
-    "@kbn/inspector-plugin",
-    "@kbn/shared-ux-page-kibana-template-types",
-    "@kbn/doc-links",
-    "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
-    "@kbn/utility-types",
-    "@kbn/ui-theme",
-    "@kbn/securitysolution-io-ts-list-types",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/search-types"
-  ]
+  "sourceRoot": "x-pack/plugins/threat_intelligence"
 }

@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-sse-utils-server",
-  "implicitDependencies": [
-    "@kbn/sse-utils"
-  ]
+  "sourceRoot": "packages/kbn-sse-utils-server"
 }

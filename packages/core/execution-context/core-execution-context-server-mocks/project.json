@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/execution-context/core-execution-context-server-mocks",
-  "implicitDependencies": [
-    "@kbn/core-execution-context-common",
-    "@kbn/core-execution-context-server",
-    "@kbn/core-execution-context-server-internal"
-  ]
+  "sourceRoot": "packages/core/execution-context/core-execution-context-server-mocks"
 }

@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/react/kibana_context/theme",
-  "implicitDependencies": [
-    "@kbn/test-jest-helpers",
-    "@kbn/react-kibana-context-common",
-    "@kbn/react-kibana-context-root"
-  ]
+  "sourceRoot": "packages/react/kibana_context/theme"
 }

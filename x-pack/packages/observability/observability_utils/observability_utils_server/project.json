@@ -22,17 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/observability/observability_utils/observability_utils_server",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/es-types",
-    "@kbn/apm-utils",
-    "@kbn/es-query",
-    "@kbn/observability-utils-common",
-    "@kbn/alerting-plugin",
-    "@kbn/rule-registry-plugin",
-    "@kbn/rule-data-utils",
-    "@kbn/utility-types",
-    "@kbn/task-manager-plugin"
-  ]
+  "sourceRoot": "x-pack/packages/observability/observability_utils/observability_utils_server"
 }

@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-eslint-plugin-i18n",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-eslint-plugin-i18n"
 }

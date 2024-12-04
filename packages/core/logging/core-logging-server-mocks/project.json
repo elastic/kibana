@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/logging/core-logging-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/logging",
-    "@kbn/logging-mocks",
-    "@kbn/core-logging-server",
-    "@kbn/core-logging-server-internal"
-  ]
+  "sourceRoot": "packages/core/logging/core-logging-server-mocks"
 }

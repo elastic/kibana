@@ -21,28 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/test-helpers/core-test-helpers-model-versions",
-  "implicitDependencies": [
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/config",
-    "@kbn/config-mocks",
-    "@kbn/repo-info",
-    "@kbn/core-saved-objects-migration-server-internal",
-    "@kbn/core-saved-objects-base-server-internal",
-    "@kbn/core-saved-objects-api-server-internal",
-    "@kbn/core-elasticsearch-server-internal",
-    "@kbn/core-elasticsearch-client-server-internal",
-    "@kbn/core-logging-server-internal",
-    "@kbn/core-saved-objects-server",
-    "@kbn/test",
-    "@kbn/logging",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/core-root-server-internal",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/doc-links",
-    "@kbn/core-doc-links-server",
-    "@kbn/core-node-server",
-    "@kbn/config-schema",
-    "@kbn/logging-mocks"
-  ]
+  "sourceRoot": "packages/core/test-helpers/core-test-helpers-model-versions"
 }

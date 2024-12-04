@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-object-versioning",
-  "implicitDependencies": [
-    "@kbn/config-schema",
-    "@kbn/safer-lodash-set",
-    "@kbn/object-versioning-utils"
-  ]
+  "sourceRoot": "packages/kbn-object-versioning"
 }

@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/feature-flags/core-feature-flags-server",
-  "implicitDependencies": []
+  "sourceRoot": "packages/core/feature-flags/core-feature-flags-server"
 }

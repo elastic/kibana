@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/inference_integration_flyout",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/test-jest-helpers"
-  ]
+  "sourceRoot": "x-pack/packages/ml/inference_integration_flyout"
 }

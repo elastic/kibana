@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/kibana_theme",
-  "implicitDependencies": [
-    "@kbn/ui-theme",
-    "@kbn/core-theme-browser"
-  ]
+  "sourceRoot": "x-pack/packages/ml/kibana_theme"
 }

@@ -22,11 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/security_api_integration/plugins/features_provider",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/features-plugin",
-    "@kbn/alerting-plugin",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "x-pack/test/security_api_integration/plugins/features_provider"
 }

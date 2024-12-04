@@ -23,11 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-try-in-console",
-  "implicitDependencies": [
-    "@kbn/core-application-browser",
-    "@kbn/i18n",
-    "@kbn/share-plugin",
-    "@kbn/console-plugin"
-  ]
+  "sourceRoot": "packages/kbn-try-in-console"
 }

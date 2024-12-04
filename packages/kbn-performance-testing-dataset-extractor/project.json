@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-performance-testing-dataset-extractor",
-  "implicitDependencies": [
-    "@kbn/dev-cli-errors",
-    "@kbn/dev-cli-runner",
-    "@kbn/tooling-log",
-    "@kbn/journeys"
-  ]
+  "sourceRoot": "packages/kbn-performance-testing-dataset-extractor"
 }

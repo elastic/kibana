@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/http/core-http-resources-server",
-  "implicitDependencies": [
-    "@kbn/core-http-server",
-    "@kbn/core-http-request-handler-context-server"
-  ]
+  "sourceRoot": "packages/core/http/core-http-resources-server"
 }

@@ -22,21 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-reporting/get_csv_panel_actions",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/i18n",
-    "@kbn/reporting-export-types-csv-common",
-    "@kbn/licensing-plugin",
-    "@kbn/i18n-react",
-    "@kbn/discover-utils",
-    "@kbn/saved-search-plugin",
-    "@kbn/discover-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/ui-actions-plugin",
-    "@kbn/react-kibana-mount",
-    "@kbn/reporting-public",
-    "@kbn/presentation-publishing"
-  ]
+  "sourceRoot": "packages/kbn-reporting/get_csv_panel_actions"
 }

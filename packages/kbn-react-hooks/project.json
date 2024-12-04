@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-react-hooks",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-react-hooks"
 }

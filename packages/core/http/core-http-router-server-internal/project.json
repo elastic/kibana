@@ -21,18 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/http/core-http-router-server-internal",
-  "implicitDependencies": [
-    "@kbn/std",
-    "@kbn/utility-types",
-    "@kbn/config-schema",
-    "@kbn/zod",
-    "@kbn/es-errors",
-    "@kbn/core-http-server",
-    "@kbn/hapi-mocks",
-    "@kbn/core-logging-server-mocks",
-    "@kbn/logging",
-    "@kbn/core-http-common",
-    "@kbn/logging-mocks"
-  ]
+  "sourceRoot": "packages/core/http/core-http-router-server-internal"
 }

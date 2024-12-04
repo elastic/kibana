@@ -22,11 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-search-index-documents",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/core",
-    "@kbn/core-elasticsearch-server"
-  ]
+  "sourceRoot": "packages/kbn-search-index-documents"
 }

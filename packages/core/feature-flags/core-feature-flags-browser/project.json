@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/feature-flags/core-feature-flags-browser",
-  "implicitDependencies": []
+  "sourceRoot": "packages/core/feature-flags/core-feature-flags-browser"
 }

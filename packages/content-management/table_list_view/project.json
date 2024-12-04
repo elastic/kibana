@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/content-management/table_list_view",
-  "implicitDependencies": [
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/content-management-table-list-view-table",
-    "@kbn/content-management-table-list-view-common"
-  ]
+  "sourceRoot": "packages/content-management/table_list_view"
 }

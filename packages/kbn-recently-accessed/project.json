@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-recently-accessed",
-  "implicitDependencies": [
-    "@kbn/crypto-browser",
-    "@kbn/core-http-browser",
-    "@kbn/core-http-browser-mocks"
-  ]
+  "sourceRoot": "packages/kbn-recently-accessed"
 }

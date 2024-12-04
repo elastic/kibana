@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/plugins/core-plugins-browser",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/core-base-common",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/logging",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/core/plugins/core-plugins-browser"
 }

@@ -25,19 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/examples/gen_ai_streaming_response_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/i18n",
-    "@kbn/config-schema",
-    "@kbn/stack-connectors-plugin",
-    "@kbn/alerting-plugin",
-    "@kbn/charts-plugin",
-    "@kbn/data-plugin",
-    "@kbn/actions-plugin",
-    "@kbn/ml-response-stream"
-  ]
+  "sourceRoot": "x-pack/examples/gen_ai_streaming_response_example"
 }

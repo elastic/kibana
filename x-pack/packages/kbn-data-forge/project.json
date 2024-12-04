@@ -22,11 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-data-forge",
-  "implicitDependencies": [
-    "@kbn/tooling-log",
-    "@kbn/datemath",
-    "@kbn/safer-lodash-set",
-    "@kbn/dev-utils"
-  ]
+  "sourceRoot": "x-pack/packages/kbn-data-forge"
 }

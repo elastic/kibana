@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/serverless/settings/search_project",
-  "implicitDependencies": [
-    "@kbn/management-settings-ids",
-    "@kbn/dev-tools-plugin"
-  ]
+  "sourceRoot": "packages/serverless/settings/search_project"
 }

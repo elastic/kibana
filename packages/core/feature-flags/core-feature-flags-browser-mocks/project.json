@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/feature-flags/core-feature-flags-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/core-feature-flags-browser",
-    "@kbn/core-feature-flags-browser-internal",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/core/feature-flags/core-feature-flags-browser-mocks"
 }

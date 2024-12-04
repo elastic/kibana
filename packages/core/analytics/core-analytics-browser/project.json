@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/analytics/core-analytics-browser",
-  "implicitDependencies": []
+  "sourceRoot": "packages/core/analytics/core-analytics-browser"
 }

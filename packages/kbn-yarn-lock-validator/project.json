@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-yarn-lock-validator",
-  "implicitDependencies": [
-    "@kbn/some-dev-log",
-    "@kbn/repo-info",
-    "@kbn/repo-packages"
-  ]
+  "sourceRoot": "packages/kbn-yarn-lock-validator"
 }

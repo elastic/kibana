@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-data-stream-adapter",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/index-adapter"
-  ]
+  "sourceRoot": "packages/kbn-data-stream-adapter"
 }

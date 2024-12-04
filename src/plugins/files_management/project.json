@@ -24,18 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/files_management",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/files-plugin",
-    "@kbn/management-plugin",
-    "@kbn/i18n",
-    "@kbn/content-management-table-list-view-table",
-    "@kbn/content-management-table-list-view",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-file-image",
-    "@kbn/shared-ux-router",
-    "@kbn/content-management-table-list-view-common",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "src/plugins/files_management"
 }

@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-std",
-  "implicitDependencies": [
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/kbn-std"
 }

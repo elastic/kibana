@@ -22,12 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/std",
-    "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/spaces-plugin"
-  ]
+  "sourceRoot": "x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin"
 }

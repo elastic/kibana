@@ -25,9 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/usage_collection",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/usage-collection-plugin"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/usage_collection"
 }

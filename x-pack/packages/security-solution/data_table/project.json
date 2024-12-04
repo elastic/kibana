@@ -22,22 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security-solution/data_table",
-  "implicitDependencies": [
-    "@kbn/cell-actions",
-    "@kbn/timelines-plugin",
-    "@kbn/es-query",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/securitysolution-ecs",
-    "@kbn/safer-lodash-set",
-    "@kbn/i18n",
-    "@kbn/ui-theme",
-    "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/i18n-react",
-    "@kbn/ui-actions-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/data-plugin"
-  ]
+  "sourceRoot": "x-pack/packages/security-solution/data_table"
 }

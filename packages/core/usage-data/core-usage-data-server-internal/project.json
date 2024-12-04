@@ -21,30 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/usage-data/core-usage-data-server-internal",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/logging",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-logging-server-internal",
-    "@kbn/core-http-server",
-    "@kbn/core-http-server-internal",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/core-elasticsearch-server-internal",
-    "@kbn/core-metrics-server",
-    "@kbn/core-saved-objects-server",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-base-server-internal",
-    "@kbn/core-saved-objects-utils-server",
-    "@kbn/core-usage-data-server",
-    "@kbn/core-usage-data-base-server-internal",
-    "@kbn/config-mocks",
-    "@kbn/core-base-server-mocks",
-    "@kbn/core-http-server-mocks",
-    "@kbn/core-metrics-server-mocks",
-    "@kbn/core-saved-objects-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/core-saved-objects-base-server-mocks",
-    "@kbn/core-saved-objects-api-server-mocks"
-  ]
+  "sourceRoot": "packages/core/usage-data/core-usage-data-server-internal"
 }

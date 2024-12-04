@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/response-ops/feature_flag_service",
-  "implicitDependencies": []
+  "sourceRoot": "packages/response-ops/feature_flag_service"
 }

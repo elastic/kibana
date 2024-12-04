@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/category_validator",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/core",
-    "@kbn/ml-runtime-field-utils"
-  ]
+  "sourceRoot": "x-pack/packages/ml/category_validator"
 }

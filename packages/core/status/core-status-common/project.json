@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/status/core-status-common",
-  "implicitDependencies": [
-    "@kbn/std",
-    "@kbn/config",
-    "@kbn/core-metrics-server"
-  ]
+  "sourceRoot": "packages/core/status/core-status-common"
 }

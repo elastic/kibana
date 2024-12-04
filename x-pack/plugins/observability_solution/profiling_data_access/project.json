@@ -23,17 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/observability_solution/profiling_data_access",
-  "implicitDependencies": [
-    "@kbn/config-schema",
-    "@kbn/core",
-    "@kbn/es-query",
-    "@kbn/es-types",
-    "@kbn/apm-utils",
-    "@kbn/profiling-utils",
-    "@kbn/fleet-plugin",
-    "@kbn/cloud-plugin",
-    "@kbn/spaces-plugin",
-    "@kbn/observability-plugin"
-  ]
+  "sourceRoot": "x-pack/plugins/observability_solution/profiling_data_access"
 }

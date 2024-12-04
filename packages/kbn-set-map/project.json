@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-set-map",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-set-map"
 }

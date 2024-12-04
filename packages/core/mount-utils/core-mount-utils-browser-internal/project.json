@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/mount-utils/core-mount-utils-browser-internal",
-  "implicitDependencies": [
-    "@kbn/i18n-react",
-    "@kbn/core-mount-utils-browser"
-  ]
+  "sourceRoot": "packages/core/mount-utils/core-mount-utils-browser-internal"
 }

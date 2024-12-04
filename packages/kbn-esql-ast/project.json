@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-esql-ast",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-esql-ast"
 }

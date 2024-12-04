@@ -22,8 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/security_api_integration/plugins/audit_log",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "x-pack/test/security_api_integration/plugins/audit_log"
 }

@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/deprecations/core-deprecations-server",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-deprecations-common",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/core-saved-objects-api-server"
-  ]
+  "sourceRoot": "packages/core/deprecations/core-deprecations-server"
 }

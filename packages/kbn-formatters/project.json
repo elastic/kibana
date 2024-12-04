@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-formatters",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-formatters"
 }

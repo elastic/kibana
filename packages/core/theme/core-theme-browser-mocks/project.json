@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/theme/core-theme-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-theme-browser",
-    "@kbn/core-theme-browser-internal"
-  ]
+  "sourceRoot": "packages/core/theme/core-theme-browser-mocks"
 }

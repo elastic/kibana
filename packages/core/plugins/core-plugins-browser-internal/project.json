@@ -22,34 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/plugins/core-plugins-browser-internal",
-  "implicitDependencies": [
-    "@kbn/core-base-common",
-    "@kbn/core-base-browser-internal",
-    "@kbn/core-injected-metadata-common-internal",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/core-lifecycle-browser-internal",
-    "@kbn/core-plugins-browser",
-    "@kbn/logging-mocks",
-    "@kbn/core-base-browser-mocks",
-    "@kbn/core-analytics-browser-mocks",
-    "@kbn/core-doc-links-browser-mocks",
-    "@kbn/core-execution-context-browser-mocks",
-    "@kbn/core-i18n-browser-mocks",
-    "@kbn/core-injected-metadata-browser-mocks",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/core-notifications-browser-mocks",
-    "@kbn/core-application-browser-mocks",
-    "@kbn/core-overlays-browser-mocks",
-    "@kbn/core-chrome-browser-mocks",
-    "@kbn/core-fatal-errors-browser-mocks",
-    "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/core-saved-objects-browser-mocks",
-    "@kbn/core-deprecations-browser-mocks",
-    "@kbn/utility-types",
-    "@kbn/core-plugins-contracts-browser",
-    "@kbn/core-security-browser-mocks",
-    "@kbn/core-user-profile-browser-mocks"
-  ]
+  "sourceRoot": "packages/core/plugins/core-plugins-browser-internal"
 }

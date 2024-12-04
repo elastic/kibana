@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/file/context",
-  "implicitDependencies": [
-    "@kbn/shared-ux-file-types"
-  ]
+  "sourceRoot": "packages/shared-ux/file/context"
 }

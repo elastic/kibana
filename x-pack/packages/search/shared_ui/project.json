@@ -23,8 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/search/shared_ui",
-  "implicitDependencies": [
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "x-pack/packages/search/shared_ui"
 }

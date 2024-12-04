@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ai-infra/product-doc-artifact-builder",
-  "implicitDependencies": [
-    "@kbn/tooling-log",
-    "@kbn/repo-info",
-    "@kbn/product-doc-common"
-  ]
+  "sourceRoot": "x-pack/packages/ai-infra/product-doc-artifact-builder"
 }

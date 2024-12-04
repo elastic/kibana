@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/ui-settings/core-ui-settings-browser",
-  "implicitDependencies": [
-    "@kbn/core-ui-settings-common"
-  ]
+  "sourceRoot": "packages/core/ui-settings/core-ui-settings-browser"
 }

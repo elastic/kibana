@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-management/settings/types",
-  "implicitDependencies": [
-    "@kbn/analytics",
-    "@kbn/core",
-    "@kbn/core-ui-settings-common",
-    "@kbn/management-settings-section-registry"
-  ]
+  "sourceRoot": "packages/kbn-management/settings/types"
 }

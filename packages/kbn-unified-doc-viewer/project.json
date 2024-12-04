@@ -22,15 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-unified-doc-viewer",
-  "implicitDependencies": [
-    "@kbn/discover-utils",
-    "@kbn/data-views-plugin",
-    "@kbn/es-query",
-    "@kbn/data-plugin",
-    "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/react-field",
-    "@kbn/field-utils"
-  ]
+  "sourceRoot": "packages/kbn-unified-doc-viewer"
 }

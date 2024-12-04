@@ -21,16 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-config",
-  "implicitDependencies": [
-    "@kbn/safer-lodash-set",
-    "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/logging-mocks",
-    "@kbn/std",
-    "@kbn/utility-types",
-    "@kbn/i18n",
-    "@kbn/doc-links",
-    "@kbn/repo-packages"
-  ]
+  "sourceRoot": "packages/kbn-config"
 }

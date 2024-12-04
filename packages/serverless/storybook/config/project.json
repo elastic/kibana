@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/serverless/storybook/config",
-  "implicitDependencies": [
-    "@kbn/storybook"
-  ]
+  "sourceRoot": "packages/serverless/storybook/config"
 }

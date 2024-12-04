@@ -23,13 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-search-response-warnings",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/inspector-plugin",
-    "@kbn/core",
-    "@kbn/react-kibana-mount",
-    "@kbn/core-i18n-browser",
-    "@kbn/es-types"
-  ]
+  "sourceRoot": "packages/kbn-search-response-warnings"
 }

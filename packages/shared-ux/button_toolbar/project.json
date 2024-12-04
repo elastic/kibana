@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/button_toolbar",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/test-jest-helpers"
-  ]
+  "sourceRoot": "packages/shared-ux/button_toolbar"
 }

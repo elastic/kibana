@@ -23,8 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/modal/tabbed",
-  "implicitDependencies": [
-    "@kbn/shared-ux-storybook-mock"
-  ]
+  "sourceRoot": "packages/shared-ux/modal/tabbed"
 }

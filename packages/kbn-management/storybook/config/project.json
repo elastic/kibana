@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-management/storybook/config",
-  "implicitDependencies": [
-    "@kbn/storybook"
-  ]
+  "sourceRoot": "packages/kbn-management/storybook/config"
 }

@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/link/redirect_app/mocks",
-  "implicitDependencies": [
-    "@kbn/shared-ux-link-redirect-app-types",
-    "@kbn/shared-ux-storybook-mock"
-  ]
+  "sourceRoot": "packages/shared-ux/link/redirect_app/mocks"
 }

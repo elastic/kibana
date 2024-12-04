@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-apm-config-loader",
-  "implicitDependencies": [
-    "@kbn/safer-lodash-set",
-    "@kbn/utils",
-    "@kbn/config-schema",
-    "@kbn/std"
-  ]
+  "sourceRoot": "packages/kbn-apm-config-loader"
 }

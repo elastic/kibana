@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-shared-ux-utility",
-  "implicitDependencies": [
-    "@kbn/shared-ux-error-boundary",
-    "@kbn/core-analytics-browser"
-  ]
+  "sourceRoot": "packages/kbn-shared-ux-utility"
 }

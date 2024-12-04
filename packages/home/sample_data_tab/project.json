@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/home/sample_data_tab",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/home-sample-data-card",
-    "@kbn/home-sample-data-types"
-  ]
+  "sourceRoot": "packages/home/sample_data_tab"
 }

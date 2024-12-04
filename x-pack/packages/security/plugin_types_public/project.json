@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security/plugin_types_public",
-  "implicitDependencies": [
-    "@kbn/core-user-profile-browser",
-    "@kbn/core-user-profile-common",
-    "@kbn/security-plugin-types-common",
-    "@kbn/core-security-common"
-  ]
+  "sourceRoot": "x-pack/packages/security/plugin_types_public"
 }

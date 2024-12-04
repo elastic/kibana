@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-import-resolver",
-  "implicitDependencies": [
-    "@kbn/repo-info",
-    "@kbn/jest-serializers",
-    "@kbn/repo-packages"
-  ]
+  "sourceRoot": "packages/kbn-import-resolver"
 }

@@ -24,21 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/observability_solution/apm_data_access",
-  "implicitDependencies": [
-    "@kbn/config-schema",
-    "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/data-plugin",
-    "@kbn/inspector-plugin",
-    "@kbn/observability-plugin",
-    "@kbn/observability-shared-plugin",
-    "@kbn/es-types",
-    "@kbn/apm-types",
-    "@kbn/core-http-server-mocks",
-    "@kbn/apm-utils",
-    "@kbn/utility-types",
-    "@kbn/elastic-agent-utils",
-    "@kbn/observability-utils-common"
-  ]
+  "sourceRoot": "x-pack/plugins/observability_solution/apm_data_access"
 }

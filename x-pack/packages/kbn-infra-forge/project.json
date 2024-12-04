@@ -27,9 +27,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-infra-forge",
-  "implicitDependencies": [
-    "@kbn/tooling-log",
-    "@kbn/datemath"
-  ]
+  "sourceRoot": "x-pack/packages/kbn-infra-forge"
 }

@@ -22,14 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security/ui_components",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/security-plugin-types-common",
-    "@kbn/test-jest-helpers",
-    "@kbn/security-role-management-model",
-    "@kbn/features-plugin"
-  ]
+  "sourceRoot": "x-pack/packages/security/ui_components"
 }

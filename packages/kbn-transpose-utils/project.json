@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-transpose-utils",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-transpose-utils"
 }

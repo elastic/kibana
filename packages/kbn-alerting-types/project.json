@@ -22,16 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-alerting-types",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/licensing-plugin",
-    "@kbn/rule-data-utils",
-    "@kbn/rrule",
-    "@kbn/core",
-    "@kbn/es-query",
-    "@kbn/field-formats-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/search-types"
-  ]
+  "sourceRoot": "packages/kbn-alerting-types"
 }

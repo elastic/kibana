@@ -24,9 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/discover_shared",
-  "implicitDependencies": [
-    "@kbn/discover-utils",
-    "@kbn/core"
-  ]
+  "sourceRoot": "src/plugins/discover_shared"
 }

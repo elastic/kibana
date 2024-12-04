@@ -21,14 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-repo-file-maps",
-  "implicitDependencies": [
-    "@kbn/set-map",
-    "@kbn/repo-packages",
-    "@kbn/repo-path",
-    "@kbn/repo-linter",
-    "@kbn/repo-info",
-    "@kbn/picomatcher",
-    "@kbn/ts-projects"
-  ]
+  "sourceRoot": "packages/kbn-repo-file-maps"
 }

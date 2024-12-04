@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/page/solution_nav",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-avatar-solution"
-  ]
+  "sourceRoot": "packages/shared-ux/page/solution_nav"
 }

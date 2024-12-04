@@ -24,10 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/index_patterns",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/index_patterns"
 }

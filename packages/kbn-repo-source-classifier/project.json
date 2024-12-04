@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-repo-source-classifier",
-  "implicitDependencies": [
-    "@kbn/import-resolver",
-    "@kbn/repo-info",
-    "@kbn/repo-packages"
-  ]
+  "sourceRoot": "packages/kbn-repo-source-classifier"
 }

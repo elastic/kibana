@@ -25,13 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/unified_doc_viewer",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/discover-utils",
-    "@kbn/unified-doc-viewer-plugin"
-  ]
+  "sourceRoot": "examples/unified_doc_viewer"
 }

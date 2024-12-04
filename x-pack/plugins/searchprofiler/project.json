@@ -23,22 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/searchprofiler",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/es-ui-shared-plugin",
-    "@kbn/dev-tools-plugin",
-    "@kbn/home-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/i18n",
-    "@kbn/share-plugin",
-    "@kbn/utility-types",
-    "@kbn/expect",
-    "@kbn/test-jest-helpers",
-    "@kbn/i18n-react",
-    "@kbn/config-schema",
-    "@kbn/react-kibana-context-render",
-    "@kbn/code-editor",
-    "@kbn/monaco"
-  ]
+  "sourceRoot": "x-pack/plugins/searchprofiler"
 }

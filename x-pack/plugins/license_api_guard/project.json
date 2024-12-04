@@ -21,10 +21,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/license_api_guard",
-  "implicitDependencies": [
-    "@kbn/licensing-plugin",
-    "@kbn/core",
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "x-pack/plugins/license_api_guard"
 }

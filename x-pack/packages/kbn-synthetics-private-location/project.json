@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-synthetics-private-location",
-  "implicitDependencies": [
-    "@kbn/tooling-log",
-    "@kbn/dev-utils"
-  ]
+  "sourceRoot": "x-pack/packages/kbn-synthetics-private-location"
 }

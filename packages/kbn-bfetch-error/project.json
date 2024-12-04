@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-bfetch-error",
-  "implicitDependencies": [
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "packages/kbn-bfetch-error"
 }

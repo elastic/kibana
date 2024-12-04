@@ -23,22 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/chart_expressions/expression_legacy_metric",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/expressions-plugin",
-    "@kbn/presentation-util-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/charts-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/visualizations-plugin",
-    "@kbn/i18n",
-    "@kbn/coloring",
-    "@kbn/utility-types",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/analytics",
-    "@kbn/ui-theme",
-    "@kbn/chart-expressions-common",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "src/plugins/chart_expressions/expression_legacy_metric"
 }

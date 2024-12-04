@@ -24,36 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/files",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/usage-collection-plugin",
-    "@kbn/security-plugin",
-    "@kbn/config-schema",
-    "@kbn/shared-ux-file-types",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/shared-ux-file-mocks",
-    "@kbn/utility-types-jest",
-    "@kbn/core-application-common",
-    "@kbn/features-plugin",
-    "@kbn/i18n",
-    "@kbn/core-analytics-server",
-    "@kbn/utility-types",
-    "@kbn/es-query",
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/ebt-tools",
-    "@kbn/core-http-router-server-internal",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/std",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/core-logging-server-mocks",
-    "@kbn/safer-lodash-set",
-    "@kbn/logging-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/core-saved-objects-server-mocks",
-    "@kbn/logging",
-    "@kbn/core-http-common",
-    "@kbn/core-lifecycle-server-internal",
-    "@kbn/cbor"
-  ]
+  "sourceRoot": "src/plugins/files"
 }

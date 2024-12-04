@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-management/settings/components/field_category",
-  "implicitDependencies": [
-    "@kbn/management-settings-utilities",
-    "@kbn/management-settings-field-definition",
-    "@kbn/management-settings-components-field-row",
-    "@kbn/management-settings-types",
-    "@kbn/i18n-react"
-  ]
+  "sourceRoot": "packages/kbn-management/settings/components/field_category"
 }

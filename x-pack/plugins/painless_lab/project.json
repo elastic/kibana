@@ -23,19 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/painless_lab",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/dev-tools-plugin",
-    "@kbn/home-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/es-ui-shared-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/i18n",
-    "@kbn/monaco",
-    "@kbn/i18n-react",
-    "@kbn/config-schema",
-    "@kbn/code-editor",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "x-pack/plugins/painless_lab"
 }

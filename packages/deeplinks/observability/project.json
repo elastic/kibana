@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/deeplinks/observability",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/es-query"
-  ]
+  "sourceRoot": "packages/deeplinks/observability"
 }

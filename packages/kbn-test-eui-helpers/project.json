@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-test-eui-helpers",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-test-eui-helpers"
 }

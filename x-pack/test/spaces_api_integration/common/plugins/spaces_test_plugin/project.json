@@ -23,8 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin"
 }

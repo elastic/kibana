@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-tooling-log",
-  "implicitDependencies": [
-    "@kbn/some-dev-log",
-    "@kbn/jest-serializers"
-  ]
+  "sourceRoot": "packages/kbn-tooling-log"
 }

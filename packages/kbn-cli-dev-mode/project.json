@@ -21,22 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-cli-dev-mode",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/optimizer",
-    "@kbn/server-http-tools",
-    "@kbn/repo-info",
-    "@kbn/ci-stats-reporter",
-    "@kbn/jest-serializers",
-    "@kbn/stdio-dev-helpers",
-    "@kbn/tooling-log",
-    "@kbn/repo-source-classifier",
-    "@kbn/import-resolver",
-    "@kbn/picomatcher",
-    "@kbn/repo-packages",
-    "@kbn/dev-utils"
-  ]
+  "sourceRoot": "packages/kbn-cli-dev-mode"
 }

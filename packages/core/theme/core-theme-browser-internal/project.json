@@ -22,14 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/theme/core-theme-browser-internal",
-  "implicitDependencies": [
-    "@kbn/core-injected-metadata-browser-internal",
-    "@kbn/core-theme-browser",
-    "@kbn/core-injected-metadata-browser-mocks",
-    "@kbn/test-jest-helpers",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/core-injected-metadata-common-internal",
-    "@kbn/ui-theme"
-  ]
+  "sourceRoot": "packages/core/theme/core-theme-browser-internal"
 }

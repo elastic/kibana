@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-item-buffer",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-item-buffer"
 }

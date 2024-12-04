@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/analytics/utils/analytics_collection_utils",
-  "implicitDependencies": []
+  "sourceRoot": "packages/analytics/utils/analytics_collection_utils"
 }

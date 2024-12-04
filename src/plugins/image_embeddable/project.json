@@ -23,26 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/image_embeddable",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/embeddable-plugin",
-    "@kbn/files-plugin",
-    "@kbn/security-plugin",
-    "@kbn/shared-ux-file-context",
-    "@kbn/shared-ux-file-upload",
-    "@kbn/shared-ux-file-picker",
-    "@kbn/shared-ux-file-types",
-    "@kbn/shared-ux-file-mocks",
-    "@kbn/shared-ux-file-image",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/core-http-browser",
-    "@kbn/ui-actions-plugin",
-    "@kbn/screenshot-mode-plugin",
-    "@kbn/presentation-containers",
-    "@kbn/presentation-publishing",
-    "@kbn/react-kibana-mount",
-    "@kbn/embeddable-enhanced-plugin"
-  ]
+  "sourceRoot": "src/plugins/image_embeddable"
 }

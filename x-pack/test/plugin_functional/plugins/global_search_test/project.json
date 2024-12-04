@@ -22,9 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/plugin_functional/plugins/global_search_test",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/global-search-plugin"
-  ]
+  "sourceRoot": "x-pack/test/plugin_functional/plugins/global_search_test"
 }

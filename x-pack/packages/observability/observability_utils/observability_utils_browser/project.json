@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/observability/observability_utils/observability_utils_browser",
-  "implicitDependencies": [
-    "@kbn/data-plugin",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/std"
-  ]
+  "sourceRoot": "x-pack/packages/observability/observability_utils/observability_utils_browser"
 }

@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/environment/core-environment-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-environment-server-internal"
-  ]
+  "sourceRoot": "packages/core/environment/core-environment-server-mocks"
 }

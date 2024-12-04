@@ -25,10 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_chat",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/core-plugins-server"
-  ]
+  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_chat"
 }

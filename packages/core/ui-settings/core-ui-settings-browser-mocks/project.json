@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/ui-settings/core-ui-settings-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/core-ui-settings-browser"
-  ]
+  "sourceRoot": "packages/core/ui-settings/core-ui-settings-browser-mocks"
 }

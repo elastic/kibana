@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/prompt/no_data_views/impl",
-  "implicitDependencies": [
-    "@kbn/i18n-react",
-    "@kbn/test-jest-helpers",
-    "@kbn/shared-ux-prompt-no-data-views-types",
-    "@kbn/shared-ux-prompt-no-data-views-mocks",
-    "@kbn/deeplinks-analytics"
-  ]
+  "sourceRoot": "packages/shared-ux/prompt/no_data_views/impl"
 }

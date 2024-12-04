@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-config-mocks",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/utility-types",
-    "@kbn/doc-links",
-    "@kbn/repo-info",
-    "@kbn/repo-packages"
-  ]
+  "sourceRoot": "packages/kbn-config-mocks"
 }

@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-ai-assistant-common",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/packages/kbn-ai-assistant-common"
 }

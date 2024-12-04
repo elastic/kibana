@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-osquery-io-ts-types",
-  "implicitDependencies": [
-    "@kbn/io-ts-utils"
-  ]
+  "sourceRoot": "packages/kbn-osquery-io-ts-types"
 }

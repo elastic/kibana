@@ -22,14 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/lifecycle/core-lifecycle-browser-internal",
-  "implicitDependencies": [
-    "@kbn/core-lifecycle-browser",
-    "@kbn/core-application-browser-internal",
-    "@kbn/core-injected-metadata-browser-internal",
-    "@kbn/core-http-browser-internal",
-    "@kbn/core-security-browser-internal",
-    "@kbn/core-user-profile-browser-internal",
-    "@kbn/core-feature-flags-browser"
-  ]
+  "sourceRoot": "packages/core/lifecycle/core-lifecycle-browser-internal"
 }

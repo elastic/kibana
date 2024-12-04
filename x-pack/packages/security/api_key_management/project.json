@@ -22,17 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security/api_key_management",
-  "implicitDependencies": [
-    "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/security-form-components",
-    "@kbn/code-editor",
-    "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/security-plugin-types-common",
-    "@kbn/security-plugin-types-server",
-    "@kbn/ui-theme"
-  ]
+  "sourceRoot": "x-pack/packages/security/api_key_management"
 }

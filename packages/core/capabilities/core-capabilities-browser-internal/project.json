@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/capabilities/core-capabilities-browser-internal",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/std",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/core-capabilities-common",
-    "@kbn/core-http-browser-internal"
-  ]
+  "sourceRoot": "packages/core/capabilities/core-capabilities-browser-internal"
 }

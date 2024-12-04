@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-flot-charts",
-  "implicitDependencies": [
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "packages/kbn-flot-charts"
 }

@@ -24,14 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/grid_example",
-  "implicitDependencies": [
-    "@kbn/grid-layout",
-    "@kbn/core-application-browser",
-    "@kbn/core",
-    "@kbn/developer-examples-plugin",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/react-kibana-mount",
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "examples/grid_example"
 }

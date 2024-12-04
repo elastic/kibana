@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-managed-content-badge",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/navigation-plugin"
-  ]
+  "sourceRoot": "packages/kbn-managed-content-badge"
 }

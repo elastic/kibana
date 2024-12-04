@@ -24,35 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/home",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-views-plugin",
-    "@kbn/custom-integrations-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/share-plugin",
-    "@kbn/url-forwarding-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/guided-onboarding-plugin",
-    "@kbn/cloud-plugin",
-    "@kbn/i18n",
-    "@kbn/home-sample-data-tab",
-    "@kbn/analytics",
-    "@kbn/i18n-react",
-    "@kbn/test-jest-helpers",
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/utility-types",
-    "@kbn/guided-onboarding",
-    "@kbn/ui-theme",
-    "@kbn/config-schema",
-    "@kbn/utility-types-jest",
-    "@kbn/es-query",
-    "@kbn/ebt-tools",
-    "@kbn/core-analytics-server",
-    "@kbn/storybook",
-    "@kbn/shared-ux-router",
-    "@kbn/core-http-common",
-    "@kbn/shared-ux-link-redirect-app",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "src/plugins/home"
 }

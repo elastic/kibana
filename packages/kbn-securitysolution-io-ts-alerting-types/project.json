@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-io-ts-alerting-types",
-  "implicitDependencies": [
-    "@kbn/securitysolution-io-ts-types",
-    "@kbn/securitysolution-io-ts-utils"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-io-ts-alerting-types"
 }

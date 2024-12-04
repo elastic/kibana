@@ -26,13 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/field_formats_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/developer-examples-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/data-plugin",
-    "@kbn/data-view-field-editor-plugin",
-    "@kbn/field-types"
-  ]
+  "sourceRoot": "examples/field_formats_example"
 }

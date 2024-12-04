@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/analytics/core-analytics-server",
-  "implicitDependencies": []
+  "sourceRoot": "packages/core/analytics/core-analytics-server"
 }

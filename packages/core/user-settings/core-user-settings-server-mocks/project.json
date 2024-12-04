@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/user-settings/core-user-settings-server-mocks",
-  "implicitDependencies": [
-    "@kbn/core-user-settings-server-internal",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/core/user-settings/core-user-settings-server-mocks"
 }

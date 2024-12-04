@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/metrics/core-metrics-collectors-server-internal",
-  "implicitDependencies": [
-    "@kbn/logging",
-    "@kbn/core-metrics-server",
-    "@kbn/core-elasticsearch-client-server-internal",
-    "@kbn/logging-mocks",
-    "@kbn/core-elasticsearch-client-server-mocks"
-  ]
+  "sourceRoot": "packages/core/metrics/core-metrics-collectors-server-internal"
 }

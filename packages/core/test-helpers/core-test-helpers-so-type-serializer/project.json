@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/test-helpers/core-test-helpers-so-type-serializer",
-  "implicitDependencies": [
-    "@kbn/std",
-    "@kbn/core-saved-objects-common",
-    "@kbn/core-saved-objects-server",
-    "@kbn/config-schema",
-    "@kbn/core-saved-objects-base-server-internal"
-  ]
+  "sourceRoot": "packages/core/test-helpers/core-test-helpers-so-type-serializer"
 }

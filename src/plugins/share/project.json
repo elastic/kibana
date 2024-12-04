@@ -23,27 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/share",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/utility-types",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/config-schema",
-    "@kbn/core-custom-branding-browser",
-    "@kbn/core-saved-objects-utils-server",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/core-analytics-browser",
-    "@kbn/shared-ux-error-boundary",
-    "@kbn/core-chrome-browser",
-    "@kbn/shared-ux-prompt-not-found",
-    "@kbn/react-kibana-mount",
-    "@kbn/shared-ux-tabbed-modal",
-    "@kbn/core-theme-browser",
-    "@kbn/test-jest-helpers",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/core-i18n-browser-mocks",
-    "@kbn/core-notifications-browser-mocks"
-  ]
+  "sourceRoot": "src/plugins/share"
 }

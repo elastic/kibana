@@ -25,14 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/examples/third_party_vis_lens_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/expressions-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/lens-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/interpreter"
-  ]
+  "sourceRoot": "x-pack/examples/third_party_vis_lens_example"
 }

@@ -26,33 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/timelines",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/cases-plugin",
-    "@kbn/alerting-plugin",
-    "@kbn/utility-types",
-    "@kbn/es-query",
-    "@kbn/securitysolution-ecs",
-    "@kbn/securitysolution-t-grid",
-    "@kbn/rule-data-utils",
-    "@kbn/rule-registry-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/ui-theme",
-    "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/security-plugin",
-    "@kbn/safer-lodash-set",
-    "@kbn/alerts-as-data-utils",
-    "@kbn/logging",
-    "@kbn/search-errors",
-    "@kbn/search-types",
-    "@kbn/react-kibana-mount",
-    "@kbn/field-formats-plugin",
-    "@kbn/config-schema",
-    "@kbn/zod"
-  ]
+  "sourceRoot": "x-pack/plugins/timelines"
 }

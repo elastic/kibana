@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-openapi-generator",
-  "implicitDependencies": [
-    "@kbn/repo-info",
-    "@kbn/handlebars"
-  ]
+  "sourceRoot": "packages/kbn-openapi-generator"
 }

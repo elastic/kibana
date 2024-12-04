@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/rendering/core-rendering-browser",
-  "implicitDependencies": []
+  "sourceRoot": "packages/core/rendering/core-rendering-browser"
 }

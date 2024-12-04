@@ -22,16 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-es-archiver",
-  "implicitDependencies": [
-    "@kbn/core-saved-objects-server",
-    "@kbn/dev-utils",
-    "@kbn/test",
-    "@kbn/tooling-log",
-    "@kbn/utils",
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
-    "@kbn/repo-info",
-    "@kbn/jest-serializers"
-  ]
+  "sourceRoot": "packages/kbn-es-archiver"
 }

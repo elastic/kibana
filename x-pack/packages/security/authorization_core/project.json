@@ -22,13 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security/authorization_core",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/features-plugin",
-    "@kbn/security-authorization-core-common",
-    "@kbn/security-plugin-types-common",
-    "@kbn/security-plugin-types-server",
-    "@kbn/licensing-plugin"
-  ]
+  "sourceRoot": "x-pack/packages/security/authorization_core"
 }

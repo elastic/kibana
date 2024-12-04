@@ -22,17 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/runtime_fields",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/es-ui-shared-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/test-jest-helpers",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/monaco",
-    "@kbn/code-editor",
-    "@kbn/code-editor-mock",
-    "@kbn/react-kibana-mount"
-  ]
+  "sourceRoot": "x-pack/plugins/runtime_fields"
 }

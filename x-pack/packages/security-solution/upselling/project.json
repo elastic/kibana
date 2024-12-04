@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security-solution/upselling",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/security-solution-navigation",
-    "@kbn/shared-ux-page-kibana-template"
-  ]
+  "sourceRoot": "x-pack/packages/security-solution/upselling"
 }

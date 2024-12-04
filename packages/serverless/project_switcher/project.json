@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/serverless/project_switcher",
-  "implicitDependencies": [
-    "@kbn/shared-ux-storybook-mock",
-    "@kbn/serverless-types"
-  ]
+  "sourceRoot": "packages/serverless/project_switcher"
 }

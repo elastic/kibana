@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/plugins/core-plugins-contracts-browser",
-  "implicitDependencies": [
-    "@kbn/core-base-common"
-  ]
+  "sourceRoot": "packages/core/plugins/core-plugins-contracts-browser"
 }

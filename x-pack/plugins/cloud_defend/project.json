@@ -26,33 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/cloud_defend",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/security-plugin",
-    "@kbn/fleet-plugin",
-    "@kbn/i18n-react",
-    "@kbn/config-schema",
-    "@kbn/licensing-plugin",
-    "@kbn/data-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/monaco",
-    "@kbn/i18n",
-    "@kbn/usage-collection-plugin",
-    "@kbn/cloud-plugin",
-    "@kbn/shared-ux-router",
-    "@kbn/shared-ux-link-redirect-app",
-    "@kbn/core-logging-server-mocks",
-    "@kbn/securitysolution-es-utils",
-    "@kbn/es-types",
-    "@kbn/data-views-plugin",
-    "@kbn/utility-types",
-    "@kbn/kubernetes-security-plugin",
-    "@kbn/core-http-router-server-mocks",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/code-editor",
-    "@kbn/code-editor-mock",
-    "@kbn/core-security-common"
-  ]
+  "sourceRoot": "x-pack/plugins/cloud_defend"
 }

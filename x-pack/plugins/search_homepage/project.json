@@ -24,21 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/search_homepage",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/react-kibana-context-render",
-    "@kbn/kibana-react-plugin",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-router",
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/shared-ux-utility",
-    "@kbn/i18n",
-    "@kbn/console-plugin",
-    "@kbn/share-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/config-schema",
-    "@kbn/cloud",
-    "@kbn/analytics"
-  ]
+  "sourceRoot": "x-pack/plugins/search_homepage"
 }

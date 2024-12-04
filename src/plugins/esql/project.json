@@ -24,23 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/esql",
-  "implicitDependencies": [
-    "@kbn/esql-editor",
-    "@kbn/kibana-react-plugin",
-    "@kbn/core",
-    "@kbn/expressions-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/index-management-shared-types",
-    "@kbn/i18n",
-    "@kbn/config-schema",
-    "@kbn/esql-utils",
-    "@kbn/ui-actions-plugin",
-    "@kbn/data-plugin",
-    "@kbn/es-query",
-    "@kbn/fields-metadata-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/content-management-plugin",
-    "@kbn/kibana-utils-plugin"
-  ]
+  "sourceRoot": "src/plugins/esql"
 }

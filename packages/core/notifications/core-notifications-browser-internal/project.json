@@ -22,25 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/notifications/core-notifications-browser-internal",
-  "implicitDependencies": [
-    "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/utility-types",
-    "@kbn/core-theme-browser",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/core-overlays-browser",
-    "@kbn/core-notifications-browser",
-    "@kbn/core-mount-utils-browser-internal",
-    "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/core-i18n-browser-mocks",
-    "@kbn/test-jest-helpers",
-    "@kbn/core-overlays-browser-mocks",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/react-kibana-context-render",
-    "@kbn/core-analytics-browser",
-    "@kbn/core-analytics-browser-mocks"
-  ]
+  "sourceRoot": "packages/core/notifications/core-notifications-browser-internal"
 }

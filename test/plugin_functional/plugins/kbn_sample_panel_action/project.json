@@ -24,11 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/kbn_sample_panel_action",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/ui-actions-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/react-kibana-mount"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/kbn_sample_panel_action"
 }

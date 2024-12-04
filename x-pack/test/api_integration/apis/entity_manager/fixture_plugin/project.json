@@ -21,15 +21,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/api_integration/apis/entity_manager/fixture_plugin",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/core-plugins-server",
-    "@kbn/zod-helpers",
-    "@kbn/entityManager-plugin",
-    "@kbn/security-plugin-types-server",
-    "@kbn/entities-schema",
-    "@kbn/zod"
-  ]
+  "sourceRoot": "x-pack/test/api_integration/apis/entity_manager/fixture_plugin"
 }

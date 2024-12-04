@@ -24,20 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/vis_types/xy",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/charts-plugin",
-    "@kbn/visualizations-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/vis-default-editor-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/i18n",
-    "@kbn/data-plugin",
-    "@kbn/coloring",
-    "@kbn/test-jest-helpers",
-    "@kbn/i18n-react",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "src/plugins/vis_types/xy"
 }

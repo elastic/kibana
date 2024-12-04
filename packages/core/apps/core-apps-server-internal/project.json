@@ -21,32 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/apps/core-apps-server-internal",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/config-schema",
-    "@kbn/ui-shared-deps-npm",
-    "@kbn/ui-shared-deps-src",
-    "@kbn/logging",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-http-resources-server",
-    "@kbn/core-http-server",
-    "@kbn/core-lifecycle-server-internal",
-    "@kbn/core-plugins-base-server-internal",
-    "@kbn/repo-info",
-    "@kbn/core-base-server-mocks",
-    "@kbn/core-http-router-server-mocks",
-    "@kbn/core-http-server-mocks",
-    "@kbn/core-http-resources-server-mocks",
-    "@kbn/core-base-common",
-    "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-lifecycle-server-mocks",
-    "@kbn/core-ui-settings-server",
-    "@kbn/monaco",
-    "@kbn/core-http-server-internal",
-    "@kbn/core-http-router-server-internal",
-    "@kbn/core-saved-objects-server-internal",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-server"
-  ]
+  "sourceRoot": "packages/core/apps/core-apps-server-internal"
 }

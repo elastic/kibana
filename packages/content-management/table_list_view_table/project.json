@@ -22,29 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/content-management/table_list_view_table",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/content-management-content-editor",
-    "@kbn/core-http-browser",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/core-overlays-browser",
-    "@kbn/core-analytics-browser",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-theme-browser",
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/shared-ux-link-redirect-app",
-    "@kbn/test-jest-helpers",
-    "@kbn/content-management-table-list-view-common",
-    "@kbn/user-profile-components",
-    "@kbn/core-user-profile-browser",
-    "@kbn/react-kibana-mount",
-    "@kbn/content-management-user-profiles",
-    "@kbn/recently-accessed",
-    "@kbn/content-management-content-insights-public",
-    "@kbn/content-management-favorites-public",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/shared-ux-table-persist"
-  ]
+  "sourceRoot": "packages/content-management/table_list_view_table"
 }

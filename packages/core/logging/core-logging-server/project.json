@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/logging/core-logging-server",
-  "implicitDependencies": [
-    "@kbn/logging",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "packages/core/logging/core-logging-server"
 }

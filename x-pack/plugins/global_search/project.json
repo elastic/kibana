@@ -24,14 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/global_search",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/licensing-plugin",
-    "@kbn/i18n",
-    "@kbn/test-jest-helpers",
-    "@kbn/config-schema",
-    "@kbn/utility-types",
-    "@kbn/core-test-helpers-test-utils"
-  ]
+  "sourceRoot": "x-pack/plugins/global_search"
 }

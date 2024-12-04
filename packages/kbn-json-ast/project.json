@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-json-ast",
-  "implicitDependencies": [
-    "@kbn/repo-packages"
-  ]
+  "sourceRoot": "packages/kbn-json-ast"
 }

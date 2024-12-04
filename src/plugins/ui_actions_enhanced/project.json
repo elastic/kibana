@@ -24,22 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/ui_actions_enhanced",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/ui-actions-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/i18n",
-    "@kbn/utility-types",
-    "@kbn/i18n-react",
-    "@kbn/handlebars",
-    "@kbn/rison",
-    "@kbn/datemath",
-    "@kbn/monaco",
-    "@kbn/presentation-publishing"
-  ]
+  "sourceRoot": "src/plugins/ui_actions_enhanced"
 }

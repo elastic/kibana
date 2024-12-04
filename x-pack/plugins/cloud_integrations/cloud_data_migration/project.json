@@ -24,17 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_data_migration",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/cloud-plugin",
-    "@kbn/management-plugin",
-    "@kbn/features-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/config-schema",
-    "@kbn/core-plugins-server",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_data_migration"
 }

@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/json_schemas",
-  "implicitDependencies": [
-    "@kbn/dev-cli-runner"
-  ]
+  "sourceRoot": "x-pack/packages/ml/json_schemas"
 }

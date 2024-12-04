@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/base/core-base-common",
-  "implicitDependencies": [
-    "@kbn/config"
-  ]
+  "sourceRoot": "packages/core/base/core-base-common"
 }

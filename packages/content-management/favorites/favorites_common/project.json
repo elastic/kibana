@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/content-management/favorites/favorites_common",
-  "implicitDependencies": []
+  "sourceRoot": "packages/content-management/favorites/favorites_common"
 }

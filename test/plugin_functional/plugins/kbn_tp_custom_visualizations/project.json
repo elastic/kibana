@@ -24,13 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/kbn_tp_custom_visualizations",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/visualizations-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/kbn_tp_custom_visualizations"
 }

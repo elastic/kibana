@@ -21,18 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/http/core-http-resources-server-internal",
-  "implicitDependencies": [
-    "@kbn/logging",
-    "@kbn/core-http-server",
-    "@kbn/core-http-resources-server",
-    "@kbn/core-rendering-server-internal",
-    "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-http-server-mocks",
-    "@kbn/core-ui-settings-server-mocks",
-    "@kbn/core-base-server-mocks",
-    "@kbn/core-rendering-server-mocks",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-http-server-internal"
-  ]
+  "sourceRoot": "packages/core/http/core-http-resources-server-internal"
 }

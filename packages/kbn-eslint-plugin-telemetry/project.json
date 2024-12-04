@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-eslint-plugin-telemetry",
-  "implicitDependencies": [
-    "@kbn/repo-packages",
-    "@kbn/repo-info"
-  ]
+  "sourceRoot": "packages/kbn-eslint-plugin-telemetry"
 }

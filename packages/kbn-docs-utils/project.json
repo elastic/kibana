@@ -23,16 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-docs-utils",
-  "implicitDependencies": [
-    "@kbn/tooling-log",
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
-    "@kbn/ci-stats-reporter",
-    "@kbn/repo-info",
-    "@kbn/std",
-    "@kbn/get-repo-files",
-    "@kbn/repo-packages",
-    "@kbn/apm-config-loader"
-  ]
+  "sourceRoot": "packages/kbn-docs-utils"
 }

@@ -25,19 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_experiments",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-views-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/cloud-plugin",
-    "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/logging-mocks",
-    "@kbn/core-plugins-browser",
-    "@kbn/core-plugins-server",
-    "@kbn/core-feature-flags-browser",
-    "@kbn/core-feature-flags-server",
-    "@kbn/config"
-  ]
+  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_experiments"
 }

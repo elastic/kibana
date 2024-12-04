@@ -25,9 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/share_examples",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/share-plugin"
-  ]
+  "sourceRoot": "examples/share_examples"
 }

@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-endpoint-exceptions-common",
-  "implicitDependencies": [
-    "@kbn/securitysolution-exceptions-common",
-    "@kbn/openapi-common",
-    "@kbn/zod"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-endpoint-exceptions-common"
 }

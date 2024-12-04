@@ -23,9 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/ui_capabilities/common/plugins/foo_plugin",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/features-plugin"
-  ]
+  "sourceRoot": "x-pack/test/ui_capabilities/common/plugins/foo_plugin"
 }

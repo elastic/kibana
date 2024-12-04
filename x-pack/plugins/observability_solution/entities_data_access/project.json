@@ -23,8 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/observability_solution/entities_data_access",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "x-pack/plugins/observability_solution/entities_data_access"
 }

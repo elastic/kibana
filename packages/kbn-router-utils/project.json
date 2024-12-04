@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-router-utils",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-router-utils"
 }

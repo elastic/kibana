@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-jest-serializers",
-  "implicitDependencies": [
-    "@kbn/repo-info"
-  ]
+  "sourceRoot": "packages/kbn-jest-serializers"
 }

@@ -23,9 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-search-types",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-views-plugin"
-  ]
+  "sourceRoot": "packages/kbn-search-types"
 }

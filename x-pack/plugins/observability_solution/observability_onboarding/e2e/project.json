@@ -22,13 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/plugins/observability_solution/observability_onboarding/e2e",
-  "implicitDependencies": [
-    "@kbn/test",
-    "@kbn/dev-utils",
-    "@kbn/cypress-config",
-    "@kbn/observability-onboarding-plugin",
-    "@kbn/ftr-common-functional-services",
-    "@kbn/ftr-common-functional-ui-services"
-  ]
+  "sourceRoot": "x-pack/plugins/observability_solution/observability_onboarding/e2e"
 }

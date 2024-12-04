@@ -22,9 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/licensing_plugin/plugins/test_feature_usage",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/licensing-plugin"
-  ]
+  "sourceRoot": "x-pack/test/licensing_plugin/plugins/test_feature_usage"
 }

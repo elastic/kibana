@@ -23,12 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/aad",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/spaces-plugin",
-    "@kbn/alerting-plugin"
-  ]
+  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/aad"
 }

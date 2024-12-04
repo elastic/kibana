@@ -26,11 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/observability_solution/investigate",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/logging",
-    "@kbn/config-schema",
-    "@kbn/es-query"
-  ]
+  "sourceRoot": "x-pack/plugins/observability_solution/investigate"
 }

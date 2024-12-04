@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-apm-types",
-  "implicitDependencies": [
-    "@kbn/elastic-agent-utils"
-  ]
+  "sourceRoot": "packages/kbn-apm-types"
 }

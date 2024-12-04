@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-sort-predicates",
-  "implicitDependencies": [
-    "@kbn/field-formats-plugin",
-    "@kbn/expressions-plugin"
-  ]
+  "sourceRoot": "packages/kbn-sort-predicates"
 }

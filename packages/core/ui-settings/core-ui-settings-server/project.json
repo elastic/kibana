@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/ui-settings/core-ui-settings-server",
-  "implicitDependencies": [
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/core-ui-settings-common"
-  ]
+  "sourceRoot": "packages/core/ui-settings/core-ui-settings-server"
 }

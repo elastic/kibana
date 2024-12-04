@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-peggy-loader",
-  "implicitDependencies": [
-    "@kbn/peggy"
-  ]
+  "sourceRoot": "packages/kbn-peggy-loader"
 }

@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/router/impl",
-  "implicitDependencies": []
+  "sourceRoot": "packages/shared-ux/router/impl"
 }

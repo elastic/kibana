@@ -25,14 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/cloud",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/core-chrome-browser",
-    "@kbn/usage-collection-plugin",
-    "@kbn/config-schema",
-    "@kbn/logging-mocks",
-    "@kbn/logging",
-    "@kbn/core-saved-objects-server"
-  ]
+  "sourceRoot": "x-pack/plugins/cloud"
 }

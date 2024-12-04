@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-zod-helpers",
-  "implicitDependencies": [
-    "@kbn/datemath",
-    "@kbn/core",
-    "@kbn/zod"
-  ]
+  "sourceRoot": "packages/kbn-zod-helpers"
 }

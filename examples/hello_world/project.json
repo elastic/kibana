@@ -26,9 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/hello_world",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/developer-examples-plugin"
-  ]
+  "sourceRoot": "examples/hello_world"
 }

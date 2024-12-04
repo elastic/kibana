@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security/authorization_core_common",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/packages/security/authorization_core_common"
 }

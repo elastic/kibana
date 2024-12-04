@@ -26,13 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/feature_control_examples",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/security-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/features-plugin",
-    "@kbn/kibana-react-plugin"
-  ]
+  "sourceRoot": "examples/feature_control_examples"
 }

@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/analytics/core-analytics-server-internal",
-  "implicitDependencies": [
-    "@kbn/ebt-tools",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-analytics-server",
-    "@kbn/config-mocks",
-    "@kbn/core-base-server-mocks"
-  ]
+  "sourceRoot": "packages/core/analytics/core-analytics-server-internal"
 }

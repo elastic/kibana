@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-logging",
-  "implicitDependencies": [
-    "@kbn/std"
-  ]
+  "sourceRoot": "packages/kbn-logging"
 }

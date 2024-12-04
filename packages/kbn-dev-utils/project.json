@@ -21,13 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-dev-utils",
-  "implicitDependencies": [
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
-    "@kbn/repo-info",
-    "@kbn/repo-packages",
-    "@kbn/some-dev-log",
-    "@kbn/stdio-dev-helpers"
-  ]
+  "sourceRoot": "packages/kbn-dev-utils"
 }

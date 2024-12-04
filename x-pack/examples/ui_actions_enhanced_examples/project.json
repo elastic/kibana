@@ -25,23 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/examples/ui_actions_enhanced_examples",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/share-plugin",
-    "@kbn/discover-plugin",
-    "@kbn/dashboard-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/ui-actions-enhanced-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/dashboard-enhanced-plugin",
-    "@kbn/data-plugin",
-    "@kbn/ui-actions-plugin",
-    "@kbn/i18n",
-    "@kbn/unified-search-plugin",
-    "@kbn/utility-types",
-    "@kbn/presentation-publishing",
-    "@kbn/react-kibana-mount"
-  ]
+  "sourceRoot": "x-pack/examples/ui_actions_enhanced_examples"
 }

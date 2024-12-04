@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-guided-onboarding",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/core-application-browser",
-    "@kbn/i18n-react",
-    "@kbn/cloud",
-    "@kbn/analytics"
-  ]
+  "sourceRoot": "packages/kbn-guided-onboarding"
 }

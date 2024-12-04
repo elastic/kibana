@@ -22,9 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/core_plugin_route_timeouts",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/core_plugin_route_timeouts"
 }

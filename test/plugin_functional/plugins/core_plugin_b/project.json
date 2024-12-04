@@ -25,12 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/core_plugin_b",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/core-plugin-a-plugin",
-    "@kbn/config-schema",
-    "@kbn/shared-ux-router",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/core_plugin_b"
 }

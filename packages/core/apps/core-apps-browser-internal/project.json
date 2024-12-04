@@ -22,35 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/apps/core-apps-browser-internal",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/core-base-browser-internal",
-    "@kbn/core-injected-metadata-browser-internal",
-    "@kbn/core-doc-links-browser",
-    "@kbn/core-http-browser",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/core-notifications-browser",
-    "@kbn/core-application-browser",
-    "@kbn/core-application-browser-internal",
-    "@kbn/core-mount-utils-browser-internal",
-    "@kbn/core-http-browser-internal",
-    "@kbn/core-application-browser-mocks",
-    "@kbn/core-notifications-browser-mocks",
-    "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/core-metrics-collectors-server-mocks",
-    "@kbn/core-status-common",
-    "@kbn/core-doc-links-browser-mocks",
-    "@kbn/test-jest-helpers",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/core-analytics-browser",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-theme-browser",
-    "@kbn/react-kibana-context-render",
-    "@kbn/core-analytics-browser-mocks",
-    "@kbn/core-i18n-browser-mocks",
-    "@kbn/core-theme-browser-mocks"
-  ]
+  "sourceRoot": "packages/core/apps/core-apps-browser-internal"
 }

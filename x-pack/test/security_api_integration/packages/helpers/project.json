@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/test/security_api_integration/packages/helpers",
-  "implicitDependencies": [
-    "@kbn/dev-utils"
-  ]
+  "sourceRoot": "x-pack/test/security_api_integration/packages/helpers"
 }

@@ -23,16 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/cases_api_integration/common/plugins/cases",
-  "implicitDependencies": [
-    "@kbn/cases-plugin",
-    "@kbn/core",
-    "@kbn/files-plugin",
-    "@kbn/config-schema",
-    "@kbn/actions-plugin",
-    "@kbn/features-plugin",
-    "@kbn/spaces-plugin",
-    "@kbn/security-plugin",
-    "@kbn/task-manager-plugin"
-  ]
+  "sourceRoot": "x-pack/test/cases_api_integration/common/plugins/cases"
 }

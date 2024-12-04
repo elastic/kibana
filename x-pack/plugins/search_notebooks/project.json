@@ -26,20 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/search_notebooks",
-  "implicitDependencies": [
-    "@kbn/analytics",
-    "@kbn/config-schema",
-    "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/logging",
-    "@kbn/console-plugin",
-    "@kbn/i18n-react",
-    "@kbn/kibana-react-plugin",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/shared-ux-utility",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/ipynb",
-    "@kbn/usage-collection-plugin"
-  ]
+  "sourceRoot": "x-pack/plugins/search_notebooks"
 }

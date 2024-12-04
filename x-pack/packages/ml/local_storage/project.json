@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/local_storage",
-  "implicitDependencies": [
-    "@kbn/kibana-utils-plugin",
-    "@kbn/ml-is-defined"
-  ]
+  "sourceRoot": "x-pack/packages/ml/local_storage"
 }

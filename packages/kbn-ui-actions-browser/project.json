@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-ui-actions-browser",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/expressions-plugin",
-    "@kbn/presentation-publishing"
-  ]
+  "sourceRoot": "packages/kbn-ui-actions-browser"
 }

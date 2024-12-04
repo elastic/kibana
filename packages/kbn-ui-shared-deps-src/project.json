@@ -24,8 +24,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-ui-shared-deps-src",
-  "implicitDependencies": [
-    "@kbn/repo-info"
-  ]
+  "sourceRoot": "packages/kbn-ui-shared-deps-src"
 }

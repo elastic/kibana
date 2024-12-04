@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/http/core-http-browser",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-execution-context-common",
-    "@kbn/core-http-common"
-  ]
+  "sourceRoot": "packages/core/http/core-http-browser"
 }

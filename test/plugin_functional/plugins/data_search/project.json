@@ -22,10 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/data_search",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/data_search"
 }

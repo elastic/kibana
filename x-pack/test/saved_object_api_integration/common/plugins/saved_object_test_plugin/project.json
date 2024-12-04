@@ -23,8 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/saved_object_api_integration/common/plugins/saved_object_test_plugin",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "x-pack/test/saved_object_api_integration/common/plugins/saved_object_test_plugin"
 }

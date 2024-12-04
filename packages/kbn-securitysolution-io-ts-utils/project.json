@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-io-ts-utils",
-  "implicitDependencies": [
-    "@kbn/datemath"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-io-ts-utils"
 }

@@ -24,9 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/analytics/plugins/analytics_plugin_a",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "test/analytics/plugins/analytics_plugin_a"
 }

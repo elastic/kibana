@@ -22,23 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-discover-contextual-components",
-  "implicitDependencies": [
-    "@kbn/field-formats-plugin",
-    "@kbn/discover-utils",
-    "@kbn/router-utils",
-    "@kbn/management-settings-ids",
-    "@kbn/share-plugin",
-    "@kbn/ui-theme",
-    "@kbn/unified-data-table",
-    "@kbn/unified-doc-viewer",
-    "@kbn/react-hooks",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/i18n",
-    "@kbn/unified-doc-viewer-plugin",
-    "@kbn/core",
-    "@kbn/shared-ux-utility",
-    "@kbn/elastic-agent-utils",
-    "@kbn/custom-icons"
-  ]
+  "sourceRoot": "packages/kbn-discover-contextual-components"
 }

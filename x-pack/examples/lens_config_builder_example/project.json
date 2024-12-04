@@ -25,15 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/examples/lens_config_builder_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/lens-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/ui-actions-plugin",
-    "@kbn/lens-embeddable-utils"
-  ]
+  "sourceRoot": "x-pack/examples/lens_config_builder_example"
 }

@@ -22,13 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/application/core-application-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/core-mount-utils-browser",
-    "@kbn/core-application-browser",
-    "@kbn/core-application-browser-internal",
-    "@kbn/core-capabilities-browser-mocks",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/core/application/core-application-browser-mocks"
 }

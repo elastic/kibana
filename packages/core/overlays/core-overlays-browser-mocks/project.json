@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/overlays/core-overlays-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/utility-types-jest",
-    "@kbn/core-overlays-browser",
-    "@kbn/core-overlays-browser-internal"
-  ]
+  "sourceRoot": "packages/core/overlays/core-overlays-browser-mocks"
 }

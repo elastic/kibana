@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/validators",
-  "implicitDependencies": [
-    "@kbn/ml-parse-interval"
-  ]
+  "sourceRoot": "x-pack/packages/ml/validators"
 }

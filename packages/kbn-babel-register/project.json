@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-babel-register",
-  "implicitDependencies": [
-    "@kbn/repo-info",
-    "@kbn/babel-transform",
-    "@kbn/peggy"
-  ]
+  "sourceRoot": "packages/kbn-babel-register"
 }

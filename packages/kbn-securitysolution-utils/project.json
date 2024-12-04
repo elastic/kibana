@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-utils",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/esql-utils",
-    "@kbn/esql-ast"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-utils"
 }

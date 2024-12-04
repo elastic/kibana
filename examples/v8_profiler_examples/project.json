@@ -23,9 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/v8_profiler_examples",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "examples/v8_profiler_examples"
 }

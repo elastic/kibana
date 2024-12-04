@@ -26,23 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/serverless_observability",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/management-plugin",
-    "@kbn/serverless",
-    "@kbn/observability-shared-plugin",
-    "@kbn/i18n",
-    "@kbn/management-cards-navigation",
-    "@kbn/data-plugin",
-    "@kbn/observability-plugin",
-    "@kbn/io-ts-utils",
-    "@kbn/serverless-observability-settings",
-    "@kbn/core-chrome-browser",
-    "@kbn/discover-plugin",
-    "@kbn/security-plugin",
-    "@kbn/search-types",
-    "@kbn/streams-plugin"
-  ]
+  "sourceRoot": "x-pack/plugins/serverless_observability"
 }

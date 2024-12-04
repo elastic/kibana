@@ -21,15 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-capture-oas-snapshot-cli",
-  "implicitDependencies": [
-    "@kbn/repo-info",
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/safer-lodash-set",
-    "@kbn/core-plugins-server-internal",
-    "@kbn/dev-cli-runner",
-    "@kbn/test",
-    "@kbn/dev-utils",
-    "@kbn/tooling-log"
-  ]
+  "sourceRoot": "packages/kbn-capture-oas-snapshot-cli"
 }

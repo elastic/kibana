@@ -23,8 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/server_integration/plugins/status_plugin_b",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "test/server_integration/plugins/status_plugin_b"
 }

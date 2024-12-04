@@ -22,13 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/chrome/navigation",
-  "implicitDependencies": [
-    "@kbn/core-chrome-browser",
-    "@kbn/core-application-browser",
-    "@kbn/i18n",
-    "@kbn/shared-ux-storybook-mock",
-    "@kbn/core-http-browser",
-    "@kbn/core-analytics-browser"
-  ]
+  "sourceRoot": "packages/shared-ux/chrome/navigation"
 }

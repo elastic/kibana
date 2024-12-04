@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "src/plugins/chart_expressions/common",
-  "implicitDependencies": [
-    "@kbn/core-execution-context-common",
-    "@kbn/expressions-plugin",
-    "@kbn/data-plugin"
-  ]
+  "sourceRoot": "src/plugins/chart_expressions/common"
 }

@@ -22,13 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/user-profile/core-user-profile-browser-internal",
-  "implicitDependencies": [
-    "@kbn/core-user-profile-browser",
-    "@kbn/logging-mocks",
-    "@kbn/core-base-server-mocks",
-    "@kbn/logging",
-    "@kbn/core-base-browser-internal",
-    "@kbn/core-user-profile-common"
-  ]
+  "sourceRoot": "packages/core/user-profile/core-user-profile-browser-internal"
 }

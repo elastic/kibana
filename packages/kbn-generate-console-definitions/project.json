@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-generate-console-definitions",
-  "implicitDependencies": [
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
-    "@kbn/repo-info",
-    "@kbn/console-plugin",
-    "@kbn/tooling-log"
-  ]
+  "sourceRoot": "packages/kbn-generate-console-definitions"
 }

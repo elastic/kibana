@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-ci-stats-core",
-  "implicitDependencies": [
-    "@kbn/some-dev-log"
-  ]
+  "sourceRoot": "packages/kbn-ci-stats-core"
 }

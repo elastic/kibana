@@ -24,11 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/examples/third_party_maps_source_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/maps-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/data-plugin"
-  ]
+  "sourceRoot": "x-pack/examples/third_party_maps_source_example"
 }

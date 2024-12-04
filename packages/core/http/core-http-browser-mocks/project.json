@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/http/core-http-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-http-browser-internal",
-    "@kbn/core-http-browser"
-  ]
+  "sourceRoot": "packages/core/http/core-http-browser-mocks"
 }

@@ -22,16 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/plugins/observability_solution/synthetics/e2e",
-  "implicitDependencies": [
-    "@kbn/test",
-    "@kbn/dev-utils",
-    "@kbn/ftr-common-functional-services",
-    "@kbn/apm-plugin",
-    "@kbn/es-archiver",
-    "@kbn/synthetics-plugin",
-    "@kbn/repo-info",
-    "@kbn/observability-synthetics-test-data",
-    "@kbn/ftr-common-functional-ui-services"
-  ]
+  "sourceRoot": "x-pack/plugins/observability_solution/synthetics/e2e"
 }

@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/deeplinks/fleet",
-  "implicitDependencies": []
+  "sourceRoot": "packages/deeplinks/fleet"
 }

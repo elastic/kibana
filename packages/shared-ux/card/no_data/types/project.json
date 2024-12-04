@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/card/no_data/types",
-  "implicitDependencies": [
-    "@kbn/shared-ux-link-redirect-app-types"
-  ]
+  "sourceRoot": "packages/shared-ux/card/no_data/types"
 }

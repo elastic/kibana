@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-picomatcher",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-picomatcher"
 }

@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-unsaved-changes-prompt",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/core"
-  ]
+  "sourceRoot": "packages/kbn-unsaved-changes-prompt"
 }

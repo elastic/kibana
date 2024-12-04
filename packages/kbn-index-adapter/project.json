@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-index-adapter",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/std",
-    "@kbn/safer-lodash-set",
-    "@kbn/logging-mocks"
-  ]
+  "sourceRoot": "packages/kbn-index-adapter"
 }

@@ -21,14 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-list-utils",
-  "implicitDependencies": [
-    "@kbn/es-query",
-    "@kbn/i18n",
-    "@kbn/securitysolution-io-ts-list-types",
-    "@kbn/securitysolution-io-ts-utils",
-    "@kbn/securitysolution-list-constants",
-    "@kbn/securitysolution-utils",
-    "@kbn/field-types"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-list-utils"
 }

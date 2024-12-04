@@ -22,10 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/plugin_api_integration/plugins/event_log",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/event-log-plugin",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "x-pack/test/plugin_api_integration/plugins/event_log"
 }

@@ -22,8 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/usage_collection/plugins/application_usage_test",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "x-pack/test/usage_collection/plugins/application_usage_test"
 }

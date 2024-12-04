@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/parse_interval",
-  "implicitDependencies": [
-    "@kbn/datemath"
-  ]
+  "sourceRoot": "x-pack/packages/ml/parse_interval"
 }

@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/test-helpers/core-test-helpers-http-setup-browser",
-  "implicitDependencies": [
-    "@kbn/core-execution-context-browser-mocks",
-    "@kbn/core-fatal-errors-browser-mocks",
-    "@kbn/core-injected-metadata-browser-mocks",
-    "@kbn/core-http-browser-internal"
-  ]
+  "sourceRoot": "packages/core/test-helpers/core-test-helpers-http-setup-browser"
 }

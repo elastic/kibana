@@ -22,10 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/preboot_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/core-http-browser",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "examples/preboot_example"
 }

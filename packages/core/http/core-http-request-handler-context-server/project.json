@@ -21,15 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/http/core-http-request-handler-context-server",
-  "implicitDependencies": [
-    "@kbn/core-http-server",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/core-saved-objects-server",
-    "@kbn/core-deprecations-server",
-    "@kbn/core-ui-settings-server",
-    "@kbn/core-security-server",
-    "@kbn/core-user-profile-server",
-    "@kbn/core-feature-flags-server"
-  ]
+  "sourceRoot": "packages/core/http/core-http-request-handler-context-server"
 }

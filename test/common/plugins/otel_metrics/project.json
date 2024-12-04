@@ -22,8 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/common/plugins/otel_metrics",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "test/common/plugins/otel_metrics"
 }

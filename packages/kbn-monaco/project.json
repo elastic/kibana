@@ -32,12 +32,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-monaco",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/repo-info",
-    "@kbn/ui-theme",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete"
-  ]
+  "sourceRoot": "packages/kbn-monaco"
 }

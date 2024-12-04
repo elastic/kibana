@@ -22,18 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-esql-utils",
-  "implicitDependencies": [
-    "@kbn/data-views-plugin",
-    "@kbn/crypto-browser",
-    "@kbn/data-view-utils",
-    "@kbn/esql-ast",
-    "@kbn/search-types",
-    "@kbn/expressions-plugin",
-    "@kbn/field-types",
-    "@kbn/es-types",
-    "@kbn/i18n",
-    "@kbn/datemath",
-    "@kbn/es-query"
-  ]
+  "sourceRoot": "packages/kbn-esql-utils"
 }

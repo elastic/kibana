@@ -23,24 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/saved_objects_tagging",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/usage-collection-plugin",
-    "@kbn/management-plugin",
-    "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/features-plugin",
-    "@kbn/security-plugin",
-    "@kbn/i18n",
-    "@kbn/utility-types",
-    "@kbn/i18n-react",
-    "@kbn/config-schema",
-    "@kbn/ebt-tools",
-    "@kbn/core-notifications-browser",
-    "@kbn/ui-theme",
-    "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-mount",
-    "@kbn/core-lifecycle-browser"
-  ]
+  "sourceRoot": "x-pack/plugins/saved_objects_tagging"
 }

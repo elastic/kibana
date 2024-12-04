@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-chart-icons",
-  "implicitDependencies": [
-    "@kbn/ui-theme"
-  ]
+  "sourceRoot": "packages/kbn-chart-icons"
 }

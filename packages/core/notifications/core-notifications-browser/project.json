@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/notifications/core-notifications-browser",
-  "implicitDependencies": [
-    "@kbn/core-mount-utils-browser"
-  ]
+  "sourceRoot": "packages/core/notifications/core-notifications-browser"
 }

@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/execution-context/core-execution-context-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-execution-context-browser",
-    "@kbn/core-execution-context-browser-internal"
-  ]
+  "sourceRoot": "packages/core/execution-context/core-execution-context-browser-mocks"
 }

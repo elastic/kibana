@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-custom-icons",
-  "implicitDependencies": [
-    "@kbn/elastic-agent-utils",
-    "@kbn/kibana-react-plugin"
-  ]
+  "sourceRoot": "packages/kbn-custom-icons"
 }

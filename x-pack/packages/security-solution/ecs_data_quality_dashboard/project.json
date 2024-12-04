@@ -22,17 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security-solution/ecs_data_quality_dashboard",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/ui-theme",
-    "@kbn/core-http-browser",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/elastic-assistant",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/core",
-    "@kbn/core-notifications-browser",
-    "@kbn/core-notifications-browser-mocks"
-  ]
+  "sourceRoot": "x-pack/packages/security-solution/ecs_data_quality_dashboard"
 }

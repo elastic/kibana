@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-profiling-utils",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-profiling-utils"
 }

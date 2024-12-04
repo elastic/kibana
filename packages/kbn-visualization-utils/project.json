@@ -23,12 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-visualization-utils",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/interpreter",
-    "@kbn/data-views-plugin",
-    "@kbn/es-query"
-  ]
+  "sourceRoot": "packages/kbn-visualization-utils"
 }

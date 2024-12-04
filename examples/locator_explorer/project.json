@@ -25,11 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/locator_explorer",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/share-plugin",
-    "@kbn/locator-examples-plugin",
-    "@kbn/developer-examples-plugin"
-  ]
+  "sourceRoot": "examples/locator_explorer"
 }

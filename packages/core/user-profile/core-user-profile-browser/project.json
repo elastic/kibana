@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/user-profile/core-user-profile-browser",
-  "implicitDependencies": [
-    "@kbn/core-user-profile-common",
-    "@kbn/core-security-common"
-  ]
+  "sourceRoot": "packages/core/user-profile/core-user-profile-browser"
 }

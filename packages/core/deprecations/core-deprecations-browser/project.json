@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/deprecations/core-deprecations-browser",
-  "implicitDependencies": [
-    "@kbn/core-deprecations-common"
-  ]
+  "sourceRoot": "packages/core/deprecations/core-deprecations-browser"
 }

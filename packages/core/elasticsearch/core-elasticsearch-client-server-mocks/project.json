@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/core-elasticsearch-client-server-internal"
-  ]
+  "sourceRoot": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks"
 }

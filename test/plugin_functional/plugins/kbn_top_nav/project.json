@@ -25,9 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/kbn_top_nav",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/navigation-plugin"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/kbn_top_nav"
 }

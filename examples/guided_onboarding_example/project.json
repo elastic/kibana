@@ -25,14 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/guided_onboarding_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/guided-onboarding-plugin",
-    "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/guided-onboarding",
-    "@kbn/shared-ux-router",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "examples/guided_onboarding_example"
 }

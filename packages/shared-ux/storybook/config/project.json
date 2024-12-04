@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/storybook/config",
-  "implicitDependencies": [
-    "@kbn/storybook"
-  ]
+  "sourceRoot": "packages/shared-ux/storybook/config"
 }

@@ -22,8 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/saved_objects_tagging_oss",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "src/plugins/saved_objects_tagging_oss"
 }

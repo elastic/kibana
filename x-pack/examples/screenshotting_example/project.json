@@ -26,12 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/examples/screenshotting_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/developer-examples-plugin",
-    "@kbn/screenshotting-plugin",
-    "@kbn/config-schema",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "x-pack/examples/screenshotting_example"
 }

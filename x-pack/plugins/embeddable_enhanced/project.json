@@ -21,16 +21,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/embeddable_enhanced",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/embeddable-plugin",
-    "@kbn/ui-actions-plugin",
-    "@kbn/ui-actions-enhanced-plugin",
-    "@kbn/i18n",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/data-plugin",
-    "@kbn/saved-objects-finder-plugin",
-    "@kbn/presentation-publishing"
-  ]
+  "sourceRoot": "x-pack/plugins/embeddable_enhanced"
 }

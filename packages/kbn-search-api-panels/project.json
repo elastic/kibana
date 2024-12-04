@@ -22,16 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-search-api-panels",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/core-application-browser",
-    "@kbn/share-plugin",
-    "@kbn/i18n-react",
-    "@kbn/security-plugin",
-    "@kbn/console-plugin",
-    "@kbn/ui-theme",
-    "@kbn/try-in-console",
-    "@kbn/test-jest-helpers"
-  ]
+  "sourceRoot": "packages/kbn-search-api-panels"
 }

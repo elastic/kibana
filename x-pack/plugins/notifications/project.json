@@ -24,14 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/notifications",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/actions-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/utility-types",
-    "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/logging-mocks"
-  ]
+  "sourceRoot": "x-pack/plugins/notifications"
 }

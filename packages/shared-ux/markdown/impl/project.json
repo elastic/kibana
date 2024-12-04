@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/markdown/impl",
-  "implicitDependencies": [
-    "@kbn/shared-ux-markdown-mocks"
-  ]
+  "sourceRoot": "packages/shared-ux/markdown/impl"
 }

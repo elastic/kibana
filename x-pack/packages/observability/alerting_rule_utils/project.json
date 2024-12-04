@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/observability/alerting_rule_utils",
-  "implicitDependencies": [
-    "@kbn/alerts-as-data-utils"
-  ]
+  "sourceRoot": "x-pack/packages/observability/alerting_rule_utils"
 }

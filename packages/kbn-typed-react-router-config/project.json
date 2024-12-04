@@ -22,14 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-typed-react-router-config",
-  "implicitDependencies": [
-    "@kbn/io-ts-utils",
-    "@kbn/shared-ux-router",
-    "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
-    "@kbn/core-chrome-browser",
-    "@kbn/serverless"
-  ]
+  "sourceRoot": "packages/kbn-typed-react-router-config"
 }

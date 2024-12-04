@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/runtime_field_utils",
-  "implicitDependencies": [
-    "@kbn/data-views-plugin",
-    "@kbn/data-plugin",
-    "@kbn/ml-is-populated-object"
-  ]
+  "sourceRoot": "x-pack/packages/ml/runtime_field_utils"
 }

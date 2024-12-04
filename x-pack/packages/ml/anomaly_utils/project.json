@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/anomaly_utils",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/ml-is-populated-object",
-    "@kbn/field-types"
-  ]
+  "sourceRoot": "x-pack/packages/ml/anomaly_utils"
 }

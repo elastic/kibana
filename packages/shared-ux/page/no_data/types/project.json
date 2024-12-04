@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/page/no_data/types",
-  "implicitDependencies": [
-    "@kbn/shared-ux-card-no-data-types"
-  ]
+  "sourceRoot": "packages/shared-ux/page/no_data/types"
 }

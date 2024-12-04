@@ -22,11 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/presentation/presentation_publishing",
-  "implicitDependencies": [
-    "@kbn/es-query",
-    "@kbn/data-views-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/core-execution-context-common"
-  ]
+  "sourceRoot": "packages/presentation/presentation_publishing"
 }

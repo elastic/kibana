@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/error_boundary",
-  "implicitDependencies": [
-    "@kbn/shared-ux-storybook-mock",
-    "@kbn/i18n",
-    "@kbn/core-analytics-browser-mocks"
-  ]
+  "sourceRoot": "packages/shared-ux/error_boundary"
 }

@@ -23,16 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/custom_branding",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/licensing-plugin",
-    "@kbn/license-api-guard-plugin",
-    "@kbn/i18n",
-    "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-custom-branding-common",
-    "@kbn/core-lifecycle-server",
-    "@kbn/core-ui-settings-common",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "x-pack/plugins/custom_branding"
 }

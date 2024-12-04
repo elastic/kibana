@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-es-utils",
-  "implicitDependencies": [
-    "@kbn/zod-helpers",
-    "@kbn/zod"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-es-utils"
 }

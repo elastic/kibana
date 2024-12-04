@@ -21,13 +21,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/monitoring_collection",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/usage-collection-plugin",
-    "@kbn/config-schema",
-    "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/utility-types",
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "x-pack/plugins/monitoring_collection"
 }

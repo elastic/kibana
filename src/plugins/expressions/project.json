@@ -24,20 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/expressions",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/inspector-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/logging",
-    "@kbn/utility-types",
-    "@kbn/interpreter",
-    "@kbn/i18n",
-    "@kbn/std",
-    "@kbn/core-execution-context-common",
-    "@kbn/tinymath",
-    "@kbn/panel-loader",
-    "@kbn/es-query"
-  ]
+  "sourceRoot": "src/plugins/expressions"
 }

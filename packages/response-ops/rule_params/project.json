@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/response-ops/rule_params",
-  "implicitDependencies": [
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "packages/response-ops/rule_params"
 }

@@ -24,10 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/core_history_block",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/shared-ux-router",
-    "@kbn/shared-ux-link-redirect-app"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/core_history_block"
 }

@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-reporting/export_types/png_common",
-  "implicitDependencies": [
-    "@kbn/screenshotting-plugin",
-    "@kbn/reporting-common"
-  ]
+  "sourceRoot": "packages/kbn-reporting/export_types/png_common"
 }

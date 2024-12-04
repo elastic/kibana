@@ -25,12 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/locator_examples",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/share-plugin",
-    "@kbn/utility-types",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/shared-ux-router"
-  ]
+  "sourceRoot": "examples/locator_examples"
 }

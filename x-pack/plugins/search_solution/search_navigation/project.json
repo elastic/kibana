@@ -25,14 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/search_solution/search_navigation",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/core-chrome-browser",
-    "@kbn/shared-ux-page-solution-nav",
-    "@kbn/logging",
-    "@kbn/serverless",
-    "@kbn/core-plugins-browser"
-  ]
+  "sourceRoot": "x-pack/plugins/search_solution/search_navigation"
 }

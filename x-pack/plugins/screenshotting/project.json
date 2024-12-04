@@ -24,22 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/screenshotting",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/expressions-plugin",
-    "@kbn/screenshot-mode-plugin",
-    "@kbn/cloud-plugin",
-    "@kbn/utility-types",
-    "@kbn/logging",
-    "@kbn/std",
-    "@kbn/i18n",
-    "@kbn/utils",
-    "@kbn/core-logging-server-mocks",
-    "@kbn/logging-mocks",
-    "@kbn/core-http-server",
-    "@kbn/core-plugins-server",
-    "@kbn/task-manager-plugin",
-    "@kbn/screenshotting-server"
-  ]
+  "sourceRoot": "x-pack/plugins/screenshotting"
 }

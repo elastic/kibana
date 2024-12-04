@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-elastic-assistant-common",
-  "implicitDependencies": [
-    "@kbn/zod-helpers",
-    "@kbn/securitysolution-io-ts-utils",
-    "@kbn/core",
-    "@kbn/logging",
-    "@kbn/zod"
-  ]
+  "sourceRoot": "x-pack/packages/kbn-elastic-assistant-common"
 }

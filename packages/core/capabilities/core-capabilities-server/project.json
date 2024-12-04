@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/capabilities/core-capabilities-server",
-  "implicitDependencies": [
-    "@kbn/core-http-server",
-    "@kbn/core-capabilities-common",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/core/capabilities/core-capabilities-server"
 }

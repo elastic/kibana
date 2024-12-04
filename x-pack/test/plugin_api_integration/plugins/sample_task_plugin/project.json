@@ -22,10 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/plugin_api_integration/plugins/sample_task_plugin",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/task-manager-plugin",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "x-pack/test/plugin_api_integration/plugins/sample_task_plugin"
 }

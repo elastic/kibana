@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/react/kibana_context/common",
-  "implicitDependencies": []
+  "sourceRoot": "packages/react/kibana_context/common"
 }

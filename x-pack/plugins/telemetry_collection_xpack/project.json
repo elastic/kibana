@@ -6,9 +6,7 @@
       "{projectRoot}/common/**/*",
       "{projectRoot}/server/**/*",
       "{workspaceRoot}/typings/*",
-      "{projectRoot}/schema/xpack_monitoring.json",
-      "{projectRoot}/schema/xpack_plugins.json",
-      "{projectRoot}/schema/xpack_root.json",
+      "{projectRoot}/schema/*.json",
       "!{projectRoot}/target/**/*"
     ]
   },
@@ -26,11 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/telemetry_collection_xpack",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/telemetry-collection-manager-plugin",
-    "@kbn/telemetry-plugin",
-    "@kbn/usage-collection-plugin"
-  ]
+  "sourceRoot": "x-pack/plugins/telemetry_collection_xpack"
 }

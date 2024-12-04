@@ -25,13 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/fields_metadata",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/io-ts-utils",
-    "@kbn/logging",
-    "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-http-server",
-    "@kbn/logging-mocks"
-  ]
+  "sourceRoot": "x-pack/plugins/fields_metadata"
 }

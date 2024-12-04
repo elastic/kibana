@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-ci-stats-shipper-cli",
-  "implicitDependencies": [
-    "@kbn/ci-stats-reporter",
-    "@kbn/dev-cli-errors",
-    "@kbn/dev-cli-runner"
-  ]
+  "sourceRoot": "packages/kbn-ci-stats-shipper-cli"
 }

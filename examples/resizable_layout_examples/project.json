@@ -24,12 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/resizable_layout_examples",
-  "implicitDependencies": [
-    "@kbn/resizable-layout",
-    "@kbn/core",
-    "@kbn/i18n-react",
-    "@kbn/developer-examples-plugin",
-    "@kbn/react-kibana-context-theme"
-  ]
+  "sourceRoot": "examples/resizable_layout_examples"
 }

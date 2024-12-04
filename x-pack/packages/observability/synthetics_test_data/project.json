@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/observability/synthetics_test_data",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/packages/observability/synthetics_test_data"
 }

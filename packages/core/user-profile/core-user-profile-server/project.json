@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/user-profile/core-user-profile-server",
-  "implicitDependencies": [
-    "@kbn/core-user-profile-common",
-    "@kbn/core-http-server"
-  ]
+  "sourceRoot": "packages/core/user-profile/core-user-profile-server"
 }

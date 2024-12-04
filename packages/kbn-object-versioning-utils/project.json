@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-object-versioning-utils",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-object-versioning-utils"
 }

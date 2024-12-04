@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-avc-banner",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/kibana-react-plugin"
-  ]
+  "sourceRoot": "packages/kbn-avc-banner"
 }

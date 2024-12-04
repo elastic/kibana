@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/saved-objects/core-saved-objects-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-saved-objects-browser",
-    "@kbn/core-saved-objects-browser-internal",
-    "@kbn/core-saved-objects-api-browser",
-    "@kbn/core-saved-objects-common"
-  ]
+  "sourceRoot": "packages/core/saved-objects/core-saved-objects-browser-mocks"
 }

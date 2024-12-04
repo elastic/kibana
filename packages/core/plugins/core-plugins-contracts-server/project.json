@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/plugins/core-plugins-contracts-server",
-  "implicitDependencies": [
-    "@kbn/core-base-common"
-  ]
+  "sourceRoot": "packages/core/plugins/core-plugins-contracts-server"
 }

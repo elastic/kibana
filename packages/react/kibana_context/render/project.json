@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/react/kibana_context/render",
-  "implicitDependencies": [
-    "@kbn/react-kibana-context-root",
-    "@kbn/shared-ux-error-boundary"
-  ]
+  "sourceRoot": "packages/react/kibana_context/render"
 }

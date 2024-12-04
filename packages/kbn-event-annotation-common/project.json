@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-event-annotation-common",
-  "implicitDependencies": [
-    "@kbn/data-plugin",
-    "@kbn/visualization-ui-components",
-    "@kbn/ui-theme",
-    "@kbn/i18n",
-    "@kbn/content-management-table-list-view-common"
-  ]
+  "sourceRoot": "packages/kbn-event-annotation-common"
 }

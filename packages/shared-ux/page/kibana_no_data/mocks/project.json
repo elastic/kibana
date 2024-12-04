@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/page/kibana_no_data/mocks",
-  "implicitDependencies": [
-    "@kbn/shared-ux-card-no-data-mocks",
-    "@kbn/shared-ux-page-kibana-no-data-types",
-    "@kbn/shared-ux-prompt-no-data-views-mocks",
-    "@kbn/shared-ux-storybook-mock",
-    "@kbn/shared-ux-page-no-data-types"
-  ]
+  "sourceRoot": "packages/shared-ux/page/kibana_no_data/mocks"
 }

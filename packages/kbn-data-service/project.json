@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-data-service",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/es-query",
-    "@kbn/data-views-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/expressions-plugin"
-  ]
+  "sourceRoot": "packages/kbn-data-service"
 }

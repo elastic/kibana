@@ -21,18 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/logging/core-logging-server-internal",
-  "implicitDependencies": [
-    "@kbn/safer-lodash-set",
-    "@kbn/logging",
-    "@kbn/config-schema",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-logging-common-internal",
-    "@kbn/core-logging-server",
-    "@kbn/logging-mocks",
-    "@kbn/std",
-    "@kbn/utility-types-jest",
-    "@kbn/utility-types",
-    "@kbn/security-hardening"
-  ]
+  "sourceRoot": "packages/core/logging/core-logging-server-internal"
 }

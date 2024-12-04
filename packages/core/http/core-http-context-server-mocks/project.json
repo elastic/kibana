@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/http/core-http-context-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-http-server",
-    "@kbn/core-http-context-server-internal"
-  ]
+  "sourceRoot": "packages/core/http/core-http-context-server-mocks"
 }

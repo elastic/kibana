@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-openapi-bundler",
-  "implicitDependencies": [
-    "@kbn/tooling-log"
-  ]
+  "sourceRoot": "packages/kbn-openapi-bundler"
 }

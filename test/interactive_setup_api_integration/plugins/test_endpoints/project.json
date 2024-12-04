@@ -21,8 +21,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/interactive_setup_api_integration/plugins/test_endpoints",
-  "implicitDependencies": [
-    "@kbn/core"
-  ]
+  "sourceRoot": "test/interactive_setup_api_integration/plugins/test_endpoints"
 }

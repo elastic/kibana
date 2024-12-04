@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/link/redirect_app/impl",
-  "implicitDependencies": [
-    "@kbn/shared-ux-utility",
-    "@kbn/shared-ux-link-redirect-app-types",
-    "@kbn/shared-ux-link-redirect-app-mocks"
-  ]
+  "sourceRoot": "packages/shared-ux/link/redirect_app/impl"
 }

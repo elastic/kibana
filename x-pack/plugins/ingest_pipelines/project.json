@@ -25,35 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/ingest_pipelines",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/licensing-plugin",
-    "@kbn/features-plugin",
-    "@kbn/security-plugin",
-    "@kbn/file-upload-plugin",
-    "@kbn/es-ui-shared-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/management-plugin",
-    "@kbn/share-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/utility-types",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/analytics",
-    "@kbn/monaco",
-    "@kbn/test-jest-helpers",
-    "@kbn/config-schema",
-    "@kbn/shared-ux-router",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/code-editor",
-    "@kbn/react-kibana-context-render",
-    "@kbn/console-plugin",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/unsaved-changes-prompt",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/shared-ux-table-persist",
-    "@kbn/core-http-browser",
-    "@kbn/core-plugins-server"
-  ]
+  "sourceRoot": "x-pack/plugins/ingest_pipelines"
 }

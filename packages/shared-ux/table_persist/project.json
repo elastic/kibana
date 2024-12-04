@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/table_persist",
-  "implicitDependencies": []
+  "sourceRoot": "packages/shared-ux/table_persist"
 }

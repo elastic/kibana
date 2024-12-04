@@ -21,14 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/execution-context/core-execution-context-server-internal",
-  "implicitDependencies": [
-    "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-execution-context-common",
-    "@kbn/core-execution-context-server",
-    "@kbn/core-base-server-mocks",
-    "@kbn/core-logging-server-mocks"
-  ]
+  "sourceRoot": "packages/core/execution-context/core-execution-context-server-internal"
 }

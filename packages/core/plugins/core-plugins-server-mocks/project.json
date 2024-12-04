@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/plugins/core-plugins-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-plugins-server-internal",
-    "@kbn/core-plugins-contracts-server"
-  ]
+  "sourceRoot": "packages/core/plugins/core-plugins-server-mocks"
 }

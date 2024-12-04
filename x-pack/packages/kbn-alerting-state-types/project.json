@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-alerting-state-types",
-  "implicitDependencies": [
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "x-pack/packages/kbn-alerting-state-types"
 }

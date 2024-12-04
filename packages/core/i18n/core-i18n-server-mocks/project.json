@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/i18n/core-i18n-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-i18n-server",
-    "@kbn/core-i18n-server-internal"
-  ]
+  "sourceRoot": "packages/core/i18n/core-i18n-server-mocks"
 }

@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/elasticsearch/core-elasticsearch-server",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/es-errors",
-    "@kbn/core-http-server",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "packages/core/elasticsearch/core-elasticsearch-server"
 }

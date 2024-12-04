@@ -21,17 +21,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/encrypted_saved_objects",
-  "implicitDependencies": [
-    "@kbn/security-plugin",
-    "@kbn/config-schema",
-    "@kbn/core",
-    "@kbn/utility-types",
-    "@kbn/core-saved-objects-server",
-    "@kbn/core-saved-objects-base-server-internal",
-    "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/core-security-common",
-    "@kbn/test-jest-helpers",
-    "@kbn/config"
-  ]
+  "sourceRoot": "x-pack/plugins/encrypted_saved_objects"
 }

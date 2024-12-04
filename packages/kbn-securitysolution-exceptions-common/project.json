@@ -21,15 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-exceptions-common",
-  "implicitDependencies": [
-    "@kbn/openapi-common",
-    "@kbn/zod-helpers",
-    "@kbn/securitysolution-lists-common",
-    "@kbn/test",
-    "@kbn/tooling-log",
-    "@kbn/core-http-common",
-    "@kbn/securitysolution-utils",
-    "@kbn/zod"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-exceptions-common"
 }

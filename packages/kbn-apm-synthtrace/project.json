@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-apm-synthtrace",
-  "implicitDependencies": [
-    "@kbn/datemath",
-    "@kbn/apm-synthtrace-client",
-    "@kbn/dev-utils",
-    "@kbn/elastic-agent-utils",
-    "@kbn/zod"
-  ]
+  "sourceRoot": "packages/kbn-apm-synthtrace"
 }

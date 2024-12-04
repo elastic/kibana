@@ -21,14 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-io-ts-list-types",
-  "implicitDependencies": [
-    "@kbn/securitysolution-io-ts-types",
-    "@kbn/securitysolution-io-ts-utils",
-    "@kbn/securitysolution-list-constants",
-    "@kbn/es-query",
-    "@kbn/core-http-browser",
-    "@kbn/core-notifications-browser",
-    "@kbn/securitysolution-exceptions-common"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-io-ts-list-types"
 }

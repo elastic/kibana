@@ -22,29 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/observability/logs_overview",
-  "implicitDependencies": [
-    "@kbn/data-views-plugin",
-    "@kbn/i18n",
-    "@kbn/search-types",
-    "@kbn/xstate-utils",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/i18n-react",
-    "@kbn/charts-plugin",
-    "@kbn/utility-types",
-    "@kbn/logs-data-access-plugin",
-    "@kbn/ml-random-sampler-utils",
-    "@kbn/zod",
-    "@kbn/calculate-auto",
-    "@kbn/es-query",
-    "@kbn/router-utils",
-    "@kbn/share-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/data-service",
-    "@kbn/discover-utils",
-    "@kbn/discover-plugin",
-    "@kbn/unified-data-table",
-    "@kbn/discover-contextual-components",
-    "@kbn/core-lifecycle-browser"
-  ]
+  "sourceRoot": "x-pack/packages/observability/logs_overview"
 }

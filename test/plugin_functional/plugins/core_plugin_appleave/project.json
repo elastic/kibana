@@ -24,9 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/core_plugin_appleave",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/core_plugin_appleave"
 }

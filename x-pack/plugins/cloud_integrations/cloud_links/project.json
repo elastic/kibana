@@ -25,21 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_links",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/cloud-plugin",
-    "@kbn/security-plugin",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/guided-onboarding-plugin",
-    "@kbn/core-chrome-browser",
-    "@kbn/core-doc-links-browser",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/user-profile-components",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/share-plugin",
-    "@kbn/cloud",
-    "@kbn/react-kibana-mount"
-  ]
+  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_links"
 }

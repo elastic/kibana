@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/capabilities/core-capabilities-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-capabilities-common",
-    "@kbn/core-capabilities-server",
-    "@kbn/core-capabilities-server-internal"
-  ]
+  "sourceRoot": "packages/core/capabilities/core-capabilities-server-mocks"
 }

@@ -22,16 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-coloring",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/interpreter",
-    "@kbn/utility-types",
-    "@kbn/shared-ux-utility",
-    "@kbn/test-jest-helpers",
-    "@kbn/data-plugin",
-    "@kbn/ui-theme",
-    "@kbn/visualization-utils"
-  ]
+  "sourceRoot": "packages/kbn-coloring"
 }

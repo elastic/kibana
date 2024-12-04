@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-plugin-generator",
-  "implicitDependencies": [
-    "@kbn/dev-utils",
-    "@kbn/repo-info",
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
-    "@kbn/jest-serializers"
-  ]
+  "sourceRoot": "packages/kbn-plugin-generator"
 }

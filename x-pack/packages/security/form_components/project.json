@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security/form_components",
-  "implicitDependencies": [
-    "@kbn/i18n-react"
-  ]
+  "sourceRoot": "x-pack/packages/security/form_components"
 }

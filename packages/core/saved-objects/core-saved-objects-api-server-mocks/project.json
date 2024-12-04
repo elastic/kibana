@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/saved-objects/core-saved-objects-api-server-mocks",
-  "implicitDependencies": [
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-api-server-internal",
-    "@kbn/logging-mocks",
-    "@kbn/core-saved-objects-server"
-  ]
+  "sourceRoot": "packages/core/saved-objects/core-saved-objects-api-server-mocks"
 }

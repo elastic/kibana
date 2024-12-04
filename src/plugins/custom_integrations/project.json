@@ -25,15 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/custom_integrations",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/ui-theme",
-    "@kbn/logging-mocks",
-    "@kbn/config-schema",
-    "@kbn/storybook"
-  ]
+  "sourceRoot": "src/plugins/custom_integrations"
 }

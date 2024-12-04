@@ -25,22 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/serverless",
-  "implicitDependencies": [
-    "@kbn/config-schema",
-    "@kbn/core",
-    "@kbn/serverless-project-switcher",
-    "@kbn/serverless-types",
-    "@kbn/utils",
-    "@kbn/core-chrome-browser",
-    "@kbn/core-chrome-browser-internal",
-    "@kbn/cloud-plugin",
-    "@kbn/serverless-common-settings",
-    "@kbn/shared-ux-chrome-navigation",
-    "@kbn/i18n",
-    "@kbn/management-cards-navigation",
-    "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-render",
-    "@kbn/ui-theme"
-  ]
+  "sourceRoot": "x-pack/plugins/serverless"
 }

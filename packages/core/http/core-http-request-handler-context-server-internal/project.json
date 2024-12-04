@@ -21,26 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/http/core-http-request-handler-context-server-internal",
-  "implicitDependencies": [
-    "@kbn/core-http-server",
-    "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-elasticsearch-server-internal",
-    "@kbn/core-saved-objects-server-internal",
-    "@kbn/core-deprecations-server-internal",
-    "@kbn/core-ui-settings-server",
-    "@kbn/core-ui-settings-server-internal",
-    "@kbn/core-http-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/core-saved-objects-server-mocks",
-    "@kbn/core-ui-settings-server-mocks",
-    "@kbn/core-deprecations-server-mocks",
-    "@kbn/core-security-server-internal",
-    "@kbn/core-security-server-mocks",
-    "@kbn/core-user-profile-server-internal",
-    "@kbn/core-user-profile-server-mocks",
-    "@kbn/core-feature-flags-server-internal",
-    "@kbn/core-feature-flags-server",
-    "@kbn/core-feature-flags-server-mocks"
-  ]
+  "sourceRoot": "packages/core/http/core-http-request-handler-context-server-internal"
 }

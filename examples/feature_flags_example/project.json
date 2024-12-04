@@ -26,14 +26,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/feature_flags_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/core-feature-flags-server",
-    "@kbn/core-plugins-server",
-    "@kbn/config-schema",
-    "@kbn/developer-examples-plugin",
-    "@kbn/core-feature-flags-browser",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "examples/feature_flags_example"
 }

@@ -7,6 +7,7 @@
       "{projectRoot}/common/**/*",
       "{projectRoot}/public/**/*",
       "{projectRoot}/server/**/*",
+      "{projectRoot}/ui_tests/**/*",
       "!{projectRoot}/target/**/*"
     ]
   },
@@ -24,23 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/discover_enhanced",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/discover-plugin",
-    "@kbn/share-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/lens-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/visualizations-plugin",
-    "@kbn/ui-actions-plugin",
-    "@kbn/i18n",
-    "@kbn/es-query",
-    "@kbn/config-schema",
-    "@kbn/presentation-publishing",
-    "@kbn/data-views-plugin",
-    "@kbn/unified-search-plugin"
-  ]
+  "sourceRoot": "x-pack/plugins/discover_enhanced"
 }

@@ -23,21 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-generate-csv",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/config-schema",
-    "@kbn/i18n",
-    "@kbn/reporting-common",
-    "@kbn/reporting-server",
-    "@kbn/reporting-export-types-csv-common",
-    "@kbn/es-query",
-    "@kbn/es-types",
-    "@kbn/data-views-plugin",
-    "@kbn/search-types",
-    "@kbn/task-manager-plugin"
-  ]
+  "sourceRoot": "packages/kbn-generate-csv"
 }

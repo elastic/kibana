@@ -22,13 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/functional_with_es_ssl/plugins/cases",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/cases-plugin",
-    "@kbn/lens-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/shared-ux-router",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "x-pack/test/functional_with_es_ssl/plugins/cases"
 }

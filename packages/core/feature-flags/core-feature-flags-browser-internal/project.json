@@ -22,13 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/feature-flags/core-feature-flags-browser-internal",
-  "implicitDependencies": [
-    "@kbn/core-base-browser-internal",
-    "@kbn/core-feature-flags-browser",
-    "@kbn/logging",
-    "@kbn/core-base-browser-mocks",
-    "@kbn/core-injected-metadata-browser-internal",
-    "@kbn/core-injected-metadata-browser-mocks"
-  ]
+  "sourceRoot": "packages/core/feature-flags/core-feature-flags-browser-internal"
 }

@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-find-used-node-modules",
-  "implicitDependencies": [
-    "@kbn/import-resolver",
-    "@kbn/babel-preset",
-    "@kbn/import-locator",
-    "@kbn/repo-info"
-  ]
+  "sourceRoot": "packages/kbn-find-used-node-modules"
 }

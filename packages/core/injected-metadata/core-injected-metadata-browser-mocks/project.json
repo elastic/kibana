@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/injected-metadata/core-injected-metadata-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-injected-metadata-browser-internal"
-  ]
+  "sourceRoot": "packages/core/injected-metadata/core-injected-metadata-browser-mocks"
 }

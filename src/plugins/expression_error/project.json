@@ -23,15 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/expression_error",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/presentation-util-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/i18n",
-    "@kbn/shared-ux-markdown",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-error-boundary"
-  ]
+  "sourceRoot": "src/plugins/expression_error"
 }

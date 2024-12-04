@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-server-http-tools",
-  "implicitDependencies": [
-    "@kbn/config-schema",
-    "@kbn/crypto"
-  ]
+  "sourceRoot": "packages/kbn-server-http-tools"
 }

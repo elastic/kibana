@@ -23,15 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/features-plugin",
-    "@kbn/actions-plugin",
-    "@kbn/alerting-api-integration-helpers",
-    "@kbn/expect",
-    "@kbn/dev-utils"
-  ]
+  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators"
 }

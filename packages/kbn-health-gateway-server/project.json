@@ -21,18 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-health-gateway-server",
-  "implicitDependencies": [
-    "@kbn/core-base-server-internal",
-    "@kbn/core-logging-server-internal",
-    "@kbn/config",
-    "@kbn/config-mocks",
-    "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/logging-mocks",
-    "@kbn/server-http-tools",
-    "@kbn/utility-types",
-    "@kbn/repo-info",
-    "@kbn/repo-packages"
-  ]
+  "sourceRoot": "packages/kbn-health-gateway-server"
 }

@@ -25,13 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "examples/bfetch_explorer",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/developer-examples-plugin",
-    "@kbn/bfetch-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/shared-ux-router",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "examples/bfetch_explorer"
 }

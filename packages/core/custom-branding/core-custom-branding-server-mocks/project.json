@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/custom-branding/core-custom-branding-server-mocks",
-  "implicitDependencies": [
-    "@kbn/core-custom-branding-server-internal"
-  ]
+  "sourceRoot": "packages/core/custom-branding/core-custom-branding-server-mocks"
 }

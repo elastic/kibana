@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security/role_management_model",
-  "implicitDependencies": [
-    "@kbn/features-plugin",
-    "@kbn/security-plugin-types-common",
-    "@kbn/security-authorization-core",
-    "@kbn/security-authorization-core-common",
-    "@kbn/licensing-plugin"
-  ]
+  "sourceRoot": "x-pack/packages/security/role_management_model"
 }

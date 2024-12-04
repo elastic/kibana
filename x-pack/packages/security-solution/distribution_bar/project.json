@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security-solution/distribution_bar",
-  "implicitDependencies": [
-    "@kbn/ui-theme"
-  ]
+  "sourceRoot": "x-pack/packages/security-solution/distribution_bar"
 }

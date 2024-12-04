@@ -23,9 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/global_search_providers",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/global-search-plugin"
-  ]
+  "sourceRoot": "x-pack/plugins/global_search_providers"
 }

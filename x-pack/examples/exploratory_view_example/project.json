@@ -25,15 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/examples/exploratory_view_example",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/observability-plugin",
-    "@kbn/developer-examples-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/exploratory-view-plugin",
-    "@kbn/shared-ux-link-redirect-app"
-  ]
+  "sourceRoot": "x-pack/examples/exploratory_view_example"
 }

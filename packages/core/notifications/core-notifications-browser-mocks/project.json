@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/notifications/core-notifications-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types-jest",
-    "@kbn/core-notifications-browser",
-    "@kbn/core-notifications-browser-internal"
-  ]
+  "sourceRoot": "packages/core/notifications/core-notifications-browser-mocks"
 }

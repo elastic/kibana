@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/integrations/core-integrations-browser-internal",
-  "implicitDependencies": [
-    "@kbn/core-base-browser-internal",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/core-ui-settings-browser-mocks"
-  ]
+  "sourceRoot": "packages/core/integrations/core-integrations-browser-internal"
 }

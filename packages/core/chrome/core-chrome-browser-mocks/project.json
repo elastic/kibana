@@ -22,11 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/chrome/core-chrome-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/utility-types-jest",
-    "@kbn/core-chrome-browser",
-    "@kbn/core-chrome-browser-internal"
-  ]
+  "sourceRoot": "packages/core/chrome/core-chrome-browser-mocks"
 }

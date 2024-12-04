@@ -23,32 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/chart_expressions/expression_xy",
-  "implicitDependencies": [
-    "@kbn/charts-plugin",
-    "@kbn/core",
-    "@kbn/expressions-plugin",
-    "@kbn/data-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/event-annotation-plugin",
-    "@kbn/visualizations-plugin",
-    "@kbn/coloring",
-    "@kbn/i18n",
-    "@kbn/utility-types",
-    "@kbn/embeddable-plugin",
-    "@kbn/i18n-react",
-    "@kbn/test-jest-helpers",
-    "@kbn/datemath",
-    "@kbn/chart-icons",
-    "@kbn/ui-theme",
-    "@kbn/analytics",
-    "@kbn/chart-expressions-common",
-    "@kbn/event-annotation-common",
-    "@kbn/visualization-ui-components",
-    "@kbn/es-query",
-    "@kbn/cell-actions",
-    "@kbn/react-kibana-context-render",
-    "@kbn/core-rendering-browser"
-  ]
+  "sourceRoot": "src/plugins/chart_expressions/expression_xy"
 }

@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/custom-branding/core-custom-branding-browser",
-  "implicitDependencies": [
-    "@kbn/core-injected-metadata-browser-internal",
-    "@kbn/core-custom-branding-common"
-  ]
+  "sourceRoot": "packages/core/custom-branding/core-custom-branding-browser"
 }

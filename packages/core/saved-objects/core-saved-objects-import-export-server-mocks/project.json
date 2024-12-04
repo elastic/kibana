@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks",
-  "implicitDependencies": [
-    "@kbn/core-saved-objects-server"
-  ]
+  "sourceRoot": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks"
 }

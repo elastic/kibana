@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-slo-schema",
-  "implicitDependencies": [
-    "@kbn/std",
-    "@kbn/io-ts-utils"
-  ]
+  "sourceRoot": "x-pack/packages/kbn-slo-schema"
 }

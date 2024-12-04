@@ -50,7 +50,7 @@ export function regenerateNxProjects() {
         (flags.filter as string | string[]) || undefined;
       const update = flags.update as boolean | undefined;
       const dryRun = flags['dry-run'] as boolean | undefined;
-      const implicitDependencies = (flags['implicit-dependencies'] as boolean) || true;
+      const implicitDependencies = (flags['implicit-dependencies'] as boolean) ?? true;
 
       const template = JSON.stringify(projectTemplate, null, 2);
       const allPackages: Package[] = getPackages(REPO_ROOT);

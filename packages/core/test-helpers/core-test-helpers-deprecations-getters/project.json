@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/test-helpers/core-test-helpers-deprecations-getters",
-  "implicitDependencies": [
-    "@kbn/safer-lodash-set",
-    "@kbn/config",
-    "@kbn/config-mocks"
-  ]
+  "sourceRoot": "packages/core/test-helpers/core-test-helpers-deprecations-getters"
 }

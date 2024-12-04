@@ -24,9 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/app_link_test",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/shared-ux-link-redirect-app"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/app_link_test"
 }

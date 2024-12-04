@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/ui-settings/core-ui-settings-common",
-  "implicitDependencies": [
-    "@kbn/config-schema",
-    "@kbn/analytics",
-    "@kbn/core-http-server"
-  ]
+  "sourceRoot": "packages/core/ui-settings/core-ui-settings-common"
 }

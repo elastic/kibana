@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-ipynb",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-ipynb"
 }

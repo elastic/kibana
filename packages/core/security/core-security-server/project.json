@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/security/core-security-server",
-  "implicitDependencies": [
-    "@kbn/core-security-common",
-    "@kbn/core-http-server",
-    "@kbn/logging"
-  ]
+  "sourceRoot": "packages/core/security/core-security-server"
 }

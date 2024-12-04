@@ -25,10 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_full_story",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/cloud-plugin",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_full_story"
 }

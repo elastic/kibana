@@ -25,10 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/session_notifications",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/navigation-plugin",
-    "@kbn/data-plugin"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/session_notifications"
 }

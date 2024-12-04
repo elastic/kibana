@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/user-settings/core-user-settings-server",
-  "implicitDependencies": []
+  "sourceRoot": "packages/core/user-settings/core-user-settings-server"
 }

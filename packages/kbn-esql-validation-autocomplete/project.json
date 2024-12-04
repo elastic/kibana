@@ -23,10 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-esql-validation-autocomplete",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/esql-ast",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/kbn-esql-validation-autocomplete"
 }

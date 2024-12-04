@@ -21,16 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-failed-test-reporter-cli",
-  "implicitDependencies": [
-    "@kbn/ci-stats-reporter",
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
-    "@kbn/dev-utils",
-    "@kbn/tooling-log",
-    "@kbn/ftr-screenshot-filename",
-    "@kbn/jest-serializers",
-    "@kbn/journeys",
-    "@kbn/repo-info"
-  ]
+  "sourceRoot": "packages/kbn-failed-test-reporter-cli"
 }

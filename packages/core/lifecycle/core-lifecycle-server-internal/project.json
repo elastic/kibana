@@ -21,34 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/lifecycle/core-lifecycle-server-internal",
-  "implicitDependencies": [
-    "@kbn/core-logging-server-internal",
-    "@kbn/core-analytics-server",
-    "@kbn/core-preboot-server-internal",
-    "@kbn/core-http-context-server-internal",
-    "@kbn/core-http-server-internal",
-    "@kbn/core-elasticsearch-server-internal",
-    "@kbn/core-ui-settings-server-internal",
-    "@kbn/core-http-resources-server-internal",
-    "@kbn/core-capabilities-server",
-    "@kbn/core-doc-links-server",
-    "@kbn/core-i18n-server",
-    "@kbn/core-environment-server-internal",
-    "@kbn/core-execution-context-server-internal",
-    "@kbn/core-deprecations-server-internal",
-    "@kbn/core-metrics-server-internal",
-    "@kbn/core-rendering-server-internal",
-    "@kbn/core-saved-objects-server-internal",
-    "@kbn/core-status-server-internal",
-    "@kbn/core-usage-data-base-server-internal",
-    "@kbn/core-usage-data-server",
-    "@kbn/core-custom-branding-server-internal",
-    "@kbn/core-custom-branding-server",
-    "@kbn/core-user-settings-server-internal",
-    "@kbn/core-security-server-internal",
-    "@kbn/core-user-profile-server-internal",
-    "@kbn/core-feature-flags-server",
-    "@kbn/core-feature-flags-server-internal"
-  ]
+  "sourceRoot": "packages/core/lifecycle/core-lifecycle-server-internal"
 }

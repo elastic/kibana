@@ -22,11 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/observability/observability_utils/observability_utils_common",
-  "implicitDependencies": [
-    "@kbn/es-query",
-    "@kbn/safer-lodash-set",
-    "@kbn/inference-common",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "x-pack/packages/observability/observability_utils/observability_utils_common"
 }

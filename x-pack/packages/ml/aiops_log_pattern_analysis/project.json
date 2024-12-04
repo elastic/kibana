@@ -22,15 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/aiops_log_pattern_analysis",
-  "implicitDependencies": [
-    "@kbn/ml-random-sampler-utils",
-    "@kbn/config-schema",
-    "@kbn/i18n",
-    "@kbn/ml-runtime-field-utils",
-    "@kbn/saved-search-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/ml-is-populated-object",
-    "@kbn/aiops-common"
-  ]
+  "sourceRoot": "x-pack/packages/ml/aiops_log_pattern_analysis"
 }

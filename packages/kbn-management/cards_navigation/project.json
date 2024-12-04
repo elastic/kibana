@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-management/cards_navigation",
-  "implicitDependencies": [
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "packages/kbn-management/cards_navigation"
 }

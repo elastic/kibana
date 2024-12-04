@@ -24,21 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/vis_types/gauge",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/charts-plugin",
-    "@kbn/data-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/expression-gauge-plugin",
-    "@kbn/visualizations-plugin",
-    "@kbn/vis-default-editor-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/utility-types",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/coloring",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "src/plugins/vis_types/gauge"
 }

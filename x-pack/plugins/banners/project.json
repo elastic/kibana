@@ -24,14 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/banners",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/screenshot-mode-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/config-schema",
-    "@kbn/i18n",
-    "@kbn/shared-ux-markdown",
-    "@kbn/react-kibana-mount"
-  ]
+  "sourceRoot": "x-pack/plugins/banners"
 }

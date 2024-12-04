@@ -22,9 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-entities-schema",
-  "implicitDependencies": [
-    "@kbn/zod",
-    "@kbn/zod-helpers"
-  ]
+  "sourceRoot": "x-pack/packages/kbn-entities-schema"
 }

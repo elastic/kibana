@@ -23,18 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/saved_objects_finder",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/saved-objects-management-plugin",
-    "@kbn/test-jest-helpers",
-    "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/i18n",
-    "@kbn/config-schema",
-    "@kbn/saved-objects-settings",
-    "@kbn/content-management-plugin",
-    "@kbn/content-management-utils",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/shared-ux-table-persist"
-  ]
+  "sourceRoot": "src/plugins/saved_objects_finder"
 }

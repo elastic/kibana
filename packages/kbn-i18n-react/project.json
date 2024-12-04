@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-i18n-react",
-  "implicitDependencies": [
-    "@kbn/i18n"
-  ]
+  "sourceRoot": "packages/kbn-i18n-react"
 }

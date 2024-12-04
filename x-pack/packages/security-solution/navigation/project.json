@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/security-solution/navigation",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/core",
-    "@kbn/deeplinks-security"
-  ]
+  "sourceRoot": "x-pack/packages/security-solution/navigation"
 }

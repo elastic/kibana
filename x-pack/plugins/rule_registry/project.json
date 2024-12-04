@@ -25,29 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/rule_registry",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/alerting-plugin",
-    "@kbn/security-plugin",
-    "@kbn/rule-data-utils",
-    "@kbn/es-query",
-    "@kbn/data-views-plugin",
-    "@kbn/utility-types",
-    "@kbn/config-schema",
-    "@kbn/spaces-plugin",
-    "@kbn/securitysolution-es-utils",
-    "@kbn/securitysolution-io-ts-types",
-    "@kbn/es-types",
-    "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/logging-mocks",
-    "@kbn/logging",
-    "@kbn/securitysolution-io-ts-utils",
-    "@kbn/share-plugin",
-    "@kbn/alerts-as-data-utils",
-    "@kbn/core-http-router-server-mocks",
-    "@kbn/core-http-server",
-    "@kbn/alerting-types"
-  ]
+  "sourceRoot": "x-pack/plugins/rule_registry"
 }

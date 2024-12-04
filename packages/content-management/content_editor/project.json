@@ -22,17 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/content-management/content_editor",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/core-overlays-browser",
-    "@kbn/core-analytics-browser",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-theme-browser",
-    "@kbn/test-jest-helpers",
-    "@kbn/react-kibana-mount",
-    "@kbn/content-management-user-profiles"
-  ]
+  "sourceRoot": "packages/content-management/content_editor"
 }

@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/execution-context/core-execution-context-browser",
-  "implicitDependencies": [
-    "@kbn/core-execution-context-common"
-  ]
+  "sourceRoot": "packages/core/execution-context/core-execution-context-browser"
 }

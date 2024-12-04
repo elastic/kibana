@@ -23,21 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/content_management",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/core-http-request-handler-context-server",
-    "@kbn/es-query",
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/item-buffer",
-    "@kbn/object-versioning",
-    "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/saved-objects-settings",
-    "@kbn/core-http-server",
-    "@kbn/content-management-favorites-server",
-    "@kbn/usage-collection-plugin",
-    "@kbn/object-versioning-utils"
-  ]
+  "sourceRoot": "src/plugins/content_management"
 }

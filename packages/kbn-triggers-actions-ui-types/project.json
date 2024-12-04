@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-triggers-actions-ui-types",
-  "implicitDependencies": [
-    "@kbn/alerting-types"
-  ]
+  "sourceRoot": "packages/kbn-triggers-actions-ui-types"
 }

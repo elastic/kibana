@@ -25,24 +25,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/license_management",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/telemetry-management-section-plugin",
-    "@kbn/management-plugin",
-    "@kbn/telemetry-plugin",
-    "@kbn/es-ui-shared-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/features-plugin",
-    "@kbn/security-plugin",
-    "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/config-schema",
-    "@kbn/test-jest-helpers",
-    "@kbn/shared-ux-router",
-    "@kbn/utility-types",
-    "@kbn/share-plugin",
-    "@kbn/react-kibana-context-render"
-  ]
+  "sourceRoot": "x-pack/plugins/license_management"
 }

@@ -22,12 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-reporting/common",
-  "implicitDependencies": [
-    "@kbn/config-schema",
-    "@kbn/utility-types",
-    "@kbn/screenshotting-plugin",
-    "@kbn/i18n",
-    "@kbn/task-manager-plugin"
-  ]
+  "sourceRoot": "packages/kbn-reporting/common"
 }

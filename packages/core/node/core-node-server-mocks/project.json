@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/node/core-node-server-mocks",
-  "implicitDependencies": [
-    "@kbn/core-node-server-internal",
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/core/node/core-node-server-mocks"
 }

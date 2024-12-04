@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/metrics/core-metrics-server-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-metrics-server",
-    "@kbn/core-metrics-server-internal",
-    "@kbn/core-metrics-collectors-server-mocks"
-  ]
+  "sourceRoot": "packages/core/metrics/core-metrics-server-mocks"
 }

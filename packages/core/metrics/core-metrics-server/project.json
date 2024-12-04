@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/metrics/core-metrics-server",
-  "implicitDependencies": [
-    "@kbn/utility-types"
-  ]
+  "sourceRoot": "packages/core/metrics/core-metrics-server"
 }

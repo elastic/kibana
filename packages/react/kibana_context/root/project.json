@@ -22,14 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/react/kibana_context/root",
-  "implicitDependencies": [
-    "@kbn/test-jest-helpers",
-    "@kbn/react-kibana-context-common",
-    "@kbn/core-i18n-browser-mocks",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-base-common",
-    "@kbn/core-analytics-browser",
-    "@kbn/core-analytics-browser-mocks"
-  ]
+  "sourceRoot": "packages/react/kibana_context/root"
 }

@@ -24,10 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/plugin_functional/plugins/management_test_plugin",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/management-plugin",
-    "@kbn/shared-ux-router"
-  ]
+  "sourceRoot": "test/plugin_functional/plugins/management_test_plugin"
 }

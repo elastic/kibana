@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-alerts-as-data-utils",
-  "implicitDependencies": [
-    "@kbn/rule-data-utils",
-    "@kbn/safer-lodash-set"
-  ]
+  "sourceRoot": "packages/kbn-alerts-as-data-utils"
 }

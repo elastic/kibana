@@ -23,9 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/ftr_apis",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "src/plugins/ftr_apis"
 }

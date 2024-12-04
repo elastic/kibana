@@ -27,31 +27,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/presentation_util",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/saved-objects-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/i18n",
-    "@kbn/expressions-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/i18n-react",
-    "@kbn/monaco",
-    "@kbn/es-query",
-    "@kbn/field-formats-plugin",
-    "@kbn/interpreter",
-    "@kbn/react-field",
-    "@kbn/config-schema",
-    "@kbn/storybook",
-    "@kbn/ui-actions-plugin",
-    "@kbn/saved-objects-finder-plugin",
-    "@kbn/content-management-plugin",
-    "@kbn/shared-ux-button-toolbar",
-    "@kbn/code-editor",
-    "@kbn/calculate-width-from-char-count",
-    "@kbn/field-utils",
-    "@kbn/presentation-publishing",
-    "@kbn/core-ui-settings-browser"
-  ]
+  "sourceRoot": "src/plugins/presentation_util"
 }

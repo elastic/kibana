@@ -21,9 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/shared-ux/page/analytics_no_data/types",
-  "implicitDependencies": [
-    "@kbn/shared-ux-page-kibana-no-data-types",
-    "@kbn/no-data-page-plugin"
-  ]
+  "sourceRoot": "packages/shared-ux/page/analytics_no_data/types"
 }

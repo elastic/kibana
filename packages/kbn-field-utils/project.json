@@ -23,15 +23,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-field-utils",
-  "implicitDependencies": [
-    "@kbn/i18n",
-    "@kbn/data-views-plugin",
-    "@kbn/react-field",
-    "@kbn/field-types",
-    "@kbn/expressions-plugin",
-    "@kbn/data-view-utils",
-    "@kbn/fields-metadata-plugin",
-    "@kbn/shared-ux-markdown"
-  ]
+  "sourceRoot": "packages/kbn-field-utils"
 }

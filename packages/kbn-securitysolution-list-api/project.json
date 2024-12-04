@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-securitysolution-list-api",
-  "implicitDependencies": [
-    "@kbn/securitysolution-io-ts-list-types",
-    "@kbn/securitysolution-io-ts-utils",
-    "@kbn/securitysolution-list-constants",
-    "@kbn/core-http-browser",
-    "@kbn/core-http-browser-mocks"
-  ]
+  "sourceRoot": "packages/kbn-securitysolution-list-api"
 }

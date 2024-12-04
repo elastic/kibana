@@ -23,15 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/maps_ems",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/licensing-plugin",
-    "@kbn/i18n",
-    "@kbn/config-schema",
-    "@kbn/config",
-    "@kbn/core-http-common",
-    "@kbn/core-plugins-server",
-    "@kbn/core-lifecycle-server"
-  ]
+  "sourceRoot": "src/plugins/maps_ems"
 }

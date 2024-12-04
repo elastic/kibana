@@ -22,6 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared"
 }

@@ -21,10 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/usage-data/core-usage-data-base-server-internal",
-  "implicitDependencies": [
-    "@kbn/core-http-server",
-    "@kbn/core-usage-data-server",
-    "@kbn/core-saved-objects-server"
-  ]
+  "sourceRoot": "packages/core/usage-data/core-usage-data-base-server-internal"
 }

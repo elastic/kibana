@@ -22,8 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/custom-branding/core-custom-branding-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/core-custom-branding-common"
-  ]
+  "sourceRoot": "packages/core/custom-branding/core-custom-branding-browser-mocks"
 }

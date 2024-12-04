@@ -24,23 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/observability_solution/entity_manager_app",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/logging",
-    "@kbn/ebt-tools",
-    "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/observability-shared-plugin",
-    "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/shared-ux-link-redirect-app",
-    "@kbn/usage-collection-plugin",
-    "@kbn/shared-ux-router",
-    "@kbn/presentation-util-plugin",
-    "@kbn/cloud-plugin",
-    "@kbn/serverless",
-    "@kbn/entityManager-plugin",
-    "@kbn/entities-schema"
-  ]
+  "sourceRoot": "x-pack/plugins/observability_solution/entity_manager_app"
 }

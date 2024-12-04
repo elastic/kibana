@@ -23,9 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/screenshot_mode",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/utility-types-jest"
-  ]
+  "sourceRoot": "src/plugins/screenshot_mode"
 }

@@ -27,19 +27,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/es_ui_shared",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-views-plugin",
-    "@kbn/i18n",
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/i18n-react",
-    "@kbn/test-jest-helpers",
-    "@kbn/share-plugin",
-    "@kbn/safer-lodash-set",
-    "@kbn/storybook",
-    "@kbn/shared-ux-link-redirect-app",
-    "@kbn/code-editor",
-    "@kbn/core-application-common"
-  ]
+  "sourceRoot": "src/plugins/es_ui_shared"
 }

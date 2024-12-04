@@ -22,9 +22,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/telemetry_collection_manager",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/usage-collection-plugin"
-  ]
+  "sourceRoot": "src/plugins/telemetry_collection_manager"
 }

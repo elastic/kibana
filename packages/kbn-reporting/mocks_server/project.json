@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-reporting/mocks_server",
-  "implicitDependencies": [
-    "@kbn/reporting-server"
-  ]
+  "sourceRoot": "packages/kbn-reporting/mocks_server"
 }

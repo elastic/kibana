@@ -21,9 +21,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "test/health_gateway/plugins/status",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema"
-  ]
+  "sourceRoot": "test/health_gateway/plugins/status"
 }

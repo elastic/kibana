@@ -21,12 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/doc-links/core-doc-links-browser-mocks",
-  "implicitDependencies": [
-    "@kbn/utility-types",
-    "@kbn/core-injected-metadata-browser-mocks",
-    "@kbn/core-doc-links-browser",
-    "@kbn/core-doc-links-browser-internal",
-    "@kbn/core-base-browser-mocks"
-  ]
+  "sourceRoot": "packages/core/doc-links/core-doc-links-browser-mocks"
 }

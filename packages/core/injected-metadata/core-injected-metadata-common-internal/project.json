@@ -21,13 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/injected-metadata/core-injected-metadata-common-internal",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/ui-shared-deps-npm",
-    "@kbn/core-base-common",
-    "@kbn/core-custom-branding-common",
-    "@kbn/core-logging-common-internal",
-    "@kbn/core-ui-settings-common"
-  ]
+  "sourceRoot": "packages/core/injected-metadata/core-injected-metadata-common-internal"
 }

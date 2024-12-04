@@ -21,8 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/content-management/table_list_view_common",
-  "implicitDependencies": [
-    "@kbn/content-management-content-editor"
-  ]
+  "sourceRoot": "packages/content-management/table_list_view_common"
 }

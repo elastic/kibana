@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-use-tracked-promise",
-  "implicitDependencies": []
+  "sourceRoot": "packages/kbn-use-tracked-promise"
 }

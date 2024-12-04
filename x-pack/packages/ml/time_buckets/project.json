@@ -22,10 +22,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ml/time_buckets",
-  "implicitDependencies": [
-    "@kbn/datemath",
-    "@kbn/data-plugin",
-    "@kbn/core-ui-settings-browser"
-  ]
+  "sourceRoot": "x-pack/packages/ml/time_buckets"
 }

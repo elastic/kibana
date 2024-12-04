@@ -21,13 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-langchain",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/logging",
-    "@kbn/actions-plugin",
-    "@kbn/logging-mocks",
-    "@kbn/utility-types",
-    "@kbn/tooling-log"
-  ]
+  "sourceRoot": "x-pack/packages/kbn-langchain"
 }

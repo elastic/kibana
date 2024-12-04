@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/kbn-alerting-comparators",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/packages/kbn-alerting-comparators"
 }

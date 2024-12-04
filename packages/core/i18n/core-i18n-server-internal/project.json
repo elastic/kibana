@@ -21,22 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/i18n/core-i18n-server-internal",
-  "implicitDependencies": [
-    "@kbn/config",
-    "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/core-base-server-internal",
-    "@kbn/core-i18n-server",
-    "@kbn/core-http-server",
-    "@kbn/core-http-server-internal",
-    "@kbn/repo-info",
-    "@kbn/config-mocks",
-    "@kbn/core-base-server-mocks",
-    "@kbn/core-http-server-mocks",
-    "@kbn/i18n",
-    "@kbn/std",
-    "@kbn/repo-packages",
-    "@kbn/core-http-router-server-mocks"
-  ]
+  "sourceRoot": "packages/core/i18n/core-i18n-server-internal"
 }

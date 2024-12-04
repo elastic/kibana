@@ -23,15 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/plugins/licensing",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/i18n-react",
-    "@kbn/utility-types",
-    "@kbn/config-schema",
-    "@kbn/std",
-    "@kbn/i18n",
-    "@kbn/logging-mocks",
-    "@kbn/react-kibana-mount"
-  ]
+  "sourceRoot": "x-pack/plugins/licensing"
 }

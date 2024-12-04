@@ -21,6 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "x-pack/packages/ai-infra/product-doc-common",
-  "implicitDependencies": []
+  "sourceRoot": "x-pack/packages/ai-infra/product-doc-common"
 }

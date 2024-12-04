@@ -21,14 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/kbn-ftr-common-functional-ui-services",
-  "implicitDependencies": [
-    "@kbn/test",
-    "@kbn/tooling-log",
-    "@kbn/repo-info",
-    "@kbn/test-subj-selector",
-    "@kbn/ftr-common-functional-services",
-    "@kbn/std",
-    "@kbn/expect"
-  ]
+  "sourceRoot": "packages/kbn-ftr-common-functional-ui-services"
 }

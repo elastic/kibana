@@ -21,11 +21,5 @@
     }
   },
   "projectType": "library",
-  "sourceRoot": "packages/core/injected-metadata/core-injected-metadata-browser-internal",
-  "implicitDependencies": [
-    "@kbn/std",
-    "@kbn/core-base-common",
-    "@kbn/core-injected-metadata-common-internal",
-    "@kbn/core-custom-branding-common"
-  ]
+  "sourceRoot": "packages/core/injected-metadata/core-injected-metadata-browser-internal"
 }

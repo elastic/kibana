@@ -24,37 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/unified_histogram",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/lens-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/inspector-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/test-jest-helpers",
-    "@kbn/i18n",
-    "@kbn/es-query",
-    "@kbn/embeddable-plugin",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/datemath",
-    "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/shared-ux-utility",
-    "@kbn/ui-actions-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/visualizations-plugin",
-    "@kbn/resizable-layout",
-    "@kbn/shared-ux-button-toolbar",
-    "@kbn/calculate-width-from-char-count",
-    "@kbn/lens-embeddable-utils",
-    "@kbn/i18n-react",
-    "@kbn/field-utils",
-    "@kbn/esql-utils",
-    "@kbn/discover-utils",
-    "@kbn/visualization-utils",
-    "@kbn/search-types",
-    "@kbn/presentation-publishing",
-    "@kbn/data-view-utils"
-  ]
+  "sourceRoot": "src/plugins/unified_histogram"
 }

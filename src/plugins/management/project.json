@@ -24,26 +24,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "src/plugins/management",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/home-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/utility-types",
-    "@kbn/share-plugin",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/shared-ux-router",
-    "@kbn/management-cards-navigation",
-    "@kbn/shared-ux-link-redirect-app",
-    "@kbn/test-jest-helpers",
-    "@kbn/config-schema",
-    "@kbn/serverless",
-    "@kbn/shared-ux-error-boundary",
-    "@kbn/deeplinks-management",
-    "@kbn/react-kibana-context-render",
-    "@kbn/core-chrome-browser"
-  ]
+  "sourceRoot": "src/plugins/management"
 }

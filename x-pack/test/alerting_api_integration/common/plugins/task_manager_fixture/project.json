@@ -23,10 +23,5 @@
     }
   },
   "projectType": "application",
-  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture",
-  "implicitDependencies": [
-    "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/task-manager-plugin"
-  ]
+  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture"
 }

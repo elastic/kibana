@@ -4,6 +4,7 @@
   "namedInputs": {
     "src": [
       "{projectRoot}/src/**/*.ts",
+      "{projectRoot}/src/**/*.json",
       "!{projectRoot}/target/**/*"
     ]
   },
