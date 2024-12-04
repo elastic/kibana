@@ -357,7 +357,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const areSuppressionFieldsSelected = isThresholdRule || Boolean(alertSuppressionFields?.length);
 
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(
-    ruleType,
     isEqlSequenceQuery(queryBar?.query?.query as string)
   );
 
