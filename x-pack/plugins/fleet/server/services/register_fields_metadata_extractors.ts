@@ -28,6 +28,7 @@ export const registerFieldsMetadataExtractors = ({ core, fieldsMetadata }: Regis
       });
     } catch (error) {
       appContextService.getLogger().warn(`registerIntegrationFieldsExtractor error: ${error}`);
+      throw error;
     }
   });
 

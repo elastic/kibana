@@ -396,7 +396,7 @@ export async function getPackage(
 export async function getPackageFieldsMetadata(
   params: { packageName: string; datasetName?: string },
   options: { excludedFieldsAssets?: string[] } = {}
-): Promise<ExtractedIntegrationFields | undefined> {
+): Promise<ExtractedIntegrationFields> {
   const { packageName, datasetName } = params;
   const { excludedFieldsAssets = ['ecs.yml'] } = options;
 
@@ -436,6 +436,7 @@ export async function getPackageFieldsMetadata(
     }
   } catch (error) {
     appContextService.getLogger().warn(`getPackageFieldsMetadata error: ${error}`);
+    throw error;
   }
 }
 
