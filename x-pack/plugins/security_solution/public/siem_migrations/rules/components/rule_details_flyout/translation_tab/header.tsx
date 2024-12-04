@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import * as i18n from './translations';
 
-export function TranslationTabHeader(): JSX.Element {
+export const TranslationTabHeader: React.FC = React.memo(() => {
   return (
     <EuiFlexGroup direction="row" alignItems="center">
       <EuiTitle data-test-subj="ruleTranslationLabel" size="xs">
@@ -17,4 +17,5 @@ export function TranslationTabHeader(): JSX.Element {
       </EuiTitle>
     </EuiFlexGroup>
   );
-}
+});
+TranslationTabHeader.displayName = 'TranslationTabHeader';

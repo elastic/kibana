@@ -11,7 +11,7 @@ import { SecurityPageName } from '../../../../../common';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import * as i18n from './translations';
 
-const NoItemsMessageComponent = () => {
+export const EmptyMigration: React.FC = React.memo(() => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const { onClick: onClickLink } = getSecuritySolutionLinkProps({
     deepLinkId: SecurityPageName.landing,
@@ -47,6 +47,5 @@ const NoItemsMessageComponent = () => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-export const NoItemsMessage = React.memo(NoItemsMessageComponent);
+});
+EmptyMigration.displayName = 'EmptyMigration';

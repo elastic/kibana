@@ -17,28 +17,28 @@ import {
   createUpdatedColumn,
 } from '../components/rules_table_columns';
 
-export const useRulesTableColumns = ({
+export const useMigrationRulesTableColumns = ({
   disableActions,
-  openMigrationRulePreview,
+  openMigrationRuleDetails,
   installMigrationRule,
 }: {
   disableActions?: boolean;
-  openMigrationRulePreview: (rule: RuleMigration) => void;
+  openMigrationRuleDetails: (rule: RuleMigration) => void;
   installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
 }): TableColumn[] => {
   return useMemo(
     () => [
       createUpdatedColumn(),
-      createNameColumn({ openMigrationRulePreview }),
+      createNameColumn({ openMigrationRuleDetails }),
       createStatusColumn(),
       createRiskScoreColumn(),
       createSeverityColumn(),
       createActionsColumn({
         disableActions,
-        openMigrationRulePreview,
+        openMigrationRuleDetails,
         installMigrationRule,
       }),
     ],
-    [disableActions, installMigrationRule, openMigrationRulePreview]
+    [disableActions, installMigrationRule, openMigrationRuleDetails]
   );
 };

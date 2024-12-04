@@ -22,7 +22,7 @@ import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TranslationTabHeader } from './header';
-import { RuleQueryComponent } from './rule_query';
+import { MigrationRuleQuery } from './migration_rule_query';
 import * as i18n from './translations';
 import {
   convertTranslationResultIntoColor,
@@ -33,7 +33,7 @@ interface TranslationTabProps {
   ruleMigration: RuleMigration;
 }
 
-export const TranslationTab = ({ ruleMigration }: TranslationTabProps) => {
+export const TranslationTab: React.FC<TranslationTabProps> = React.memo(({ ruleMigration }) => {
   const { euiTheme } = useEuiTheme();
 
   const name = ruleMigration.elastic_rule?.title ?? ruleMigration.original_rule.title;
@@ -81,7 +81,7 @@ export const TranslationTab = ({ ruleMigration }: TranslationTabProps) => {
             <EuiSplitPanel.Inner grow>
               <EuiFlexGroup gutterSize="s" alignItems="flexStart">
                 <EuiFlexItem grow={1}>
-                  <RuleQueryComponent
+                  <MigrationRuleQuery
                     title={i18n.SPLUNK_QUERY_TITLE}
                     query={originalQuery}
                     canEdit={false}
@@ -95,7 +95,7 @@ export const TranslationTab = ({ ruleMigration }: TranslationTabProps) => {
                   `}
                 />
                 <EuiFlexItem grow={1}>
-                  <RuleQueryComponent
+                  <MigrationRuleQuery
                     title={i18n.ESQL_TRANSLATION_TITLE}
                     query={elasticQuery}
                     canEdit={false}
@@ -108,4 +108,5 @@ export const TranslationTab = ({ ruleMigration }: TranslationTabProps) => {
       </EuiAccordion>
     </>
   );
-};
+});
+TranslationTab.displayName = 'TranslationTab';
