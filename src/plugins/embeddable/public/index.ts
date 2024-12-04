@@ -11,6 +11,7 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export { openAddPanelFlyout } from './add_panel_flyout/open_add_panel_flyout';
+export { EmbeddablePanel } from './embeddable_panel';
 export {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
