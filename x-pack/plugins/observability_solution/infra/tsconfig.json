@@ -65,7 +65,6 @@
     "@kbn/discover-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/ui-theme",
     "@kbn/ml-anomaly-utils",
     "@kbn/aiops-plugin",
     "@kbn/field-formats-plugin",

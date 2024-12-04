@@ -32,7 +32,6 @@
     "@kbn/share-plugin",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-utility",
-    "@kbn/ui-theme",
     "@kbn/xstate-utils",
     "@kbn/router-utils",
     "@kbn/observability-ai-assistant-plugin",
