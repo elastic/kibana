@@ -5,27 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { asKeyword } from './utils';
+import { EntitySourceDefinition, SortBy } from '../types';
 
-export const entitySourceSchema = z.object({
-  type: z.string(),
-  timestamp_field: z.optional(z.string()),
-  index_patterns: z.array(z.string()),
-  identity_fields: z.array(z.string()),
-  metadata_fields: z.array(z.string()),
-  filters: z.array(z.string()),
-  display_name: z.optional(z.string()),
-});
-
-export interface SortBy {
-  field: string;
-  direction: 'ASC' | 'DESC';
-}
-
-export type EntitySource = z.infer<typeof entitySourceSchema>;
-
-const sourceCommand = ({ source }: { source: EntitySource }) => {
+const sourceCommand = ({ source }: { source: EntitySourceDefinition }) => {
   let query = `FROM ${source.index_patterns.join(', ')}`;
 
   const esMetadataFields = source.metadata_fields.filter((field) =>
@@ -43,7 +26,7 @@ const whereCommand = ({
   start,
   end,
 }: {
-  source: EntitySource;
+  source: EntitySourceDefinition;
   start: string;
   end: string;
 }) => {
@@ -61,7 +44,7 @@ const whereCommand = ({
   return filters.map((filter) => `WHERE ${filter}`).join(' | ');
 };
 
-const statsCommand = ({ source }: { source: EntitySource }) => {
+const statsCommand = ({ source }: { source: EntitySourceDefinition }) => {
   const aggs = source.metadata_fields
     .filter((field) => !source.identity_fields.some((idField) => idField === field))
     .map((field) => `${field} = VALUES(${asKeyword(field)})`);
@@ -79,12 +62,12 @@ const statsCommand = ({ source }: { source: EntitySource }) => {
   return `STATS ${aggs.join(', ')} BY ${source.identity_fields.map(asKeyword).join(', ')}`;
 };
 
-const renameCommand = ({ source }: { source: EntitySource }) => {
+const renameCommand = ({ source }: { source: EntitySourceDefinition }) => {
   const operations = source.identity_fields.map((field) => `\`${asKeyword(field)}\` AS ${field}`);
   return `RENAME ${operations.join(', ')}`;
 };
 
-const evalCommand = ({ source }: { source: EntitySource }) => {
+const evalCommand = ({ source }: { source: EntitySourceDefinition }) => {
   const id =
     source.identity_fields.length === 1
       ? source.identity_fields[0]
@@ -95,13 +78,13 @@ const evalCommand = ({ source }: { source: EntitySource }) => {
     : 'entity.id';
 
   return `EVAL ${[
-    `entity.type = "${source.type}"`,
+    `entity.type = "${source.type_id}"`,
     `entity.id = ${id}`,
     `entity.display_name = ${displayName}`,
   ].join(', ')}`;
 };
 
-const sortCommand = ({ source, sort }: { source: EntitySource; sort?: SortBy }) => {
+const sortCommand = ({ source, sort }: { source: EntitySourceDefinition; sort?: SortBy }) => {
   if (sort) {
     return `SORT ${sort.field} ${sort.direction}`;
   }
@@ -120,7 +103,7 @@ export function getEntityInstancesQuery({
   end,
   sort,
 }: {
-  source: EntitySource;
+  source: EntitySourceDefinition;
   limit: number;
   start: string;
   end: string;

@@ -12,7 +12,8 @@ describe('getEntityInstancesQuery', () => {
     it('generates a valid esql query', () => {
       const query = getEntityInstancesQuery({
         source: {
-          type: 'service',
+          id: 'service_source',
+          type_id: 'service',
           index_patterns: ['logs-*', 'metrics-*'],
           identity_fields: ['service.name'],
           metadata_fields: ['host.name'],
