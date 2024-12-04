@@ -10,7 +10,6 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-
 import type {
   BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
@@ -22,7 +21,7 @@ import type { CriticalityValues } from './constants';
 import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
-import { getImplicitEntityFields } from './helpers';
+import { getMappingForFlattenField, getImplicitEntityFields } from './helpers';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -147,6 +146,22 @@ export class AssetCriticalityDataClient {
     return getAssetCriticalityIndex(this.options.namespace);
   }
 
+  /**
+   * Check if the index mappings needs update.
+   * @returns
+   */
+  public async isIndexMappingsOutdated(): Promise<boolean> {
+    const storedMappings = await this.getIndexMappings();
+    const storedIndexProperties = storedMappings?.[this.getIndex()]?.mappings.properties;
+    if (!storedIndexProperties) {
+      return true;
+    }
+
+    return Object.keys(assetCriticalityFieldMap).some(
+      (flattenField) => getMappingForFlattenField(flattenField, storedIndexProperties) === undefined
+    );
+  }
+
   public async doesIndexExist() {
     try {
       const result = await this.options.esClient.indices.exists({
@@ -178,9 +193,12 @@ export class AssetCriticalityDataClient {
   }
 
   public getIndexMappings() {
-    return this.options.esClient.indices.getMapping({
-      index: this.getIndex(),
-    });
+    return this.options.esClient.indices.getMapping(
+      {
+        index: this.getIndex(),
+      },
+      { ignore: [404] }
+    );
   }
 
   public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityRecord | undefined> {
