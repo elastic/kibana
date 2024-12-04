@@ -25,45 +25,52 @@ export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
   return (events$: Observable<InferenceChatCompletionEvent>) => {
     return events$.pipe(
       map((event) => {
-        if (event.type === InferenceChatCompletionEventType.ChatCompletionChunk) {
-          // Convert to ChatCompletionChunkEvent
-          return {
-            type: StreamingChatResponseEventType.ChatCompletionChunk,
-            id: v4(),
-            message: {
-              content: event.content,
-              function_call:
-                event.tool_calls.length > 0
-                  ? {
-                      name: event.tool_calls[0].function?.name,
-                      arguments: event.tool_calls[0].function?.arguments,
-                    }
-                  : undefined,
-            },
-          } as ChatCompletionChunkEvent;
+        switch (event.type) {
+          case InferenceChatCompletionEventType.ChatCompletionChunk:
+            // Convert to ChatCompletionChunkEvent
+            return {
+              type: StreamingChatResponseEventType.ChatCompletionChunk,
+              id: v4(),
+              message: {
+                content: event.content,
+                function_call:
+                  event.tool_calls.length > 0
+                    ? {
+                        name: event.tool_calls[0].function.name,
+                        arguments: event.tool_calls[0].function.arguments,
+                      }
+                    : undefined,
+              },
+            } as ChatCompletionChunkEvent;
+          case InferenceChatCompletionEventType.ChatCompletionTokenCount:
+            // Convert to TokenCountEvent
+            return {
+              type: StreamingChatResponseEventType.TokenCount,
+              tokens: {
+                completion: event.tokens.completion,
+                prompt: event.tokens.prompt,
+                total: event.tokens.total,
+              },
+            } as TokenCountEvent;
+          case InferenceChatCompletionEventType.ChatCompletionMessage:
+            // Convert to ChatCompletionMessageEvent
+            return {
+              type: StreamingChatResponseEventType.ChatCompletionMessage,
+              id: v4(),
+              message: {
+                content: event.content,
+                function_call:
+                  event.toolCalls.length > 0
+                    ? {
+                        name: event.toolCalls[0].function.name,
+                        arguments: event.toolCalls[0].function.arguments,
+                      }
+                    : undefined,
+              },
+            } as ChatCompletionMessageEvent;
+          default:
+            throw new Error(`Unknown event type`);
         }
-        if (event.type === InferenceChatCompletionEventType.ChatCompletionTokenCount) {
-          // Convert to TokenCountEvent
-          return {
-            type: StreamingChatResponseEventType.TokenCount,
-            tokens: {
-              completion: event.tokens.completion,
-              prompt: event.tokens.prompt,
-              total: event.tokens.total,
-            },
-          } as TokenCountEvent;
-        }
-        if (event.type === InferenceChatCompletionEventType.ChatCompletionMessage) {
-          // Convert to ChatCompletionMessageEvent
-          return {
-            type: StreamingChatResponseEventType.ChatCompletionMessage,
-            id: v4(),
-            message: {
-              content: event.content,
-            },
-          } as ChatCompletionMessageEvent;
-        }
-        throw new Error(`Unknown event type`);
       })
     );
   };

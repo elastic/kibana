@@ -24,9 +24,9 @@ export function extractTokenCount(): OperatorFunction<
       ),
       scan(
         (acc, event) => {
-          acc.completion += event?.tokens?.completion ?? 0;
-          acc.prompt += event?.tokens?.prompt ?? 0;
-          acc.total += event?.tokens?.total ?? 0;
+          acc.completion += event.tokens.completion;
+          acc.prompt += event.tokens.prompt;
+          acc.total += event.tokens.total;
           return acc;
         },
         { completion: 0, prompt: 0, total: 0 }
