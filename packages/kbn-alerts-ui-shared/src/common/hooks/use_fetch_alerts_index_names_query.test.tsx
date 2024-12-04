@@ -36,8 +36,8 @@ describe('useFetchAlertsIndexNamesQuery', () => {
     queryClient.clear();
   });
 
-  it('does not fetch if featureIds is empty', () => {
-    renderHook(() => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, featureIds: [] }), {
+  it('does not fetch if ruleTypeIds is empty', () => {
+    renderHook(() => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, ruleTypeIds: [] }), {
       wrapper,
     });
 
@@ -45,19 +45,22 @@ describe('useFetchAlertsIndexNamesQuery', () => {
   });
 
   it('calls fetchAlertsIndexNames with the correct parameters', () => {
-    renderHook(() => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, featureIds: ['apm'] }), {
-      wrapper,
-    });
+    renderHook(
+      () => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, ruleTypeIds: ['apm'] }),
+      {
+        wrapper,
+      }
+    );
 
     expect(mockFetchAlertsIndexNames).toHaveBeenCalledWith({
       http: mockHttpClient,
-      featureIds: ['apm'],
+      ruleTypeIds: ['apm'],
     });
   });
 
   it('correctly caches the index names', async () => {
     const { result, rerender } = renderHook(
-      () => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, featureIds: ['apm'] }),
+      () => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, ruleTypeIds: ['apm'] }),
       {
         wrapper,
       }
