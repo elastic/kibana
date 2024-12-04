@@ -178,7 +178,7 @@
             "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -264,7 +264,7 @@
                 "section": "def-public.PublishesFilters",
                 "text": "PublishesFilters"
               },
-              " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+              " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -936,7 +936,7 @@
             "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
