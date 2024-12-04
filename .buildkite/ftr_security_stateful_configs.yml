@@ -102,3 +102,4 @@ enabled:
   - x-pack/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/test/cloud_security_posture_functional/data_views/config.ts
   - x-pack/test/automatic_import_api_integration/security/config_basic.ts
+  - x-pack/test/asset_inventory_api_integration/config.ts

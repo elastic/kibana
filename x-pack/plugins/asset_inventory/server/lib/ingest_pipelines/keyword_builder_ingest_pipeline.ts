@@ -10,7 +10,7 @@ import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/ty
 
 const PIPELINE_ID = 'entity-keyword-builder@platform';
 
-const buildIngestPipeline = (): IngestProcessorContainer[] => {
+export const buildIngestPipeline = (): IngestProcessorContainer[] => {
   return [
     {
       script: {
