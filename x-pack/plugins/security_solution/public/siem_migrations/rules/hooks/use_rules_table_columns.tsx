@@ -14,6 +14,7 @@ import {
   createRiskScoreColumn,
   createSeverityColumn,
   createStatusColumn,
+  createUpdatedColumn,
 } from '../components/rules_table_columns';
 
 export const useRulesTableColumns = ({
@@ -27,6 +28,7 @@ export const useRulesTableColumns = ({
 }): TableColumn[] => {
   return useMemo(
     () => [
+      createUpdatedColumn(),
       createNameColumn({ openMigrationRulePreview }),
       createStatusColumn(),
       createRiskScoreColumn(),

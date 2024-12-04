@@ -267,7 +267,7 @@ function getComparisonName(ctx: ComparisonOperatorContext) {
   return (ctx.EQ() || ctx.NEQ() || ctx.LT() || ctx.LTE() || ctx.GT() || ctx.GTE()).getText() || '';
 }
 
-function visitValueExpression(ctx: ValueExpressionContext) {
+export function visitValueExpression(ctx: ValueExpressionContext) {
   if (!textExistsAndIsValid(ctx.getText())) {
     return [];
   }

@@ -56,8 +56,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
         });
 
+        describe('check code example texts', () => {
+          const indexNameCodeExample = 'test-my-index2';
+          before(async () => {
+            await es.indices.create({ index: indexNameCodeExample });
+            await svlSearchNavigation.navigateToIndexDetailPage(indexNameCodeExample);
+          });
+
+          after(async () => {
+            await esDeleteAllIndices(indexNameCodeExample);
+          });
+
+          it('should have basic example texts', async () => {
+            await pageObjects.svlSearchIndexDetailPage.expectHasSampleDocuments();
+          });
+
+          it('should have other example texts when mapping changed', async () => {
+            await es.indices.putMapping({
+              index: indexNameCodeExample,
+              properties: {
+                text: { type: 'text' },
+                number: { type: 'integer' },
+              },
+            });
+            await pageObjects.svlSearchIndexDetailPage.expectSampleDocumentsWithCustomMappings();
+          });
+        });
+
         describe('API key details', () => {
-          // Flaky test related with deleting API keys
+
           it('should show api key', async () => {
             await pageObjects.svlApiKeys.deleteAPIKeys();
             await svlSearchNavigation.navigateToIndexDetailPage(indexName);
