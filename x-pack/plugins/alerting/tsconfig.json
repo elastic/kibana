@@ -76,7 +76,9 @@
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-security-server-mocks",
     "@kbn/response-ops-rule-params",
-    "@kbn/core-http-server-utils"
+    "@kbn/core-http-server-utils",
+    "@kbn/core-deprecations-common",
+    "@kbn/core-deprecations-server"
   ],
   "exclude": [
     "target/**/*"
