@@ -13,7 +13,7 @@ import { LogLevelCoalescedValue } from './get_log_level_coalesed_value';
 
 const euiTheme = {
   colors: {
-    lightShade: '#ffffff',
+    mediumShade: '#d3dae6',
   },
 };
 
@@ -32,20 +32,20 @@ describe('getLogLevelColor', () => {
       '#d6bf57'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.error, euiTheme as EuiThemeComputed)).toBe(
-      '#df9352'
-    );
-    expect(getLogLevelColor(LogLevelCoalescedValue.critical, euiTheme as EuiThemeComputed)).toBe(
       '#e7664c'
     );
+    expect(getLogLevelColor(LogLevelCoalescedValue.critical, euiTheme as EuiThemeComputed)).toBe(
+      '#dc5640'
+    );
     expect(getLogLevelColor(LogLevelCoalescedValue.alert, euiTheme as EuiThemeComputed)).toBe(
-      '#da5e47'
+      '#d24635'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.emergency, euiTheme as EuiThemeComputed)).toBe(
-      '#cc5642'
+      '#c73729'
     );
     // other
     expect(getLogLevelColor(LogLevelCoalescedValue.trace, euiTheme as EuiThemeComputed)).toBe(
-      '#ffffff'
+      '#d3dae6'
     );
   });
 });

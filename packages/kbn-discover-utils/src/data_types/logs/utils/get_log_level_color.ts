@@ -31,11 +31,11 @@ export const getLogLevelColor = (
     case LogLevelCoalescedValue.error:
       return euiPaletteForStatus9[6];
     case LogLevelCoalescedValue.critical:
-      return '#DC5640'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
+      return '#dc5640'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
     case LogLevelCoalescedValue.alert:
-      return '#D24635'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
+      return '#d24635'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
     case LogLevelCoalescedValue.emergency:
-      return '#C73729'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
+      return '#c73729'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
     case LogLevelCoalescedValue.fatal:
       return euiTheme.colors.danger;
     default:
