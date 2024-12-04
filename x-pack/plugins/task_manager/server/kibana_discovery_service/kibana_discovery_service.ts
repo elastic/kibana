@@ -9,7 +9,7 @@ import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
-import { TaskManagerConfig } from '../config';
+import { DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS, TaskManagerConfig } from '../config';
 import { isClusterBlockException } from '../lib/bulk_update_error';
 
 interface DiscoveryServiceParams {
@@ -81,7 +81,7 @@ export class KibanaDiscoveryService {
           );
         }
         if (isClusterBlockException(e)) {
-          retryInterval = 60000;
+          retryInterval = DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS;
         }
       } finally {
         this.timer = setTimeout(

@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   createManagedConfiguration,
   ADJUST_THROUGHPUT_INTERVAL,
+  INTERVAL_AFTER_BLOCK_EXCEPTION,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
 import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET, TaskManagerConfig } from '../config';
@@ -420,12 +421,29 @@ describe('createManagedConfiguration()', () => {
       expect(subscription).toHaveBeenNthCalledWith(2, 120);
     });
 
+    test('should increase configuration at the next interval when an error with cluster_block_exception type is emitted, then decreases back to normal', async () => {
+      const { subscription, errors$ } = setupScenario(100);
+      errors$.next(
+        new BulkUpdateError({
+          statusCode: 403,
+          message: 'index is blocked',
+          type: 'cluster_block_exception',
+        })
+      );
+      expect(subscription).toHaveBeenNthCalledWith(1, 100);
+      // It emits the error with cluster_block_exception type immediately
+      expect(subscription).toHaveBeenNthCalledWith(2, INTERVAL_AFTER_BLOCK_EXCEPTION);
+      clock.tick(INTERVAL_AFTER_BLOCK_EXCEPTION);
+      expect(subscription).toHaveBeenCalledTimes(3);
+      expect(subscription).toHaveBeenNthCalledWith(3, 100);
+    });
+
     test('should log a warning when the configuration changes from the starting value', async () => {
       const { errors$ } = setupScenario(100);
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script and/or "cluster_block_exception"" error(s).'
       );
     });
 
