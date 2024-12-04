@@ -667,6 +667,27 @@
           },
           {
             "parentPluginId": "slo",
+            "id": "def-public.SLOPublicPluginsStart.embeddableEnhanced",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddableEnhanced",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddableEnhanced",
+                "scope": "public",
+                "docId": "kibEmbeddableEnhancedPluginApi",
+                "section": "def-public.StartContract",
+                "text": "StartContract"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "slo",
             "id": "def-public.SLOPublicPluginsStart.fieldFormats",
             "type": "CompoundType",
             "tags": [],
