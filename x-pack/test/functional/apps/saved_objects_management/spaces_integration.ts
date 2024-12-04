@@ -64,6 +64,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const visibleContainerText = await inspectContainer.getVisibleText();
       expect(
         textIncludesAll(visibleContainerText, [
+          'Log Threshold Alerting Rule Source',
+          'Metric AND Inventory Alerting Rule Source',
           'A Pie',
           'title',
           'id',

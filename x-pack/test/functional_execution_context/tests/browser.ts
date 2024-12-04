@@ -10,7 +10,14 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'home',
+    'timePicker',
+    'discover',
+  ]);
 
   describe('Browser apps', () => {
     let logs: Ecs[];
@@ -53,6 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('discover app', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('log*');
         await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
         await PageObjects.header.waitUntilLoadingHasFinished();
         logs = await readLogFile();

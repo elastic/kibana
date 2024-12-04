@@ -619,7 +619,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             expect(menuEntries.length).to.be(2);
             expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[2]);
           });
 
           // Test back all filter
