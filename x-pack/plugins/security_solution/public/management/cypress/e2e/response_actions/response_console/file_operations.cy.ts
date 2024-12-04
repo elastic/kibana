@@ -66,6 +66,12 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       }
     });
 
+    afterEach(function () {
+      if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
+        cy.task('captureHostVmAgentDiagnostics', { hostname: createdHost.hostname });
+      }
+    });
+
     it('"get-file --path" - should retrieve a file', () => {
       const downloadsFolder = Cypress.config('downloadsFolder');
 
@@ -114,6 +120,8 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       }).then((unzippedFileContent) => {
         expect(unzippedFileContent).to.contain(fileContent);
       });
+
+      throw new Error('test test test');
     });
 
     it('"upload --file" - should upload a file', () => {
