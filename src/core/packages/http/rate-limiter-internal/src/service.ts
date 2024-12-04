@@ -57,14 +57,17 @@ export class HttpRateLimiterService
     return !request.route.options.excludeFromRateLimiter && this.overloaded$.getValue();
   }
 
-  private watch(metrics$: Observable<EluMetrics>, threshold: number) {
+  private watch(
+    metrics$: Observable<EluMetrics>,
+    { elu, term }: InternalHttpServiceSetup['rateLimiter']
+  ) {
     metrics$
       .pipe(
         skipUntil(this.ready$),
         takeUntil(this.stopped$),
         map(
           ({ short, medium, long }) =>
-            short >= threshold && medium >= threshold && long >= threshold
+            short >= elu && (term === 'short' || medium >= elu) && (term !== 'long' || long >= elu)
         ),
         endWith(false)
       )
@@ -72,11 +75,11 @@ export class HttpRateLimiterService
   }
 
   public setup({ http, metrics }: SetupDeps): InternalRateLimiterSetup {
-    if (http.rateLimiter.elu === false) {
+    if (!http.rateLimiter.enabled) {
       return;
     }
 
-    this.watch(metrics.getEluMetrics$(), http.rateLimiter.elu);
+    this.watch(metrics.getEluMetrics$(), http.rateLimiter);
     http.registerOnPreAuth(this.handler);
   }
 
