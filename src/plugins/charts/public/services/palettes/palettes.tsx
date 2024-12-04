@@ -14,15 +14,14 @@ import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@k
 import { flatten, zip } from 'lodash';
 import { CoreTheme } from '@kbn/core/public';
 import { createColorPalette as createLegacyColorPalette } from '../..';
-import { lightenColor } from './lighten_color';
 import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
+import { decreaseOpacity } from './decrease_opacity';
 
 function buildRoundRobinCategoricalWithMappedColors(
   id: string,
   colors: string[],
-  behindTextColors?: string[],
-  isNewTheme?: boolean
+  behindTextColors?: string[]
 ): Omit<PaletteDefinition, 'title'> {
   const behindTextColorMap: Record<string, string> = Object.fromEntries(
     zip(colors, behindTextColors)
@@ -41,27 +40,17 @@ function buildRoundRobinCategoricalWithMappedColors(
       const mappedColor = mappedColors.get(colorKey);
       outputColor = chartConfiguration.behindText ? behindTextColorMap[mappedColor] : mappedColor;
     } else {
-      if (isNewTheme && id === KbnPalette.Default) {
-        // no behind color for new default palette
-        outputColor = colors[series[0].rankAtDepth % 10];
-      } else {
-        outputColor =
-          chartConfiguration.behindText && behindTextColors
-            ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
-            : colors[series[0].rankAtDepth % colors.length];
-      }
+      outputColor =
+        chartConfiguration.behindText && behindTextColors
+          ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
+          : colors[series[0].rankAtDepth % colors.length];
     }
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
     }
 
-    if (id === KbnPalette.Default) {
-      // divides palette into 3 - 10 color levels and assigns color round robin
-      const colorIndex = series[0].rankAtDepth % 10;
-      return colors[(series.length - 1) * 10 + colorIndex]; // max series count of 3
-    }
-    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
+    return decreaseOpacity(outputColor, series.length, chartConfiguration.maxDepth);
   }
   return {
     id,
@@ -96,7 +85,7 @@ function buildGradient(id: string, palette: IKbnPalette): PaletteDefinition {
       return outputColor;
     }
 
-    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
+    return decreaseOpacity(outputColor, series.length, chartConfiguration.maxDepth);
   }
   return {
     id,
@@ -153,7 +142,7 @@ function buildCustomPalette(): PaletteDefinition {
         return outputColor;
       }
 
-      return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
+      return decreaseOpacity(outputColor, series.length, chartConfiguration.maxDepth);
     },
     internal: true,
     title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'Custom' }),
@@ -229,8 +218,7 @@ export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinitio
       ...buildRoundRobinCategoricalWithMappedColors(
         'default', // needs to match key of palette definition
         defaultPalette.colors(),
-        kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors(),
-        theme.name !== 'amsterdam'
+        kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors()
       ),
     },
     status: buildGradient('status', kbnPalettes.get('status')),

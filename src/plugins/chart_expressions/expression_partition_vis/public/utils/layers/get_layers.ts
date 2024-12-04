@@ -76,8 +76,8 @@ export const getLayers = (
     columns,
     rows,
     palettes,
-    isDarkMode,
-    visParams
+    visParams,
+    isDarkMode
   );
 
   return columns.map((col, layerIndex) => {
@@ -129,8 +129,8 @@ function getColorFromMappingFactory(
   columns: Array<Partial<BucketColumns>>,
   rows: DatatableRow[],
   palettes: KbnPalettes,
-  isDarkMode: boolean,
-  visParams: PartitionVisParams
+  visParams: PartitionVisParams,
+  isDarkMode: boolean
 ): undefined | ((category: string | string[]) => string) {
   const { colorMapping, dimensions } = visParams;
 
