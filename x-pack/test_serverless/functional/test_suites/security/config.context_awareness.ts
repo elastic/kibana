@@ -18,6 +18,6 @@ export default createTestConfig({
     `--discover.experimental.enabledProfiles=${JSON.stringify(['security-root-profile'])}`,
   ],
   // include settings from project controller
-  // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
+  // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
   esServerArgs: ['xpack.ml.dfa.enabled=false'],
 });
