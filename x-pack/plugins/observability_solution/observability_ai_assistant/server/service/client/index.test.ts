@@ -63,6 +63,7 @@ function createLlmSimulator(subscriber: any) {
       subscriber.next({
         type: InferenceChatCompletionEventType.ChatCompletionMessage,
         content: msg.content,
+        toolCalls: msg.function_call ? [{ function: msg.function_call }] : [],
       });
     },
     tokenCount: async ({
