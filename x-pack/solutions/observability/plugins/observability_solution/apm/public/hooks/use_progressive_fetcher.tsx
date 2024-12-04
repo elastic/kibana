@@ -95,7 +95,7 @@ export function useProgressiveFetcher<TReturn>(
       }
       return callback(clientWithProbability(regularCallApmApi, sampledProbability));
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     dependencies,
     options
   );
@@ -104,7 +104,7 @@ export function useProgressiveFetcher<TReturn>(
     (regularCallApmApi) => {
       return callback(clientWithProbability(regularCallApmApi, 1));
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     dependencies
   );
 

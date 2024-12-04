@@ -143,17 +143,13 @@ describe('useFetcher', () => {
     });
 
     it('should show "first response" while loading "second response"', async () => {
-      const hook = renderHook(
-        /* eslint-disable-next-line react-hooks/exhaustive-deps */
-        ({ callback, args }) => useFetcher(callback, args),
-        {
-          initialProps: {
-            callback: () => Promise.resolve('first response'),
-            args: ['a'],
-          },
-          wrapper,
-        }
-      );
+      const hook = renderHook(({ callback, args }) => useFetcher(callback, args), {
+        initialProps: {
+          callback: () => Promise.resolve('first response'),
+          args: ['a'],
+        },
+        wrapper,
+      });
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -215,14 +211,10 @@ describe('useFetcher', () => {
         args: ['a'],
       };
 
-      const hook = renderHook(
-        /* eslint-disable-next-line react-hooks/exhaustive-deps */
-        ({ callback, args }) => useFetcher(callback, args),
-        {
-          initialProps,
-          wrapper,
-        }
-      );
+      const hook = renderHook(({ callback, args }) => useFetcher(callback, args), {
+        initialProps,
+        wrapper,
+      });
 
       act(() => {
         jest.runAllTimers();

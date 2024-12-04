@@ -10,8 +10,12 @@ const path = require('path');
 module.exports = {
   preset: '@kbn/test',
   rootDir: path.resolve(__dirname, '../../../../../..'),
-  roots: ['<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm'],
-  setupFiles: ['<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/.storybook/jest_setup.js'],
+  roots: [
+    '<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm',
+  ],
+  setupFiles: [
+    '<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/.storybook/jest_setup.js',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm',
   coverageReporters: ['text', 'html'],

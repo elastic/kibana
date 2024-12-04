@@ -998,7 +998,9 @@ module.exports = {
     },
     {
       // require explicit return types in route handlers for performance reasons
-      files: ['x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/server/**/route.ts'],
+      files: [
+        'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/apm/server/**/route.ts',
+      ],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'error',

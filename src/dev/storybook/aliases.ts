@@ -45,7 +45,8 @@ export const storybookAliases = {
   grouping: 'packages/kbn-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/plugins/observability_solution/infra/.storybook',
-  inventory: 'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/.storybook',
+  inventory:
+    'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/.storybook',
   investigate: 'x-pack/plugins/observability_solution/investigate_app/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
@@ -56,7 +57,8 @@ export const storybookAliases = {
     'x-pack/plugins/observability_solution/observability_ai_assistant/.storybook',
   observability_ai_assistant_app:
     'x-pack/plugins/observability_solution/observability_ai_assistant_app/.storybook',
-  observability_inventory: 'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/.storybook',
+  observability_inventory:
+    'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/inventory/.storybook',
   observability_shared: 'x-pack/plugins/observability_solution/observability_shared/.storybook',
   observability_slo: 'x-pack/plugins/observability_solution/slo/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
@@ -71,5 +73,6 @@ export const storybookAliases = {
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
-  profiling: 'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/.storybook',
+  profiling:
+    'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/profiling/.storybook',
 };
