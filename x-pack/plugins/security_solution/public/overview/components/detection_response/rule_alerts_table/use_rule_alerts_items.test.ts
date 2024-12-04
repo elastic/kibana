@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 
 import {
@@ -49,7 +49,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 
 // helper function to render the hook
 const renderUseRuleAlertsItems = (props: Partial<UseRuleAlertsItemsProps> = {}) =>
-  renderHook<UseRuleAlertsItemsProps, ReturnType<UseRuleAlertsItems>>(() =>
+  renderHook<ReturnType<UseRuleAlertsItems>, UseRuleAlertsItemsProps>(() =>
     useRuleAlertsItems({
       queryId: 'test',
       signalIndexName: 'signal-alerts',
