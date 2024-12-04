@@ -674,7 +674,7 @@ export class LensPlugin {
       )(core.application)
     );
 
-    // Allows the Lens embeddable to easily open the inapp editing flyout
+    // Allows the Lens embeddable to easily open the inline editing flyout
     const editLensEmbeddableAction = new EditLensEmbeddableAction(startDependencies, core);
     // embeddable inline edit panel action
     startDependencies.uiActions.addTriggerAction(
