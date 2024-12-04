@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AllEDRActions } from './constants';
 import {
   type ResponseActionAgentType,
   type EDRActionsApiCommandNames,
@@ -12,7 +13,7 @@ import {
 } from './constants';
 
 type SupportMap = Record<
-  EDRActionsApiCommandNames<'endpoint'>,
+  AllEDRActions,
   Record<ResponseActionType, Record<ResponseActionAgentType, boolean>>
 >;
 

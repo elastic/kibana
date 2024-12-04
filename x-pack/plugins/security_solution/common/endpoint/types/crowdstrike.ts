@@ -24,6 +24,7 @@ export interface CrowdStrikeActionsRunScriptParametersBase {
 
 export interface CrowdStrikeActionRunScriptOutputContent {
   output: string;
+  code: string;
 }
 
 // Enforce at least one of the script parameters is required

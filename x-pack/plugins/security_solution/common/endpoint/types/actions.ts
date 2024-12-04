@@ -29,7 +29,7 @@ export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 /** The output provided by some of the Endpoint responses */
 export interface ActionResponseOutput<
-  TOutputContent = ActionDetailsAgentTypeMapping['endpoint']['output']
+  TOutputContent = ActionDetailsAgentTypeMapping[ResponseActionAgentType]['output']
 > {
   type: 'json' | 'text';
   content: TOutputContent;
@@ -102,6 +102,7 @@ export interface ResponseActionScanOutputContent {
 
 export interface ResponseActionRunScriptOutputContent {
   output: string;
+  code: string;
 }
 
 export const ActivityLogItemTypes = {
@@ -411,10 +412,10 @@ export interface ActionDetailsAgentTypeMapping {
     output: CrowdStrikeActionResponseDataOutput;
     parameters: CrowdStrikeActionDataParameterTypes;
   };
-  // sentinelone: {
-  //   output: SentinelOneActionResponseDataOutput;
-  //   parameters: SentinelOneActionDataParameterTypes;
-  // };
+  sentinel_one: {
+    output: unknown;
+    parameters: unknown;
+  };
 }
 
 export interface ActionDetails<

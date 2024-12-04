@@ -38,6 +38,7 @@ export const SENTINEL_ONE_ACTIONS = [] as const;
 export const ALL_EDR_ACTIONS = Array.from(
   new Set([...ENDPOINT_ACTIONS, ...CROWDSTRIKE_ACTIONS, ...SENTINEL_ONE_ACTIONS])
 );
+export type AllEDRActions = (typeof ALL_EDR_ACTIONS)[number];
 
 export const EDR_ACTION_API_COMMANDS_NAMES = {
   endpoint: ENDPOINT_ACTIONS,
@@ -45,9 +46,8 @@ export const EDR_ACTION_API_COMMANDS_NAMES = {
   sentinel_one: SENTINEL_ONE_ACTIONS,
 };
 
-export type EDRActionsApiCommandNames<
-  TAgentType extends keyof typeof EDR_ACTION_API_COMMANDS_NAMES
-> = (typeof EDR_ACTION_API_COMMANDS_NAMES)[TAgentType][number];
+export type EDRActionsApiCommandNames<TAgentType extends ResponseActionAgentType> =
+  (typeof EDR_ACTION_API_COMMANDS_NAMES)[TAgentType][number];
 
 export const getActionsForAgentType = <TAgentType extends ResponseActionAgentType>(
   agentType: TAgentType = 'endpoint' as TAgentType
@@ -131,7 +131,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
-  Record<EDRActionsApiCommandNames<'endpoint' | 'crowdstrike'>, ConsoleResponseActionCommands>
+  Record<EDRActionsApiCommandNames<ResponseActionAgentType>, ConsoleResponseActionCommands>
 >({
   isolate: 'isolate',
   unisolate: 'release',
@@ -146,7 +146,7 @@ export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
 });
 
 export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
-  Record<ConsoleResponseActionCommands, EDRActionsApiCommandNames<'endpoint' | 'crowdstrike'>>
+  Record<ConsoleResponseActionCommands, EDRActionsApiCommandNames<ResponseActionAgentType>>
 >({
   isolate: 'isolate',
   release: 'unisolate',

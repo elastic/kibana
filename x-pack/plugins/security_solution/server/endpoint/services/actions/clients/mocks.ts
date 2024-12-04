@@ -70,6 +70,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     getFileInfo: jest.fn().mockReturnValue(Promise.resolve()),
     getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
     scan: jest.fn().mockReturnValue(Promise.resolve()),
+    runscript: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 

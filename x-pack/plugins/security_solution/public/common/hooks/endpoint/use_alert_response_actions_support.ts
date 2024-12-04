@@ -79,7 +79,7 @@ export interface AlertResponseActionsSupport {
 }
 
 type AlertAgentActionsSupported = Record<
-  EDRActionsApiCommandNames<'endpoint' | 'crowdstrike' | 'sentinel_one'>,
+  EDRActionsApiCommandNames<ResponseActionAgentType>,
   boolean
 >;
 

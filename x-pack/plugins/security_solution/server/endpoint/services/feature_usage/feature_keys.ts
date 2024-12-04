@@ -45,7 +45,7 @@ const RESPONSE_ACTIONS_FEATURE_KEY: Readonly<
 };
 
 export const getResponseActionFeatureKey = (
-  responseAction: EDRActionsApiCommandNames
+  responseAction: EDRActionsApiCommandNames<'endpoint'>
 ): FeatureKeys | undefined => {
   return RESPONSE_ACTIONS_FEATURE_KEY[responseAction];
 };
