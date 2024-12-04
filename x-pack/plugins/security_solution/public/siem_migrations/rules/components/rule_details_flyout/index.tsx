@@ -67,6 +67,7 @@ export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) 
 interface MigrationRuleDetailsFlyoutProps {
   ruleActions?: React.ReactNode;
   ruleMigration: RuleMigration;
+  matchedPrebuiltRule?: RuleResponse;
   size?: EuiFlyoutProps['size'];
   extraTabs?: EuiTabbedContentTab[];
   closeFlyout: () => void;
@@ -76,6 +77,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
   ({
     ruleActions,
     ruleMigration,
+    matchedPrebuiltRule,
     size = 'm',
     extraTabs = [],
     closeFlyout,
@@ -83,6 +85,9 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
     const rule: RuleResponse = useMemo(() => {
+      if (matchedPrebuiltRule) {
+        return matchedPrebuiltRule;
+      }
       const esqlLanguage = ruleMigration.elastic_rule?.query_language ?? 'esql';
       return {
         type: esqlLanguage,
@@ -95,7 +100,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         severity:
           (ruleMigration.elastic_rule?.severity as Severity) ?? DEFAULT_TRANSLATION_SEVERITY,
       } as RuleResponse; // TODO: we need to adjust RuleOverviewTab to allow partial RuleResponse as a parameter
-    }, [ruleMigration]);
+    }, [matchedPrebuiltRule, ruleMigration]);
 
     const translationTab: EuiTabbedContentTab = useMemo(
       () => ({
@@ -103,11 +108,14 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.TRANSLATION_TAB_LABEL,
         content: (
           <TabContentPadding>
-            <TranslationTab ruleMigration={ruleMigration} />
+            <TranslationTab
+              ruleMigration={ruleMigration}
+              matchedPrebuiltRule={matchedPrebuiltRule}
+            />
           </TabContentPadding>
         ),
       }),
-      [ruleMigration]
+      [matchedPrebuiltRule, ruleMigration]
     );
 
     const overviewTab: EuiTabbedContentTab = useMemo(

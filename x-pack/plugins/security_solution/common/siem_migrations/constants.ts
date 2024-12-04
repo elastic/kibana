@@ -21,6 +21,8 @@ export const SIEM_RULE_MIGRATION_STOP_PATH = `${SIEM_RULE_MIGRATION_PATH}/stop` 
 export const SIEM_RULE_MIGRATION_INSTALL_PATH = `${SIEM_RULE_MIGRATION_PATH}/install` as const;
 export const SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/install_translated` as const;
+export const SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH =
+  `${SIEM_RULE_MIGRATION_PATH}/prebuilt_rules` as const;
 
 export const SIEM_RULE_MIGRATION_RESOURCES_PATH = `${SIEM_RULE_MIGRATION_PATH}/resources` as const;
 

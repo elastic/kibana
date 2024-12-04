@@ -16,7 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString } from './common.gen';
+import { NonEmptyString } from '../../api/model/primitives.gen';
+import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
 
 /**
  * The original rule vendor identifier.
@@ -103,6 +104,21 @@ export const ElasticRule = z.object({
  */
 export type ElasticRulePartial = z.infer<typeof ElasticRulePartial>;
 export const ElasticRulePartial = ElasticRule.partial();
+
+/**
+ * The prebuilt rule version.
+ */
+export type PrebuiltRuleVersion = z.infer<typeof PrebuiltRuleVersion>;
+export const PrebuiltRuleVersion = z.object({
+  /**
+   * The latest available version of prebuilt rule.
+   */
+  target: RuleResponse,
+  /**
+   * The currently installed version of prebuilt rule.
+   */
+  current: RuleResponse.optional(),
+});
 
 /**
  * The rule translation result.

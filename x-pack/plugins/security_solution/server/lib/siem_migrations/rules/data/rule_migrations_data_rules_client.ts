@@ -43,6 +43,7 @@ export interface RuleMigrationFilterOptions {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
   ids?: string[];
   installable?: boolean;
+  prebuiltRulesOnly?: boolean;
   searchTerm?: string;
 }
 
@@ -63,6 +64,15 @@ const getInstallableConditions = (): QueryDslQueryContainer[] => {
       },
     },
   ];
+};
+
+const getPrebuiltRulesCondition = (): QueryDslQueryContainer => {
+  return {
+    nested: {
+      path: 'elastic_rule',
+      query: { exists: { field: 'elastic_rule.prebuilt_rule_id' } },
+    },
+  };
 };
 
 export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
@@ -249,12 +259,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
     const aggregations = {
       prebuilt: {
-        filter: {
-          nested: {
-            path: 'elastic_rule',
-            query: { exists: { field: 'elastic_rule.prebuilt_rule_id' } },
-          },
-        },
+        filter: getPrebuiltRulesCondition(),
       },
       installable: {
         filter: {
@@ -363,6 +368,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     status,
     ids,
     installable,
+    prebuiltRulesOnly,
     searchTerm,
   }: RuleMigrationFilterOptions): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
@@ -378,6 +384,9 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }
     if (installable) {
       filter.push(...getInstallableConditions());
+    }
+    if (prebuiltRulesOnly) {
+      filter.push(getPrebuiltRulesCondition());
     }
     if (searchTerm?.length) {
       filter.push({

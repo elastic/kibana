@@ -34,7 +34,7 @@ paths:
                 properties:
                   migration_id:
                     description: The migration id created.
-                    $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+                    $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     put:
       summary: Updates rules migrations
@@ -57,7 +57,7 @@ paths:
                 properties:
                   id:
                     description: The rule migration id
-                    $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+                    $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
                   elastic_rule:
                     description: The migrated elastic rule attributes to update.
                     $ref: '../../rule_migration.schema.yaml#/components/schemas/ElasticRulePartial'
@@ -95,7 +95,7 @@ paths:
           required: true
           schema:
             description: The migration id to isnstall rules for
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -104,7 +104,7 @@ paths:
               type: array
               items:
                 description: The rule migration id
-                $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+                $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates rules migrations have been installed correctly.
@@ -133,7 +133,7 @@ paths:
           required: true
           schema:
             description: The migration id to install translated rules for
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates rules migrations have been installed correctly.
@@ -147,6 +147,33 @@ paths:
                   installed:
                     type: boolean
                     description: Indicates rules migrations have been installed.
+
+  /internal/siem_migrations/rules/{migration_id}/prebuilt_rules:
+    get:
+      summary: Retrieves all prebuilt rules
+      operationId: GetRuleMigrationPrebuiltRules
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves all available prebuilt rules (installed and installable)
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to install translated rules for
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates prebuilt rules have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  description: The list of prebuilt rules
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/PrebuiltRuleVersion'
 
   /internal/siem_migrations/rules/stats:
     get:
@@ -184,7 +211,7 @@ paths:
           required: true
           schema:
             description: The migration id to start
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - name: page
           in: query
           required: false
@@ -237,7 +264,7 @@ paths:
           required: true
           schema:
             description: The migration id to start
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -282,7 +309,7 @@ paths:
           required: true
           schema:
             description: The migration id to fetch stats for
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates the migration stats has been retrieved correctly.
@@ -307,7 +334,7 @@ paths:
           required: true
           schema:
             description: The migration id to fetch translation stats for
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates the migration stats has been retrieved correctly.
@@ -333,7 +360,7 @@ paths:
           required: true
           schema:
             description: The migration id to stop
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates migration task stop has been processed successfully.
@@ -368,7 +395,7 @@ paths:
           required: true
           schema:
             description: The migration id to attach the resources
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -406,7 +433,7 @@ paths:
           required: true
           schema:
             description: The migration id to attach the resources
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../.././../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - name: type
           in: query
           required: false

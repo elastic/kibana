@@ -16,6 +16,7 @@ import {
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_START_PATH,
   SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
+  SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   GetAllStatsRuleMigrationResponse,
@@ -24,8 +25,29 @@ import type {
   InstallTranslatedMigrationRulesResponse,
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
+  GetRuleMigrationPrebuiltRulesResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
+/**
+ * Retrieves all prebuilt rules.
+ *
+ * @param migrationId `id` of the migration to get prebuilt rules for
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getRuleMigrationsPrebuiltRules = async ({
+  migrationId,
+  signal,
+}: {
+  migrationId: string;
+  signal: AbortSignal | undefined;
+}): Promise<GetRuleMigrationPrebuiltRulesResponse> => {
+  return KibanaServices.get().http.fetch<GetRuleMigrationPrebuiltRulesResponse>(
+    replaceParams(SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH, { migration_id: migrationId }),
+    { method: 'GET', version: '1', signal }
+  );
+};
 /**
  * Retrieves the stats for all the existing migrations, aggregated by `migration_id`.
  *

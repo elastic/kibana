@@ -22,6 +22,7 @@ import {
   ElasticRulePartial,
   RuleMigrationTranslationResult,
   RuleMigrationComments,
+  PrebuiltRuleVersion,
   RuleMigrationTaskStats,
   RuleMigration,
   RuleMigrationTranslationStats,
@@ -29,7 +30,8 @@ import {
   RuleMigrationResourceType,
   RuleMigrationResource,
 } from '../../rule_migration.gen';
-import { NonEmptyString, ConnectorId, LangSmithOptions } from '../../common.gen';
+import { NonEmptyString } from '../../../../api/model/primitives.gen';
+import { ConnectorId, LangSmithOptions } from '../../common.gen';
 
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
 export const CreateRuleMigrationRequestBody = z.array(OriginalRule);
@@ -67,6 +69,21 @@ export const GetRuleMigrationResponse = z.object({
   total: z.number(),
   data: z.array(RuleMigration),
 });
+
+export type GetRuleMigrationPrebuiltRulesRequestParams = z.infer<
+  typeof GetRuleMigrationPrebuiltRulesRequestParams
+>;
+export const GetRuleMigrationPrebuiltRulesRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetRuleMigrationPrebuiltRulesRequestParamsInput = z.input<
+  typeof GetRuleMigrationPrebuiltRulesRequestParams
+>;
+
+export type GetRuleMigrationPrebuiltRulesResponse = z.infer<
+  typeof GetRuleMigrationPrebuiltRulesResponse
+>;
+export const GetRuleMigrationPrebuiltRulesResponse = z.array(PrebuiltRuleVersion);
 export type GetRuleMigrationResourcesRequestQuery = z.infer<
   typeof GetRuleMigrationResourcesRequestQuery
 >;

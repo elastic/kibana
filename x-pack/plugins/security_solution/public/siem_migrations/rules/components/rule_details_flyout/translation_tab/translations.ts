@@ -28,6 +28,13 @@ export const SPLUNK_QUERY_TITLE = i18n.translate(
   }
 );
 
+export const PREBUILT_RULE_QUERY_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.prebuiltRuleQueryTitle',
+  {
+    defaultMessage: 'Prebuilt rule query',
+  }
+);
+
 export const ESQL_TRANSLATION_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.esqlTranslationTitle',
   {
