@@ -9,12 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
-import {
-  AlertConsumers,
-  ALERT_CASE_IDS,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_UUID } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -344,7 +339,7 @@ const browserFields: BrowserFields = {
   },
 };
 
-jest.mocked(fetchAlertsFields).mockResolvedValue({ browserFields, fields: [] });
+const fetchAlertsFieldsMock = fetchAlertsFields as jest.Mock;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -367,7 +362,7 @@ describe('AlertsTableState', () => {
     alertsTableConfigurationRegistry: alertsTableConfigurationRegistryMock,
     configurationId: PLUGIN_ID,
     id: PLUGIN_ID,
-    featureIds: [AlertConsumers.LOGS],
+    ruleTypeIds: ['logs'],
     query: {},
     columns,
     pagination: {
@@ -419,6 +414,8 @@ describe('AlertsTableState', () => {
       data: maintenanceWindowsMap,
       isFetching: false,
     });
+
+    fetchAlertsFieldsMock.mockResolvedValue({ browserFields, fields: [] });
   });
 
   describe('Cases', () => {
@@ -837,6 +834,8 @@ describe('AlertsTableState', () => {
         data: new Map(),
         isFetching: false,
       });
+
+      fetchAlertsFieldsMock.mockResolvedValue({ browserFields, fields: [] });
     });
 
     it('should show field browser', async () => {
@@ -845,13 +844,13 @@ describe('AlertsTableState', () => {
     });
 
     it('should remove an already existing element when selected', async () => {
-      const { getByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
+      const { findByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
 
       expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
-      fireEvent.click(getByTestId('show-field-browser'));
-      const fieldCheckbox = getByTestId(`field-${AlertsField.name}-checkbox`);
+      fireEvent.click(await findByTestId('show-field-browser'));
+      const fieldCheckbox = await findByTestId(`field-${AlertsField.name}-checkbox`);
       fireEvent.click(fieldCheckbox);
-      fireEvent.click(getByTestId('close'));
+      fireEvent.click(await findByTestId('close'));
 
       await waitFor(() => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).toBe(null);
@@ -877,13 +876,15 @@ describe('AlertsTableState', () => {
         set: jest.fn(),
       }));
 
-      const { getByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
+      const { getByTestId, findByTestId, queryByTestId } = render(
+        <TestComponent {...tableProps} />
+      );
 
       expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).toBe(null);
-      fireEvent.click(getByTestId('show-field-browser'));
-      const fieldCheckbox = getByTestId(`field-${AlertsField.name}-checkbox`);
+      fireEvent.click(await findByTestId('show-field-browser'));
+      const fieldCheckbox = await findByTestId(`field-${AlertsField.name}-checkbox`);
       fireEvent.click(fieldCheckbox);
-      fireEvent.click(getByTestId('close'));
+      fireEvent.click(await findByTestId('close'));
 
       await waitFor(() => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
@@ -896,13 +897,13 @@ describe('AlertsTableState', () => {
     });
 
     it('should insert a new field as column when its not a default one', async () => {
-      const { getByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
+      const { findByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
 
       expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).toBe(null);
-      fireEvent.click(getByTestId('show-field-browser'));
-      const fieldCheckbox = getByTestId(`field-${AlertsField.uuid}-checkbox`);
+      fireEvent.click(await findByTestId('show-field-browser'));
+      const fieldCheckbox = await findByTestId(`field-${AlertsField.uuid}-checkbox`);
       fireEvent.click(fieldCheckbox);
-      fireEvent.click(getByTestId('close'));
+      fireEvent.click(await findByTestId('close'));
 
       await waitFor(() => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
@@ -954,6 +955,16 @@ describe('AlertsTableState', () => {
     });
 
     it('should render an empty screen if there are no alerts', async () => {
+      const result = render(<TestComponent {...tableProps} />);
+      expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
+    });
+
+    it('should render an empty screen when the data are undefined', async () => {
+      mockUseSearchAlertsQuery.mockReturnValue({
+        data: undefined,
+        refetch: refetchMock,
+      });
+
       const result = render(<TestComponent {...tableProps} />);
       expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
     });
