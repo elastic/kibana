@@ -1280,6 +1280,8 @@
       "@kbn/no-data-page-plugin/*": ["src/plugins/no_data_page/*"],
       "@kbn/notifications-plugin": ["x-pack/plugins/notifications"],
       "@kbn/notifications-plugin/*": ["x-pack/plugins/notifications/*"],
+      "@kbn/nx": ["packages/kbn-nx"],
+      "@kbn/nx/*": ["packages/kbn-nx/*"],
       "@kbn/object-versioning": ["packages/kbn-object-versioning"],
       "@kbn/object-versioning/*": ["packages/kbn-object-versioning/*"],
       "@kbn/object-versioning-utils": ["packages/kbn-object-versioning-utils"],

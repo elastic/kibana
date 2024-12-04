@@ -12,15 +12,35 @@ import { REPO_ROOT } from './paths.mjs';
 import path from 'path';
 
 /**
- * Builds a single package using it's npm build script
- * @param {string} packageName
- * @param {{quiet: boolean}} options
- * @returns {Promise<void>}
+ * Builds a set of packages with NX, relying on an existing build target
+ * @param {string[]} packages
+ * @param {{quiet: boolean, disableNXCache: boolean, log: any}} options
+ * @returns {Promise<unknown>}
  */
-export async function buildPackage(packageName, { quiet }) {
-  await run('yarn', ['build'], {
-    cwd: path.resolve(REPO_ROOT, 'packages', packageName),
-    pipe: !quiet,
+export async function buildPackages(packages, options) {
+  if (packages.length === 0) {
+    throw new Error('No packages to build');
+  }
+
+  const BUILD_TARGET = 'build';
+  const projectFilterFlags = packages.map((packageName) => `--projects="${packageName}"`);
+
+  const flags = [
+    `--target=${BUILD_TARGET}`,
+    ...projectFilterFlags,
+    '--verbose', // NX is quite quiet by default, verbose doesn't hurt
+  ];
+
+  if (options.disableNXCache) {
+    flags.push('--skipNxCache');
+  }
+
+  const command = ['nx', 'run-many', ...flags].join(' ');
+  options.log.info(`Running ${command}`);
+
+  return run('nx', ['run-many', ...flags], {
+    cwd: REPO_ROOT,
+    pipe: !options.quiet,
   });
 }
 

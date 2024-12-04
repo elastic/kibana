@@ -14,7 +14,7 @@ import { REPO_ROOT } from '../../lib/paths.mjs';
 import { maybeRealpath, isFile, isDirectory } from '../../lib/fs.mjs';
 import { run } from '../../lib/spawn.mjs';
 
-// yarn integrity file checker
+// remove the yarn integrity file if it exists
 export async function removeYarnIntegrityFileIfExists() {
   try {
     const nodeModulesRealPath = await maybeRealpath(Path.resolve(REPO_ROOT, 'node_modules'));
@@ -51,7 +51,9 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
   if (quiet) args.push('--silent');
   await run('yarn', args, { cwd: process.cwd(), pipe: true });
 
-  // await run('yarn', ['playwright', 'install'], { cwd: process.cwd(), pipe: true });
-
-  // log.success('Playwright browsers installed');
+  await run('yarn', ['playwright', 'install'], {
+    cwd: process.cwd(),
+    pipe: true,
+  });
+  log.success('Playwright browsers installed');
 }

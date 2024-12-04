@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "name": "kbn-nx",
+  "version": "0.0.1",
+  "generators": {
+
+  }
+}

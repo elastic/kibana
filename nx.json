@@ -1,10 +1,13 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
-  "nxCloudId": "66eae265a5140b29d4e9bc4a",
+  "cli": {
+    "packageManager": "yarn"
+  },
+  "parallel": 5,
+  "useDaemonProcess": true,
   "tasksRunnerOptions": {
     "default": {
-      "runner": "nx/tasks-runners/default",
       "options": {
         "cacheableOperations": [
           "build",
@@ -15,11 +18,46 @@
     }
   },
   "plugins": [
-    {
-      "plugin": "@nx/eslint/plugin",
+  ],
+  "namedInputs": {
+    "global:tsConfigs": [
+      "{projectRoot}/tsconfig.json",
+      "{projectRoot}/tsconfig.type_check.json",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/tsconfig.base.type_check.json",
+      "!{workspaceRoot}/nx.json",
+      "!{workspaceRoot}/package.json",
+      "!{workspaceRoot}/yarn.lock"
+    ]
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "typecheck": {
+      "executor": "@kbn/nx:typecheck-js",
+      "dependsOn": [
+        "^@kbn/nx",
+        "^typecheck"
+      ],
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ],
       "options": {
-        "targetName": "eslint:lint"
-      }
-    }
-  ]
+      },
+      "cache": true
+    },
+  }
 }

@@ -65,7 +65,7 @@ export async function validateDependencies(log: SomeDevLog, yarnLock: YarnLock) 
   // look through all the dependencies of production packages and production
   // dependencies of those packages to determine if we're shipping any versions
   // of lodash v3 in the distributable
-  const prodDependencies = findProductionDependencies(log, yarnLock);
+  const prodDependencies = findProductionDependencies(log, yarnLock)!;
   const lodash3Versions = new Set<string>();
   for (const dep of prodDependencies.values()) {
     if (dep.name === 'lodash' && dep.version.startsWith('3.')) {

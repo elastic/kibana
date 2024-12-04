@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "<pluginName>",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/src/**"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  }
+}
