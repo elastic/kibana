@@ -18,6 +18,8 @@ export const getLogLevelColor = (
   const euiPaletteForStatus9 = euiPaletteForStatus(9);
 
   switch (logLevelCoalescedValue) {
+    case LogLevelCoalescedValue.trace:
+      return euiTheme.colors.mediumShade;
     case LogLevelCoalescedValue.debug:
       return euiPaletteForTemperature6[2]; // lighter, closer to the default color for all other unknown log levels
     case LogLevelCoalescedValue.info:
@@ -27,15 +29,16 @@ export const getLogLevelColor = (
     case LogLevelCoalescedValue.warning:
       return euiPaletteForStatus9[4];
     case LogLevelCoalescedValue.error:
-      return euiPaletteForStatus9[5];
-    case LogLevelCoalescedValue.critical:
       return euiPaletteForStatus9[6];
+    case LogLevelCoalescedValue.critical:
+      return '#DC5640'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
     case LogLevelCoalescedValue.alert:
-      return euiPaletteForStatus9[7];
+      return '#D24635'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
     case LogLevelCoalescedValue.emergency:
+      return '#C73729'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
     case LogLevelCoalescedValue.fatal:
-      return euiPaletteForStatus9[8];
+      return euiTheme.colors.danger;
     default:
-      return euiTheme.colors.lightShade;
+      return euiTheme.colors.mediumShade;
   }
 };
