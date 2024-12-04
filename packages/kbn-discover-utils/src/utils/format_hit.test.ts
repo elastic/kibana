@@ -106,6 +106,36 @@ describe('formatHit', () => {
     ]);
   });
 
+  it('should highlight a subfield even shouldShowFieldHandler determines it should not be shown ', () => {
+    const highlightHit = buildDataTableRecord(
+      {
+        _id: '2',
+        _index: 'logs',
+        fields: {
+          object: ['object'],
+          'object.value': [42, 13],
+        },
+        highlight: { 'object.value': ['%%'] },
+      },
+      dataViewMock
+    );
+
+    const formatted = formatHit(
+      highlightHit,
+      dataViewMock,
+      (fieldName) => ['object'].includes(fieldName),
+      220,
+      fieldFormatsMock
+    );
+
+    expect(formatted).toEqual([
+      ['object.value', 'formatted:42,13', 'object.value'],
+      ['object', ['object'], 'object'],
+      ['_index', 'formatted:logs', '_index'],
+      ['_score', undefined, '_score'],
+    ]);
+  });
+
   it('should filter fields based on their real name not displayName', () => {
     const formatted = formatHit(
       row,

@@ -6,7 +6,7 @@
  */
 
 const { Client } = require('@elastic/elasticsearch');
-const faker = require('faker');
+const { faker } = require('@faker-js/faker');
 
 const THREAT_INDEX = 'logs-ti';
 
