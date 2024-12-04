@@ -37,18 +37,6 @@ describe('Workflow Insights', () => {
       expect(() => validateQuery(validQuery)).not.toThrow();
     });
 
-    it('should throw an error if required fields are missing', () => {
-      const invalidQuery = {
-        query: {
-          size: 10,
-        },
-      };
-
-      expect(() => validateQuery(invalidQuery)).toThrowErrorMatchingInlineSnapshot(
-        '"[query.actionTypes]: expected value of type [array] but got [undefined]"'
-      );
-    });
-
     it('should throw an error for invalid types', () => {
       const invalidQuery = {
         query: {
@@ -84,15 +72,13 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateQuery(invalidQuery)).toThrowErrorMatchingInlineSnapshot(
-        '"[query.sourceIds.1]: sourceId can not be an empty string"'
+        '"[query.sourceIds.1]: sourceId cannot be an empty string"'
       );
     });
 
     it('should validate successfully when optional fields are omitted', () => {
       const validQuery = {
-        query: {
-          actionTypes: ['refreshed'],
-        },
+        query: {},
       };
 
       expect(() => validateQuery(validQuery)).not.toThrow();
