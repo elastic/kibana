@@ -11,11 +11,13 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamDetailOverview } from '../stream_detail_overview';
+import { StreamDetailManagement } from '../stream_detail_management';
 
 export function StreamDetailView() {
-  const {
-    path: { key, tab },
-  } = useStreamsAppParams('/{key}/{tab}');
+  const { path } = useStreamsAppParams('/{key}/*');
+
+  const key = path.key;
+  const tab = 'tab' in path ? path.tab : 'management';
 
   const {
     dependencies: {
@@ -25,7 +27,7 @@ export function StreamDetailView() {
     },
   } = useKibana();
 
-  const { value: streamEntity } = useStreamsAppFetch(
+  const { value: streamEntity, refresh } = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /api/streams/{id}', {
         signal,
@@ -54,12 +56,19 @@ export function StreamDetailView() {
     },
     {
       name: 'management',
-      content: <></>,
+      content: <StreamDetailManagement definition={streamEntity} refreshDefinition={refresh} />,
       label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
         defaultMessage: 'Management',
       }),
     },
   ];
 
-  return <EntityDetailViewWithoutParams tabs={tabs} entity={entity} selectedTab={tab} />;
+  return (
+    <EntityDetailViewWithoutParams
+      tabs={tabs}
+      entity={entity}
+      definition={streamEntity}
+      selectedTab={tab}
+    />
+  );
 }
