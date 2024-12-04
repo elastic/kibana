@@ -63,7 +63,7 @@ export const getSecurityBaseKibanaFeature = ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitleDeprecated',
     {
-      defaultMessage: 'Security (deprecated)',
+      defaultMessage: 'Security (Deprecated)',
     }
   ),
   order: 1100,
