@@ -29,15 +29,13 @@ export const listStreamsRoute = createServerRoute({
     response,
     request,
     getScopedClients,
-  }): Promise<{ definitions: Record<string, StreamDefinition> }> => {
+  }): Promise<{ definitions: StreamDefinition[] }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
       const { definitions } = await listStreams({ scopedClusterClient });
 
       return {
-        definitions: Object.fromEntries(
-          definitions.map((definition) => [definition.id, definition])
-        ),
+        definitions,
       };
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
