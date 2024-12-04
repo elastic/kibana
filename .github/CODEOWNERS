@@ -1034,7 +1034,6 @@ x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
-
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
