@@ -16,7 +16,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { eventLogServiceMock } from '@kbn/event-log-plugin/server/mocks';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import type { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { ConfigType } from '../../../../config';
 import type { AlertAttributes } from '../types';
 import { createRuleMock } from './rule';
@@ -48,7 +48,7 @@ export const createRuleTypeMocks = (
       alertExecutor = executor;
     },
     getConfig: () => ({ run: { alerts: { max: DEFAULT_MAX_ALERTS } } }),
-  } as AlertingPluginSetupContract;
+  } as AlertingServerSetup;
 
   const actions = {
     registerType: jest.fn(),
