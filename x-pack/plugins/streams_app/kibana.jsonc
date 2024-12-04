@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-app-plugin",
-  "owner": "@simianhacker @flash1293 @dgieselaar",
+  "owner": "@elastic/streams-program-team",
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -16,7 +16,8 @@
       "dataViews",
       "unifiedSearch",
       "share",
-      "savedObjectsTagging"
+      "savedObjectsTagging",
+      "navigation"
     ],
     "requiredBundles": [
       "kibanaReact"

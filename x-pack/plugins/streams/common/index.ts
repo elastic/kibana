@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { StreamDefinition } from './types';
 export type { Asset, AssetType } from './assets';
+export type { StreamDefinition, ReadStreamDefinition } from './types';

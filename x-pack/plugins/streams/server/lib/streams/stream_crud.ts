@@ -120,7 +120,6 @@ async function syncAssets({
 type ListStreamsParams = BaseParams;
 
 export interface ListStreamResponse {
-  total: number;
   definitions: StreamDefinition[];
 }
 
@@ -134,12 +133,14 @@ export async function listStreams({
   });
 
   const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
-  const definitions = response.hits.hits.map((hit) => ({ ...hit._source!, managed: true }));
-  const total = response.hits.total!;
+  let definitions = response.hits.hits.map((hit) => ({ ...hit._source!, managed: true }));
+  const hasAccess = await Promise.all(
+    definitions.map((definition) => checkReadAccess({ id: definition.id, scopedClusterClient }))
+  );
+  definitions = definitions.filter((_, index) => hasAccess[index]);
 
   return {
     definitions: [...definitions, ...dataStreams],
-    total: (typeof total === 'number' ? total : total.value) + dataStreams.length,
   };
 }
 
@@ -275,7 +276,9 @@ export async function readAncestors({
 
   return {
     ancestors: await Promise.all(
-      ancestorIds.map((ancestorId) => readStream({ scopedClusterClient, id: ancestorId }))
+      ancestorIds.map((ancestorId) =>
+        readStream({ scopedClusterClient, id: ancestorId, skipAccessCheck: true })
+      )
     ),
   };
 }

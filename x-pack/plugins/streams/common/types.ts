@@ -33,11 +33,11 @@ export interface AndCondition {
   and: Condition[];
 }
 
-export interface RerouteOrCondition {
+export interface OrCondition {
   or: Condition[];
 }
 
-export type Condition = FilterCondition | AndCondition | RerouteOrCondition | undefined;
+export type Condition = FilterCondition | AndCondition | OrCondition | undefined;
 
 export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
   z.union([
@@ -77,18 +77,17 @@ export const fieldDefinitionSchema = z.object({
 
 export type FieldDefinition = z.infer<typeof fieldDefinitionSchema>;
 
+export const streamChildSchema = z.object({
+  id: z.string(),
+  condition: z.optional(conditionSchema),
+});
+
+export type StreamChild = z.infer<typeof streamChildSchema>;
+
 export const streamWithoutIdDefinitonSchema = z.object({
   processing: z.array(processingDefinitionSchema).default([]),
   fields: z.array(fieldDefinitionSchema).default([]),
-  children: z
-    .array(
-      z.object({
-        id: z.string(),
-        condition: z.optional(conditionSchema),
-      })
-    )
-    .default([]),
-  dashboards: z.optional(z.array(z.string()).default([])),
+  children: z.array(streamChildSchema).default([]),
 });
 
 export type StreamWithoutIdDefinition = z.infer<typeof streamDefinitonSchema>;
@@ -111,3 +110,9 @@ export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;
 export const streamDefinitonWithoutChildrenSchema = streamDefinitonSchema.omit({ children: true });
 
 export type StreamWithoutChildrenDefinition = z.infer<typeof streamDefinitonWithoutChildrenSchema>;
+
+export const readStreamDefinitonSchema = streamDefinitonSchema.extend({
+  inheritedFields: z.array(fieldDefinitionSchema.extend({ from: z.string() })).default([]),
+});
+
+export type ReadStreamDefinition = z.infer<typeof readStreamDefinitonSchema>;
