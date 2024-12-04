@@ -187,7 +187,7 @@ this setting stores part of the URL in your browser session to keep the URL
 short.
 
 [[theme-darkmode]]`theme:darkMode`::
-The UI theme that the {kib} UI should use.
+deprecated:[9.0.0] The UI theme that the {kib} UI should use.
 Set to `enabled` or `disabled` to enable or disable the dark theme.
 Set to `system` to have the {kib} UI theme follow the system theme.
 You must refresh the page to apply the setting.
