@@ -36,5 +36,7 @@
     "@kbn/code-editor",
     "@kbn/ui-theme",
     "@kbn/navigation-plugin",
+    "@kbn/server-route-repository-client",
+    "@kbn/saved-objects-tagging-plugin",
   ]
 }

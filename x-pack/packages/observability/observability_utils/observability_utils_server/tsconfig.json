@@ -26,5 +26,6 @@
     "@kbn/rule-data-utils",
     "@kbn/utility-types",
     "@kbn/task-manager-plugin",
+    "@kbn/es-errors",
   ]
 }
