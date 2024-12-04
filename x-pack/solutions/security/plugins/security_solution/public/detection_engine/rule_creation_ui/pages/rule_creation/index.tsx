@@ -219,7 +219,6 @@ const CreateRulePageComponent: React.FC = () => {
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
   const defineStepFormFields = defineStepForm.getFields();
-
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType,
     isQueryBarValid,
