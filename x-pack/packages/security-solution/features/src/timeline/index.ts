@@ -7,9 +7,10 @@
 
 import { getTimelineBaseKibanaFeature } from './kibana_features';
 import type { ProductFeatureParams } from '../types';
+import type { SecurityFeatureParams } from '../security/types';
 
-export const getTimelineFeature = (): ProductFeatureParams => ({
-  baseKibanaFeature: getTimelineBaseKibanaFeature(),
+export const getTimelineFeature = (params: SecurityFeatureParams): ProductFeatureParams => ({
+  baseKibanaFeature: getTimelineBaseKibanaFeature(params),
   baseKibanaSubFeatureIds: [],
   subFeaturesMap: new Map(),
 });

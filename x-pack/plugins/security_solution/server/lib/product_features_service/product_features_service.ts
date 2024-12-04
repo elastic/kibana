@@ -28,7 +28,10 @@ import type { ExperimentalFeatures } from '../../../common';
 import { APP_ID } from '../../../common';
 import { ProductFeatures } from './product_features';
 import type { ProductFeaturesConfigurator } from './types';
-import { securityDefaultSavedObjects } from './security_saved_objects';
+import {
+  securityDefaultSavedObjects,
+  securityTimelineSavedObjects,
+} from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 
 // The prefix ("securitySolution-") used by all the Security Solution API action privileges.
@@ -101,7 +104,9 @@ export class ProductFeaturesService {
       attackDiscoveryFeature.baseKibanaSubFeatureIds
     );
 
-    const timelineFeature = getTimelineFeature();
+    const timelineFeature = getTimelineFeature({
+      savedObjects: securityTimelineSavedObjects,
+    });
     this.timelineProductFeatures = new ProductFeatures(
       this.logger,
       timelineFeature.subFeaturesMap,

@@ -11,8 +11,11 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import { APP_ID, TIMELINE_FEATURE_ID } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
+import type { SecurityFeatureParams } from '../security/types';
 
-export const getTimelineBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
+export const getTimelineBaseKibanaFeature = (
+  params: SecurityFeatureParams
+): BaseKibanaFeatureConfig => ({
   id: TIMELINE_FEATURE_ID,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTimelineTitle',
@@ -30,19 +33,21 @@ export const getTimelineBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
       app: [TIMELINE_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
-        all: [],
-        read: [],
+        all: params.savedObjects,
+        read: params.savedObjects,
       },
       ui: ['read', 'crud'],
+      api: ['timeline_read', 'timeline_write'],
     },
     read: {
       app: [TIMELINE_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: [],
+        read: params.savedObjects,
       },
       ui: ['read'],
+      api: ['timeline_read'],
     },
   },
 });

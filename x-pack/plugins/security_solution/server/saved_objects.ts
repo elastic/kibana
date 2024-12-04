@@ -33,6 +33,21 @@ const types = [
 
 export const savedObjectTypes = types.map((type) => type.name);
 
+export const savedObjectTypesWithoutTimelineAndWithoutNotes = savedObjectTypes.filter((type) => {
+  switch (type) {
+    case noteType.name:
+    case pinnedEventType.name:
+    case timelineType.name:
+      return false;
+    default:
+      return true;
+  }
+});
+
+export const timelineSavedObjectTypes = [timelineType.name, pinnedEventType.name];
+
+export const notesSavedObjectTypes = [noteType.name];
+
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
   types.forEach((type) => savedObjects.registerType(type));
 };
