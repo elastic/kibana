@@ -142,7 +142,7 @@ export function registerChatCompleteRoute({
           body: chatCompleteResponse,
         });
       } catch (e) {
-        return response.customError({
+        return response.custom({
           statusCode: isInferenceError(e) ? e.meta?.status ?? 500 : 500,
           bypassErrorFormat: true,
           body: {
