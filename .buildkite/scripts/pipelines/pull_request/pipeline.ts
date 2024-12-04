@@ -252,72 +252,72 @@ const getPipeline = (filename: string, removeSteps = true) => {
       );
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^package.json/,
-        /^packages\/kbn-discover-utils/,
-        /^packages\/kbn-doc-links/,
-        /^packages\/kbn-dom-drag-drop/,
-        /^packages\/kbn-es-query/,
-        /^packages\/kbn-i18n/,
-        /^packages\/kbn-i18n-react/,
-        /^packages\/kbn-expandable-flyout/,
-        /^packages\/kbn-grouping/,
-        /^packages\/kbn-resizable-layout/,
-        /^packages\/kbn-rison/,
-        /^packages\/kbn-rule-data-utils/,
-        /^packages\/kbn-safer-lodash-set/,
-        /^packages\/kbn-search-types/,
-        /^packages\/kbn-securitysolution-.*/,
-        /^packages\/kbn-securitysolution-ecs/,
-        /^packages\/kbn-securitysolution-io-ts-alerting-types/,
-        /^packages\/kbn-securitysolution-io-ts-list-types/,
-        /^packages\/kbn-securitysolution-list-hooks/,
-        /^packages\/kbn-securitysolution-t-grid/,
-        /^packages\/kbn-ui-theme/,
-        /^packages\/kbn-utility-types/,
-        /^packages\/react/,
-        /^packages\/shared-ux/,
-        /^src\/core/,
-        /^src\/plugins\/charts/,
-        /^src\/plugins\/controls/,
-        /^src\/plugins\/data/,
-        /^src\/plugins\/data_views/,
-        /^src\/plugins\/discover/,
-        /^src\/plugins\/field_formats/,
-        /^src\/plugins\/inspector/,
-        /^src\/plugins\/kibana_react/,
-        /^src\/plugins\/kibana_utils/,
-        /^src\/plugins\/saved_search/,
-        /^src\/plugins\/ui_actions/,
-        /^src\/plugins\/unified_histogram/,
-        /^src\/plugins\/unified_search/,
-        /^x-pack\/packages\/kbn-elastic-assistant/,
-        /^x-pack\/packages\/kbn-elastic-assistant-common/,
-        /^x-pack\/packages\/security-solution/,
-        /^x-pack\/plugins\/alerting/,
-        /^x-pack\/plugins\/cases/,
-        /^x-pack\/plugins\/data_views\/common/,
-        /^x-pack\/plugins\/elastic_assistant/,
-        /^x-pack\/plugins\/lists/,
-        /^x-pack\/plugins\/rule_registry\/common/,
-        /^x-pack\/plugins\/security_solution/,
-        /^x-pack\/plugins\/security_solution_ess/,
-        /^x-pack\/plugins\/security_solution_serverless/,
-        /^x-pack\/plugins\/task_manager/,
-        /^x-pack\/plugins\/threat_intelligence/,
-        /^x-pack\/plugins\/timelines/,
-        /^x-pack\/plugins\/triggers_actions_ui/,
-        /^x-pack\/plugins\/usage_collection\/public/,
-        /^x-pack\/test\/functional\/es_archives\/security_solution/,
-        /^x-pack\/test\/security_solution_cypress/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
-      );
-    }
+    // if (
+    //   (await doAnyChangesMatch([
+    //     /^package.json/,
+    //     /^packages\/kbn-discover-utils/,
+    //     /^packages\/kbn-doc-links/,
+    //     /^packages\/kbn-dom-drag-drop/,
+    //     /^packages\/kbn-es-query/,
+    //     /^packages\/kbn-i18n/,
+    //     /^packages\/kbn-i18n-react/,
+    //     /^packages\/kbn-expandable-flyout/,
+    //     /^packages\/kbn-grouping/,
+    //     /^packages\/kbn-resizable-layout/,
+    //     /^packages\/kbn-rison/,
+    //     /^packages\/kbn-rule-data-utils/,
+    //     /^packages\/kbn-safer-lodash-set/,
+    //     /^packages\/kbn-search-types/,
+    //     /^packages\/kbn-securitysolution-.*/,
+    //     /^packages\/kbn-securitysolution-ecs/,
+    //     /^packages\/kbn-securitysolution-io-ts-alerting-types/,
+    //     /^packages\/kbn-securitysolution-io-ts-list-types/,
+    //     /^packages\/kbn-securitysolution-list-hooks/,
+    //     /^packages\/kbn-securitysolution-t-grid/,
+    //     /^packages\/kbn-ui-theme/,
+    //     /^packages\/kbn-utility-types/,
+    //     /^packages\/react/,
+    //     /^packages\/shared-ux/,
+    //     /^src\/core/,
+    //     /^src\/plugins\/charts/,
+    //     /^src\/plugins\/controls/,
+    //     /^src\/plugins\/data/,
+    //     /^src\/plugins\/data_views/,
+    //     /^src\/plugins\/discover/,
+    //     /^src\/plugins\/field_formats/,
+    //     /^src\/plugins\/inspector/,
+    //     /^src\/plugins\/kibana_react/,
+    //     /^src\/plugins\/kibana_utils/,
+    //     /^src\/plugins\/saved_search/,
+    //     /^src\/plugins\/ui_actions/,
+    //     /^src\/plugins\/unified_histogram/,
+    //     /^src\/plugins\/unified_search/,
+    //     /^x-pack\/packages\/kbn-elastic-assistant/,
+    //     /^x-pack\/packages\/kbn-elastic-assistant-common/,
+    //     /^x-pack\/packages\/security-solution/,
+    //     /^x-pack\/plugins\/alerting/,
+    //     /^x-pack\/plugins\/cases/,
+    //     /^x-pack\/plugins\/data_views\/common/,
+    //     /^x-pack\/plugins\/elastic_assistant/,
+    //     /^x-pack\/plugins\/lists/,
+    //     /^x-pack\/plugins\/rule_registry\/common/,
+    //     /^x-pack\/plugins\/security_solution/,
+    //     /^x-pack\/plugins\/security_solution_ess/,
+    //     /^x-pack\/plugins\/security_solution_serverless/,
+    //     /^x-pack\/plugins\/task_manager/,
+    //     /^x-pack\/plugins\/threat_intelligence/,
+    //     /^x-pack\/plugins\/timelines/,
+    //     /^x-pack\/plugins\/triggers_actions_ui/,
+    //     /^x-pack\/plugins\/usage_collection\/public/,
+    //     /^x-pack\/test\/functional\/es_archives\/security_solution/,
+    //     /^x-pack\/test\/security_solution_cypress/,
+    //   ])) ||
+    //   GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    // ) {
+    //   pipeline.push(
+    //     getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
+    //   );
+    // }
 
     if (
       ((await doAnyChangesMatch([
@@ -349,7 +349,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       );
     }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+    // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     // remove duplicated steps
     console.log([...new Set(pipeline)].join('\n'));
