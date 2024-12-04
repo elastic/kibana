@@ -350,18 +350,6 @@
         "operationId": "delete-actions-connector-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -395,18 +383,6 @@
         "operationId": "get-actions-connector-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "An identifier for the connector.",
             "in": "path",
             "name": "id",
@@ -419,7 +395,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -480,18 +456,6 @@
         "operationId": "post-actions-connector-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -513,7 +477,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -548,7 +512,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -609,18 +573,6 @@
         "operationId": "put-actions-connector-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -642,7 +594,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -672,7 +624,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -736,18 +688,6 @@
         "operationId": "post-actions-connector-id-execute",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -769,7 +709,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -789,7 +729,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -853,18 +793,6 @@
         "operationId": "get-actions-connector-types",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).",
             "in": "query",
             "name": "feature_id",
@@ -884,20 +812,7 @@
     "/api/actions/connectors": {
       "get": {
         "operationId": "get-actions-connectors",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {},
         "summary": "Get all connectors",
         "tags": [
@@ -909,18 +824,6 @@
       "delete": {
         "operationId": "delete-alerting-rule-id",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -964,18 +867,6 @@
         "operationId": "get-alerting-rule-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "The identifier for the rule.",
             "in": "path",
             "name": "id",
@@ -988,7 +879,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -1845,18 +1736,6 @@
         "operationId": "post-alerting-rule-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -1878,7 +1757,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -2174,7 +2053,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -3031,18 +2910,6 @@
         "operationId": "put-alerting-rule-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -3064,7 +2931,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -3343,7 +3210,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -4205,18 +4072,6 @@
         "operationId": "post-alerting-rule-id-disable",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -4238,7 +4093,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "nullable": true,
@@ -4278,18 +4133,6 @@
       "post": {
         "operationId": "post-alerting-rule-id-enable",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -4335,18 +4178,6 @@
         "operationId": "post-alerting-rule-id-mute-all",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -4391,18 +4222,6 @@
         "operationId": "post-alerting-rule-id-unmute-all",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -4446,18 +4265,6 @@
       "post": {
         "operationId": "post-alerting-rule-id-update-api-key",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -4505,18 +4312,6 @@
       "post": {
         "operationId": "post-alerting-rule-rule-id-alert-alert-id-mute",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -4571,18 +4366,6 @@
         "operationId": "post-alerting-rule-rule-id-alert-alert-id-unmute",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -4635,18 +4418,6 @@
       "get": {
         "operationId": "get-alerting-rules-find",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "The number of rules to return per page.",
             "in": "query",
@@ -4793,7 +4564,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -5647,24 +5418,11 @@
     "/api/fleet/agent_download_sources": {
       "get": {
         "operationId": "get-fleet-agent-download-sources",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -5724,7 +5482,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -5757,18 +5515,6 @@
         "operationId": "post-fleet-agent-download-sources",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -5781,7 +5527,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -5817,7 +5563,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -5862,7 +5608,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -5898,18 +5644,6 @@
         "operationId": "delete-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -5931,7 +5665,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -5949,7 +5683,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -5983,18 +5717,6 @@
         "operationId": "get-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "sourceId",
             "required": true,
@@ -6006,7 +5728,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -6051,7 +5773,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -6085,18 +5807,6 @@
         "operationId": "put-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -6117,7 +5827,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -6153,7 +5863,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -6198,7 +5908,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -6232,18 +5942,6 @@
       "get": {
         "operationId": "get-fleet-agent-policies",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "page",
@@ -6340,7 +6038,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -7049,7 +6747,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -7082,18 +6780,6 @@
         "operationId": "post-fleet-agent-policies",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -7114,7 +6800,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -7365,7 +7051,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -8059,7 +7745,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -8094,18 +7780,6 @@
         "operationId": "post-fleet-agent-policies-bulk-get",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -8130,7 +7804,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -8160,7 +7834,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -8857,7 +8531,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -8893,18 +8567,6 @@
         "operationId": "post-fleet-agent-policies-delete",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -8917,7 +8579,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -8940,7 +8602,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -8962,7 +8624,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -8998,18 +8660,6 @@
         "operationId": "post-fleet-agent-policies-outputs",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -9022,7 +8672,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -9045,7 +8695,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -9147,7 +8797,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -9183,18 +8833,6 @@
         "operationId": "get-fleet-agent-policies-agentpolicyid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "agentPolicyId",
             "required": true,
@@ -9218,7 +8856,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -9912,7 +9550,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -9946,18 +9584,6 @@
         "operationId": "put-fleet-agent-policies-agentpolicyid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -9990,7 +9616,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -10241,7 +9867,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -10935,7 +10561,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -10971,18 +10597,6 @@
         "operationId": "post-fleet-agent-policies-agentpolicyid-copy",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -11015,7 +10629,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -11038,7 +10652,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -11732,7 +11346,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -11768,18 +11382,6 @@
         "operationId": "get-fleet-agent-policies-agentpolicyid-download",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "agentPolicyId",
             "required": true,
@@ -11815,7 +11417,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "type": "string"
                 }
@@ -11824,7 +11426,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -11849,7 +11451,7 @@
           },
           "404": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -11885,18 +11487,6 @@
         "operationId": "get-fleet-agent-policies-agentpolicyid-full",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "agentPolicyId",
             "required": true,
@@ -11932,7 +11522,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -12387,7 +11977,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -12423,18 +12013,6 @@
         "operationId": "get-fleet-agent-policies-agentpolicyid-outputs",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "agentPolicyId",
             "required": true,
@@ -12446,7 +12024,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -12545,7 +12123,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -12579,18 +12157,6 @@
       "get": {
         "operationId": "get-fleet-agent-status",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "policyId",
@@ -12629,7 +12195,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -12692,7 +12258,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -12726,18 +12292,6 @@
       "get": {
         "operationId": "get-fleet-agent-status-data",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "agentsIds",
@@ -12785,7 +12339,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -12823,7 +12377,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -12857,18 +12411,6 @@
       "get": {
         "operationId": "get-fleet-agents",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "page",
@@ -12955,7 +12497,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -13376,7 +12918,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -13409,18 +12951,6 @@
         "operationId": "post-fleet-agents",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -13433,7 +12963,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -13455,7 +12985,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -13476,7 +13006,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -13510,18 +13040,6 @@
       "get": {
         "operationId": "get-fleet-agents-action-status",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "page",
@@ -13569,7 +13087,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -13711,7 +13229,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -13746,18 +13264,6 @@
         "operationId": "post-fleet-agents-actions-actionid-cancel",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -13779,7 +13285,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -13852,7 +13358,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -13885,24 +13391,11 @@
     "/api/fleet/agents/available_versions": {
       "get": {
         "operationId": "get-fleet-agents-available-versions",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -13923,7 +13416,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -13958,18 +13451,6 @@
         "operationId": "post-fleet-agents-bulk-reassign",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -13982,7 +13463,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -14022,7 +13503,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -14040,7 +13521,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -14075,18 +13556,6 @@
         "operationId": "post-fleet-agents-bulk-request-diagnostics",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -14099,7 +13568,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -14140,7 +13609,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -14158,7 +13627,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -14193,18 +13662,6 @@
         "operationId": "post-fleet-agents-bulk-unenroll",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -14217,7 +13674,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -14263,7 +13720,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -14281,7 +13738,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -14316,18 +13773,6 @@
         "operationId": "post-fleet-agents-bulk-update-agent-tags",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -14340,7 +13785,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -14388,7 +13833,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -14406,7 +13851,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -14441,18 +13886,6 @@
         "operationId": "post-fleet-agents-bulk-upgrade",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -14465,7 +13898,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -14521,7 +13954,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -14539,7 +13972,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -14575,18 +14008,6 @@
         "operationId": "delete-fleet-agents-files-fileid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -14608,7 +14029,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -14630,7 +14051,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -14666,18 +14087,6 @@
         "operationId": "get-fleet-agents-files-fileid-filename",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "fileId",
             "required": true,
@@ -14697,7 +14106,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "type": "object"
                 }
@@ -14706,7 +14115,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -14739,24 +14148,11 @@
     "/api/fleet/agents/setup": {
       "get": {
         "operationId": "get-fleet-agents-setup",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "A summary of the agent setup status. `isReady` indicates whether the setup is ready. If the setup is not ready, `missing_requirements` lists which requirements are missing.",
@@ -14808,7 +14204,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -14841,18 +14237,6 @@
         "operationId": "post-fleet-agents-setup",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -14866,7 +14250,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "A summary of the result of Fleet's `setup` lifecycle. If `isInitialized` is true, Fleet is ready to accept agent enrollment. `nonFatalErrors` may include useful insight into non-blocking issues with Fleet setup.",
@@ -14905,7 +14289,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -14940,18 +14324,6 @@
         "operationId": "get-fleet-agents-tags",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "query",
             "name": "kuery",
             "required": false,
@@ -14972,7 +14344,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -14993,7 +14365,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -15029,18 +14401,6 @@
         "operationId": "delete-fleet-agents-agentid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -15062,7 +14422,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -15083,7 +14443,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -15117,18 +14477,6 @@
         "operationId": "get-fleet-agents-agentid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "agentId",
             "required": true,
@@ -15149,7 +14497,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -15549,7 +14897,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -15583,18 +14931,6 @@
         "operationId": "put-fleet-agents-agentid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -15615,7 +14951,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -15638,7 +14974,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -16038,7 +15374,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -16073,18 +15409,6 @@
         "operationId": "post-fleet-agents-agentid-actions",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -16105,7 +15429,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -16181,7 +15505,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -16254,7 +15578,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -16289,18 +15613,6 @@
         "operationId": "post-fleet-agents-agentid-reassign",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -16321,7 +15633,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -16340,7 +15652,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {},
@@ -16351,7 +15663,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -16386,18 +15698,6 @@
         "operationId": "post-fleet-agents-agentid-request-diagnostics",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -16418,7 +15718,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "nullable": true,
@@ -16441,7 +15741,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -16459,7 +15759,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -16494,18 +15794,6 @@
         "operationId": "post-fleet-agents-agentid-unenroll",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -16526,7 +15814,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "nullable": true,
@@ -16555,18 +15843,6 @@
         "operationId": "post-fleet-agents-agentid-upgrade",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -16587,7 +15863,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -16615,7 +15891,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {},
@@ -16626,7 +15902,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -16661,18 +15937,6 @@
         "operationId": "get-fleet-agents-agentid-uploads",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "agentId",
             "required": true,
@@ -16684,7 +15948,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -16745,7 +16009,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -16780,18 +16044,6 @@
         "operationId": "get-fleet-check-permissions",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "query",
             "name": "fleetServerSetup",
             "required": false,
@@ -16803,7 +16055,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -16829,7 +16081,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -16862,24 +16114,11 @@
     "/api/fleet/data_streams": {
       "get": {
         "operationId": "get-fleet-data-streams",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -16986,7 +16225,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -17021,18 +16260,6 @@
         "operationId": "get-fleet-enrollment-api-keys",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "query",
             "name": "page",
             "required": false,
@@ -17062,7 +16289,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -17175,7 +16402,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -17208,18 +16435,6 @@
         "operationId": "post-fleet-enrollment-api-keys",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -17232,7 +16447,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -17257,7 +16472,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -17318,7 +16533,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -17354,18 +16569,6 @@
         "operationId": "delete-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -17387,7 +16590,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -17408,7 +16611,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -17442,18 +16645,6 @@
         "operationId": "get-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "keyId",
             "required": true,
@@ -17465,7 +16656,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -17519,7 +16710,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -17554,18 +16745,6 @@
         "operationId": "post-fleet-epm-bulk-assets",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -17578,7 +16757,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -17613,7 +16792,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -17669,7 +16848,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -17704,18 +16883,6 @@
         "operationId": "get-fleet-epm-categories",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "query",
             "name": "prerelease",
             "required": false,
@@ -17735,7 +16902,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -17779,7 +16946,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -17814,18 +16981,6 @@
         "operationId": "post-fleet-epm-custom-integrations",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -17838,7 +16993,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -17887,7 +17042,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -17987,7 +17142,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -18021,18 +17176,6 @@
       "get": {
         "operationId": "get-fleet-epm-data-streams",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "type",
@@ -18082,7 +17225,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -18112,7 +17255,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -18147,18 +17290,6 @@
         "operationId": "get-fleet-epm-packages",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "query",
             "name": "category",
             "required": false,
@@ -18186,7 +17317,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -18685,7 +17816,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -18718,18 +17849,6 @@
         "operationId": "post-fleet-epm-packages",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -18760,7 +17879,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/gzip; application/zip; Elastic-Api-Version=2023-10-31": {
+            "application/gzip; application/zip": {
               "schema": {
                 "format": "binary",
                 "type": "string"
@@ -18771,7 +17890,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/gzip; application/zip; Elastic-Api-Version=2023-10-31": {
+              "application/gzip; application/zip": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -18871,7 +17990,7 @@
           },
           "400": {
             "content": {
-              "application/gzip; application/zip; Elastic-Api-Version=2023-10-31": {
+              "application/gzip; application/zip": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -18906,18 +18025,6 @@
         "operationId": "post-fleet-epm-packages-bulk",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -18938,7 +18045,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -18988,7 +18095,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -19148,7 +18255,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -19182,18 +18289,6 @@
       "get": {
         "operationId": "get-fleet-epm-packages-installed",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "dataStreamType",
@@ -19269,7 +18364,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -19388,7 +18483,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -19421,24 +18516,11 @@
     "/api/fleet/epm/packages/limited": {
       "get": {
         "operationId": "get-fleet-epm-packages-limited",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -19459,7 +18541,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -19494,18 +18576,6 @@
         "operationId": "get-fleet-epm-packages-pkgname-stats",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "pkgName",
             "required": true,
@@ -19517,7 +18587,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -19544,7 +18614,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -19578,18 +18648,6 @@
       "delete": {
         "operationId": "delete-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -19628,7 +18686,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -19715,7 +18773,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -19747,18 +18805,6 @@
       "get": {
         "operationId": "get-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "path",
             "name": "pkgName",
@@ -19812,7 +18858,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -20406,7 +19452,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -20438,18 +19484,6 @@
       "post": {
         "operationId": "post-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -20505,7 +19539,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "nullable": true,
@@ -20527,7 +19561,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -20627,7 +19661,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -20660,18 +19694,6 @@
         "operationId": "put-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -20700,7 +19722,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -20719,7 +19741,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -21301,7 +20323,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -21335,18 +20357,6 @@
       "post": {
         "operationId": "post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -21384,7 +20394,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -21415,7 +20425,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "items": {
                     "additionalProperties": false,
@@ -21444,7 +20454,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -21479,18 +20489,6 @@
         "operationId": "get-fleet-epm-packages-pkgname-pkgversion-filepath",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "pkgName",
             "required": true,
@@ -21518,14 +20516,14 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {}
               }
             }
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -21559,18 +20557,6 @@
       "get": {
         "operationId": "get-fleet-epm-templates-pkgname-pkgversion-inputs",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "path",
             "name": "pkgName",
@@ -21621,7 +20607,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "anyOf": [
                     {
@@ -21693,7 +20679,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -21726,24 +20712,11 @@
     "/api/fleet/epm/verification_key_id": {
       "get": {
         "operationId": "get-fleet-epm-verification-key-id",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -21762,7 +20735,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -21795,24 +20768,11 @@
     "/api/fleet/fleet_server_hosts": {
       "get": {
         "operationId": "get-fleet-fleet-server-hosts",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -21881,7 +20841,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -21914,18 +20874,6 @@
         "operationId": "post-fleet-fleet-server-hosts",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -21938,7 +20886,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -21983,7 +20931,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -22037,7 +20985,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22073,18 +21021,6 @@
         "operationId": "delete-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -22106,7 +21042,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -22124,7 +21060,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22158,18 +21094,6 @@
         "operationId": "get-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "itemId",
             "required": true,
@@ -22181,7 +21105,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -22235,7 +21159,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22269,18 +21193,6 @@
         "operationId": "put-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -22301,7 +21213,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -22337,7 +21249,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -22391,7 +21303,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22426,18 +21338,6 @@
         "operationId": "post-fleet-health-check",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -22450,7 +21350,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -22469,7 +21369,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -22493,7 +21393,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22518,7 +21418,7 @@
           },
           "404": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22553,18 +21453,6 @@
         "operationId": "get-fleet-kubernetes",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "query",
             "name": "download",
             "required": false,
@@ -22592,7 +21480,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -22610,7 +21498,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22645,18 +21533,6 @@
         "operationId": "get-fleet-kubernetes-download",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "query",
             "name": "download",
             "required": false,
@@ -22684,7 +21560,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "type": "string"
                 }
@@ -22693,7 +21569,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22718,7 +21594,7 @@
           },
           "404": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22753,18 +21629,6 @@
         "operationId": "post-fleet-logstash-api-keys",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -22778,7 +21642,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -22796,7 +21660,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22831,18 +21695,6 @@
         "operationId": "post-fleet-message-signing-service-rotate-key-pair",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -22865,7 +21717,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -22883,7 +21735,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22908,7 +21760,7 @@
           },
           "500": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -22941,24 +21793,11 @@
     "/api/fleet/outputs": {
       "get": {
         "operationId": "get-fleet-outputs",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -24006,7 +22845,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -24039,18 +22878,6 @@
         "operationId": "post-fleet-outputs",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -24063,7 +22890,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "anyOf": [
                   {
@@ -25088,7 +23915,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -26121,7 +24948,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -26157,18 +24984,6 @@
         "operationId": "delete-fleet-outputs-outputid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -26190,7 +25005,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -26208,7 +25023,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -26233,7 +25048,7 @@
           },
           "404": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -26267,18 +25082,6 @@
         "operationId": "get-fleet-outputs-outputid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "outputId",
             "required": true,
@@ -26290,7 +25093,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -27323,7 +26126,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -27357,18 +26160,6 @@
         "operationId": "put-fleet-outputs-outputid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -27389,7 +26180,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "anyOf": [
                   {
@@ -28390,7 +27181,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -29423,7 +28214,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -29458,18 +28249,6 @@
         "operationId": "get-fleet-outputs-outputid-health",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "outputId",
             "required": true,
@@ -29481,7 +28260,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -29510,7 +28289,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -29544,18 +28323,6 @@
       "get": {
         "operationId": "get-fleet-package-policies",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "page",
@@ -29632,7 +28399,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -30232,7 +28999,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -30265,18 +29032,6 @@
         "operationId": "post-fleet-package-policies",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -30301,7 +29056,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "anyOf": [
                   {
@@ -30911,7 +29666,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -31496,7 +30251,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -31521,7 +30276,7 @@
           },
           "409": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -31556,18 +30311,6 @@
         "operationId": "post-fleet-package-policies-bulk-get",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -31592,7 +30335,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -31618,7 +30361,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -32206,7 +30949,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -32231,7 +30974,7 @@
           },
           "404": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -32259,18 +31002,6 @@
         "operationId": "post-fleet-package-policies-delete",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -32283,7 +31014,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -32308,7 +31039,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "items": {
                     "additionalProperties": false,
@@ -32427,7 +31158,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -32463,18 +31194,6 @@
         "operationId": "post-fleet-package-policies-upgrade",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -32487,7 +31206,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -32509,7 +31228,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "items": {
                     "additionalProperties": false,
@@ -32552,7 +31271,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -32587,18 +31306,6 @@
         "operationId": "post-fleet-package-policies-upgrade-dryrun",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -32611,7 +31318,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -32636,7 +31343,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "items": {
                     "additionalProperties": false,
@@ -33749,7 +32456,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -33785,18 +32492,6 @@
         "operationId": "delete-fleet-package-policies-packagepolicyid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -33826,7 +32521,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -33844,7 +32539,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -33878,18 +32573,6 @@
         "operationId": "get-fleet-package-policies-packagepolicyid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "packagePolicyId",
             "required": true,
@@ -33913,7 +32596,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -34498,7 +33181,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -34523,7 +33206,7 @@
           },
           "404": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -34549,18 +33232,6 @@
         "description": "Update a package policy by ID.",
         "operationId": "put-fleet-package-policies-packagepolicyid",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -34594,7 +33265,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "anyOf": [
                   {
@@ -35196,7 +33867,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -35781,7 +34452,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -35806,7 +34477,7 @@
           },
           "403": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -35839,24 +34510,11 @@
     "/api/fleet/proxies": {
       "get": {
         "operationId": "get-fleet-proxies",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -35939,7 +34597,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -35972,18 +34630,6 @@
         "operationId": "post-fleet-proxies",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -35996,7 +34642,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -36055,7 +34701,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -36123,7 +34769,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -36159,18 +34805,6 @@
         "operationId": "delete-fleet-proxies-itemid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -36192,7 +34826,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -36210,7 +34844,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -36244,18 +34878,6 @@
         "operationId": "get-fleet-proxies-itemid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "itemId",
             "required": true,
@@ -36267,7 +34889,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -36335,7 +34957,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -36369,18 +34991,6 @@
         "operationId": "put-fleet-proxies-itemid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -36401,7 +35011,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -36455,7 +35065,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -36523,7 +35133,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -36558,18 +35168,6 @@
         "operationId": "post-fleet-service-tokens",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -36582,7 +35180,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "nullable": true,
@@ -36600,7 +35198,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -36622,7 +35220,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -36655,24 +35253,11 @@
     "/api/fleet/settings": {
       "get": {
         "operationId": "get-fleet-settings",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -36751,7 +35336,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -36776,7 +35361,7 @@
           },
           "404": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -36802,18 +35387,6 @@
         "operationId": "put-fleet-settings",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -36826,7 +35399,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -36874,7 +35447,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -36953,7 +35526,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -36978,7 +35551,7 @@
           },
           "404": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -37006,18 +35579,6 @@
         "operationId": "post-fleet-setup",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -37031,7 +35592,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "A summary of the result of Fleet's `setup` lifecycle. If `isInitialized` is true, Fleet is ready to accept agent enrollment. `nonFatalErrors` may include useful insight into non-blocking issues with Fleet setup.",
@@ -37070,7 +35631,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -37095,7 +35656,7 @@
           },
           "500": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Internal Server Error",
@@ -37124,18 +35685,6 @@
         "description": "List the metadata for the latest uninstall tokens per agent policy.",
         "operationId": "get-fleet-uninstall-tokens",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "Partial match filtering for policy IDs",
             "in": "query",
@@ -37178,7 +35727,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -37238,7 +35787,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -37274,18 +35823,6 @@
         "operationId": "get-fleet-uninstall-tokens-uninstalltokenid",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "in": "path",
             "name": "uninstallTokenId",
             "required": true,
@@ -37297,7 +35834,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -37346,7 +35883,7 @@
           },
           "400": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -37381,18 +35918,6 @@
         "operationId": "get-security-role",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.",
             "in": "query",
             "name": "replaceDeprecatedPrivileges",
@@ -37417,18 +35942,6 @@
       "delete": {
         "operationId": "delete-security-role-name",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -37462,18 +35975,6 @@
       "get": {
         "operationId": "get-security-role-name",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "The role name.",
             "in": "path",
@@ -37509,18 +36010,6 @@
         "operationId": "put-security-role-name",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -37554,7 +36043,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -37828,18 +36317,6 @@
         "operationId": "post-security-roles",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -37852,7 +36329,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -38139,18 +36616,6 @@
         "operationId": "post-spaces-copy-saved-objects",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -38163,7 +36628,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -38237,18 +36702,6 @@
         "operationId": "post-spaces-disable-legacy-url-aliases",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -38261,7 +36714,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -38313,18 +36766,6 @@
         "operationId": "post-spaces-get-shareable-references",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -38337,7 +36778,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -38382,18 +36823,6 @@
         "operationId": "post-spaces-resolve-copy-saved-objects-errors",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -38406,7 +36835,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -38503,18 +36932,6 @@
         "operationId": "post-spaces-update-objects-spaces",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -38527,7 +36944,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -38588,18 +37005,6 @@
       "get": {
         "operationId": "get-spaces-space",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "Specifies which authorization checks are applied to the API call. The default value is `any`.",
             "in": "query",
@@ -38669,18 +37074,6 @@
         "operationId": "post-spaces-space",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -38693,7 +37086,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -38770,18 +37163,6 @@
         "operationId": "delete-spaces-space-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -38818,18 +37199,6 @@
         "operationId": "get-spaces-space-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "The space identifier.",
             "in": "path",
             "name": "id",
@@ -38853,18 +37222,6 @@
         "operationId": "put-spaces-space-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -38886,7 +37243,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -38962,18 +37319,6 @@
         "operationId": "get-status",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "Set to \"true\" to get the response in v7 format.",
             "in": "query",
             "name": "v7format",
@@ -38995,7 +37340,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "anyOf": [
                     {
@@ -39013,7 +37358,7 @@
           },
           "503": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "anyOf": [
                     {
