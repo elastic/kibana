@@ -8,17 +8,19 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { formatNumber } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import { QualityIssue } from '../../../../../common/api_types';
 import { SparkPlot } from '../../../common/spark_plot';
 import { NUMBER_FORMAT } from '../../../../../common/constants';
 import {
   countColumnName,
-  fieldColumnName,
+  documentIndexFailed,
+  issueColumnName,
   lastOccurrenceColumnName,
 } from '../../../../../common/translations';
 
@@ -54,11 +56,10 @@ export const getDegradedFieldsColumns = ({
     field: 'name',
     render: (_, { name, type }) => {
       const isExpanded =
-        name === expandedDegradedField?.name &&
-        (type as unknown as QualityIssueType) === expandedDegradedField?.type;
+        name === expandedDegradedField?.name && type === expandedDegradedField?.type;
 
       const onExpandClick = () => {
-        openDegradedFieldFlyout(name, type as unknown as QualityIssueType);
+        openDegradedFieldFlyout(name, type);
       };
 
       return (
@@ -81,10 +82,26 @@ export const getDegradedFieldsColumns = ({
     `,
   },
   {
-    name: fieldColumnName,
+    name: issueColumnName,
     field: 'name',
     render: (_, { name, type }) => {
-      return <>{type === 'degraded' ? `${name} ignored` : 'Documents indexing failed'}</>;
+      return type === 'degraded' ? (
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.datasetQuality.details.qualityIssues.degradedField"
+            defaultMessage="{name} field ignored"
+            values={{
+              name: (
+                <>
+                  <strong>{name}</strong>{' '}
+                </>
+              ),
+            }}
+          />
+        </EuiText>
+      ) : (
+        <>{documentIndexFailed}</>
+      );
     },
   },
   {
