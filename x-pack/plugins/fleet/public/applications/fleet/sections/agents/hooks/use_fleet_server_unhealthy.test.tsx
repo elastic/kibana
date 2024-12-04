@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
+
 import { createFleetTestRendererMock } from '../../../../../mock';
 import { sendGetEnrollmentSettings } from '../../../../../hooks/use_request/settings';
 
@@ -61,9 +63,15 @@ describe('useFleetServerUnhealthy', () => {
         },
       },
     });
-    const { result } = testRenderer.renderHook(() => useFleetServerUnhealthy());
-    await testRenderer.waitFor(() => expect(result.current.isLoading).toBeFalsy());
-    expect(result.current.isUnhealthy).toBeTruthy();
+
+    let result;
+
+    await act(async () => {
+      result = testRenderer.renderHook(() => useFleetServerUnhealthy()).result;
+    });
+
+    expect(result!.current.isLoading).toBeFalsy();
+    expect(result!.current.isUnhealthy).toBeTruthy();
   });
 
   it('should call notifications service if an error happen while fetching status', async () => {
@@ -71,9 +79,15 @@ describe('useFleetServerUnhealthy', () => {
       error: new Error('Invalid request'),
       data: null,
     });
-    const { result } = testRenderer.renderHook(() => useFleetServerUnhealthy());
-    await testRenderer.waitFor(() => expect(result.current.isLoading).toBeFalsy());
-    expect(result.current.isUnhealthy).toBeFalsy();
+
+    let result;
+
+    await act(async () => {
+      result = testRenderer.renderHook(() => useFleetServerUnhealthy()).result;
+    });
+
+    expect(result!.current.isLoading).toBeFalsy();
+    expect(result!.current.isUnhealthy).toBeFalsy();
     expect(testRenderer.startServices.notifications.toasts.addError).toBeCalled();
   });
 });
