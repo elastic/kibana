@@ -1091,6 +1091,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test_serverless/functional/test_suites/security/config.examples.ts   @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/security/config.example.context_awareness.ts @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/security-threat-hunting-investigations @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/security/constants.ts   @elastic/kibana-data-discovery
 /test/accessibility/apps/discover.ts @elastic/kibana-data-discovery
 /test/api_integration/apis/data_views @elastic/kibana-data-discovery
 /test/api_integration/apis/data_view_field_editor @elastic/kibana-data-discovery
