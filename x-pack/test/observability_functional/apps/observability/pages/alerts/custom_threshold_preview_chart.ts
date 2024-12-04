@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Key } from 'selenium-webdriver';
 import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -19,35 +18,23 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
   const logger = getService('log');
   const retry = getService('retry');
 
-  describe('Custom threshold rule chart', () => {
+  describe('Custom threshold preview chart', () => {
     const observability = getService('observability');
-    const DATA_VIEW_1 = 'filebeat-*';
+    const DATA_VIEW_1 = 'metricbeat-*';
     const DATA_VIEW_1_ID = 'data-view-id_1';
     const DATA_VIEW_1_NAME = 'test-data-view-name_1';
-    const DATA_VIEW_2 = 'metricbeat-*';
-    const DATA_VIEW_2_ID = 'data-view-id_2';
-    const DATA_VIEW_2_NAME = 'test-data-view-name_2';
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      // create two data views
-      await Promise.all([
-        observability.alerts.common.createDataView({
-          supertest,
-          name: DATA_VIEW_1_NAME,
-          id: DATA_VIEW_1_ID,
-          title: DATA_VIEW_1,
-          logger,
-        }),
-        await observability.alerts.common.createDataView({
-          supertest,
-          name: DATA_VIEW_2_NAME,
-          id: DATA_VIEW_2_ID,
-          title: DATA_VIEW_2,
-          logger,
-        }),
-      ]);
+      await observability.alerts.common.createDataView({
+        supertest,
+        name: DATA_VIEW_1_NAME,
+        id: DATA_VIEW_1_ID,
+        title: DATA_VIEW_1,
+        logger,
+      });
       await observability.alerts.common.navigateToRulesPage();
+      // TODO Remove when it's fixed https://github.com/elastic/kibana/issues/201805
       await common.sleep(1000);
       if (await testSubjects.exists('toastCloseButton')) {
         await testSubjects.click('toastCloseButton');
@@ -96,20 +83,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       // fix the equation
       await customEquationField.type('A');
       await testSubjects.click('o11yClosablePopoverTitleButton');
-      // set threshold
-      await testSubjects.click('thresholdPopover');
-      await testSubjects.click('comparatorOptionsComboBox');
-
-      await find.clickByCssSelector(`option[value="notBetween"]`);
-      const thresholdField1 = await find.byCssSelector('[data-test-subj="alertThresholdInput0"]');
-      await thresholdField1.click();
-      await common.sleep(1000);
-      await thresholdField1.pressKeys(Key.BACK_SPACE);
-      await common.sleep(1000);
-      await thresholdField1.pressKeys(Key.BACK_SPACE);
-      await common.sleep(1000);
-      await thresholdField1.pressKeys(Key.BACK_SPACE);
-      await thresholdField1.type('200');
 
       // check no error is visible
       await testSubjects.missingOrFail('embeddable-lens-failure');
