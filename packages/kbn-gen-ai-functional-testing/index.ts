@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { observableIntoEventSourceStream } from './src/observable_into_event_source_stream';
-export { supertestToObservable } from './src/supertest_to_observable';
+export {
+  AI_CONNECTORS_VAR_ENV,
+  getPreconfiguredConnectorConfig,
+  getAvailableConnectors,
+  type AvailableConnector,
+  type AvailableConnectorWithId,
+} from './src/connectors';

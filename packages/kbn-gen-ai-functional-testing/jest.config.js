@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { observableIntoEventSourceStream } from './src/observable_into_event_source_stream';
-export { supertestToObservable } from './src/supertest_to_observable';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-gen-ai-functional-testing'],
+};
