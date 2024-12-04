@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleMigrationsRetriever } from '../../../retrievers';
+import type { RuleMigrationsRetriever } from '../../../../../retrievers';
 import type { GraphNode } from '../../types';
 
 interface GetRetrieveIntegrationsNodeParams {

@@ -24,6 +24,7 @@ export interface Integration {
 }
 
 export interface PrebuiltRuleQueryResponse {
+  rule_id: string;
   name: string;
   description: string;
 }

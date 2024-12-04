@@ -27,6 +27,9 @@ export const registerSiemRuleMigrationsStartRoute = (
       path: SIEM_RULE_MIGRATION_START_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      options: {
+        timeout: { idleSocket: 20 * 60 * 1000 },
+      },
     })
     .addVersion(
       {

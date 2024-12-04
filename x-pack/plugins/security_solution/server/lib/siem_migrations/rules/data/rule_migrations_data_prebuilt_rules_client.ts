@@ -68,19 +68,22 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
       currentLength += prebuiltRuleSlice.length;
       this.logger.info(`Indexing ${currentLength}/${totalLength} prebuilt rules for ELSER`);
       await this.esClient
-        .bulk({
-          refresh: 'wait_for',
-          operations: prebuiltRuleSlice.flatMap((prebuiltRule) => [
-            { update: { _index: index, _id: prebuiltRule.rule_id } },
-            {
-              doc: {
-                ...prebuiltRule,
-                '@timestamp': createdAt,
+        .bulk(
+          {
+            refresh: 'wait_for',
+            operations: prebuiltRuleSlice.flatMap((prebuiltRule) => [
+              { update: { _index: index, _id: prebuiltRule.rule_id } },
+              {
+                doc: {
+                  ...prebuiltRule,
+                  '@timestamp': createdAt,
+                },
+                doc_as_upsert: true,
               },
-              doc_as_upsert: true,
-            },
-          ]),
-        })
+            ]),
+          },
+          { requestTimeout: 10 * 60 * 1000 }
+        )
         .catch((error) => {
           this.logger.error(`Error indexing prebuilt rules for ELSER: ${error.message}`);
           throw error;
