@@ -8,10 +8,10 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
-  FindRulesRequestQueryV1,
+  FindRulesInternalRequestBodyV1,
   FindRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/find';
-import { findRulesRequestQuerySchemaV1 } from '../../../../../common/routes/rule/apis/find';
+import { findRulesInternalRequestBodySchemaV1 } from '../../../../../common/routes/rule/apis/find';
 import { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ILicenseState } from '../../../../lib';
 import {
@@ -20,7 +20,7 @@ import {
 } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
-import { transformFindRulesBodyV1, transformFindRulesResponseV1 } from './transforms';
+import { transformFindRulesInternalBodyV1, transformFindRulesResponseV1 } from './transforms';
 
 export const findInternalRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -32,14 +32,14 @@ export const findInternalRulesRoute = (
       path: INTERNAL_ALERTING_API_FIND_RULES_PATH,
       options: { access: 'internal' },
       validate: {
-        body: findRulesRequestQuerySchemaV1,
+        body: findRulesInternalRequestBodySchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const rulesClient = await (await context.alerting).getRulesClient();
 
-        const body: FindRulesRequestQueryV1 = req.body;
+        const body: FindRulesInternalRequestBodyV1 = req.body;
 
         trackLegacyTerminology(
           [req.body.search, req.body.search_fields, req.body.sort_field].filter(
@@ -48,7 +48,7 @@ export const findInternalRulesRoute = (
           usageCounter
         );
 
-        const options = transformFindRulesBodyV1({
+        const options = transformFindRulesInternalBodyV1({
           ...body,
           has_reference: body.has_reference || undefined,
           search_fields: searchFieldsAsArray(body.search_fields),

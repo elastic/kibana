@@ -30,6 +30,7 @@ import {
   type MetricsCommandContext,
   IndexPatternContext,
   InlinestatsCommandContext,
+  JoinCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
@@ -58,6 +59,7 @@ import {
   getEnrichClauses,
 } from './walkers';
 import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
+import { createJoinCommand } from './factories/join';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -302,6 +304,23 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     const command = createCommand('enrich', ctx);
     this.ast.push(command);
     command.args.push(...getPolicyName(ctx), ...getMatchField(ctx), ...getEnrichClauses(ctx));
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.joinCommand`.
+   *
+   * Parse the JOIN command:
+   *
+   * ```
+   * <type> JOIN identifier [ AS identifier ] ON expression [, expression [, ... ]]
+   * ```
+   *
+   * @param ctx the parse tree
+   */
+  exitJoinCommand(ctx: JoinCommandContext): void {
+    const command = createJoinCommand(ctx);
+
+    this.ast.push(command);
   }
 
   enterEveryRule(ctx: ParserRuleContext): void {
