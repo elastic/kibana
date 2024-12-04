@@ -43,7 +43,8 @@ describe(
     },
   },
   () => {
-    const loginUser = Cypress.env('IS_SERVERLESS') ? ROLE.admin : ROLE.system_indices_superuser;
+    // In Serverless MKI we use `admin` for the login user... other deployments use system indices superuser
+    const loginUser = Cypress.env('CLOUD_SERVERLESS') ? ROLE.admin : ROLE.system_indices_superuser;
     const roleName = `test_${Math.random().toString().substring(2, 6)}`;
     let spaceId: string = '';
 
