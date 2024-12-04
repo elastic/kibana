@@ -8,7 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { schema, Type } from '@kbn/config-schema';
+import { ObjectType, schema, Type } from '@kbn/config-schema';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
@@ -27,6 +27,8 @@ import {
 } from '@kbn/controls-plugin/common';
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
+import { ViewMode } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
@@ -249,56 +251,88 @@ export const gridDataSchema = schema.object({
   }),
 });
 
-export const panelSchema = schema.object({
-  panelConfig: schema.object(
+const genericPanelConfig = schema.object(
+  {
+    type: schema.maybe(schema.string()),
+    version: schema.maybe(
+      schema.string({
+        meta: { description: 'The version of the embeddable in the panel.' },
+      })
+    ),
+    viewMode: schema.maybe(
+      schema.oneOf(
+        Object.values(ViewMode)
+          .filter((value): value is ViewMode => typeof value === 'string')
+          .map((value) => schema.literal(value)) as [Type<ViewMode>]
+      )
+    ),
+    title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
+    description: schema.maybe(
+      schema.string({ meta: { description: 'The description of the panel' } })
+    ),
+    savedObjectId: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'The unique id of the library item to construct the embeddable.',
+        },
+      })
+    ),
+    hidePanelTitles: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: { description: 'Set to true to hide the panel title in its container.' },
+      })
+    ),
+    enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    disabledActions: schema.maybe(schema.arrayOf(schema.string())),
+    disableTriggers: schema.maybe(schema.boolean()),
+    timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
+  },
+  {
+    unknowns: 'allow',
+  }
+);
+
+export const getPanelSchema = (embeddable: EmbeddableStart) =>
+  schema.object(
     {
+      panelConfig: genericPanelConfig,
+      id: schema.maybe(
+        schema.string({ meta: { description: 'The saved object id for by reference panels' } })
+      ),
+      type: schema.string({ meta: { description: 'The embeddable type' } }),
+      panelRefName: schema.maybe(schema.string()),
+      gridData: gridDataSchema,
+      panelIndex: schema.string({
+        meta: { description: 'The unique ID of the panel.' },
+        defaultValue: schema.siblingRef('gridData.i'),
+      }),
+      title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
       version: schema.maybe(
         schema.string({
-          meta: { description: 'The version of the embeddable in the panel.' },
+          meta: {
+            description:
+              "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+            deprecated: true,
+          },
         })
       ),
-      title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
-      description: schema.maybe(
-        schema.string({ meta: { description: 'The description of the panel' } })
-      ),
-      savedObjectId: schema.maybe(
-        schema.string({
-          meta: { description: 'The unique id of the library item to construct the embeddable.' },
-        })
-      ),
-      hidePanelTitles: schema.maybe(
-        schema.boolean({
-          defaultValue: false,
-          meta: { description: 'Set to true to hide the panel title in its container.' },
-        })
-      ),
-      enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     },
     {
-      unknowns: 'allow',
-    }
-  ),
-  id: schema.maybe(
-    schema.string({ meta: { description: 'The saved object id for by reference panels' } })
-  ),
-  type: schema.string({ meta: { description: 'The embeddable type' } }),
-  panelRefName: schema.maybe(schema.string()),
-  gridData: gridDataSchema,
-  panelIndex: schema.string({
-    meta: { description: 'The unique ID of the panel.' },
-    defaultValue: schema.siblingRef('gridData.i'),
-  }),
-  title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
-  version: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
-        deprecated: true,
+      validate(value) {
+        const { type, panelConfig } = value;
+        const getConfigSchema = embeddable.getValidationSchema(
+          type
+        ) as unknown as () => ObjectType<any>;
+        if (getConfigSchema) {
+          const configSchema = getConfigSchema();
+          const panelConfigSchema = schema.intersection([genericPanelConfig, configSchema]);
+          return panelConfigSchema.validate(panelConfig);
+        }
+        return value;
       },
-    })
-  ),
-});
+    }
+  );
 
 export const optionsSchema = schema.object({
   hidePanelTitles: schema.boolean({
@@ -333,72 +367,73 @@ export const searchResultsAttributesSchema = schema.object({
   }),
 });
 
-export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
-  // Search
-  kibanaSavedObjectMeta: schema.object(
-    {
-      searchSource: schema.maybe(searchSourceSchema),
-    },
-    {
-      meta: {
-        description: 'A container for various metadata',
-      },
-      defaultValue: {},
-    }
-  ),
-  // Time
-  timeFrom: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  timeTo: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  refreshInterval: schema.maybe(
-    schema.object(
+export const getDashboardAttributesSchema = (embeddable: EmbeddableStart) =>
+  searchResultsAttributesSchema.extends({
+    // Search
+    kibanaSavedObjectMeta: schema.object(
       {
-        pause: schema.boolean({
-          meta: {
-            description:
-              'Whether the refresh interval is set to be paused while viewing the dashboard.',
-          },
-        }),
-        value: schema.number({
-          meta: {
-            description: 'A numeric value indicating refresh frequency in milliseconds.',
-          },
-        }),
-        display: schema.maybe(
-          schema.string({
-            meta: {
-              description:
-                'A human-readable string indicating the refresh frequency. No longer used.',
-              deprecated: true,
-            },
-          })
-        ),
-        section: schema.maybe(
-          schema.number({
-            meta: {
-              description: 'No longer used.', // TODO what is this legacy property?
-              deprecated: true,
-            },
-          })
-        ),
+        searchSource: schema.maybe(searchSourceSchema),
       },
       {
         meta: {
-          description: 'A container for various refresh interval settings',
+          description: 'A container for various metadata',
         },
+        defaultValue: {},
       }
-    )
-  ),
+    ),
+    // Time
+    timeFrom: schema.maybe(
+      schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
+    ),
+    timeTo: schema.maybe(
+      schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
+    ),
+    refreshInterval: schema.maybe(
+      schema.object(
+        {
+          pause: schema.boolean({
+            meta: {
+              description:
+                'Whether the refresh interval is set to be paused while viewing the dashboard.',
+            },
+          }),
+          value: schema.number({
+            meta: {
+              description: 'A numeric value indicating refresh frequency in milliseconds.',
+            },
+          }),
+          display: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'A human-readable string indicating the refresh frequency. No longer used.',
+                deprecated: true,
+              },
+            })
+          ),
+          section: schema.maybe(
+            schema.number({
+              meta: {
+                description: 'No longer used.', // TODO what is this legacy property?
+                deprecated: true,
+              },
+            })
+          ),
+        },
+        {
+          meta: {
+            description: 'A container for various refresh interval settings',
+          },
+        }
+      )
+    ),
 
-  // Dashboard Content
-  controlGroupInput: schema.maybe(controlGroupInputSchema),
-  panels: schema.arrayOf(panelSchema, { defaultValue: [] }),
-  options: optionsSchema,
-  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
-});
+    // Dashboard Content
+    controlGroupInput: schema.maybe(controlGroupInputSchema),
+    panels: schema.arrayOf(getPanelSchema(embeddable), { defaultValue: [] }),
+    options: optionsSchema,
+    version: schema.maybe(schema.number({ meta: { deprecated: true } })),
+  });
 
 export const referenceSchema = schema.object(
   {
@@ -409,28 +444,30 @@ export const referenceSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const dashboardItemSchema = schema.object(
-  {
-    id: schema.string(),
-    type: schema.string(),
-    version: schema.maybe(schema.string()),
-    createdAt: schema.maybe(schema.string()),
-    updatedAt: schema.maybe(schema.string()),
-    createdBy: schema.maybe(schema.string()),
-    updatedBy: schema.maybe(schema.string()),
-    managed: schema.maybe(schema.boolean()),
-    error: schema.maybe(apiError),
-    attributes: dashboardAttributesSchema,
-    references: schema.arrayOf(referenceSchema),
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    originId: schema.maybe(schema.string()),
-  },
-  { unknowns: 'allow' }
-);
+export const getDashboardItemSchema = (embeddable: EmbeddableStart) =>
+  schema.object(
+    {
+      id: schema.string(),
+      type: schema.string(),
+      version: schema.maybe(schema.string()),
+      createdAt: schema.maybe(schema.string()),
+      updatedAt: schema.maybe(schema.string()),
+      createdBy: schema.maybe(schema.string()),
+      updatedBy: schema.maybe(schema.string()),
+      managed: schema.maybe(schema.boolean()),
+      error: schema.maybe(apiError),
+      attributes: getDashboardAttributesSchema(embeddable),
+      references: schema.arrayOf(referenceSchema),
+      namespaces: schema.maybe(schema.arrayOf(schema.string())),
+      originId: schema.maybe(schema.string()),
+    },
+    { unknowns: 'allow' }
+  );
 
-export const dashboardSearchResultsSchema = dashboardItemSchema.extends({
-  attributes: searchResultsAttributesSchema,
-});
+export const getDashboardSearchResultsSchema = (embeddable: EmbeddableStart) =>
+  getDashboardItemSchema(embeddable).extends({
+    attributes: searchResultsAttributesSchema,
+  });
 
 export const dashboardSearchOptionsSchema = schema.maybe(
   schema.object(
@@ -458,42 +495,44 @@ export const dashboardUpdateOptionsSchema = schema.object({
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
 });
 
-export const dashboardGetResultSchema = schema.object(
-  {
-    item: dashboardItemSchema,
-    meta: schema.object(
-      {
-        outcome: schema.oneOf([
-          schema.literal('exactMatch'),
-          schema.literal('aliasMatch'),
-          schema.literal('conflict'),
-        ]),
-        aliasTargetId: schema.maybe(schema.string()),
-        aliasPurpose: schema.maybe(
-          schema.oneOf([
-            schema.literal('savedObjectConversion'),
-            schema.literal('savedObjectImport'),
-          ])
-        ),
-      },
-      { unknowns: 'forbid' }
-    ),
-  },
-  { unknowns: 'forbid' }
-);
+export const getDashboardGetResultSchema = (embeddable: EmbeddableStart) =>
+  schema.object(
+    {
+      item: getDashboardItemSchema(embeddable),
+      meta: schema.object(
+        {
+          outcome: schema.oneOf([
+            schema.literal('exactMatch'),
+            schema.literal('aliasMatch'),
+            schema.literal('conflict'),
+          ]),
+          aliasTargetId: schema.maybe(schema.string()),
+          aliasPurpose: schema.maybe(
+            schema.oneOf([
+              schema.literal('savedObjectConversion'),
+              schema.literal('savedObjectImport'),
+            ])
+          ),
+        },
+        { unknowns: 'forbid' }
+      ),
+    },
+    { unknowns: 'forbid' }
+  );
 
-export const dashboardCreateResultSchema = schema.object(
-  {
-    item: dashboardItemSchema,
-  },
-  { unknowns: 'forbid' }
-);
+export const getDashboardCreateResultSchema = (embeddable: EmbeddableStart) =>
+  schema.object(
+    {
+      item: getDashboardItemSchema(embeddable),
+    },
+    { unknowns: 'forbid' }
+  );
 
-export const serviceDefinition: ServicesDefinition = {
+export const getServiceDefinition = (embeddable: EmbeddableStart): ServicesDefinition => ({
   get: {
     out: {
       result: {
-        schema: dashboardGetResultSchema,
+        schema: getDashboardGetResultSchema(embeddable),
         down: getResultV3ToV2,
       },
     },
@@ -504,12 +543,12 @@ export const serviceDefinition: ServicesDefinition = {
         schema: dashboardCreateOptionsSchema,
       },
       data: {
-        schema: dashboardAttributesSchema,
+        schema: getDashboardAttributesSchema(embeddable),
       },
     },
     out: {
       result: {
-        schema: dashboardCreateResultSchema,
+        schema: getDashboardCreateResultSchema(embeddable),
       },
     },
   },
@@ -519,7 +558,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: dashboardUpdateOptionsSchema,
       },
       data: {
-        schema: dashboardAttributesSchema,
+        schema: getDashboardAttributesSchema(embeddable),
       },
     },
   },
@@ -533,8 +572,8 @@ export const serviceDefinition: ServicesDefinition = {
   mSearch: {
     out: {
       result: {
-        schema: dashboardItemSchema,
+        schema: getDashboardItemSchema(embeddable),
       },
     },
   },
-};
+});

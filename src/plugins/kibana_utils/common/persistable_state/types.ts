@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Type } from '@kbn/config-schema';
 import type { SerializableRecord, Serializable } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/types';
 

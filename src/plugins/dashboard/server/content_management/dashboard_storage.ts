@@ -9,6 +9,7 @@
 
 import Boom from '@hapi/boom';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import {
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
@@ -18,7 +19,7 @@ import type { Logger } from '@kbn/logging';
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { StorageContext } from '@kbn/content-management-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
-import { cmServicesDefinition } from './cm_services';
+import { getCmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './latest';
 import type {
@@ -60,67 +61,72 @@ const savedObjectClientFromRequest = async (ctx: StorageContext) => {
 
 export class DashboardStorage {
   constructor({
+    core,
     logger,
     throwOnResultValidationError,
   }: {
+    core: CoreSetup;
     logger: Logger;
     throwOnResultValidationError: boolean;
   }) {
+    this.core = core;
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
-    this.mSearch = {
-      savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE,
-      additionalSearchFields: [],
-      toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): DashboardItem => {
-        const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    // this.mSearch = {
+    //   savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE,
+    //   additionalSearchFields: [],
+    //   toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): DashboardItem => {
+    //     const transforms = ctx.utils.getTransforms(getCmServicesDefinition(this.embeddable));
 
-        const { item, error: itemError } = savedObjectToItem(
-          savedObject as SavedObjectsFindResult<DashboardSavedObjectAttributes>,
-          false
-        );
-        if (itemError) {
-          throw Boom.badRequest(`Invalid response. ${itemError.message}`);
-        }
+    //     const { item, error: itemError } = savedObjectToItem(
+    //       savedObject as SavedObjectsFindResult<DashboardSavedObjectAttributes>,
+    //       false
+    //     );
+    //     if (itemError) {
+    //       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
+    //     }
 
-        const validationError = transforms.mSearch.out.result.validate(item);
-        if (validationError) {
-          if (this.throwOnResultValidationError) {
-            throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-          } else {
-            this.logger.warn(`Invalid response. ${validationError.message}`);
-          }
-        }
+    //     const validationError = transforms.mSearch.out.result.validate(item);
+    //     if (validationError) {
+    //       if (this.throwOnResultValidationError) {
+    //         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+    //       } else {
+    //         this.logger.warn(`Invalid response. ${validationError.message}`);
+    //       }
+    //     }
 
-        // Validate DB response and DOWN transform to the request version
-        const { value, error: resultError } = transforms.mSearch.out.result.down<
-          DashboardItem,
-          DashboardItem
-        >(
-          item,
-          undefined, // do not override version
-          { validate: false } // validation is done above
-        );
+    //     // Validate DB response and DOWN transform to the request version
+    //     const { value, error: resultError } = transforms.mSearch.out.result.down<
+    //       DashboardItem,
+    //       DashboardItem
+    //     >(
+    //       item,
+    //       undefined, // do not override version
+    //       { validate: false } // validation is done above
+    //     );
 
-        if (resultError) {
-          throw Boom.badRequest(`Invalid response. ${resultError.message}`);
-        }
+    //     if (resultError) {
+    //       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+    //     }
 
-        return value;
-      },
-    };
+    //     return value;
+    //   },
+    // };
   }
 
+  private core: CoreSetup;
   private logger: Logger;
   private throwOnResultValidationError: boolean;
 
-  mSearch: {
-    savedObjectType: string;
-    toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult) => DashboardItem;
-    additionalSearchFields?: string[];
-  };
+  // mSearch: {
+  //   savedObjectType: string;
+  //   toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult) => DashboardItem;
+  //   additionalSearchFields?: string[];
+  // };
 
   async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const [_, { embeddable }] = await this.core.getStartServices();
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Save data in DB
@@ -174,7 +180,8 @@ export class DashboardStorage {
     data: DashboardAttributes,
     options: DashboardCreateOptions
   ): Promise<DashboardCreateOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const [_, { embeddable }] = await this.core.getStartServices();
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
@@ -243,7 +250,8 @@ export class DashboardStorage {
     data: DashboardAttributes,
     options: DashboardUpdateOptions
   ): Promise<DashboardUpdateOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const [_, { embeddable }] = await this.core.getStartServices();
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
@@ -324,7 +332,8 @@ export class DashboardStorage {
     query: SearchQuery,
     options: DashboardSearchOptions
   ): Promise<DashboardSearchOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const [_, { embeddable }] = await this.core.getStartServices();
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate and UP transform the options

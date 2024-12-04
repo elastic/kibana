@@ -11,7 +11,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
@@ -42,6 +42,7 @@ interface SetupDeps {
 interface StartDeps {
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
+  embeddable: EmbeddableStart;
 }
 
 export class DashboardPlugin
@@ -63,10 +64,10 @@ export class DashboardPlugin
         },
       })
     );
-
     plugins.contentManagement.register({
       id: CONTENT_ID,
       storage: new DashboardStorage({
+        core,
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
         logger: this.logger.get('storage'),
       }),
@@ -114,10 +115,13 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
-    registerAPIRoutes({
-      http: core.http,
-      contentManagement: plugins.contentManagement,
-      logger: this.logger,
+    core.getStartServices().then(([_, { embeddable }]) => {
+      registerAPIRoutes({
+        http: core.http,
+        contentManagement: plugins.contentManagement,
+        logger: this.logger,
+        embeddable,
+      });
     });
 
     return {};

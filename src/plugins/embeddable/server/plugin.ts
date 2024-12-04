@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
+import { schema, type Type } from '@kbn/config-schema';
+import type { SerializableRecord, WithRequiredProperty } from '@kbn/utility-types';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { identity } from 'lodash';
 import {
@@ -20,6 +21,7 @@ import {
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
+  EmbeddableRegistryItem,
 } from './types';
 import {
   getExtractFunction,
@@ -38,6 +40,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
+  getValidationSchema: (embeddableId: string) => Type<any>;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
@@ -87,6 +90,13 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
           Array.from(this.enhancements.values()),
           this.migrateFn!
         ),
+      getValidationSchema: (embeddableId: string) => {
+        const factory = this.embeddableFactories.get(embeddableId);
+        if (!factory || !factory.getSchema) {
+          return;
+        }
+        return factory.getSchema;
+      },
     };
   }
 
@@ -135,6 +145,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       inject: factory.inject || identity,
       extract: factory.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
       migrations: factory.migrations || {},
+      getSchema: factory.getSchema,
     });
   };
 

@@ -52,6 +52,7 @@ import {
   XYVisState850,
 } from '../migrations/types';
 import { extract, inject } from '../../common/embeddable_factory';
+import { getSchema } from './schema';
 
 export const makeLensEmbeddableFactory =
   (
@@ -186,5 +187,6 @@ export const makeLensEmbeddableFactory =
         ),
       extract,
       inject,
+      getSchema,
     };
   };

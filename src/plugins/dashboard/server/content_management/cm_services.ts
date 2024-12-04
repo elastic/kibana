@@ -11,16 +11,19 @@ import type {
   ContentManagementServicesDefinition as ServicesDefinition,
   Version,
 } from '@kbn/object-versioning';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 
 // We export the versioned service definition from this file and not the barrel to avoid adding
 // the schemas in the "public" js bundle
 
 import { serviceDefinition as v1 } from './v1';
 import { serviceDefinition as v2 } from './v2';
-import { serviceDefinition as v3 } from './v3';
+import { getServiceDefinition as v3 } from './v3';
 
-export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = {
+export const getCmServicesDefinition = (
+  embeddable: EmbeddableStart
+): { [version: Version]: ServicesDefinition } => ({
   1: v1,
   2: v2,
-  3: v3,
-};
+  3: v3(embeddable),
+});
