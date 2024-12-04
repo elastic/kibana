@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import React, { useState } from 'react';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { EventsTimeline } from '../events_timeline/events_timeline';
-import { InvestigationSearchBar } from '../investigation_search_bar/investigation_search_bar';
+import { InvestigationSearchBar } from './investigation_search_bar/investigation_search_bar';
 
 export function InvestigationTimeline() {
   const { globalParams, updateInvestigationParams } = useInvestigation();

@@ -10,7 +10,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { SearchBar } from '@kbn/unified-search-plugin/public';
 import React from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { InvestigationEventTypesFilter } from './investigation_event_types_filter';
 
 interface Props {
