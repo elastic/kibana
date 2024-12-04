@@ -1494,7 +1494,7 @@
     "@kbn/sort-package-json": "link:packages/kbn-sort-package-json",
     "@kbn/stdio-dev-helpers": "link:packages/kbn-stdio-dev-helpers",
     "@kbn/storybook": "link:packages/kbn-storybook",
-    "@kbn/synthetics-e2e": "link:x-pack/solutions/observability/solutions/observability/plugins/observability_solution/synthetics/e2e",
+    "@kbn/synthetics-e2e": "link:x-pack/solutions/observability/plugins/observability_solution/synthetics/e2e",
     "@kbn/telemetry-tools": "link:packages/kbn-telemetry-tools",
     "@kbn/test": "link:packages/kbn-test",
     "@kbn/test-eui-helpers": "link:packages/kbn-test-eui-helpers",
