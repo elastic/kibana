@@ -10,11 +10,14 @@ import { EuiText } from '@elastic/eui';
 import React from 'react';
 
 import {
+<<<<<<< HEAD
   singleEntryThreat,
   containsInvalidItems,
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
+=======
+>>>>>>> 6f9d274c27f (after rebase fix)
   isEsqlRule,
   isThreatMatchRule,
   isSuppressionRuleConfiguredWithGroupBy,
@@ -33,12 +36,16 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
+<<<<<<< HEAD
 import {
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
 } from './translations';
+=======
+import { INDEX_HELPER_TEXT } from './translations';
+>>>>>>> 6f9d274c27f (after rebase fix)
 import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
 import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
 
