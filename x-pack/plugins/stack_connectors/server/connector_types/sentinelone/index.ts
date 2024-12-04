@@ -11,7 +11,10 @@ import {
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { EdrForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator, ActionExecutionSourceType } from '@kbn/actions-plugin/server';
-import { CONNECTORS_EDR_EXECUTE_PRIVILEGE } from '@kbn/actions-plugin/server/feature';
+import {
+  CONNECTORS_EDR_EXECUTE_PRIVILEGE,
+  SUB_ACTIONS_EDR__EXECUTE_PRIVILEGE,
+} from '@kbn/actions-plugin/server/feature';
 import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 
@@ -40,9 +43,13 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
   renderParameterTemplates,
   isEdrActionType: true,
   getKibanaPrivileges: (args) => {
-    return args?.source === ActionExecutionSourceType.HTTP_REQUEST &&
+    const privileges = [CONNECTORS_EDR_EXECUTE_PRIVILEGE];
+    if (
+      args?.source === ActionExecutionSourceType.HTTP_REQUEST &&
       args?.params?.subAction !== SUB_ACTION.GET_AGENTS
-      ? [CONNECTORS_EDR_EXECUTE_PRIVILEGE]
-      : [];
+    ) {
+      privileges.push(SUB_ACTIONS_EDR__EXECUTE_PRIVILEGE);
+    }
+    return privileges;
   },
 });

@@ -19,6 +19,7 @@ export const CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-basic
 
 export const CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-edr-connectors';
 export const CONNECTORS_EDR_EXECUTE_PRIVILEGE = `api:${CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG}`;
+export const SUB_ACTIONS_EDR_EXECUTE_PRIVILEGE = `api:actions:execute-edr-sub_actions`;
 
 /**
  * The order of appearance in the feature privilege page
@@ -71,4 +72,31 @@ export const ACTIONS_FEATURE = {
       ui: ['show', 'execute'],
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureName', {
+        defaultMessage: 'EDR Connectors',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              api: [CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG],
+              id: 'executeEdrConnectors',
+              name: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureDetails', {
+                defaultMessage: 'Execute advanced EDR connectors',
+              }),
+              includeIn: 'all',
+              savedObject: {
+                all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, CONNECTOR_TOKEN_SAVED_OBJECT_TYPE],
+                read: [ACTION_SAVED_OBJECT_TYPE],
+              },
+              ui: ['executeEdr'],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };

@@ -29,6 +29,7 @@ import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 
 const FlyoutHeaderComponent: React.FC<{
   isExperimental?: boolean;
+  isEdrActionType?: boolean;
   isPreconfigured: boolean;
   connectorName: string;
   connectorTypeDesc: string;
@@ -38,6 +39,7 @@ const FlyoutHeaderComponent: React.FC<{
 }> = ({
   icon,
   isExperimental = false,
+  isEdrActionType = false,
   isPreconfigured,
   connectorName,
   connectorTypeDesc,
@@ -49,7 +51,7 @@ const FlyoutHeaderComponent: React.FC<{
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
-  const canExecute = hasExecuteActionsCapability(capabilities);
+  const canExecute = hasExecuteActionsCapability(capabilities, isEdrActionType);
 
   const setConfigurationTab = useCallback(() => {
     setTab(EditConnectorTabs.Configuration);
