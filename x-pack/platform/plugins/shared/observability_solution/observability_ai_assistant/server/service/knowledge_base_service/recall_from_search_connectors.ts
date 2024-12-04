@@ -163,7 +163,13 @@ async function recallFromLegacyConnectors({
               },
             },
           ],
-          filter: [{ term: { [modelField]: modelId } }],
+          filter: [
+            {
+              term: {
+                [modelField]: modelId,
+              },
+            },
+          ],
         },
       };
     });
