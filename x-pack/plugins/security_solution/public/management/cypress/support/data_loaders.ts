@@ -581,7 +581,7 @@ ${s1Info.status}
       const localDiagnosticsFile = `${localDiagnosticsDir}/${
         fileNamePrefix
           ? // Insure the file name prefix does not have characters that can't be used in file names
-            `${fileNamePrefix.replace(/[><:"/\\|?*'`{}]/g, '_')}-`
+            `${fileNamePrefix.replace(/[><:"/\\|?*'`{} ]/g, '_')}-`
           : ''
       }${fileName}`;
 
