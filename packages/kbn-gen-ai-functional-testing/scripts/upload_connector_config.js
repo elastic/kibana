@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { observableIntoEventSourceStream } from './src/observable_into_event_source_stream';
-export { supertestToObservable } from './src/supertest_to_observable';
+require('@kbn/babel-register').install();
+require('../src/manage_connector_config').uploadToVault();
