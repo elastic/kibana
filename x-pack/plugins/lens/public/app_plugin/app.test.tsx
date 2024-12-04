@@ -804,31 +804,6 @@ describe('Lens App', () => {
         await waitForModalVisible();
         expect(screen.queryByTestId('saveAsNewCheckbox')).not.toBeInTheDocument();
       });
-
-      it('enables Save Query UI when user has app-level permissions', async () => {
-        services.application.capabilities = {
-          ...services.application.capabilities,
-          visualize: { saveQuery: true },
-        };
-
-        await renderApp();
-        expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenLastCalledWith(
-          expect.objectContaining({ saveQueryMenuVisibility: 'allowed_by_app_privilege' }),
-          {}
-        );
-      });
-
-      it('checks global save query permission when user does not have app-level permissions', async () => {
-        services.application.capabilities = {
-          ...services.application.capabilities,
-          visualize: { saveQuery: false },
-        };
-        await renderApp();
-        expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenLastCalledWith(
-          expect.objectContaining({ saveQueryMenuVisibility: 'globally_managed' }),
-          {}
-        );
-      });
     });
   });
 
@@ -1046,24 +1021,11 @@ describe('Lens App', () => {
   });
 
   describe('saved query handling', () => {
-    it('does not allow saving when the user is missing the saveQuery permission', async () => {
-      services.application.capabilities = {
-        ...services.application.capabilities,
-        visualize: { save: false, saveQuery: false, show: true },
-      };
-      await renderApp();
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
-        expect.objectContaining({ saveQueryMenuVisibility: 'globally_managed' }),
-        {}
-      );
-    });
-
     it('persists the saved query ID when the query is saved', async () => {
       await renderApp();
 
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          saveQueryMenuVisibility: 'allowed_by_app_privilege',
           savedQuery: undefined,
           onSaved: expect.any(Function),
           onSavedQueryUpdated: expect.any(Function),

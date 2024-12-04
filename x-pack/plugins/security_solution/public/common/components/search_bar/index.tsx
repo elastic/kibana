@@ -337,7 +337,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           showFilterBar={!hideFilterBar}
           showDatePicker={true}
           showQueryInput={!hideQueryInput}
-          saveQueryMenuVisibility="allowed_by_app_privilege"
           dataTestSubj={dataTestSubj}
         />
       </div>

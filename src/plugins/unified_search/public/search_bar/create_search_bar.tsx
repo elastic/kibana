@@ -22,7 +22,7 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { type SavedQueryMenuVisibility, canShowSavedQuery } from './lib/can_show_saved_query';
+import { canShowSavedQuery } from './lib/can_show_saved_query';
 import type { UnifiedSearchPublicPluginStart } from '../types';
 
 export interface StatefulSearchBarDeps {
@@ -41,7 +41,6 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = 
   appName: string;
   useDefaultBehaviors?: boolean;
   savedQueryId?: string;
-  saveQueryMenuVisibility?: SavedQueryMenuVisibility;
   onSavedQueryIdChange?: (savedQueryId?: string) => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
 };
@@ -200,7 +199,6 @@ export function createSearchBar({
     }, [query, timeRange, useDefaultBehaviors]);
 
     const showSaveQuery = canShowSavedQuery({
-      saveQueryMenuVisibility: props.saveQueryMenuVisibility,
       query,
       core,
     });

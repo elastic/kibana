@@ -1078,11 +1078,6 @@ export const LensTopNavMenu = ({
       setMenuMountPoint={setHeaderActionMenu}
       popoverBreakpoints={['xs', 's', 'm']}
       config={topNavConfig}
-      saveQueryMenuVisibility={
-        application.capabilities.visualize.saveQuery
-          ? 'allowed_by_app_privilege'
-          : 'globally_managed'
-      }
       badges={
         managed
           ? [

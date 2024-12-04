@@ -130,32 +130,6 @@ describe('Discover topnav component', () => {
     expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share']);
   });
 
-  test('top nav is correct when discover saveQuery permission is granted', () => {
-    const props = getProps({ capabilities: { discover: { saveQuery: true } } });
-    const component = mountWithIntl(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
-      </DiscoverMainProvider>
-    );
-    const statefulSearchBar = component.find(
-      mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu
-    );
-    expect(statefulSearchBar.props().saveQueryMenuVisibility).toBe('allowed_by_app_privilege');
-  });
-
-  test('top nav is correct when discover saveQuery permission is not granted', () => {
-    const props = getProps({ capabilities: { discover: { saveQuery: false } } });
-    const component = mountWithIntl(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
-      </DiscoverMainProvider>
-    );
-    const statefulSearchBar = component.find(
-      mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu
-    );
-    expect(statefulSearchBar.props().saveQueryMenuVisibility).toBe('globally_managed');
-  });
-
   describe('top nav customization', () => {
     it('should allow disabling default menu items', () => {
       mockUseCustomizations = true;
