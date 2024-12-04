@@ -2508,6 +2508,8 @@ x-pack/test_serverless/api_integration/test_suites/security/cloud_security_postu
 ## CSP e2e tests
 x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
 x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
+## Asset Inventory tests
+x-pack/test/asset_inventory_api_integration/ @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
