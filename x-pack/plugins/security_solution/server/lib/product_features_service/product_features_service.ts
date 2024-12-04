@@ -21,6 +21,7 @@ import {
   getCasesFeature,
   getSecurityFeature,
   getCasesV2Feature,
+  getSecurityV2Feature,
   getTimelineFeature,
 } from '@kbn/security-solution-features/product_features';
 import type { RecursiveReadonly } from '@kbn/utility-types';
@@ -39,6 +40,7 @@ export const API_ACTION_PREFIX = `${APP_ID}-`;
 
 export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;
+  private securityV2ProductFeatures: ProductFeatures;
   private casesProductFeatures: ProductFeatures;
   private casesProductV2Features: ProductFeatures;
   private securityAssistantProductFeatures: ProductFeatures;
@@ -59,6 +61,16 @@ export class ProductFeaturesService {
       securityFeature.subFeaturesMap,
       securityFeature.baseKibanaFeature,
       securityFeature.baseKibanaSubFeatureIds
+    );
+    const securityV2Feature = getSecurityV2Feature({
+      savedObjects: securityDefaultSavedObjects,
+      experimentalFeatures: this.experimentalFeatures,
+    });
+    this.securityV2ProductFeatures = new ProductFeatures(
+      this.logger,
+      securityV2Feature.subFeaturesMap,
+      securityV2Feature.baseKibanaFeature,
+      securityV2Feature.baseKibanaSubFeatureIds
     );
 
     const casesFeature = getCasesFeature({
@@ -117,6 +129,7 @@ export class ProductFeaturesService {
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.securityProductFeatures.init(featuresSetup);
+    this.securityV2ProductFeatures.init(featuresSetup);
     this.casesProductFeatures.init(featuresSetup);
     this.casesProductV2Features.init(featuresSetup);
     this.securityAssistantProductFeatures.init(featuresSetup);
@@ -127,6 +140,7 @@ export class ProductFeaturesService {
   public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
     const securityProductFeaturesConfig = configurator.security();
     this.securityProductFeatures.setConfig(securityProductFeaturesConfig);
+    this.securityV2ProductFeatures.setConfig(securityProductFeaturesConfig);
 
     const casesProductFeaturesConfig = configurator.cases();
     this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
@@ -162,6 +176,7 @@ export class ProductFeaturesService {
   public isActionRegistered(action: string) {
     return (
       this.securityProductFeatures.isActionRegistered(action) ||
+      this.securityV2ProductFeatures.isActionRegistered(action) ||
       this.casesProductFeatures.isActionRegistered(action) ||
       this.casesProductV2Features.isActionRegistered(action) ||
       this.securityAssistantProductFeatures.isActionRegistered(action) ||
