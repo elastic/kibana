@@ -116,6 +116,7 @@ export const initializeSearchEmbeddableApi = async (
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
+  const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
 
   /**
    * The state manager is used to modify the state of the saved search - this should never be
@@ -134,6 +135,7 @@ export const initializeSearchEmbeddableApi = async (
     totalHitCount: totalHitCount$,
     viewMode: savedSearchViewMode$,
     density: density$,
+    inspectorAdapters: inspectorAdapters$,
   };
 
   /** The saved search should be the source of truth for all state  */
