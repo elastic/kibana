@@ -256,7 +256,7 @@ If your tests align with the outlined criteria and requirements, you can migrate
 1. Move your tests to the `x-pack/test/api_integration/deployment_agnostic/apis/<plugin>` directory.
 2. Update each test file to use the `DeploymentAgnosticFtrProviderContext` context and load the required FTR services it provides.
 3. Ensure the `roleScopedSupertest` or `samlAuth` service is used instead for `supertest` for authentication and test API calls.
-4. Remove all usage of the `supertest` service. It is the main cuase of test failure on Cloud becuase of system index superuser priveleges.
+4. Remove all usage of the `supertest` service. It is athenticated as system index superuser and often causes test failures on Cloud, where priveleges are more strict.
 5. Avoid modifying `config` files, as this could disrupt test runs in Cloud environments.
 6. Include your tests in both the platform and at least one solution index file.
 7. Execute your tests locally against a local environment.
