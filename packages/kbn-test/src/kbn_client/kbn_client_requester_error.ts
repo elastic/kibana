@@ -17,9 +17,7 @@ export class KbnClientRequesterError extends Error {
   }
 }
 function clean(error: Error): AxiosError {
-  const _ = new AxiosError(error.message);
-  _.cause = error;
-  _.name = error.name;
+  const _ = AxiosError.from(error);
   delete _.config;
   delete _.request;
   delete _.response;
