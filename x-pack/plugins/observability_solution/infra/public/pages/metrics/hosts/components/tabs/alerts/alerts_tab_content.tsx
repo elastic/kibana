@@ -31,12 +31,12 @@ import { CreateAlertRuleButton } from '../../../../../../components/shared/alert
 import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/links/link_to_alerts_page';
 import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
 import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
-import { useHostsViewContext } from '../../../hooks/use_hosts_view';
+
+const HOST_NAME_ALERTS_QUERY = 'host.name: *';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();
   const { featureFlags } = usePluginConfig();
-  const { hostNodes } = useHostsViewContext();
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
@@ -47,11 +47,6 @@ export const AlertsTabContent = () => {
 
   const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
     triggersActionsUi;
-
-  const hostsWithAlertsKuery = hostNodes
-    .filter((host) => host.alertsCount)
-    .map((host) => `"${host.name}"`)
-    .join(' OR ');
 
   return (
     <HeightRetainer>
@@ -73,7 +68,7 @@ export const AlertsTabContent = () => {
               <LinkToAlertsPage
                 dateRange={searchCriteria.dateRange}
                 data-test-subj="infraHostAlertsTabAlertsShowAllButton"
-                kuery={`${hostsWithAlertsKuery}`}
+                kuery={HOST_NAME_ALERTS_QUERY}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

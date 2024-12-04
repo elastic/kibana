@@ -15,10 +15,12 @@ const useKibanaMock = useKibana as jest.Mock;
 
 const commonEntityFields: Partial<InventoryEntity> = {
   entityLastSeenTimestamp: 'foo',
-  entityId: 'entity1',
+  entityId: '1',
 };
 
 describe('AlertsBadge', () => {
+  const mockAsKqlFilter = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -27,6 +29,11 @@ describe('AlertsBadge', () => {
         http: {
           basePath: {
             prepend: (path: string) => path,
+          },
+        },
+        entityManager: {
+          entityClient: {
+            asKqlFilter: mockAsKqlFilter,
           },
         },
       },
@@ -52,10 +59,11 @@ describe('AlertsBadge', () => {
         provider: null,
       },
     };
+    mockAsKqlFilter.mockReturnValue('host.name: foo');
 
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      `/app/observability/alerts?_a=(kuery:\"entity1\",status:active)`
+      "/app/observability/alerts?_a=(kuery:'host.name: foo',status:active)"
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('1');
   });
@@ -78,11 +86,40 @@ describe('AlertsBadge', () => {
 
       alertsCount: 5,
     };
+    mockAsKqlFilter.mockReturnValue('service.name: bar');
 
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      `/app/observability/alerts?_a=(kuery:\"entity1\",status:active)`
+      "/app/observability/alerts?_a=(kuery:'service.name: bar',status:active)"
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('5');
+  });
+  it('render alerts badge for a service entity with multiple identity fields', () => {
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityType: 'service',
+      entityDisplayName: 'foo',
+      entityIdentityFields: ['service.name', 'service.environment'],
+      entityDefinitionId: 'service',
+      service: {
+        name: 'bar',
+        environment: 'prod',
+      },
+      agent: {
+        name: 'node',
+      },
+      cloud: {
+        provider: null,
+      },
+      alertsCount: 2,
+    };
+
+    mockAsKqlFilter.mockReturnValue('service.name: bar AND service.environment: prod');
+
+    render(<AlertsBadge entity={entity} />);
+    expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
+      "/app/observability/alerts?_a=(kuery:'service.name: bar AND service.environment: prod',status:active)"
+    );
+    expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('2');
   });
 });
