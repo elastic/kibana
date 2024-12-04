@@ -117,7 +117,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
 
         <EuiSpacer size="s" />
 
-        <EuiText style={{ width: 300 }} color="subdued" size="s">
+        <EuiText css={{ width: 300 }} color="subdued" size="s">
           <p>
             {i18n.translate('console.helpPopover.description', {
               defaultMessage:
