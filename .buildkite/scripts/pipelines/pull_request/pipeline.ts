@@ -136,7 +136,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution/])) {
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution/, /^package.json/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/slo_plugin_e2e.yml'));
     }
 
