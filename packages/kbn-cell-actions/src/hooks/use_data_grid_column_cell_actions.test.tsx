@@ -88,18 +88,22 @@ describe('useDataGridColumnsCellActions', () => {
       initialProps: useDataGridColumnsCellActionsProps,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => {
+      expect(result.current).toHaveLength(columns.length);
+    });
 
     renderCellAction(result.current[0][0], { rowIndex: 0 });
     renderCellAction(result.current[0][1], { rowIndex: 1 });
     renderCellAction(result.current[1][0], { rowIndex: 0 });
     renderCellAction(result.current[1][1], { rowIndex: 1 });
 
-    expect(mockGetCellValue).toHaveBeenCalledTimes(4);
-    expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 0);
-    expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 1);
-    expect(mockGetCellValue).toHaveBeenCalledWith(field2.name, 0);
-    expect(mockGetCellValue).toHaveBeenCalledWith(field2.name, 1);
+    await waitFor(() => {
+      expect(mockGetCellValue).toHaveBeenCalledTimes(4);
+      expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 0);
+      expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 1);
+      expect(mockGetCellValue).toHaveBeenCalledWith(field2.name, 0);
+      expect(mockGetCellValue).toHaveBeenCalledWith(field2.name, 1);
+    });
   });
 
   it('should render the cell actions', async () => {
@@ -107,28 +111,34 @@ describe('useDataGridColumnsCellActions', () => {
       initialProps: useDataGridColumnsCellActionsProps,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => {
+      expect(result.current).toHaveLength(columns.length);
+    });
 
     const cellAction1 = renderCellAction(result.current[0][0]);
 
-    expect(cellAction1.getByTestId(`dataGridColumnCellAction-${action1.id}`)).toBeInTheDocument();
-    expect(cellAction1.getByText(action1.getDisplayName())).toBeInTheDocument();
+    await waitFor(() => {
+      expect(cellAction1.getByTestId(`dataGridColumnCellAction-${action1.id}`)).toBeInTheDocument();
+      expect(cellAction1.getByText(action1.getDisplayName())).toBeInTheDocument();
+    });
 
     const cellAction2 = renderCellAction(result.current[0][1]);
 
-    expect(cellAction2.getByTestId(`dataGridColumnCellAction-${action2.id}`)).toBeInTheDocument();
-    expect(cellAction2.getByText(action2.getDisplayName())).toBeInTheDocument();
+    await waitFor(() => {
+      expect(cellAction2.getByTestId(`dataGridColumnCellAction-${action2.id}`)).toBeInTheDocument();
+      expect(cellAction2.getByText(action2.getDisplayName())).toBeInTheDocument();
+    });
   });
 
   it('should execute the action on click', async () => {
     const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    const cellAction = renderCellAction(result.current[0][0]);
-
-    cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
+    await waitFor(() => {
+      const cellAction = renderCellAction(result.current[0][0]);
+      cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
+    });
 
     await waitFor(() => {
       expect(action1.execute).toHaveBeenCalled();
@@ -139,7 +149,10 @@ describe('useDataGridColumnsCellActions', () => {
     const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    await waitFor(() => {
+      expect(result.current).toHaveLength(columns.length);
+    });
 
     const cellAction1 = renderCellAction(result.current[0][0], { rowIndex: 1 });
 
@@ -196,15 +209,16 @@ describe('useDataGridColumnsCellActions', () => {
     const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    const cellAction = renderCellAction(result.current[0][0], { rowIndex: 25 });
-
-    cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
-
-    expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 25);
 
     await waitFor(() => {
+      expect(result.current).toHaveLength(columns.length);
+    });
+
+    const cellAction = renderCellAction(result.current[0][0], { rowIndex: 25 });
+    cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
+
+    await waitFor(() => {
+      expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 25);
       expect(action1.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           data: [
@@ -227,10 +241,12 @@ describe('useDataGridColumnsCellActions', () => {
     const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    await waitFor(() => {
+      expect(result.current).toHaveLength(columns.length);
+    });
 
     const cellAction = renderCellAction(result.current[0][0], { rowIndex: 25 });
-
     cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
     await waitFor(() => {
@@ -246,10 +262,10 @@ describe('useDataGridColumnsCellActions', () => {
       },
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toBeInstanceOf(Array);
-    expect(result.current.length).toBe(0);
+    await waitFor(() => {
+      expect(result.current).toBeInstanceOf(Array);
+      expect(result.current.length).toBe(0);
+    });
   });
 
   it('should return empty array of actions when list of fields is undefined', async () => {
@@ -260,9 +276,9 @@ describe('useDataGridColumnsCellActions', () => {
       },
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toBeInstanceOf(Array);
-    expect(result.current.length).toBe(0);
+    await waitFor(() => {
+      expect(result.current).toBeInstanceOf(Array);
+      expect(result.current.length).toBe(0);
+    });
   });
 });

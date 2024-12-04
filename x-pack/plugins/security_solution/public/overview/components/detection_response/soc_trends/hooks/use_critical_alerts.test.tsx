@@ -76,15 +76,17 @@ describe('useCriticalAlerts', () => {
       wrapper: wrapperContainer,
     });
 
-    expect(result.current).toEqual({
-      stat: '-',
-      isLoading: false,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA('alerts'),
-      },
-      ...basicData,
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        stat: '-',
+        isLoading: false,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA('alerts'),
+        },
+        ...basicData,
+      });
     });
   });
   it('finds positive percentage change', async () => {

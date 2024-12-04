@@ -28,12 +28,6 @@ const mockAbortSignal = {} as unknown as AbortSignal;
 const mockCreateTag = jest.fn();
 const renderUseCreateSecurityDashboardLink = () => renderHook(() => useFetchSecurityTags(), {});
 
-const asyncRenderUseCreateSecurityDashboardLink = async () => {
-  const renderedHook = renderUseCreateSecurityDashboardLink();
-  await waitFor(() => null);
-  return renderedHook;
-};
-
 describe('useFetchSecurityTags', () => {
   beforeAll(() => {
     useKibana().services.http = { get: mockGet } as unknown as HttpStart;
@@ -52,25 +46,31 @@ describe('useFetchSecurityTags', () => {
 
   test('should fetch Security Solution tags', async () => {
     mockGet.mockResolvedValue([]);
-    await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockGet).toHaveBeenCalledWith(
-      INTERNAL_TAGS_URL,
-      expect.objectContaining({
-        query: { name: SECURITY_TAG_NAME },
-        signal: mockAbortSignal,
-      })
-    );
+    renderUseCreateSecurityDashboardLink();
+
+    await waitFor(() => {
+      expect(mockGet).toHaveBeenCalledWith(
+        INTERNAL_TAGS_URL,
+        expect.objectContaining({
+          query: { name: SECURITY_TAG_NAME },
+          signal: mockAbortSignal,
+        })
+      );
+    });
   });
 
   test('should create a Security Solution tag if no Security Solution tags were found', async () => {
     mockGet.mockResolvedValue([]);
-    await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockCreateTag).toHaveBeenCalledWith({
-      name: SECURITY_TAG_NAME,
-      description: SECURITY_TAG_DESCRIPTION,
-      color: '#FFFFFF',
+    renderUseCreateSecurityDashboardLink();
+
+    await waitFor(() => {
+      expect(mockCreateTag).toHaveBeenCalledWith({
+        name: SECURITY_TAG_NAME,
+        description: SECURITY_TAG_DESCRIPTION,
+        color: '#FFFFFF',
+      });
     });
   });
 
@@ -82,9 +82,11 @@ describe('useFetchSecurityTags', () => {
       type: 'tag',
       ...tag.attributes,
     }));
-    const { result } = await asyncRenderUseCreateSecurityDashboardLink();
+    const { result } = renderUseCreateSecurityDashboardLink();
 
-    expect(mockCreateTag).not.toHaveBeenCalled();
-    expect(result.current.tags).toEqual(expect.objectContaining(expected));
+    await waitFor(() => {
+      expect(mockCreateTag).not.toHaveBeenCalled();
+      expect(result.current.tags).toEqual(expect.objectContaining(expected));
+    });
   });
 });

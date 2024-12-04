@@ -26,14 +26,6 @@ const renderUseFetchSecurityDashboards = () =>
     wrapper: DashboardContextProvider,
   });
 
-const asyncRenderUseFetchSecurityDashboards = async () => {
-  const renderedHook = renderUseFetchSecurityDashboards();
-
-  await waitFor(() => new Promise((resolve) => resolve(null)));
-
-  return renderedHook;
-};
-
 describe('useFetchSecurityDashboards', () => {
   beforeAll(() => {
     useKibana().services.http = mockHttp as unknown as HttpStart;
@@ -49,32 +41,39 @@ describe('useFetchSecurityDashboards', () => {
   });
 
   it('should fetch Security Solution tags', async () => {
-    await asyncRenderUseFetchSecurityDashboards();
-    expect(getTagsByName).toHaveBeenCalledTimes(1);
+    renderUseFetchSecurityDashboards();
+
+    await waitFor(() => {
+      expect(getTagsByName).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should fetch Security Solution dashboards', async () => {
-    await asyncRenderUseFetchSecurityDashboards();
+    renderUseFetchSecurityDashboards();
 
-    expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
-    expect(getDashboardsByTagIds).toHaveBeenCalledWith(
-      {
-        http: mockHttp,
-        tagIds: [MOCK_TAG_ID],
-      },
-      expect.any(Object)
-    );
+    await waitFor(() => {
+      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+      expect(getDashboardsByTagIds).toHaveBeenCalledWith(
+        {
+          http: mockHttp,
+          tagIds: [MOCK_TAG_ID],
+        },
+        expect.any(Object)
+      );
+    });
   });
 
   it('should fetch Security Solution dashboards with abort signal', async () => {
-    await asyncRenderUseFetchSecurityDashboards();
+    renderUseFetchSecurityDashboards();
 
-    expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
-    expect((getDashboardsByTagIds as jest.Mock).mock.calls[0][1]).toEqual(mockAbortSignal);
+    await waitFor(() => {
+      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+      expect((getDashboardsByTagIds as jest.Mock).mock.calls[0][1]).toEqual(mockAbortSignal);
+    });
   });
 
   it('should return Security Solution dashboards', async () => {
-    const { result } = await asyncRenderUseFetchSecurityDashboards();
+    const { result } = renderUseFetchSecurityDashboards();
 
     await waitFor(() => {
       expect(result.current.isLoading).toEqual(false);

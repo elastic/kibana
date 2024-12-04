@@ -34,14 +34,6 @@ const renderUseCreateSecurityDashboardLink = () =>
     ),
   });
 
-const asyncRenderUseCreateSecurityDashboard = async () => {
-  const renderedHook = renderUseCreateSecurityDashboardLink();
-
-  await waitFor(() => new Promise((resolve) => resolve(null)));
-
-  return renderedHook;
-};
-
 describe('useCreateSecurityDashboardLink', () => {
   beforeAll(() => {
     (useKibana as jest.Mock).mockReturnValue({
@@ -60,33 +52,46 @@ describe('useCreateSecurityDashboardLink', () => {
 
   describe('useSecurityDashboardsTableItems', () => {
     it('should fetch Security Solution tags when renders', async () => {
-      await asyncRenderUseCreateSecurityDashboard();
+      renderUseCreateSecurityDashboardLink();
 
-      expect(getTagsByName).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(getTagsByName).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('should return a memoized value when rerendered', async () => {
-      const { result, rerender } = await asyncRenderUseCreateSecurityDashboard();
+      const { result, rerender } = renderUseCreateSecurityDashboardLink();
 
       const result1 = result.current;
       act(() => rerender());
       const result2 = result.current;
-      expect(result1).toEqual(result2);
+
+      await waitFor(() => {
+        expect(result1).toEqual(result2);
+      });
     });
 
     it('should not re-request tag id when re-rendered', async () => {
-      const { rerender } = await asyncRenderUseCreateSecurityDashboard();
+      const { rerender } = renderUseCreateSecurityDashboardLink();
 
-      expect(getTagsByName).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(getTagsByName).toHaveBeenCalledTimes(1);
+      });
+
       act(() => rerender());
-      expect(getTagsByName).toHaveBeenCalledTimes(1);
+
+      await waitFor(() => {
+        expect(getTagsByName).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('should return isLoading while requesting', async () => {
       const { result } = renderUseCreateSecurityDashboardLink();
 
-      expect(result.current.isLoading).toEqual(true);
-      expect(result.current.url).toEqual('/app/security/dashboards/create');
+      await waitFor(() => {
+        expect(result.current.isLoading).toEqual(true);
+        expect(result.current.url).toEqual('/app/security/dashboards/create');
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toEqual(false);

@@ -59,15 +59,17 @@ describe('useCasesMttr', () => {
       wrapper: wrapperContainer,
     });
 
-    expect(result.current).toEqual({
-      stat: '-',
-      isLoading: true,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA('case'),
-      },
-      ...basicData,
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        stat: '-',
+        isLoading: true,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA('case'),
+        },
+        ...basicData,
+      });
     });
   });
 

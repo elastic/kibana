@@ -26,9 +26,11 @@ class ErrorCatcher extends React.Component<React.PropsWithChildren> {
   }
 
   render() {
-    return this.state.error
-      ? React.createElement('div', { 'data-test-subj': 'leaf-error' }, this.state.error.toString())
-      : this.props.children;
+    return this.state.error ? (
+      <div data-test-subj="leaf-error">{this.state.error.toString()}</div>
+    ) : (
+      this.props.children
+    );
   }
 }
 
