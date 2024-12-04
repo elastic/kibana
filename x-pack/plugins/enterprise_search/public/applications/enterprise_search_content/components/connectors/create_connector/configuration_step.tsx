@@ -119,12 +119,16 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
                 if (isFormEditing) {
                   const confirmResponse = await overlays?.openConfirm(
                     i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.body', {
-                      defaultMessage: 'Your connector is created but missing some details. You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
+                      defaultMessage:
+                        'Your connector is created but missing some details. You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
                     }),
                     {
-                      title: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.title', {
-                        defaultMessage: 'Your connector is not fully configured',
-                      }),
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.unsavedPrompt.title',
+                        {
+                          defaultMessage: 'Your connector is not fully configured',
+                        }
+                      ),
                       cancelButtonText: i18n.translate(
                         'xpack.enterpriseSearch.createConnector.unsavedPrompt.cancel',
                         {
