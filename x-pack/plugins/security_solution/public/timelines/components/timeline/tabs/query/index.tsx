@@ -52,6 +52,8 @@ import { NotesFlyout } from '../../properties/notes_flyout';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 
+const ALL_FIELDS = ['*'];
+
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
   prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
@@ -179,7 +181,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
-    fields: timelineQueryFieldsFromColumns,
+    fields: ALL_FIELDS,
     filterQuery: combinedQueries?.filterQuery,
     id: timelineId,
     indexNames: selectedPatterns,
