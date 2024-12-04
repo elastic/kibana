@@ -9,7 +9,7 @@
 
 import { inspect } from 'util';
 
-import { Page } from 'playwright';
+import { Page } from '@playwright/test';
 import callsites from 'callsites';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';

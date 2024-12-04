@@ -1803,8 +1803,6 @@
     "pirates": "^4.0.1",
     "piscina": "^3.2.0",
     "pixelmatch": "^5.3.0",
-    "playwright": "1.49.0",
-    "playwright-chromium": "1.49.0",
     "pngjs": "^7.0.0",
     "postcss": "^8.4.31",
     "postcss-loader": "^4.2.0",

@@ -9,7 +9,7 @@
 
 import { subj } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ElementHandle, Page } from 'playwright';
+import { ElementHandle, Page } from '@playwright/test';
 import { Retry } from '..';
 
 interface WaitForRenderArgs {

@@ -26332,13 +26332,6 @@ platform@^1.3.0:
   resolved "https://registry.yarnpkg.com/platform/-/platform-1.3.5.tgz#fb6958c696e07e2918d2eeda0f0bc9448d733444"
   integrity sha512-TuvHS8AOIZNAlE77WUDiR4rySV/VMptyMfcfeoMgs4P8apaZM3JrnbzBiixKUv+XR6i+BXrQh8WAnjaSPFO65Q==
 
-playwright-chromium@1.49.0:
-  version "1.49.0"
-  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.49.0.tgz#0661428204396dbf5445eb04536d43a5f91bca59"
-  integrity sha512-xU+nOHawNFKfJsHTTGyWqSJ5nRGGHQq1wTsc49H9rM+hDNnoKZi+3m12mGoLpqvJP7vRjZQ3uvU9/UJZbrJ1AA==
-  dependencies:
-    playwright-core "1.49.0"
-
 playwright-chromium@=1.45.1:
   version "1.45.1"
   resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.45.1.tgz#a20b513edbc0435b2e06a303aac61001f44bf094"

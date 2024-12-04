@@ -7,7 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { subj } from '@kbn/test-subj-selector';
-import { Page } from 'playwright';
+import { Page } from '@playwright/test';
 
 import { toMs, type TimeOrMilliseconds } from './lib/time';
 

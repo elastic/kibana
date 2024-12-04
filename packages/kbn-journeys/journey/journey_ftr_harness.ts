@@ -12,7 +12,13 @@ import { inspect, format } from 'util';
 import { setTimeout as setTimer } from 'timers/promises';
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
-import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
+import playwright, {
+  ChromiumBrowser,
+  Page,
+  BrowserContext,
+  CDPSession,
+  Request,
+} from '@playwright/test';
 import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';

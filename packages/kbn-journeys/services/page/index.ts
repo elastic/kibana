@@ -8,7 +8,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { Page } from 'playwright';
+import { Page } from '@playwright/test';
 import { Retry } from '..';
 import { KibanaPage } from './kibana_page';
 import { ProjectPage } from './project_page';
