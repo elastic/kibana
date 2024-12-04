@@ -219,7 +219,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('delete', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('delete', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');

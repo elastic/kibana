@@ -27,7 +27,7 @@ export const getAreaStyles = ({ points, lines, color }) => ({
       radius: points.radius || 0.5,
       stroke: color || DEFAULT_COLOR,
       strokeWidth: points.lineWidth || 5,
-      visible: points.lineWidth > 0 && Boolean(points.show),
+      visible: points.lineWidth > 0 && Boolean(points.show) ? 'always' : 'never',
     },
   },
   curve: lines.steps ? CurveType.CURVE_STEP_AFTER : CurveType.LINEAR,
