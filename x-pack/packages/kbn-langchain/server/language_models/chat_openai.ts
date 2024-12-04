@@ -14,7 +14,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
+import { DEFAULT_OPEN_AI_MODEL } from './constants';
 import { InvokeAIActionParamsSchema, RunActionParamsSchema } from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
@@ -59,7 +59,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #logger: Logger;
   #actionResultData: string;
   #traceId: string;
-  #signal?: AbortSignal;
+  #signal: AbortSignal;
   #timeout?: number;
 
   constructor({
@@ -98,7 +98,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.#timeout = timeout;
     this.#actionResultData = '';
     this.streaming = streaming;
-    this.#signal = signal;
+    this.#signal = signal ?? new AbortController().signal;
     this.model = model ?? DEFAULT_OPEN_AI_MODEL;
     // to be passed to the actions client
     this.#temperature = temperature;
@@ -136,7 +136,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       | OpenAI.ChatCompletionCreateParamsNonStreaming
   ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk> | OpenAI.ChatCompletion> {
     return this.caller.call(async () => {
-      const requestBody = this.formatRequestForActionsClient(completionRequest);
+      console.log('==> this.llmType', this.llmType);
+      const requestBody = this.formatRequestForActionsClient(completionRequest, this.llmType);
       this.#logger.debug(
         () =>
           `${LLM_TYPE}#completionWithRetry ${this.#traceId} assistantMessage:\n${JSON.stringify(
@@ -179,7 +180,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   formatRequestForActionsClient(
     completionRequest:
       | OpenAI.ChatCompletionCreateParamsNonStreaming
-      | OpenAI.ChatCompletionCreateParamsStreaming
+      | OpenAI.ChatCompletionCreateParamsStreaming,
+    llmType: string
   ): {
     actionId: string;
     params: {
@@ -207,19 +209,28 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
       })),
     };
+    const subAction =
+      llmType === 'inference'
+        ? completionRequest.stream
+          ? 'completion_stream'
+          : 'completion'
+        : // langchain expects stream to be of type AsyncIterator<OpenAI.ChatCompletionChunk>
+        // for non-stream, use `run` instead of `invokeAI` in order to get the entire OpenAI.ChatCompletion response,
+        // which may contain non-content messages like functions
+        completionRequest.stream
+        ? 'invokeAsyncIterator'
+        : 'run';
+    console.log('==> body', body);
     // create a new connector request body with the assistant message:
     return {
       actionId: this.#connectorId,
       params: {
-        // langchain expects stream to be of type AsyncIterator<OpenAI.ChatCompletionChunk>
-        // for non-stream, use `run` instead of `invokeAI` in order to get the entire OpenAI.ChatCompletion response,
-        // which may contain non-content messages like functions
-        subAction: completionRequest.stream ? 'invokeAsyncIterator' : 'run',
+        subAction,
         subActionParams: {
-          ...(completionRequest.stream ? body : { body: JSON.stringify(body) }),
-          signal: this.#signal,
-          // This timeout is large because LangChain prompts can be complicated and take a long time
-          timeout: this.#timeout ?? DEFAULT_TIMEOUT,
+          ...(completionRequest.stream ? body : { input: 'hello world' }), //  JSON.stringify(body) }),
+          // signal: this.#signal,
+          // // This timeout is large because LangChain prompts can be complicated and take a long time
+          // timeout: this.#timeout ?? DEFAULT_TIMEOUT,
         },
       },
       signal: this.#signal,
