@@ -9,13 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { ValueFormatConfig } from '../form_based/operations/definitions/column_types';
-import {
-  TextBasedPrivateState,
-  TextBasedLayer,
-  IndexPatternRef,
-  TextBasedLayerColumn,
-} from './types';
+import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
 import type { OriginalColumn } from '../../../common/types';
 
 function getExpressionForLayer(
