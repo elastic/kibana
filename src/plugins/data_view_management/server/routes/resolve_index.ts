@@ -15,6 +15,12 @@ export function registerResolveIndexRoute(router: IRouter): void {
   router.get(
     {
       path: '/internal/index-pattern-management/resolve_index/{query}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization provided by Elasticsearch',
+        },
+      },
       validate: {
         params: schema.object({
           query: schema.string(),
