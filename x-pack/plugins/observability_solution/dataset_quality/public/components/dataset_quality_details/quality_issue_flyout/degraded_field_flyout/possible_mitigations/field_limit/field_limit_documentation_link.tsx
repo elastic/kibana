@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useKibanaContextForPlugin } from '../../../../../utils';
-import { fieldLimitMitigationOfficialDocumentation } from '../../../../../../common/translations';
+import { fieldLimitMitigationOfficialDocumentation } from '../../../../../../../common/translations';
+import { useKibanaContextForPlugin } from '../../../../../../utils';
 
 export function FieldLimitDocLink() {
   const {

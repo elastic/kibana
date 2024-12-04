@@ -21,6 +21,16 @@ export type GetDataStreamsDegradedDocsStatsQuery = GetDataStreamsDegradedDocsSta
 export type GetDataStreamsFailedDocsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/failed_docs`>['params'];
 export type GetDataStreamsFailedDocsStatsQuery = GetDataStreamsFailedDocsStatsParams['query'];
+export type GetDataStreamsFailedDocsDetailsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/failed_docs`>['params'];
+export type GetDataStreamsFailedDocsDetailsQuery = GetDataStreamsFailedDocsDetailsParams['query'];
+export type GetDataStreamFailedDocsDetailsParams = GetDataStreamsFailedDocsDetailsParams['path'] &
+  GetDataStreamsFailedDocsDetailsQuery;
+export type GetDataStreamsFailedDocsErrorsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/failed_docs/errors`>['params'];
+export type GetDataStreamsFailedDocsErrorsQuery = GetDataStreamsFailedDocsErrorsParams['query'];
+export type GetDataStreamFailedDocsErrorsParams = GetDataStreamsFailedDocsErrorsParams['path'] &
+  GetDataStreamsFailedDocsErrorsQuery;
 
 /*
 Types for stats based in documents inside a DataStream

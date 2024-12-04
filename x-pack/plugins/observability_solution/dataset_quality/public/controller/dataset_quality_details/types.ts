@@ -32,7 +32,7 @@ export type DatasetQualityDetailsPublicStateUpdate = Partial<
     WithDefaultControllerState,
     | 'timeRange'
     | 'breakdownField'
-    | 'expandedDegradedField'
+    | 'expandedQualityIssue'
     | 'showCurrentQualityIssues'
     | 'qualityIssuesChart'
   >

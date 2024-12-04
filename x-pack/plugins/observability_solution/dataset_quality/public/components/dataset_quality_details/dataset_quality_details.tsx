@@ -13,7 +13,7 @@ import { Header } from './header';
 import { Overview } from './overview';
 import { Details } from './details';
 
-const DegradedFieldFlyout = dynamic(() => import('./degraded_field_flyout'));
+const DegradedFieldFlyout = dynamic(() => import('./quality_issue_flyout'));
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export

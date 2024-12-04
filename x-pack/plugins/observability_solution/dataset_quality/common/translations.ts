@@ -348,7 +348,7 @@ export const overviewDegradedFieldsTableLoadingText = i18n.translate(
 export const overviewDegradedFieldsTableNoData = i18n.translate(
   'xpack.datasetQuality.details.degradedFieldsTableNoData',
   {
-    defaultMessage: 'No degraded fields found',
+    defaultMessage: 'No quality issues found',
   }
 );
 
@@ -696,5 +696,12 @@ export const manualMitigationCustomPipelineCreateEditPipelineLink = i18n.transla
   'xpack.datasetQuality.details.degradedField.possibleMitigation.createEditPipelineLink',
   {
     defaultMessage: 'create or edit the pipeline',
+  }
+);
+
+export const failedDocsErrorsColumnName = i18n.translate(
+  'xpack.datasetQuality.details.failedDocs.errors',
+  {
+    defaultMessage: 'Error messages',
   }
 );

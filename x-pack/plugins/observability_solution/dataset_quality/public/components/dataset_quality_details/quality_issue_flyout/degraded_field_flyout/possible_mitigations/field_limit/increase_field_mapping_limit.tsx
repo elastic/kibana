@@ -14,13 +14,13 @@ import {
   EuiButton,
   EuiFieldNumber,
 } from '@elastic/eui';
+import { useDegradedFields } from '../../../../../../hooks';
 import {
   fieldLimitMitigationApplyButtonText,
   fieldLimitMitigationCurrentLimitLabelText,
   fieldLimitMitigationNewLimitButtonText,
   fieldLimitMitigationNewLimitPlaceholderText,
-} from '../../../../../../common/translations';
-import { useDegradedFields } from '../../../../../hooks';
+} from '../../../../../../../common/translations';
 
 export function IncreaseFieldMappingLimit({ totalFieldLimit }: { totalFieldLimit: number }) {
   // Propose the user a 30% increase over the current limit

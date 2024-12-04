@@ -7,11 +7,14 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { extractIndexNameFromBackingIndex, streamPartsToIndexPattern } from '../../../common/utils';
-import { DataStreamType } from '../../../common/types';
-import { DataStreamDocsStat } from '../../../common/api_types';
-import { createDatasetQualityESClient } from '../../utils';
-import { DatasetQualityESClient } from '../../utils/create_dataset_quality_es_client';
+import {
+  extractIndexNameFromBackingIndex,
+  streamPartsToIndexPattern,
+} from '../../../../common/utils';
+import { DataStreamType } from '../../../../common/types';
+import { DataStreamDocsStat } from '../../../../common/api_types';
+import { createDatasetQualityESClient } from '../../../utils';
+import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 
 const SIZE_LIMIT = 10000;
 

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useCallback, useMemo } from 'react';
 import { useSelector } from '@xstate/react';
-import { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { DegradedField } from '../../common/data_streams_stats';
 import { SortDirection } from '../../common/types';
@@ -23,6 +24,8 @@ import {
   degradedFieldCauseFieldMalformed,
   degradedFieldCauseFieldMalformedTooltip,
 } from '../../common/translations';
+import { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
+import { getFailedDocsErrorsColumns } from '../components/dataset_quality_details/quality_issue_flyout/failed_docs_flyout/columns';
 
 export type DegradedFieldSortField = keyof DegradedField;
 
@@ -32,12 +35,21 @@ export function useDegradedFields() {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const { degradedFields, expandedDegradedField, showCurrentQualityIssues } = useSelector(
-    service,
-    (state) => state.context
-  );
+  const {
+    degradedFields,
+    expandedQualityIssue: expandedDegradedField,
+    showCurrentQualityIssues,
+    failedDocsErrors,
+  } = useSelector(service, (state) => state.context);
   const { data, table } = degradedFields ?? {};
   const { page, rowsPerPage, sort } = table;
+
+  const { data: failedDocsErrorsData, table: failedDocsErrorsTable } = failedDocsErrors ?? {};
+  const {
+    page: failedDocsErrorsPage,
+    rowsPerPage: failedDocsErrorsRowsPerPage,
+    sort: failedDocsErrorsSort,
+  } = failedDocsErrorsTable;
 
   const totalItemCount = data?.length ?? 0;
 
@@ -74,7 +86,10 @@ export function useDegradedFields() {
   }, [data, sort.field, sort.direction, page, rowsPerPage]);
 
   const expandedRenderedItem = useMemo(() => {
-    return renderedItems.find((item) => item.name === expandedDegradedField);
+    return renderedItems.find(
+      (item) =>
+        item.name === expandedDegradedField?.name && item.type === expandedDegradedField?.type
+    );
   }, [expandedDegradedField, renderedItems]);
 
   const isDegradedFieldsLoading = useSelector(service, (state) =>
@@ -89,11 +104,20 @@ export function useDegradedFields() {
   );
 
   const openDegradedFieldFlyout = useCallback(
-    (fieldName: string) => {
-      if (expandedDegradedField === fieldName) {
+    (fieldName: string, qualityIssueType: QualityIssueType) => {
+      if (
+        expandedDegradedField?.name === fieldName &&
+        expandedDegradedField?.type === qualityIssueType
+      ) {
         service.send({ type: 'CLOSE_DEGRADED_FIELD_FLYOUT' });
       } else {
-        service.send({ type: 'OPEN_DEGRADED_FIELD_FLYOUT', fieldName });
+        service.send({
+          type: 'OPEN_DEGRADED_FIELD_FLYOUT',
+          qualityIssue: {
+            name: fieldName,
+            type: qualityIssueType,
+          },
+        });
       }
     },
     [expandedDegradedField, service]
@@ -103,23 +127,39 @@ export function useDegradedFields() {
     service.send('TOGGLE_CURRENT_QUALITY_ISSUES');
   }, [service]);
 
-  const degradedFieldValues = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open.initialized.ignoredValues.done')
-      ? state.context.degradedFieldValues
-      : undefined
+  const degradedFieldValues = useSelector(
+    service,
+    (state) =>
+      /*  state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.ignoredValues.done'
+    )
+      ?  */ state.context.degradedFieldValues
+    /* : undefined */
   );
 
-  const degradedFieldAnalysis = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.analyzed') ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.mitigating') ||
-    state.matches(
-      'initializing.degradedFieldFlyout.open.initialized.mitigation.askingForRollover'
+  const degradedFieldAnalysis = useSelector(
+    service,
+    (state) =>
+      /* state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.analyzed'
     ) ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.rollingOver') ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.success') ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.error')
-      ? state.context.degradedFieldAnalysis
-      : undefined
+    state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.mitigating'
+    ) ||
+    state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.askingForRollover'
+    ) ||
+    state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.rollingOver'
+    ) ||
+    state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.success'
+    ) ||
+    state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.error'
+    )
+      ?  */ state.context.degradedFieldAnalysis
+    /* : undefined */
   );
 
   const degradedFieldAnalysisFormattedResult = useMemo(() => {
@@ -165,27 +205,37 @@ export function useDegradedFields() {
 
   const isDegradedFieldsValueLoading = useSelector(service, (state) => {
     return state.matches(
-      'initializing.degradedFieldFlyout.open.initialized.ignoredValues.fetching'
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.ignoredValues.fetching'
+    );
+  });
+
+  const isFailedDocsErrorsLoading = useSelector(service, (state) => {
+    return state.matches(
+      'initializing.degradedFieldFlyout.open.failedDocsFlyout.initialized.failedDocsErrors.fetching'
     );
   });
 
   const isRolloverRequired = useSelector(service, (state) => {
     return state.matches(
-      'initializing.degradedFieldFlyout.open.initialized.mitigation.askingForRollover'
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.askingForRollover'
     );
   });
 
   const isMitigationAppliedSuccessfully = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.success');
+    return state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.success'
+    );
   });
 
   const isAnalysisInProgress = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.analyzing');
+    return state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.analyzing'
+    );
   });
 
   const isRolloverInProgress = useSelector(service, (state) => {
     return state.matches(
-      'initializing.degradedFieldFlyout.open.initialized.mitigation.rollingOver'
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.rollingOver'
     );
   });
 
@@ -197,12 +247,18 @@ export function useDegradedFields() {
   );
 
   const isMitigationInProgress = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.mitigating');
+    return state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.mitigating'
+    );
   });
 
   const newFieldLimitData = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.success') ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.error')
+    state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.success'
+    ) ||
+    state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.error'
+    )
       ? state.context.fieldLimit
       : undefined
   );
@@ -210,6 +266,54 @@ export function useDegradedFields() {
   const triggerRollover = useCallback(() => {
     service.send('ROLLOVER_DATA_STREAM');
   }, [service]);
+
+  const failedDocsErrorsColumns = useMemo(() => getFailedDocsErrorsColumns(), []);
+
+  const renderedFailedDocsErrorsItems = useMemo(() => {
+    const sortedItems = orderBy(
+      failedDocsErrorsData,
+      failedDocsErrorsSort.field,
+      failedDocsErrorsSort.direction
+    );
+    return sortedItems.slice(
+      failedDocsErrorsPage * failedDocsErrorsRowsPerPage,
+      (failedDocsErrorsPage + 1) * failedDocsErrorsRowsPerPage
+    );
+  }, [
+    failedDocsErrorsData,
+    failedDocsErrorsSort.field,
+    failedDocsErrorsSort.direction,
+    failedDocsErrorsPage,
+    failedDocsErrorsRowsPerPage,
+  ]);
+
+  const resultsCount = useMemo(() => {
+    const startNumberItemsOnPage =
+      failedDocsErrorsRowsPerPage * failedDocsErrorsPage +
+      (renderedFailedDocsErrorsItems.length ? 1 : 0);
+    const endNumberItemsOnPage =
+      failedDocsErrorsRowsPerPage * failedDocsErrorsPage + renderedFailedDocsErrorsItems.length;
+
+    return failedDocsErrorsRowsPerPage === 0 ? (
+      <strong>
+        {i18n.translate('xpack.datasetQuality.resultsCount.strong.lllLabel', {
+          defaultMessage: 'lll',
+        })}
+      </strong>
+    ) : (
+      <>
+        <strong>
+          {startNumberItemsOnPage}-{endNumberItemsOnPage}
+        </strong>{' '}
+        {' of '} {failedDocsErrorsData?.length}
+      </>
+    );
+  }, [
+    failedDocsErrorsRowsPerPage,
+    failedDocsErrorsPage,
+    renderedFailedDocsErrorsItems.length,
+    failedDocsErrorsData?.length,
+  ]);
 
   return {
     isDegradedFieldsLoading,
@@ -237,5 +341,10 @@ export function useDegradedFields() {
     isRolloverRequired,
     isMitigationAppliedSuccessfully,
     triggerRollover,
+    isFailedDocsErrorsLoading,
+    failedDocsErrorsColumns,
+    renderedFailedDocsErrorsItems,
+    failedDocsErrorsSort: { sort: failedDocsErrorsSort },
+    resultsCount,
   };
 }

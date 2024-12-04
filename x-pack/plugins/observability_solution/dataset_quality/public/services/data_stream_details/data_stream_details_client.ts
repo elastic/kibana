@@ -14,6 +14,8 @@ import {
   degradedFieldAnalysisRt,
   DegradedFieldValues,
   degradedFieldValuesRt,
+  FailedDocsDetails,
+  failedDocsErrorsRt,
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsSettingsResponseRt,
@@ -21,6 +23,7 @@ import {
   IntegrationDashboardsResponse,
   integrationDashboardsRT,
   IntegrationResponse,
+  qualityIssueBaseRT,
   UpdateFieldLimitResponse,
   updateFieldLimitResponseRt,
 } from '../../../common/api_types';
@@ -28,10 +31,11 @@ import {
   DataStreamDetails,
   DataStreamSettings,
   DegradedFieldResponse,
-  GetDataStreamDegradedFieldsParams,
   GetDataStreamDegradedFieldValuesPathParams,
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
+  GetDataStreamFailedDocsDetailsParams,
+  GetDataStreamFailedDocsErrorsParams,
   GetDataStreamSettingsParams,
   GetDataStreamSettingsResponse,
   GetIntegrationDashboardsParams,
@@ -87,11 +91,64 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
     return dataStreamDetails as DataStreamDetails;
   }
 
+  public async getFailedDocsDetails({
+    dataStream,
+    start,
+    end,
+  }: GetDataStreamFailedDocsDetailsParams) {
+    const response = await this.http
+      .get<FailedDocsDetails>(`/internal/dataset_quality/data_streams/${dataStream}/failed_docs`, {
+        query: { start, end },
+      })
+      .catch((error) => {
+        throw new DatasetQualityError(
+          `Failed to fetch data stream failed docs details": ${error}`,
+          error
+        );
+      });
+
+    return decodeOrThrow(
+      qualityIssueBaseRT,
+      (message: string) =>
+        new DatasetQualityError(
+          `Failed to decode data stream failed docs details response: ${message}"`
+        )
+    )(response);
+  }
+
+  public async getFailedDocsErrors({
+    dataStream,
+    start,
+    end,
+  }: GetDataStreamFailedDocsErrorsParams): Promise<{ errors: Record<string, string[]> }> {
+    const response = await this.http
+      .get<FailedDocsDetails>(
+        `/internal/dataset_quality/data_streams/${dataStream}/failed_docs/errors`,
+        {
+          query: { start, end },
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(
+          `Failed to fetch data stream failed docs details": ${error}`,
+          error
+        );
+      });
+
+    return decodeOrThrow(
+      failedDocsErrorsRt,
+      (message: string) =>
+        new DatasetQualityError(
+          `Failed to decode data stream failed docs details response: ${message}"`
+        )
+    )(response);
+  }
+
   public async getDataStreamDegradedFields({
     dataStream,
     start,
     end,
-  }: GetDataStreamDegradedFieldsParams) {
+  }: GetDataStreamFailedDocsDetailsParams) {
     const response = await this.http
       .get<DegradedFieldResponse>(
         `/internal/dataset_quality/data_streams/${dataStream}/degraded_fields`,

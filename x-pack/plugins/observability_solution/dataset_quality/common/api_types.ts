@@ -109,18 +109,54 @@ export const getIntegrationsResponseRt = rt.exact(
 
 export type IntegrationResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
 
-export const degradedFieldRt = rt.type({
-  name: rt.string,
+export const qualityIssueBaseRT = rt.type({
   count: rt.number,
-  lastOccurrence: rt.union([rt.null, rt.number]),
+  lastOccurrence: rt.union([rt.undefined, rt.null, rt.number]),
   timeSeries: rt.array(
     rt.type({
       x: rt.number,
       y: rt.number,
     })
   ),
-  indexFieldWasLastPresentIn: rt.string,
 });
+
+export const qualityIssueRT = rt.intersection([
+  qualityIssueBaseRT,
+  rt.partial({
+    name: rt.string,
+    indexFieldWasLastPresentIn: rt.string,
+  }),
+  rt.type({
+    name: rt.string,
+    type: rt.keyof({
+      degraded: null,
+      failed: null,
+    }),
+  }),
+]);
+
+export type QualityIssue = rt.TypeOf<typeof qualityIssueRT>;
+
+export type FailedDocsDetails = rt.TypeOf<typeof qualityIssueBaseRT>;
+
+export const failedDocsErrorRt = rt.type({
+  message: rt.string,
+  type: rt.string,
+});
+
+export const failedDocsErrorsRt = rt.type({
+  errors: rt.array(failedDocsErrorRt),
+});
+
+export type FailedDocsErrors = rt.TypeOf<typeof failedDocsErrorsRt>;
+
+export const degradedFieldRt = rt.intersection([
+  qualityIssueBaseRT,
+  rt.type({
+    name: rt.string,
+    indexFieldWasLastPresentIn: rt.string,
+  }),
+]);
 
 export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;
 

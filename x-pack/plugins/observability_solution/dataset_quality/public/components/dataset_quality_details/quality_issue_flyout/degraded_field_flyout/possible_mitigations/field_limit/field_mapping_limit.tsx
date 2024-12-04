@@ -15,6 +15,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { useDegradedFields } from '../../../../../../hooks';
 import {
   fieldLimitMitigationConsiderationText,
   fieldLimitMitigationConsiderationText1,
@@ -23,8 +24,7 @@ import {
   fieldLimitMitigationConsiderationText4,
   fieldLimitMitigationDescriptionText,
   increaseFieldMappingLimitTitle,
-} from '../../../../../../common/translations';
-import { useDegradedFields } from '../../../../../hooks';
+} from '../../../../../../../common/translations';
 import { IncreaseFieldMappingLimit } from './increase_field_mapping_limit';
 import { FieldLimitDocLink } from './field_limit_documentation_link';
 import { MessageCallout } from './message_callout';

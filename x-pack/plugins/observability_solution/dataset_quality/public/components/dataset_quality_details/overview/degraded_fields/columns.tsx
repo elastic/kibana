@@ -12,7 +12,8 @@ import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { formatNumber } from '@elastic/eui';
 
-import { DegradedField } from '../../../../../common/api_types';
+import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
+import { QualityIssue } from '../../../../../common/api_types';
 import { SparkPlot } from '../../../common/spark_plot';
 import { NUMBER_FORMAT } from '../../../../../common/constants';
 import {
@@ -42,17 +43,22 @@ export const getDegradedFieldsColumns = ({
 }: {
   dateFormatter: FieldFormat;
   isLoading: boolean;
-  expandedDegradedField?: string;
-  openDegradedFieldFlyout: (name: string) => void;
-}): Array<EuiBasicTableColumn<DegradedField>> => [
+  expandedDegradedField?: {
+    name: string;
+    type: QualityIssueType;
+  };
+  openDegradedFieldFlyout: (name: string, type: QualityIssueType) => void;
+}): Array<EuiBasicTableColumn<QualityIssue>> => [
   {
     name: '',
     field: 'name',
-    render: (_, { name }) => {
-      const isExpanded = name === expandedDegradedField;
+    render: (_, { name, type }) => {
+      const isExpanded =
+        name === expandedDegradedField?.name &&
+        (type as unknown as QualityIssueType) === expandedDegradedField?.type;
 
       const onExpandClick = () => {
-        openDegradedFieldFlyout(name);
+        openDegradedFieldFlyout(name, type as unknown as QualityIssueType);
       };
 
       return (
@@ -77,6 +83,9 @@ export const getDegradedFieldsColumns = ({
   {
     name: fieldColumnName,
     field: 'name',
+    render: (_, { name, type }) => {
+      return <>{type === 'degraded' ? `${name} ignored` : 'Documents indexing failed'}</>;
+    },
   },
   {
     name: countColumnName,

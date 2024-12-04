@@ -12,17 +12,19 @@ import {
   DataStreamDetails,
   DataStreamRolloverResponse,
   DataStreamSettings,
-  DegradedField,
   DegradedFieldAnalysis,
   DegradedFieldResponse,
   DegradedFieldValues,
+  FailedDocsDetails,
+  FailedDocsErrors,
   NonAggregatableDatasets,
+  QualityIssue,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { TableCriteria, TimeRangeConfig } from '../../../common/types';
 import { Integration } from '../../../common/data_streams_stats/integration';
 
-export type QualityIssue = 'degradedDocs' | 'failedDocs';
+export type QualityIssueType = QualityIssue['type'];
 
 export interface DataStream {
   name: string;
@@ -33,12 +35,12 @@ export interface DataStream {
 
 export interface DegradedFieldsTableConfig {
   table: TableCriteria<DegradedFieldSortField>;
-  data?: DegradedField[];
+  data?: QualityIssue[];
 }
 
 export interface DegradedFieldsWithData {
   table: TableCriteria<DegradedFieldSortField>;
-  data: DegradedField[];
+  data: QualityIssue[];
 }
 
 export interface FieldLimit {
@@ -52,14 +54,18 @@ export interface WithDefaultControllerState {
   degradedFields: DegradedFieldsTableConfig;
   timeRange: TimeRangeConfig;
   showCurrentQualityIssues: boolean;
-  qualityIssuesChart: QualityIssue;
+  qualityIssuesChart: QualityIssueType;
   breakdownField?: string;
   isBreakdownFieldEcs?: boolean;
   isIndexNotFoundError?: boolean;
   integration?: Integration;
-  expandedDegradedField?: string;
+  expandedQualityIssue?: {
+    name: string;
+    type: QualityIssueType;
+  };
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
+  failedDocsErrors?: WithFailedDocsErrors['failedDocsErrors'];
 }
 
 export interface WithDataStreamDetails {
@@ -91,6 +97,13 @@ export interface WithIntegration {
   integrationDashboards?: Dashboard[];
 }
 
+export interface WithFailedDocsErrors {
+  failedDocsErrors: {
+    table: TableCriteria<keyof FailedDocsErrors['errors'][0]>;
+    data?: FailedDocsErrors['errors'];
+  };
+}
+
 export interface WithDegradedFieldValues {
   degradedFieldValues: DegradedFieldValues;
 }
@@ -116,6 +129,7 @@ export type DefaultDatasetQualityDetailsContext = Pick<
   | 'isIndexNotFoundError'
   | 'showCurrentQualityIssues'
   | 'qualityIssuesChart'
+  | 'failedDocsErrors'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =
@@ -172,26 +186,26 @@ export type DatasetQualityDetailsControllerTypeState =
     }
   | {
       value:
-        | 'initializing.degradedFieldFlyout.open.initialized.ignoredValues.fetching'
-        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.analyzing';
+        | 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.ignoredValues.fetching'
+        | 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.analyzing';
       context: WithDefaultControllerState & WithDegradedFieldsData;
     }
   | {
-      value: 'initializing.degradedFieldFlyout.open.initialized.ignoredValues.done';
+      value: 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.ignoredValues.done';
       context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradedFieldValues;
     }
   | {
       value:
-        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.analyzed'
-        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.mitigating'
-        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.askingForRollover'
-        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.rollingOver'
-        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.success'
-        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.error';
+        | 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.analyzed'
+        | 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.mitigating'
+        | 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.askingForRollover'
+        | 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.rollingOver'
+        | 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.success'
+        | 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.error';
       context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradeFieldAnalysis;
     }
   | {
-      value: 'initializing.degradedFieldFlyout.open.initialized.mitigation.success';
+      value: 'initializing.degradedFieldFlyout.open.initialized.degradedFieldFlyout.mitigation.success';
       context: WithDefaultControllerState &
         WithDegradedFieldsData &
         WithDegradedFieldValues &
@@ -210,7 +224,10 @@ export type DatasetQualityDetailsControllerEvent =
     }
   | {
       type: 'OPEN_DEGRADED_FIELD_FLYOUT';
-      fieldName: string | undefined;
+      qualityIssue: {
+        name: string;
+        type: QualityIssueType;
+      };
     }
   | {
       type: 'CLOSE_DEGRADED_FIELD_FLYOUT';
@@ -220,7 +237,7 @@ export type DatasetQualityDetailsControllerEvent =
     }
   | {
       type: 'QUALITY_ISSUES_CHART_CHANGE';
-      qualityIssuesChart: QualityIssue;
+      qualityIssuesChart: QualityIssueType;
     }
   | {
       type: 'BREAKDOWN_FIELD_CHANGE';
@@ -241,6 +258,7 @@ export type DatasetQualityDetailsControllerEvent =
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<Error>
   | DoneInvokeEvent<boolean>
+  | DoneInvokeEvent<FailedDocsDetails>
   | DoneInvokeEvent<DegradedFieldResponse>
   | DoneInvokeEvent<DegradedFieldValues>
   | DoneInvokeEvent<DataStreamSettings>

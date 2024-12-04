@@ -19,7 +19,13 @@ export const urlSchemaRT = rt.exact(
       qualityIssuesChart: qualityIssuesRT,
       breakdownField: rt.string,
       degradedFields: degradedFieldRT,
-      expandedDegradedField: rt.string,
+      expandedQualityIssue: rt.type({
+        name: rt.string,
+        type: rt.keyof({
+          degraded: null,
+          failed: null,
+        }),
+      }),
       showCurrentQualityIssues: rt.boolean,
     }),
   ])

@@ -33,7 +33,7 @@ export function DegradedFields() {
   });
   const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
 
-  const { totalItemCount, toggleCurrentQualityIssues, showCurrentQualityIssues } =
+  const { totalItemCount, toggleCurrentQualityIssues, showCurrentQualityIssues, renderedItems } =
     useDegradedFields();
 
   const latestBackingIndexToggle = (
