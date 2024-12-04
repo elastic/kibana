@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { StreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition, StreamDefinition } from '@kbn/streams-plugin/common';
+import { css } from '@emotion/css';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiText } from '@elastic/eui';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
@@ -14,6 +15,7 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailEnriching } from '../stream_detail_enriching';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { useKibana } from '../../hooks/use_kibana';
 
 type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor';
 
@@ -25,7 +27,7 @@ export function StreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition?: StreamDefinition;
+  definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
   const {
@@ -90,7 +92,13 @@ export function StreamDetailManagement({
   const selectedTabObject = tabs[subtab];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      className={css`
+        max-width: 100%;
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
           legend="Management tabs"
@@ -107,7 +115,57 @@ export function StreamDetailManagement({
           }))}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow>{selectedTabObject.content}</EuiFlexItem>
+      <EuiFlexItem
+        className={css`
+          overflow: auto;
+        `}
+        grow
+      >
+        {selectedTabObject.content}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function UnmanagedStreamOverview({ definition }: { definition: StreamDefinition }) {
+  const {
+    core: {
+      http: { basePath },
+    },
+  } = useKibana();
+  const groupedAssets = (definition.unmanaged_elasticsearch_assets ?? []).reduce((acc, asset) => {
+    const title = assetToTitle(asset);
+    if (title) {
+      acc[title] = acc[title] ?? [];
+      acc[title].push(asset);
+    }
+    return acc;
+  }, {} as Record<string, Array<{ type: string; id: string }>>);
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiText>
+        <p>
+          {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
+            defaultMessage:
+              'This stream is not managed. Follow the links to stack management to change the related Elasticsearch objects.',
+          })}
+        </p>
+      </EuiText>
+      {Object.entries(groupedAssets).map(([title, assets]) => (
+        <div key={title}>
+          <EuiText>
+            <h3>{title}</h3>
+          </EuiText>
+          <EuiListGroup
+            listItems={assets.map((asset) => ({
+              label: asset.id,
+              href: basePath.prepend(assetToLink(asset)),
+              iconType: 'index',
+              target: '_blank',
+            }))}
+          />
+        </div>
+      ))}
     </EuiFlexGroup>
   );
 }
@@ -148,42 +206,4 @@ function assetToTitle(asset: { type: string; id: string }) {
     default:
       return '';
   }
-}
-
-function UnmanagedStreamOverview({ definition }: { definition: StreamDefinition }) {
-  const groupedAssets = (definition.unmanaged_elasticsearch_assets ?? []).reduce((acc, asset) => {
-    const title = assetToTitle(asset);
-    if (title) {
-      acc[title] = acc[title] ?? [];
-      acc[title].push(asset);
-    }
-    return acc;
-  }, {} as Record<string, Array<{ type: string; id: string }>>);
-  return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiText>
-        <p>
-          {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
-            defaultMessage:
-              'This stream is not managed. Follow the links to stack management to change the related Elasticsearch objects.',
-          })}
-        </p>
-      </EuiText>
-      {Object.entries(groupedAssets).map(([title, assets]) => (
-        <div key={title}>
-          <EuiText>
-            <h3>{title}</h3>
-          </EuiText>
-          <EuiListGroup
-            listItems={assets.map((asset) => ({
-              label: asset.id,
-              href: assetToLink(asset),
-              iconType: 'index',
-              target: '_blank',
-            }))}
-          />
-        </div>
-      ))}
-    </EuiFlexGroup>
-  );
 }

@@ -141,7 +141,6 @@ async function upsertInternalStream({ definition, scopedClusterClient }: BasePar
 type ListStreamsParams = BaseParams;
 
 export interface ListStreamResponse {
-  total: number;
   definitions: StreamDefinition[];
 }
 
@@ -155,18 +154,20 @@ export async function listStreams({
   });
 
   const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
-  const definitions = response.hits.hits.map((hit) => ({ ...hit._source!, managed: true }));
+  let definitions = response.hits.hits.map((hit) => ({ ...hit._source! }));
+  const hasAccess = await Promise.all(
+    definitions.map((definition) => checkReadAccess({ id: definition.id, scopedClusterClient }))
+  );
+  definitions = definitions.filter((_, index) => hasAccess[index]);
   const definitionMap = new Map(definitions.map((definition) => [definition.id, definition]));
   dataStreams.forEach((dataStream) => {
     if (!definitionMap.has(dataStream.id)) {
       definitionMap.set(dataStream.id, dataStream);
     }
   });
-  const total = response.hits.total!;
 
   return {
     definitions: Array.from(definitionMap.values()),
-    total: (typeof total === 'number' ? total : total.value) + dataStreams.length,
   };
 }
 
@@ -212,7 +213,10 @@ export async function readStream({
       }
     }
     return {
-      definition,
+      definition: {
+        ...definition,
+        managed: true,
+      },
     };
   } catch (e) {
     if (e.meta?.statusCode === 404) {
@@ -315,7 +319,9 @@ export async function readAncestors({
 
   return {
     ancestors: await Promise.all(
-      ancestorIds.map((ancestorId) => readStream({ scopedClusterClient, id: ancestorId }))
+      ancestorIds.map((ancestorId) =>
+        readStream({ scopedClusterClient, id: ancestorId, skipAccessCheck: true })
+      )
     ),
   };
 }
