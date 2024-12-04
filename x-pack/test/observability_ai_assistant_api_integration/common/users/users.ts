@@ -11,17 +11,9 @@ const password = kbnTestConfig.getUrlParts().password!;
 
 export const UNAUTHORIZED_USERNAME = 'unauthorized_user';
 export const UNAUTHORIZED_USER_PASSWORD = 'unauthorized_password';
-export const AI_ASSISTANT_USER_NAME = 'ai_assistant_user';
-export const AI_ASSISTANT_USER_PASSWORD = `${AI_ASSISTANT_USER_NAME}-password`;
 
 export interface User {
-  username:
-    | 'elastic'
-    | 'editor'
-    | 'viewer'
-    | 'secondary_editor'
-    | 'unauthorized_user'
-    | 'ai_assistant_user';
+  username: 'elastic' | 'editor' | 'viewer' | 'secondary_editor' | 'unauthorized_user';
   password: string;
   roles: string[];
 }
