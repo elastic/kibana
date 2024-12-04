@@ -386,6 +386,7 @@ export function useFetchAgentsData() {
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
+    noAgentCount: false,
   });
 
   const allAgentPolicies = useMemo(
