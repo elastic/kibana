@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -15,6 +15,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiFieldText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -379,6 +380,17 @@ function DiscoverDocumentsComponent({
     [isDataLoading]
   );
 
+  const [uiSearchTerm, setUISearchTerm] = useState('');
+
+  // TODO: needs debouncing
+  const onChangeUiSearchTerm = useCallback(
+    (event) => {
+      const nextUiSearchTerm = event.target.value.toLowerCase();
+      setUISearchTerm(nextUiSearchTerm);
+    },
+    [setUISearchTerm]
+  );
+
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
@@ -387,11 +399,45 @@ function DiscoverDocumentsComponent({
           <>
             {callouts}
             {loadingIndicator}
+            <EuiFieldText // TODO: move to a better place
+              placeholder="Search in the table"
+              value={uiSearchTerm}
+              onChange={onChangeUiSearchTerm}
+              aria-label="Use aria labels when no actual label is in use"
+              css={{
+                marginLeft: 8,
+              }}
+            />
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator]
+    [viewModeToggle, callouts, loadingIndicator, uiSearchTerm, onChangeUiSearchTerm]
   );
+
+  useEffect(() => {
+    if (!uiSearchTerm) {
+      CSS?.highlights?.clear();
+      return;
+    }
+
+    const gridElement = document.querySelector('[data-test-subj="euiDataGridBody"]');
+
+    if (!gridElement) {
+      return;
+    }
+
+    // TODO: optimize to reduce the number of recalculations
+    highlightUiSearchResults(gridElement, uiSearchTerm);
+
+    const observer = new MutationObserver(() => {
+      highlightUiSearchResults(gridElement, uiSearchTerm);
+    });
+    observer.observe(gridElement, { subtree: true, childList: true });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [uiSearchTerm]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -412,7 +458,15 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
-      <div className="unifiedDataTable">
+      <div
+        className="unifiedDataTable"
+        css={css`
+          ::highlight(search-results) {
+            background-color: #f06;
+            color: white;
+          }
+        `}
+      >
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGridMemoized
             ariaLabelledBy="documentsAriaLabel"
@@ -480,3 +534,51 @@ function DiscoverDocumentsComponent({
 }
 
 export const DiscoverDocuments = memo(DiscoverDocumentsComponent);
+
+// Based on https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API
+const highlightUiSearchResults = (gridElement: Element | undefined, nextUiSearchTerm: string) => {
+  if (!CSS.highlights || !nextUiSearchTerm) {
+    return;
+  }
+
+  if (!gridElement) {
+    return;
+  }
+
+  const treeWalker = document.createTreeWalker(gridElement, NodeFilter.SHOW_TEXT);
+  const allTextNodes = [];
+  let currentNode = treeWalker.nextNode();
+  while (currentNode) {
+    allTextNodes.push(currentNode);
+    currentNode = treeWalker.nextNode();
+  }
+
+  CSS.highlights.clear();
+
+  const ranges = allTextNodes
+    .filter((el) => Boolean(el?.textContent))
+    .map((el) => {
+      return { el, text: el.textContent.toLowerCase() };
+    })
+    .map(({ text, el }) => {
+      const indices = [];
+      let startPos = 0;
+      while (startPos < text.length) {
+        const index = text.indexOf(nextUiSearchTerm, startPos);
+        if (index === -1) break;
+        indices.push(index);
+        startPos = index + nextUiSearchTerm.length;
+      }
+
+      return indices.map((index) => {
+        const range = new Range();
+        range.setStart(el, index);
+        range.setEnd(el, index + nextUiSearchTerm.length);
+        return range;
+      });
+    });
+
+  const searchResultsHighlight = new Highlight(...ranges.flat());
+
+  CSS.highlights.set('search-results', searchResultsHighlight);
+};
