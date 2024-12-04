@@ -30,12 +30,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type FC, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import { ElandPythonClient } from '@kbn/inference_integration_flyout';
+import type { ModelDownloadItem } from '../../../common/types/trained_models';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
-import type { ModelItem } from './models_list';
 
 export interface AddModelFlyoutProps {
-  modelDownloads: ModelItem[];
+  modelDownloads: ModelDownloadItem[];
   onClose: () => void;
   onSubmit: (modelId: string) => void;
 }
@@ -138,7 +138,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
 };
 
 interface ClickToDownloadTabContentProps {
-  modelDownloads: ModelItem[];
+  modelDownloads: ModelDownloadItem[];
   onModelDownload: (modelId: string) => void;
 }
 
