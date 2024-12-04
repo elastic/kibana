@@ -52,7 +52,11 @@ function encodeValue(value: string | number | boolean) {
 function binaryToPainless(condition: BinaryFilterCondition) {
   switch (condition.operator) {
     case 'neq':
-      return `${safePainlessField(condition)} != ${encodeValue(condition.value)}`;
+      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
+        condition
+      )}.toString() != ${encodeValue(String(condition.value))}) || ${safePainlessField(
+        condition
+      )} != ${encodeValue(String(condition.value))})`;
     case 'lt':
       return `((${safePainlessField(
         condition
@@ -96,7 +100,11 @@ function binaryToPainless(condition: BinaryFilterCondition) {
         condition
       )}.contains(${encodeValue(String(condition.value))}))`;
     default:
-      return `${safePainlessField(condition)} == ${encodeValue(condition.value)}`;
+      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
+        condition
+      )}.toString() == ${encodeValue(String(condition.value))}) || ${safePainlessField(
+        condition
+      )} == ${encodeValue(String(condition.value))})`;
   }
 }
 

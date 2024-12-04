@@ -10,11 +10,13 @@ import { conditionToPainless, conditionToStatement } from './condition_to_painle
 const operatorConditionAndResults = [
   {
     condition: { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
-    result: '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy")',
+    result:
+      '(ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString() == "nginx_proxy") || ctx.log?.logger == "nginx_proxy"))',
   },
   {
     condition: { field: 'log.logger', operator: 'neq' as const, value: 'nginx_proxy' },
-    result: '(ctx.log?.logger !== null && ctx.log?.logger != "nginx_proxy")',
+    result:
+      '(ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString() != "nginx_proxy") || ctx.log?.logger != "nginx_proxy"))',
   },
   {
     condition: { field: 'http.response.status_code', operator: 'lt' as const, value: 500 },
@@ -102,7 +104,7 @@ describe('conditionToPainless', () => {
         };
         expect(
           expect(conditionToStatement(condition)).toEqual(
-            '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") && (ctx.log?.level !== null && ctx.log?.level == "error")'
+            '(ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString() == "nginx_proxy") || ctx.log?.logger == "nginx_proxy")) && (ctx.log?.level !== null && ((ctx.log?.level instanceof Number && ctx.log?.level.toString() == "error") || ctx.log?.level == "error"))'
           )
         );
       });
@@ -118,7 +120,7 @@ describe('conditionToPainless', () => {
         };
         expect(
           expect(conditionToStatement(condition)).toEqual(
-            '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") || (ctx.log?.level !== null && ctx.log?.level == "error")'
+            '(ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString() == "nginx_proxy") || ctx.log?.logger == "nginx_proxy")) || (ctx.log?.level !== null && ((ctx.log?.level instanceof Number && ctx.log?.level.toString() == "error") || ctx.log?.level == "error"))'
           )
         );
       });
@@ -139,7 +141,7 @@ describe('conditionToPainless', () => {
         };
         expect(
           expect(conditionToStatement(condition)).toEqual(
-            '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") && ((ctx.log?.level !== null && ctx.log?.level == "error") || (ctx.log?.level !== null && ctx.log?.level == "ERROR"))'
+            '(ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString() == "nginx_proxy") || ctx.log?.logger == "nginx_proxy")) && ((ctx.log?.level !== null && ((ctx.log?.level instanceof Number && ctx.log?.level.toString() == "error") || ctx.log?.level == "error")) || (ctx.log?.level !== null && ((ctx.log?.level instanceof Number && ctx.log?.level.toString() == "ERROR") || ctx.log?.level == "ERROR")))'
           )
         );
       });
@@ -162,7 +164,7 @@ describe('conditionToPainless', () => {
         };
         expect(
           expect(conditionToStatement(condition)).toEqual(
-            '((ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") || (ctx.service?.name !== null && ctx.service?.name == "nginx")) && ((ctx.log?.level !== null && ctx.log?.level == "error") || (ctx.log?.level !== null && ctx.log?.level == "ERROR"))'
+            '((ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString() == "nginx_proxy") || ctx.log?.logger == "nginx_proxy")) || (ctx.service?.name !== null && ((ctx.service?.name instanceof Number && ctx.service?.name.toString() == "nginx") || ctx.service?.name == "nginx"))) && ((ctx.log?.level !== null && ((ctx.log?.level instanceof Number && ctx.log?.level.toString() == "error") || ctx.log?.level == "error")) || (ctx.log?.level !== null && ((ctx.log?.level instanceof Number && ctx.log?.level.toString() == "ERROR") || ctx.log?.level == "ERROR")))'
           )
         );
       });
@@ -200,7 +202,7 @@ describe('conditionToPainless', () => {
   return false;
 }
 try {
-  if ((ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") && ((ctx.log?.level !== null && ctx.log?.level == "error") || (ctx.log?.level !== null && ctx.log?.level == "ERROR"))) {
+  if ((ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString() == "nginx_proxy") || ctx.log?.logger == "nginx_proxy")) && ((ctx.log?.level !== null && ((ctx.log?.level instanceof Number && ctx.log?.level.toString() == "error") || ctx.log?.level == "error")) || (ctx.log?.level !== null && ((ctx.log?.level instanceof Number && ctx.log?.level.toString() == "ERROR") || ctx.log?.level == "ERROR")))) {
     return true;
   }
   return false;
