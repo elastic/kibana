@@ -409,6 +409,14 @@ export function buildComponentTemplates(params: {
                 templateSettings.index?.mapping?.total_fields?.limit
               ),
             },
+            ...(templateSettings.index?.mapping?.source || sourceModeSynthetic
+              ? {
+                  source: {
+                    ...templateSettings.index?.mapping?.source,
+                    ...(sourceModeSynthetic ? { mode: 'synthetic' } : {}),
+                  },
+                }
+              : {}),
           },
         },
       },
@@ -418,15 +426,7 @@ export function buildComponentTemplates(params: {
           ? { runtime: mappingsRuntimeFields }
           : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
-        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source', 'runtime'),
-        ...(indexTemplateMappings?._source || sourceModeSynthetic
-          ? {
-              _source: {
-                ...indexTemplateMappings?._source,
-                ...(sourceModeSynthetic ? { mode: 'synthetic' } : {}),
-              },
-            }
-          : {}),
+        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
       },
       ...(lifecycle ? { lifecycle } : {}),
     },
