@@ -18,8 +18,8 @@ import { PerformanceMetricEvent } from '../../performance_metric_events';
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
 export const metaRt = rt.type({
-  rangeFrom: isoToEpochRt,
-  rangeTo: isoToEpochRt,
+  endDate: isoToEpochRt,
+  startDate: isoToEpochRt,
 });
 
 export type Meta = rt.TypeOf<typeof metaRt>;

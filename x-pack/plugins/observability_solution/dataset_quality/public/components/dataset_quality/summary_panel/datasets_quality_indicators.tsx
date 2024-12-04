@@ -65,8 +65,8 @@ export function DatasetsQualityIndicators() {
         value2: numberOfDocuments,
       },
       meta: {
-        rangeFrom: startDate,
-        rangeTo: endDate,
+        startDate,
+        endDate,
       },
     });
   }

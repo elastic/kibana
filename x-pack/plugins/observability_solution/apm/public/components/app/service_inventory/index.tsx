@@ -293,7 +293,7 @@ export function ServiceInventory() {
     ) {
       const { startDate, endDate } = getDateISORange({ from: start, to: end });
       onPageReady({
-        meta: { rangeFrom: startDate, rangeTo: endDate },
+        meta: { startDate, endDate },
       });
     }
   }, [mainStatisticsStatus, comparisonFetch.status, onPageReady, end, start]);

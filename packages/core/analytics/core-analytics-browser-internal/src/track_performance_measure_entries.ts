@@ -75,7 +75,7 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
             meta: {
               target,
               query_range_secs: meta
-                ? getTimestampRangeInSeconds(meta.rangeFrom, meta.rangeTo, isDevMode)
+                ? getTimestampRangeInSeconds(meta.startDate, meta.endDate, isDevMode)
                 : undefined,
             },
           });

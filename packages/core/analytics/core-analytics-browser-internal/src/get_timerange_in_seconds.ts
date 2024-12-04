@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function getTimestampRangeInSeconds(rangeFrom: number, rangeTo: number, isDevMode: boolean) {
-  if (rangeTo > rangeFrom) {
-    const rangeInSeconds = (rangeTo - rangeFrom) / 1000;
+export function getTimestampRangeInSeconds(startDate: number, endDate: number, isDevMode: boolean) {
+  if (endDate > startDate) {
+    const rangeInSeconds = (endDate - startDate) / 1000;
     return rangeInSeconds;
   } else {
     if (isDevMode) {
       // eslint-disable-next-line no-console
       console.error(
-        'Failed to calculate the range in seconds. rangeFrom is greater than the rangeTo'
+        'Failed to calculate the range in seconds. rangeFrom is older than the endDate'
       );
     }
     return undefined;
