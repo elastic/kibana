@@ -183,7 +183,7 @@ export function initializeFetch({
               inspector: {
                 adapter: inspectorAdapters.requests,
                 title: i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
-                  defaultMessage: 'Data',
+                  defaultMessage: 'Table',
                 }),
                 description: i18n.translate('discover.embeddable.inspectorRequestDescription', {
                   defaultMessage:
