@@ -5,100 +5,98 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
-import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import { SecurityPageName } from '../../../app/types';
+import type { RouteComponentProps } from 'react-router-dom';
+import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import { SecurityPageName } from '../../../app/types';
 
 import * as i18n from './translations';
 import { RulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
-import { useGetRuleMigrationsStatsAllQuery } from '../api/hooks/use_get_rule_migrations_stats_all';
-import { useRulePreviewFlyout } from '../hooks/use_rule_preview_flyout';
-import { NoMigrations } from '../components/no_migrations';
+import { UnknownMigration } from '../components/unknown_migration';
+import { useLatestStats } from '../hooks/use_latest_stats';
 
-const RulesPageComponent: React.FC = () => {
-  const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } =
-    useGetRuleMigrationsStatsAllQuery();
+type RulesMigrationPageProps = RouteComponentProps<{ migrationId?: string }>;
 
-  const migrationsIds = useMemo(() => {
-    if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
-      return [];
-    }
-    return ruleMigrationsStatsAll
-      .filter((migration) => migration.status === 'finished')
-      .map((migration) => migration.migration_id);
-  }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
-
-  const [selectedMigrationId, setSelectedMigrationId] = useState<string | undefined>();
-  const onMigrationIdChange = (selectedId?: string) => {
-    setSelectedMigrationId(selectedId);
-  };
-
-  useEffect(() => {
-    if (!migrationsIds.length) {
-      return;
-    }
-    const index = migrationsIds.findIndex((id) => id === selectedMigrationId);
-    if (index === -1) {
-      setSelectedMigrationId(migrationsIds[0]);
-    }
-  }, [migrationsIds, selectedMigrationId]);
-
-  const ruleActionsFactory = useCallback(
-    (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
-      // TODO: Add flyout action buttons
-      return null;
+export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
+  ({
+    match: {
+      params: { migrationId },
     },
-    []
-  );
+  }) => {
+    const { navigateTo } = useNavigation();
 
-  const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
-    ruleActionsFactory,
-  });
+    const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
 
-  return (
-    <>
-      <NeedAdminForUpdateRulesCallOut />
-      <MissingPrivilegesCallOut />
+    const migrationsIds = useMemo(() => {
+      if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
+        return [];
+      }
+      return ruleMigrationsStatsAll
+        .filter((migration) => migration.status === 'finished')
+        .map((migration) => migration.id);
+    }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
-      <SecuritySolutionPageWrapper>
-        <HeaderPage title={i18n.PAGE_TITLE}>
-          <HeaderButtons
-            migrationsIds={migrationsIds}
-            selectedMigrationId={selectedMigrationId}
-            onMigrationIdChange={onMigrationIdChange}
+    useEffect(() => {
+      if (isLoadingMigrationsStats) {
+        return;
+      }
+
+      // Navigate to landing page if there are no migrations
+      if (!migrationsIds.length) {
+        navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
+        return;
+      }
+
+      // Navigate to the most recent migration if none is selected
+      if (!migrationId) {
+        navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: migrationsIds[0] });
+      }
+    }, [isLoadingMigrationsStats, migrationId, migrationsIds, navigateTo]);
+
+    const onMigrationIdChange = (selectedId?: string) => {
+      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
+    };
+
+    const content = useMemo(() => {
+      if (!migrationId || !migrationsIds.includes(migrationId)) {
+        return <UnknownMigration />;
+      }
+      return <RulesTable migrationId={migrationId} />;
+    }, [migrationId, migrationsIds]);
+
+    return (
+      <>
+        <NeedAdminForUpdateRulesCallOut />
+        <MissingPrivilegesCallOut />
+
+        <SecuritySolutionPageWrapper>
+          <HeaderPage title={i18n.PAGE_TITLE}>
+            <HeaderButtons
+              migrationsIds={migrationsIds}
+              selectedMigrationId={migrationId}
+              onMigrationIdChange={onMigrationIdChange}
+            />
+          </HeaderPage>
+          <EuiSkeletonLoading
+            isLoading={isLoadingMigrationsStats}
+            loadingContent={
+              <>
+                <EuiSkeletonTitle />
+                <EuiSkeletonText />
+              </>
+            }
+            loadedContent={content}
           />
-        </HeaderPage>
-        <EuiSkeletonLoading
-          isLoading={isLoadingMigrationsStats}
-          loadingContent={
-            <>
-              <EuiSkeletonTitle />
-              <EuiSkeletonText />
-            </>
-          }
-          loadedContent={
-            selectedMigrationId ? (
-              <RulesTable migrationId={selectedMigrationId} openRulePreview={openRulePreview} />
-            ) : (
-              <NoMigrations />
-            )
-          }
-        />
-        {rulePreviewFlyout}
-      </SecuritySolutionPageWrapper>
-
-      <SpyRoute pageName={SecurityPageName.siemMigrationsRules} />
-    </>
-  );
-};
-
-export const RulesPage = React.memo(RulesPageComponent);
+        </SecuritySolutionPageWrapper>
+      </>
+    );
+  }
+);
 RulesPage.displayName = 'RulesPage';

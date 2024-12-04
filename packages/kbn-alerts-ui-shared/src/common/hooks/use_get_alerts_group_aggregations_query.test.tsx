@@ -9,13 +9,11 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks/dom';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { ToastsStart } from '@kbn/core-notifications-browser';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { useGetAlertsGroupAggregationsQuery } from './use_get_alerts_group_aggregations_query';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
 
 const queryClient = new QueryClient({
@@ -41,7 +39,8 @@ const mockToasts = {
 const toasts = mockToasts as unknown as ToastsStart;
 
 const params = {
-  featureIds: [AlertConsumers.STACK_ALERTS],
+  ruleTypeIds: ['.es-query'],
+  consumers: ['stackAlerts'],
   groupByField: 'kibana.alert.rule.name',
 };
 

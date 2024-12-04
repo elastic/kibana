@@ -28,7 +28,7 @@ import { withLazyHook } from '../../../../../common/components/with_lazy_hook';
 import {
   useStoredIntegrationSearchTerm,
   useStoredIntegrationTabId,
-} from '../../../../hooks/use_stored_state';
+} from '../../../hooks/use_stored_state';
 import { useOnboardingContext } from '../../../onboarding_context';
 import {
   DEFAULT_TAB,
@@ -43,7 +43,7 @@ import { INTEGRATION_TABS, INTEGRATION_TABS_BY_ID } from './integration_tabs_con
 import { useIntegrationCardList } from './use_integration_card_list';
 import { IntegrationTabId } from './types';
 import { IntegrationCardTopCallout } from './callouts/integration_card_top_callout';
-import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 export interface IntegrationsCardGridTabsProps {
   installedIntegrationsCount: number;
