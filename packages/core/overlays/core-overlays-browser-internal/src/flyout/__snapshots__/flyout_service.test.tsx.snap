@@ -170,26 +170,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
-          "getUserProfile$": [MockFunction] {
-            "calls": Array [
-              Array [],
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": Observable {
-                  "_subscribe": [Function],
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Observable {
-                  "_subscribe": [Function],
-                },
-              },
-            ],
-          },
+          "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -309,26 +290,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
-          "getUserProfile$": [MockFunction] {
-            "calls": Array [
-              Array [],
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": Observable {
-                  "_subscribe": [Function],
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Observable {
-                  "_subscribe": [Function],
-                },
-              },
-            ],
-          },
+          "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],

@@ -23,16 +23,6 @@ Array [
           "theme$": Rx.Observable,
         }
       }
-      userProfile={
-        Object {
-          "bulkGet": [MockFunction],
-          "getCurrent": [MockFunction],
-          "getUserProfile$": [MockFunction],
-          "partialUpdate": [MockFunction],
-          "suggest": [MockFunction],
-          "update": [MockFunction],
-        }
-      }
     >
       <FatalErrorsScreen
         errorInfo$={Rx.Observable}
