@@ -276,6 +276,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   form={aboutStepForm}
                   esqlQuery={esqlQueryForAboutStep}
                   key="aboutStep"
+                  ruleSource={rule.rule_source}
                 />
               )}
               <EuiSpacer />
@@ -341,6 +342,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [
       isPrebuiltRulesCustomizationEnabled,
       rule?.immutable,
+      rule.rule_source,
       rule?.id,
       activeStep,
       loading,
