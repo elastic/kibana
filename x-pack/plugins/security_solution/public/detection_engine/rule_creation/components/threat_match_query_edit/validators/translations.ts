@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const THREAT_MATCH_QUERY_REQUIRED_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchQueryBar.requiredError',
   {
-    defaultMessage: 'A custom query is required.',
+    defaultMessage: 'An indicator index query is required.',
   }
 );
