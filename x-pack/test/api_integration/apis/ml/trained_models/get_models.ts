@@ -16,12 +16,10 @@ export default ({ getService }: FtrProviderContext) => {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('GET trained_models', () => {
-    let testModelIds: string[] = [];
-
     before(async () => {
       await ml.api.initSavedObjects();
       await ml.testResources.setKibanaTimeZoneToUTC();
-      testModelIds = await ml.api.createTestTrainedModels('regression', 5, true);
+      await ml.api.createTestTrainedModels('regression', 5, true);
     });
 
     after(async () => {
