@@ -210,7 +210,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     );
 
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
-
+    console.log('==> streamApi', signal);
     const response = await this.request(
       {
         url: this.url,
@@ -321,6 +321,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       };
 
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
+      console.log('==> invokeAsyncIterator', signal);
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,
         timeout, // do not default if not provided
@@ -330,6 +331,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       return { consumerStream: teed[0], tokenCountStream: teed[1] };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
+      console.log('==> invokeAsyncIterator e', e);
       const errorMessage = this.getResponseErrorMessage(e);
       throw new Error(errorMessage);
     }

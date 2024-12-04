@@ -65,6 +65,7 @@ export const streamGraph = async ({
 
   let didEnd = false;
   const handleStreamEnd = (finalResponse: string, isError = false) => {
+    console.log('===> handleStreamEnd', { finalResponse, isError });
     if (onLlmResponse) {
       onLlmResponse(
         finalResponse,
@@ -160,10 +161,7 @@ export const streamGraph = async ({
               finalMessage += msg.content;
             }
           } else if (event.event === 'on_llm_end' && !didEnd) {
-            const generations = event.data.output?.generations[0];
-            if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
-              handleStreamEnd(generations[0]?.text ?? finalMessage);
-            }
+            handleStreamEnd(event.data.output?.generations[0]?.text ?? finalMessage);
           }
         }
       }

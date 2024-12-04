@@ -40,6 +40,8 @@ export class ActionsClientChatBedrockConverse extends ChatBedrockConverse {
       model: fields?.model ?? DEFAULT_BEDROCK_MODEL,
       region: DEFAULT_BEDROCK_REGION,
     });
+    this.signal = fields.signal;
+    console.log('==> ActionsClientChatBedrockConverse fields', fields);
     this.client = new BedrockRuntimeClient({
       actionsClient,
       connectorId,
