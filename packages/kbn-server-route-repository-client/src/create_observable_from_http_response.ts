@@ -37,10 +37,10 @@ export function createObservableFromHttpResponse(
   }
 
   return new Observable<string>((subscriber) => {
-    const parser = createParser((event) => {
-      if (event.type === 'event') {
+    const parser = createParser({
+      onEvent: (event) => {
         subscriber.next(event.data);
-      }
+      },
     });
 
     const readStream = async () => {

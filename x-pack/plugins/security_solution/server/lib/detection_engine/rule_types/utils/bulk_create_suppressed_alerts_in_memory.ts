@@ -7,14 +7,18 @@
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
+
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   WrapSuppressedHits,
   SignalSourceHit,
+  SignalSource,
 } from '../types';
 import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
-import { addToSearchAfterReturn } from './utils';
+import type { SharedParams } from './utils';
+import { addToSearchAfterReturn, buildShellAlertSuppressionTermsAndFields } from './utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
@@ -25,8 +29,12 @@ import type { ExperimentalFeatures } from '../../../../../common';
 
 import type {
   BaseFieldsLatest,
+  EqlBuildingBlockFieldsLatest,
+  EqlShellFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
+import { robustGet } from './source_fields_merging/utils/robust_field_access';
+import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
@@ -54,9 +62,31 @@ export interface BulkCreateSuppressedAlertsParams
   mergeSourceAndFields?: boolean;
   maxNumberOfAlertsMultiplier?: number;
 }
+
+export interface BulkCreateSuppressedSequencesParams
+  extends Pick<
+    SearchAfterAndBulkCreateSuppressedAlertsParams,
+    | 'bulkCreate'
+    | 'services'
+    | 'buildReasonMessage'
+    | 'ruleExecutionLogger'
+    | 'tuple'
+    | 'alertSuppression'
+    | 'alertWithSuppression'
+    | 'alertTimestampOverride'
+  > {
+  sequences: Array<EqlHitsSequence<SignalSource>>;
+  buildingBlockAlerts?: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+  toReturn: SearchAfterAndBulkCreateReturnType;
+  experimentalFeatures: ExperimentalFeatures;
+  maxNumberOfAlertsMultiplier?: number;
+  sharedParams: SharedParams;
+  alertSuppression: AlertSuppressionCamel;
+}
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
- * If parameter alertSuppression.missingFieldsStrategy configured not to be suppressed, regular alerts will be created for such events without suppression
+ * If parameter alertSuppression.missingFieldsStrategy configured not to be suppressed,
+ * regular alerts will be created for such events without suppression
  */
 export const bulkCreateSuppressedAlertsInMemory = async ({
   enrichedEvents,
@@ -98,6 +128,90 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
 
   return executeBulkCreateAlerts({
     suppressibleWrappedDocs,
+    unsuppressibleWrappedDocs,
+    toReturn,
+    bulkCreate,
+    services,
+    ruleExecutionLogger,
+    tuple,
+    alertSuppression,
+    alertWithSuppression,
+    alertTimestampOverride,
+    experimentalFeatures,
+    maxNumberOfAlertsMultiplier,
+  });
+};
+
+/**
+ * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
+ * If parameter alertSuppression.missingFieldsStrategy configured not to be suppressed,
+ * regular alerts will be created for such events without suppression
+ */
+export const bulkCreateSuppressedSequencesInMemory = async ({
+  sequences,
+  toReturn,
+  bulkCreate,
+  services,
+  ruleExecutionLogger,
+  tuple,
+  alertSuppression,
+  buildReasonMessage,
+  sharedParams,
+  alertWithSuppression,
+  alertTimestampOverride,
+  experimentalFeatures,
+  maxNumberOfAlertsMultiplier,
+}: BulkCreateSuppressedSequencesParams) => {
+  const suppressOnMissingFields =
+    (alertSuppression.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
+    AlertSuppressionMissingFieldsStrategyEnum.suppress;
+
+  const suppressibleWrappedSequences: Array<
+    WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
+      subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+    }
+  > = [];
+  const unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
+
+  sequences.forEach((sequence) => {
+    const alertGroupFromSequence = buildAlertGroupFromSequence({
+      sequence,
+      applyOverrides: true,
+      buildReasonMessage,
+      ...sharedParams,
+    });
+    const shellAlert = alertGroupFromSequence.shellAlert;
+    const buildingBlocks = alertGroupFromSequence.buildingBlocks;
+    if (shellAlert) {
+      if (!suppressOnMissingFields) {
+        // does the shell alert have all the suppression fields?
+        const hasEverySuppressionField = alertSuppression.groupBy.every(
+          (suppressionPath) =>
+            robustGet({ key: suppressionPath, document: shellAlert._source }) != null
+        );
+        if (!hasEverySuppressionField) {
+          unsuppressibleWrappedDocs.push(shellAlert, ...buildingBlocks);
+        } else {
+          const wrappedWithSuppressionTerms = buildShellAlertSuppressionTermsAndFields({
+            shellAlert,
+            buildingBlockAlerts: buildingBlocks,
+            ...sharedParams,
+          });
+          suppressibleWrappedSequences.push(wrappedWithSuppressionTerms);
+        }
+      } else {
+        const wrappedWithSuppressionTerms = buildShellAlertSuppressionTermsAndFields({
+          shellAlert,
+          buildingBlockAlerts: buildingBlocks,
+          ...sharedParams,
+        });
+        suppressibleWrappedSequences.push(wrappedWithSuppressionTerms);
+      }
+    }
+  });
+
+  return executeBulkCreateAlerts({
+    suppressibleWrappedDocs: suppressibleWrappedSequences,
     unsuppressibleWrappedDocs,
     toReturn,
     bulkCreate,
