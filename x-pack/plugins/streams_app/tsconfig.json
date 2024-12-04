@@ -33,5 +33,8 @@
     "@kbn/streams-plugin",
     "@kbn/share-plugin",
     "@kbn/observability-utils-server",
+    "@kbn/code-editor",
+    "@kbn/ui-theme",
+    "@kbn/navigation-plugin",
   ]
 }

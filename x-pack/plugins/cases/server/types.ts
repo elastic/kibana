@@ -29,7 +29,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import type { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
@@ -37,7 +37,7 @@ import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_frame
 import type { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 
 export interface CasesServerSetupDependencies {
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
