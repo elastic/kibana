@@ -97,3 +97,17 @@ export const ADD_RULE_SETUP_HELP_TEXT = i18n.translate(
     defaultMessage: 'Add rule setup guide...',
   }
 );
+
+export const AUTHOR_IMMUTABLE_FIELD_TOOLTIP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.authorImmutableFieldTooltipText',
+  {
+    defaultMessage: 'Author is not editable for Elastic rules',
+  }
+);
+
+export const LICENSE_IMMUTABLE_FIELD_TOOLTIP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.licenseImmutableFieldTooltipText',
+  {
+    defaultMessage: 'License is not editable for Elastic rules',
+  }
+);
