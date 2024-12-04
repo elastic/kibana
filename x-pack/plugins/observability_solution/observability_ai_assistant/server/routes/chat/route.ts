@@ -126,8 +126,10 @@ async function initializeChatRequest({
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   params: t.type({
     body: t.intersection([
@@ -174,8 +176,10 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
 
 const chatRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat/recall',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   params: t.type({
     body: t.type({
@@ -282,8 +286,10 @@ async function chatComplete(
 
 const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   params: chatCompleteInternalRt,
   handler: async (resources): Promise<Readable> => {
@@ -293,8 +299,10 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
 
 const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   params: chatCompletePublicRt,
   handler: async (resources): Promise<Readable> => {

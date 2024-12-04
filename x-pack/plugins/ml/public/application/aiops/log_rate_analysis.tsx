@@ -60,6 +60,7 @@ export const LogRateAnalysisPage: FC = () => {
               'unifiedSearch',
               'observabilityAIAssistant',
               'embeddable',
+              'cases',
             ]),
           }}
         />

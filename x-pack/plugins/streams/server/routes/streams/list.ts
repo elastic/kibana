@@ -52,32 +52,27 @@ export interface StreamTree {
   children: StreamTree[];
 }
 
-function asTrees(definitions: StreamDefinition[]): StreamTree[] {
-  const nodes = new Map<string, StreamTree>();
+function asTrees(definitions: Array<{ id: string; managed?: boolean }>) {
+  const trees: StreamTree[] = [];
+  const ids = definitions
+    .filter((definition) => definition.managed)
+    .map((definition) => definition.id);
 
-  const rootNodes = new Set<StreamTree>();
+  ids.sort((a, b) => a.split('.').length - b.split('.').length);
 
-  function getNode(id: string) {
-    let node = nodes.get(id);
-    if (!node) {
-      node = { id, children: [] };
-      nodes.set(id, node);
+  ids.forEach((id) => {
+    let currentTree = trees;
+    let existingNode: StreamTree | undefined;
+    // traverse the tree following the prefix of the current id.
+    // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
+    while ((existingNode = currentTree.find((node) => id.startsWith(node.id)))) {
+      currentTree = existingNode.children;
     }
-    return node;
-  }
-
-  definitions.forEach((definition) => {
-    const path = definition.id.split('.');
-    const parentId = path.slice(0, path.length - 1).join('.');
-    const parentNode = parentId.length ? getNode(parentId) : undefined;
-    const selfNode = getNode(definition.id);
-
-    if (parentNode) {
-      parentNode.children.push(selfNode);
-    } else {
-      rootNodes.add(selfNode);
+    if (!existingNode) {
+      const newNode = { id, children: [] };
+      currentTree.push(newNode);
     }
   });
 
-  return Array.from(rootNodes.values());
+  return trees;
 }
