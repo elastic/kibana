@@ -151,3 +151,5 @@ oas_docs/output/kibana.serverless.new.yaml
 oas_docs/output/kibana.tmp1.yaml
 oas_docs/output/kibana.tmp2.yaml
 oas_docs/output/kibana.new.yaml
+
+.devcontainer/.env
