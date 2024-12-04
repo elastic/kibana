@@ -10,7 +10,7 @@ import { Action, createAction, IncompatibleActionError } from '@kbn/ui-actions-p
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
-import { LensApi } from '../embeddable';
+import { LensApi } from '../react_embeddable/types';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
@@ -41,7 +41,7 @@ export const createOpenInDiscoverAction = (
     },
     isCompatible: async (context: EmbeddableApiContext) => {
       const { isCompatible } = await getDiscoverHelpersAsync();
-      return isCompatible({
+      return await isCompatible({
         hasDiscoverAccess,
         locator,
         dataViews,

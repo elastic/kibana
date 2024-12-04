@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { ALERT_STATUS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { waitFor, renderHook } from '@testing-library/react';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { useAlertsCount } from './use_alerts_count';
 import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -53,7 +53,8 @@ const mockUseKibana = () => {
 };
 
 describe('useAlertsCount', () => {
-  const featureIds: ValidFeatureId[] = ['infrastructure'];
+  const ruleTypeIds = ['metrics.alert.inventory.threshold'];
+  const consumers = ['foo'];
 
   beforeAll(() => {
     mockUseKibana();
@@ -66,12 +67,12 @@ describe('useAlertsCount', () => {
   it('should return the mocked data from API', async () => {
     mockedPostAPI.mockResolvedValue(mockedAlertsCountResponse);
 
-    const { result, waitForNextUpdate } = renderHook(() => useAlertsCount({ featureIds }));
+    const { result } = renderHook(() => useAlertsCount({ ruleTypeIds }));
 
     expect(result.current.loading).toBe(true);
     expect(result.current.alertsCount).toEqual(undefined);
 
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const { alertsCount, loading, error } = result.current;
     expect(alertsCount).toEqual(expectedResult);
@@ -88,14 +89,13 @@ describe('useAlertsCount', () => {
     };
     mockedPostAPI.mockResolvedValue(mockedAlertsCountResponse);
 
-    const { waitForNextUpdate } = renderHook(() =>
+    renderHook(() =>
       useAlertsCount({
-        featureIds,
+        ruleTypeIds,
+        consumers,
         query,
       })
     );
-
-    await waitForNextUpdate();
 
     const body = JSON.stringify({
       aggs: {
@@ -103,14 +103,17 @@ describe('useAlertsCount', () => {
           terms: { field: ALERT_STATUS },
         },
       },
-      feature_ids: featureIds,
+      rule_type_ids: ruleTypeIds,
+      consumers,
       query,
       size: 0,
     });
 
-    expect(mockedPostAPI).toHaveBeenCalledWith(
-      '/internal/rac/alerts/find',
-      expect.objectContaining({ body })
+    await waitFor(() =>
+      expect(mockedPostAPI).toHaveBeenCalledWith(
+        '/internal/rac/alerts/find',
+        expect.objectContaining({ body })
+      )
     );
   });
 
@@ -118,10 +121,8 @@ describe('useAlertsCount', () => {
     const error = new Error('Fetch Alerts Count Failed');
     mockedPostAPI.mockRejectedValueOnce(error);
 
-    const { result, waitForNextUpdate } = renderHook(() => useAlertsCount({ featureIds }));
+    const { result } = renderHook(() => useAlertsCount({ ruleTypeIds }));
 
-    await waitForNextUpdate();
-
-    expect(result.current.error?.message).toMatch(error.message);
+    await waitFor(() => expect(result.current.error?.message).toMatch(error.message));
   });
 });

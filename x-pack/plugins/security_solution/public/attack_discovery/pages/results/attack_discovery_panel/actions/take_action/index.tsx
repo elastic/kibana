@@ -33,8 +33,8 @@ const TakeActionComponent: React.FC<Props> = ({ attackDiscovery, replacements })
   const { cases } = useKibana().services;
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canUserCreateAndReadCases = useCallback(
-    () => userCasesPermissions.create && userCasesPermissions.read,
-    [userCasesPermissions.create, userCasesPermissions.read]
+    () => userCasesPermissions.createComment && userCasesPermissions.read,
+    [userCasesPermissions.createComment, userCasesPermissions.read]
   );
   const { disabled: addToCaseDisabled, onAddToNewCase } = useAddToNewCase({
     canUserCreateAndReadCases,

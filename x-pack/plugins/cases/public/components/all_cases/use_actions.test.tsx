@@ -6,8 +6,7 @@
  */
 
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { waitFor, renderHook } from '@testing-library/react';
 import {
   waitForEuiPopoverOpen,
   waitForEuiContextMenuPanelTransition,
@@ -17,6 +16,7 @@ import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';
 import * as api from '../../containers/api';
 import type { AppMockRenderer } from '../../common/mock';
+import { CaseStatuses } from '../../../common/types/domain';
 import {
   createAppMockRenderer,
   noDeleteCasesPermissions,
@@ -381,6 +381,99 @@ describe('useActions', () => {
       await waitFor(() => {
         expect(res.getByTestId(`case-action-popover-button-${basicCase.id}`)).toBeDisabled();
       });
+    });
+
+    it('shows actions when user only has reopenCase permission and only when case is closed', async () => {
+      appMockRender = createAppMockRenderer({
+        permissions: {
+          all: false,
+          read: true,
+          create: false,
+          update: false,
+          delete: false,
+          reopenCase: true,
+          push: false,
+          connectors: true,
+          settings: false,
+          createComment: false,
+        },
+      });
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      expect(result.current.actions).not.toBe(null);
+      const caseWithClosedStatus = { ...basicCase, status: CaseStatuses.closed };
+      const comp = result.current.actions!.render(caseWithClosedStatus) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
+
+      expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+      expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
+      expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
+      expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
+    });
+
+    it('shows actions with combination of reopenCase and other permissions', async () => {
+      appMockRender = createAppMockRenderer({
+        permissions: {
+          all: false,
+          read: true,
+          create: false,
+          update: false,
+          delete: true,
+          reopenCase: true,
+          push: false,
+          connectors: true,
+          settings: false,
+          createComment: false,
+        },
+      });
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      expect(result.current.actions).not.toBe(null);
+      const caseWithClosedStatus = { ...basicCase, status: CaseStatuses.closed };
+
+      const comp = result.current.actions!.render(caseWithClosedStatus) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
+
+      expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+      expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
+      expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
+    });
+
+    it('shows no actions with everything false but read', async () => {
+      appMockRender = createAppMockRenderer({
+        permissions: {
+          all: false,
+          read: true,
+          create: false,
+          update: false,
+          delete: false,
+          reopenCase: false,
+          push: false,
+          connectors: true,
+          settings: false,
+          createComment: false,
+        },
+      });
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      expect(result.current.actions).toBe(null);
     });
   });
 });

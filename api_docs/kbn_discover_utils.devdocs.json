@@ -285,7 +285,7 @@
         "tags": [],
         "label": "buildDataTableRecord",
         "description": [
-          "\nBuild a record for data table, explorer + classic one"
+          "\nBuild a record for data grid"
         ],
         "signature": [
           "(doc: ",
@@ -2071,76 +2071,6 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.isLegacyTableEnabled",
-        "type": "Function",
-        "tags": [],
-        "label": "isLegacyTableEnabled",
-        "description": [],
-        "signature": [
-          "({\n  uiSettings,\n  isEsqlMode,\n}: { uiSettings: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
-          "; isEsqlMode: boolean; }) => boolean"
-        ],
-        "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.isLegacyTableEnabled.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  uiSettings,\n  isEsqlMode,\n}",
-            "description": [],
-            "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.isLegacyTableEnabled.$1.uiSettings",
-                "type": "Object",
-                "tags": [],
-                "label": "uiSettings",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-public.IUiSettingsClient",
-                    "text": "IUiSettingsClient"
-                  }
-                ],
-                "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.isLegacyTableEnabled.$1.isEsqlMode",
-                "type": "boolean",
-                "tags": [],
-                "label": "isEsqlMode",
-                "description": [],
-                "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.isNestedFieldParent",
         "type": "Function",
         "tags": [],
@@ -3821,7 +3751,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
             ],
             "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
@@ -4705,21 +4635,6 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.DOC_TABLE_LEGACY",
-        "type": "string",
-        "tags": [],
-        "label": "DOC_TABLE_LEGACY",
-        "description": [],
-        "signature": [
-          "\"doc_table:legacy\""
-        ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.ERROR_EXCEPTION_STACKTRACE",
         "type": "string",
         "tags": [],
@@ -5339,36 +5254,6 @@
           "\"trace.id\""
         ],
         "path": "packages/kbn-discover-utils/src/field_constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TRUNCATE_MAX_HEIGHT",
-        "type": "string",
-        "tags": [],
-        "label": "TRUNCATE_MAX_HEIGHT",
-        "description": [],
-        "signature": [
-          "\"truncate:maxHeight\""
-        ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE",
-        "type": "number",
-        "tags": [],
-        "label": "TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE",
-        "description": [],
-        "signature": [
-          "115"
-        ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

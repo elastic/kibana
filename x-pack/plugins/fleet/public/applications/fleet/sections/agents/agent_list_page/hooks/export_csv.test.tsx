@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { act } from '@testing-library/react-hooks';
+import { act, type RenderHookResult } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
