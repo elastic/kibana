@@ -445,26 +445,30 @@ export const PresentationPanelHoverActions = ({
     />
   );
 
-  const dragHandle = (
-    <div
-      ref={(ref) => {
-        dragHandleRef.current = ref;
-        setDragHandle(ref);
-      }}
-    >
-      <EuiIcon
-        type="move"
-        color="text"
-        className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-        aria-label={i18n.translate('presentationPanel.dragHandle', {
-          defaultMessage: 'Move panel',
-        })}
-        data-test-subj="embeddablePanelDragHandle"
-        css={css`
-          margin: ${euiThemeVars.euiSizeXS};
-        `}
-      />
-    </div>
+  const dragHandle = useMemo(
+    /** Memoize the drag handle to avoid calling `setDragHandle` unnecessarily */
+    () => (
+      <div
+        ref={(ref) => {
+          dragHandleRef.current = ref;
+          setDragHandle(ref);
+        }}
+      >
+        <EuiIcon
+          type="move"
+          color="text"
+          className={`embPanel--dragHandle`}
+          aria-label={i18n.translate('presentationPanel.dragHandle', {
+            defaultMessage: 'Move panel',
+          })}
+          data-test-subj="embeddablePanelDragHandle"
+          css={css`
+            margin: ${euiThemeVars.euiSizeXS};
+          `}
+        />
+      </div>
+    ),
+    [setDragHandle]
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
@@ -545,7 +549,6 @@ export const PresentationPanelHoverActions = ({
         >
           {viewMode === 'edit' && !combineHoverActions ? (
             <div
-              // ref={dragHandleRef}
               data-test-subj="embPanel__hoverActions__left"
               className={classNames(
                 'embPanel__hoverActions',

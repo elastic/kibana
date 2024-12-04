@@ -88,7 +88,7 @@ export const GridPanel = forwardRef<
         e.stopPropagation();
         interactionStart(panelId, 'drag', e);
       },
-      [interactionStart, panelId]
+      [interactionStart, panelId, gridLayoutStateManager.accessMode$]
     );
 
     const setDragHandles = useCallback(

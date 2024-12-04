@@ -15,7 +15,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelError } from './presentation_panel_error';
@@ -95,6 +95,22 @@ export const PresentationPanelInternal = <
     return attrs;
   }, [dataLoading, blockingError]);
 
+  const setHoverActionDragHandle = useCallback(
+    (ref: HTMLDivElement | null) => {
+      hoverDragHandleRef.current = ref;
+      setDragHandles?.([hoverDragHandleRef.current, headerDragHandleRef.current]);
+    },
+    [setDragHandles]
+  );
+
+  const setPanelTitleDragHandle = useCallback(
+    (ref: HTMLDivElement | null) => {
+      headerDragHandleRef.current = ref;
+      setDragHandles?.([hoverDragHandleRef.current, headerDragHandleRef.current]);
+    },
+    [setDragHandles]
+  );
+
   return (
     <PresentationPanelHoverActions
       {...{
@@ -105,11 +121,8 @@ export const PresentationPanelInternal = <
         viewMode,
         showNotifications,
         showBorder,
-        setDragHandle: (ref) => {
-          hoverDragHandleRef.current = ref;
-          setDragHandles?.([hoverDragHandleRef.current, headerDragHandleRef.current]);
-        },
       }}
+      setDragHandle={setHoverActionDragHandle}
     >
       <EuiPanel
         role="figure"
@@ -125,10 +138,7 @@ export const PresentationPanelInternal = <
         {!hideHeader && api && (
           <PresentationPanelHeader
             api={api}
-            setDragHandle={(ref) => {
-              headerDragHandleRef.current = ref;
-              setDragHandles?.([hoverDragHandleRef.current, headerDragHandleRef.current]);
-            }}
+            setDragHandle={setPanelTitleDragHandle}
             headerId={headerId}
             viewMode={viewMode}
             hideTitle={hideTitle}
