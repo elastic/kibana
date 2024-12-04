@@ -23,3 +23,8 @@ export interface TranslateRuleGraphParams {
   integrationRetriever: IntegrationRetriever;
   logger: Logger;
 }
+
+export interface TranslateRuleValidationErrors {
+  iterations: number;
+  esql_errors?: string;
+}
