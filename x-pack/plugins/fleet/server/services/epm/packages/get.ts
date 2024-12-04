@@ -768,7 +768,7 @@ export async function getPackageAssetsMap({
   packageInfo: PackageInfo;
   logger: Logger;
   ignoreUnverified?: boolean;
-}) {
+}): Promise<AssetsMap> {
   const cache = getPackageAssetsMapCache(packageInfo.name, packageInfo.version);
   if (cache) {
     return cache;
@@ -794,6 +794,7 @@ export async function getPackageAssetsMap({
 
     return assetsMap;
   } catch (error) {
-    appContextService.getLogger().warn(`getPackageAssetsMap error: ${error}`);
+    logger.warn(`getPackageAssetsMap error: ${error}`);
+    throw error;
   }
 }
