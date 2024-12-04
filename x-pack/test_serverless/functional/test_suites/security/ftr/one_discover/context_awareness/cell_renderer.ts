@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const esArchiver = getService('esArchiver');
+  const queryBar = getService('queryBar');
 
   describe('security root profile', () => {
     before(async () => {
@@ -39,6 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               adHoc: true,
               hasTimeField: true,
             });
+            await queryBar.setQuery('host.name: "siem-kibana"');
+            await queryBar.clickQuerySubmitButton();
             await PageObjects.discover.waitUntilSearchingHasFinished();
             await PageObjects.discover.dragFieldToTable('host.name');
             expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
@@ -59,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const state = kbnRison.encode({
               dataSource: { type: 'esql' },
 
-              query: { esql: 'from auditbeat-2022 | sort @timestamp desc' },
+              query: { esql: 'from auditbeat-2022 | WHERE host.name == "siem-kibana"' },
             });
 
             await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
