@@ -12,7 +12,10 @@ import { getAppName } from './get_app_name';
 const SYSTEMPATH = 'systemPath';
 
 const testMap = [
-  ['x-pack/solutions/observability/solutions/observability/plugins/observability_solution/observability/foo/bar/baz/header_actions.tsx', 'o11y'],
+  [
+    'x-pack/solutions/observability/solutions/observability/plugins/observability_solution/observability/foo/bar/baz/header_actions.tsx',
+    'o11y',
+  ],
   ['x-pack/plugins/observability_solution/apm/baz/header_actions.tsx', 'apm'],
   ['x-pack/plugins/apm/public/components/app/correlations/correlations_table.tsx', 'apm'],
   ['x-pack/plugins/observability/foo/bar/baz/header_actions.tsx', 'o11y'],

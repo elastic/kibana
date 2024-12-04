@@ -8,8 +8,12 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo'],
-  setupFiles: ['<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo/.storybook/jest_setup.js'],
+  roots: [
+    '<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo',
+  ],
+  setupFiles: [
+    '<rootDir>/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo/.storybook/jest_setup.js',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/solutions/observability/plugins/observability_solution/slo',
   coverageReporters: ['text', 'html'],

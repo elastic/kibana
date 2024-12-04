@@ -46,7 +46,6 @@ interface ExpressionRowProps {
   children?: React.ReactNode;
 }
 
-// eslint-disable-next-line react/function-component-definition
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const {
     dataView,
@@ -192,7 +191,6 @@ const ThresholdElement: React.FC<{
   isMetricPct: boolean;
   comparator: MetricExpression['comparator'];
   errors: IErrorObject;
-  // eslint-disable-next-line react/function-component-definition
 }> = ({ updateComparator, updateThreshold, threshold, isMetricPct, comparator, errors }) => {
   const displayedThreshold = useMemo(() => {
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));

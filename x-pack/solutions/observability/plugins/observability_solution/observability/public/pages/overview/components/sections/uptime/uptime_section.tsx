@@ -65,7 +65,7 @@ export function UptimeSection({ bucketSize }: Props) {
       }
     },
     // `forceUpdate` and `lastUpdated` should trigger a reload
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [
       bucketSize,
       relativeStart,
