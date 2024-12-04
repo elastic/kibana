@@ -15,7 +15,7 @@ import {
   EuiSkeletonText,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
@@ -40,7 +40,7 @@ const NO_ITEMS_MESSAGE = (
 export const UpgradePrebuiltRulesTable = React.memo(() => {
   const {
     state: {
-      rulesUpgradeState,
+      ruleUpgradeStates,
       hasRulesToUpgrade,
       isLoading,
       isRefetching,
@@ -49,10 +49,6 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
   } = useUpgradePrebuiltRulesTableContext();
   const [selected, setSelected] = useState<RuleUpgradeState[]>([]);
 
-  const ruleUpgradeStatesArray = useMemo(
-    () => Object.values(rulesUpgradeState),
-    [rulesUpgradeState]
-  );
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
 
@@ -101,7 +97,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
               </EuiFlexGroup>
 
               <EuiInMemoryTable
-                items={ruleUpgradeStatesArray}
+                items={ruleUpgradeStates}
                 sorting
                 pagination={{
                   initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,

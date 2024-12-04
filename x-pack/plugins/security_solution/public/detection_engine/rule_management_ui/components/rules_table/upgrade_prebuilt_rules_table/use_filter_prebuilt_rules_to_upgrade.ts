@@ -14,16 +14,19 @@ export type UpgradePrebuiltRulesTableFilterOptions = Pick<
   'filter' | 'tags' | 'ruleSource'
 >;
 
-export const useFilterPrebuiltRulesToUpgrade = ({
-  rules,
-  filterOptions,
-}: {
-  rules: RuleUpgradeInfoForReview[];
+interface UseFilterPrebuiltRulesToUpgradeParams<T extends RuleUpgradeInfoForReview> {
+  data: T[];
   filterOptions: UpgradePrebuiltRulesTableFilterOptions;
-}) => {
-  const filteredRules = useMemo(() => {
+}
+
+export const useFilterPrebuiltRulesToUpgrade = <T extends RuleUpgradeInfoForReview>({
+  data,
+  filterOptions,
+}: UseFilterPrebuiltRulesToUpgradeParams<T>): T[] => {
+  return useMemo(() => {
     const { filter, tags, ruleSource } = filterOptions;
-    return rules.filter((ruleInfo) => {
+
+    return data.filter((ruleInfo) => {
       if (filter && !ruleInfo.current_rule.name.toLowerCase().includes(filter.toLowerCase())) {
         return false;
       }
@@ -53,7 +56,5 @@ export const useFilterPrebuiltRulesToUpgrade = ({
 
       return true;
     });
-  }, [filterOptions, rules]);
-
-  return filteredRules;
+  }, [filterOptions, data]);
 };
