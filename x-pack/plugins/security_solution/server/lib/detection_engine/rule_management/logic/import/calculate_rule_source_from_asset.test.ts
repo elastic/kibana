@@ -15,6 +15,7 @@ describe('calculateRuleSourceFromAsset', () => {
       rule: getRulesSchemaMock(),
       assetWithMatchingVersion: undefined,
       isKnownPrebuiltRule: false,
+      isRuleCustomizationEnabled: true,
     });
 
     expect(result).toEqual({
@@ -28,6 +29,7 @@ describe('calculateRuleSourceFromAsset', () => {
       rule: ruleToImport,
       assetWithMatchingVersion: undefined,
       isKnownPrebuiltRule: true,
+      isRuleCustomizationEnabled: true,
     });
 
     expect(result).toEqual({
@@ -47,6 +49,7 @@ describe('calculateRuleSourceFromAsset', () => {
           // no other overwrites -> no differences
         }),
         isKnownPrebuiltRule: true,
+        isRuleCustomizationEnabled: true,
       });
 
       expect(result).toEqual({
@@ -65,6 +68,7 @@ describe('calculateRuleSourceFromAsset', () => {
           name: 'Customized name', // mock a customization
         }),
         isKnownPrebuiltRule: true,
+        isRuleCustomizationEnabled: true,
       });
 
       expect(result).toEqual({
