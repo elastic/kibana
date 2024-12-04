@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Rx from 'rxjs';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -18,6 +17,7 @@ import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nes
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
 import { emitEuiProviderWarning } from '@elastic/eui/lib/services/theme/warning';
 
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaEuiProvider } from '@kbn/react-kibana-context-root';
 
 import {
@@ -42,7 +42,7 @@ export interface KibanaThemeProviderProps extends EuiProps {
   /** The `ThemeServiceStart` API. */
   theme: ThemeServiceStart;
   /** The `UserProfileService` start API. */
-  userProfile?: { getUserProfile$: () => Rx.Observable<Record<string, unknown> | null> };
+  userProfile?: Pick<UserProfileService, 'getUserProfile$'>;
 }
 
 /**

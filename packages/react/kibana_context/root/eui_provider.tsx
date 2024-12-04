@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Rx from 'rxjs';
 import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
@@ -20,18 +19,15 @@ import {
   getThemeConfigByName,
   DEFAULT_THEME_CONFIG,
 } from '@kbn/react-kibana-context-common';
-import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-
-interface IUserProfile {
-  getUserProfile$: () => Rx.Observable<Record<string, unknown> | null>;
-}
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
 /**
  * Props for the KibanaEuiProvider.
  */
 export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
-  userProfile?: IUserProfile; // TODO: use this to access a "high contrast mode" flag from user settings. Pass the flag to EuiProvider, when it is supported in EUI.
+  userProfile?: Pick<UserProfileService, 'getUserProfile$'>; // TODO: use this to access a "high contrast mode" flag from user settings. Pass the flag to EuiProvider, when it is supported in EUI.
   globalStyles?: boolean;
 }
 
