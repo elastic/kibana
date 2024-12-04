@@ -293,6 +293,7 @@ export default function (ctx: FtrProviderContext) {
       it(`doesn't show visualize button`, async () => {
         await common.navigateToApp('discover');
         await common.waitForTopNavToBeVisible();
+        await discover.selectIndexPattern('log*');
         await setDiscoverTimeRange();
         await unifiedFieldList.clickFieldListItem('bytes');
         await unifiedFieldList.expectMissingFieldListItemVisualize('bytes');

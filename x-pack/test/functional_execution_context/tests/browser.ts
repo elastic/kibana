@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('discover app', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('log*');
+        // await PageObjects.discover.selectIndexPattern('log*');
         await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
         await PageObjects.header.waitUntilLoadingHasFinished();
         logs = await readLogFile();

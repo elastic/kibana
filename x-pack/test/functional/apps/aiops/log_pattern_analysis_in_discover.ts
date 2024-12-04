@@ -46,12 +46,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it(`loads the log pattern analysis flyout and shows patterns in discover`, async () => {
       await ml.navigation.navigateToDiscoverViaAppsMenu();
+      await PageObjects.discover.selectIndexPattern('logstash-*');
       await PageObjects.timePicker.pauseAutoRefresh();
       await PageObjects.timePicker.setAbsoluteRange(
         'Sep 20, 2015 @ 00:00:00.000',
         'Sep 22, 2015 @ 23:50:13.253'
       );
-      await PageObjects.discover.selectIndexPattern('logstash-*');
       await aiops.logPatternAnalysisPage.assertDiscoverDocCount(totalDocCount);
 
       await aiops.logPatternAnalysisPage.clickPatternsTab();
@@ -78,12 +78,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it(`loads the log pattern analysis flyout and hides patterns in discover`, async () => {
       await ml.navigation.navigateToDiscoverViaAppsMenu();
+      await PageObjects.discover.selectIndexPattern('logs-*');
       await PageObjects.timePicker.pauseAutoRefresh();
       await PageObjects.timePicker.setAbsoluteRange(
         'Sep 20, 2015 @ 00:00:00.000',
         'Sep 22, 2015 @ 23:50:13.253'
       );
-      await PageObjects.discover.selectIndexPattern('logs-*');
       await aiops.logPatternAnalysisPage.assertDiscoverDocCount(totalDocCount);
 
       await aiops.logPatternAnalysisPage.clickPatternsTab();
