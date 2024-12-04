@@ -59,7 +59,7 @@ export interface EntityEngineInstallationDescriptor {
    **/
   pipeline:
     | IngestProcessorContainer[]
-    | ((defaultProcessors: IngestProcessorContainer) => IngestProcessorContainer[]);
+    | ((defaultProcessors: IngestProcessorContainer[]) => IngestProcessorContainer[]);
 }
 
 export type FieldDescription = EntityDefinitionMetadataElement & {
