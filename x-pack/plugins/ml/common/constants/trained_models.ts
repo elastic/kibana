@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const PAGE_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.addRules.pageTitle',
-  {
-    defaultMessage: 'Add Elastic rules',
-  }
-);
+/**
+ * Default page for the trained_models endpoint is 100,
+ * which is too small for the most cases, so we set it to 10000.
+ */
+export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
