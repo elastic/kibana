@@ -173,7 +173,7 @@ export function getDashboardApi({
         currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
       };
     },
-    isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
+    isEmbeddedExternally: Boolean(creationOptions?.isEmbeddedExternally),
     isManaged,
     reload$: merge(
       unifiedSearchManager.internalApi.controlGroupReload$,
