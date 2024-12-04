@@ -2389,10 +2389,10 @@
     "@elastic/react-search-ui-views" "1.20.2"
     "@elastic/search-ui" "1.20.2"
 
-"@elastic/request-converter@^8.15.4":
-  version "8.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.16.0.tgz#e607d06d898ec290c7a9412104d7fa67d5fb9c8c"
-  integrity sha512-tSwCJMoX3/hme1HXi7ewfP5E+BLFV2LcItt3EB4eucWPKEtG3SqJ3iuK3ygWm1PodPz8Mww/DMaxTJFERb/usg==
+"@elastic/request-converter@^8.16.2":
+  version "8.16.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.16.2.tgz#e82c5c794adf8da37795cb8656e2f0334460cb08"
+  integrity sha512-bljPrXbXkImBglTz5N8Rrpmzc64ahpZxOkBIKFBX1mnU3kv/JDeMjsv1rvfHXrkuhtQQ4kRRZqfwmqzJIwzlag==
   dependencies:
     child-process-promise "^2.2.1"
     commander "^12.1.0"
@@ -3996,6 +3996,10 @@
   uid ""
 
 "@kbn/application-usage-test-plugin@link:x-pack/test/usage_collection/plugins/application_usage_test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/asset-inventory-plugin@link:x-pack/plugins/asset_inventory":
   version "0.0.0"
   uid ""
 

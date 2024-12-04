@@ -10,17 +10,20 @@ import type { InstallTranslatedMigrationRulesResponse } from '../../../../../com
 import { SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH } from '../../../../../common/siem_migrations/constants';
 import { installTranslatedMigrationRules } from '../api';
 import { useInvalidateGetMigrationRulesQuery } from './use_get_migration_rules_query';
+import { useInvalidateGetMigrationTranslationStatsQuery } from './use_get_migration_translation_stats_query';
 
 export const INSTALL_ALL_MIGRATION_RULES_MUTATION_KEY = [
   'POST',
   SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH,
 ];
 
-export const useInstallAllMigrationRulesMutation = (
+export const useInstallTranslatedMigrationRulesMutation = (
   migrationId: string,
   options?: UseMutationOptions<InstallTranslatedMigrationRulesResponse, Error>
 ) => {
   const invalidateGetRuleMigrationsQuery = useInvalidateGetMigrationRulesQuery(migrationId);
+  const invalidateGetMigrationTranslationStatsQuery =
+    useInvalidateGetMigrationTranslationStatsQuery(migrationId);
 
   return useMutation<InstallTranslatedMigrationRulesResponse, Error>(
     () => installTranslatedMigrationRules({ migrationId }),
@@ -29,6 +32,7 @@ export const useInstallAllMigrationRulesMutation = (
       mutationKey: INSTALL_ALL_MIGRATION_RULES_MUTATION_KEY,
       onSettled: (...args) => {
         invalidateGetRuleMigrationsQuery();
+        invalidateGetMigrationTranslationStatsQuery();
 
         if (options?.onSettled) {
           options.onSettled(...args);
