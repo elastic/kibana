@@ -6,23 +6,32 @@
  */
 import { css } from '@emotion/css';
 import React from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   const {
     dependencies: {
-      start: { observabilityShared },
+      start: { observabilityShared, navigation },
     },
   } = useKibana();
 
   const { PageTemplate } = observabilityShared.navigation;
 
+  const isSolutionNavEnabled = useObservable(navigation.isSolutionNavEnabled$);
+
   return (
     <PageTemplate
       pageSectionProps={{
         className: css`
-          max-height: calc(100vh - var(--euiFixedHeadersOffset, 0));
+          max-height: calc(
+            100vh - var(--euiFixedHeadersOffset, 0)
+              ${isSolutionNavEnabled
+                ? `-
+              var(--kbnProjectHeaderAppActionMenuHeight, 48px)`
+                : ''}
+          );
           overflow: auto;
           padding-inline: 0px;
         `,
@@ -35,8 +44,16 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
         },
       }}
     >
-      <EuiPanel paddingSize="none" color="subdued" hasShadow={false} hasBorder={false}>
-        <EuiSpacer size="m" />
+      <EuiPanel
+        paddingSize="none"
+        color="subdued"
+        hasShadow={false}
+        hasBorder={false}
+        className={css`
+          display: flex;
+          max-width: 100%;
+        `}
+      >
         {children}
       </EuiPanel>
     </PageTemplate>

@@ -199,4 +199,10 @@ type TestSubject =
   | 'ignoreMissingPipelineSwitch.input'
   | 'destinationField.input'
   | 'datasetField.input'
-  | 'namespaceField.input';
+  | 'namespaceField.input'
+  | 'processorField'
+  | 'paramsField'
+  | 'scriptSource'
+  | 'inferenceModelId.input'
+  | 'inferenceConfig'
+  | 'fieldMap';

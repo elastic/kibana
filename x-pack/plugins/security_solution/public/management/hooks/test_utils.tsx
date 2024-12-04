@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -39,10 +39,10 @@ export const renderQuery = async (
   const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
     <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
   );
-  const { result: resultHook, waitFor } = renderHook(() => hook(), {
+  const { result: resultHook } = renderHook(() => hook(), {
     wrapper,
   });
-  await waitFor(() => resultHook.current[waitForHook]);
+  await waitFor(() => expect(resultHook.current[waitForHook]).toBeTruthy());
   return resultHook.current;
 };
 
@@ -58,3 +58,5 @@ export const renderMutation = async (
   });
   return resultHook.current;
 };
+
+export const renderWrappedHook = renderMutation;
