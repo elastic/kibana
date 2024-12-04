@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { VersionsPicker } from './versions_picker/versions_picker';
 import type { Version } from './versions_picker/constants';
 import { SelectedVersions } from './versions_picker/constants';
@@ -37,18 +37,22 @@ export function FieldComparisonSide(): JSX.Element {
   return (
     <>
       <FieldUpgradeSideHeader>
-        <EuiFlexGroup direction="row" alignItems="center">
-          <EuiTitle size="xxs">
-            <h3>
-              {i18n.TITLE}
-              <ComparisonSideHelpInfo />
-            </h3>
-          </EuiTitle>
-          <VersionsPicker
-            hasBaseVersion={fieldDiff.has_base_version}
-            selectedVersions={selectedVersions}
-            onChange={setSelectedVersions}
-          />
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h3>
+                {i18n.TITLE}
+                <ComparisonSideHelpInfo />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <VersionsPicker
+              hasBaseVersion={fieldDiff.has_base_version}
+              selectedVersions={selectedVersions}
+              onChange={setSelectedVersions}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </FieldUpgradeSideHeader>
       <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
