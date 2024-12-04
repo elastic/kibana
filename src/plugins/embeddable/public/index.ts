@@ -11,7 +11,6 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export { openAddPanelFlyout } from './add_panel_flyout/open_add_panel_flyout';
-export { EmbeddablePanel } from './embeddable_panel';
 export {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
@@ -21,8 +20,6 @@ export {
   defaultEmbeddableFactoryProvider,
   Embeddable,
   EmbeddableFactoryNotFoundError,
-  EmbeddableRenderer,
-  EmbeddableRoot,
   EmbeddableStateTransfer,
   ErrorEmbeddable,
   genericEmbeddableInputIsEqual,
@@ -51,7 +48,6 @@ export {
   SELECT_RANGE_TRIGGER,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
-  useEmbeddableFactory,
   VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
@@ -71,7 +67,6 @@ export type {
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePackageState,
-  EmbeddableRendererProps,
   FilterableEmbeddable,
   IContainer,
   IEmbeddable,
