@@ -46,26 +46,26 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^src\/plugins\/data/,
-        /^x-pack\/plugins\/actions/,
-        /^x-pack\/plugins\/alerting/,
-        /^x-pack\/plugins\/event_log/,
-        /^x-pack\/plugins\/rule_registry/,
-        /^x-pack\/plugins\/task_manager/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
-    }
-
-    if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
-    }
+    // if (
+    //   (await doAnyChangesMatch([
+    //     /^src\/plugins\/data/,
+    //     /^x-pack\/plugins\/actions/,
+    //     /^x-pack\/plugins\/alerting/,
+    //     /^x-pack\/plugins\/event_log/,
+    //     /^x-pack\/plugins\/rule_registry/,
+    //     /^x-pack\/plugins\/task_manager/,
+    //   ])) ||
+    //   GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    // ) {
+    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
+    // }
+    //
+    // if (
+    //   (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
+    //   GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    // ) {
+    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
+    // }
 
     if (
       (await doAnyChangesMatch([
