@@ -38,10 +38,10 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(({ mig
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
               <p>
-                {i18n.START_MIGRATION_CARD_RESULT_DESCRIPTION({
-                  createdAt: moment(migrationStats.created_at).format('MMMM Do YYYY, h:mm:ss a'),
-                  finishedAt: moment(migrationStats.last_updated_at).fromNow(),
-                })}
+                {i18n.START_MIGRATION_CARD_RESULT_DESCRIPTION(
+                  moment(migrationStats.created_at).format('MMMM Do YYYY, h:mm:ss a'),
+                  moment(migrationStats.last_updated_at).fromNow()
+                )}
               </p>
             </EuiText>
           </EuiFlexItem>

@@ -26,9 +26,7 @@ export const START_MIGRATION_CARD_CONNECTOR_MISSING_TEXT = i18n.translate(
 );
 export const START_MIGRATION_CARD_CONNECTOR_MISSING_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.connectorMissingText',
-  {
-    defaultMessage: 'AI provider step',
-  }
+  { defaultMessage: 'AI provider step' }
 );
 
 export const START_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(
@@ -103,13 +101,10 @@ export const START_MIGRATION_CARD_RESULT_TITLE = (number: number) =>
     values: { number },
   });
 
-export const START_MIGRATION_CARD_RESULT_DESCRIPTION = (values: {
-  createdAt: string;
-  finishedAt: string;
-}) =>
+export const START_MIGRATION_CARD_RESULT_DESCRIPTION = (createdAt: string, finishedAt: string) =>
   i18n.translate('xpack.securitySolution.onboarding.startMigration.result.description', {
     defaultMessage: 'Export uploaded on {createdAt} and translation finished {finishedAt}.',
-    values,
+    values: { createdAt, finishedAt },
   });
 
 export const VIEW_TRANSLATED_RULES_TITLE = i18n.translate(
