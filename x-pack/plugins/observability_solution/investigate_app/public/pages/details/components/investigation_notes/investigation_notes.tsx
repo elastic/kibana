@@ -70,19 +70,17 @@ export function InvestigationNotes({ user }: Props) {
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {isLoading || notes === undefined
-            ? 'Loading...'
-            : notes.map((currNote: InvestigationNoteResponse) => {
-                return (
-                  <Note
-                    key={currNote.id}
-                    note={currNote}
-                    userProfile={userProfiles?.[currNote.createdBy]}
-                    userProfileLoading={isLoadingUserProfiles}
-                    isOwner={currNote.createdBy === user.profile_uid}
-                  />
-                );
-              })}
+          {notes?.map((currNote: InvestigationNoteResponse) => {
+            return (
+              <Note
+                key={currNote.id}
+                note={currNote}
+                userProfile={userProfiles?.[currNote.createdBy]}
+                userProfileLoading={isLoadingUserProfiles}
+                isOwner={currNote.createdBy === user.profile_uid}
+              />
+            );
+          })}
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
