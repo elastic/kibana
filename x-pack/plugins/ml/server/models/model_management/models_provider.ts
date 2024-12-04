@@ -33,10 +33,7 @@ import {
   BUILT_IN_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type {
-  ElasticCuratedModelName,
-  InferenceAPIConfigResponse,
-} from '@kbn/ml-trained-models-utils';
+import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
 import type { MlFeatures } from '../../../common/constants/app';
@@ -153,11 +150,8 @@ export class ModelsProvider {
 
     try {
       // Check if model is used by an inference service
-      const { endpoints } = await esClient.transport.request<{
-        endpoints: InferenceAPIConfigResponse[];
-      }>({
-        method: 'GET',
-        path: `/_inference/_all`,
+      const { endpoints } = await esClient.inference.get({
+        inference_id: '_all',
       });
 
       const inferenceAPIMap = groupBy(

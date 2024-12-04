@@ -14,6 +14,7 @@ import { mlLog } from '../../lib/log';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ExistingModelBase } from '../../../common/types/trained_models';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 jest.mock('../../lib/log');
 
@@ -318,8 +319,8 @@ describe('modelsProvider', () => {
         model_id: 'elser_test',
         service_settings: { model_id: '.elser_model_2' },
       },
-      { service: 'open_api_01', model_id: 'open_api_model', service_settings: {} },
-    ];
+      { service: 'open_api_01', service_settings: {} },
+    ] as InferenceInferenceEndpointInfo[];
 
     beforeEach(() => {
       trainedModels = [
@@ -327,7 +328,7 @@ describe('modelsProvider', () => {
         { model_id: 'model2' },
       ] as ExistingModelBase[];
 
-      mockClient.asInternalUser.transport.request.mockResolvedValue({
+      mockClient.asInternalUser.inference.get.mockResolvedValue({
         endpoints: inferenceServices,
       });
 
@@ -340,7 +341,7 @@ describe('modelsProvider', () => {
 
     describe('when the user has required privileges', () => {
       beforeEach(() => {
-        mockClient.asCurrentUser.transport.request.mockResolvedValue({
+        mockClient.asCurrentUser.inference.get.mockResolvedValue({
           endpoints: inferenceServices,
         });
       });
@@ -350,12 +351,11 @@ describe('modelsProvider', () => {
         await modelService.assignInferenceEndpoints(trainedModels, false);
 
         // assert
-        expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-          method: 'GET',
-          path: '/_inference/_all',
+        expect(mockClient.asCurrentUser.inference.get).toHaveBeenCalledWith({
+          inference_id: '_all',
         });
 
-        expect(mockClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+        expect(mockClient.asInternalUser.inference.get).not.toHaveBeenCalled();
 
         expect(trainedModels[0].inference_apis).toEqual([
           {
@@ -375,7 +375,7 @@ describe('modelsProvider', () => {
 
     describe('when the user does not have required privileges', () => {
       beforeEach(() => {
-        mockClient.asCurrentUser.transport.request.mockRejectedValue(
+        mockClient.asCurrentUser.inference.get.mockRejectedValue(
           new errors.ResponseError(
             elasticsearchClientMock.createApiResponse({
               statusCode: 403,
@@ -389,14 +389,12 @@ describe('modelsProvider', () => {
         await modelService.assignInferenceEndpoints(trainedModels, false);
 
         // assert
-        expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-          method: 'GET',
-          path: '/_inference/_all',
+        expect(mockClient.asCurrentUser.inference.get).toHaveBeenCalledWith({
+          inference_id: '_all',
         });
 
-        expect(mockClient.asInternalUser.transport.request).toHaveBeenCalledWith({
-          method: 'GET',
-          path: '/_inference/_all',
+        expect(mockClient.asInternalUser.inference.get).toHaveBeenCalledWith({
+          inference_id: '_all',
         });
 
         expect(trainedModels[0].inference_apis).toEqual(undefined);
@@ -417,17 +415,16 @@ describe('modelsProvider', () => {
         })
       );
 
-      mockClient.asCurrentUser.transport.request.mockRejectedValue(notFoundError);
+      mockClient.asCurrentUser.inference.get.mockRejectedValue(notFoundError);
 
       await modelService.assignInferenceEndpoints(trainedModels, false);
 
       // assert
-      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-        method: 'GET',
-        path: '/_inference/_all',
+      expect(mockClient.asCurrentUser.inference.get).toHaveBeenCalledWith({
+        inference_id: '_all',
       });
 
-      expect(mockClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+      expect(mockClient.asInternalUser.inference.get).not.toHaveBeenCalled();
 
       expect(mlLog.error).toHaveBeenCalledWith(notFoundError);
     });

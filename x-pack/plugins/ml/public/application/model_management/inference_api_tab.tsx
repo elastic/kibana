@@ -16,10 +16,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface InferenceAPITabProps {
-  inferenceApis: InferenceAPIConfigResponse[];
+  inferenceApis: InferenceInferenceEndpointInfo[];
 }
 
 export const InferenceApi: FC<InferenceAPITabProps> = ({ inferenceApis }) => {

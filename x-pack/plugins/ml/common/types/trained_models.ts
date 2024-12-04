@@ -5,9 +5,11 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { MlInferenceConfigCreateContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  InferenceAPIConfigResponse,
+  InferenceInferenceEndpointInfo,
+  MlInferenceConfigCreateContainer,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   ModelDefinitionResponse,
   ModelState,
   TrainedModelType,
@@ -313,7 +315,7 @@ interface BaseModelItem {
   /**
    * Inference services associated with the model
    */
-  inference_apis?: InferenceAPIConfigResponse[];
+  inference_apis?: InferenceInferenceEndpointInfo[];
   /**
    * Associated pipelines. Extends response from the ES endpoint.
    */
