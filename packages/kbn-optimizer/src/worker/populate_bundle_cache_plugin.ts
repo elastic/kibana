@@ -52,6 +52,7 @@ export class PopulateBundleCachePlugin {
     compiler.hooks.emit.tap(
       {
         name: 'PopulateBundleCachePlugin',
+        // @ts-ignore - types are resolved differently now with webpack 5 in the game
         before: ['BundleMetricsPlugin'],
       },
       (compilation) => {
