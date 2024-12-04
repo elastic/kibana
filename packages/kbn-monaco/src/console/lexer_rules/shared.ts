@@ -107,7 +107,7 @@ xjsonRules.json_root = [
   matchToken('variable.template', /("\${\w+}")/),
   // @ts-expect-error include a rule to start sql highlighting
   buildSqlStartRule(),
-  // @ts-expect-error include a rule to start sql highlighting
+  // @ts-expect-error include a rule to start painless highlighting
   buildPainlessStartRule(),
   ...xjsonRules.json_root,
 ];
