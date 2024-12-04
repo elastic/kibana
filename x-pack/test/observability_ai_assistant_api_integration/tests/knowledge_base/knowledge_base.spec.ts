@@ -15,6 +15,7 @@ import {
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from './helpers';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -225,6 +226,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -238,6 +242,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 query: { query: '', sortBy: 'title', sortDirection: 'asc' },
               },
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -251,6 +258,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 path: { entryId: 'my-doc-id-1' },
               },
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }

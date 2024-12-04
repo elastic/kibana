@@ -14,6 +14,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { SupertestReturnType } from '../../common/observability_ai_assistant_api_client';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -292,6 +293,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -302,6 +306,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             await observabilityAIAssistantAPIClient.unauthorizedUser({
               endpoint: 'POST /internal/observability_ai_assistant/conversations',
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -322,6 +329,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -337,6 +347,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -352,6 +365,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }

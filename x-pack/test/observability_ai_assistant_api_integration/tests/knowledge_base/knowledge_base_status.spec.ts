@@ -13,6 +13,7 @@ import {
   TINY_ELSER,
   deleteInferenceEndpoint,
 } from './helpers';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -89,6 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           await observabilityAIAssistantAPIClient.unauthorizedUser({
             endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
           });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
         } catch (e) {
           expect(e.status).to.be(403);
         }

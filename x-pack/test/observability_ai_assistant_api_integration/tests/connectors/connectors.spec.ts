@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -60,6 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           await observabilityAIAssistantAPIClient.unauthorizedUser({
             endpoint: `GET ${CONNECTOR_API_URL}`,
           });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
         } catch (e) {
           expect(e.status).to.be(403);
         }

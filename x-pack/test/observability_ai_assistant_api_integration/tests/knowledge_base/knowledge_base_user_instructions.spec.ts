@@ -23,6 +23,7 @@ import { getConversationCreatedEvent } from '../conversations/helpers';
 import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import { User } from '../../common/users/users';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -377,6 +378,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -387,6 +391,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             await observabilityAIAssistantAPIClient.unauthorizedUser({
               endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
             });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }

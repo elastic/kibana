@@ -11,6 +11,7 @@ import { PassThrough } from 'stream';
 import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -200,6 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
             },
           });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
         } catch (e) {
           expect(e.status).to.be(403);
         }
