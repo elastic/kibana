@@ -137,16 +137,16 @@
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
         "cheerio",
-        "@types/faker",
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
         "babel-plugin-istanbul",
-        "faker",
         "nyc",
         "oboe",
         "pixelmatch",
+        "@playwright/test",
         "playwright",
+        "playwright-chromium",
         "pngjs",
         "sharp",
         "superagent",
@@ -373,6 +373,49 @@
         "Team:Core",
         "release_note:skip",
         "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-data-discovery dependencies",
+      "matchDepNames": [
+        "@elastic/datemath",
+        "diff",
+        "fastest-levenshtein",
+        "usng.js",
+        "@types/diff"
+      ],
+      "reviewers": [
+        "team:kibana-data-discovery"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:DataDiscovery",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-visualizations test dependencies",
+      "matchDepNames": [
+        "@types/faker",
+        "faker"
+      ],
+      "reviewers": [
+        "team:visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Visualizations",
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "enabled": true,
       "minimumReleaseAge": "7 days"
@@ -1286,9 +1329,7 @@
     {
       "groupName": "Security Engineering Productivity",
       "matchDepNames": [
-        "dotenv",
-        "playwright-chromium",
-        "@playwright/test"
+        "dotenv"
       ],
       "reviewers": [
         "team:security-engineering-productivity"

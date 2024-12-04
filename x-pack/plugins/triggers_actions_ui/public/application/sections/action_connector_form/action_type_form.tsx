@@ -8,7 +8,7 @@
 import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,11 +44,12 @@ import {
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
 import type { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
-import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
-import { RuleActionsNotifyWhen } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_notify_when';
-import { RuleActionsAlertsFilter } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_alerts_filter';
-import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/rule_form/utils/check_action_type_enabled';
-import { RuleActionsAlertsFilterTimeframe } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_alerts_filter_timeframe';
+import {
+  RuleActionsNotifyWhen,
+  RuleActionsAlertsFilter,
+  RuleActionsAlertsFilterTimeframe,
+} from '@kbn/response-ops-rule-form';
+import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
@@ -507,7 +508,6 @@ export const ActionTypeForm = ({
               <RuleActionsAlertsFilter
                 action={actionItem}
                 onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
-                featureIds={[producerId as ValidFeatureId]}
                 appName={featureId!}
                 ruleTypeId={ruleTypeId}
                 plugins={{
