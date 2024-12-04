@@ -18,7 +18,7 @@ import {
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public/plugin';
 import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   ObservabilityAIAssistantPublicSetup,
@@ -36,7 +36,6 @@ export interface ProfilingPluginPublicSetupDeps {
   dataViews: DataViewsPublicPluginSetup;
   data: DataPublicPluginSetup;
   charts: ChartsPluginSetup;
-  licensing: LicensingPluginSetup;
   share: SharePluginSetup;
   unifiedSearch: UnifiedSearchPluginSetup;
 }
@@ -50,4 +49,5 @@ export interface ProfilingPluginPublicStartDeps {
   charts: ChartsPluginStart;
   share: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  licensing: LicensingPluginStart;
 }
