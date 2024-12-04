@@ -2327,7 +2327,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/unified_components/data_table/index.tsx"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/public/timelines/components/timeline/unified_components/data_table/index.tsx"
               }
             ]
           },

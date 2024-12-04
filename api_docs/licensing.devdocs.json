@@ -572,71 +572,71 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               }
             ]
           }
@@ -1893,71 +1893,71 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               }
             ]
           }
@@ -2220,19 +2220,19 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/indicator_match/threat_mapping/create_threat_signals.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/indicator_match/threat_mapping/create_threat_signals.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/query/query.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/query/query.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
             },
             {
               "plugin": "painlessLab",
@@ -2272,15 +2272,15 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
             },
             {
               "plugin": "actions",

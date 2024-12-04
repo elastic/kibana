@@ -137,7 +137,7 @@
         "tags": [],
         "label": "CloudDefendPageId",
         "description": [
-          "\nAll the IDs for the cloud defend pages.\nThis needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`."
+          "\nAll the IDs for the cloud defend pages.\nThis needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/solutions/security/solutions/security/plugins/security_solution/common/constants.ts`."
         ],
         "signature": [
           "\"cloud_defend-policies\" | \"kubernetes_security-dashboard\""

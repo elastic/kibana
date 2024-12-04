@@ -813,11 +813,11 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/telemetry/sender.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
             },
             {
               "plugin": "fleet",
@@ -841,7 +841,7 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.test.ts"
+              "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/telemetry/sender.test.ts"
             }
           ],
           "children": [],

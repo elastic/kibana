@@ -4695,7 +4695,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack",
@@ -7309,11 +7309,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack",
@@ -8117,7 +8117,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
                 "plugin": "spaces",
@@ -15859,19 +15859,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
               },
               {
                 "plugin": "osquery",
@@ -15939,71 +15939,71 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/get_prebuilt_rules_status_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/get_prebuilt_rules_status_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/find_rules/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/find_rules/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/filters/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/filters/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/read_rule/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/read_rule/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/tags/read_tags/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/tags/read_tags/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_all_integrations/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_all_integrations/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_installed_integrations/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_installed_integrations/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_exceptions/api/find_exception_references/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_exceptions/api/find_exception_references/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/index/read_index_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index/read_index_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/get_signals_migration_status_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/get_signals_migration_status_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/index/read_alerts_index_exists_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index/read_alerts_index_exists_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_dev_tool_content/routes/read_prebuilt_dev_tool_content_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_dev_tool_content/routes/read_prebuilt_dev_tool_content_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/index_status/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/risk_score/index_status/index.ts"
               },
               {
                 "plugin": "dashboard",
@@ -16015,143 +16015,143 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/tags/routes/get_tags_by_name.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/tags/routes/get_tags_by_name.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timeline/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/get_timeline/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timelines/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/get_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/resolve_timeline/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/resolve_timeline/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/get_draft_timelines/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/draft_timelines/get_draft_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/security_integrations/cribl/routes/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/security_integrations/cribl/routes/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/status.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/status.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/get.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/get.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/privileges.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/privileges.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/list.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/list.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/status.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/status.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/privileges.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/privileges.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/settings.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/settings.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entities/list.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entities/list.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/get.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/get.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/list.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/list.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/privileges.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/privileges.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/status.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/status.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/get.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/get.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/stats.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/stats.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/stats_all.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/stats_all.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/resources/get.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/resources/get.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/policy/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_download_handler.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/file_download_handler.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/details.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/details.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/status.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/status.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/state.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/state.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
               },
               {
                 "plugin": "sessionView",
@@ -16598,19 +16598,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/update_rule/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/update_rule/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/indices/create_index_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/risk_score/indices/create_index_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/stored_scripts/create_script_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/risk_score/stored_scripts/create_script_route.ts"
               },
               {
                 "plugin": "dashboard",
@@ -16618,23 +16618,23 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/tags/routes/create_tag.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/tags/routes/create_tag.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/update.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/update.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/start.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/start.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/stop.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/stop.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/retry.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/retry.ts"
               },
               {
                 "plugin": "transform",
@@ -16650,7 +16650,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_update_rules/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_update_rules/route.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -17433,19 +17433,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_rule_health/get_rule_health_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_rule_health/get_rule_health_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
               },
               {
                 "plugin": "osquery",
@@ -17465,107 +17465,107 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/create_timelines/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/create_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/import_timelines/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/import_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_actions/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_actions/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/create_rule/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/create_rule/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/export_rules/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/export_rules/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/import_rules/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/import_rules/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/index/create_index_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index/create_index_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_exceptions/api/create_rule_exceptions/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_exceptions/api/create_rule_exceptions/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/indices/delete_indices_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/risk_score/indices/delete_indices_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/routes/create_prebuilt_saved_objects.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/routes/create_prebuilt_saved_objects.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/routes/delete_prebuilt_saved_objects.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/routes/delete_prebuilt_saved_objects.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/onboarding/routes/install_risk_scores.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/risk_score/onboarding/routes/install_risk_scores.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/exceptions/api/manage_exceptions/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/exceptions/api/manage_exceptions/route.ts"
               },
               {
                 "plugin": "dashboard",
@@ -17573,147 +17573,147 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/dashboards/routes/get_dashboards_by_tags.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/dashboards/routes/get_dashboards_by_tags.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_tags_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_tags_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_assignees_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_assignees_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/export_timelines/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/export_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/copy_timeline/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/copy_timeline/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/clean_draft_timelines/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/draft_timelines/clean_draft_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upsert.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upsert.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/bulk_upload.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/bulk_upload.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/preview.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/preview.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/entity_calculation.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/entity_calculation.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/entity_calculation.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/entity_calculation.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/init.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/init.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/enable.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/enable.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/disable.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/disable.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/schedule_now.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/schedule_now.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/apply_dataview_indices.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/apply_dataview_indices.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/init.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/init.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/start.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/start.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/stop.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/stop.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/enablement.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/enablement.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/create.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/create.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/resources/upsert.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/resources/upsert.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/install.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/install.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/install_translated.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/install_translated.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/suggestions/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/suggestions/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
               },
               {
                 "plugin": "transform",
@@ -17765,11 +17765,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_create_rules/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_create_rules/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
               },
               {
                 "plugin": "dataViewFieldEditor",
@@ -17972,27 +17972,27 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/patch_rule/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/patch_rule/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/patch_timelines/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/patch_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/persist_favorite/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/persist_favorite/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/persist_note.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/notes/persist_note.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/pinned_events/persist_pinned_event.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/pinned_events/persist_pinned_event.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_patch_rules/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_patch_rules/route.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -18231,19 +18231,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/delete_rule/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/delete_rule/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/index/delete_index_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index/delete_index_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/stored_scripts/delete_script_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/risk_score/stored_scripts/delete_script_route.ts"
               },
               {
                 "plugin": "dashboard",
@@ -18251,23 +18251,23 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/delete_timelines/index.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/delete_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/delete_note.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/notes/delete_note.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/delete.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/delete.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/delete.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/delete.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/delete.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/delete.ts"
               },
               {
                 "plugin": "synthetics",
@@ -18275,7 +18275,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",

@@ -111,11 +111,11 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/types.ts"
+            "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/public/types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/types.ts"
+            "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/public/types.ts"
           },
           {
             "plugin": "cloudChat",

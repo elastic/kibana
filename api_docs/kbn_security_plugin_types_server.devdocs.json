@@ -4755,15 +4755,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/request_context_factory.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/plugin.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/plugin.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/plugin.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/plugin.ts"
               }
             ]
           },
@@ -5039,11 +5039,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
+                "path": "x-pack/solutions/security/solutions/security/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
               }
             ]
           }
