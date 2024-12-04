@@ -55,7 +55,7 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
-      const childDefinition = { ...params.body.stream, children: [] };
+      const childDefinition = { ...params.body.stream, children: [], managed: true };
 
       // check whether root stream has a child of the given name already
       if (rootDefinition.children.some((child) => child.id === childDefinition.id)) {
@@ -76,6 +76,14 @@ export const forkStreamsRoute = createServerRoute({
         params.body.stream.fields
       );
 
+      // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
+      await syncStream({
+        scopedClusterClient,
+        definition: childDefinition,
+        rootDefinition,
+        logger,
+      });
+
       rootDefinition.children.push({
         id: params.body.stream.id,
         condition: params.body.condition,
@@ -84,13 +92,6 @@ export const forkStreamsRoute = createServerRoute({
       await syncStream({
         scopedClusterClient,
         definition: rootDefinition,
-        rootDefinition,
-        logger,
-      });
-
-      await syncStream({
-        scopedClusterClient,
-        definition: childDefinition,
         rootDefinition,
         logger,
       });

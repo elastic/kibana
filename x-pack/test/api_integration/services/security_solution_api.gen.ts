@@ -83,7 +83,7 @@ import {
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
 import { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
-import { GetEntityEngineStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stats.gen';
+import { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
@@ -95,12 +95,16 @@ import {
   GetRuleExecutionResultsRequestQueryInput,
   GetRuleExecutionResultsRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
-import { GetRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetRuleMigrationRequestQueryInput,
+  GetRuleMigrationRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import { GetRuleMigrationTranslationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timeline/get_timeline_route.gen';
 import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timelines/get_timelines_route.gen';
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
@@ -109,7 +113,7 @@ import {
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
-import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enablement.gen';
+import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
@@ -856,24 +860,13 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getEntityEngineStats(props: GetEntityEngineStatsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(
-          routeWithNamespace(
-            replaceParams('/api/entity_store/engines/{entityType}/stats', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    getEntityStoreStatus(kibanaSpace: string = 'default') {
+    getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/entity_store/status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     /**
      * Gets notes
@@ -967,7 +960,8 @@ finalize it.
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     /**
      * Retrieves resources for an existing SIEM rules migration
@@ -996,6 +990,27 @@ finalize it.
         .get(
           routeWithNamespace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/stats', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Retrieves the translation stats of a SIEM rules migration using the migration id provided
+     */
+    getRuleMigrationTranslationStats(
+      props: GetRuleMigrationTranslationStatsProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .get(
+          routeWithNamespace(
+            replaceParams(
+              '/internal/siem_migrations/rules/{migration_id}/translation_stats',
+              props.params
+            ),
             kibanaSpace
           )
         )
@@ -1661,8 +1676,8 @@ export interface GetEndpointSuggestionsProps {
 export interface GetEntityEngineProps {
   params: GetEntityEngineRequestParamsInput;
 }
-export interface GetEntityEngineStatsProps {
-  params: GetEntityEngineStatsRequestParamsInput;
+export interface GetEntityStoreStatusProps {
+  query: GetEntityStoreStatusRequestQueryInput;
 }
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
@@ -1682,6 +1697,7 @@ export interface GetRuleExecutionResultsProps {
   params: GetRuleExecutionResultsRequestParamsInput;
 }
 export interface GetRuleMigrationProps {
+  query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
 }
 export interface GetRuleMigrationResourcesProps {
@@ -1690,6 +1706,9 @@ export interface GetRuleMigrationResourcesProps {
 }
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;
+}
+export interface GetRuleMigrationTranslationStatsProps {
+  params: GetRuleMigrationTranslationStatsRequestParamsInput;
 }
 export interface GetTimelineProps {
   query: GetTimelineRequestQueryInput;
