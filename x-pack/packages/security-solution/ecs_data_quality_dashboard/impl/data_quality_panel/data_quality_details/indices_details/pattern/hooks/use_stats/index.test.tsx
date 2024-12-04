@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider } from '../../../../../data_quality_context';
 import { ERROR_LOADING_STATS } from '../../../../../translations';
-import { useStats, UseStats } from '.';
+import { useStats } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { Theme } from '@elastic/charts';
 import { mockStatsAuditbeatIndex } from '../../../../../mock/stats/mock_stats_auditbeat_index';
@@ -24,63 +24,14 @@ const mockTelemetryEvents = {
 };
 const { toasts } = notificationServiceMock.createSetupContract();
 
-const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<{ isILMAvailable?: boolean }>> = ({
+  children,
+  isILMAvailable = true,
+}) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
-    isILMAvailable={true}
-    toasts={toasts}
-    addSuccessToast={jest.fn()}
-    canUserCreateAndReadCases={jest.fn(() => true)}
-    endDate={null}
-    formatBytes={jest.fn()}
-    formatNumber={jest.fn()}
-    isAssistantEnabled={true}
-    lastChecked={'2023-03-28T22:27:28.159Z'}
-    openCreateCaseFlyout={jest.fn()}
-    patterns={['auditbeat-*']}
-    setLastChecked={jest.fn()}
-    startDate={null}
-    theme={{
-      background: {
-        color: '#000',
-      },
-    }}
-    baseTheme={
-      {
-        background: {
-          color: '#000',
-        },
-      } as Theme
-    }
-    ilmPhases={['hot', 'warm', 'unmanaged']}
-    selectedIlmPhaseOptions={[
-      {
-        label: 'Hot',
-        value: 'hot',
-      },
-      {
-        label: 'Warm',
-        value: 'warm',
-      },
-      {
-        label: 'Unmanaged',
-        value: 'unmanaged',
-      },
-    ]}
-    setSelectedIlmPhaseOptions={jest.fn()}
-    defaultStartTime={'now-7d'}
-    defaultEndTime={'now'}
-  >
-    {children}
-  </DataQualityProvider>
-);
-
-const ContextWrapperILMNotAvailable: FC<PropsWithChildren<unknown>> = ({ children }) => (
-  <DataQualityProvider
-    httpFetch={mockHttpFetch}
-    telemetryEvents={mockTelemetryEvents}
-    isILMAvailable={false}
+    isILMAvailable={isILMAvailable}
     toasts={toasts}
     addSuccessToast={jest.fn()}
     canUserCreateAndReadCases={jest.fn(() => true)}
@@ -141,79 +92,113 @@ describe('useStats', () => {
   });
 
   describe('query with date range when ILM is not available', () => {
-    const queryParams = {
-      isILMAvailable: false,
-      startDate,
-      endDate,
-    };
-
-    beforeEach(async () => {
+    test('it calls the stats api with the expected params', async () => {
       mockHttpFetch.mockResolvedValue(mockStatsAuditbeatIndex);
 
-      const { waitForNextUpdate } = renderHook(() => useStats({ pattern, startDate, endDate }), {
-        wrapper: ContextWrapperILMNotAvailable,
+      const queryParams = {
+        isILMAvailable: false,
+        startDate,
+        endDate,
+      };
+
+      renderHook(() => useStats({ pattern, startDate, endDate }), {
+        wrapper: ({ children }) => (
+          <ContextWrapper isILMAvailable={false}>{children}</ContextWrapper>
+        ),
       });
-      await waitForNextUpdate();
-    });
-    test(`it calls the stats api with the expected params`, async () => {
-      expect(mockHttpFetch.mock.calls[0][1].query).toEqual(queryParams);
+
+      await waitFor(() => {
+        expect(mockHttpFetch.mock.calls[0][1].query).toEqual(queryParams);
+      });
     });
   });
 
   describe('successful response from the stats api', () => {
-    let statsResult: UseStats | undefined;
-
-    beforeEach(async () => {
+    function setup() {
       mockHttpFetch.mockResolvedValue(mockStatsAuditbeatIndex);
-
-      const { result, waitForNextUpdate } = renderHook(() => useStats(params), {
+      const { result } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
-      statsResult = await result.current;
-    });
+
+      return result;
+    }
 
     test('it returns the expected stats', async () => {
-      expect(statsResult?.stats).toEqual(mockStatsAuditbeatIndex);
+      const result = setup();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.stats).toEqual(mockStatsAuditbeatIndex);
+      });
     });
 
     test('it returns loading: false, because the data has loaded', async () => {
-      expect(statsResult?.loading).toBe(false);
+      const result = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
     });
 
     test('it returns a null error, because no errors occurred', async () => {
-      expect(statsResult?.error).toBeNull();
+      const result = setup();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBeNull();
+      });
     });
 
-    test(`it calls the stats api with the expected params`, async () => {
-      expect(mockHttpFetch.mock.calls[0][1].query).toEqual({ isILMAvailable: true });
+    test('it calls the stats api with the expected params', async () => {
+      setup();
+      await waitFor(() => {
+        expect(mockHttpFetch.mock.calls[0][1].query).toEqual({ isILMAvailable: true });
+      });
     });
   });
 
   describe('fetch rejects with an error', () => {
-    let statsResult: UseStats | undefined;
     const errorMessage = 'simulated error';
 
-    beforeEach(async () => {
+    function setup() {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(() => useStats(params), {
+      const { result } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
-      statsResult = await result.current;
-    });
+
+      return result;
+    }
 
     test('it returns null stats, because an error occurred', async () => {
-      expect(statsResult?.stats).toBeNull();
+      const result = setup();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.stats).toBeNull();
+      });
     });
 
     test('it returns loading: false, because data loading reached a terminal state', async () => {
-      expect(statsResult?.loading).toBe(false);
+      const result = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
     });
 
     test('it returns the expected error', async () => {
-      expect(statsResult?.error).toEqual(ERROR_LOADING_STATS(errorMessage));
+      const result = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toEqual(ERROR_LOADING_STATS(errorMessage));
+      });
     });
   });
 });
