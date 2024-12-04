@@ -24,7 +24,6 @@ export async function validateActions(
   context: RulesClientContext,
   ruleType: UntypedNormalizedRuleType,
   data: ValidateActionsData,
-  consumer: string,
   allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
   const { actions, notifyWhen, throttle, systemActions = [] } = data;
