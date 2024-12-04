@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { compact, uniq } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EntityV2 } from '@kbn/entities-schema';
-import { ESQLSearchResponse } from '@kbn/es-types';
-import { EntitySource } from '.';
+import { compact, uniq } from 'lodash';
+import { EntitySourceDefinition } from '../types';
 
 function getLatestDate(date1?: string, date2?: string) {
   if (!date1 && !date2) return;
@@ -45,7 +43,10 @@ function mergeEntities(metadataFields: string[], entity1: EntityV2, entity2: Ent
   return merged;
 }
 
-export function mergeEntitiesList(sources: EntitySource[], entities: EntityV2[]): EntityV2[] {
+export function mergeEntitiesList(
+  sources: EntitySourceDefinition[],
+  entities: EntityV2[]
+): EntityV2[] {
   const metadataFields = uniq(
     sources.flatMap((source) => compact([source.timestamp_field, ...source.metadata_fields]))
   );
@@ -63,40 +64,4 @@ export function mergeEntitiesList(sources: EntitySource[], entities: EntityV2[])
   }
 
   return Object.values(instances);
-}
-
-export async function runESQLQuery<T>({
-  esClient,
-  query,
-}: {
-  esClient: ElasticsearchClient;
-  query: string;
-}): Promise<T[]> {
-  const esqlResponse = (await esClient.esql.query(
-    {
-      query,
-      format: 'json',
-    },
-    { querystring: { drop_null_columns: true } }
-  )) as unknown as ESQLSearchResponse;
-
-  const documents = esqlResponse.values.map((row) =>
-    row.reduce<Record<string, any>>((acc, value, index) => {
-      const column = esqlResponse.columns[index];
-
-      if (!column) {
-        return acc;
-      }
-
-      // Removes the type suffix from the column name
-      const name = column.name.replace(/\.(text|keyword)$/, '');
-      if (!acc[name]) {
-        acc[name] = value;
-      }
-
-      return acc;
-    }, {})
-  ) as T[];
-
-  return documents;
 }
