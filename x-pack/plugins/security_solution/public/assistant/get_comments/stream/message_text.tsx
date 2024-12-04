@@ -25,6 +25,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
+import * as mermaidPlugin from '../mermaid';
 
 interface Props {
   content: string;
@@ -145,11 +146,13 @@ const getPluginDependencies = () => {
 };
 
 export function MessageText({ loading, content, index, 'data-test-subj': dataTestSubj }: Props) {
+  const { parsingPluginList, processingPluginList } = getPluginDependencies();
+  parsingPluginList.push([mermaidPlugin.parser, {}]);
+  processingPluginList[1][1].components.mermaid = mermaidPlugin.renderer;
+
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
-
-  const { parsingPluginList, processingPluginList } = getPluginDependencies();
 
   return (
     <EuiText className={containerClassName} data-test-subj={dataTestSubj}>

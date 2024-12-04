@@ -114,6 +114,7 @@ export function getWebpackConfig(
       noParse: [
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
         /[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/,
+        /[\/\\]node_modules[\/\\]mermaid[\/\\]dist[\/\\]mermaid\.js$/,
       ],
 
       rules: [
@@ -303,12 +304,13 @@ export function getWebpackConfig(
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
-      mainFields: ['browser', 'main'],
+      mainFields: ['browser', 'main', 'module'],
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
           'src/core/public/styles/core_app/images'
         ),
+        mermaid: Path.resolve(worker.repoRoot, 'node_modules/mermaid/dist/mermaid.js'),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
     },
