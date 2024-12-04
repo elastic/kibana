@@ -52,6 +52,8 @@ import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
   BaseFieldsLatest,
   DetectionAlert,
+  EqlBuildingBlockFieldsLatest,
+  EqlShellFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../common/api/detection_engine/model/alerts';
 import type {
@@ -354,7 +356,9 @@ export type WrapSuppressedHits = (
 export type WrapSequences = (
   sequences: Array<EqlSequence<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+) => Array<
+  WrappedFieldsLatest<EqlShellFieldsLatest> | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
+>;
 
 export type RuleServices = RuleExecutorServices<
   AlertInstanceState,

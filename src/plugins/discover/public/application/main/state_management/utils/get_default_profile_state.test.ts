@@ -27,6 +27,7 @@ describe('getDefaultProfileState', () => {
       let appState = getDefaultProfileState({
         profilesManager: profilesManagerMock,
         resetDefaultProfileState: {
+          resetId: 'test',
           columns: false,
           rowHeight: false,
           breakdownField: true,
@@ -39,6 +40,7 @@ describe('getDefaultProfileState', () => {
       appState = getDefaultProfileState({
         profilesManager: profilesManagerMock,
         resetDefaultProfileState: {
+          resetId: 'test',
           columns: false,
           rowHeight: false,
           breakdownField: true,
@@ -54,6 +56,7 @@ describe('getDefaultProfileState', () => {
       let appState = getDefaultProfileState({
         profilesManager: profilesManagerMock,
         resetDefaultProfileState: {
+          resetId: 'test',
           columns: true,
           rowHeight: false,
           breakdownField: false,
@@ -79,6 +82,7 @@ describe('getDefaultProfileState', () => {
       appState = getDefaultProfileState({
         profilesManager: profilesManagerMock,
         resetDefaultProfileState: {
+          resetId: 'test',
           columns: true,
           rowHeight: false,
           breakdownField: false,
@@ -107,6 +111,7 @@ describe('getDefaultProfileState', () => {
       const appState = getDefaultProfileState({
         profilesManager: profilesManagerMock,
         resetDefaultProfileState: {
+          resetId: 'test',
           columns: false,
           rowHeight: true,
           breakdownField: false,
@@ -125,6 +130,7 @@ describe('getDefaultProfileState', () => {
       const appState = getDefaultProfileState({
         profilesManager: profilesManagerMock,
         resetDefaultProfileState: {
+          resetId: 'test',
           columns: false,
           rowHeight: false,
           breakdownField: false,

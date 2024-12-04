@@ -17,10 +17,7 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import {
-  AlertingAuthorization,
-  RegistryAlertTypeWithAuth,
-} from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { getBeforeSetup } from './lib';
 import { RecoveredActionGroup } from '../../../common';
@@ -88,6 +85,7 @@ describe('listRuleTypes', () => {
     hasFieldsForAAD: false,
     validLegacyConsumers: [],
   };
+
   const myAppAlertType: RegistryRuleType = {
     actionGroups: [],
     actionVariables: undefined,
@@ -104,7 +102,11 @@ describe('listRuleTypes', () => {
     hasFieldsForAAD: false,
     validLegacyConsumers: [],
   };
-  const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
+
+  const setOfAlertTypes = new Map<string, RegistryRuleType>([
+    [myAppAlertType.id, myAppAlertType],
+    [alertingAlertType.id, alertingAlertType],
+  ]);
 
   const authorizedConsumers = {
     alerts: { read: true, all: true },
@@ -118,62 +120,162 @@ describe('listRuleTypes', () => {
 
   test('should return a list of AlertTypes that exist in the registry', async () => {
     ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-    authorization.filterByRuleTypeAuthorization.mockResolvedValue(
-      new Set<RegistryAlertTypeWithAuth>([
-        { ...myAppAlertType, authorizedConsumers },
-        { ...alertingAlertType, authorizedConsumers },
+    ruleTypeRegistry.has.mockReturnValue(true);
+
+    authorization.getAuthorizedRuleTypes.mockResolvedValue(
+      new Map([
+        [myAppAlertType.id, { authorizedConsumers }],
+        [alertingAlertType.id, { authorizedConsumers }],
       ])
     );
-    expect(await rulesClient.listRuleTypes()).toEqual(
-      new Set([
-        { ...myAppAlertType, authorizedConsumers },
-        { ...alertingAlertType, authorizedConsumers },
+
+    expect(await rulesClient.listRuleTypes()).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "actionGroups": Array [],
+          "actionVariables": undefined,
+          "authorizedConsumers": Object {
+            "alerts": Object {
+              "all": true,
+              "read": true,
+            },
+            "myApp": Object {
+              "all": true,
+              "read": true,
+            },
+            "myOtherApp": Object {
+              "all": true,
+              "read": true,
+            },
+          },
+          "category": "test",
+          "defaultActionGroupId": "default",
+          "enabledInLicense": true,
+          "hasAlertsMappings": false,
+          "hasFieldsForAAD": false,
+          "id": "myAppAlertType",
+          "isExportable": true,
+          "minimumLicenseRequired": "basic",
+          "name": "myAppAlertType",
+          "producer": "myApp",
+          "recoveryActionGroup": Object {
+            "id": "recovered",
+            "name": "Recovered",
+          },
+          "validLegacyConsumers": Array [],
+        },
+        Object {
+          "actionGroups": Array [],
+          "actionVariables": undefined,
+          "authorizedConsumers": Object {
+            "alerts": Object {
+              "all": true,
+              "read": true,
+            },
+            "myApp": Object {
+              "all": true,
+              "read": true,
+            },
+            "myOtherApp": Object {
+              "all": true,
+              "read": true,
+            },
+          },
+          "category": "test",
+          "defaultActionGroupId": "default",
+          "enabledInLicense": true,
+          "hasAlertsMappings": false,
+          "hasFieldsForAAD": false,
+          "id": "alertingAlertType",
+          "isExportable": true,
+          "minimumLicenseRequired": "basic",
+          "name": "alertingAlertType",
+          "producer": "alerts",
+          "recoveryActionGroup": Object {
+            "id": "recovered",
+            "name": "Recovered",
+          },
+          "validLegacyConsumers": Array [],
+        },
+      ]
+    `);
+  });
+
+  test('should filter out rule types that are not registered in the registry', async () => {
+    ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+    ruleTypeRegistry.has.mockImplementation((id: string) => id === myAppAlertType.id);
+
+    authorization.getAuthorizedRuleTypes.mockResolvedValue(
+      new Map([
+        [myAppAlertType.id, { authorizedConsumers }],
+        [alertingAlertType.id, { authorizedConsumers }],
       ])
     );
+
+    expect(await rulesClient.listRuleTypes()).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "actionGroups": Array [],
+          "actionVariables": undefined,
+          "authorizedConsumers": Object {
+            "alerts": Object {
+              "all": true,
+              "read": true,
+            },
+            "myApp": Object {
+              "all": true,
+              "read": true,
+            },
+            "myOtherApp": Object {
+              "all": true,
+              "read": true,
+            },
+          },
+          "category": "test",
+          "defaultActionGroupId": "default",
+          "enabledInLicense": true,
+          "hasAlertsMappings": false,
+          "hasFieldsForAAD": false,
+          "id": "myAppAlertType",
+          "isExportable": true,
+          "minimumLicenseRequired": "basic",
+          "name": "myAppAlertType",
+          "producer": "myApp",
+          "recoveryActionGroup": Object {
+            "id": "recovered",
+            "name": "Recovered",
+          },
+          "validLegacyConsumers": Array [],
+        },
+      ]
+    `);
   });
 
   describe('authorization', () => {
-    const listedTypes = new Set<RegistryRuleType>([
-      {
-        actionGroups: [],
-        actionVariables: undefined,
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        recoveryActionGroup: RecoveredActionGroup,
-        id: 'myType',
-        name: 'myType',
-        category: 'test',
-        producer: 'myApp',
-        enabledInLicense: true,
-        hasAlertsMappings: false,
-        hasFieldsForAAD: false,
-        validLegacyConsumers: [],
-      },
-      {
-        id: 'myOtherType',
-        name: 'Test',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        recoveryActionGroup: RecoveredActionGroup,
-        category: 'test',
-        producer: 'alerts',
-        enabledInLicense: true,
-        hasAlertsMappings: false,
-        hasFieldsForAAD: false,
-        validLegacyConsumers: [],
-      },
-    ]);
-    beforeEach(() => {
-      ruleTypeRegistry.list.mockReturnValue(listedTypes);
-    });
-
-    test('should return a list of AlertTypes that exist in the registry only if the user is authorised to get them', async () => {
-      const authorizedTypes = new Set<RegistryAlertTypeWithAuth>([
+    const listedTypes = new Map<string, RegistryRuleType>([
+      [
+        'myType',
         {
+          actionGroups: [],
+          actionVariables: undefined,
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          recoveryActionGroup: RecoveredActionGroup,
           id: 'myType',
+          name: 'myType',
+          category: 'test',
+          producer: 'myApp',
+          enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
+        },
+      ],
+      [
+        'myOtherType',
+        {
+          id: 'myOtherType',
           name: 'Test',
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
@@ -182,18 +284,62 @@ describe('listRuleTypes', () => {
           recoveryActionGroup: RecoveredActionGroup,
           category: 'test',
           producer: 'alerts',
-          authorizedConsumers: {
-            myApp: { read: true, all: true },
-          },
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
-      ]);
-      authorization.filterByRuleTypeAuthorization.mockResolvedValue(authorizedTypes);
+      ],
+    ]);
 
-      expect(await rulesClient.listRuleTypes()).toEqual(authorizedTypes);
+    beforeEach(() => {
+      ruleTypeRegistry.list.mockReturnValue(listedTypes);
+      ruleTypeRegistry.has.mockReturnValue(true);
+    });
+
+    test('should return a list of AlertTypes that exist in the registry only if the user is authorized to get them', async () => {
+      authorization.getAuthorizedRuleTypes.mockResolvedValue(
+        new Map([
+          [
+            'myType',
+            {
+              authorizedConsumers: {
+                myApp: { read: true, all: true },
+              },
+            },
+          ],
+        ])
+      );
+
+      expect(await rulesClient.listRuleTypes()).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionGroups": Array [],
+            "actionVariables": undefined,
+            "authorizedConsumers": Object {
+              "myApp": Object {
+                "all": true,
+                "read": true,
+              },
+            },
+            "category": "test",
+            "defaultActionGroupId": "default",
+            "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
+            "id": "myType",
+            "isExportable": true,
+            "minimumLicenseRequired": "basic",
+            "name": "myType",
+            "producer": "myApp",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+            "validLegacyConsumers": Array [],
+          },
+        ]
+      `);
     });
   });
 });
