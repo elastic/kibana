@@ -30,6 +30,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { FlyoutParamProps } from './types';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
@@ -56,14 +58,10 @@ interface Props {
   id: string;
   location: string;
   locationId: string;
+  spaceId?: string;
   onClose: () => void;
   onEnabledChange: () => void;
-  onLocationChange: (params: {
-    configId: string;
-    id: string;
-    location: string;
-    locationId: string;
-  }) => void;
+  onLocationChange: (params: FlyoutParamProps) => void;
   currentDurationChartFrom?: string;
   currentDurationChartTo?: string;
   previousDurationChartFrom?: string;
@@ -220,7 +218,7 @@ export function LoadingState() {
 }
 
 export function MonitorDetailFlyout(props: Props) {
-  const { id, configId, onLocationChange, locationId } = props;
+  const { id, configId, onLocationChange, locationId, spaceId } = props;
 
   const { status: overviewStatus } = useOverviewStatus({ scopeStatusByLocation: true });
 
@@ -235,8 +233,8 @@ export function MonitorDetailFlyout(props: Props) {
 
   const setLocation = useCallback(
     (location: string, locationIdT: string) =>
-      onLocationChange({ id, configId, location, locationId: locationIdT }),
-    [id, configId, onLocationChange]
+      onLocationChange({ id, configId, location, locationId: locationIdT, spaceId }),
+    [onLocationChange, id, configId, spaceId]
   );
 
   const detailLink = useMonitorDetailLocator({
@@ -259,9 +257,16 @@ export function MonitorDetailFlyout(props: Props) {
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
+  const { space } = useKibanaSpace();
+
   useEffect(() => {
-    dispatch(getMonitorAction.get({ monitorId: configId }));
-  }, [configId, dispatch, upsertSuccess]);
+    dispatch(
+      getMonitorAction.get({
+        monitorId: configId,
+        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+      })
+    );
+  }, [configId, dispatch, space?.id, spaceId, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 

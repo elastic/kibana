@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -24,6 +25,7 @@ const paramSchema = schema.object({
 export const muteAlertInstanceRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
+  docLinks: DocLinksServiceSetup,
   usageCounter?: UsageCounter,
   isServerless?: boolean
 ) => {
@@ -37,7 +39,15 @@ export const muteAlertInstanceRoute = (
         access: isServerless ? 'internal' : 'public',
         summary: 'Mute an alert',
         tags: ['oas-tag:alerting'],
-        deprecated: true,
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'POST',
+            newApiPath: '/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
@@ -48,7 +58,8 @@ export const muteAlertInstanceRoute = (
 
       trackLegacyRouteUsage('muteInstance', usageCounter);
 
-      const rulesClient = (await context.alerting).getRulesClient();
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
 
       const renameMap = {
         alert_id: 'alertId',

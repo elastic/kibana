@@ -46,9 +46,12 @@ export interface NewAgentPolicy {
   global_data_tags?: GlobalDataTag[];
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
-    enabled: boolean;
+    enabled?: boolean;
     host?: string;
     port?: number;
+    buffer?: {
+      enabled: boolean;
+    };
   };
   monitoring_diagnostics?: {
     limit?: {
@@ -182,6 +185,18 @@ export interface FullAgentPolicy {
       uninstall_token_hash: string;
       signing_key: string;
     };
+    logging?: {
+      level?: string;
+      to_files?: boolean;
+      files?: {
+        rotateeverybytes?: number;
+        keepfiles?: number;
+        interval?: string;
+      };
+    };
+    limits?: {
+      go_max_procs?: number;
+    };
   };
   secret_references?: PolicySecretReference[];
   signed?: {
@@ -257,5 +272,25 @@ export interface FleetServerPolicy {
 
 export interface AgentlessApiResponse {
   id: string;
-  region_id: string;
+}
+
+// Definitions for agent policy outputs endpoints
+export interface MinimalOutput {
+  name?: string;
+  id?: string;
+}
+export interface IntegrationsOutput extends MinimalOutput {
+  pkgName?: string;
+  integrationPolicyName?: string;
+}
+
+export interface OutputsForAgentPolicy {
+  agentPolicyId?: string;
+  monitoring: {
+    output: MinimalOutput;
+  };
+  data: {
+    output: MinimalOutput;
+    integrations?: IntegrationsOutput[];
+  };
 }

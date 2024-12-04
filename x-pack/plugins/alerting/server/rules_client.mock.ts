@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { RulesClientApi } from './types';
 
 type Schema = RulesClientApi;
 export type RulesClientMock = jest.Mocked<Schema>;
 
 const createRulesClientMock = () => {
+  const alertingAuthorization = alertingAuthorizationMock.create();
+
   const mocked: RulesClientMock = {
     aggregate: jest.fn().mockReturnValue({ ruleExecutionStatus: {}, ruleLastRunOutcome: {} }),
     getTags: jest.fn(),
@@ -31,10 +34,7 @@ const createRulesClientMock = () => {
     listRuleTypes: jest.fn(),
     getAlertSummary: jest.fn(),
     getAuditLogger: jest.fn(),
-    getAuthorization: jest.fn().mockImplementation(() => ({
-      getFindAuthorizationFilter: jest.fn().mockReturnValue({ filter: null }),
-      getAuthorizedRuleTypes: jest.fn().mockResolvedValue([]),
-    })),
+    getAuthorization: jest.fn().mockReturnValue(alertingAuthorization),
     getExecutionLogForRule: jest.fn(),
     getRuleExecutionKPI: jest.fn(),
     getGlobalExecutionKpiWithAuth: jest.fn(),
@@ -52,10 +52,8 @@ const createRulesClientMock = () => {
     bulkDisableRules: jest.fn(),
     snooze: jest.fn(),
     unsnooze: jest.fn(),
-    clearExpiredSnoozes: jest.fn(),
     runSoon: jest.fn(),
     clone: jest.fn(),
-    getAlertFromRaw: jest.fn(),
     getScheduleFrequency: jest.fn(),
     bulkUntrackAlerts: jest.fn(),
   };

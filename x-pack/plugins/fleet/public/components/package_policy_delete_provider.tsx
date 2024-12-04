@@ -15,10 +15,11 @@ import {
   sendDeletePackagePolicy,
   sendDeleteAgentPolicy,
   useConfig,
+  sendGetAgents,
+  useMultipleAgentPolicies,
 } from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
-import { sendGetAgents, useMultipleAgentPolicies } from '../hooks';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
@@ -235,6 +236,23 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         confirmButtonDisabled={isLoading || isLoadingAgentsCount}
       >
+        {(hasMultipleAgentPolicies || isShared) && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"
+                  defaultMessage="This integration is shared by multiple agent policies."
+                />
+              }
+              data-test-subj="sharedAgentPolicyCallOut"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {isLoadingAgentsCount ? (
           <FormattedMessage
             id="xpack.fleet.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
@@ -242,23 +260,9 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           />
         ) : agentsCount && agentPolicies ? (
           <>
-            {(hasMultipleAgentPolicies || isShared) && (
-              <>
-                <EuiCallOut
-                  color="warning"
-                  iconType="alert"
-                  title={
-                    <FormattedMessage
-                      id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"
-                      defaultMessage="This integration is shared by multiple agent policies."
-                    />
-                  }
-                />
-                <EuiSpacer size="m" />
-              </>
-            )}
             <EuiCallOut
               color="danger"
+              data-test-subj="affectedAgentsCallOut"
               title={
                 !isAgentlessPolicy && (
                   <FormattedMessage

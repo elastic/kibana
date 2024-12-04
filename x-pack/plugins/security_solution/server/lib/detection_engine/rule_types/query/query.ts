@@ -22,7 +22,7 @@ import type { UnifiedQueryRuleParams } from '../../rule_schema';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { CreateRuleAdditionalOptions, RunOpts } from '../types';
+import type { CreateRuleOptions, RunOpts } from '../types';
 
 export const queryExecutor = async ({
   runOpts,
@@ -42,7 +42,7 @@ export const queryExecutor = async ({
   version: string;
   spaceId: string;
   bucketHistory?: BucketHistory[];
-  scheduleNotificationResponseActionsService: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
   licensing: LicensingPluginSetup;
 }) => {
   const completeRule = runOpts.completeRule;
@@ -65,6 +65,7 @@ export const queryExecutor = async ({
     const hasPlatinumLicense = license.hasAtLeast('platinum');
 
     const result =
+      // TODO: replace this with getIsAlertSuppressionActive function
       ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
         ? await groupAndBulkCreate({
             runOpts,
@@ -98,13 +99,11 @@ export const queryExecutor = async ({
             state: {},
           };
 
-    if (scheduleNotificationResponseActionsService) {
-      scheduleNotificationResponseActionsService({
-        signals: result.createdSignals,
-        signalsCount: result.createdSignalsCount,
-        responseActions: completeRule.ruleParams.responseActions,
-      });
-    }
+    scheduleNotificationResponseActionsService({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: completeRule.ruleParams.responseActions,
+    });
 
     return result;
   });

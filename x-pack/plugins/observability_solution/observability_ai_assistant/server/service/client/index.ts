@@ -7,7 +7,7 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SpanKind, context } from '@opentelemetry/api';
@@ -30,6 +30,7 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -46,22 +47,19 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
+  type AdHocInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
-  type AdHocInstruction,
-  AssistantScope,
+  KnowledgeBaseType,
+  KnowledgeBaseEntryRole,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import {
-  KnowledgeBaseEntryOperationType,
-  KnowledgeBaseService,
-  RecalledEntry,
-} from '../knowledge_base_service';
+import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
@@ -82,12 +80,20 @@ import {
   LangtraceServiceProvider,
   withLangtraceChatCompleteSpan,
 } from './operators/with_langtrace_chat_complete_span';
+import {
+  runSemanticTextKnowledgeBaseMigration,
+  scheduleSemanticTextMigration,
+} from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { ObservabilityAIAssistantConfig } from '../../config';
 
 const MAX_FUNCTION_CALLS = 8;
 
 export class ObservabilityAIAssistantClient {
   constructor(
     private readonly dependencies: {
+      config: ObservabilityAIAssistantConfig;
+      core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
       actionsClient: PublicMethodsOf<ActionsClient>;
       uiSettingsClient: IUiSettingsClient;
       namespace: string;
@@ -101,7 +107,7 @@ export class ObservabilityAIAssistantClient {
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
-      scope: AssistantScope;
+      scopes: AssistantScope[];
     }
   ) {}
 
@@ -210,6 +216,9 @@ export class ObservabilityAIAssistantClient {
 
         const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
 
+        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
+        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
         const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
@@ -217,11 +226,11 @@ export class ObservabilityAIAssistantClient {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
-                applicationInstructions: functionClient.getInstructions(this.dependencies.scope),
+                applicationInstructions: functionClient.getInstructions(),
                 userInstructions,
-                adHocInstructions,
+                adHocInstructions: allAdHocInstructions,
                 availableFunctionNames: functionClient
-                  .getFunctions({ scope: this.dependencies.scope })
+                  .getFunctions()
                   .map((fn) => fn.definition.name),
               }),
               initialMessages
@@ -301,7 +310,6 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
-                scope: this.dependencies.scope,
                 useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );
@@ -707,48 +715,104 @@ export class ObservabilityAIAssistantClient {
   }: {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
-  }): Promise<{ entries: RecalledEntry[] }> => {
-    return this.dependencies.knowledgeBaseService.recall({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      queries,
-      categories,
-      esClient: this.dependencies.esClient,
-      uiSettingsClient: this.dependencies.uiSettingsClient,
-    });
+  }): Promise<RecalledEntry[]> => {
+    return (
+      this.dependencies.knowledgeBaseService?.recall({
+        namespace: this.dependencies.namespace,
+        user: this.dependencies.user,
+        queries,
+        categories,
+        esClient: this.dependencies.esClient,
+        uiSettingsClient: this.dependencies.uiSettingsClient,
+      }) || []
+    );
   };
 
   getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.status();
+    return this.dependencies.knowledgeBaseService.getStatus();
   };
 
-  setupKnowledgeBase = () => {
-    return this.dependencies.knowledgeBaseService.setup();
+  setupKnowledgeBase = async (modelId: string | undefined) => {
+    const { esClient, core, logger, knowledgeBaseService } = this.dependencies;
+
+    // setup the knowledge base
+    const res = await knowledgeBaseService.setup(esClient, modelId);
+
+    core
+      .getStartServices()
+      .then(([_, pluginsStart]) => {
+        logger.debug('Schedule semantic text migration task');
+        return scheduleSemanticTextMigration(pluginsStart);
+      })
+      .catch((error) => {
+        logger.error(`Failed to run semantic text migration task: ${error}`);
+      });
+
+    return res;
+  };
+
+  resetKnowledgeBase = () => {
+    const { esClient } = this.dependencies;
+    return this.dependencies.knowledgeBaseService.reset(esClient);
+  };
+
+  migrateKnowledgeBaseToSemanticText = () => {
+    return runSemanticTextKnowledgeBaseMigration({
+      esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+      config: this.dependencies.config,
+    });
+  };
+
+  addUserInstruction = async ({
+    entry,
+  }: {
+    entry: Omit<
+      KnowledgeBaseEntry,
+      '@timestamp' | 'confidence' | 'is_correction' | 'type' | 'role'
+    >;
+  }): Promise<void> => {
+    // for now we want to limit the number of user instructions to 1 per user
+    // if a user instruction already exists for the user, we get the id and update it
+    this.dependencies.logger.debug('Adding user instruction entry');
+    const existingId = await this.dependencies.knowledgeBaseService.getPersonalUserInstructionId({
+      isPublic: entry.public,
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+    });
+
+    if (existingId) {
+      entry.id = existingId;
+      this.dependencies.logger.debug(`Updating user instruction with id "${existingId}"`);
+    }
+
+    return this.dependencies.knowledgeBaseService.addEntry({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      entry: {
+        ...entry,
+        confidence: 'high',
+        is_correction: false,
+        type: KnowledgeBaseType.UserInstruction,
+        labels: {},
+        role: KnowledgeBaseEntryRole.UserEntry,
+      },
+    });
   };
 
   addKnowledgeBaseEntry = async ({
     entry,
   }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'type'>;
   }): Promise<void> => {
     return this.dependencies.knowledgeBaseService.addEntry({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      entry,
+      entry: {
+        ...entry,
+        type: KnowledgeBaseType.Contextual,
+      },
     });
-  };
-
-  importKnowledgeBaseEntries = async ({
-    entries,
-  }: {
-    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
-  }): Promise<void> => {
-    const operations = entries.map((entry) => ({
-      type: KnowledgeBaseEntryOperationType.Index,
-      document: { ...entry, '@timestamp': new Date().toISOString() },
-    }));
-
-    await this.dependencies.knowledgeBaseService.addEntries({ operations });
   };
 
   getKnowledgeBaseEntries = async ({

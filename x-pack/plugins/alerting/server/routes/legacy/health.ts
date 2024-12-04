@@ -7,6 +7,7 @@
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -18,6 +19,7 @@ export function healthRoute(
   router: AlertingRouter,
   licenseState: ILicenseState,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  docLinks: DocLinksServiceSetup,
   usageCounter?: UsageCounter,
   isServerless?: boolean
 ) {
@@ -29,7 +31,15 @@ export function healthRoute(
         access: isServerless ? 'internal' : 'public',
         summary: 'Get the alerting framework health',
         tags: ['oas-tag:alerting'],
-        deprecated: true,
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'GET',
+            newApiPath: '/api/alerting/rule/_health',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
@@ -40,8 +50,9 @@ export function healthRoute(
       trackLegacyRouteUsage('health', usageCounter);
       try {
         const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         // Verify that user has access to at least one rule type
-        const ruleTypes = Array.from(await alertingContext.getRulesClient().listRuleTypes());
+        const ruleTypes = Array.from(await rulesClient.listRuleTypes());
         if (ruleTypes.length > 0) {
           const alertingFrameworkHealth = await alertingContext.getFrameworkHealth();
 

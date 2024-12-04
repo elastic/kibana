@@ -19,9 +19,9 @@ import {
   timer,
 } from 'rxjs';
 
-import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
 import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import { createDefaultSpace } from './create_default_space';
@@ -33,7 +33,7 @@ interface Deps {
   license$: Observable<ILicense>;
   spacesLicense: SpacesLicense;
   logger: Logger;
-  solution?: OnBoardingDefaultSolution;
+  solution?: SolutionId;
 }
 
 export const RETRY_SCALE_DURATION = 100;

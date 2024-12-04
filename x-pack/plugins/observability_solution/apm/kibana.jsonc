@@ -1,13 +1,20 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": "@elastic/obs-ux-infra_services-team",
+  "owner": [
+    "@elastic/obs-ux-infra_services-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
   "description": "The user interface for Elastic APM",
   "plugin": {
     "id": "apm",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "apm"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "apm"
+    ],
     "requiredPlugins": [
       "apmDataAccess",
       "data",
@@ -31,7 +38,7 @@
       "maps",
       "uiActions",
       "logsDataAccess",
-      "entityManager"
+      "savedSearch",
     ],
     "optionalPlugins": [
       "actions",
@@ -48,12 +55,19 @@
       "serverless",
       "taskManager",
       "usageCollection",
-      "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
+      "customIntegrations",
       "licenseManagement",
       "profilingDataAccess",
       "cases",
       "observabilityAIAssistant"
     ],
-    "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
+    "requiredBundles": [
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils",
+      "ml",
+      "observability",
+      "maps"
+    ]
   }
 }

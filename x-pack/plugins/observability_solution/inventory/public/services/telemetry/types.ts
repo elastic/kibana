@@ -6,9 +6,14 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
+}
+
+export interface TelemetryServiceStartParams {
+  entityManager: EntityManagerPublicPluginSetup;
 }
 
 export interface InventoryAddDataParams {
@@ -16,14 +21,48 @@ export interface InventoryAddDataParams {
   journey?: 'add_data' | 'associate_existing_service_logs';
 }
 
-export type TelemetryEventParams = InventoryAddDataParams;
+export interface EntityInventoryViewedParams {
+  view_state: 'empty' | 'populated' | 'eem_disabled';
+}
+
+export interface EntityInventorySearchQuerySubmittedParams {
+  kuery_fields: string[];
+  action: 'submit' | 'refresh';
+}
+
+export interface EntityInventoryEntityTypeFilteredParams {
+  include_entity_types: string[];
+  exclude_entity_types: string[];
+}
+
+export interface EntityViewClickedParams {
+  entity_type: string;
+  view_type: 'detail' | 'flyout';
+}
+
+export type TelemetryEventParams =
+  | InventoryAddDataParams
+  | EntityInventoryViewedParams
+  | EntityInventorySearchQuerySubmittedParams
+  | EntityViewClickedParams
+  | EntityInventoryEntityTypeFilteredParams;
 
 export interface ITelemetryClient {
   reportInventoryAddData(params: InventoryAddDataParams): void;
+  reportEntityInventoryViewed(params: EntityInventoryViewedParams): void;
+  reportEntityInventorySearchQuerySubmitted(
+    params: EntityInventorySearchQuerySubmittedParams
+  ): void;
+  reportEntityViewClicked(params: EntityViewClickedParams): void;
+  reportEntityInventoryEntityTypeFiltered(params: EntityInventoryEntityTypeFilteredParams): void;
 }
 
 export enum TelemetryEventTypes {
   INVENTORY_ADD_DATA_CLICKED = 'inventory_add_data_clicked',
+  ENTITY_INVENTORY_VIEWED = 'Entity Inventory Viewed',
+  ENTITY_INVENTORY_SEARCH_QUERY_SUBMITTED = 'Entity Inventory Search Query Submitted',
+  ENTITY_INVENTORY_ENTITY_TYPE_FILTERED = 'Entity Inventory Entity Type Filtered',
+  ENTITY_VIEW_CLICKED = 'Entity View Clicked',
 }
 
 export interface TelemetryEvent {

@@ -33,10 +33,11 @@ import {
   SIZE,
 } from '../../../../../translations';
 import * as i18n from '../translations';
-import { UseIndicesCheckCheckState } from '../../../../../hooks/use_indices_check/types';
 import { IndexResultBadge } from '../../index_result_badge';
 import { Stat } from '../../../../../stat';
 import { getIndexResultToolTip } from '../../utils/get_index_result_tooltip';
+import { CHECK_NOW } from '../../translations';
+import { HISTORICAL_RESULTS_TOUR_SELECTOR_KEY } from '../../constants';
 
 const ProgressContainer = styled.div`
   width: 150px;
@@ -100,17 +101,17 @@ export const getSummaryTableColumns = ({
   formatNumber,
   isILMAvailable,
   pattern,
-  onExpandAction,
   onCheckNowAction,
-  checkState,
+  onViewHistoryAction,
+  firstIndexName,
 }: {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   isILMAvailable: boolean;
   pattern: string;
-  onExpandAction: (indexName: string) => void;
   onCheckNowAction: (indexName: string) => void;
-  checkState: UseIndicesCheckCheckState;
+  onViewHistoryAction: (indexName: string) => void;
+  firstIndexName?: string;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
   {
     name: i18n.ACTIONS,
@@ -118,30 +119,34 @@ export const getSummaryTableColumns = ({
     width: '65px',
     actions: [
       {
-        name: i18n.VIEW_CHECK_DETAILS,
+        name: CHECK_NOW,
         render: (item) => {
           return (
-            <EuiToolTip content={i18n.VIEW_CHECK_DETAILS}>
+            <EuiToolTip content={CHECK_NOW}>
               <EuiButtonIcon
-                iconType="expand"
-                aria-label={i18n.VIEW_CHECK_DETAILS}
-                onClick={() => onExpandAction(item.indexName)}
+                iconType="refresh"
+                aria-label={CHECK_NOW}
+                data-test-subj={`checkNowAction-${item.indexName}`}
+                onClick={() => onCheckNowAction(item.indexName)}
               />
             </EuiToolTip>
           );
         },
       },
       {
-        name: i18n.CHECK_INDEX,
+        name: i18n.VIEW_HISTORY,
         render: (item) => {
-          const isChecking = checkState[item.indexName]?.isChecking ?? false;
+          const isFirstIndexName = firstIndexName === item.indexName;
           return (
-            <EuiToolTip content={i18n.CHECK_INDEX}>
+            <EuiToolTip content={i18n.VIEW_HISTORY}>
               <EuiButtonIcon
-                iconType="refresh"
-                aria-label={i18n.CHECK_INDEX}
-                isLoading={isChecking}
-                onClick={() => onCheckNowAction(item.indexName)}
+                iconType="clockCounter"
+                aria-label={i18n.VIEW_HISTORY}
+                data-test-subj={`viewHistoryAction-${item.indexName}`}
+                onClick={() => onViewHistoryAction(item.indexName)}
+                {...(isFirstIndexName && {
+                  [HISTORICAL_RESULTS_TOUR_SELECTOR_KEY]: pattern,
+                })}
               />
             </EuiToolTip>
           );

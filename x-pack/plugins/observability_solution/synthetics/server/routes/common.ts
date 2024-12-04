@@ -9,6 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
@@ -35,6 +36,12 @@ export const QuerySchema = schema.object({
   status: StringOrArraySchema,
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
   monitorQueryIds: StringOrArraySchema,
+  internal: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+    })
+  ),
+  showFromAllSpaces: schema.maybe(schema.boolean()),
 });
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
@@ -50,6 +57,7 @@ export const OverviewStatusSchema = schema.object({
   schedules: StringOrArraySchema,
   status: StringOrArraySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
+  showFromAllSpaces: schema.maybe(schema.boolean()),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
@@ -82,6 +90,7 @@ export const getMonitors = async (
     projects,
     schedules,
     monitorQueryIds,
+    showFromAllSpaces,
   } = context.request.query;
 
   const { filtersStr } = await getMonitorFilters({
@@ -95,20 +104,19 @@ export const getMonitors = async (
     context,
   });
 
-  const findParams = {
+  return context.savedObjectsClient.find({
     type: syntheticsMonitorType,
     perPage,
     page,
     sortField: parseMappingKey(sortField),
     sortOrder,
     searchFields: SEARCH_FIELDS,
-    search: query ? `${query}*` : undefined,
+    search: query,
     filter: filtersStr,
     searchAfter,
     fields,
-  };
-
-  return context.savedObjectsClient.find(findParams);
+    ...(showFromAllSpaces && { namespaces: ['*'] }),
+  });
 };
 
 interface Filters {
@@ -262,3 +270,26 @@ function parseMappingKey(key: string | undefined) {
       return key;
   }
 }
+
+export const validateRouteSpaceName = async (routeContext: RouteContext) => {
+  const { spaceId, server, request, response } = routeContext;
+  if (spaceId === DEFAULT_SPACE_ID) {
+    // default space is always valid
+    return { spaceId: DEFAULT_SPACE_ID };
+  }
+
+  try {
+    await server.spaces?.spacesService.getActiveSpace(request);
+  } catch (error) {
+    if (error.output?.statusCode === 404) {
+      return {
+        spaceId,
+        invalidResponse: response.notFound({
+          body: { message: `Kibana space '${spaceId}' does not exist` },
+        }),
+      };
+    }
+  }
+
+  return { invalidResponse: undefined };
+};

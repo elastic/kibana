@@ -11,7 +11,7 @@ import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function getAllActionTests({ getService }: FtrProviderContext) {
+export default function getAllConnectorsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('getAll', () => {
@@ -19,13 +19,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
     afterEach(() => objectRemover.removeAll());
 
-    it('should handle get all action request appropriately', async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+    it('should handle get all connectors request appropriately', async () => {
+      const { body: createdConnector } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My action',
-          actionTypeId: 'test.index-record',
+          name: 'My connector',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -34,7 +34,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       const { body: connectors } = await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connectors`)
@@ -57,10 +57,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           referenced_by_count: 0,
         },
         {
-          id: createdAction.id,
+          id: createdConnector.id,
           is_preconfigured: false,
           is_deprecated: false,
-          name: 'My action',
+          name: 'My connector',
           connector_type_id: 'test.index-record',
           is_missing_secrets: false,
           is_system_action: false,
@@ -144,13 +144,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
       ]);
     });
 
-    it(`shouldn't get all action from another space`, async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+    it(`shouldn't get all connectors from another space`, async () => {
+      const { body: createdConnector } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My action',
-          actionTypeId: 'test.index-record',
+          name: 'My connector',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -159,7 +159,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       const { body: connectors } = await supertest
         .get(`${getUrlPrefix(Spaces.other.id)}/api/actions/connectors`)
@@ -254,133 +254,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           referenced_by_count: 0,
         },
       ]);
-    });
-
-    describe('legacy', () => {
-      it('should handle get all action request appropriately', async () => {
-        const { body: createdAction } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'My action',
-            actionTypeId: 'test.index-record',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-            secrets: {
-              encrypted: 'This value should be encrypted',
-            },
-          })
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
-
-        const { body: connectors } = await supertest
-          .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`)
-          .expect(200);
-
-        // the custom ssl connectors have dynamic ports, so remove them before
-        // comparing to what we expect
-        const nonCustomSslConnectors = connectors.filter(
-          (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
-        );
-
-        expect(nonCustomSslConnectors).to.eql([
-          {
-            id: 'preconfigured-alert-history-es-index',
-            name: 'Alert history Elasticsearch index',
-            actionTypeId: '.index',
-            isPreconfigured: true,
-            isSystemAction: false,
-            isDeprecated: false,
-            referencedByCount: 0,
-          },
-          {
-            id: createdAction.id,
-            isPreconfigured: false,
-            isDeprecated: false,
-            isSystemAction: false,
-            name: 'My action',
-            actionTypeId: 'test.index-record',
-            isMissingSecrets: false,
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-            referencedByCount: 0,
-          },
-          {
-            actionTypeId: '.email',
-            id: 'notification-email',
-            isDeprecated: false,
-            isPreconfigured: true,
-            isSystemAction: false,
-            name: 'Notification Email Connector',
-            referencedByCount: 0,
-          },
-          {
-            id: 'preconfigured-es-index-action',
-            isPreconfigured: true,
-            isDeprecated: false,
-            actionTypeId: '.index',
-            isSystemAction: false,
-            name: 'preconfigured_es_index_action',
-            referencedByCount: 0,
-          },
-          {
-            actionTypeId: '.servicenow',
-            id: 'my-deprecated-servicenow',
-            isDeprecated: true,
-            isPreconfigured: true,
-            isSystemAction: false,
-            name: 'ServiceNow#xyz',
-            referencedByCount: 0,
-          },
-          {
-            actionTypeId: '.servicenow',
-            id: 'my-deprecated-servicenow-default',
-            isPreconfigured: true,
-            isDeprecated: true,
-            isSystemAction: false,
-            name: 'ServiceNow#xyz',
-            referencedByCount: 0,
-          },
-          {
-            id: 'my-slack1',
-            isPreconfigured: true,
-            isDeprecated: false,
-            actionTypeId: '.slack',
-            isSystemAction: false,
-            name: 'Slack#xyz',
-            referencedByCount: 0,
-          },
-          {
-            id: 'custom-system-abc-connector',
-            isPreconfigured: true,
-            isDeprecated: false,
-            actionTypeId: 'system-abc-action-type',
-            isSystemAction: false,
-            name: 'SystemABC',
-            referencedByCount: 0,
-          },
-          {
-            id: 'preconfigured.test.index-record',
-            isPreconfigured: true,
-            isDeprecated: false,
-            actionTypeId: 'test.index-record',
-            isSystemAction: false,
-            name: 'Test:_Preconfigured_Index_Record',
-            referencedByCount: 0,
-          },
-          {
-            id: 'my-test-email',
-            isPreconfigured: true,
-            isDeprecated: false,
-            actionTypeId: '.email',
-            isSystemAction: false,
-            name: 'TestEmail#xyz',
-            referencedByCount: 0,
-          },
-        ]);
-      });
     });
   });
 }

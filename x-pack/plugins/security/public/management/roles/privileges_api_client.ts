@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { RawKibanaPrivileges } from '@kbn/security-authorization-core';
+import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { PrivilegesAPIClientPublicContract } from '@kbn/security-plugin-types-public';
 
 import type { BuiltinESPrivileges } from '../../../common/model';

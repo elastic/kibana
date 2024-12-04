@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCheckbox,
@@ -37,21 +36,28 @@ const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
 export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>
-> = ({ actionParams, editAction, errors, index, producerId, featureId }) => {
+> = ({ actionParams, editAction, errors, index, producerId, featureId, ruleTypeId }) => {
   const {
+    cloud,
+    data: { dataViews: dataViewsService },
     http,
     notifications: { toasts },
-    data: { dataViews: dataViewsService },
   } = useKibana().services;
-  const owner = getOwnerFromRuleConsumerProducer(featureId, producerId);
+
+  const owner = getOwnerFromRuleConsumerProducer({
+    consumer: featureId,
+    producer: producerId,
+    // This is a workaround for a very specific bug with the cases action in serverless security
+    // More info here: https://github.com/elastic/kibana/issues/195599
+    isServerlessSecurity:
+      cloud?.isServerlessEnabled && cloud?.serverless.projectType === 'security',
+  });
 
   const { dataView, isLoading: loadingAlertDataViews } = useAlertsDataView({
     http,
     toasts,
     dataViewsService,
-    featureIds: producerId
-      ? [producerId as Exclude<ValidFeatureId, typeof AlertConsumers.SIEM>]
-      : [],
+    ruleTypeIds: ruleTypeId ? [ruleTypeId] : [],
   });
 
   const { data: configurations, isLoading: isLoadingCaseConfiguration } =

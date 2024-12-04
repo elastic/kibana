@@ -10,13 +10,15 @@
 import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { ViewMode } from '@kbn/presentation-publishing';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { FiltersNotificationActionApi } from './filters_notification_action';
 import { FiltersNotificationPopover } from './filters_notification_popover';
+import { ViewMode } from '@kbn/presentation-publishing';
+
+const canEditUnifiedSearch = jest.fn().mockReturnValue(true);
 
 const getMockPhraseFilter = (key: string, value: string): Filter => {
   return {
@@ -50,18 +52,24 @@ describe('filters notification popover', () => {
   let api: FiltersNotificationActionApi;
   let updateFilters: (filters: Filter[]) => void;
   let updateQuery: (query: Query | AggregateQuery | undefined) => void;
+  let updateViewMode: (viewMode: ViewMode) => void;
 
   beforeEach(async () => {
     const filtersSubject = new BehaviorSubject<Filter[] | undefined>(undefined);
     updateFilters = (filters) => filtersSubject.next(filters);
     const querySubject = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     updateQuery = (query) => querySubject.next(query);
+    const viewModeSubject = new BehaviorSubject<ViewMode>('view');
+    updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
 
     api = {
       uuid: 'testId',
-      viewMode: new BehaviorSubject<ViewMode>('edit'),
       filters$: filtersSubject,
       query$: querySubject,
+      parentApi: {
+        viewMode: viewModeSubject,
+      },
+      canEditUnifiedSearch,
     };
   });
 
@@ -87,7 +95,23 @@ describe('filters notification popover', () => {
     expect(await screen.findByTestId('filtersNotificationModal__query')).toBeInTheDocument();
   });
 
+  it('does not render an edit button when not in edit mode', async () => {
+    await renderAndOpenPopover();
+    expect(
+      await screen.queryByTestId('filtersNotificationModal__editButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render an edit button when canEditUnifiedSearch returns false', async () => {
+    await renderAndOpenPopover();
+    canEditUnifiedSearch.mockReturnValueOnce(false);
+    expect(
+      await screen.queryByTestId('filtersNotificationModal__editButton')
+    ).not.toBeInTheDocument();
+  });
+
   it('renders an edit button when the edit panel action is compatible', async () => {
+    updateViewMode('edit');
     updateFilters([getMockPhraseFilter('ay', 'oh')]);
     await renderAndOpenPopover();
     expect(await screen.findByTestId('filtersNotificationModal__editButton')).toBeInTheDocument();
@@ -104,6 +128,7 @@ describe('filters notification popover', () => {
   });
 
   it('calls edit action execute when edit button is clicked', async () => {
+    updateViewMode('edit');
     updateFilters([getMockPhraseFilter('ay', 'oh')]);
     await renderAndOpenPopover();
     const editButton = await screen.findByTestId('filtersNotificationModal__editButton');

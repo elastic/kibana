@@ -61,7 +61,8 @@ const defaultProps = {
   editorRef,
 };
 
-describe('EditableMarkdown', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/171177
+describe.skip('EditableMarkdown', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

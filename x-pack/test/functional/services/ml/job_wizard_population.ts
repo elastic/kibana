@@ -9,9 +9,11 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
+import type { MlCommonUI } from './common_ui';
 
 export function MachineLearningJobWizardPopulationProvider(
   { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI,
   mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
 ) {
   const comboBox = getService('comboBox');
@@ -46,7 +48,10 @@ export function MachineLearningJobWizardPopulationProvider(
     },
 
     async selectPopulationField(identifier: string) {
-      await comboBox.set('mlPopulationSplitFieldSelect > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlPopulationSplitFieldSelect > comboBoxInput',
+        identifier
+      );
       await this.assertPopulationFieldSelection([identifier]);
     },
 
@@ -70,7 +75,7 @@ export function MachineLearningJobWizardPopulationProvider(
     },
 
     async selectDetectorSplitField(detectorPosition: number, identifier: string) {
-      await comboBox.set(
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
         `mlDetector ${detectorPosition} > mlByFieldSelect  > comboBoxInput`,
         identifier
       );

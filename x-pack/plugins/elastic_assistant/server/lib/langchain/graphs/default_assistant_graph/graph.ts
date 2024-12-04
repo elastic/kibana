@@ -86,11 +86,11 @@ export const getDefaultAssistantGraph = ({
         value: (x: string, y?: string) => y ?? x,
         default: () => 'unknown',
       },
-      bedrockChatEnabled: {
+      isStream: {
         value: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
       },
-      isStream: {
+      isOssModel: {
         value: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
       },
@@ -137,7 +137,7 @@ export const getDefaultAssistantGraph = ({
         })
       )
       .addNode(NodeType.AGENT, (state: AgentState) =>
-        runAgent({ ...nodeParams, state, agentRunnable })
+        runAgent({ ...nodeParams, state, agentRunnable, kbDataClient: dataClients?.kbDataClient })
       )
       .addNode(NodeType.TOOLS, (state: AgentState) => executeTools({ ...nodeParams, state, tools }))
       .addNode(NodeType.RESPOND, (state: AgentState) =>

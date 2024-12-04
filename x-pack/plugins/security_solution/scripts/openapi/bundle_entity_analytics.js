@@ -28,6 +28,7 @@ const ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security Entity Analytics API',
+            'x-displayName': 'Security entity analytics',
             description: '',
           },
         ],
@@ -51,6 +52,7 @@ const ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security Entity Analytics API',
+            'x-displayName': 'Security entity analytics',
             description: '',
           },
         ],

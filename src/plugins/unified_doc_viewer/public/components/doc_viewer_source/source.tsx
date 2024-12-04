@@ -17,7 +17,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { isLegacyTableEnabled, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import { SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import { omit } from 'lodash';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { useEsDocSearch } from '../../hooks';
 import { getHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
@@ -35,9 +36,6 @@ interface SourceViewerProps {
   onRefresh: () => void;
 }
 
-// Ihe number of lines displayed without scrolling used for classic table, which renders the component
-// inline limitation was necessary to enable virtualized scrolling, which improves performance
-export const MAX_LINES_CLASSIC_TABLE = 500;
 // Minimum height for the source content to guarantee minimum space when the flyout is scrollable.
 export const MIN_HEIGHT = 400;
 
@@ -56,10 +54,6 @@ export const DocViewerSource = ({
   const [jsonValue, setJsonValue] = useState<string>('');
   const { uiSettings } = getUnifiedDocViewerServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const useDocExplorer = !isLegacyTableEnabled({
-    uiSettings,
-    isEsqlMode: Array.isArray(textBasedHits),
-  });
   const [requestState, hit] = useEsDocSearch({
     id,
     index,
@@ -70,13 +64,11 @@ export const DocViewerSource = ({
 
   useEffect(() => {
     if (requestState === ElasticRequestState.Found && hit) {
-      setJsonValue(JSON.stringify(hit.raw, undefined, 2));
+      setJsonValue(JSON.stringify(omit(hit.raw, '_score'), undefined, 2));
     }
   }, [requestState, hit]);
 
-  // setting editor height
-  // - classic view: based on lines height and count to stretch and fit its content
-  // - explorer: to fill the available space of the document flyout
+  // setting editor height to fill the available space of the document flyout
   useEffect(() => {
     if (!editor) {
       return;
@@ -87,11 +79,7 @@ export const DocViewerSource = ({
       return;
     }
 
-    const height = getHeight(
-      editor,
-      useDocExplorer,
-      decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM
-    );
+    const height = getHeight(editor, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM);
     if (height === 0) {
       return;
     }
@@ -101,7 +89,7 @@ export const DocViewerSource = ({
     } else {
       setEditorHeight(height);
     }
-  }, [editor, jsonValue, useDocExplorer, setEditorHeight, decreaseAvailableHeightBy]);
+  }, [editor, jsonValue, setEditorHeight, decreaseAvailableHeightBy]);
 
   const loadingState = (
     <div className="sourceViewer__loading">

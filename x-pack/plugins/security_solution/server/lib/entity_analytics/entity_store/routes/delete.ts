@@ -17,17 +17,21 @@ import {
 } from '../../../../../common/api/entity_analytics/entity_store/engine/delete.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_engine/routes/translations';
 
 export const deleteEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .delete({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}',
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
@@ -43,12 +47,21 @@ export const deleteEntityEngineRoute = (
 
       async (context, request, response): Promise<IKibanaResponse<DeleteEntityEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
-
+        const [_, { taskManager }] = await getStartServices();
+        if (!taskManager) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: TASK_MANAGER_UNAVAILABLE_ERROR,
+          });
+        }
         try {
           const secSol = await context.securitySolution;
           const body = await secSol
             .getEntityStoreDataClient()
-            .delete(request.params.entityType, !!request.query.data);
+            .delete(request.params.entityType, taskManager, {
+              deleteData: !!request.query.data,
+              deleteEngine: true,
+            });
 
           return response.ok({ body });
         } catch (e) {

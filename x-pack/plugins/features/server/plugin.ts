@@ -135,9 +135,11 @@ export class FeaturesPlugin
     }
 
     this.featureRegistry.lockRegistration();
+    this.featureRegistry.validateFeatures();
 
     this.capabilities = uiCapabilitiesForFeatures(
-      this.featureRegistry.getAllKibanaFeatures(),
+      // Don't expose capabilities of the deprecated features.
+      this.featureRegistry.getAllKibanaFeatures({ omitDeprecated: true }),
       this.featureRegistry.getAllElasticsearchFeatures()
     );
 

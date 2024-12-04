@@ -328,7 +328,7 @@
         "label": "JSONCodeEditorCommonMemoized",
         "description": [],
         "signature": [
-          "React.NamedExoticComponent<JsonCodeEditorCommonProps> & { readonly type: (props: JsonCodeEditorCommonProps) => JSX.Element; }"
+          "React.NamedExoticComponent<JsonCodeEditorCommonProps> & { readonly type: (props: JsonCodeEditorCommonProps) => React.JSX.Element; }"
         ],
         "path": "packages/kbn-unified-data-table/src/components/json_code_editor/json_code_editor_common.tsx",
         "deprecated": false,
@@ -345,7 +345,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -534,7 +534,7 @@
             "section": "def-public.RowHeightSettingsProps",
             "text": "RowHeightSettingsProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
         "deprecated": false,
@@ -605,7 +605,7 @@
             "section": "def-public.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          "; dataTestSubj?: string | undefined; className?: string | undefined; isCompressed?: boolean | undefined; }) => JSX.Element"
+          "; dataTestSubj?: string | undefined; className?: string | undefined; isCompressed?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-data-table/src/components/source_document.tsx",
         "deprecated": false,
@@ -823,7 +823,7 @@
         "label": "UnifiedDataTable",
         "description": [],
         "signature": [
-          "({ ariaLabelledBy, columns, columnsMeta, showColumnTokens, configHeaderRowHeight, headerRowHeightState, onUpdateHeaderRowHeight, controlColumnIds, rowAdditionalLeadingControls, dataView, loadingState, onFilter, onResize, onSetColumns, onSort, rows, searchDescription, searchTitle, settings, showTimeCol, showFullScreenButton, sort, useNewFieldsApi, isSortEnabled, isPaginationEnabled, cellActionsTriggerId, cellActionsMetadata, cellActionsHandling, visibleCellActions, className, rowHeightState, onUpdateRowHeight, maxAllowedSampleSize, sampleSizeState, onUpdateSampleSize, isPlainRecord, rowsPerPageState, onUpdateRowsPerPage, onFieldEdited, services, renderCustomGridBody, renderCustomToolbar, externalControlColumns, trailingControlColumns, totalHits, onFetchMoreRecords, renderDocumentView, setExpandedDoc, expandedDoc, configRowHeight, showMultiFields, maxDocFieldsDisplayed, externalAdditionalControls, rowsPerPageOptions, externalCustomRenderers, additionalFieldGroups, consumer, componentsTourSteps, gridStyleOverride, rowLineHeightOverride, customGridColumnsConfiguration, enableComparisonMode, cellContext, renderCellPopover, getRowIndicator, dataGridDensityState, onUpdateDataGridDensity, }: ",
+          "({ ariaLabelledBy, columns, columnsMeta, showColumnTokens, canDragAndDropColumns, configHeaderRowHeight, headerRowHeightState, onUpdateHeaderRowHeight, controlColumnIds, rowAdditionalLeadingControls, dataView, loadingState, onFilter, onResize, onSetColumns, onSort, rows, searchDescription, searchTitle, settings, showTimeCol, showFullScreenButton, sort, useNewFieldsApi, isSortEnabled, isPaginationEnabled, cellActionsTriggerId, cellActionsMetadata, cellActionsHandling, visibleCellActions, className, rowHeightState, onUpdateRowHeight, maxAllowedSampleSize, sampleSizeState, onUpdateSampleSize, isPlainRecord, rowsPerPageState, onUpdateRowsPerPage, onFieldEdited, services, renderCustomGridBody, renderCustomToolbar, externalControlColumns, trailingControlColumns, totalHits, onFetchMoreRecords, renderDocumentView, setExpandedDoc, expandedDoc, configRowHeight, showMultiFields, maxDocFieldsDisplayed, externalAdditionalControls, rowsPerPageOptions, externalCustomRenderers, additionalFieldGroups, consumer, componentsTourSteps, gridStyleOverride, rowLineHeightOverride, customGridColumnsConfiguration, enableComparisonMode, cellContext, renderCellPopover, getRowIndicator, dataGridDensityState, onUpdateDataGridDensity, onUpdatePageIndex, }: ",
           {
             "pluginId": "@kbn/unified-data-table",
             "scope": "public",
@@ -831,7 +831,7 @@
             "section": "def-public.UnifiedDataTableProps",
             "text": "UnifiedDataTableProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
         "deprecated": false,
@@ -842,7 +842,7 @@
             "id": "def-public.UnifiedDataTable.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  ariaLabelledBy,\n  columns,\n  columnsMeta,\n  showColumnTokens,\n  configHeaderRowHeight,\n  headerRowHeightState,\n  onUpdateHeaderRowHeight,\n  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,\n  rowAdditionalLeadingControls,\n  dataView,\n  loadingState,\n  onFilter,\n  onResize,\n  onSetColumns,\n  onSort,\n  rows,\n  searchDescription,\n  searchTitle,\n  settings,\n  showTimeCol,\n  showFullScreenButton = true,\n  sort,\n  useNewFieldsApi,\n  isSortEnabled = true,\n  isPaginationEnabled = true,\n  cellActionsTriggerId,\n  cellActionsMetadata,\n  cellActionsHandling = 'replace',\n  visibleCellActions,\n  className,\n  rowHeightState,\n  onUpdateRowHeight,\n  maxAllowedSampleSize,\n  sampleSizeState,\n  onUpdateSampleSize,\n  isPlainRecord = false,\n  rowsPerPageState,\n  onUpdateRowsPerPage,\n  onFieldEdited,\n  services,\n  renderCustomGridBody,\n  renderCustomToolbar,\n  externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls\n  trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls\n  totalHits,\n  onFetchMoreRecords,\n  renderDocumentView,\n  setExpandedDoc,\n  expandedDoc,\n  configRowHeight,\n  showMultiFields = true,\n  maxDocFieldsDisplayed = 50,\n  externalAdditionalControls,\n  rowsPerPageOptions,\n  externalCustomRenderers,\n  additionalFieldGroups,\n  consumer = 'discover',\n  componentsTourSteps,\n  gridStyleOverride,\n  rowLineHeightOverride,\n  customGridColumnsConfiguration,\n  enableComparisonMode,\n  cellContext,\n  renderCellPopover,\n  getRowIndicator,\n  dataGridDensityState,\n  onUpdateDataGridDensity,\n}",
+            "label": "{\n  ariaLabelledBy,\n  columns,\n  columnsMeta,\n  showColumnTokens,\n  canDragAndDropColumns,\n  configHeaderRowHeight,\n  headerRowHeightState,\n  onUpdateHeaderRowHeight,\n  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,\n  rowAdditionalLeadingControls,\n  dataView,\n  loadingState,\n  onFilter,\n  onResize,\n  onSetColumns,\n  onSort,\n  rows,\n  searchDescription,\n  searchTitle,\n  settings,\n  showTimeCol,\n  showFullScreenButton = true,\n  sort,\n  useNewFieldsApi,\n  isSortEnabled = true,\n  isPaginationEnabled = true,\n  cellActionsTriggerId,\n  cellActionsMetadata,\n  cellActionsHandling = 'replace',\n  visibleCellActions,\n  className,\n  rowHeightState,\n  onUpdateRowHeight,\n  maxAllowedSampleSize,\n  sampleSizeState,\n  onUpdateSampleSize,\n  isPlainRecord = false,\n  rowsPerPageState,\n  onUpdateRowsPerPage,\n  onFieldEdited,\n  services,\n  renderCustomGridBody,\n  renderCustomToolbar,\n  externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls\n  trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls\n  totalHits,\n  onFetchMoreRecords,\n  renderDocumentView,\n  setExpandedDoc,\n  expandedDoc,\n  configRowHeight,\n  showMultiFields = true,\n  maxDocFieldsDisplayed = 50,\n  externalAdditionalControls,\n  rowsPerPageOptions,\n  externalCustomRenderers,\n  additionalFieldGroups,\n  consumer = 'discover',\n  componentsTourSteps,\n  gridStyleOverride,\n  rowLineHeightOverride,\n  customGridColumnsConfiguration,\n  enableComparisonMode,\n  cellContext,\n  renderCellPopover,\n  getRowIndicator,\n  dataGridDensityState,\n  onUpdateDataGridDensity,\n  onUpdatePageIndex,\n}",
             "description": [],
             "signature": [
               {
@@ -1205,6 +1205,22 @@
             "label": "showColumnTokens",
             "description": [
               "\nField tokens could be rendered in column header next to the field name."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.canDragAndDropColumns",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canDragAndDropColumns",
+            "description": [
+              "\nSet to true to allow users to drag and drop columns for reordering"
             ],
             "signature": [
               "boolean | undefined"
@@ -1948,6 +1964,40 @@
           },
           {
             "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onUpdatePageIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdatePageIndex",
+            "description": [
+              "\n\nthis callback is triggered when user navigates to a different page\n"
+            ],
+            "signature": [
+              "((pageIndex: number) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onUpdatePageIndex.$1",
+                "type": "number",
+                "tags": [],
+                "label": "pageIndex",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
             "id": "def-public.UnifiedDataTableProps.maxAllowedSampleSize",
             "type": "number",
             "tags": [],
@@ -2040,9 +2090,9 @@
               "{ theme: ",
               {
                 "pluginId": "@kbn/react-kibana-context-common",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                "section": "def-public.ThemeServiceStart",
+                "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               },
               "; fieldFormats: ",
@@ -2365,7 +2415,7 @@
               "\nOptional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions."
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
             "deprecated": false,
@@ -2766,9 +2816,7 @@
             "label": "gridProps",
             "description": [],
             "signature": [
-              "{ additionalControls?: React.ReactNode | ",
-              "EuiDataGridToolBarAdditionalControlsOptions",
-              "; }"
+              "{ additionalControls?: React.ReactNode; }"
             ],
             "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
             "deprecated": false,
@@ -3130,7 +3178,7 @@
         "label": "CustomCellRenderer",
         "description": [],
         "signature": [
-          "{ [x: string]: (props: ",
+          "{ [x: string]: React.FunctionComponent<",
           {
             "pluginId": "@kbn/unified-data-table",
             "scope": "public",
@@ -3138,7 +3186,7 @@
             "section": "def-public.DataGridCellValueElementProps",
             "text": "DataGridCellValueElementProps"
           },
-          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
+          ">; }"
         ],
         "path": "packages/kbn-unified-data-table/src/types.ts",
         "deprecated": false,

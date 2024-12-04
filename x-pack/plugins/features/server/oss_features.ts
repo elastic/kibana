@@ -401,6 +401,7 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['save'],
+          api: ['indexPatterns:manage'],
         },
         read: {
           app: ['kibana'],
@@ -555,10 +556,12 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['saveQuery'],
-        }, // No read-only mode supported
+        },
+        // No read-only mode supported
+        read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
       },
     },
-  ] as KibanaFeatureConfig[];
+  ];
 };
 
 const reportingPrivilegeGroupName = i18n.translate(

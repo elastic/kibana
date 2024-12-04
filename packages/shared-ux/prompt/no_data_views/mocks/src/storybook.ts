@@ -34,16 +34,18 @@ export class StorybookMock extends AbstractStorybookMock<
       defaultValue: true,
     },
     dataViewsDocLink: {
-      options: ['some/link', undefined],
+      options: ['dataviews/link', undefined],
       control: { type: 'radio' },
-    },
-    esqlDocLink: {
-      options: ['some/link', undefined],
-      control: { type: 'radio' },
+      defaultValue: 'dataviews/link',
     },
     canTryEsql: {
       control: 'boolean',
       defaultValue: true,
+    },
+    esqlDocLink: {
+      options: ['esql/link', undefined],
+      control: { type: 'radio' },
+      defaultValue: 'esql/link',
     },
   };
   dependencies = [];
@@ -59,7 +61,7 @@ export class StorybookMock extends AbstractStorybookMock<
     let onTryESQL;
 
     if (canTryEsql !== false) {
-      onTryESQL = action('onTryESQL');
+      onTryESQL = action('onTryESQL-from-services');
     }
 
     return {

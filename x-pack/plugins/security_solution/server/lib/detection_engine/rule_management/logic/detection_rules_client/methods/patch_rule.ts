@@ -16,6 +16,7 @@ import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { getIdError } from '../../../utils/utils';
+import { validateNonCustomizablePatchFields } from '../../../utils/validate';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
@@ -27,6 +28,7 @@ interface PatchRuleOptions {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   rulePatch: RulePatchProps;
   mlAuthz: MlAuthz;
+  isRuleCustomizationEnabled: boolean;
 }
 
 export const patchRule = async ({
@@ -35,6 +37,7 @@ export const patchRule = async ({
   prebuiltRuleAssetClient,
   rulePatch,
   mlAuthz,
+  isRuleCustomizationEnabled,
 }: PatchRuleOptions): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = rulePatch;
 
@@ -51,10 +54,13 @@ export const patchRule = async ({
 
   await validateMlAuth(mlAuthz, rulePatch.type ?? existingRule.type);
 
+  validateNonCustomizablePatchFields(rulePatch, existingRule);
+
   const patchedRule = await applyRulePatch({
     prebuiltRuleAssetClient,
     existingRule,
     rulePatch,
+    isRuleCustomizationEnabled,
   });
 
   const patchedInternalRule = await rulesClient.update({

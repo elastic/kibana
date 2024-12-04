@@ -1393,6 +1393,48 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "command": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-any-type": true,
+        },
+      ],
+      "type": "any",
+    },
+    "signal": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-any-type": true,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "any",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .bedrock 8`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
     "apiUrl": Object {
       "flags": Object {
         "error": [Function],
@@ -1428,7 +1470,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 8`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock 9`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1471,7 +1513,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 9`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock 10`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -2250,6 +2292,78 @@ Object {
         },
       ],
       "type": "string",
+    },
+    "getIncidentJson": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "getIncidentMethod": Object {
+      "flags": Object {
+        "default": "get",
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "get",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "post",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
     },
     "getIncidentResponseExternalTitleKey": Object {
       "flags": Object {
@@ -5297,7 +5411,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "gemini-1.5-pro-001",
+        "default": "gemini-1.5-pro-002",
         "error": [Function],
         "presence": "optional",
       },

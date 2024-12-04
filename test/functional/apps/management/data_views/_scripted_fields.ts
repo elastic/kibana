@@ -19,10 +19,6 @@
 // 3. Filter in Discover by the scripted field
 // 4. Visualize with aggregation on the scripted field by clicking unifiedFieldList.clickFieldListItemVisualize
 
-// NOTE: Scripted field input is managed by Ace editor, which automatically
-//   appends closing braces, for exmaple, if you type opening square brace [
-//   it will automatically insert a a closing square brace ], etc.
-
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -391,14 +387,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\ntrue');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\nfalse');
         });
       });
@@ -473,14 +469,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
       });

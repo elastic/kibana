@@ -82,8 +82,7 @@ export function syncUnifiedSearchState(
 
       // if there is no url override time range, check if this dashboard uses time restore, and restore to that.
       const timeRestoreTimeRange =
-        this.getState().explicitInput.timeRestore &&
-        this.getState().componentState.lastSavedInput.timeRange;
+        this.getState().explicitInput.timeRestore && this.lastSavedInput$.value.timeRange;
       if (timeRestoreTimeRange) {
         timefilterService.setTime(timeRestoreTimeRange);
         return timeRestoreTimeRange;
@@ -115,8 +114,7 @@ export function syncUnifiedSearchState(
 
         // if there is no url override refresh interval, check if this dashboard uses time restore, and restore to that.
         const timeRestoreRefreshInterval =
-          this.getState().explicitInput.timeRestore &&
-          this.getState().componentState.lastSavedInput.refreshInterval;
+          this.getState().explicitInput.timeRestore && this.lastSavedInput$.value.refreshInterval;
         if (timeRestoreRefreshInterval) {
           timefilterService.setRefreshInterval(timeRestoreRefreshInterval);
           return timeRestoreRefreshInterval;

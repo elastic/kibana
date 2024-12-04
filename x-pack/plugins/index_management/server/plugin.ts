@@ -37,15 +37,20 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
   ): IndexManagementPluginSetup {
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
-      management: {
-        data: ['index_management'],
-      },
       privileges: [
+        {
+          requiredClusterPrivileges: ['monitor_enrich'],
+          ui: ['monitorEnrich'],
+        },
+        {
+          requiredClusterPrivileges: ['manage_enrich'],
+          ui: ['manageEnrich'],
+        },
         {
           // manage_index_templates is also required, but we will disable specific parts of the
           // UI if this privilege is missing.
           requiredClusterPrivileges: ['monitor'],
-          ui: [],
+          ui: ['monitor'],
         },
       ],
     });
@@ -57,6 +62,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
         isLegacyTemplatesEnabled: this.config.enableLegacyTemplates,
         isIndexStatsEnabled: this.config.enableIndexStats ?? true,
         isSizeAndDocCountEnabled: this.config.enableSizeAndDocCount ?? false,
+        enableProjectLevelRetentionChecks: this.config.enableProjectLevelRetentionChecks ?? false,
         isDataStreamStatsEnabled: this.config.enableDataStreamStats,
         enableMappingsSourceFieldSection: this.config.enableMappingsSourceFieldSection,
         enableTogglingDataRetention: this.config.enableTogglingDataRetention,

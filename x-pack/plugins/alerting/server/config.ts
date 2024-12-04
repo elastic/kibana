@@ -39,7 +39,7 @@ const rulesSchema = schema.object({
     }),
     enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
   }),
-  maxScheduledPerMinute: schema.number({ defaultValue: 32000, max: 32000, min: 0 }),
+  maxScheduledPerMinute: schema.number({ defaultValue: 32000, min: 0 }),
   overwriteProducer: schema.maybe(
     schema.oneOf([
       schema.literal('observability'),
@@ -60,7 +60,6 @@ const rulesSchema = schema.object({
   }),
 });
 
-export const DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT = 10;
 export const configSchema = schema.object({
   healthCheck: schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '60m' }),
@@ -69,9 +68,7 @@ export const configSchema = schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
     removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '1h' }),
   }),
-  maxEphemeralActionsPerAlert: schema.number({
-    defaultValue: DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT,
-  }),
+  maxEphemeralActionsPerAlert: schema.maybe(schema.number()),
   enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,

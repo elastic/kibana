@@ -26,8 +26,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
-import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
+import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule-form';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
@@ -71,6 +71,7 @@ import {
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -78,6 +79,7 @@ export type RuleDetailsProps = {
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
   refreshToken?: RefreshToken;
+  useNewRuleForm?: boolean;
 } & Pick<
   BulkOperationsComponentOpts,
   'bulkDisableRules' | 'bulkEnableRules' | 'bulkDeleteRules' | 'snoozeRule' | 'unsnoozeRule'
@@ -98,7 +100,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 }) => {
   const history = useHistory();
   const {
-    application: { capabilities },
+    application: { capabilities, navigateToApp },
     ruleTypeRegistry,
     actionTypeRegistry,
     setBreadcrumbs,
@@ -108,6 +110,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     theme,
     notifications: { toasts },
   } = useKibana().services;
+
+  const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
+
   const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
   const [{}, dispatch] = useReducer(ruleReducer, { rule });
   const setInitialRule = (value: Rule) => {
@@ -206,7 +211,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                       data-test-subj="ruleIntervalToastEditButton"
                       onClick={() => {
                         toasts.remove(configurationToast);
-                        setEditFlyoutVisibility(true);
+                        onEditRuleClick();
                       }}
                     >
                       <FormattedMessage
@@ -223,6 +228,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     i18nStart,
     theme,
@@ -256,12 +262,26 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     }
   };
 
+  const onEditRuleClick = () => {
+    if (!isUsingRuleCreateFlyout) {
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+        },
+      });
+    } else {
+      setEditFlyoutVisibility(true);
+    }
+  };
+
   const editButton = hasEditButton ? (
     <>
       <EuiButtonEmpty
         data-test-subj="openEditRuleFlyoutButton"
         iconType="pencil"
-        onClick={() => setEditFlyoutVisibility(true)}
+        onClick={onEditRuleClick}
         name="edit"
         disabled={!ruleType.enabledInLicense}
       >
@@ -529,7 +549,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     <EuiLink
                       data-test-subj="actionWithBrokenConnectorWarningBannerEdit"
                       color="primary"
-                      onClick={() => setEditFlyoutVisibility(true)}
+                      onClick={onEditRuleClick}
                     >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerEditText"

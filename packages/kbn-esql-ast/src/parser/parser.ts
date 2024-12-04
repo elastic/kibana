@@ -64,7 +64,7 @@ export const createParser = (text: string) => {
 
 // These will need to be manually updated whenever the relevant grammar changes.
 const SYNTAX_ERRORS_TO_IGNORE = [
-  `SyntaxError: mismatched input '<EOF>' expecting {'explain', 'from', 'meta', 'row', 'show'}`,
+  `SyntaxError: mismatched input '<EOF>' expecting {'explain', 'from', 'row', 'show'}`,
 ];
 
 export interface ParseOptions {
@@ -100,33 +100,66 @@ export interface ParseResult {
 }
 
 export const parse = (text: string | undefined, options: ParseOptions = {}): ParseResult => {
-  if (text == null) {
-    const commands: ESQLAstQueryExpression['commands'] = [];
-    return { ast: commands, root: Builder.expression.query(commands), errors: [], tokens: [] };
+  try {
+    if (text == null) {
+      const commands: ESQLAstQueryExpression['commands'] = [];
+      return { ast: commands, root: Builder.expression.query(commands), errors: [], tokens: [] };
+    }
+    const errorListener = new ESQLErrorListener();
+    const parseListener = new ESQLAstBuilderListener();
+    const { tokens, parser } = getParser(
+      CharStreams.fromString(text),
+      errorListener,
+      parseListener
+    );
+
+    parser[GRAMMAR_ROOT_RULE]();
+
+    const errors = errorListener.getErrors().filter((error) => {
+      return !SYNTAX_ERRORS_TO_IGNORE.includes(error.message);
+    });
+    const { ast: commands } = parseListener.getAst();
+    const root = Builder.expression.query(commands, {
+      location: {
+        min: 0,
+        max: text.length - 1,
+      },
+    });
+
+    if (options.withFormatting) {
+      const decorations = collectDecorations(tokens);
+      attachDecorations(root, tokens.tokens, decorations.lines);
+    }
+
+    return { root, ast: commands, errors, tokens: tokens.tokens };
+  } catch (error) {
+    /**
+     * Parsing should never fail, meaning this branch should never execute. But
+     * if it does fail, we want to log the error message for easier debugging.
+     */
+    // eslint-disable-next-line no-console
+    console.error(error);
+
+    const root = Builder.expression.query();
+
+    return {
+      root,
+      ast: root.commands,
+      errors: [
+        {
+          startLineNumber: 0,
+          endLineNumber: 0,
+          startColumn: 0,
+          endColumn: 0,
+          message:
+            'Parsing internal error: ' +
+            (!!error && typeof error === 'object' ? String(error.message) : String(error)),
+          severity: 'error',
+        },
+      ],
+      tokens: [],
+    };
   }
-  const errorListener = new ESQLErrorListener();
-  const parseListener = new ESQLAstBuilderListener();
-  const { tokens, parser } = getParser(CharStreams.fromString(text), errorListener, parseListener);
-
-  parser[GRAMMAR_ROOT_RULE]();
-
-  const errors = errorListener.getErrors().filter((error) => {
-    return !SYNTAX_ERRORS_TO_IGNORE.includes(error.message);
-  });
-  const { ast: commands } = parseListener.getAst();
-  const root = Builder.expression.query(commands, {
-    location: {
-      min: 0,
-      max: text.length - 1,
-    },
-  });
-
-  if (options.withFormatting) {
-    const decorations = collectDecorations(tokens);
-    attachDecorations(root, tokens.tokens, decorations.lines);
-  }
-
-  return { root, ast: commands, errors, tokens: tokens.tokens };
 };
 
 export const parseErrors = (text: string) => {

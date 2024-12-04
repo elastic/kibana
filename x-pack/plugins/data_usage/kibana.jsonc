@@ -1,16 +1,32 @@
 {
   "type": "plugin",
   "id": "@kbn/data-usage-plugin",
-  "owner": ["@elastic/obs-ai-assistant", "@elastic/security-solution"],
+  "owner": [
+    "@elastic/obs-ai-assistant",
+    "@elastic/security-solution"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "dataUsage",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "dataUsage"],
-    "requiredPlugins": ["home", "management", "features", "share"],
-    "optionalPlugins": [],
+    "configPath": [
+      "xpack",
+      "dataUsage"
+    ],
+    "requiredPlugins": [
+      "home",
+      "management",
+      "features",
+      "share"
+    ],
+    "optionalPlugins": [
+      "cloud",
+    ],
     "requiredBundles": [
       "kibanaReact",
-    ],
+      "data"
+    ]
   }
 }

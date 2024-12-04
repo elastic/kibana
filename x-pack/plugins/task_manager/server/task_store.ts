@@ -26,7 +26,7 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 
-import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result } from './lib/result_type';
 
@@ -34,6 +34,7 @@ import {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   TaskInstance,
+  TaskStatus,
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
@@ -47,6 +48,8 @@ import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
 import { ErrorOutput } from './lib/bulk_operation_buffer';
+import { MsearchError } from './lib/msearch_error';
+import { BulkUpdateError } from './lib/bulk_update_error';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -385,11 +388,19 @@ export class TaskStore {
     }
 
     return result.items.map((item) => {
+      const malformedResponseType = 'malformed response';
+
       if (!item.update || !item.update._id) {
+        const err = new BulkUpdateError({
+          message: malformedResponseType,
+          type: malformedResponseType,
+          statusCode: 500,
+        });
+        this.errors$.next(err);
         return asErr({
           type: 'task',
           id: 'unknown',
-          error: { type: 'malformed response' },
+          error: { type: malformedResponseType },
         });
       }
 
@@ -398,6 +409,12 @@ export class TaskStore {
         : item.update._id;
 
       if (item.update?.error) {
+        const err = new BulkUpdateError({
+          message: item.update.error.reason,
+          type: item.update.error.type,
+          statusCode: item.update.status,
+        });
+        this.errors$.next(err);
         return asErr({
           type: 'task',
           id: docId,
@@ -411,6 +428,7 @@ export class TaskStore {
       return asOk({
         ...doc,
         id: docId,
+        version: encodeVersion(item.update._seq_no, item.update._primary_term),
       });
     });
   }
@@ -575,7 +593,7 @@ export class TaskStore {
 
     for (const response of responses) {
       if (response.status !== 200) {
-        const err = new Error(`Unexpected status code from taskStore::msearch: ${response.status}`);
+        const err = new MsearchError(response.status);
         this.errors$.next(err);
         throw err;
       }
@@ -825,7 +843,12 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
   const originalQuery = opts.query;
   const filterToOnlyTasks = {
     bool: {
-      filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+      filter: {
+        bool: {
+          must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+          must_not: [{ term: { 'task.status': TaskStatus.Unrecognized } }],
+        },
+      },
     },
   };
   const query = originalQuery

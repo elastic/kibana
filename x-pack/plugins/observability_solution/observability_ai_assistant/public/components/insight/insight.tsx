@@ -56,7 +56,7 @@ function ChatContent({
 }) {
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
-  const { scope } = service;
+  const scopes = chatService.getScopes();
 
   const initialMessagesRef = useRef(initialMessages);
 
@@ -69,7 +69,7 @@ function ChatContent({
     initialMessages,
     persist: false,
     disableFunctions: true,
-    scope,
+    scopes,
   });
 
   const lastAssistantResponse = getLastMessageOfType(
@@ -80,6 +80,17 @@ function ChatContent({
   useEffect(() => {
     next(initialMessagesRef.current);
   }, [next]);
+
+  useEffect(() => {
+    if (state !== ChatState.Loading && lastAssistantResponse) {
+      chatService.sendAnalyticsEvent({
+        type: ObservabilityAIAssistantTelemetryEventType.InsightResponse,
+        payload: {
+          '@timestamp': lastAssistantResponse['@timestamp'],
+        },
+      });
+    }
+  }, [state, lastAssistantResponse, chatService]);
 
   return (
     <>
@@ -128,6 +139,7 @@ function ChatContent({
                     service.conversations.openNewConversation({
                       messages,
                       title: defaultTitle,
+                      hideConversationList: true,
                     });
                   }}
                 />

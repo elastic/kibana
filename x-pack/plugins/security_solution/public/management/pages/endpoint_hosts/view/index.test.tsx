@@ -60,6 +60,7 @@ import { useGetAgentStatus as _useGetAgentStatus } from '../../../hooks/agents/u
 import { agentStatusMocks } from '../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import { useBulkGetAgentPolicies } from '../../../services/policies/hooks';
 import type { PartialEndpointPolicyData } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -1148,11 +1149,13 @@ describe('when on the endpoint list page', () => {
     const generator = new EndpointDocGenerator('seed');
     let hostInfo: HostInfo[];
     let agentId: string;
-    let agentPolicyId: string;
+    let agentPolicies: AgentPolicy[];
     let endpointActionsButton: HTMLElement;
 
     // 2nd endpoint only has isolation capabilities
     const mockEndpointListApi = () => {
+      agentPolicies = [generator.generateAgentPolicy(), generator.generateAgentPolicy()];
+
       const { data: hosts } = mockEndpointResultList({ total: 2 });
       hostInfo = [
         {
@@ -1180,6 +1183,13 @@ describe('when on the endpoint list page', () => {
             },
           },
           last_checkin: hosts[0].last_checkin,
+          policy_info: {
+            agent: {
+              applied: { id: agentPolicies[1].id, revision: 13 }, // host is assigned to the 2nd agent policy
+              configured: { id: 'dont-care', revision: 39 },
+            },
+            endpoint: { id: 'dont-care', revision: 3 },
+          },
         },
         {
           host_status: hosts[1].host_status,
@@ -1212,15 +1222,13 @@ describe('when on the endpoint list page', () => {
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
 
-      const agentPolicy = generator.generateAgentPolicy();
-      agentPolicyId = agentPolicy.id;
       agentId = hosts[0].metadata.elastic.agent.id;
-      packagePolicy.policy_ids = [agentPolicyId];
+      packagePolicy.policy_ids = [agentPolicies[0].id, agentPolicies[1].id]; // package is assigned to two agent policies
 
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: hostInfo,
         endpointPackagePolicies: [packagePolicy],
-        agentPolicy,
+        agentPolicy: agentPolicies[0],
       });
     };
 
@@ -1234,7 +1242,6 @@ describe('when on the endpoint list page', () => {
 
       render();
       await middlewareSpy.waitForAction('serverReturnedEndpointList');
-      await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
 
       endpointActionsButton = (await renderResult.findAllByTestId('endpointTableRowActions'))[0];
 
@@ -1299,12 +1306,14 @@ describe('when on the endpoint list page', () => {
     it('navigates to the Security Solution Host Details page', async () => {
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink.getAttribute('href')).toEqual(
-        `${APP_PATH}/hosts/${hostInfo[0].metadata.host.hostname}`
+        `${APP_PATH}/hosts/${hostInfo[0].metadata.host.hostname.toLowerCase()}`
       );
     });
-    it('navigates to the Ingest Agent Policy page', async () => {
+    it('navigates to the correct Ingest Agent Policy page', async () => {
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
-      expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet/policies/${agentPolicyId}`);
+      expect(agentPolicyLink.getAttribute('href')).toEqual(
+        `/app/fleet/policies/${agentPolicies[1].id}`
+      );
     });
     it('navigates to the Ingest Agent Details page', async () => {
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
@@ -1482,7 +1491,6 @@ describe('when on the endpoint list page', () => {
 
       render();
       await middlewareSpy.waitForAction('serverReturnedEndpointList');
-      await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
 
       const endpointActionsButton: HTMLElement = (
         await renderResult.findAllByTestId('endpointTableRowActions')

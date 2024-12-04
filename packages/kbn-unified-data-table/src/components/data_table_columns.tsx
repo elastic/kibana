@@ -258,6 +258,7 @@ function buildEuiGridColumn({
     },
     cellActions,
     visibleCellActions,
+    displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
   };
 
   if (column.id === dataView.timeFieldName) {

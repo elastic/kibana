@@ -46,7 +46,6 @@ import { NormalizedRuleType } from '../rule_type_registry';
 import {
   CombinedSummarizedAlerts,
   RawRule,
-  RulesClientApi,
   RuleTypeRegistry,
   SpaceIdToNamespaceFunction,
 } from '../types';
@@ -74,7 +73,6 @@ export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params>;
-  rulesClient: RulesClientApi;
   validatedParams: Params;
   version: string | undefined;
 }
@@ -148,6 +146,7 @@ export interface RuleTypeRunnerContext {
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   spaceId: string;
+  isServerless: boolean;
 }
 
 export interface RuleRunnerErrorStackTraceLog {
@@ -169,18 +168,16 @@ export interface TaskRunnerContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   eventLogger: IEventLogger;
   executionContext: ExecutionContextStart;
-  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
   kibanaBaseUrl: string | undefined;
   logger: Logger;
   maintenanceWindowsService: MaintenanceWindowsService;
   maxAlerts: number;
-  maxEphemeralActionsPerRule: number;
   ruleTypeRegistry: RuleTypeRegistry;
   rulesSettingsService: RulesSettingsService;
   savedObjects: SavedObjectsServiceStart;
   share: SharePluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  supportsEphemeralTasks: boolean;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
+  isServerless: boolean;
 }

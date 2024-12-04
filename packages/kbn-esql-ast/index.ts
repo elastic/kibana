@@ -45,6 +45,7 @@ export {
 } from './src/parser';
 
 export { Walker, type WalkerOptions, walk } from './src/walker';
+export * as synth from './src/synth';
 
 export {
   LeafPrinter,
@@ -56,3 +57,5 @@ export {
 } from './src/pretty_print';
 
 export { EsqlQuery } from './src/query';
+
+export * as mutate from './src/mutate';

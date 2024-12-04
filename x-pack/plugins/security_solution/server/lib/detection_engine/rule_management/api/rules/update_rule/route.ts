@@ -27,8 +27,10 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
     .put({
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -48,7 +50,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });

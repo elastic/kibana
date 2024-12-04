@@ -21,6 +21,10 @@ import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import type {
+  SecuritySolutionAppWrapperFeature,
+  SecuritySolutionCellRendererFeature,
+} from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -70,6 +74,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   // Lazily instantiated dependencies
   private _subPlugins?: SubPlugins;
   private _store?: SecurityAppStore;
+  private _securityStoreForDiscover?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
   private _alertsTableRegistered?: boolean = false;
 
@@ -203,6 +208,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       getExternalReferenceAttachmentEndpointRegular()
     );
 
+    this.registerDiscoverSharedFeatures(core, plugins);
+
     return this.contract.getSetupContract();
   }
 
@@ -215,6 +222,60 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public stop() {
     this.services.stop();
+  }
+
+  public async registerDiscoverSharedFeatures(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>,
+    plugins: SetupPlugins
+  ) {
+    const { discoverShared } = plugins;
+    const discoverFeatureRegistry = discoverShared.features.registry;
+    const cellRendererFeature: SecuritySolutionCellRendererFeature = {
+      id: 'security-solution-cell-renderer',
+      getRenderer: async () => {
+        const { getCellRendererForGivenRecord } = await this.getLazyDiscoverSharedDeps();
+        return getCellRendererForGivenRecord;
+      },
+    };
+
+    const appWrapperFeature: SecuritySolutionAppWrapperFeature = {
+      id: 'security-solution-app-wrapper',
+      getWrapper: async () => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+
+        const services = await this.services.generateServices(coreStart, startPlugins);
+        const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+        const securityStoreForDiscover = await this.getStoreForDiscover(
+          coreStart,
+          startPlugins,
+          subPlugins
+        );
+
+        const { createSecuritySolutionDiscoverAppWrapperGetter } =
+          await this.getLazyDiscoverSharedDeps();
+
+        return createSecuritySolutionDiscoverAppWrapperGetter({
+          core: coreStart,
+          services,
+          plugins: startPlugins,
+          store: securityStoreForDiscover,
+        });
+      },
+    };
+
+    discoverFeatureRegistry.register(cellRendererFeature);
+    discoverFeatureRegistry.register(appWrapperFeature);
+  }
+
+  public async getLazyDiscoverSharedDeps() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "one_discover_shared_deps" */
+      './one_discover'
+    );
   }
 
   /**
@@ -234,6 +295,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         dashboards: new subPluginClasses.Dashboards(),
         explore: new subPluginClasses.Explore(),
         kubernetes: new subPluginClasses.Kubernetes(),
+        onboarding: new subPluginClasses.Onboarding(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -244,6 +306,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         assets: new subPluginClasses.Assets(),
         investigations: new subPluginClasses.Investigations(),
         machineLearning: new subPluginClasses.MachineLearning(),
+        siemMigrations: new subPluginClasses.SiemMigrations(),
       };
     }
     return this._subPlugins;
@@ -255,8 +318,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins: StartPlugins
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.createSubPlugins();
+    const alerts = await subPlugins.alerts.start(storage, plugins);
     return {
-      alerts: subPlugins.alerts.start(storage),
+      alerts,
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
@@ -266,6 +330,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       explore: subPlugins.explore.start(storage),
       kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
+      onboarding: subPlugins.onboarding.start(),
       overview: subPlugins.overview.start(),
       rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
@@ -276,6 +341,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assets: subPlugins.assets.start(),
       investigations: subPlugins.investigations.start(),
       machineLearning: subPlugins.machineLearning.start(),
+      siemMigrations: subPlugins.siemMigrations.start(
+        this.experimentalFeatures.siemMigrationsEnabled
+      ),
     };
   }
 
@@ -302,6 +370,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       startPlugins.timelines.setTimelineEmbeddedStore(this._store);
     }
     return this._store;
+  }
+
+  /**
+   * Lazily instantiate a `SecurityAppStore` for discover.
+   */
+  private async getStoreForDiscover(
+    coreStart: CoreStart,
+    startPlugins: StartPlugins,
+    subPlugins: StartedSubPlugins
+  ): Promise<SecurityAppStore> {
+    if (!this._securityStoreForDiscover) {
+      const { createStoreFactory } = await this.lazyApplicationDependencies();
+
+      this._securityStoreForDiscover = await createStoreFactory(
+        coreStart,
+        startPlugins,
+        subPlugins,
+        this.storage,
+        this.experimentalFeatures
+      );
+    }
+    if (startPlugins.timelines) {
+      startPlugins.timelines.setTimelineEmbeddedStore(this._securityStoreForDiscover);
+    }
+    return this._securityStoreForDiscover;
   }
 
   private async registerActions(
@@ -343,7 +436,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
     // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
-    if (!capabilities.siem?.show && !capabilities.securitySolutionCases?.read_cases) {
+    if (!capabilities.siem?.show && !capabilities.securitySolutionCasesV2?.read_cases) {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,
         visibleIn: [],

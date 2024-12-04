@@ -12,7 +12,17 @@ import { css } from '@emotion/react';
 /** DistributionBar component props */
 export interface DistributionBarProps {
   /** distribution data points */
-  stats: Array<{ key: string; count: number; color: string; label?: React.ReactNode }>;
+  stats: Array<{
+    key: string;
+    count: number;
+    color: string;
+    label?: React.ReactNode;
+    isCurrentFilter?: boolean;
+    filter?: () => void;
+    reset?: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
+  }>;
+  /** hide the label above the bar at first render */
+  hideLastTooltip?: boolean;
   /** data-test-subj used for querying the component in tests */
   ['data-test-subj']?: string;
 }
@@ -34,6 +44,7 @@ const useStyles = () => {
         position: relative;
         border-radius: 2px;
         height: 5px;
+        min-width: 10px; // prevents bar from shrinking too small
       `,
       empty: css`
         background-color: ${euiTheme.colors.lightShade};
@@ -55,7 +66,6 @@ const useStyles = () => {
         &:hover {
           height: 7px;
           border-radius: 3px;
-          cursor: pointer;
 
           .euiBadge {
             cursor: unset;
@@ -136,22 +146,37 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
   props
 ) {
   const styles = useStyles();
-  const { stats, 'data-test-subj': dataTestSubj } = props;
+  const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
   const parts = stats.map((stat) => {
     const partStyle = [
       styles.part.base,
       styles.part.tick,
       styles.part.hover,
-      styles.part.lastTooltip,
       css`
         background-color: ${stat.color};
         flex: ${stat.count};
       `,
     ];
+    if (!hideLastTooltip) {
+      partStyle.push(styles.part.lastTooltip);
+    }
+
     const prettyNumber = numeral(stat.count).format('0,0a');
 
     return (
-      <div key={stat.key} css={partStyle} data-test-subj={`${dataTestSubj}__part`}>
+      <div
+        key={stat.key}
+        css={partStyle}
+        data-test-subj={`${dataTestSubj}__part`}
+        onClick={stat.filter}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            stat.filter?.();
+          }
+        }}
+        tabIndex={0}
+        role="button"
+      >
         <div css={styles.tooltip}>
           <EuiFlexGroup
             gutterSize={'none'}
@@ -171,6 +196,11 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
                     <EuiIcon type={'dot'} size={'s'} color={stat.color} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>{stat.label ? stat.label : stat.key}</EuiFlexItem>
+                  {stat.isCurrentFilter ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="cross" size="m" onClick={stat.reset} />
+                    </EuiFlexItem>
+                  ) : undefined}
                 </EuiFlexGroup>
               </EuiBadge>
             </EuiFlexItem>

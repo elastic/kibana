@@ -21,15 +21,13 @@ import type { ListResult, ListWithKuery } from './common';
 
 export interface GetAgentsRequest {
   query: ListWithKuery & {
-    showInactive: boolean;
+    showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
   };
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
-  // deprecated in 8.x
-  list?: Agent[];
   statusSummary?: Record<AgentStatus, number>;
 }
 
@@ -128,16 +126,6 @@ export type PostBulkAgentUpgradeResponse = BulkAgentAction;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
 
-// deprecated
-export interface PutAgentReassignRequest {
-  params: {
-    agentId: string;
-  };
-  body: { policy_id: string };
-}
-// deprecated
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PutAgentReassignResponse {}
 export interface PostAgentReassignRequest {
   params: {
     agentId: string;
@@ -217,8 +205,6 @@ export interface GetAgentStatusRequest {
 export interface GetAgentStatusResponse {
   results: {
     events: number;
-    // deprecated
-    total: number;
     online: number;
     error: number;
     offline: number;
@@ -234,6 +220,8 @@ export interface GetAgentStatusResponse {
 export interface GetAgentIncomingDataRequest {
   query: {
     agentsIds: string[];
+    pkgName?: string;
+    pkgVersion?: string;
     previewData?: boolean;
   };
 }

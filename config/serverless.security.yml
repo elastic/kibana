@@ -76,7 +76,7 @@ telemetry.labels.serverless: security
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['security']
 xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.2'
+xpack.fleet.internal.registry.spec.max: '3.3'
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
@@ -84,25 +84,26 @@ xpack.fleet.internal.registry.excludePackages: [
     'synthetics',
     'synthetics_dashboards',
 
-    # Removed in 8.11 integrations
-    'cisco',
-    'microsoft',
-    'symantec',
-    'cyberark',
-
-    # ML integrations
-    'dga',
-
-    # Removed from serverless
+    # Deprecated security integrations
     'bluecoat',
+    'cisco',
+    'cyberark',
     'cylance',
     'f5',
     'fortinet_forticlient',
     'juniper_junos',
     'juniper_netscreen',
+    'microsoft',
     'netscout',
     'radware',
+    'symantec',
     'tomcat',
+
+    # ML integrations
+    'dga',
+
+    # Unsupported in serverless
+    'cloud-defend',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
@@ -111,8 +112,29 @@ xpack.fleet.packages:
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
-xpack.ml.nlp.enabled: true
+xpack.ml.nlp:
+  enabled: true
+  modelDeployment:
+    allowStaticAllocations: false
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+      medium:
+        min: 1
+        max: 32
+      high:
+        min: 1
+        max: 128
 xpack.ml.compatibleModuleType: 'security'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+# Enable project level rentention checks in DSL form from Index Management UI
+xpack.index_management.enableProjectLevelRetentionChecks: true
+
+# Experimental Security Solution features
+
+# This feature is disabled in Serverless until fully performance tested within a Serverless environment
+xpack.securitySolution.enableExperimental: ['entityStoreDisabled']

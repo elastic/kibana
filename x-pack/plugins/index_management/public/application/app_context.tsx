@@ -68,6 +68,7 @@ export interface AppDependencies {
     editableIndexSettings: 'all' | 'limited';
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
+    enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
   };
   history: ScopedHistory;
@@ -78,6 +79,12 @@ export interface AppDependencies {
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
   overlays: OverlayStart;
+  canUseSyntheticSource: boolean;
+  privs: {
+    monitor: boolean;
+    manageEnrich: boolean;
+    monitorEnrich: boolean;
+  };
 }
 
 export const AppContextProvider = ({

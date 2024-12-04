@@ -37,6 +37,7 @@ export enum NavigationSource {
   Trend = 'trend',
   Table = 'table',
   ActionMenu = 'action_menu',
+  DegradedFieldFlyoutHeader = 'degraded_field_flyout_header',
 }
 
 export interface WithTrackingId {

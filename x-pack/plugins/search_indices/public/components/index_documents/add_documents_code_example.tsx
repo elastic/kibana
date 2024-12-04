@@ -6,11 +6,13 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { MappingDenseVectorProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
+import { isEqual } from 'lodash';
 
+import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { useKibana } from '../../hooks/use_kibana';
 import { IngestCodeSnippetParameters } from '../../types';
 import { LanguageSelector } from '../shared/language_selector';
@@ -22,6 +24,13 @@ import { AnalyticsEvents } from '../../analytics/constants';
 import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';
 import { getDefaultCodingLanguage } from '../../utils/language';
+
+export const basicExampleTexts = [
+  'Yellowstone National Park',
+  'Yosemite National Park',
+  'Rocky Mountain National Park',
+];
+export const exampleTextsWithCustomMapping = [1, 2, 3].map((num) => `Example text ${num}`);
 
 export interface AddDocumentsCodeExampleProps {
   indexName: string;
@@ -54,19 +63,31 @@ export const AddDocumentsCodeExample = ({
     },
     [usageTracker]
   );
-  const sampleDocument = useMemo(() => {
-    // TODO: implement smart document generation
-    return generateSampleDocument(codeSampleMappings);
-  }, [codeSampleMappings]);
+  const sampleDocuments = useMemo(() => {
+    // If the default mapping was used, we need to exclude generated vector fields
+    const copyCodeSampleMappings = {
+      ...codeSampleMappings,
+      vector: {
+        type: codeSampleMappings.vector?.type,
+        dims: (codeSampleMappings.vector as MappingDenseVectorProperty)?.dims,
+      },
+    };
+    const isDefaultMapping = isEqual(copyCodeSampleMappings, ingestCodeExamples.defaultMapping);
+    const sampleTexts = isDefaultMapping ? basicExampleTexts : exampleTextsWithCustomMapping;
+
+    return sampleTexts.map((text) => generateSampleDocument(codeSampleMappings, text));
+  }, [codeSampleMappings, ingestCodeExamples.defaultMapping]);
+  const { apiKey } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
       indexName,
       elasticsearchURL: elasticsearchUrl,
-      sampleDocument,
+      sampleDocuments,
       indexHasMappings,
       mappingProperties: codeSampleMappings,
+      apiKey: apiKey || undefined,
     };
-  }, [indexName, elasticsearchUrl, sampleDocument, codeSampleMappings, indexHasMappings]);
+  }, [indexName, elasticsearchUrl, sampleDocuments, codeSampleMappings, indexHasMappings, apiKey]);
 
   return (
     <EuiPanel
@@ -84,33 +105,27 @@ export const AddDocumentsCodeExample = ({
               onSelectLanguage={onSelectLanguage}
             />
           </EuiFlexItem>
-          {selectedLanguage === 'curl' && (
-            <EuiFlexItem grow={false}>
-              <TryInConsoleButton
-                request={
-                  !indexHasMappings
-                    ? `${ingestCodeExamples.sense.updateMappingsCommand(
-                        codeParams
-                      )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
-                    : ingestCodeExamples.sense.ingestCommand(codeParams)
-                }
-                application={application}
-                sharePlugin={share}
-                consolePlugin={consolePlugin}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              request={
+                !indexHasMappings
+                  ? `${ingestCodeExamples.sense.updateMappingsCommand(
+                      codeParams
+                    )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
+                  : ingestCodeExamples.sense.ingestCommand(codeParams)
+              }
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiText>
-          <p>{ingestCodeExamples.description}</p>
-        </EuiText>
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
             <CodeSample
               id="installCodeExample"
-              title={i18n.translate('xpack.searchIndices.indexDetails.installLibrary.title', {
-                defaultMessage: 'Install Elasticsearch library',
-              })}
+              title={ingestCodeExamples.installTitle}
+              description={ingestCodeExamples.installDescription}
               language="shell"
               code={selectedCodeExamples.installCommand}
               onCodeCopyClick={() => {
@@ -126,9 +141,8 @@ export const AddDocumentsCodeExample = ({
           <EuiFlexItem>
             <CodeSample
               id="addMappingsCodeExample"
-              title={i18n.translate('xpack.searchIndices.indexDetails.addMappingsCode.title', {
-                defaultMessage: 'Add mappings to your index',
-              })}
+              title={ingestCodeExamples.addMappingsTitle}
+              description={ingestCodeExamples.addMappingsDescription}
               language={Languages[selectedLanguage].codeBlockLanguage}
               code={selectedCodeExamples.updateMappingsCommand(codeParams)}
               onCodeCopyClick={() => {
@@ -143,7 +157,16 @@ export const AddDocumentsCodeExample = ({
         <EuiFlexItem>
           <CodeSample
             id="ingestDataCodeExample"
-            title={ingestCodeExamples.ingestTitle}
+            title={i18n.translate('xpack.searchIndices.indexDetails.ingestDocuments.title', {
+              defaultMessage: 'Ingest documents',
+            })}
+            description={i18n.translate(
+              'xpack.searchIndices.indexDetails.ingestDocuments.description',
+              {
+                defaultMessage:
+                  'Next, use the Elasticsearch bulk API to ingest an array of documents into the index.',
+              }
+            )}
             language={Languages[selectedLanguage].codeBlockLanguage}
             code={selectedCodeExamples.ingestCommand(codeParams)}
             onCodeCopyClick={() => {

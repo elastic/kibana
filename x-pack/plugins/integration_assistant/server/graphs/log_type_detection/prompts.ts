@@ -8,30 +8,30 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 export const LOG_FORMAT_DETECTION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `You are a helpful, expert assistant in identifying different log types based on the format.
-
-Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
-<context>
-<log_samples>
-{log_samples}
-</log_samples>
-</context>`,
+    `You are a helpful, expert assistant specializing in all things logs. You're great at analyzing log samples.`,
   ],
   [
     'human',
-    `Looking at the log samples , our goal is to identify the syslog type based on the guidelines below.
-Follow these steps to identify the log format type:
-1. Go through each log sample and identify the log format type.
-2. If the samples have any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId in the beginning information then set "header: true".
-3. If the samples have a syslog header then set "header: true" , else set "header: false". If you are unable to determine the syslog header presence then set "header: false".
-4. If the log samples have structured message body with key-value pairs then classify it as "log_type: structured". Look for a flat list of key-value pairs, often separated by spaces, commas, or other delimiters.
-5. Consider variations in formatting, such as quotes around values ("key=value", key="value"), special characters in keys or values, or escape sequences.
-6. If the log samples have unstructured body like a free-form text then classify it as "log_type: unstructured".
-7. If the log samples follow a csv format then classify it as "log_type: csv".
-8. If the samples are identified as "csv" and there is a csv header then set "header: true" , else set "header: false".
-9. If you do not find the log format in any of the above categories then classify it as "log_type: unsupported".
+    `The current task is to identify the log format from the provided samples based on the guidelines below.
 
- You ALWAYS follow these guidelines when writing your response:
+The samples apply to the data stream {datastream_title} inside the integration package {package_title}.
+
+Follow these steps to do this:
+1. Go through each log sample and identify the log format. Output this as "name: <log_format>". Here are the values for log_format:
+  * 'csv': If the log samples follow a Comma-Separated Values format then classify it with "name: csv". There are two sub-cases for csv:
+     a. If there is a csv header then set "header: true".
+     b. If there is no csv header then set "header: false" and try to find good names for the columns in the "columns" array by looking into the values of data in those columns. For each column, if you are unable to find good name candidate for it then output an empty string, like in the example.
+  * 'structured': If the log samples have structured message body with key-value pairs then classify it as "name: structured". Look for a flat list of key-value pairs, often separated by some delimiters. Consider variations in formatting, such as quotes around values ("key=value", key="value"), special characters in keys or values, or escape sequences.
+  * 'unstructured': If the log samples have unstructured body like a free-form text then classify it as "name: unstructured".
+  * 'cef': If the log samples have Common Event Format (CEF) then classify it as "name: cef".
+  * 'unsupported': If you cannot put the format into any of the above categories then classify it with "name: unsupported".
+2. Header: for structured and unstructured format:
+  - if the samples have any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId in the beginning information then set "header: true".
+  - if the samples have a syslog header then set "header: true"
+  - else set "header: false". If you are unable to determine the syslog header presence then set "header: false".
+3. Note that a comma-separated list should be classified as 'csv' if its rows only contain values separated by commas. But if it looks like a list of comma separated key-values pairs like 'key1=value1, key2=value2' it should be classified as 'structured'.
+
+You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - Do not respond with anything except the updated current mapping JSON object enclosed with 3 backticks (\`). See example response below.
 </guidelines>
@@ -42,7 +42,13 @@ A: Please find the JSON object below:
 \`\`\`json
 {ex_answer}
 \`\`\`
-</example>`,
+</example>
+
+Please process these log samples:
+<log_samples>
+{log_samples}
+</log_samples>
+`,
   ],
   ['ai', 'Please find the JSON object below:'],
 ]);

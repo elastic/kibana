@@ -4,7 +4,6 @@ exports[`TOCEntry is rendered 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"
-  id="1"
   style={Object {}}
 >
   <div
@@ -88,7 +87,6 @@ exports[`TOCEntry props Should indent child layer 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"
-  id="1"
   style={
     Object {
       "paddingLeft": "56px",
@@ -176,7 +174,6 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"
-  id="1"
   style={Object {}}
 >
   <div
@@ -260,7 +257,6 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
 <div
   className="mapTocEntry mapTocEntry-isSelected"
   data-layerid="1"
-  id="1"
   style={Object {}}
 >
   <div
@@ -344,7 +340,6 @@ exports[`TOCEntry props isReadOnly 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"
-  id="1"
   style={Object {}}
 >
   <div
@@ -413,7 +408,6 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
 <div
   className="mapTocEntry"
   data-layerid="1"
-  id="1"
   style={Object {}}
 >
   <div

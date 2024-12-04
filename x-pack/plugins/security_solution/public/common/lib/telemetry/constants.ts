@@ -35,6 +35,8 @@ export enum TELEMETRY_EVENT {
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
 
+  ONBOARDING = 'onboarding',
+
   // value list
   OPEN_VALUE_LIST_MODAL = 'open_value_list_modal',
   CREATE_VALUE_LIST_ITEM = 'create_value_list_item',
@@ -49,50 +51,4 @@ export enum TELEMETRY_EVENT {
 
   // AI assistant on rule creation form
   OPEN_ASSISTANT_ON_RULE_QUERY_ERROR = 'open_assistant_on_rule_query_error',
-}
-
-export enum TelemetryEventTypes {
-  AlertsGroupingChanged = 'Alerts Grouping Changed',
-  AlertsGroupingToggled = 'Alerts Grouping Toggled',
-  AlertsGroupingTakeAction = 'Alerts Grouping Take Action',
-  BreadcrumbClicked = 'Breadcrumb Clicked',
-  AssistantInvoked = 'Assistant Invoked',
-  AssistantMessageSent = 'Assistant Message Sent',
-  AssistantQuickPrompt = 'Assistant Quick Prompt',
-  AssistantSettingToggled = 'Assistant Setting Toggled',
-  AssetCriticalityCsvPreviewGenerated = 'Asset Criticality Csv Preview Generated',
-  AssetCriticalityFileSelected = 'Asset Criticality File Selected',
-  AssetCriticalityCsvImported = 'Asset Criticality CSV Imported',
-  EntityDetailsClicked = 'Entity Details Clicked',
-  EntityAlertsClicked = 'Entity Alerts Clicked',
-  EntityRiskFiltered = 'Entity Risk Filtered',
-  MLJobUpdate = 'ML Job Update',
-  AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
-  ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
-  RiskInputsExpandedFlyoutOpened = 'Risk Inputs Expanded Flyout Opened',
-  CellActionClicked = 'Cell Action Clicked',
-  AnomaliesCountClicked = 'Anomalies Count Clicked',
-  DataQualityIndexChecked = 'Data Quality Index Checked',
-  DataQualityCheckAllCompleted = 'Data Quality Check All Completed',
-  DetailsFlyoutOpened = 'Details Flyout Opened',
-  DetailsFlyoutTabClicked = 'Details Flyout Tabs Clicked',
-  OnboardingHubStepOpen = 'Onboarding Hub Step Open',
-  OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
-  OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
-  ManualRuleRunOpenModal = 'Manual Rule Run Open Modal',
-  ManualRuleRunExecute = 'Manual Rule Run Execute',
-  ManualRuleRunCancelJob = 'Manual Rule Run Cancel Job',
-  EventLogFilterByRunType = 'Event Log Filter By Run Type',
-  EventLogShowSourceEventDateRange = 'Event Log -> Show Source -> Event Date Range',
-  OpenNoteInExpandableFlyoutClicked = 'Open Note In Expandable Flyout Clicked',
-  AddNoteFromExpandableFlyoutClicked = 'Add Note From Expandable Flyout Clicked',
-}
-
-export enum ML_JOB_TELEMETRY_STATUS {
-  started = 'started',
-  startError = 'start_error',
-  stopped = 'stopped',
-  stopError = 'stop_error',
-  moduleInstalled = 'module_installed',
-  installationError = 'installationError',
 }

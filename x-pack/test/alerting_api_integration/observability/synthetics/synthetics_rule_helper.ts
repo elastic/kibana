@@ -16,9 +16,9 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Agent as SuperTestAgent } from 'supertest';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
+import { PrivateLocationTestService } from '../../../api_integration/apis/synthetics/services/private_location_test_service';
 import { waitForAlertInIndex } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { PrivateLocationTestService } from './private_location_test_service';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 
 export const SYNTHETICS_ALERT_ACTION_INDEX = 'alert-action-synthetics';
@@ -143,7 +143,7 @@ export class SyntheticsRuleHelper {
       schedule: 1,
     };
     const res = await this.supertest
-      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?internal=true')
       .set('kbn-xsrf', 'true')
       .send(testData);
 
@@ -170,11 +170,6 @@ export class SyntheticsRuleHelper {
     expect(result.status).to.eql(200, JSON.stringify(result.body));
 
     return result.body as EncryptedSyntheticsSavedMonitor;
-  }
-
-  async addPrivateLocation() {
-    await this.locService.installSyntheticsPackage();
-    return this.locService.addTestPrivateLocation();
   }
 
   async waitForStatusAlert({

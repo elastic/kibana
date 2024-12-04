@@ -8,7 +8,7 @@
 import { createParser } from 'eventsource-parser';
 import { partition } from 'lodash';
 import { merge, of, throwError } from 'rxjs';
-import type { InferenceTaskEvent } from '../../common/inference_task';
+import type { InferenceTaskEvent } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from './observable_into_event_source_stream';
 import type { Logger } from '@kbn/logging';
 
@@ -72,10 +72,10 @@ describe('observableIntoEventSourceStream', () => {
 
     const events: Array<Record<string, any>> = [];
 
-    const parser = createParser((event) => {
-      if (event.type === 'event') {
+    const parser = createParser({
+      onEvent: (event) => {
         events.push(JSON.parse(event.data));
-      }
+      },
     });
 
     chunks.forEach((chunk) => {

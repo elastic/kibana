@@ -148,7 +148,7 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
   {
     id: GCP_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel', {
-      defaultMessage: 'Single Account',
+      defaultMessage: 'Single Project',
     }),
     testId: 'gcpSingleAccountTestId',
   },
@@ -377,7 +377,7 @@ const GcpAccountTypeSelect = ({
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel"
-          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
+          defaultMessage="Select between single project or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -674,6 +674,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
       : undefined;
+    const isParentSecurityPosture = !integration;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const { cloud } = useKibana().services;
@@ -798,6 +799,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+
+      // When the integration is the parent Security Posture (!integration) we need to
+      // reset the setup technology when the integration option changes if it was set to agentless for CSPM
+      if (isParentSecurityPosture && input.policy_template !== 'cspm') {
+        updateSetupTechnology(SetupTechnology.AGENT_BASED);
+      }
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
@@ -908,12 +915,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         <PolicyTemplateInfo postureType={input.policy_template} />
         <EuiSpacer size="l" />
         {/* Defines the single enabled input of the active policy template */}
-        <PolicyTemplateInputSelector
-          input={input}
-          setInput={setEnabledPolicyInput}
-          disabled={isEditPage}
-        />
-        <EuiSpacer size="l" />
+        {input.type === 'cloudbeat/vuln_mgmt_aws' ? null : (
+          <>
+            <PolicyTemplateInputSelector
+              input={input}
+              setInput={setEnabledPolicyInput}
+              disabled={isEditPage}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
 
         {/* AWS account type selection box */}
         {input.type === 'cloudbeat/cis_aws' && (
@@ -947,8 +958,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           />
         )}
 
-        {/* Defines the name/description */}
-        <EuiSpacer size="l" />
+        {input.type === 'cloudbeat/vuln_mgmt_aws' ? null : (
+          <>
+            <EuiSpacer size="l" />
+          </>
+        )}
         <IntegrationSettings
           fields={integrationFields}
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}

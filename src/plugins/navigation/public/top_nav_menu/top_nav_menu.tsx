@@ -10,14 +10,15 @@
 import React, { ReactElement } from 'react';
 import classNames from 'classnames';
 
-import { MountPoint } from '@kbn/core/public';
+import type { MountPoint } from '@kbn/core/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { TopNavMenuData } from './top_nav_menu_data';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { EuiBreakpointSize } from '@elastic/eui';
+import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItems } from './top_nav_menu_items';
-import { TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
+import { type TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
 
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   StatefulSearchBarProps<QT>,
@@ -51,6 +52,11 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
    * ```
    */
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+
+  /**
+   * A list of named breakpoints at which to show the popover version. If not provided, it will use the default set of ['xs', 's'] that is internally provided by EUI.
+   */
+  popoverBreakpoints?: EuiBreakpointSize[];
 };
 
 /*
@@ -76,7 +82,13 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   }
 
   function renderMenu(className: string): ReactElement | null {
-    return <TopNavMenuItems config={config} className={className} />;
+    return (
+      <TopNavMenuItems
+        config={config}
+        className={className}
+        popoverBreakpoints={props.popoverBreakpoints}
+      />
+    );
   }
 
   function renderSearchBar(): ReactElement | null {

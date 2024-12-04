@@ -1,16 +1,27 @@
 {
   "type": "plugin",
   "id": "@kbn/ai-assistant-management-plugin",
-  "owner": "@elastic/obs-knowledge-team",
+  "owner": ["@elastic/obs-ai-assistant"],
+  // This should probably be platform. While the code owner is currently observability, the package is a platform AI assistant selector.
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "aiAssistantManagementSelection",
-    "server": true,
     "browser": true,
-    "requiredPlugins": ["management"],
-    "optionalPlugins": ["home", "serverless", "features"],
-    "requiredBundles": ["kibanaReact"],
+    "server": true,
     "configPath": [
       "aiAssistantManagementSelection"
     ],
-  },
+    "requiredPlugins": [
+      "management"
+    ],
+    "optionalPlugins": [
+      "home",
+      "serverless",
+      "features"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
 }

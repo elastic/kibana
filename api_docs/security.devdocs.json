@@ -944,7 +944,7 @@
               "Render a custom ReactNode instead of the default <EuiContextMenuItem />"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
@@ -1818,7 +1818,15 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(operation: string) => string"
+              "{ (operation: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.ApiOperation",
+                "text": "ApiOperation"
+              },
+              ", subject: string): string; (subject: string): string; }"
             ],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
             "deprecated": false,
@@ -1827,9 +1835,570 @@
               {
                 "parentPluginId": "security",
                 "id": "def-server.ApiActions.get.$1",
-                "type": "string",
+                "type": "Enum",
                 "tags": [],
                 "label": "operation",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-server",
+                    "scope": "server",
+                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                    "section": "def-server.ApiOperation",
+                    "text": "ApiOperation"
+                  }
+                ],
+                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.ApiActions.get.$2",
+                "type": "string",
+                "tags": [],
+                "label": "subject",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ApiActions.get",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "{ (operation: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.ApiOperation",
+                "text": "ApiOperation"
+              },
+              ", subject: string): string; (subject: string): string; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/security-plugin-types-server",
+                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/app/index.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/lib/setup/get_has_setup_privileges.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/lib/setup/get_has_setup_privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/actions/api.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/actions/api.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/api.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/actions/api.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/actions/api.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              }
+            ],
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.ApiActions.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "subject",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ApiActions.actionFromRouteTag",
+            "type": "Function",
+            "tags": [],
+            "label": "actionFromRouteTag",
+            "description": [],
+            "signature": [
+              "(routeTag: string) => string"
+            ],
+            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.ApiActions.actionFromRouteTag.$1",
+                "type": "string",
+                "tags": [],
+                "label": "routeTag",
                 "description": [],
                 "signature": [
                   "string"
@@ -5263,7 +5832,7 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"getTags\" | \"pushCase\" | \"createCase\" | \"createComment\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
+          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
         ],
         "path": "x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
@@ -5933,6 +6502,18 @@
               "path": "x-pack/plugins/entity_manager/server/routes/enablement/disable.ts"
             },
             {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
+            },
+            {
               "plugin": "serverlessSearch",
               "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
@@ -5951,18 +6532,6 @@
             {
               "plugin": "upgradeAssistant",
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
             },
             {
               "plugin": "synthetics",
@@ -6075,6 +6644,10 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
             }
           ]
         }
@@ -6788,12 +7361,40 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-common.RawKibanaFeaturePrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "RawKibanaFeaturePrivileges",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RawKibanaFeaturePrivileges.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[featureId: string]: { [privilegeId: string]: string[]; }",
+            "description": [],
+            "signature": [
+              "[featureId: string]:  { [privilegeId: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-common.RawKibanaPrivileges",
         "type": "Interface",
         "tags": [],
         "label": "RawKibanaPrivileges",
         "description": [],
-        "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6807,7 +7408,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6820,14 +7421,14 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/security-authorization-core",
-                "scope": "server",
-                "docId": "kibKbnSecurityAuthorizationCorePluginApi",
-                "section": "def-server.RawKibanaFeaturePrivileges",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RawKibanaFeaturePrivileges",
                 "text": "RawKibanaFeaturePrivileges"
               }
             ],
-            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6841,7 +7442,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6855,7 +7456,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }

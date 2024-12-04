@@ -21,7 +21,7 @@ import type {
   FleetStartContract,
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
-import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -31,10 +31,12 @@ import type { ResponseActionsClient } from './services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from './services';
 import {
   getAgentPolicyCreateCallback,
+  getAgentPolicyPostUpdateCallback,
   getAgentPolicyUpdateCallback,
   getPackagePolicyCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyPostCreateCallback,
+  getPackagePolicyPostUpdateCallback,
   getPackagePolicyUpdateCallback,
 } from '../fleet_integration/fleet_integration';
 import type { ManifestManager } from './services/artifacts';
@@ -71,7 +73,7 @@ export interface EndpointAppContextServiceStartContract {
   fleetStartServices: FleetStartContract;
   manifestManager: ManifestManager;
   security: SecurityServiceStart;
-  alerting: AlertsPluginStartContract;
+  alerting: AlertingServerStart;
   config: ConfigType;
   registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;
@@ -117,7 +119,8 @@ export class EndpointAppContextService {
     this.savedObjectsFactoryService = savedObjectsFactory;
     this.fleetServicesFactory = new EndpointFleetServicesFactory(
       dependencies.fleetStartServices,
-      savedObjectsFactory
+      savedObjectsFactory,
+      this.createLogger('endpointFleetServices')
     );
 
     this.registerFleetExtensions();
@@ -169,6 +172,8 @@ export class EndpointAppContextService {
       getAgentPolicyUpdateCallback(logger, productFeaturesService)
     );
 
+    registerFleetCallback('agentPolicyPostUpdate', getAgentPolicyPostUpdateCallback(this));
+
     registerFleetCallback(
       'packagePolicyCreate',
       getPackagePolicyCreateCallback(
@@ -183,10 +188,7 @@ export class EndpointAppContextService {
       )
     );
 
-    registerFleetCallback(
-      'packagePolicyPostCreate',
-      getPackagePolicyPostCreateCallback(logger, exceptionListsClient)
-    );
+    registerFleetCallback('packagePolicyPostCreate', getPackagePolicyPostCreateCallback(this));
 
     registerFleetCallback(
       'packagePolicyUpdate',
@@ -200,6 +202,8 @@ export class EndpointAppContextService {
         productFeaturesService
       )
     );
+
+    registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
 
     registerFleetCallback(
       'packagePolicyPostDelete',
@@ -216,6 +220,27 @@ export class EndpointAppContextService {
     }
 
     return this.savedObjectsFactoryService;
+  }
+
+  /**
+   * Is kibana running in serverless mode
+   */
+  public isServerless(): boolean {
+    if (!this.setupDependencies) {
+      throw new EndpointAppContentServicesNotSetUpError();
+    }
+
+    // TODO:PT check what this returns when running locally with kibana in serverless emulation
+
+    return Boolean(this.setupDependencies.cloud.isServerlessEnabled);
+  }
+
+  public getInternalEsClient(): ElasticsearchClient {
+    if (!this.startDependencies?.esClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.esClient;
   }
 
   private getFleetAuthzService(): FleetStartContract['authz'] {
@@ -253,20 +278,30 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
+    const spaceIdValue = this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+      ? spaceId
+      : DEFAULT_SPACE_ID;
+
     return new EndpointMetadataService(
       this.startDependencies.esClient,
-      this.savedObjects.createInternalScopedSoClient({ readonly: false }),
-      this.getInternalFleetServices(),
+      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId: spaceIdValue }),
+      this.getInternalFleetServices(spaceIdValue),
       this.createLogger('endpointMetadata')
     );
   }
 
-  public getInternalFleetServices(): EndpointInternalFleetServicesInterface {
+  /**
+   * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
+   * @param spaceId
+   */
+  public getInternalFleetServices(spaceId?: string): EndpointInternalFleetServicesInterface {
     if (this.fleetServicesFactory === null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.fleetServicesFactory.asInternalUser();
+    return this.fleetServicesFactory.asInternalUser(
+      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined
+    );
   }
 
   public getManifestManager(): ManifestManager | undefined {

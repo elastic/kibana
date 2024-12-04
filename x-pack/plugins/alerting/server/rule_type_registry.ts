@@ -72,6 +72,7 @@ export interface RegistryRuleType
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'fieldsForAAD'
+    | 'alerts'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -381,59 +382,40 @@ export class RuleTypeRegistry {
     >;
   }
 
-  public list(): Set<RegistryRuleType> {
-    const mapRuleTypes: Array<[string, UntypedNormalizedRuleType]> = Array.from(this.ruleTypes);
-    const tempRegistryRuleType = mapRuleTypes.map<RegistryRuleType>(
-      ([
-        id,
-        {
-          name,
-          actionGroups,
-          recoveryActionGroup,
-          defaultActionGroupId,
-          actionVariables,
-          category,
-          producer,
-          minimumLicenseRequired,
-          isExportable,
-          ruleTaskTimeout,
-          defaultScheduleInterval,
-          doesSetRecoveryContext,
-          alerts,
-          fieldsForAAD,
-          validLegacyConsumers,
-        },
-      ]) => {
-        // KEEP the type here to be safe if not the map is  ignoring it for some reason
-        const ruleType: RegistryRuleType = {
-          id,
-          name,
-          actionGroups,
-          recoveryActionGroup,
-          defaultActionGroupId,
-          actionVariables,
-          category,
-          producer,
-          minimumLicenseRequired,
-          isExportable,
-          ruleTaskTimeout,
-          defaultScheduleInterval,
-          doesSetRecoveryContext,
-          enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
-            id,
-            name,
-            minimumLicenseRequired
-          ).isValid,
-          fieldsForAAD,
-          hasFieldsForAAD: Boolean(fieldsForAAD),
-          hasAlertsMappings: !!alerts,
-          validLegacyConsumers,
-          ...(alerts ? { alerts } : {}),
-        };
-        return ruleType;
-      }
-    );
-    return new Set(tempRegistryRuleType);
+  public list(): Map<string, RegistryRuleType> {
+    const ruleTypesMap = new Map();
+
+    this.ruleTypes.forEach((_ruleType) => {
+      const ruleType: RegistryRuleType = {
+        id: _ruleType.id,
+        name: _ruleType.name,
+        actionGroups: _ruleType.actionGroups,
+        recoveryActionGroup: _ruleType.recoveryActionGroup,
+        defaultActionGroupId: _ruleType.defaultActionGroupId,
+        actionVariables: _ruleType.actionVariables,
+        category: _ruleType.category,
+        producer: _ruleType.producer,
+        minimumLicenseRequired: _ruleType.minimumLicenseRequired,
+        isExportable: _ruleType.isExportable,
+        ruleTaskTimeout: _ruleType.ruleTaskTimeout,
+        defaultScheduleInterval: _ruleType.defaultScheduleInterval,
+        doesSetRecoveryContext: _ruleType.doesSetRecoveryContext,
+        enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
+          _ruleType.id,
+          _ruleType.name,
+          _ruleType.minimumLicenseRequired
+        ).isValid,
+        fieldsForAAD: _ruleType.fieldsForAAD,
+        hasFieldsForAAD: Boolean(_ruleType.fieldsForAAD),
+        hasAlertsMappings: !!_ruleType.alerts,
+        ...(_ruleType.alerts ? { alerts: _ruleType.alerts } : {}),
+        validLegacyConsumers: _ruleType.validLegacyConsumers,
+      };
+
+      ruleTypesMap.set(ruleType.id, ruleType);
+    });
+
+    return ruleTypesMap;
   }
 
   public getAllTypes(): string[] {

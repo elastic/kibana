@@ -32,12 +32,13 @@ import {
 } from '@kbn/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { alertsMock, rulesClientMock } from '../mocks';
+import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import {
   AlertingEventLogger,
   ContextOpts,
@@ -74,6 +75,9 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 }));
 
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
+
+jest.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -112,7 +116,6 @@ describe('Task Runner Cancel', () => {
   const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
   const backfillClient = backfillClientMock.create();
   const actionsClient = actionsClientMock.create();
-  const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
@@ -142,20 +145,18 @@ describe('Task Runner Cancel', () => {
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
-    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     kibanaBaseUrl: 'https://localhost:5601',
     logger,
     maintenanceWindowsService,
     maxAlerts: 1000,
-    maxEphemeralActionsPerRule: 10,
     ruleTypeRegistry,
     rulesSettingsService,
     savedObjects: savedObjectsService,
     share: {} as SharePluginStart,
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    supportsEphemeralTasks: false,
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
+    isServerless: false,
   };
 
   beforeEach(() => {
@@ -172,7 +173,6 @@ describe('Task Runner Cancel', () => {
       });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
-    taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
     );
@@ -187,7 +187,7 @@ describe('Task Runner Cancel', () => {
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
     });
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [],
       maintenanceWindowsWithoutScopedQueryIds: [],

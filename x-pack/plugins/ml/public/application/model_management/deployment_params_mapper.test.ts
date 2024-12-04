@@ -44,23 +44,82 @@ describe('DeploymentParamsMapper', () => {
 
       it('should get correct VCU levels', () => {
         expect(mapper.getVCURange('low')).toEqual({
-          min: 8,
+          min: 0,
           max: 16,
           static: 16,
         });
         expect(mapper.getVCURange('medium')).toEqual({
-          min: 24,
+          min: 8,
           max: 256,
           static: 256,
         });
         expect(mapper.getVCURange('high')).toEqual({
-          min: 264,
-          max: 4000,
-          static: 800,
+          min: 8,
+          max: 4096,
+          static: 4096,
         });
       });
 
-      it('should enforce adaptive allocations', () => {
+      it('maps UI params to API correctly', () => {
+        expect(
+          mapper.mapUiToApiDeploymentParams({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'low',
+          })
+        ).toEqual({
+          number_of_allocations: 1,
+          deployment_id: 'test-deployment',
+          model_id: 'test-model',
+          priority: 'normal',
+          threads_per_allocation: 2,
+        });
+
+        expect(
+          mapper.mapUiToApiDeploymentParams({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForIngest',
+            adaptiveResources: false,
+            vCPUUsage: 'low',
+          })
+        ).toEqual({
+          deployment_id: 'test-deployment',
+          model_id: 'test-model',
+          priority: 'normal',
+          threads_per_allocation: 1,
+          number_of_allocations: 2,
+        });
+      });
+
+      it('overrides vCPUs levels and enforces adaptive allocations if static support is not configured', () => {
+        mapper = new DeploymentParamsMapper(modelId, mlServerLimits, cloudInfo, false, {
+          modelDeployment: {
+            allowStaticAllocations: false,
+            vCPURange: {
+              low: { min: 0, max: 2, static: 2 },
+              medium: { min: 1, max: 32, static: 32 },
+              high: { min: 1, max: 128, static: 128 },
+            },
+          },
+        });
+
+        expect(mapper.getVCURange('low')).toEqual({
+          min: 0,
+          max: 16,
+          static: 16,
+        });
+        expect(mapper.getVCURange('medium')).toEqual({
+          min: 8,
+          max: 256,
+          static: 256,
+        });
+        expect(mapper.getVCURange('high')).toEqual({
+          min: 8,
+          max: 1024,
+          static: 1024,
+        });
+
         expect(
           mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
@@ -72,7 +131,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             max_number_of_allocations: 1,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
           },
           deployment_id: 'test-deployment',
           model_id: 'test-model',
@@ -88,15 +147,15 @@ describe('DeploymentParamsMapper', () => {
             vCPUUsage: 'low',
           })
         ).toEqual({
-          adaptive_allocations: {
-            enabled: true,
-            max_number_of_allocations: 2,
-            min_number_of_allocations: 1,
-          },
           deployment_id: 'test-deployment',
           model_id: 'test-model',
           priority: 'normal',
           threads_per_allocation: 1,
+          adaptive_allocations: {
+            enabled: true,
+            max_number_of_allocations: 2,
+            min_number_of_allocations: 0,
+          },
         });
       });
     });
@@ -468,7 +527,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 2,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
             max_number_of_allocations: 1,
           },
         });
@@ -507,7 +566,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             max_number_of_allocations: 12499,
-            min_number_of_allocations: 4,
+            min_number_of_allocations: 1,
           },
         });
 
@@ -525,7 +584,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 1,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
             max_number_of_allocations: 2,
           },
         });
@@ -544,7 +603,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 1,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 3,
+            min_number_of_allocations: 1,
             max_number_of_allocations: 32,
           },
         });
@@ -563,9 +622,300 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 1,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 33,
+            min_number_of_allocations: 1,
             max_number_of_allocations: 99999,
           },
+        });
+      });
+
+      describe('mapApiToUiDeploymentParams', () => {
+        it('should map API params to UI correctly', () => {
+          // Optimized for search
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 16,
+              number_of_allocations: 2,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'medium',
+          });
+
+          // Lower value
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 16,
+              number_of_allocations: 1,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'medium',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 8,
+              number_of_allocations: 2,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'medium',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 2,
+              number_of_allocations: 1,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'low',
+          });
+
+          // Exact match
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 16,
+              number_of_allocations: 8,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'high',
+          });
+
+          // Higher value
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 16,
+              number_of_allocations: 12,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'high',
+          });
+
+          // Lower value
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 16,
+              number_of_allocations: 5,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'high',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 16,
+              number_of_allocations: 6,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'high',
+          });
+
+          // Optimized for ingest
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 1,
+              number_of_allocations: 1,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForIngest',
+            adaptiveResources: false,
+            vCPUUsage: 'low',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 1,
+              number_of_allocations: 2,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForIngest',
+            adaptiveResources: false,
+            vCPUUsage: 'low',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 1,
+              number_of_allocations: 6,
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForIngest',
+            adaptiveResources: false,
+            vCPUUsage: 'medium',
+          });
+        });
+
+        it('should map API params to UI correctly with adaptive resources', () => {
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 8,
+              adaptive_allocations: {
+                enabled: true,
+                min_number_of_allocations: 2,
+                max_number_of_allocations: 2,
+              },
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: true,
+            vCPUUsage: 'medium',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 2,
+              adaptive_allocations: {
+                enabled: true,
+                min_number_of_allocations: 2,
+                max_number_of_allocations: 2,
+              },
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: true,
+            vCPUUsage: 'medium',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 1,
+              adaptive_allocations: {
+                enabled: true,
+                min_number_of_allocations: 1,
+                max_number_of_allocations: 1,
+              },
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForIngest',
+            adaptiveResources: true,
+            vCPUUsage: 'low',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 2,
+              adaptive_allocations: {
+                enabled: true,
+                min_number_of_allocations: 0,
+                max_number_of_allocations: 1,
+              },
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: true,
+            vCPUUsage: 'low',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 1,
+              adaptive_allocations: {
+                enabled: true,
+                min_number_of_allocations: 0,
+                max_number_of_allocations: 64,
+              },
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForIngest',
+            adaptiveResources: true,
+            vCPUUsage: 'high',
+          });
+
+          expect(
+            mapper.mapApiToUiDeploymentParams({
+              model_id: modelId,
+              deployment_id: 'test-deployment',
+              priority: 'normal',
+              threads_per_allocation: 16,
+              adaptive_allocations: {
+                enabled: true,
+                min_number_of_allocations: 0,
+                max_number_of_allocations: 12,
+              },
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+          ).toEqual({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: true,
+            vCPUUsage: 'high',
+          });
         });
       });
     });

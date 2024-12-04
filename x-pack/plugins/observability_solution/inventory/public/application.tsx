@@ -6,44 +6,30 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { APP_WRAPPER_CLASS, type AppMountParameters, type CoreStart } from '@kbn/core/public';
+import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { css } from '@emotion/css';
 import type { InventoryStartDependencies } from './types';
 import { InventoryServices } from './services/types';
 import { AppRoot } from './components/app_root';
+import { KibanaEnvironment } from './hooks/use_kibana';
 
-export const renderApp = ({
-  coreStart,
-  pluginsStart,
-  services,
-  appMountParameters,
-}: {
+export const renderApp = (props: {
   coreStart: CoreStart;
   pluginsStart: InventoryStartDependencies;
   services: InventoryServices;
-} & { appMountParameters: AppMountParameters }) => {
+  appMountParameters: AppMountParameters;
+  kibanaEnvironment: KibanaEnvironment;
+}) => {
+  const { appMountParameters, coreStart } = props;
   const { element } = appMountParameters;
-
-  const appWrapperClassName = css`
-    overflow: auto;
-  `;
-  const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
-  appWrapperElement.classList.add(appWrapperClassName);
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
-      <AppRoot
-        appMountParameters={appMountParameters}
-        coreStart={coreStart}
-        pluginsStart={pluginsStart}
-        services={services}
-      />
+      <AppRoot {...props} />
     </KibanaRenderContextProvider>,
     element
   );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
-    appWrapperElement.classList.remove(APP_WRAPPER_CLASS);
   };
 };

@@ -40,7 +40,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { alertsMock, rulesClientMock } from '../mocks';
+import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -53,7 +53,6 @@ import {
   generateActionOpts,
   mockDate,
   mockedRuleTypeSavedObject,
-  mockRunNowResponse,
   ruleType,
   RULE_NAME,
   generateRunnerResult,
@@ -79,6 +78,7 @@ import {
   AlertingEventLogger,
   ContextOpts,
 } from '../lib/alerting_event_logger/alerting_event_logger';
+import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -108,6 +108,9 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 jest.mock('../monitoring/rule_result_service');
+
+jest.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
 
 jest.spyOn(getExecutorServicesModule, 'getExecutorServices');
 
@@ -145,7 +148,6 @@ describe('Task Runner', () => {
   const backfillClient = backfillClientMock.create();
   const services = alertsMock.createRuleExecutorServices();
   const actionsClient = actionsClientMock.create();
-  const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
@@ -180,41 +182,19 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
-    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     kibanaBaseUrl: 'https://localhost:5601',
     logger,
     maintenanceWindowsService,
     maxAlerts: 1000,
-    maxEphemeralActionsPerRule: 10,
     ruleTypeRegistry,
     rulesSettingsService,
     savedObjects: savedObjectsService,
     share: {} as SharePluginStart,
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    supportsEphemeralTasks: false,
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
+    isServerless: false,
   };
-
-  const ephemeralTestParams: Array<
-    [
-      nameExtension: string,
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: unknown,
-      isBulk: boolean
-    ]
-  > = [
-    ['', taskRunnerFactoryInitializerParams, actionsClient.bulkEnqueueExecution, true],
-    [
-      ' (with ephemeral support)',
-      {
-        ...taskRunnerFactoryInitializerParams,
-        supportsEphemeralTasks: true,
-      },
-      actionsClient.ephemeralEnqueuedExecution,
-      false,
-    ],
-  ];
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -232,7 +212,6 @@ describe('Task Runner', () => {
       });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
-    taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
     );
@@ -286,7 +265,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
@@ -361,103 +340,95 @@ describe('Task Runner', () => {
     ).toHaveBeenCalled();
   });
 
-  test.each(ephemeralTestParams)(
-    'actionsPlugin.execute is called per alert alert that is scheduled %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          return { state: {} };
-        }
-      );
-      const taskRunner = new TaskRunner({
-        ruleType,
-        taskInstance: mockedTaskInstance,
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-        internalSavedObjectsRepository,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+  test('actionsPlugin.execute is called per alert alert that is scheduled', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-      rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      await taskRunner.run();
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
-      );
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith(
+      generateEnqueueFunctionInput({ isBulk: true, id: '1', foo: true })
+    );
 
-      expect(logger.debug).toHaveBeenCalledTimes(6);
-      expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-        tags: ['1', 'test'],
-      });
-      expect(logger.debug).nthCalledWith(
-        2,
-        `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        3,
-        'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        4,
-        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        5,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-        { tags: ['1', 'test'] }
-      );
+    expect(logger.debug).toHaveBeenCalledTimes(6);
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      tags: ['1', 'test'],
+    });
+    expect(logger.debug).nthCalledWith(
+      2,
+      `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}',
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      5,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
+      { tags: ['1', 'test'] }
+    );
 
-      testAlertingEventLogCalls({
-        activeAlerts: 1,
-        generatedActions: 1,
-        newAlerts: 1,
-        triggeredActions: 1,
-        status: 'active',
-        logAlert: 2,
-        logAction: 1,
-      });
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        1,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.newInstance,
-          group: 'default',
-          state: { start: DATE_1970, duration: '0' },
-        })
-      );
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        2,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.activeInstance,
-          group: 'default',
-          state: { start: DATE_1970, duration: '0' },
-        })
-      );
-      expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts());
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      generatedActions: 1,
+      newAlerts: 1,
+      triggeredActions: 1,
+      status: 'active',
+      logAlert: 2,
+      logAction: 1,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      1,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.newInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+      })
+    );
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      2,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+      })
+    );
+    expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts());
 
-      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-    }
-  );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
 
   test('actionsPlugin.execute is skipped if muteAll is true', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
@@ -486,13 +457,12 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-    rulesClient.getAlertFromRaw.mockReturnValue({
+    mockGetAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
       muteAll: true,
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
-    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
@@ -621,7 +591,7 @@ describe('Task Runner', () => {
       });
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-      rulesClient.getAlertFromRaw.mockReturnValue({
+      mockGetAlertFromRaw.mockReturnValue({
         ...(mockedRuleTypeSavedObject as Rule),
         muteAll,
         snoozeSchedule: snoozeSchedule != null ? JSON.parse(snoozeSchedule) : [],
@@ -631,7 +601,6 @@ describe('Task Runner', () => {
 
       const expectedExecutions = shouldBeSnoozed ? 0 : 1;
       expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(expectedExecutions);
-      expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
       const expectedMessage = `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is snoozed.`;
       if (expectedExecutions) {
@@ -683,11 +652,10 @@ describe('Task Runner', () => {
       internalSavedObjectsRepository,
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
-    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     testAlertingEventLogCalls({
       activeAlerts: 1,
@@ -755,11 +723,10 @@ describe('Task Runner', () => {
       internalSavedObjectsRepository,
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
-    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     testAlertingEventLogCalls({
       activeAlerts: 1,
@@ -818,11 +785,10 @@ describe('Task Runner', () => {
       internalSavedObjectsRepository,
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
-    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     testAlertingEventLogCalls({
       activeAlerts: 1,
@@ -853,199 +819,182 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test.each(ephemeralTestParams)(
-    'skips firing actions for active alert if alert is muted %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
-      (
-        customTaskRunnerFactoryInitializerParams as TaskRunnerFactoryInitializerParamsType
-      ).actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          executorServices.alertFactory.create('2').scheduleActions('default');
-          return { state: {} };
-        }
-      );
-      const taskRunner = new TaskRunner({
-        ruleType,
-        taskInstance: mockedTaskInstance,
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-        internalSavedObjectsRepository,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+  test('skips firing actions for active alert if alert is muted', async () => {
+    (
+      taskRunnerFactoryInitializerParams as TaskRunnerFactoryInitializerParamsType
+    ).actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-      rulesClient.getAlertFromRaw.mockReturnValue({
-        ...(mockedRuleTypeSavedObject as Rule),
-        mutedInstanceIds: ['2'],
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      await taskRunner.run();
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
+    mockGetAlertFromRaw.mockReturnValue({
+      ...(mockedRuleTypeSavedObject as Rule),
+      mutedInstanceIds: ['2'],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
 
-      expect(logger.debug).toHaveBeenCalledTimes(7);
-      expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-        tags: ['1', 'test'],
-      });
-      expect(logger.debug).nthCalledWith(
-        2,
-        `rule test:1: '${RULE_NAME}' has 2 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`,
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        3,
-        `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        4,
-        'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        5,
-        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":2,"new":2,"recovered":0,"ignored":0}}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        6,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-        { tags: ['1', 'test'] }
-      );
-      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-    }
-  );
+    expect(logger.debug).toHaveBeenCalledTimes(7);
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      tags: ['1', 'test'],
+    });
+    expect(logger.debug).nthCalledWith(
+      2,
+      `rule test:1: '${RULE_NAME}' has 2 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
+      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      5,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":2,"new":2,"recovered":0,"ignored":0}}',
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      6,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
+      { tags: ['1', 'test'] }
+    );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
 
-  test.each(ephemeralTestParams)(
-    'skips firing actions for active alert if alert is throttled %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
-      (
-        customTaskRunnerFactoryInitializerParams as TaskRunnerFactoryInitializerParamsType
-      ).actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          executorServices.alertFactory.create('2').scheduleActions('default');
-          return { state: {} };
-        }
-      );
-      const taskRunner = new TaskRunner({
-        ruleType,
-        internalSavedObjectsRepository,
-        taskInstance: {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '2': {
-                meta: {
-                  lastScheduledActions: { date: moment().toISOString(), group: 'default' },
-                },
-                state: {
-                  bar: false,
-                  start: DATE_1969,
-                  duration: MOCK_DURATION,
-                },
+  test('skips firing actions for active alert if alert is throttled', async () => {
+    (
+      taskRunnerFactoryInitializerParams as TaskRunnerFactoryInitializerParamsType
+    ).actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '2': {
+              meta: {
+                lastScheduledActions: { date: moment().toISOString(), group: 'default' },
+              },
+              state: {
+                bar: false,
+                start: DATE_1969,
+                duration: MOCK_DURATION,
               },
             },
           },
         },
-        context: taskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-      rulesClient.getAlertFromRaw.mockReturnValue({
-        ...(mockedRuleTypeSavedObject as Rule),
-        notifyWhen: 'onThrottleInterval',
-        throttle: '1d',
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      await taskRunner.run();
-      // expect(enqueueFunction).toHaveBeenCalledTimes(1);
+    mockGetAlertFromRaw.mockReturnValue({
+      ...(mockedRuleTypeSavedObject as Rule),
+      notifyWhen: 'onThrottleInterval',
+      throttle: '1d',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    // expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
-      // expect(logger.debug).toHaveBeenCalledTimes(5);
-      expect(logger.debug).nthCalledWith(
-        3,
-        `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is throttled`,
-        { tags: ['1', 'test'] }
-      );
-    }
-  );
+    // expect(logger.debug).toHaveBeenCalledTimes(5);
+    expect(logger.debug).nthCalledWith(
+      3,
+      `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is throttled`,
+      { tags: ['1', 'test'] }
+    );
+  });
 
-  test.each(ephemeralTestParams)(
-    'skips firing actions for active alert when alert is muted even if notifyWhen === onActionGroupChange %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          executorServices.alertFactory.create('2').scheduleActions('default');
-          return { state: {} };
-        }
-      );
-      const taskRunner = new TaskRunner({
-        ruleType,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+  test('skips firing actions for active alert when alert is muted even if notifyWhen === onActionGroupChange', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-      rulesClient.getAlertFromRaw.mockReturnValue({
-        ...(mockedRuleTypeSavedObject as Rule),
-        mutedInstanceIds: ['2'],
-        notifyWhen: 'onActionGroupChange',
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      await taskRunner.run();
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(logger.debug).toHaveBeenCalledTimes(7);
-      expect(logger.debug).nthCalledWith(
-        3,
-        `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
-        { tags: ['1', 'test'] }
-      );
-    }
-  );
+    mockGetAlertFromRaw.mockReturnValue({
+      ...(mockedRuleTypeSavedObject as Rule),
+      mutedInstanceIds: ['2'],
+      notifyWhen: 'onActionGroupChange',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledTimes(7);
+    expect(logger.debug).nthCalledWith(
+      3,
+      `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
+      { tags: ['1', 'test'] }
+    );
+  });
 
   test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert state does not change', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
@@ -1091,13 +1040,12 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-    rulesClient.getAlertFromRaw.mockReturnValue({
+    mockGetAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
       notifyWhen: 'onActionGroupChange',
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
-    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     testAlertingEventLogCalls({
       activeAlerts: 1,
@@ -1116,678 +1064,620 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test.each(ephemeralTestParams)(
-    'actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert state has changed %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          return { state: {} };
-        }
-      );
-      const taskRunner = new TaskRunner({
-        ruleType,
-        internalSavedObjectsRepository,
-        taskInstance: {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': {
-                meta: {
-                  lastScheduledActions: { group: 'newGroup', date: new Date().toISOString() },
-                },
-                state: { bar: false },
-              },
-            },
-          },
-        },
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-
-      rulesClient.getAlertFromRaw.mockReturnValue({
-        ...(mockedRuleTypeSavedObject as Rule),
-        notifyWhen: 'onActionGroupChange',
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-
-      await taskRunner.run();
-
-      testAlertingEventLogCalls({
-        activeAlerts: 1,
-        triggeredActions: 1,
-        generatedActions: 1,
-        status: 'active',
-        logAlert: 1,
-        logAction: 1,
-      });
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        1,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.activeInstance,
-          group: 'default',
-          state: { bar: false },
-        })
-      );
-      expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
-
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-    }
-  );
-
-  test.each(ephemeralTestParams)(
-    'includes the apiKey in the request used to initialize the actionsClient %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          return { state: {} };
-        }
-      );
-      const taskRunner = new TaskRunner({
-        ruleType,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalled();
-
-      rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      await taskRunner.run();
-      expect(
-        customTaskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest
-      ).toHaveBeenCalledWith(
-        expect.objectContaining({
-          headers: {
-            // base64 encoded "123:abc"
-            authorization: 'ApiKey MTIzOmFiYw==',
-          },
-        })
-      );
-
-      const [request] =
-        customTaskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mock
-          .calls[0];
-
-      expect(customTaskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-        request,
-        '/'
-      );
-
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
-      );
-
-      testAlertingEventLogCalls({
-        activeAlerts: 1,
-        newAlerts: 1,
-        triggeredActions: 1,
-        generatedActions: 1,
-        status: 'active',
-        logAlert: 2,
-        logAction: 1,
-      });
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        1,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.newInstance,
-          group: 'default',
-          state: { start: DATE_1970, duration: '0' },
-        })
-      );
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        2,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.activeInstance,
-          group: 'default',
-          state: { start: DATE_1970, duration: '0' },
-        })
-      );
-      expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
-
-      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-    }
-  );
-
-  test.each(ephemeralTestParams)(
-    'fire recovered actions for execution for the alertInstances which is in the recovered state %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          return { state: {} };
-        }
-      );
-      const taskRunner = new TaskRunner({
-        ruleType,
-        internalSavedObjectsRepository,
-        taskInstance: {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': {
-                meta: {},
-                state: {
-                  bar: false,
-                  start: DATE_1969,
-                  duration: '80000000000',
-                },
-              },
-              '2': {
-                meta: {},
-                state: {
-                  bar: false,
-                  start: '1969-12-31T06:00:00.000Z',
-                  duration: '70000000000',
-                },
-              },
-            },
-          },
-        },
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalled();
-
-      rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      const runnerResult = await taskRunner.run();
-      expect(runnerResult.state.alertInstances).toEqual(
-        generateAlertInstance({
-          id: 1,
-          duration: MOCK_DURATION,
-          start: DATE_1969,
-          flappingHistory: [false],
-        })
-      );
-
-      expect(logger.debug).toHaveBeenCalledTimes(7);
-      expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-        tags: ['1', 'test'],
-      });
-      expect(logger.debug).nthCalledWith(
-        2,
-        `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        3,
-        `rule test:1: '${RULE_NAME}' has 1 recovered alerts: [\"2\"]`,
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        4,
-        'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        5,
-        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        6,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-        { tags: ['1', 'test'] }
-      );
-
-      testAlertingEventLogCalls({
-        activeAlerts: 1,
-        recoveredAlerts: 1,
-        triggeredActions: 2,
-        generatedActions: 2,
-        status: 'active',
-        logAlert: 2,
-        logAction: 2,
-      });
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        1,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.recoveredInstance,
-          id: '2',
-          state: {
-            bar: false,
-            start: '1969-12-31T06:00:00.000Z',
-            duration: '64800000000000',
-            end: DATE_1970,
-          },
-        })
-      );
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        2,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.activeInstance,
-          group: 'default',
-          state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
-        })
-      );
-      expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
-      expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(
-        2,
-        generateActionOpts({ id: '2', alertId: '2', alertGroup: 'recovered' })
-      );
-
-      expect(enqueueFunction).toHaveBeenCalledTimes(isBulk ? 1 : 2);
-      expect(enqueueFunction).toHaveBeenCalledWith(
-        isBulk
-          ? [
-              generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true }),
-              generateEnqueueFunctionInput({ isBulk: false, id: '2', isResolved: true }),
-            ]
-          : generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true })
-      );
-      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-      jest.resetAllMocks();
-    }
-  );
-
-  test.each(ephemeralTestParams)(
-    "should skip alertInstances which weren't active on the previous execution %s",
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-
-          // create an instance, but don't schedule any actions, so it doesn't go active
-          executorServices.alertFactory.create('3');
-          return { state: {} };
-        }
-      );
-      const taskRunner = new TaskRunner({
-        ruleType,
-        internalSavedObjectsRepository,
-        taskInstance: {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': { meta: {}, state: { bar: false } },
-              '2': { meta: {}, state: { bar: false } },
-            },
-          },
-        },
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalled();
-
-      rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      const runnerResult = await taskRunner.run();
-      expect(runnerResult.state.alertInstances).toEqual(
-        generateAlertInstance({
-          id: 1,
-          flappingHistory: [false],
-        })
-      );
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-        { tags: ['1', 'test'] }
-      );
-
-      expect(logger.debug).nthCalledWith(
-        3,
-        `rule test:1: '${RULE_NAME}' has 1 recovered alerts: [\"2\"]`,
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        4,
-        `deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`,
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        5,
-        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        6,
-        `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}`,
-        { tags: ['1', 'test'] }
-      );
-
-      testAlertingEventLogCalls({
-        activeAlerts: 1,
-        recoveredAlerts: 1,
-        triggeredActions: 2,
-        generatedActions: 2,
-        status: 'active',
-        logAlert: 2,
-        logAction: 2,
-      });
-
-      expect(enqueueFunction).toHaveBeenCalledTimes(isBulk ? 1 : 2);
-      if (isBulk) {
-        expect((enqueueFunction as jest.Mock).mock.calls[0][0][0].id).toEqual('1');
-        expect((enqueueFunction as jest.Mock).mock.calls[0][0][1].id).toEqual('2');
-      } else {
-        expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('1');
-        expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('2');
+  test('actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert state has changed', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
-      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-    }
-  );
-
-  test.each(ephemeralTestParams)(
-    'fire actions under a custom recovery group when specified on an alert type for alertInstances which are in the recovered state %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-
-      const recoveryActionGroup = {
-        id: 'customRecovered',
-        name: 'Custom Recovered',
-      };
-      const ruleTypeWithCustomRecovery = {
-        ...ruleType,
-        recoveryActionGroup,
-        actionGroups: [{ id: 'default', name: 'Default' }, recoveryActionGroup],
-      };
-
-      ruleTypeWithCustomRecovery.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          return { state: {} };
-        }
-      );
-      const taskRunner = new TaskRunner({
-        ruleType: ruleTypeWithCustomRecovery,
-        internalSavedObjectsRepository,
-        taskInstance: {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': { meta: {}, state: { bar: false } },
-              '2': { meta: {}, state: { bar: false } },
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: { group: 'newGroup', date: new Date().toISOString() },
+              },
+              state: { bar: false },
             },
           },
         },
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalled();
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-      rulesClient.getAlertFromRaw.mockReturnValue({
-        ...(mockedRuleTypeSavedObject as Rule),
-        actions: [
-          {
-            group: 'default',
-            id: '1',
-            actionTypeId: 'action',
-            params: {
-              foo: true,
-            },
-            uuid: '111-111',
-          },
-          {
-            group: recoveryActionGroup.id,
-            id: '2',
-            actionTypeId: 'action',
-            params: {
-              isResolved: true,
-            },
-            uuid: '222-222',
-          },
-        ],
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      const runnerResult = await taskRunner.run();
-      expect(runnerResult.state.alertInstances).toEqual(
-        generateAlertInstance({
-          id: 1,
-          flappingHistory: [false],
-        })
-      );
+    mockGetAlertFromRaw.mockReturnValue({
+      ...(mockedRuleTypeSavedObject as Rule),
+      notifyWhen: 'onActionGroupChange',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
-      testAlertingEventLogCalls({
-        ruleTypeDef: ruleTypeWithCustomRecovery,
-        activeAlerts: 1,
-        recoveredAlerts: 1,
-        triggeredActions: 2,
-        generatedActions: 2,
-        status: 'active',
-        logAlert: 2,
-        logAction: 2,
-      });
+    await taskRunner.run();
 
-      expect(enqueueFunction).toHaveBeenCalledTimes(isBulk ? 1 : 2);
-      expect(enqueueFunction).toHaveBeenCalledWith(
-        isBulk
-          ? [
-              generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true }),
-              generateEnqueueFunctionInput({ isBulk: false, id: '2', isResolved: true }),
-            ]
-          : generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true })
-      );
-      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-    }
-  );
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      triggeredActions: 1,
+      generatedActions: 1,
+      status: 'active',
+      logAlert: 1,
+      logAction: 1,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      1,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        group: 'default',
+        state: { bar: false },
+      })
+    );
+    expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
 
-  test.each(ephemeralTestParams)(
-    'triggers summary actions (Per rule run)',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(async () => {
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
+
+  test('includes the apiKey in the request used to initialize the actionsClient', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
-      });
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
 
-      alertsClient.getSummarizedAlerts.mockResolvedValue({
-        new: {
-          count: 1,
-          data: [mockAAD],
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    expect(
+      taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: {
+          // base64 encoded "123:abc"
+          authorization: 'ApiKey MTIzOmFiYw==',
         },
-        ongoing: { count: 0, data: [] },
-        recovered: { count: 0, data: [] },
-      });
-      alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+      })
+    );
 
-      const taskRunner = new TaskRunner({
-        ruleType,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+    const [request] =
+      taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mock.calls[0];
 
-      rulesClient.getAlertFromRaw.mockReturnValue({
-        ...(mockedRuleTypeSavedObject as Rule),
-        actions: [
-          {
-            group: 'default',
-            id: '1',
-            actionTypeId: 'slack',
-            frequency: {
-              notifyWhen: 'onActiveAlert',
-              summary: true,
-              throttle: null,
-            },
-            params: {
-              foo: true,
-            },
-            uuid: '111-111',
-          },
-        ],
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      await taskRunner.run();
+    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+      request,
+      '/'
+    );
 
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true, actionTypeId: 'slack' })
-      );
-    }
-  );
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith(
+      generateEnqueueFunctionInput({ isBulk: true, id: '1', foo: true })
+    );
 
-  test.each(ephemeralTestParams)(
-    'triggers summary actions (Custom Frequency)',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(async () => {
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      newAlerts: 1,
+      triggeredActions: 1,
+      generatedActions: 1,
+      status: 'active',
+      logAlert: 2,
+      logAction: 1,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      1,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.newInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+      })
+    );
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      2,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+      })
+    );
+    expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
+
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
+
+  test('fire recovered actions for execution for the alertInstances which is in the recovered state', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
-      });
-
-      alertsClient.getSummarizedAlerts.mockResolvedValue({
-        new: {
-          count: 1,
-          data: [mockAAD],
-        },
-        ongoing: { count: 0, data: [] },
-        recovered: { count: 0, data: [] },
-      });
-      alertsClient.getAlertsToSerialize.mockResolvedValueOnce({ state: {}, meta: {} });
-      alertsService.createAlertsClient.mockImplementation(() => alertsClient);
-
-      const taskRunner = new TaskRunner({
-        ruleType,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-        context: customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics,
-      });
-      expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-
-      rulesClient.getAlertFromRaw.mockReturnValue({
-        ...(mockedRuleTypeSavedObject as Rule),
-        actions: [
-          {
-            group: 'default',
-            id: '1',
-            actionTypeId: 'slack',
-            frequency: {
-              notifyWhen: 'onThrottleInterval',
-              summary: true,
-              throttle: '1h',
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {},
+              state: {
+                bar: false,
+                start: DATE_1969,
+                duration: '80000000000',
+              },
             },
-            params: {
-              foo: true,
+            '2': {
+              meta: {},
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: '70000000000',
+              },
             },
-            uuid: '111-111',
           },
-        ],
-      });
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
 
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      const result = await taskRunner.run();
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.alertInstances).toEqual(
+      generateAlertInstance({
+        id: 1,
+        duration: MOCK_DURATION,
+        start: DATE_1969,
+        flappingHistory: [false],
+      })
+    );
 
-      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
-        start: new Date('1969-12-31T23:00:00.000Z'),
-        end: new Date(DATE_1970),
-        ruleId: '1',
-        spaceId: 'default',
-        excludedAlertInstanceIds: [],
-      });
+    expect(logger.debug).toHaveBeenCalledTimes(7);
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      tags: ['1', 'test'],
+    });
+    expect(logger.debug).nthCalledWith(
+      2,
+      `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      `rule test:1: '${RULE_NAME}' has 1 recovered alerts: [\"2\"]`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
+      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      5,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}',
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      6,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
+      { tags: ['1', 'test'] }
+    );
 
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true, actionTypeId: 'slack' })
-      );
-      expect(result.state.summaryActions).toEqual({
-        '111-111': { date: new Date(DATE_1970).toISOString() },
-      });
-    }
-  );
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      recoveredAlerts: 1,
+      triggeredActions: 2,
+      generatedActions: 2,
+      status: 'active',
+      logAlert: 2,
+      logAction: 2,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      1,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.recoveredInstance,
+        id: '2',
+        state: {
+          bar: false,
+          start: '1969-12-31T06:00:00.000Z',
+          duration: '64800000000000',
+          end: DATE_1970,
+        },
+      })
+    );
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      2,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        group: 'default',
+        state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
+      })
+    );
+    expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
+    expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(
+      2,
+      generateActionOpts({ id: '2', alertId: '2', alertGroup: 'recovered', uuid: '222-222' })
+    );
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
+      generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true }),
+      generateEnqueueFunctionInput({
+        isBulk: false,
+        id: '2',
+        isResolved: true,
+        uuid: '222-222',
+      }),
+    ]);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    jest.resetAllMocks();
+  });
+
+  test("should skip alertInstances which weren't active on the previous execution", async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+
+        // create an instance, but don't schedule any actions, so it doesn't go active
+        executorServices.alertFactory.create('3');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': { meta: {}, state: { bar: false } },
+            '2': { meta: {}, state: { bar: false } },
+          },
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.alertInstances).toEqual(
+      generateAlertInstance({
+        id: 1,
+        flappingHistory: [false],
+      })
+    );
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
+      { tags: ['1', 'test'] }
+    );
+
+    expect(logger.debug).nthCalledWith(
+      3,
+      `rule test:1: '${RULE_NAME}' has 1 recovered alerts: [\"2\"]`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
+      `deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      5,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}',
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      6,
+      `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}`,
+      { tags: ['1', 'test'] }
+    );
+
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      recoveredAlerts: 1,
+      triggeredActions: 2,
+      generatedActions: 2,
+      status: 'active',
+      logAlert: 2,
+      logAction: 2,
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect((actionsClient.bulkEnqueueExecution as jest.Mock).mock.calls[0][0][0].id).toEqual('1');
+    expect((actionsClient.bulkEnqueueExecution as jest.Mock).mock.calls[0][0][1].id).toEqual('2');
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
+
+  test('fire actions under a custom recovery group when specified on an alert type for alertInstances which are in the recovered state', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    const recoveryActionGroup = {
+      id: 'customRecovered',
+      name: 'Custom Recovered',
+    };
+    const ruleTypeWithCustomRecovery = {
+      ...ruleType,
+      recoveryActionGroup,
+      actionGroups: [{ id: 'default', name: 'Default' }, recoveryActionGroup],
+    };
+
+    ruleTypeWithCustomRecovery.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithCustomRecovery,
+      internalSavedObjectsRepository,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': { meta: {}, state: { bar: false } },
+            '2': { meta: {}, state: { bar: false } },
+          },
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+
+    mockGetAlertFromRaw.mockReturnValue({
+      ...(mockedRuleTypeSavedObject as Rule),
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: 'action',
+          params: {
+            foo: true,
+          },
+          uuid: '111-111',
+        },
+        {
+          group: recoveryActionGroup.id,
+          id: '2',
+          actionTypeId: 'action',
+          params: {
+            isResolved: true,
+          },
+          uuid: '222-222',
+        },
+      ],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.alertInstances).toEqual(
+      generateAlertInstance({
+        id: 1,
+        flappingHistory: [false],
+      })
+    );
+
+    testAlertingEventLogCalls({
+      ruleTypeDef: ruleTypeWithCustomRecovery,
+      activeAlerts: 1,
+      recoveredAlerts: 1,
+      triggeredActions: 2,
+      generatedActions: 2,
+      status: 'active',
+      logAlert: 2,
+      logAction: 2,
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
+      generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true }),
+      generateEnqueueFunctionInput({
+        isBulk: false,
+        id: '2',
+        isResolved: true,
+        uuid: '222-222',
+      }),
+    ]);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
+
+  test('triggers summary actions (Per rule run)', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(async () => {
+      return { state: {} };
+    });
+
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: {
+        count: 1,
+        data: [mockAAD],
+      },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+
+    mockGetAlertFromRaw.mockReturnValue({
+      ...(mockedRuleTypeSavedObject as Rule),
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: 'slack',
+          frequency: {
+            notifyWhen: 'onActiveAlert',
+            summary: true,
+            throttle: null,
+          },
+          params: {
+            foo: true,
+          },
+          uuid: '111-111',
+        },
+      ],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith(
+      generateEnqueueFunctionInput({ isBulk: true, id: '1', foo: true, actionTypeId: 'slack' })
+    );
+  });
+
+  test('triggers summary actions (Custom Frequency)', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(async () => {
+      return { state: {} };
+    });
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: {
+        count: 1,
+        data: [mockAAD],
+      },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+
+    alertsClient.getAlertsToSerialize.mockResolvedValueOnce({ state: {}, meta: {} });
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+
+    mockGetAlertFromRaw.mockReturnValue({
+      ...(mockedRuleTypeSavedObject as Rule),
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: 'slack',
+          frequency: {
+            notifyWhen: 'onThrottleInterval',
+            summary: true,
+            throttle: '1h',
+          },
+          params: {
+            foo: true,
+          },
+          uuid: '111-111',
+        },
+      ],
+    });
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    const result = await taskRunner.run();
+
+    expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
+      start: new Date('1969-12-31T23:00:00.000Z'),
+      end: new Date(DATE_1970),
+      ruleId: '1',
+      spaceId: 'default',
+      excludedAlertInstanceIds: [],
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith(
+      generateEnqueueFunctionInput({ isBulk: true, id: '1', foo: true, actionTypeId: 'slack' })
+    );
+    expect(result.state.summaryActions).toEqual({
+      '111-111': { date: new Date(DATE_1970).toISOString() },
+    });
+  });
 
   test('persists alertInstances passed in from state, only if they are scheduled for execution', async () => {
     ruleType.executor.mockImplementation(
@@ -1839,7 +1729,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult.state.alertInstances).toEqual(
@@ -1899,7 +1789,7 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
@@ -1942,7 +1832,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
@@ -2060,7 +1950,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
@@ -2127,7 +2017,7 @@ describe('Task Runner', () => {
   });
 
   test('reschedules for smaller interval if es connectivity error encountered and schedule interval is greater than connectivity retry', async () => {
-    rulesClient.getAlertFromRaw.mockImplementation(() => {
+    mockGetAlertFromRaw.mockImplementation(() => {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
         RULE_SAVED_OBJECT_TYPE,
         '1'
@@ -2229,7 +2119,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue({
+    mockGetAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
       notifyWhen: 'onActionGroupChange',
       actions: [],
@@ -2340,7 +2230,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue({
+    mockGetAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
       notifyWhen: 'onActionGroupChange',
       actions: [],
@@ -2418,7 +2308,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue({
+    mockGetAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
       notifyWhen: 'onActionGroupChange',
       actions: [],
@@ -2490,7 +2380,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue({
+    mockGetAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
       notifyWhen: 'onActionGroupChange',
       actions: [],
@@ -2568,7 +2458,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue({
+    mockGetAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
       notifyWhen: 'onActionGroupChange',
       actions: [],
@@ -2615,13 +2505,12 @@ describe('Task Runner', () => {
       },
       context: {
         ...taskRunnerFactoryInitializerParams,
-        supportsEphemeralTasks: true,
       },
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
@@ -2692,7 +2581,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
@@ -2709,7 +2598,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
     ruleType.executor.mockImplementation(
       async ({
@@ -2742,7 +2631,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
     await taskRunner.run();
@@ -2782,7 +2671,7 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       ...mockedRawRuleSO,
       attributes: { ...mockedRawRuleSO.attributes, schedule: { interval: '50s' } },
@@ -2804,7 +2693,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     ruleType.executor.mockImplementation(
@@ -2845,7 +2734,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     for (let i = 0; i < 300; i++) {
@@ -2890,31 +2779,36 @@ describe('Task Runner', () => {
       {
         group: 'default',
         id: '1',
+        uuid: '111-111',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '2',
+        uuid: '222-222',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '3',
+        uuid: '333-333',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '4',
+        uuid: '444-444',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '5',
+        uuid: '555-555',
         actionTypeId: 'action',
       },
     ];
 
-    rulesClient.getAlertFromRaw.mockReturnValue({
+    mockGetAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
       actions: mockActions as RuleAction[],
     });
@@ -2974,7 +2868,7 @@ describe('Task Runner', () => {
       })
     );
 
-    expect(logger.debug).toHaveBeenCalledTimes(7);
+    expect(logger.debug).toHaveBeenCalledTimes(8);
 
     expect(logger.debug).nthCalledWith(
       3,
@@ -3011,11 +2905,11 @@ describe('Task Runner', () => {
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(
       2,
-      generateActionOpts({ id: '2' })
+      generateActionOpts({ id: '2', uuid: '222-222' })
     );
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(
       3,
-      generateActionOpts({ id: '3' })
+      generateActionOpts({ id: '3', uuid: '333-333' })
     );
   });
 
@@ -3054,32 +2948,37 @@ describe('Task Runner', () => {
       }
     );
 
-    rulesClient.getAlertFromRaw.mockReturnValue({
+    mockGetAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
       actions: [
         {
           group: 'default',
           id: '1',
+          uuid: '111-111',
           actionTypeId: '.server-log',
         },
         {
           group: 'default',
           id: '2',
+          uuid: '222-222',
           actionTypeId: '.server-log',
         },
         {
           group: 'default',
           id: '3',
+          uuid: '333-333',
           actionTypeId: '.server-log',
         },
         {
           group: 'default',
           id: '4',
+          uuid: '444-444',
           actionTypeId: 'any-action',
         },
         {
           group: 'default',
           id: '5',
+          uuid: '555-555',
           actionTypeId: 'any-action',
         },
       ] as RuleAction[],
@@ -3175,7 +3074,7 @@ describe('Task Runner', () => {
       status: 'warning',
       errorReason: `maxExecutableActions`,
       logAlert: 4,
-      logAction: 3,
+      logAction: 5,
     });
   });
 
@@ -3189,7 +3088,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
@@ -3272,7 +3171,7 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult.state.alertInstances).toEqual({});
@@ -3299,7 +3198,7 @@ describe('Task Runner', () => {
   });
 
   test('reports error to eventLogger when ruleResultService.addLastRunError adds an error', async () => {
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const taskRunner = new TaskRunner({
@@ -3343,7 +3242,7 @@ describe('Task Runner', () => {
   });
 
   test('returns user error if all the errors reported by getLastRunResults are user error', async () => {
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const taskRunner = new TaskRunner({
@@ -3393,7 +3292,7 @@ describe('Task Runner', () => {
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();

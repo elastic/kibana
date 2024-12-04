@@ -30,7 +30,6 @@ export interface UsageStats {
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
-  'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
@@ -46,8 +45,6 @@ export interface UsageStats {
   'observability:apmEnableContinuousRollups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
-  'observability:enableInfrastructureHostsView': boolean;
-  'observability:enableInfrastructureContainerAssetView': boolean;
   'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
@@ -55,10 +52,11 @@ export interface UsageStats {
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
   'observability:logSources': string[];
+  'observability:enableLogsStream': boolean;
+  'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'visualization:heatmap:maxBuckets': number;
-  'visualization:colorMapping': string;
   'visualization:useLegacyTimeAxis': boolean;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -102,12 +100,12 @@ export interface UsageStats {
   'fileUpload:maxFileSize': string;
   'ml:anomalyDetection:results:enableTimeDefaults': boolean;
   'ml:anomalyDetection:results:timeDefaults': string;
-  'truncate:maxHeight': number;
   'timepicker:timeDefaults': string;
   'timepicker:refreshIntervalDefaults': string;
   'timepicker:quickRanges': string;
   'theme:version': string;
   'theme:darkMode': boolean;
+  'theme:name': string;
   'state:storeInSessionStorage': boolean;
   'savedObjects:perPage': number;
   'search:queryLanguage': string;
@@ -152,7 +150,6 @@ export interface UsageStats {
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
-  'metrics:allowCheckingForFailedShards': boolean;
   'observability:syntheticsThrottlingEnabled': boolean;
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmLabsButton': boolean;
@@ -181,5 +178,6 @@ export interface UsageStats {
   'aiAssistant:preferredAIAssistantType': string;
   'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
+  'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
 }

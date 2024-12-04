@@ -127,6 +127,34 @@ export default function ({
         expect(res.get('content-type')).to.equal('application/pdf');
         await share.closeShareModal();
       });
+
+      it('provides a button to copy POST URL', async () => {
+        // The "clipboard-read" permission of the Permissions API must be granted
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
+
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.openExportTab();
+        await reporting.checkUsePrintLayout();
+        await testSubjects.click('shareReportingCopyURL');
+
+        const postUrl = await browser.getClipboardValue();
+        expect(postUrl).to.contain('printablePdfV2');
+
+        const [, jobParams] = postUrl.split('jobParams=');
+        expect(decodeURIComponent(jobParams)).to.contain('browserTimezone:UTC,');
+        expect(decodeURIComponent(jobParams)).to.match(
+          /layout:\(dimensions:\(height:1\d{3},width:1\d{3}\),id:print\),/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /objectType:dashboard,title:'Ecom Dashboard',/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /locatorParams:.*id:DASHBOARD_APP_LOCATOR,params:\(dashboardId:'6c263e00-1c6d-11ea-a100-8589bb9d7c6b',/
+        );
+      });
     });
 
     describe('Print PNG button', () => {
@@ -153,9 +181,37 @@ export default function ({
         expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
+
+      it('provides a button to copy POST URL', async () => {
+        // The "clipboard-read" permission of the Permissions API must be granted
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
+
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.openExportTab();
+        await testSubjects.click('pngV2-radioOption');
+        await testSubjects.click('shareReportingCopyURL');
+
+        const postUrl = await browser.getClipboardValue();
+        expect(postUrl).to.contain('pngV2');
+
+        const [, jobParams] = postUrl.split('jobParams=');
+        expect(decodeURIComponent(jobParams)).to.contain('browserTimezone:UTC,');
+        expect(decodeURIComponent(jobParams)).to.match(
+          /layout:\(dimensions:\(height:1\d{3},width:1\d{3}\),id:preserve_layout\),/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /objectType:dashboard,title:'Ecom Dashboard',/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /locatorParams:.*id:DASHBOARD_APP_LOCATOR,params:\(dashboardId:'6c263e00-1c6d-11ea-a100-8589bb9d7c6b',/
+        );
+      });
     });
 
-    describe.skip('Preserve Layout', () => {
+    describe('Preserve Layout', () => {
       before(async () => {
         await loadEcommerce();
       });
@@ -165,7 +221,6 @@ export default function ({
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
-        await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('Ecom Dashboard');
@@ -179,6 +234,33 @@ export default function ({
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
         await kibanaServer.uiSettings.replace({});
+      });
+
+      it('provides a button to copy POST URL', async () => {
+        // The "clipboard-read" permission of the Permissions API must be granted
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
+
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.openExportTab();
+        await testSubjects.click('shareReportingCopyURL');
+
+        const postUrl = await browser.getClipboardValue();
+        expect(postUrl).to.contain('printablePdfV2');
+
+        const [, jobParams] = postUrl.split('jobParams=');
+        expect(decodeURIComponent(jobParams)).to.contain('browserTimezone:UTC,');
+        expect(decodeURIComponent(jobParams)).to.match(
+          /layout:\(dimensions:\(height:1\d{3},width:1\d{3}\),id:preserve_layout\),/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /objectType:dashboard,title:'Ecom Dashboard',/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /locatorParams:.*id:DASHBOARD_APP_LOCATOR,params:\(dashboardId:'6c263e00-1c6d-11ea-a100-8589bb9d7c6b',/
+        );
       });
     });
 

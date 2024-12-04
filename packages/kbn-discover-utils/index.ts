@@ -14,7 +14,6 @@ export {
   DEFAULT_ALLOWED_LOGS_BASE_PATTERNS,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
-  DOC_TABLE_LEGACY,
   FIELDS_LIMIT_SETTING,
   HIDE_ANNOUNCEMENTS,
   MAX_DOC_FIELDS_DISPLAYED,
@@ -28,8 +27,6 @@ export {
   SHOW_FIELD_STATISTICS,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
-  TRUNCATE_MAX_HEIGHT,
-  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
@@ -45,22 +42,24 @@ export {
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
   isNestedFieldParent,
-  isLegacyTableEnabled,
   usePager,
   calcFieldCounts,
   getLogLevelColor,
   getLogLevelCoalescedValue,
   getLogLevelCoalescedValueLabel,
   LogLevelCoalescedValue,
-  LogLevelBadge,
   getFieldValue,
   getVisibleColumns,
   canPrependTimeFieldColumn,
   DiscoverFlyouts,
+  AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  LogLevelBadge,
 } from './src';
 
 export type { LogsContextService } from './src';
 
 export * from './src/types';
+
+export * from './src/data_types/logs/constants';

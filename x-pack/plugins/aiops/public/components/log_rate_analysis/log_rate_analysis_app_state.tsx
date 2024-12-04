@@ -18,13 +18,14 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
 
-import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import type { AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { LogRateAnalysisPage } from './log_rate_analysis_page';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
+import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -36,8 +37,8 @@ export interface LogRateAnalysisAppStateProps {
   dataView: DataView;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
-  /** App dependencies */
-  appDependencies: AiopsAppDependencies;
+  /** App context value */
+  appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether to show contextual insights */
   showContextualInsights?: boolean;
   /** Optional flag to indicate whether kibana is running in serverless */
@@ -47,7 +48,7 @@ export interface LogRateAnalysisAppStateProps {
 export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   dataView,
   savedSearch,
-  appDependencies,
+  appContextValue,
   showContextualInsights = false,
   showFrozenDataTierChoice = true,
 }) => {
@@ -58,26 +59,32 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   if (warning !== null) {
     return <>{warning}</>;
   }
+  const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = appContextValue.cases?.helpers.canUseCases();
 
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
   };
 
   return (
-    <AiopsAppContext.Provider value={appDependencies}>
-      <UrlStateProvider>
-        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <LogRateAnalysisReduxProvider>
-            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
-              </DatePickerContextProvider>
-            </StorageContextProvider>
-          </LogRateAnalysisReduxProvider>
-        </DataSourceContext.Provider>
-      </UrlStateProvider>
+    <AiopsAppContext.Provider value={appContextValue}>
+      <CasesContext permissions={casesPermissions!} owner={[]}>
+        <UrlStateProvider>
+          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+            <LogRateAnalysisReduxProvider>
+              <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+                <DatePickerContextProvider {...datePickerDeps}>
+                  <FilterQueryContextProvider>
+                    <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
+                  </FilterQueryContextProvider>
+                </DatePickerContextProvider>
+              </StorageContextProvider>
+            </LogRateAnalysisReduxProvider>
+          </DataSourceContext.Provider>
+        </UrlStateProvider>
+      </CasesContext>
     </AiopsAppContext.Provider>
   );
 };

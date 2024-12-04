@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/Either';
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
@@ -26,17 +27,55 @@ const objectiveSchema = t.intersection([
   t.partial({ timesliceTarget: t.number, timesliceWindow: durationType }),
 ]);
 
-const settingsSchema = t.type({
-  syncDelay: durationType,
-  frequency: durationType,
-  preventInitialBackfill: t.boolean,
-});
+const settingsSchema = t.intersection([
+  t.type({
+    syncDelay: durationType,
+    frequency: durationType,
+    preventInitialBackfill: t.boolean,
+  }),
+  t.partial({ syncField: t.union([t.string, t.null]) }),
+]);
 
 const groupBySchema = allOrAnyStringOrArray;
 
-const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
+const optionalSettingsSchema = t.partial({
+  syncDelay: durationType,
+  frequency: durationType,
+  preventInitialBackfill: t.boolean,
+  syncField: t.union([t.string, t.null]),
+});
+
 const tagsSchema = t.array(t.string);
-const sloIdSchema = t.string;
+
+// id cannot contain special characters and spaces
+const sloIdSchema = new t.Type<string, string, unknown>(
+  'sloIdSchema',
+  t.string.is,
+  (input, context): Either<t.Errors, string> => {
+    if (typeof input === 'string') {
+      const valid = isValidId(input);
+      if (!valid) {
+        return t.failure(
+          input,
+          context,
+          'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
+        );
+      }
+
+      return t.success(input);
+    } else {
+      return t.failure(input, context);
+    }
+  },
+  t.identity
+);
+
+function isValidId(id: string): boolean {
+  const MIN_ID_LENGTH = 8;
+  const MAX_ID_LENGTH = 48;
+  const validLength = MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
+  return validLength && /^[a-z0-9-_]+$/.test(id);
+}
 
 const sloDefinitionSchema = t.type({
   id: sloIdSchema,

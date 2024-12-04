@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { AIOPS_TELEMETRY_ID, AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
@@ -44,7 +44,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
     trackAIOpsRouteUsage(
       `POST ${AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS_FIELD_CANDIDATES}`,
-      headers[AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN],
+      headers[AIOPS_ANALYSIS_RUN_ORIGIN],
       usageCounter
     );
 

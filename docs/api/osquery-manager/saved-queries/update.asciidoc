@@ -4,6 +4,12 @@
 <titleabbrev>Update saved query</titleabbrev>
 ++++
 
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-kibana}/group/endpoint-security-osquery-api[Osquery APIs].
+--
+
 experimental[] Update saved queries.
 
 WARNING: You are unable to update a prebuilt saved query (`prebuilt = true`).

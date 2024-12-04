@@ -12,11 +12,13 @@
 // and makes it harder to understand the code structure.
 
 import { type GlobalVisitorContext, SharedData } from './global_visitor_context';
-import { firstItem, singleItems } from './utils';
+import { children, firstItem, singleItems } from './utils';
 import type {
   ESQLAstCommand,
+  ESQLAstExpression,
   ESQLAstItem,
   ESQLAstNodeWithArgs,
+  ESQLAstNodeWithChildren,
   ESQLAstRenameExpression,
   ESQLColumn,
   ESQLCommandOption,
@@ -27,7 +29,6 @@ import type {
   ESQLList,
   ESQLLiteral,
   ESQLOrderExpression,
-  ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -46,6 +47,11 @@ import { Builder } from '../builder';
 
 const isNodeWithArgs = (x: unknown): x is ESQLAstNodeWithArgs =>
   !!x && typeof x === 'object' && Array.isArray((x as any).args);
+
+const isNodeWithChildren = (x: unknown): x is ESQLAstNodeWithChildren =>
+  !!x &&
+  typeof x === 'object' &&
+  (Array.isArray((x as any).args) || Array.isArray((x as any).values));
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -99,13 +105,13 @@ export class VisitorContext<
   public arguments(): ESQLAstExpressionNode[] {
     const node = this.node;
 
-    if (!isNodeWithArgs(node)) {
+    if (!isNodeWithChildren(node)) {
       return [];
     }
 
     const args: ESQLAstExpressionNode[] = [];
 
-    for (const arg of singleItems(node.args)) {
+    for (const arg of children(node)) {
       args.push(arg);
     }
 
@@ -331,7 +337,7 @@ export class LimitCommandVisitorContext<
     if (
       arg &&
       arg.type === 'literal' &&
-      (arg.literalType === 'integer' || arg.literalType === 'decimal')
+      (arg.literalType === 'integer' || arg.literalType === 'double')
     ) {
       return arg;
     }
@@ -535,7 +541,7 @@ export class InlineCastExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends ExpressionVisitorContext<Methods, Data, ESQLInlineCast> {
-  public value(): ESQLSingleAstItem {
+  public value(): ESQLAstExpression {
     this.ctx.assertMethodExists('visitExpression');
 
     const value = firstItem([this.node.value])!;

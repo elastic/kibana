@@ -1237,11 +1237,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     // If the job uses aggregation or scripted fields, and if it's a config we don't support
     // use model plot data if model plot is enabled
     // else if source data can be plotted, use that, otherwise model plot will be available.
-    // @ts-ignore
+    // @ts-expect-error
     const useSourceData = isSourceDataChartableForDetector(job, detectorIndex);
 
     if (useSourceData) {
-      const datafeedQuery = get(config, 'datafeedConfig.query', null);
+      const datafeedQuery = get(config, 'datafeedConfig.query');
 
       try {
         return await fetchMetricData(

@@ -5,13 +5,25 @@
  * 2.0.
  */
 import { createHash } from 'crypto';
-import { chunk, get, invert, isEmpty, partition } from 'lodash';
+import { chunk, get, invert, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
+import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import {
+  ALERT_UUID,
+  ALERT_RULE_UUID,
+  ALERT_RULE_PARAMETERS,
+  TIMESTAMP,
+  ALERT_INSTANCE_ID,
+  ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_TERMS,
+} from '@kbn/rule-data-utils';
 import type {
   ListArray,
   ExceptionListItemSchema,
@@ -26,12 +38,13 @@ import type {
 import type {
   AlertInstanceContext,
   AlertInstanceState,
-  PluginSetupContract,
+  AlertingServerSetup,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -50,6 +63,7 @@ import type {
 } from '../types';
 import type { ShardError } from '../../../types';
 import type {
+  CompleteRule,
   EqlRuleParams,
   EsqlRuleParams,
   MachineLearningRuleParams,
@@ -64,9 +78,20 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   BaseFieldsLatest,
   DetectionAlert,
+  EqlBuildingBlockFieldsLatest,
+  EqlShellFieldsLatest,
+  WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
+import type { ConfigType } from '../../../../config';
+import type {
+  ExtraFieldsForShellAlert,
+  WrappedEqlShellOptionalSubAlertsType,
+} from '../eql/build_alert_group_from_sequence';
+import type { BuildReasonMessage } from './reason_formatters';
+import { getSuppressionTerms } from './suppression_utils';
+import { robustGet } from './source_fields_merging/utils/robust_field_access';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -82,7 +107,9 @@ export const hasReadIndexPrivileges = async (args: {
   const indexNames = Object.keys(privileges.index);
   const filteredIndexNames = isCcsPermissionWarningEnabled
     ? indexNames
-    : indexNames.filter((indexName) => !indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
+    : indexNames.filter((indexName) => {
+        return !isCCSRemoteIndexName(indexName);
+      });
 
   const [, indexesWithNoReadPrivileges] = partition(
     filteredIndexNames,
@@ -426,7 +453,7 @@ export const getRuleRangeTuples = async ({
   interval: string;
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  alerting: PluginSetupContract;
+  alerting: AlertingServerSetup;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
@@ -1023,4 +1050,97 @@ export const getDisabledActionsWarningText = ({
   } else {
     return `${alertsGeneratedText} connector ${actionTypesJoined} is not enabled. To send notifications, you need a higher Security Analytics license / tier`;
   }
+};
+
+export interface SharedParams {
+  spaceId: string;
+  completeRule: CompleteRule<RuleWithInMemorySuppression>;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  indicesToQuery: string[];
+  alertTimestampOverride: Date | undefined;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl: string | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  intendedTimestamp: Date | undefined;
+}
+
+export type RuleWithInMemorySuppression =
+  | ThreatRuleParams
+  | EqlRuleParams
+  | MachineLearningRuleParams;
+
+export interface SequenceSuppressionTermsAndFieldsParams {
+  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest>;
+  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  spaceId: string;
+  completeRule: CompleteRule<RuleWithInMemorySuppression>;
+  indicesToQuery: string[];
+  alertTimestampOverride: Date | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+}
+
+export type SequenceSuppressionTermsAndFieldsFactory = (
+  shellAlert: WrappedEqlShellOptionalSubAlertsType,
+  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>,
+  buildReasonMessage: BuildReasonMessage
+) => WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
+  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+};
+
+export const buildShellAlertSuppressionTermsAndFields = ({
+  shellAlert,
+  buildingBlockAlerts,
+  spaceId,
+  completeRule,
+  alertTimestampOverride,
+  primaryTimestamp,
+  secondaryTimestamp,
+}: SequenceSuppressionTermsAndFieldsParams): WrappedFieldsLatest<
+  EqlShellFieldsLatest & SuppressionFieldsLatest
+> & {
+  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+} => {
+  const suppressionTerms = getSuppressionTerms({
+    alertSuppression: completeRule?.ruleParams?.alertSuppression,
+    input: shellAlert._source,
+  });
+  const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
+
+  const primarySuppressionTime = robustGet({
+    key: primaryTimestamp,
+    document: shellAlert._source,
+  }) as string | undefined;
+
+  const secondarySuppressionTime =
+    secondaryTimestamp &&
+    (robustGet({
+      key: secondaryTimestamp,
+      document: shellAlert._source,
+    }) as string | undefined);
+
+  const suppressionTime = new Date(
+    primarySuppressionTime ??
+      secondarySuppressionTime ??
+      alertTimestampOverride ??
+      shellAlert._source[TIMESTAMP]
+  );
+
+  const suppressionFields: ExtraFieldsForShellAlert = {
+    [ALERT_INSTANCE_ID]: instanceId,
+    [ALERT_SUPPRESSION_TERMS]: suppressionTerms,
+    [ALERT_SUPPRESSION_START]: suppressionTime,
+    [ALERT_SUPPRESSION_END]: suppressionTime,
+    [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+  };
+
+  merge<EqlShellFieldsLatest, SuppressionFieldsLatest>(shellAlert._source, suppressionFields);
+
+  return {
+    _id: shellAlert._id,
+    _index: shellAlert._index,
+    _source: shellAlert._source as EqlShellFieldsLatest & SuppressionFieldsLatest,
+    subAlerts: buildingBlockAlerts,
+  };
 };

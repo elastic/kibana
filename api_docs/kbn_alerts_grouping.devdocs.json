@@ -29,7 +29,7 @@
             "section": "def-public.AlertsGroupingProps",
             "text": "AlertsGroupingProps"
           },
-          "<T>) => JSX.Element"
+          "<T>) => React.JSX.Element"
         ],
         "path": "packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
         "deprecated": false,
@@ -362,22 +362,31 @@
           },
           {
             "parentPluginId": "@kbn/alerts-grouping",
-            "id": "def-public.AlertsGroupingProps.featureIds",
+            "id": "def-public.AlertsGroupingProps.ruleTypeIds",
             "type": "Array",
             "tags": [],
-            "label": "featureIds",
+            "label": "ruleTypeIds",
             "description": [
-              "\nThe alerting feature ids this grouping covers"
+              "\nThe alerting rule type ids this grouping covers"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/rule-data-utils",
-                "scope": "common",
-                "docId": "kibKbnRuleDataUtilsPluginApi",
-                "section": "def-common.AlertConsumers",
-                "text": "AlertConsumers"
-              },
-              "[]"
+              "string[]"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.consumers",
+            "type": "Array",
+            "tags": [],
+            "label": "consumers",
+            "description": [
+              "\nThe alerting consumers this grouping covers"
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,

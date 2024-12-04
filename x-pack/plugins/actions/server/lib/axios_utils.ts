@@ -137,6 +137,16 @@ export const throwIfResponseIsNotValid = ({
   const requiredContentType = 'application/json';
   const contentType = res.headers['content-type'] ?? 'undefined';
   const data = res.data;
+  const statusCode = res.status;
+
+  /**
+   * Some external services may return a 204
+   * status code but with unsupported content type like text/html.
+   * To avoid throwing on valid requests we return.
+   */
+  if (statusCode === 204) {
+    return;
+  }
 
   /**
    * Check that the content-type of the response is application/json.

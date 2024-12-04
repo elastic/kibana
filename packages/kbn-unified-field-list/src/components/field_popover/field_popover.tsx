@@ -8,12 +8,20 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiPopoverProps, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverProps,
+  EuiPopoverTitle,
+} from '@elastic/eui';
 import './field_popover.scss';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export interface FieldPopoverProps extends EuiPopoverProps {
   renderHeader?: () => React.ReactNode;
   renderContent?: () => React.ReactNode;
+  renderFooter?: () => React.ReactNode;
 }
 
 export const FieldPopover: React.FC<FieldPopoverProps> = ({
@@ -21,10 +29,12 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   closePopover,
   renderHeader,
   renderContent,
+  renderFooter,
   ...otherPopoverProps
 }) => {
-  let header = null;
-  let content = null;
+  let header: React.ReactNode | null = null;
+  let content: React.ReactNode | null = null;
+  let footer: React.ReactNode | null = null;
 
   if (isOpen) {
     try {
@@ -36,6 +46,13 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
 
     try {
       content = renderContent?.() || null;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+
+    try {
+      footer = renderFooter?.() || null;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
@@ -54,10 +71,27 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
       {...otherPopoverProps}
     >
       {isOpen && (
-        <>
-          {content && header ? <EuiPopoverTitle>{header}</EuiPopoverTitle> : header}
-          {content}
-        </>
+        <EuiFlexGroup gutterSize="none" direction="column" css={{ maxHeight: '90vh' }}>
+          {Boolean(header) && (
+            <EuiFlexItem grow={false}>
+              {content ? <EuiPopoverTitle>{header}</EuiPopoverTitle> : header}
+            </EuiFlexItem>
+          )}
+          {content ? (
+            <EuiFlexItem
+              className="eui-yScrollWithShadows"
+              css={{
+                padding: euiThemeVars.euiSize,
+                margin: `-${euiThemeVars.euiSize}`,
+              }}
+            >
+              {content}
+            </EuiFlexItem>
+          ) : (
+            content
+          )}
+          {Boolean(footer) && <EuiFlexItem grow={false}>{footer}</EuiFlexItem>}
+        </EuiFlexGroup>
       )}
     </EuiPopover>
   );

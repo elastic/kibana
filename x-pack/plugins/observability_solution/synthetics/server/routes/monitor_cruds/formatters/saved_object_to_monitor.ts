@@ -21,14 +21,6 @@ const keysToOmit = [
   ConfigKey.CONFIG_HASH,
   ConfigKey.JOURNEY_ID,
   ConfigKey.FORM_MONITOR_TYPE,
-  ConfigKey.MAX_ATTEMPTS,
-  ConfigKey.MONITOR_SOURCE_TYPE,
-  ConfigKey.METADATA,
-  ConfigKey.SOURCE_PROJECT_CONTENT,
-  ConfigKey.PROJECT_ID,
-  ConfigKey.JOURNEY_FILTERS_MATCH,
-  ConfigKey.JOURNEY_FILTERS_TAGS,
-  ConfigKey.MONITOR_SOURCE_TYPE,
 ];
 
 type Result = MonitorFieldsResult & {
@@ -41,6 +33,20 @@ type Result = MonitorFieldsResult & {
 };
 
 export const transformPublicKeys = (result: Result) => {
+  if (result[ConfigKey.SOURCE_INLINE]) {
+    result.inline_script = result[ConfigKey.SOURCE_INLINE];
+  }
+  if (result[ConfigKey.HOSTS]) {
+    result.host = result[ConfigKey.HOSTS];
+  }
+  if (result[ConfigKey.PARAMS]) {
+    try {
+      result[ConfigKey.PARAMS] = JSON.parse(result[ConfigKey.PARAMS] ?? '{}');
+    } catch (e) {
+      // ignore
+    }
+  }
+
   let formattedResult = {
     ...result,
     [ConfigKey.PARAMS]: formatParams(result),
@@ -54,21 +60,8 @@ export const transformPublicKeys = (result: Result) => {
       ...(result[ConfigKey.SOURCE_INLINE] && { inline_script: result[ConfigKey.SOURCE_INLINE] }),
       [ConfigKey.PLAYWRIGHT_OPTIONS]: formatPWOptions(result),
     };
-  } else {
-    formattedResult.ssl = formatNestedFields(formattedResult, 'ssl');
-    formattedResult.response = formatNestedFields(formattedResult, 'response');
-    formattedResult.check = formatNestedFields(formattedResult, 'check');
-    if (formattedResult[ConfigKey.MAX_REDIRECTS]) {
-      formattedResult[ConfigKey.MAX_REDIRECTS] = Number(formattedResult[ConfigKey.MAX_REDIRECTS]);
-    }
   }
-  const res = omit(formattedResult, keysToOmit) as Result;
-
-  return omitBy(
-    res,
-    (value, key) =>
-      key.startsWith('response.') || key.startsWith('ssl.') || key.startsWith('check.')
-  );
+  return omit(formattedResult, keysToOmit) as Result;
 };
 
 export function mapSavedObjectToMonitor({
@@ -78,7 +71,7 @@ export function mapSavedObjectToMonitor({
   monitor: SavedObject<MonitorFields | EncryptedSyntheticsMonitor>;
   internal?: boolean;
 }) {
-  const result = {
+  let result = {
     ...monitor.attributes,
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
@@ -86,7 +79,9 @@ export function mapSavedObjectToMonitor({
   if (internal) {
     return result;
   }
-  return transformPublicKeys(result);
+  result = transformPublicKeys(result);
+  // omit undefined value or null value
+  return omitBy(result, removeMonitorEmptyValues);
 }
 export function mergeSourceMonitor(
   normalizedPreviousMonitor: EncryptedSyntheticsMonitor,
@@ -155,4 +150,18 @@ const formatNestedFields = (
   }
 
   return obj;
+};
+
+export const removeMonitorEmptyValues = (v: any) => {
+  // value is falsy
+  return (
+    v === undefined ||
+    v === null ||
+    // value is empty string
+    (typeof v === 'string' && v.trim() === '') ||
+    // is empty array
+    (Array.isArray(v) && v.length === 0) ||
+    // object is has no values
+    (typeof v === 'object' && Object.keys(v).length === 0)
+  );
 };

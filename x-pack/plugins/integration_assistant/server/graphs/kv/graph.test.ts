@@ -29,11 +29,7 @@ describe('KVGraph', () => {
     it('Ensures that the graph compiles', async () => {
       // When getKVGraph runs, langgraph compiles the graph it will error if the graph has any issues.
       // Common issues for example detecting a node has no next step, or there is a infinite loop between them.
-      try {
-        await getKVGraph({ model, client });
-      } catch (error) {
-        fail(`getKVGraph threw an error: ${error}`);
-      }
+      await getKVGraph({ model, client });
     });
   });
 });

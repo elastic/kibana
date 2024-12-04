@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createContext, useContext } from 'react';
-import type { Pipeline, Docs, SamplesFormat } from '../../../../common';
+import type { Pipeline, Docs, SamplesFormat, CelInput } from '../../../../common';
 import type { AIConnector, IntegrationSettings } from './types';
 
 export interface State {
@@ -13,11 +13,13 @@ export interface State {
   connector?: AIConnector;
   integrationSettings?: IntegrationSettings;
   isGenerating: boolean;
+  hasCelInput: boolean;
   result?: {
     pipeline: Pipeline;
     docs: Docs;
     samplesFormat?: SamplesFormat;
   };
+  celInputResult?: CelInput;
 }
 
 export const initialState: State = {
@@ -25,6 +27,7 @@ export const initialState: State = {
   connector: undefined,
   integrationSettings: undefined,
   isGenerating: false,
+  hasCelInput: false,
   result: undefined,
 };
 
@@ -33,7 +36,9 @@ type Action =
   | { type: 'SET_CONNECTOR'; payload: State['connector'] }
   | { type: 'SET_INTEGRATION_SETTINGS'; payload: State['integrationSettings'] }
   | { type: 'SET_IS_GENERATING'; payload: State['isGenerating'] }
-  | { type: 'SET_GENERATED_RESULT'; payload: State['result'] };
+  | { type: 'SET_HAS_CEL_INPUT'; payload: State['hasCelInput'] }
+  | { type: 'SET_GENERATED_RESULT'; payload: State['result'] }
+  | { type: 'SET_CEL_INPUT_RESULT'; payload: State['celInputResult'] };
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -50,12 +55,16 @@ export const reducer = (state: State, action: Action): State => {
       return { ...state, integrationSettings: action.payload };
     case 'SET_IS_GENERATING':
       return { ...state, isGenerating: action.payload };
+    case 'SET_HAS_CEL_INPUT':
+      return { ...state, hasCelInput: action.payload };
     case 'SET_GENERATED_RESULT':
       return {
         ...state,
         // keep original result as the samplesFormat is not always included in the payload
         result: state.result ? { ...state.result, ...action.payload } : action.payload,
       };
+    case 'SET_CEL_INPUT_RESULT':
+      return { ...state, celInputResult: action.payload };
     default:
       return state;
   }
@@ -66,7 +75,9 @@ export interface Actions {
   setConnector: (payload: State['connector']) => void;
   setIntegrationSettings: (payload: State['integrationSettings']) => void;
   setIsGenerating: (payload: State['isGenerating']) => void;
+  setHasCelInput: (payload: State['hasCelInput']) => void;
   setResult: (payload: State['result']) => void;
+  setCelInputResult: (payload: State['celInputResult']) => void;
 }
 
 const ActionsContext = createContext<Actions | undefined>(undefined);

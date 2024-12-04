@@ -79,7 +79,7 @@ const createInstance = async () => {
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
       savedSearch: savedSearchPluginMock.createStartContract(),
       navigation: navigationPluginMock.createStartContract(),
-      presentationUtil: presentationUtilPluginMock.createStartContract(coreMock.createStart()),
+      presentationUtil: presentationUtilPluginMock.createStartContract(),
       urlForwarding: urlForwardingPluginMock.createStartContract(),
       screenshotMode: screenshotModePluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),

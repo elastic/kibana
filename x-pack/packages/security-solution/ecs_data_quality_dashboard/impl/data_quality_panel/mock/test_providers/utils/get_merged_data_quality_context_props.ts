@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import numeral from '@elastic/numeral';
-
 import { DataQualityProviderProps } from '../../../data_quality_context';
-import { EMPTY_STAT } from '../../../constants';
+
+import { formatBytes as formatBytesMock, formatNumber as formatNumberMock } from './format';
 
 export const getMergedDataQualityContextProps = (
   dataQualityContextProps?: Partial<DataQualityProviderProps>
@@ -31,15 +30,15 @@ export const getMergedDataQualityContextProps = (
     ilmPhases,
     selectedIlmPhaseOptions,
     setSelectedIlmPhaseOptions,
+    defaultStartTime,
+    defaultEndTime,
   } = {
     isILMAvailable: true,
     addSuccessToast: jest.fn(),
     canUserCreateAndReadCases: jest.fn(() => true),
     endDate: null,
-    formatBytes: (value: number | undefined) =>
-      value != null ? numeral(value).format('0,0.[0]b') : EMPTY_STAT,
-    formatNumber: (value: number | undefined) =>
-      value != null ? numeral(value).format('0,0.[000]') : EMPTY_STAT,
+    formatBytes: formatBytesMock,
+    formatNumber: formatNumberMock,
     isAssistantEnabled: true,
     lastChecked: '2023-03-28T22:27:28.159Z',
     openCreateCaseFlyout: jest.fn(),
@@ -72,6 +71,8 @@ export const getMergedDataQualityContextProps = (
       },
     ],
     setSelectedIlmPhaseOptions: jest.fn(),
+    defaultStartTime: 'now-7d/d',
+    defaultEndTime: 'now/d',
     ...dataQualityContextProps,
   };
 
@@ -93,5 +94,7 @@ export const getMergedDataQualityContextProps = (
     ilmPhases,
     selectedIlmPhaseOptions,
     setSelectedIlmPhaseOptions,
+    defaultStartTime,
+    defaultEndTime,
   };
 };

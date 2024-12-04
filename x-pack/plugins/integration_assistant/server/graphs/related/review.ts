@@ -11,6 +11,7 @@ import type { RelatedState, SimplifiedProcessors, SimplifiedProcessor } from '..
 import type { RelatedNodeParams } from './types';
 import { combineProcessors } from '../../util/processors';
 import { RELATED_REVIEW_PROMPT } from './prompts';
+import { deepCopySkipArrays } from './util';
 
 export async function handleReview({
   state,
@@ -24,7 +25,7 @@ export async function handleReview({
     current_processors: JSON.stringify(state.currentProcessors, null, 2),
     ex_answer: state.exAnswer,
     previous_error: state.previousError,
-    pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
+    pipeline_results: JSON.stringify(state.pipelineResults.map(deepCopySkipArrays), null, 2),
   })) as SimplifiedProcessor[];
 
   const processors = {

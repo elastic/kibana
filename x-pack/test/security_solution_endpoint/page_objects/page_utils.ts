@@ -19,6 +19,7 @@ export function EndpointPageUtils({ getService }: FtrProviderContext) {
      */
     async clickOnEuiCheckbox(euiCheckBoxTestId: string) {
       const euiCheckboxInput = await testSubjects.find(euiCheckBoxTestId);
+      await euiCheckboxInput.scrollIntoView();
       await euiCheckboxInput.click();
     },
 

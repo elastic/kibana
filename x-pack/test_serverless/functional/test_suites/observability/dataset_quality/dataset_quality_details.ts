@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
 
-  describe('Flyout', function () {
+  describe('Dataset quality details', function () {
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
       ]);
 
-      await PageObjects.svlCommonPage.loginAsAdmin();
+      await PageObjects.svlCommonPage.loginAsViewer();
     });
 
     after(async () => {
@@ -165,7 +165,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('overview summary panel', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/194575
+    describe.skip('overview summary panel', () => {
       it('should show summary KPIs', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
@@ -177,7 +178,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(parseInt(degradedDocs, 10)).to.be(1);
         expect(parseInt(services, 10)).to.be(3);
         expect(parseInt(hosts, 10)).to.be(52);
-        expect(parseInt(size, 10)).to.be.greaterThan(0);
+        // metering stats API is cached for 30seconds, waiting for the exact value is not optimal in this case
+        // rather we can just check if any value is present
+        expect(size).to.be.ok();
       });
     });
 
@@ -362,7 +365,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should show the degraded fields table with data when present', async () => {
+      it('should show the degraded fields table with data and spark plots when present', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
         });
@@ -375,15 +378,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
         expect(rows.length).to.eql(3);
-      });
-
-      it('should display Spark Plot for every row of degraded fields', async () => {
-        await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: degradedDataStreamName,
-        });
-
-        const rows =
-          await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
         const sparkPlots = await testSubjects.findAll(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot

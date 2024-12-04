@@ -29,7 +29,7 @@
           "\nPredefined `EuiEmptyPrompt` for 404 pages."
         ],
         "signature": [
-          "({ actions, title, body }: NotFoundProps) => JSX.Element"
+          "({ actions, title, body }: NotFoundProps) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
         "deprecated": false,

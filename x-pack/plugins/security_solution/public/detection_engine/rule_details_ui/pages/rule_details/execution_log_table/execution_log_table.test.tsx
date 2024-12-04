@@ -32,7 +32,7 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => {
 });
 
 const mockTelemetry = {
-  reportEventLogShowSourceEventDateRange: jest.fn(),
+  reportEvent: jest.fn(),
 };
 
 const mockedUseKibana = {
@@ -47,11 +47,11 @@ const coreStart = coreMock.createStart();
 
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 mockUseSourcererDataView.mockReturnValue({
-  indexPattern: { fields: [] },
   missingPatterns: {},
   selectedPatterns: {},
   scopeSelectedPatterns: {},
   loading: false,
+  sourcererDataView: {},
 });
 
 const mockUseRuleExecutionEvents = useExecutionResults as jest.Mock;
@@ -91,6 +91,6 @@ describe('ExecutionLogTable', () => {
 
     fireEvent.click(switchButton);
 
-    expect(mockTelemetry.reportEventLogShowSourceEventDateRange).toHaveBeenCalled();
+    expect(mockTelemetry.reportEvent).toHaveBeenCalled();
   });
 });

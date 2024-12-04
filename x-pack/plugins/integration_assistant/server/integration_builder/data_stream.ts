@@ -9,6 +9,7 @@ import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
 import { load } from 'js-yaml';
 import type { DataStream } from '../../common';
+import { DEFAULT_CEL_PROGRAM } from './constants';
 import { copySync, createSync, ensureDirSync, listDirSync, readSync } from '../util';
 import { Field } from '../util/samples';
 
@@ -30,13 +31,33 @@ export function createDataStream(
 
   const dataStreams: string[] = [];
   for (const inputType of dataStream.inputTypes) {
-    const mappedValues = {
+    let mappedValues = {
       data_stream_title: title,
       data_stream_description: description,
       package_name: packageName,
       data_stream_name: dataStreamName,
       multiline_ndjson: useMultilineNDJSON,
-    };
+    } as object;
+
+    if (inputType === 'cel') {
+      if (dataStream.celInput != null) {
+        // Map the generated CEL config items into the template
+        const cel = dataStream.celInput;
+        mappedValues = {
+          ...mappedValues,
+          // Ready the program for printing with correct indentation
+          program: cel.program.split('\n'),
+          state: cel.stateSettings,
+          redact: cel.redactVars,
+        };
+      } else {
+        mappedValues = {
+          ...mappedValues,
+          program: DEFAULT_CEL_PROGRAM.split('\n'),
+        };
+      }
+    }
+
     const dataStreamManifest = nunjucks.render(
       `${inputType.replaceAll('-', '_')}_manifest.yml.njk`,
       mappedValues

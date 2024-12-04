@@ -11,6 +11,7 @@ import type { RuleResponse } from '../../../../../../../common/api/detection_eng
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { getIdError } from '../../../utils/utils';
+import { validateNonCustomizableUpdateFields } from '../../../utils/validate';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 
 import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
@@ -26,6 +27,7 @@ interface UpdateRuleArguments {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   ruleUpdate: RuleUpdateProps;
   mlAuthz: MlAuthz;
+  isRuleCustomizationEnabled: boolean;
 }
 
 export const updateRule = async ({
@@ -34,6 +36,7 @@ export const updateRule = async ({
   prebuiltRuleAssetClient,
   ruleUpdate,
   mlAuthz,
+  isRuleCustomizationEnabled,
 }: UpdateRuleArguments): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = ruleUpdate;
 
@@ -50,10 +53,13 @@ export const updateRule = async ({
     throw new ClientError(error.message, error.statusCode);
   }
 
+  validateNonCustomizableUpdateFields(ruleUpdate, existingRule);
+
   const ruleWithUpdates = await applyRuleUpdate({
     prebuiltRuleAssetClient,
     existingRule,
     ruleUpdate,
+    isRuleCustomizationEnabled,
   });
 
   const updatedRule = await rulesClient.update({

@@ -15,10 +15,9 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
-import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import type { AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
@@ -35,8 +34,8 @@ export interface LogCategorizationAppStateProps {
   dataView: DataView;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
-  /** App dependencies */
-  appDependencies: AiopsAppDependencies;
+  /** App context value */
+  appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
 }
@@ -44,7 +43,7 @@ export interface LogCategorizationAppStateProps {
 export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   dataView,
   savedSearch,
-  appDependencies,
+  appContextValue,
   showFrozenDataTierChoice = true,
 }) => {
   if (!dataView) return null;
@@ -56,22 +55,27 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   }
 
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
   };
 
+  const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = appContextValue.cases?.helpers.canUseCases();
+
   return (
-    <AiopsAppContext.Provider value={appDependencies}>
-      <UrlStateProvider>
-        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-            <DatePickerContextProvider {...datePickerDeps}>
-              <LogCategorizationPage embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE} />
-            </DatePickerContextProvider>
-          </StorageContextProvider>
-        </DataSourceContext.Provider>
-      </UrlStateProvider>
+    <AiopsAppContext.Provider value={appContextValue}>
+      <CasesContext owner={[]} permissions={casesPermissions!}>
+        <UrlStateProvider>
+          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <LogCategorizationPage />
+              </DatePickerContextProvider>
+            </StorageContextProvider>
+          </DataSourceContext.Provider>
+        </UrlStateProvider>
+      </CasesContext>
     </AiopsAppContext.Provider>
   );
 };

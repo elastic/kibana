@@ -9,6 +9,7 @@
 
 import { Key } from 'selenium-webdriver';
 import { asyncForEach } from '@kbn/std';
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class ConsolePageObject extends FtrService {
@@ -49,6 +50,13 @@ export class ConsolePageObject extends FtrService {
     const textArea = await this.getTextArea();
     await textArea.clickMouseButton();
     await textArea.clearValueWithKeyboard();
+  }
+
+  public async focusInputEditor() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoEditor');
+    // Simply clicking on the editor doesn't focus it, so we need to click
+    // on the margin view overlays
+    await (await outputEditor.findByClassName('margin-view-overlays')).click();
   }
 
   public async focusOutputEditor() {
@@ -216,6 +224,10 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async isPlayButtonVisible() {
+    return await this.testSubjects.exists('sendRequestButton');
+  }
+
   public async clickCopyOutput() {
     await this.testSubjects.click('copyOutputButton');
   }
@@ -271,8 +283,12 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleSkipTourButton');
   }
 
-  public async clickNextTourStep() {
+  public async clickNextTourStep(andWaitFor: number = 0) {
     await this.testSubjects.click('consoleNextTourStepButton');
+
+    if (andWaitFor) {
+      await this.common.sleep(andWaitFor);
+    }
   }
 
   public async clickCompleteTour() {
@@ -368,10 +384,12 @@ export class ConsolePageObject extends FtrService {
   public async setFontSizeSetting(newSize: number) {
     // while the settings form opens/loads this may fail, so retry for a while
     await this.retry.try(async () => {
+      const newSizeString = String(newSize);
       const fontSizeInput = await this.testSubjects.find('setting-font-size-input');
       await fontSizeInput.clearValue({ withJS: true });
       await fontSizeInput.click();
-      await fontSizeInput.type(String(newSize));
+      await fontSizeInput.type(newSizeString);
+      expect(await fontSizeInput.getAttribute('value')).to.be(newSizeString);
     });
   }
 

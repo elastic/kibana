@@ -28,6 +28,7 @@ import * as i18n from './translations';
 
 import type { OnComplete, ProgressItem } from './use_generation';
 import { ProgressOrder, useGeneration } from './use_generation';
+import { ErrorMessage } from './error_with_link';
 
 const progressText: Record<ProgressItem, string> = {
   analyzeLogs: i18n.PROGRESS_ANALYZE_LOGS,
@@ -82,12 +83,12 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                 {error ? (
                   <EuiFlexItem>
                     <EuiCallOut
-                      title={i18n.GENERATION_ERROR(progressText[progress])}
+                      title={i18n.GENERATION_ERROR_TITLE(progressText[progress])}
                       color="danger"
                       iconType="alert"
                       data-test-subj="generationErrorCallout"
                     >
-                      {error}
+                      <ErrorMessage error={error} />
                     </EuiCallOut>
                   </EuiFlexItem>
                 ) : (

@@ -37,7 +37,7 @@ export const SECRET = i18n.translate('xpack.stackConnectors.components.gemini.se
 });
 
 export const CREDENTIALS_JSON = i18n.translate(
-  'xpack.stackConnectors.components.gemini.credentialsJSON',
+  'xpack.stackConnectors.components.gemini.credentialsJson',
   {
     defaultMessage: 'Credentials JSON',
   }

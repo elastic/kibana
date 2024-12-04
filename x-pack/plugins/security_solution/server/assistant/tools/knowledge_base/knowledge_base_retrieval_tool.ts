@@ -25,8 +25,8 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is KnowledgeBaseRetrievalToolParams => {
-    const { kbDataClient, isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && kbDataClient != null;
+    const { kbDataClient, isEnabledKnowledgeBase } = params;
+    return isEnabledKnowledgeBase && kbDataClient != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
@@ -40,7 +40,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
       schema: z.object({
         query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
       }),
-      func: async (input, _, cbManager) => {
+      func: async (input) => {
         logger.debug(
           () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );

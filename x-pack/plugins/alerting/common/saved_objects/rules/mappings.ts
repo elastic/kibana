@@ -225,6 +225,18 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     // NO NEED TO BE INDEXED
+    // flapping: {
+    //   index: false,
+    //   properties: {
+    //     lookBackWindow: {
+    //       type: 'long',
+    //     },
+    //     statusChangeThreshold: {
+    //       type: 'long',
+    //     },
+    //   },
+    // },
+    // NO NEED TO BE INDEXED
     // nextRun: {
     //   type: 'date',
     // },

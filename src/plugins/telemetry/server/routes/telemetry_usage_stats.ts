@@ -14,6 +14,7 @@ import type {
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { ApiOperation } from '@kbn/security-plugin-types-server';
 import { RequestHandler } from '@kbn/core-http-server';
 import { FetchSnapshotTelemetry } from '../../common/routes';
 import { UsageStatsBody, v2 } from '../../common/types';
@@ -50,7 +51,7 @@ export function registerTelemetryUsageStatsRoutes(
       // security API directly to check privileges for this action. Note that the 'decryptedTelemetry' API privilege string is only
       // granted to users that have "Global All" or "Global Read" privileges in Kibana.
       const { checkPrivilegesWithRequest, actions } = security.authz;
-      const privileges = { kibana: actions.api.get('decryptedTelemetry') };
+      const privileges = { kibana: actions.api.get(ApiOperation.Read, 'decryptedTelemetry') };
       const { hasAllRequested } = await checkPrivilegesWithRequest(req).globally(privileges);
       if (!hasAllRequested) {
         return res.forbidden();
@@ -96,6 +97,30 @@ export function registerTelemetryUsageStatsRoutes(
       enableQueryVersion: true, // Allow specifying the version through querystring so that we can use it in Dev Console
     })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
-    .addVersion({ version: '1', validate: v2Validations }, v2Handler)
-    .addVersion({ version: '2', validate: v2Validations }, v2Handler);
+    .addVersion(
+      {
+        version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: v2Validations,
+      },
+      v2Handler
+    )
+    .addVersion(
+      {
+        version: '2',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: v2Validations,
+      },
+      v2Handler
+    );
 }

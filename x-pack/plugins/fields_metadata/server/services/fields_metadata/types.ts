@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core/server';
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
-import { IntegrationFieldsExtractor, IntegrationFieldsSearchParams } from './repositories/types';
+import {
+  IntegrationFieldsExtractor,
+  IntegrationFieldsSearchParams,
+  IntegrationListExtractor,
+} from './repositories/types';
 
 export * from './repositories/types';
 
@@ -15,10 +20,11 @@ export interface FieldsMetadataServiceStartDeps {}
 
 export interface FieldsMetadataServiceSetup {
   registerIntegrationFieldsExtractor: (extractor: IntegrationFieldsExtractor) => void;
+  registerIntegrationListExtractor: (extractor: IntegrationListExtractor) => void;
 }
 
 export interface FieldsMetadataServiceStart {
-  getClient(): IFieldsMetadataClient;
+  getClient(request: KibanaRequest): Promise<IFieldsMetadataClient>;
 }
 
 export interface FindFieldsMetadataOptions extends Partial<IntegrationFieldsSearchParams> {

@@ -39,8 +39,8 @@ export const vulnerabilitiesTableFieldLabels: Record<string, string> = {
     'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.packageFixedVersionColumnLabel',
     { defaultMessage: 'Fix Version' }
   ),
-  'data_stream.dataset': i18n.translate(
-    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.sourceColumnLabel',
-    { defaultMessage: 'Source' }
+  'observer.vendor': i18n.translate(
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vendorColumnLabel',
+    { defaultMessage: 'Vendor' }
   ),
 } as const;

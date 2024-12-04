@@ -18,6 +18,7 @@ import { z } from '@kbn/zod';
 
 import { Mapping, Pipeline, Docs, SamplesFormat } from './common_attributes.gen';
 import { ESProcessorItem } from './processor_attributes.gen';
+import { CelInput } from './cel_input_attributes.gen';
 
 export type EcsMappingAPIResponse = z.infer<typeof EcsMappingAPIResponse>;
 export const EcsMappingAPIResponse = z.object({
@@ -57,4 +58,9 @@ export const AnalyzeLogsAPIResponse = z.object({
     samplesFormat: SamplesFormat,
     parsedSamples: z.array(z.string()),
   }),
+});
+
+export type CelInputAPIResponse = z.infer<typeof CelInputAPIResponse>;
+export const CelInputAPIResponse = z.object({
+  results: CelInput,
 });

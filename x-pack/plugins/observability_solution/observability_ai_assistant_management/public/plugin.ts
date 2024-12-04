@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import { EnterpriseSearchPublicStart } from '@kbn/enterprise-search-plugin/public';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 
 import type {
   ObservabilityAIAssistantPublicSetup,
@@ -32,7 +32,13 @@ export interface SetupDependencies {
 export interface StartDependencies {
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   serverless?: ServerlessPluginStart;
-  enterpriseSearch?: EnterpriseSearchPublicStart;
+  productDocBase?: ProductDocBasePluginStart;
+}
+
+export interface ConfigSchema {
+  logSourcesEnabled: boolean;
+  spacesEnabled: boolean;
+  visibilityEnabled: boolean;
 }
 
 export class AiAssistantManagementObservabilityPlugin
@@ -44,12 +50,18 @@ export class AiAssistantManagementObservabilityPlugin
       StartDependencies
     >
 {
+  private readonly config: ConfigSchema;
+
+  constructor(context: PluginInitializerContext<ConfigSchema>) {
+    this.config = context.config.get();
+  }
+
   public setup(
     core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>,
     { home, management, observabilityAIAssistant }: SetupDependencies
   ): AiAssistantManagementObservabilityPluginSetup {
     const title = i18n.translate('xpack.observabilityAiAssistantManagement.app.title', {
-      defaultMessage: 'AI Assistant for Observability',
+      defaultMessage: 'AI Assistant for Observability and Search',
     });
 
     if (home) {
@@ -57,7 +69,7 @@ export class AiAssistantManagementObservabilityPlugin
         id: 'ai_assistant_observability',
         title,
         description: i18n.translate('xpack.observabilityAiAssistantManagement.app.description', {
-          defaultMessage: 'Manage your AI Assistant for Observability.',
+          defaultMessage: 'Manage your AI Assistant for Observability and Search.',
         }),
         icon: 'sparkles',
         path: '/app/management/kibana/ai-assistant/observability',
@@ -78,6 +90,7 @@ export class AiAssistantManagementObservabilityPlugin
           return mountManagementSection({
             core,
             mountParams,
+            config: this.config,
           });
         },
       });

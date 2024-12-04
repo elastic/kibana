@@ -15,9 +15,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
-  isLegacyTableEnabled,
 } from '@kbn/discover-utils';
-import { Filter } from '@kbn/es-query';
 import {
   FetchContext,
   useBatchedOptionalPublishingSubjects,
@@ -27,10 +25,8 @@ import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
@@ -51,16 +47,17 @@ interface SavedSearchEmbeddableComponentProps {
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
+  enableDocumentViewer: boolean;
   stateManager: SearchEmbeddableStateManager;
 }
 
-const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable);
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 
 export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
+  enableDocumentViewer,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
@@ -69,8 +66,8 @@ export function SearchEmbeddableGridComponent({
     savedSearch,
     savedSearchId,
     interceptedWarnings,
-    query,
-    filters,
+    apiQuery,
+    apiFilters,
     fetchContext,
     rows,
     totalHitCount,
@@ -90,6 +87,12 @@ export function SearchEmbeddableGridComponent({
     stateManager.grid
   );
 
+  // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
+  // `fetchContext.query` and `fetchContext.filters` are Dashboard's query and filters
+
+  const savedSearchQuery = apiQuery;
+  const savedSearchFilters = apiFilters;
+
   const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
     useBatchedOptionalPublishingSubjects(
       api.panelTitle,
@@ -99,14 +102,6 @@ export function SearchEmbeddableGridComponent({
     );
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
-  const useLegacyTable = useMemo(
-    () =>
-      isLegacyTableEnabled({
-        uiSettings: discoverServices.uiSettings,
-        isEsqlMode: isEsql,
-      }),
-    [discoverServices, isEsql]
-  );
 
   const sort = useMemo(() => {
     return getSortForEmbeddable(savedSearch.sort, dataView, discoverServices.uiSettings, isEsql);
@@ -137,7 +132,10 @@ export function SearchEmbeddableGridComponent({
     settings: grid,
   });
 
-  const dataSource = useMemo(() => createDataSource({ dataView, query }), [dataView, query]);
+  const dataSource = useMemo(
+    () => createDataSource({ dataView, query: savedSearchQuery }),
+    [dataView, savedSearchQuery]
+  );
   const timeRange = useMemo(
     () => (fetchContext ? getTimeRangeFromFetchContext(fetchContext) : undefined),
     [fetchContext]
@@ -146,8 +144,8 @@ export function SearchEmbeddableGridComponent({
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
-    query,
-    filters,
+    query: savedSearchQuery,
+    filters: savedSearchFilters,
     timeRange,
   });
 
@@ -224,19 +222,6 @@ export function SearchEmbeddableGridComponent({
     useNewFieldsApi,
   };
 
-  if (useLegacyTable) {
-    return (
-      <DiscoverDocTableEmbeddableMemoized
-        {...sharedProps}
-        {...onStateEditedProps}
-        filters={savedSearch.searchSource.getField('filter') as Filter[]}
-        isEsqlMode={isEsql}
-        isLoading={Boolean(loading)}
-        sharedItemTitle={panelTitle || savedSearchTitle}
-      />
-    );
-  }
-
   return (
     <DiscoverGridEmbeddableMemoized
       {...sharedProps}
@@ -258,12 +243,14 @@ export function SearchEmbeddableGridComponent({
       isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
-      query={savedSearch.searchSource.getField('query')}
+      query={savedSearchQuery}
+      filters={savedSearchFilters}
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
+      enableDocumentViewer={enableDocumentViewer}
     />
   );
 }

@@ -24,8 +24,6 @@ export type {
 
 export { getUserDisplayName, isRoleReserved, isRoleWithWildcardBasePrivilege } from './model';
 
-export type { RawKibanaPrivileges } from '@kbn/security-authorization-core';
-
 // Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {
   AuthenticatedUser,
@@ -39,6 +37,8 @@ export type {
   RoleRemoteClusterPrivilege,
   FeaturesPrivileges,
   LoginLayout,
+  RawKibanaPrivileges,
+  RawKibanaFeaturePrivileges,
   SecurityLicenseFeatures,
   SecurityLicense,
   UserProfile,

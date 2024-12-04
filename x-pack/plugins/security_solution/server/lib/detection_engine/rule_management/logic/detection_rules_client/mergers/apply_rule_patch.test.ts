@@ -37,6 +37,7 @@ describe('applyRulePatch', () => {
         rulePatch,
         existingRule,
         prebuiltRuleAssetClient,
+        isRuleCustomizationEnabled: true,
       });
       expect(patchedRule).toEqual(
         expect.objectContaining({
@@ -65,6 +66,7 @@ describe('applyRulePatch', () => {
         rulePatch,
         existingRule,
         prebuiltRuleAssetClient,
+        isRuleCustomizationEnabled: true,
       });
       expect(patchedRule).toEqual(
         expect.objectContaining({
@@ -94,6 +96,7 @@ describe('applyRulePatch', () => {
           rulePatch,
           existingRule,
           prebuiltRuleAssetClient,
+          isRuleCustomizationEnabled: true,
         })
       ).rejects.toThrowError(
         'event_category_override: Expected string, received number, tiebreaker_field: Expected string, received number, timestamp_field: Expected string, received number'
@@ -119,6 +122,7 @@ describe('applyRulePatch', () => {
           rulePatch,
           existingRule,
           prebuiltRuleAssetClient,
+          isRuleCustomizationEnabled: true,
         })
       ).rejects.toThrowError('alert_suppression.group_by: Expected array, received string');
     });
@@ -134,6 +138,7 @@ describe('applyRulePatch', () => {
       rulePatch,
       existingRule,
       prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
     });
     expect(patchedRule).toEqual(
       expect.objectContaining({
@@ -154,6 +159,7 @@ describe('applyRulePatch', () => {
         rulePatch,
         existingRule,
         prebuiltRuleAssetClient,
+        isRuleCustomizationEnabled: true,
       })
     ).rejects.toThrowError(
       'threat_query: Expected string, received number, threat_indicator_path: Expected string, received number'
@@ -170,6 +176,7 @@ describe('applyRulePatch', () => {
       rulePatch,
       existingRule,
       prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
     });
     expect(patchedRule).toEqual(
       expect.objectContaining({
@@ -190,6 +197,7 @@ describe('applyRulePatch', () => {
         rulePatch,
         existingRule,
         prebuiltRuleAssetClient,
+        isRuleCustomizationEnabled: true,
       })
     ).rejects.toThrowError(
       "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
@@ -206,6 +214,7 @@ describe('applyRulePatch', () => {
       rulePatch,
       existingRule,
       prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
     });
     expect(patchedRule).toEqual(
       expect.objectContaining({
@@ -226,6 +235,7 @@ describe('applyRulePatch', () => {
         rulePatch,
         existingRule,
         prebuiltRuleAssetClient,
+        isRuleCustomizationEnabled: true,
       })
     ).rejects.toThrowError(
       "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
@@ -244,6 +254,7 @@ describe('applyRulePatch', () => {
       rulePatch,
       existingRule,
       prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
     });
     expect(patchedRule).toEqual(
       expect.objectContaining({
@@ -268,6 +279,7 @@ describe('applyRulePatch', () => {
         rulePatch,
         existingRule,
         prebuiltRuleAssetClient,
+        isRuleCustomizationEnabled: true,
       })
     ).rejects.toThrowError('threshold.value: Expected number, received string');
   });
@@ -285,6 +297,7 @@ describe('applyRulePatch', () => {
       rulePatch,
       existingRule,
       prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
     });
     expect(patchedRule).toEqual(
       expect.objectContaining({
@@ -308,6 +321,7 @@ describe('applyRulePatch', () => {
       rulePatch,
       existingRule,
       prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
     });
     expect(patchedRule).toEqual(
       expect.objectContaining({
@@ -330,6 +344,7 @@ describe('applyRulePatch', () => {
       rulePatch,
       existingRule,
       prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
     });
     expect(patchedRule).toEqual(
       expect.objectContaining({
@@ -354,6 +369,7 @@ describe('applyRulePatch', () => {
       rulePatch,
       existingRule,
       prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
     });
     expect(patchedRule).toEqual(
       expect.objectContaining({
@@ -376,6 +392,7 @@ describe('applyRulePatch', () => {
         rulePatch,
         existingRule,
         prebuiltRuleAssetClient,
+        isRuleCustomizationEnabled: true,
       });
       expect(patchedRule).toEqual(
         expect.objectContaining({
@@ -394,6 +411,7 @@ describe('applyRulePatch', () => {
           rulePatch,
           existingRule,
           prebuiltRuleAssetClient,
+          isRuleCustomizationEnabled: true,
         })
       ).rejects.toThrowError('anomaly_threshold: Expected number, received string');
     });
@@ -410,6 +428,7 @@ describe('applyRulePatch', () => {
         rulePatch,
         existingRule,
         prebuiltRuleAssetClient,
+        isRuleCustomizationEnabled: true,
       });
 
       expect(patchedRule).toEqual(
@@ -432,6 +451,7 @@ describe('applyRulePatch', () => {
       rulePatch,
       existingRule,
       prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
     });
     expect(patchedRule).toEqual(
       expect.objectContaining({
@@ -450,7 +470,41 @@ describe('applyRulePatch', () => {
         rulePatch,
         existingRule,
         prebuiltRuleAssetClient,
+        isRuleCustomizationEnabled: true,
       })
     ).rejects.toThrowError('new_terms_fields: Expected array, received string');
+  });
+
+  test('should retain existing required_fields when not present in rule patch body', async () => {
+    const rulePatch = {
+      name: 'new name',
+    } as PatchRuleRequestBody;
+    const existingRule = {
+      ...getRulesSchemaMock(),
+      required_fields: [
+        {
+          name: 'event.action',
+          type: 'keyword',
+          ecs: true,
+        },
+      ],
+    };
+    const patchedRule = await applyRulePatch({
+      rulePatch,
+      existingRule,
+      prebuiltRuleAssetClient,
+      isRuleCustomizationEnabled: true,
+    });
+    expect(patchedRule).toEqual(
+      expect.objectContaining({
+        required_fields: [
+          {
+            name: 'event.action',
+            type: 'keyword',
+            ecs: true,
+          },
+        ],
+      })
+    );
   });
 });

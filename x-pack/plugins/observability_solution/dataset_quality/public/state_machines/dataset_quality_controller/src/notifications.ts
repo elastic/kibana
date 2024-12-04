@@ -7,6 +7,7 @@
 
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { DataStreamType } from '../../../../common/types';
 
 export const fetchDatasetStatsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
@@ -21,6 +22,18 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchDegradedStatsFailed', {
       defaultMessage: "We couldn't get your degraded docs information.",
+    }),
+    text: error.message,
+  });
+};
+
+export const fetchTotalDocsFailedNotifier = (toasts: IToasts, error: Error, meta: any) => {
+  const dataStreamType = meta._event.origin as DataStreamType;
+
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.fetchTotalDocsFailed', {
+      defaultMessage: "We couldn't get total docs information for {dataStreamType}.",
+      values: { dataStreamType },
     }),
     text: error.message,
   });

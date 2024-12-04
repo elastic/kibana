@@ -28,7 +28,7 @@ describe('helpers', () => {
           eventHasNotes: true,
           timelineType: TimelineTypeEnum.default,
         })
-      ).toEqual('This event cannot be unpinned because it has notes');
+      ).toEqual('This event cannot be unpinned because it has notes in Timeline');
     });
 
     test('it indicates the alert may NOT be unpinned when `isPinned` is `true` and the alert has notes', () => {
@@ -39,7 +39,7 @@ describe('helpers', () => {
           eventHasNotes: true,
           timelineType: TimelineTypeEnum.default,
         })
-      ).toEqual('This alert cannot be unpinned because it has notes');
+      ).toEqual('This alert cannot be unpinned because it has notes in Timeline');
     });
 
     test('it indicates the event is pinned when `isPinned` is `true` and the event does NOT have notes', () => {
@@ -72,7 +72,7 @@ describe('helpers', () => {
           eventHasNotes: true,
           timelineType: TimelineTypeEnum.default,
         })
-      ).toEqual('This event cannot be unpinned because it has notes');
+      ).toEqual('This event cannot be unpinned because it has notes in Timeline');
     });
 
     test('it indicates the alert is pinned when `isPinned` is `false` and the alert has notes', () => {
@@ -83,7 +83,7 @@ describe('helpers', () => {
           eventHasNotes: true,
           timelineType: TimelineTypeEnum.default,
         })
-      ).toEqual('This alert cannot be unpinned because it has notes');
+      ).toEqual('This alert cannot be unpinned because it has notes in Timeline');
     });
 
     test('it indicates the event is NOT pinned when `isPinned` is `false` and the event does NOT have notes', () => {

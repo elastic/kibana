@@ -15,12 +15,16 @@ import {
 
 import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 
-const ruleTypes = Object.values(ApmRuleType);
+const alertingFeatures = Object.values(ApmRuleType).map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [APM_SERVER_FEATURE_ID, ALERTING_FEATURE_ID],
+}));
 
-export const APM_FEATURE = {
+export const APM_FEATURE: KibanaFeatureConfig = {
   id: APM_SERVER_FEATURE_ID,
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
     defaultMessage: 'APM and User Experience',
@@ -33,7 +37,7 @@ export const APM_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: ruleTypes,
+  alerting: alertingFeatures,
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
@@ -46,10 +50,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          all: ruleTypes,
+          all: alertingFeatures,
         },
         rule: {
-          all: ruleTypes,
+          all: alertingFeatures,
         },
       },
       management: {
@@ -67,10 +71,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          read: ruleTypes,
+          read: alertingFeatures,
         },
         rule: {
-          read: ruleTypes,
+          read: alertingFeatures,
         },
       },
       management: {
@@ -79,6 +83,33 @@ export const APM_FEATURE = {
       ui: ['show', 'alerting:show'],
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.apm.subFeatureRegistry.settings', {
+        defaultMessage: 'Settings',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'settings_save',
+              name: i18n.translate('xpack.apm.subFeatureRegistry.modifySettings', {
+                defaultMessage: 'Ability to modify settings',
+              }),
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              api: ['apm_settings_write'],
+              ui: ['settings:save'],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 
 interface Feature {

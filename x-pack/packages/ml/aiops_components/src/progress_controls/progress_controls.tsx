@@ -40,6 +40,7 @@ interface ProgressControlProps {
   shouldRerunAnalysis: boolean;
   runAnalysisDisabled?: boolean;
   analysisInfo?: React.ReactNode;
+  isAnalysisControlsDisabled?: boolean;
 }
 
 /**
@@ -63,6 +64,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
     shouldRerunAnalysis,
     runAnalysisDisabled = false,
     analysisInfo = null,
+    isAnalysisControlsDisabled = false,
   } = props;
 
   const progressOutput = Math.round(progress * 100);
@@ -70,51 +72,58 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
   const { euiTheme } = useEuiTheme();
 
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
-  const analysisCompleteStyle = { display: 'none' };
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        {!isRunning && (
-          <EuiButton
-            disabled={runAnalysisDisabled}
-            data-test-subj={`aiopsRerunAnalysisButton${shouldRerunAnalysis ? ' shouldRerun' : ''}`}
-            size="s"
-            onClick={onRefresh}
-            color={shouldRerunAnalysis ? 'warning' : 'primary'}
-          >
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <FormattedMessage
-                  id="xpack.aiops.rerunAnalysisButtonTitle"
-                  defaultMessage="Run analysis"
-                />
-              </EuiFlexItem>
-              {shouldRerunAnalysis && (
-                <>
-                  <EuiFlexItem>
-                    <EuiIconTip
-                      aria-label="Warning"
-                      type="warning"
-                      color="warning"
-                      content={i18n.translate('xpack.aiops.rerunAnalysisTooltipContent', {
-                        defaultMessage:
-                          'Analysis data may be out of date due to selection update. Rerun analysis.',
-                      })}
-                    />
-                  </EuiFlexItem>
-                </>
-              )}
-            </EuiFlexGroup>
-          </EuiButton>
-        )}
-        {isRunning && (
-          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
-            <FormattedMessage id="xpack.aiops.cancelAnalysisButtonTitle" defaultMessage="Cancel" />
-          </EuiButton>
-        )}
-      </EuiFlexItem>
-      {(progress === 1 || isRunning === false) && !isBrushCleared ? (
+      {!isAnalysisControlsDisabled && (
+        <EuiFlexItem grow={false}>
+          {!isRunning && (
+            <EuiButton
+              disabled={runAnalysisDisabled}
+              data-test-subj={`aiopsRerunAnalysisButton${
+                shouldRerunAnalysis ? ' shouldRerun' : ''
+              }`}
+              size="s"
+              onClick={onRefresh}
+              color={shouldRerunAnalysis ? 'warning' : 'primary'}
+            >
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.aiops.rerunAnalysisButtonTitle"
+                    defaultMessage="Run analysis"
+                  />
+                </EuiFlexItem>
+                {shouldRerunAnalysis && (
+                  <>
+                    <EuiFlexItem>
+                      <EuiIconTip
+                        aria-label="Warning"
+                        type="warning"
+                        color="warning"
+                        content={i18n.translate('xpack.aiops.rerunAnalysisTooltipContent', {
+                          defaultMessage:
+                            'Analysis data may be out of date due to selection update. Rerun analysis.',
+                        })}
+                      />
+                    </EuiFlexItem>
+                  </>
+                )}
+              </EuiFlexGroup>
+            </EuiButton>
+          )}
+          {isRunning && (
+            <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
+              <FormattedMessage
+                id="xpack.aiops.cancelAnalysisButtonTitle"
+                defaultMessage="Cancel"
+              />
+            </EuiButton>
+          )}
+        </EuiFlexItem>
+      )}
+
+      {(progress === 1 || isRunning === false) && !isBrushCleared && !isAnalysisControlsDisabled ? (
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="aiopsClearSelectionBadge"
@@ -144,32 +153,30 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          css={progress === 1 ? analysisCompleteStyle : undefined}
-        >
-          <EuiFlexItem data-test-subj="aiopProgressTitle">
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                data-test-subj="aiopsProgressTitleMessage"
-                id="xpack.aiops.progressTitle"
-                defaultMessage="Progress: {progress}% — {progressMessage}"
-                values={{ progress: progressOutput, progressMessage }}
+        {progress !== 1 ? (
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem data-test-subj="aiopProgressTitle">
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  data-test-subj="aiopsProgressTitleMessage"
+                  id="xpack.aiops.progressTitle"
+                  defaultMessage="Progress: {progress}% — {progressMessage}"
+                  values={{ progress: progressOutput, progressMessage }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem css={isRunning ? runningProgressBarStyles : undefined}>
+              <EuiProgress
+                aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
+                  defaultMessage: 'Progress',
+                })}
+                value={progressOutput}
+                max={100}
+                size="m"
               />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem css={isRunning ? runningProgressBarStyles : undefined}>
-            <EuiProgress
-              aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
-                defaultMessage: 'Progress',
-              })}
-              value={progressOutput}
-              max={100}
-              size="m"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
       </EuiFlexItem>
       {children}
     </EuiFlexGroup>

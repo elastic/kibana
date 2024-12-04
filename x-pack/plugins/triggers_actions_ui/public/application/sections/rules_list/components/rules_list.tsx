@@ -13,7 +13,7 @@ import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import { RuleTypeModal } from '@kbn/alerts-ui-shared/src/rule_type_modal';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import React, {
   lazy,
   useEffect,
@@ -45,6 +45,8 @@ import {
   RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   STACK_ALERTS_FEATURE_ID,
+  getCreateRuleRoute,
+  getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import {
@@ -115,7 +117,8 @@ const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
-  filterConsumers?: string[];
+  ruleTypeIds?: string[];
+  consumers?: string[];
   filteredRuleTypes?: string[];
   lastResponseFilter?: string[];
   lastRunOutcomeFilter?: string[];
@@ -139,6 +142,7 @@ export interface RulesListProps {
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
+  useNewRuleForm?: boolean;
 }
 
 export const percentileFields = {
@@ -156,7 +160,8 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
 const EMPTY_ARRAY: string[] = [];
 
 export const RulesList = ({
-  filterConsumers,
+  ruleTypeIds,
+  consumers,
   filteredRuleTypes = EMPTY_ARRAY,
   lastResponseFilter,
   lastRunOutcomeFilter,
@@ -180,12 +185,13 @@ export const RulesList = ({
   onRefresh,
   setHeaderActions,
   initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
+  useNewRuleForm = false,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
-    application: { capabilities },
+    application: { capabilities, navigateToApp },
     http,
     kibanaFeatures,
     notifications: { toasts },
@@ -211,6 +217,7 @@ export const RulesList = ({
   const cloneRuleId = useRef<null | string>(null);
 
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
+  const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
 
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
@@ -267,6 +274,7 @@ export const RulesList = ({
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
     : filters.types;
+
   const hasDefaultRuleTypesFiltersOn = isEmpty(filters.types);
 
   const computedFilter = useMemo(() => {
@@ -280,7 +288,8 @@ export const RulesList = ({
 
   // Fetch rules
   const { rulesState, loadRules, hasData, lastUpdate } = useLoadRulesQuery({
-    filterConsumers,
+    ruleTypeIds,
+    consumers,
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
@@ -293,7 +302,8 @@ export const RulesList = ({
   // Fetch status aggregation
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
-      filterConsumers,
+      ruleTypeIds,
+      consumers,
       filters: computedFilter,
       enabled: canLoadRules,
       refresh,
@@ -312,8 +322,18 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    setEditFlyoutVisibility(true);
-    setCurrentRuleToEdit(ruleItem);
+    if (!isUsingRuleCreateFlyout && useNewRuleForm) {
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/rules`,
+        },
+      });
+    } else {
+      setEditFlyoutVisibility(true);
+      setCurrentRuleToEdit(ruleItem);
+    }
   };
 
   const onRunRule = async (id: string) => {
@@ -751,12 +771,16 @@ export const RulesList = ({
 
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
 
+  const allRuleCategories = getAllUniqueRuleTypeCategories(
+    Array.from(ruleTypesState.data.values())
+  );
+
   return (
     <>
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
-      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={filterConsumers} />
+      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}
@@ -1006,9 +1030,15 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              setRuleTypeIdToCreate(ruleTypeId);
-              setRuleTypeModalVisibility(false);
-              setRuleFlyoutVisibility(true);
+              if (!isUsingRuleCreateFlyout) {
+                navigateToApp('management', {
+                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                });
+              } else {
+                setRuleTypeIdToCreate(ruleTypeId);
+                setRuleTypeModalVisibility(false);
+                setRuleFlyoutVisibility(true);
+              }
             }}
             http={http}
             toasts={toasts}
@@ -1060,3 +1090,9 @@ export { RulesList as default };
 function filterRulesById(rules: Rule[], ids: string[]): Rule[] {
   return rules.filter((rule) => ids.includes(rule.id));
 }
+
+const getAllUniqueRuleTypeCategories = (ruleTypes: RuleType[]) => {
+  const categories = new Set(ruleTypes.map((ruleType) => ruleType.category));
+
+  return Array.from(categories).filter(Boolean);
+};

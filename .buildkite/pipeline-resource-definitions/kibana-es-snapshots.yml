@@ -22,11 +22,10 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.x 8.15 7.17
+      branch_configuration: main 8.x 8.17 8.16 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/build.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -46,21 +45,31 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
       schedules:
         Daily build (main):
-          cronline: 0 9 * * * America/New_York
+          cronline: 0 22 * * * America/New_York
           message: Daily build
           branch: main
         Daily build (8.x):
-          cronline: 0 9 * * * America/New_York
+          cronline: 0 22 * * * America/New_York
           message: Daily build
           branch: '8.x'
+        Daily build (8.17):
+          cronline: 0 22 * * * America/New_York
+          message: Daily build
+          branch: '8.17'
+        Daily build (8.16):
+          cronline: 0 22 * * * America/New_York
+          message: Daily build
+          branch: '8.16'
         Daily build (8.15):
-          cronline: 0 9 * * * America/New_York
+          cronline: 0 22 * * * America/New_York
           message: Daily build
           branch: '8.15'
         Daily build (7.17):
-          cronline: 0 9 * * * America/New_York
+          cronline: 0 20 * * * America/New_York
           message: Daily build
           branch: '7.17'
+      tags:
+        - kibana
 ---
 # yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
 apiVersion: backstage.io/v1alpha1
@@ -86,11 +95,10 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.x 8.15 7.17
+      branch_configuration: main 8.x 8.17 8.16 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/promote.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -108,6 +116,8 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
+      tags:
+        - kibana
 ---
 # yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
 apiVersion: backstage.io/v1alpha1
@@ -134,11 +144,10 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.x 8.15 7.17
+      branch_configuration: main 8.x 8.17 8.16 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/verify.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -156,3 +165,5 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
+      tags:
+        - kibana

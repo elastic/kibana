@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { CustomInferenceEndpointConfig, SemanticTextField } from '../../../../../types';
 import { useSemanticText } from './use_semantic_text';
 import { act } from 'react-dom/test-utils';
@@ -13,15 +13,15 @@ import { act } from 'react-dom/test-utils';
 jest.mock('../../../../../../../../hooks/use_details_page_mappings_model_management', () => ({
   useDetailsPageMappingsModelManagement: () => ({
     fetchInferenceToModelIdMap: () => ({
-      e5: {
-        isDeployed: false,
-        isDeployable: true,
-        trainedModelId: '.multilingual-e5-small',
-      },
-      elser_model_2: {
+      '.preconfigured_elser': {
         isDeployed: false,
         isDeployable: true,
         trainedModelId: '.elser_model_2',
+      },
+      '.preconfigured_e5': {
+        isDeployed: false,
+        isDeployable: true,
+        trainedModelId: '.multilingual-e5-small',
       },
       openai: {
         isDeployed: false,
@@ -49,13 +49,13 @@ const mockField: Record<string, SemanticTextField> = {
   elser_model_2: {
     name: 'name',
     type: 'semantic_text',
-    inference_id: 'elser_model_2',
+    inference_id: '.preconfigured_elser',
     reference_field: 'title',
   },
   e5: {
     name: 'name',
     type: 'semantic_text',
-    inference_id: 'e5',
+    inference_id: '.preconfigured_e5',
     reference_field: 'title',
   },
   openai: {
@@ -100,15 +100,15 @@ const mockDispatch = jest.fn();
 jest.mock('../../../../../mappings_state_context', () => ({
   useMappingsState: jest.fn().mockReturnValue({
     inferenceToModelIdMap: {
-      e5: {
-        isDeployed: false,
-        isDeployable: true,
-        trainedModelId: '.multilingual-e5-small',
-      },
-      elser_model_2: {
+      '.preconfigured_elser': {
         isDeployed: false,
         isDeployable: true,
         trainedModelId: '.elser_model_2',
+      },
+      '.preconfigured_e5': {
+        isDeployed: false,
+        isDeployable: true,
+        trainedModelId: '.multilingual-e5-small',
       },
       openai: {
         isDeployed: false,
@@ -142,7 +142,7 @@ jest.mock('../../../../../../../services/api', () => ({
   getInferenceEndpoints: jest.fn().mockResolvedValue({
     data: [
       {
-        inference_id: 'e5',
+        inference_id: '.preconfigured_e5',
         task_type: 'text_embedding',
         service: 'elasticsearch',
         service_settings: {
@@ -212,28 +212,6 @@ describe('useSemanticText', () => {
       mockConfig.openai.modelConfig
     );
   });
-  it('should handle semantic text with inference endpoint created from flyout correctly', async () => {
-    const { result } = renderHook(() =>
-      useSemanticText({
-        form: mockForm.elasticModelEndpointCreatedfromFlyout,
-        setErrorsInTrainedModelDeployment: jest.fn(),
-        ml: mlMock,
-      })
-    );
-    await act(async () => {
-      result.current.handleSemanticText(mockField.my_elser_endpoint, mockConfig.elser);
-    });
-
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'field.add',
-      value: mockField.my_elser_endpoint,
-    });
-    expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
-      'my_elser_endpoint',
-      'sparse_embedding',
-      mockConfig.elser.modelConfig
-    );
-  });
 
   it('should handle semantic text correctly', async () => {
     const { result } = renderHook(() =>
@@ -252,18 +230,6 @@ describe('useSemanticText', () => {
       type: 'field.add',
       value: mockField.elser_model_2,
     });
-    expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
-      'elser_model_2',
-      'sparse_embedding',
-      {
-        service: 'elser',
-        service_settings: {
-          num_allocations: 1,
-          num_threads: 1,
-          model_id: '.elser_model_2',
-        },
-      }
-    );
   });
   it('does not call create inference endpoint api, if default endpoint already exists', async () => {
     const { result } = renderHook(() =>

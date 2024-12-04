@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from '@kbn/core-http-browser';
+import { HttpFetchQuery, HttpHandler } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 
 import {
@@ -15,8 +15,8 @@ import {
   IncompatibleFieldValueItem,
   PartitionedFieldMetadata,
   SameFamilyFieldItem,
+  StorageResult,
 } from '../../../types';
-import { StorageResult } from '../types';
 import { GET_INDEX_RESULTS_LATEST, POST_INDEX_RESULTS } from '../constants';
 import { INTERNAL_API_VERSION } from '../../../constants';
 import { GET_RESULTS_ERROR_TITLE, POST_RESULT_ERROR_TITLE } from '../../../translations';
@@ -131,23 +131,40 @@ export async function postStorageResult({
   }
 }
 
+export interface GetStorageResultsOpts {
+  pattern: string;
+  httpFetch: HttpHandler;
+  toasts: IToasts;
+  abortController: AbortController;
+  startTime?: string;
+  endTime?: string;
+}
+
 export async function getStorageResults({
   pattern,
   httpFetch,
   toasts,
   abortController,
-}: {
-  pattern: string;
-  httpFetch: HttpHandler;
-  toasts: IToasts;
-  abortController: AbortController;
-}): Promise<StorageResult[]> {
+  startTime,
+  endTime,
+}: GetStorageResultsOpts): Promise<StorageResult[]> {
   try {
     const route = GET_INDEX_RESULTS_LATEST.replace('{pattern}', pattern);
+
+    const query: HttpFetchQuery = {};
+
+    if (startTime) {
+      query.startDate = startTime;
+    }
+    if (endTime) {
+      query.endDate = endTime;
+    }
+
     const results = await httpFetch<StorageResult[]>(route, {
       method: 'GET',
       signal: abortController.signal,
       version: INTERNAL_API_VERSION,
+      ...(Object.keys(query).length > 0 ? { query } : {}),
     });
     return results;
   } catch (err) {

@@ -31,6 +31,8 @@ import { getCommonTags } from '../utils';
 
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 
+import { useExportCSV } from '../hooks/export_csv';
+
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
@@ -44,6 +46,8 @@ export interface Props {
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
   agentPolicies: AgentPolicy[];
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -56,6 +60,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   refreshAgents,
   allTags,
   agentPolicies,
+  sortField,
+  sortOrder,
 }) => {
   const licenseService = useLicense();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
@@ -77,7 +83,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
 
-  // update the query removing the "managed" agents
+  // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
   const selectionQuery = useMemo(() => {
     if (totalManagedAgentIds.length) {
       const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${totalManagedAgentIds
@@ -96,7 +102,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       : nAgentsInTable - totalManagedAgentIds?.length;
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
-  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled, enableExportCSV } = ExperimentalFeaturesService.get();
+
+  const { generateReportingJobCSV } = useExportCSV(enableExportCSV);
 
   const menuItems = [
     {
@@ -217,6 +225,30 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         setIsUnenrollModalOpen(true);
       },
     },
+    ...(enableExportCSV
+      ? [
+          {
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.exportAgents"
+                data-test-subj="bulkAgentExportBtn"
+                defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+                values={{
+                  agentCount,
+                }}
+              />
+            ),
+            icon: <EuiIcon type="exportAction" size="m" />,
+            onClick: () => {
+              closeMenu();
+              generateReportingJobCSV(agents, {
+                field: sortField,
+                direction: sortOrder,
+              });
+            },
+          },
+        ]
+      : []),
   ];
 
   const panels = [

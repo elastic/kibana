@@ -44,6 +44,8 @@ The merging order for profiles is based on the context level hierarchy (`root` >
 The following diagram illustrates the extension point merging process:
 ![image](./docs/merged_accessors.png)
 
+Additionally, extension point implementations are passed an `accessorParams` argument as the second argument after `prev`. This object contains additional parameters that may be useful to extension point implementations, primarily the current `context` object. This is most useful in situations where consumers want to [customize the `context` object](#custom-context-objects) with properties specific to their profile, such as state stores and asynchronously initialized services.
+
 Definitions for composable profiles and the merging routine are located in the [`composable_profile.ts`](./composable_profile.ts) file.
 
 ### Supporting services
@@ -102,7 +104,7 @@ Existing providers can be extended using the [`extendProfileProvider`](./profile
 
 Example profile provider implementations are located in [`profile_providers/example`](./profile_providers/example).
 
-## Example implementation
+### Example implementation
 
 ```ts
 /**
@@ -190,4 +192,241 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
  * Navigate to Discover and execute the following ES|QL query
  * to resolve the profile: `FROM my-example-logs`
  */
+```
+
+## React context and state management
+
+In the Discover context awareness framework, pieces of Discover’s state are passed down explicitly to extension points as needed. This avoids leaking Discover internals – which may change – to consumer extension point implementations and allows us to be intentional about which pieces of state extension points have access to. This approach generally works well when extension points need access to things like the current ES|QL query or data view, time range, columns, etc. However, this does not provide a solution for consumers to manage custom shared state between their extension point implementations.
+
+In cases where the state for an extension point implementation is local to that implementation, consumers can simply manage the state within the corresponding profile method or returned React component:
+
+```tsx
+// Extension point implementation definition
+const getCellRenderers = (prev) => (params) => {
+  // Declare shared state within the profile method closure
+  const blueOrRed$ = new BehaviorSubject<'blue' | 'red'>('blue');
+
+  return {
+    ...prev(params),
+    foo: function FooComponent() {
+      // It's still in scope and can be easily accessed...
+      const blueOrRed = useObservable(blueOrRed$, blueOrRed$.getValue());
+
+      return (
+        // ...and modified...
+        <button onClick={() => blueOrRed$.next(blueOrRed === 'blue' ? 'red' : 'blue')}>
+          Click to make bar {blueOrRed === 'blue' ? 'red' : 'blue'}
+        </button>
+      );
+    },
+    bar: function BarComponent() {
+      const blueOrRed = useObservable(blueOrRed$, blueOrRed$.getValue());
+
+      // ...and we can react to the changes
+      return <span style={{ color: blueOrRed }}>Look ma, I'm {blueOrRed}!</span>;
+    },
+  };
+};
+```
+
+For more advanced use cases, such as when state needs to be shared across extension point implementations, we provide an extension point called `getRenderAppWrapper`. The app wrapper extension point allows consumers to wrap the Discover root in a custom wrapper component, such as a React context provider. With this approach consumers can handle things like integrating with a state management library, accessing custom services from within their extension point implementations, managing shared components such as flyouts, etc. in a React-friendly way and without needing to work around the context awareness framework:
+
+```tsx
+// The app wrapper extension point supports common patterns like React context
+const flyoutContext = createContext({ setFlyoutOpen: (open: boolean) => {} });
+
+// App wrapper implementations can only exist at the root level, and their lifecycle will match the Discover lifecycle
+export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
+  profileId: 'security-root-profile',
+  profile: {
+    // The app wrapper extension point implementation
+    getRenderAppWrapper: (PrevWrapper) =>
+      function AppWrapper({ children }) {
+        // Now we can declare state high up in the React tree
+        const [flyoutOpen, setFlyoutOpen] = useState(false);
+
+        return (
+          // Be sure to render the previous wrapper as well
+          <PrevWrapper>
+            // This is our wrapper -- it uses React context to give extension point implementations
+            access to the shared state
+            <flyoutContext.Provider value={{ setFlyoutOpen }}>
+              // Make sure to render `children`, which is the Discover app
+              {children}
+              // Now extension point implementations can interact with shared state managed higher
+              up in the tree
+              {flyoutOpen && (
+                <EuiFlyout onClose={() => setFlyoutOpen(false)}>
+                  Check it out, I'm a flyout!
+                </EuiFlyout>
+              )}
+            </flyoutContext.Provider>
+          </PrevWrapper>
+        );
+      },
+    // Some other extension point implementation that depends on the shared state
+    getCellRenderers: (prev) => (params) => ({
+      ...prev(params),
+      foo: function FooComponent() {
+        // Since the app wrapper implementation wrapped Discover with a React context provider,
+        // we can now access its values from within our extension point implementations
+        const { setFlyoutOpen } = useContext(flyoutContext);
+
+        return <button onClick={() => setFlyoutOpen(true)}>Click me to open a flyout!</button>;
+      },
+    }),
+  },
+  resolve: (params) => {
+    if (params.solutionNavId === SolutionType.Security) {
+      return {
+        isMatch: true,
+        context: { solutionType: SolutionType.Security },
+      };
+    }
+
+    return { isMatch: false };
+  },
+});
+```
+
+## Custom `context` objects
+
+By default the `context` object returned from each profile provider's `resolve` method conforms to a standard interface specific to their profile's context level. However, in some situations it may be useful for consumers to extend this object with properties specific to their profile implementation. To support this, profile providers can define a strongly typed `context` interface that extends the default interface, and allows passing properties through to their profile's extension point implementations. One potential use case for this is instantiating state stores or asynchronously initialized services, then accessing them within a `getRenderAppWrapper` implementation to pass to a React context provider:
+
+```tsx
+// The profile provider interfaces accept a custom context object type param
+type SecurityRootProfileProvider = RootProfileProvider<{ stateStore: SecurityStateStore }>;
+
+export const createSecurityRootProfileProvider = (
+  services: ProfileProviderServices
+): SecurityRootProfileProvider => ({
+  profileId: 'security-root-profile',
+  profile: {
+    getRenderAppWrapper:
+      (PrevWrapper, { context }) =>
+      ({ children }) =>
+        (
+          <PrevWrapper>
+            // Custom props can be accessed from the context object available in `accessorParams`
+            <SecurityStateProvider stateStore={context.stateStore}>
+              {children}
+            </SecurityStateProvider>
+          </PrevWrapper>
+        ),
+  },
+  resolve: async (params) => {
+    if (params.solutionNavId !== SolutionType.Security) {
+      return { isMatch: false };
+    }
+
+    // Perform async service initialization within the `resolve` method
+    const stateStore = await initializeSecurityStateStore(services);
+
+    return {
+      isMatch: true,
+      context: {
+        solutionType: SolutionType.Security,
+        // Include the custom service in the returned context object
+        stateStore,
+      },
+    };
+  },
+});
+```
+
+## Overriding defaults
+
+Discover ships with a set of common contextual profiles, shared across Solutions in Kibana (e.g. the current logs data source profile). The goal of these profiles is to provide Solution agnostic contextual features to help improve the default data exploration experience for various data types. They should be generally useful across user types and not be tailored to specific Solution workflows – for example, viewing logs should be a delightful experience regardless of whether it’s done within the Observability Solution, the Search Solution, or the classic on-prem experience.
+
+We’re aiming to make these profiles generic enough that they don’t obstruct Solution workflows or create confusion, but there will always be some complexity around juggling the various Discover use cases. For situations where Solution teams are confident some common profile feature will not be helpful to their users or will create confusion, there is an option to override these defaults while keeping the remainder of the functionality for the target profile intact. To do so a Solution team would follow these steps:
+
+- Create and register a Solution specific root profile provider, e.g. `SecurityRootProfileProvider`.
+- Identify the contextual feature you want to override and the common profile provider it belongs to, e.g. the `getDocViewer` implementation in the common `LogsDataSourceProfileProvider`.
+- Implement a Solution specific version of the profile provider that extends the common provider as its base (using the `extendProfileProvider` utility), and excludes the extension point implementations you don’t want, e.g. `SecurityLogsDataSourceProfileProvider`. Other than the excluded extension point implementations, the only required change is to update its `resolve` method to first check the `rootContext.solutionType` for the target solution type before executing the base provider’s `resolve` method. This will ensure the override profile only resolves for the specific Solution, and will fall back to the common profile in other Solutions.
+- Register the Solution specific version of the profile provider in Discover, ensuring it precedes the common provider in the registration array. The ordering here is important since the Solution specific profile should attempt to resolve first, otherwise the common profile would be resolved instead.
+
+This is how an example implementation would work in code:
+
+```tsx
+/**
+ * profile_providers/security/security_root_profile/profile.tsx
+ */
+
+// Create a solution specific root profile provider
+export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
+  profileId: 'security-root-profile',
+  profile: {},
+  resolve: (params) => {
+    if (params.solutionNavId === SolutionType.Security) {
+      return {
+        isMatch: true,
+        context: { solutionType: SolutionType.Security },
+      };
+    }
+
+    return { isMatch: false };
+  },
+});
+
+/**
+ * profile_providers/security/security_logs_data_source_profile/profile.tsx
+ */
+
+// Create a solution specific data source profile provider that extends a target base provider
+export const createSecurityLogsDataSourceProfileProivder = (
+  logsDataSourceProfileProvider: DataSourceProfileProvider
+): DataSourceProfileProvider =>
+  // Extend the base profile provider with `extendProfileProvider`
+  extendProfileProvider(logsDataSourceProfileProvider, {
+    profileId: 'security-logs-data-source-profile',
+    profile: {
+      // Completely remove a specific extension point implementation
+      getDocViewer: undefined,
+      // Modify the result of an existing extension point implementation
+      getCellRenderers: (prev, accessorParams) => (params) => {
+        // Retrieve and execute the base implementation
+        const baseImpl = logsDataSourceProfileProvider.profile.getCellRenderers?.(
+          prev,
+          accessorParams
+        );
+        const baseRenderers = baseImpl?.(params);
+
+        // Return the modified result
+        return omit(baseRenderers, 'log.level');
+      },
+    },
+    // Customize the `resolve` implementation
+    resolve: (params) => {
+      // Only match this profile when in the target solution context
+      if (params.rootContext.solutionType !== SolutionType.Security) {
+        return { isMatch: false };
+      }
+
+      // Delegate to the base implementation
+      return logsDataSourceProfileProvider.resolve(params);
+    },
+  });
+
+/**
+ * profile_providers/register_profile_providers.ts
+ */
+
+// Register root profile providers
+const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
+  // Register the solution specific root profile provider
+  createSecurityRootProfileProvider(),
+];
+
+// Register data source profile providers
+const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => {
+  // Instantiate the data source profile provider base implementation
+  const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
+
+  return [
+    // Ensure the solution specific override is registered and resolved first
+    createSecurityLogsDataSourceProfileProivder(logsDataSourceProfileProvider),
+    // Then register the base implementation
+    logsDataSourceProfileProvider,
+  ];
+};
 ```

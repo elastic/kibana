@@ -4,24 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  SerializedTitles,
-  PublishesWritablePanelTitle,
-  PublishesPanelTitle,
-  HasEditCapabilities,
-} from '@kbn/presentation-publishing';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
+import type { EmbeddableApiContext, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import {
-  type CoreStart,
-  IUiSettingsClient,
-  ApplicationStart,
-  NotificationsStart,
-} from '@kbn/core/public';
-import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+  HasEditCapabilities,
+  PublishesPanelTitle,
+  PublishesWritablePanelTitle,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
@@ -48,6 +40,7 @@ export type GroupSloCustomInput = SloConfigurationProps & {
 };
 
 export type SloOverviewEmbeddableState = SerializedTitles &
+  Partial<DynamicActionsSerializedState> &
   Partial<GroupSloCustomInput> &
   Partial<SingleSloCustomInput>;
 
@@ -55,7 +48,8 @@ export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   PublishesWritablePanelTitle &
   PublishesPanelTitle &
   HasSloGroupOverviewConfig &
-  HasEditCapabilities;
+  HasEditCapabilities &
+  HasSupportedTriggers;
 
 export interface HasSloGroupOverviewConfig {
   getSloGroupOverviewConfig: () => GroupSloCustomInput;
@@ -71,18 +65,6 @@ export const apiHasSloGroupOverviewConfig = (
       typeof (api as HasSloGroupOverviewConfig).updateSloGroupOverviewConfig === 'function'
   );
 };
-
-export interface SloEmbeddableDeps {
-  uiSettings: IUiSettingsClient;
-  http: CoreStart['http'];
-  i18n: CoreStart['i18n'];
-  theme: CoreStart['theme'];
-  application: ApplicationStart;
-  notifications: NotificationsStart;
-  observability: ObservabilityPublicStart;
-  observabilityShared: ObservabilitySharedPluginStart;
-  uiActions: UiActionsStart;
-}
 
 export type SloOverviewEmbeddableActionContext = EmbeddableApiContext & {
   embeddable: SloOverviewApi;

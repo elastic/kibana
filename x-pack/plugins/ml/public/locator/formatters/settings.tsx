@@ -27,6 +27,24 @@ export function formatEditCalendarUrl(
   return url;
 }
 
+export function formatEditCalendarDstUrl(
+  appBasePath: string,
+  pageState: CalendarEditUrlState['pageState']
+): string {
+  let url = `${appBasePath}/${ML_PAGES.CALENDARS_DST_EDIT}`;
+  if (pageState) {
+    const { globalState, calendarId } = pageState;
+    if (calendarId !== undefined) {
+      url = `${url}/${calendarId}`;
+    }
+    if (globalState) {
+      url = setStateToKbnUrl('_g', globalState, { useHash: false, storeInHashQuery: false }, url);
+    }
+  }
+
+  return url;
+}
+
 export function formatEditFilterUrl(
   appBasePath: string,
   pageState: FilterEditUrlState['pageState']

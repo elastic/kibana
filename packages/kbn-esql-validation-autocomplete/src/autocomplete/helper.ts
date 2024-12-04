@@ -7,21 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSource } from '@kbn/esql-ast';
+import type {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLLiteral,
+  ESQLSource,
+} from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
-import type { FunctionDefinition } from '../definitions/types';
 import {
+  isParameterType,
+  type FunctionDefinition,
+  type FunctionReturnType,
+  type SupportedDataType,
+  isReturnType,
+} from '../definitions/types';
+import {
+  findFinalWord,
+  getColumnForASTNode,
   getFunctionDefinition,
+  isArrayType,
   isAssignment,
+  isColumnItem,
   isFunctionItem,
+  isIdentifier,
   isLiteralItem,
+  isTimeIntervalItem,
 } from '../shared/helpers';
-import type { SuggestionRawDefinition } from './types';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
 import { compareTypesWithLiterals } from '../shared/esql_types';
-import { TIME_SYSTEM_PARAMS } from './factories';
+import {
+  TIME_SYSTEM_PARAMS,
+  buildVariablesDefinitions,
+  getFunctionSuggestions,
+  getCompatibleLiterals,
+  getDateLiterals,
+  getOperatorSuggestions,
+} from './factories';
 import { EDITOR_MARKER } from '../shared/constants';
-import { extractTypeFromASTArg } from './autocomplete';
-import { ESQLRealField, ESQLVariable } from '../validation/types';
+import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import { listCompleteItem } from './complete_items';
+import { removeMarkerArgFromArgsList } from '../shared/context';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -53,23 +79,6 @@ export function getFunctionsToIgnoreForStats(command: ESQLCommand, argIndex: num
 }
 
 /**
- * Given a function signature, returns the parameter at the given position.
- *
- * Takes into account variadic functions (minParams), returning the last
- * parameter if the position is greater than the number of parameters.
- *
- * @param signature
- * @param position
- * @returns
- */
-export function getParamAtPosition(
-  { params, minParams }: FunctionDefinition['signatures'][number],
-  position: number
-) {
-  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
-}
-
-/**
  * Given a function signature, returns the parameter at the given position, even if it's undefined or null
  *
  * @param {params}
@@ -86,9 +95,7 @@ export function strictlyGetParamAtPosition(
 export function getQueryForFields(queryString: string, commands: ESQLCommand[]) {
   // If there is only one source command and it does not require fields, do not
   // fetch fields, hence return an empty string.
-  return commands.length === 1 && ['from', 'row', 'show'].includes(commands[0].name)
-    ? ''
-    : queryString;
+  return commands.length === 1 && ['row', 'show'].includes(commands[0].name) ? '' : queryString;
 }
 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
@@ -207,9 +214,10 @@ export function getOverlapRange(
     }
   }
 
+  // add one since Monaco columns are 1-based
   return {
-    start: Math.min(query.length - overlapLength + 1, query.length),
-    end: query.length,
+    start: query.length - overlapLength + 1,
+    end: query.length + 1,
   };
 }
 
@@ -290,4 +298,371 @@ export function getValidSignaturesAndTypesToSuggestNext(
     argIndex,
     currentArg,
   };
+}
+
+/**
+ * This function handles the logic to suggest completions
+ * for a given fragment of text in a generic way. A good example is
+ * a field name.
+ *
+ * When typing a field name, there are 2 scenarios
+ *
+ * 1. field name is incomplete (includes the empty string)
+ * KEEP /
+ * KEEP fie/
+ *
+ * 2. field name is complete
+ * KEEP field/
+ *
+ * This function provides a framework for detecting and handling both scenarios in a clean way.
+ *
+ * @param innerText - the query text before the current cursor position
+ * @param isFragmentComplete — return true if the fragment is complete
+ * @param getSuggestionsForIncomplete — gets suggestions for an incomplete fragment
+ * @param getSuggestionsForComplete - gets suggestions for a complete fragment
+ * @returns
+ */
+export function handleFragment(
+  innerText: string,
+  isFragmentComplete: (fragment: string) => boolean,
+  getSuggestionsForIncomplete: (
+    fragment: string,
+    rangeToReplace?: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>,
+  getSuggestionsForComplete: (
+    fragment: string,
+    rangeToReplace: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>
+): SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]> {
+  /**
+   * @TODO — this string manipulation is crude and can't support all cases
+   * Checking for a partial word and computing the replacement range should
+   * really be done using the AST node, but we'll have to refactor further upstream
+   * to make that available. This is a quick fix to support the most common case.
+   */
+  const fragment = findFinalWord(innerText);
+  if (!fragment) {
+    return getSuggestionsForIncomplete('');
+  } else {
+    const rangeToReplace = {
+      start: innerText.length - fragment.length + 1,
+      end: innerText.length + 1,
+    };
+    if (isFragmentComplete(fragment)) {
+      return getSuggestionsForComplete(fragment, rangeToReplace);
+    } else {
+      return getSuggestionsForIncomplete(fragment, rangeToReplace);
+    }
+  }
+}
+/**
+ * TODO — split this into distinct functions, one for fields, one for functions, one for literals
+ */
+export async function getFieldsOrFunctionsSuggestions(
+  types: string[],
+  commandName: string,
+  optionName: string | undefined,
+  getFieldsByType: GetColumnsByTypeFn,
+  {
+    functions,
+    fields,
+    variables,
+    literals = false,
+  }: {
+    functions: boolean;
+    fields: boolean;
+    variables?: Map<string, ESQLVariable[]>;
+    literals?: boolean;
+  },
+  {
+    ignoreFn = [],
+    ignoreColumns = [],
+  }: {
+    ignoreFn?: string[];
+    ignoreColumns?: string[];
+  } = {}
+): Promise<SuggestionRawDefinition[]> {
+  const filteredFieldsByType = pushItUpInTheList(
+    (await (fields
+      ? getFieldsByType(types, ignoreColumns, {
+          advanceCursor: commandName === 'sort',
+          openSuggestions: commandName === 'sort',
+        })
+      : [])) as SuggestionRawDefinition[],
+    functions
+  );
+
+  const filteredVariablesByType: string[] = [];
+  if (variables) {
+    for (const variable of variables.values()) {
+      if (
+        (types.includes('any') || types.includes(variable[0].type)) &&
+        !ignoreColumns.includes(variable[0].name)
+      ) {
+        filteredVariablesByType.push(variable[0].name);
+      }
+    }
+    // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
+    // avg( numberField ) => avg_numberField_
+    const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
+    if (
+      filteredVariablesByType.length &&
+      filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
+    ) {
+      for (const variable of filteredVariablesByType) {
+        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
+        const index = filteredFieldsByType.findIndex(
+          ({ label }) => underscoredName === label || `_${underscoredName}_` === label
+        );
+        if (index >= 0) {
+          filteredFieldsByType.splice(index);
+        }
+      }
+    }
+  }
+  // could also be in stats (bucket) but our autocomplete is not great yet
+  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
+
+  const suggestions = filteredFieldsByType.concat(
+    displayDateSuggestions ? getDateLiterals() : [],
+    functions
+      ? getFunctionSuggestions({
+          command: commandName,
+          option: optionName,
+          returnTypes: types,
+          ignored: ignoreFn,
+        })
+      : [],
+    variables
+      ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
+      : [],
+    literals ? getCompatibleLiterals(commandName, types) : []
+  );
+
+  return suggestions;
+}
+
+export function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote: boolean) {
+  if (!shouldPromote) {
+    return suggestions;
+  }
+  return suggestions.map(({ sortText, ...rest }) => ({
+    ...rest,
+    sortText: `1${sortText}`,
+  }));
+}
+
+/** @deprecated — use getExpressionType instead (packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
+export function extractTypeFromASTArg(
+  arg: ESQLAstItem,
+  references: Pick<ReferenceMaps, 'fields' | 'variables'>
+):
+  | ESQLLiteral['literalType']
+  | SupportedDataType
+  | FunctionReturnType
+  | 'timeInterval'
+  | string // @TODO remove this
+  | undefined {
+  if (Array.isArray(arg)) {
+    return extractTypeFromASTArg(arg[0], references);
+  }
+  if (isLiteralItem(arg)) {
+    return arg.literalType;
+  }
+  if (isColumnItem(arg) || isIdentifier(arg)) {
+    const hit = getColumnForASTNode(arg, references);
+    if (hit) {
+      return hit.type;
+    }
+  }
+  if (isTimeIntervalItem(arg)) {
+    return arg.type;
+  }
+  if (isFunctionItem(arg)) {
+    const fnDef = getFunctionDefinition(arg.name);
+    if (fnDef) {
+      // @TODO: improve this to better filter down the correct return type based on existing arguments
+      // just mind that this can be highly recursive...
+      return fnDef.signatures[0].returnType;
+    }
+  }
+}
+
+// @TODO: refactor this to be shared with validation
+export function checkFunctionInvocationComplete(
+  func: ESQLFunction,
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): {
+  complete: boolean;
+  reason?: 'tooFewArgs' | 'wrongTypes';
+} {
+  const fnDefinition = getFunctionDefinition(func.name);
+  if (!fnDefinition) {
+    return { complete: false };
+  }
+  const cleanedArgs = removeMarkerArgFromArgsList(func)!.args;
+  const argLengthCheck = fnDefinition.signatures.some((def) => {
+    if (def.minParams && cleanedArgs.length >= def.minParams) {
+      return true;
+    }
+    if (cleanedArgs.length === def.params.length) {
+      return true;
+    }
+    return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
+  });
+  if (!argLengthCheck) {
+    return { complete: false, reason: 'tooFewArgs' };
+  }
+  if (fnDefinition.name === 'in' && Array.isArray(func.args[1]) && !func.args[1].length) {
+    return { complete: false, reason: 'tooFewArgs' };
+  }
+  const hasCorrectTypes = fnDefinition.signatures.some((def) => {
+    return func.args.every((a, index) => {
+      return (
+        (fnDefinition.name.endsWith('null') && def.params[index].type === 'any') ||
+        def.params[index].type === getExpressionType(a)
+      );
+    });
+  });
+  if (!hasCorrectTypes) {
+    return { complete: false, reason: 'wrongTypes' };
+  }
+  return { complete: true };
+}
+
+/**
+ * This function is used to
+ * - suggest the next argument for an incomplete or incorrect binary operator expression (e.g. field > <suggest>)
+ * - suggest an operator to the right of a complete binary operator expression (e.g. field > 0 <suggest>)
+ * - suggest an operator to the right of a complete unary operator (e.g. field IS NOT NULL <suggest>)
+ *
+ * TODO — is this function doing too much?
+ */
+export async function getSuggestionsToRightOfOperatorExpression({
+  queryText,
+  commandName,
+  optionName,
+  rootOperator: operator,
+  preferredExpressionType,
+  getExpressionType,
+  getColumnsByType,
+}: {
+  queryText: string;
+  commandName: string;
+  optionName?: string;
+  rootOperator: ESQLFunction;
+  preferredExpressionType?: SupportedDataType;
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
+  getColumnsByType: GetColumnsByTypeFn;
+}) {
+  const suggestions = [];
+  const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
+  if (isFnComplete.complete) {
+    // i.e. ... | <COMMAND> field > 0 <suggest>
+    // i.e. ... | <COMMAND> field + otherN <suggest>
+    const operatorReturnType = getExpressionType(operator);
+    suggestions.push(
+      ...getOperatorSuggestions({
+        command: commandName,
+        option: optionName,
+        // here we use the operator return type because we're suggesting operators that could
+        // accept the result of the existing operator as a left operand
+        leftParamType:
+          operatorReturnType === 'unknown' || operatorReturnType === 'unsupported'
+            ? 'any'
+            : operatorReturnType,
+        ignored: ['='],
+      })
+    );
+  } else {
+    // i.e. ... | <COMMAND> field >= <suggest>
+    // i.e. ... | <COMMAND> field + <suggest>
+    // i.e. ... | <COMMAND> field and <suggest>
+
+    // Because it's an incomplete function, need to extract the type of the current argument
+    // and suggest the next argument based on types
+
+    // pick the last arg and check its type to verify whether is incomplete for the given function
+    const cleanedArgs = removeMarkerArgFromArgsList(operator)!.args;
+    const leftArgType = getExpressionType(operator.args[cleanedArgs.length - 1]);
+
+    if (isFnComplete.reason === 'tooFewArgs') {
+      const fnDef = getFunctionDefinition(operator.name);
+      if (
+        fnDef?.signatures.every(({ params }) =>
+          params.some(({ type }) => isArrayType(type as string))
+        )
+      ) {
+        suggestions.push(listCompleteItem);
+      } else {
+        const finalType = leftArgType || leftArgType || 'any';
+        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
+
+        // this is a special case with AND/OR
+        // <COMMAND> expression AND/OR <suggest>
+        // technically another boolean value should be suggested, but it is a better experience
+        // to actually suggest a wider set of fields/functions
+        const typeToUse =
+          finalType === 'boolean' && getFunctionDefinition(operator.name)?.type === 'builtin'
+            ? ['any']
+            : (supportedTypes as string[]);
+
+        // TODO replace with fields callback + function suggestions
+        suggestions.push(
+          ...(await getFieldsOrFunctionsSuggestions(
+            typeToUse,
+            commandName,
+            optionName,
+            getColumnsByType,
+            {
+              functions: true,
+              fields: true,
+            }
+          ))
+        );
+      }
+    }
+
+    /**
+     * If the caller has supplied a preferred expression type, we can suggest operators that
+     * would move the user toward that expression type.
+     *
+     * e.g. if we have a preferred type of boolean and we have `timestamp > "2002" AND doubleField`
+     * this is an incorrect signature for AND because the left side is boolean and the right side is double
+     *
+     * Knowing that we prefer boolean expressions, we suggest operators that would accept doubleField as a left operand
+     * and also return a boolean value.
+     *
+     * I believe this is only used in WHERE and probably bears some rethinking.
+     */
+    if (isFnComplete.reason === 'wrongTypes') {
+      if (leftArgType && preferredExpressionType) {
+        // suggest something to complete the operator
+        if (
+          leftArgType !== preferredExpressionType &&
+          isParameterType(leftArgType) &&
+          isReturnType(preferredExpressionType)
+        ) {
+          suggestions.push(
+            ...getOperatorSuggestions({
+              command: commandName,
+              leftParamType: leftArgType,
+              returnTypes: [preferredExpressionType],
+            })
+          );
+        }
+      }
+    }
+  }
+  return suggestions.map<SuggestionRawDefinition>((s) => {
+    const overlap = getOverlapRange(queryText, s.text);
+    const offset = overlap.start === overlap.end ? 1 : 0;
+    return {
+      ...s,
+      rangeToReplace: {
+        start: overlap.start + offset,
+        end: overlap.end + offset,
+      },
+    };
+  });
 }

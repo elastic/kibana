@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,9 +17,9 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 
-import { pluginServices } from '../../services';
 import { EnvironmentName } from '../../../common/labs';
 import { LabsStrings } from '../../i18n';
+import { getPresentationCapabilities } from '../../utils/get_presentation_capabilities';
 
 const { Switch: strings } = LabsStrings.Components;
 
@@ -37,18 +37,20 @@ export interface Props {
 }
 
 export const EnvironmentSwitch = ({ env, isChecked, onChange, name }: Props) => {
-  const { capabilities } = pluginServices.getHooks();
+  const { canSetAdvancedSettings } = useMemo(() => {
+    return getPresentationCapabilities();
+  }, []);
 
-  const canSet = env === 'kibana' ? capabilities.useService().canSetAdvancedSettings() : true;
+  const canSet = env === 'kibana' ? canSetAdvancedSettings : true;
 
   return (
-    <EuiFlexItem grow={false} style={{ marginBottom: '.25rem' }}>
+    <EuiFlexItem grow={false} css={{ marginBottom: '.25rem' }}>
       <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiSwitch
             disabled={!canSet}
             checked={isChecked}
-            style={{ marginTop: 1 }}
+            css={{ marginTop: 1 }}
             label={
               <EuiFlexItem grow={false}>
                 <EuiScreenReaderOnly>
@@ -61,7 +63,7 @@ export const EnvironmentSwitch = ({ env, isChecked, onChange, name }: Props) => 
             compressed
           />
         </EuiFlexItem>
-        <EuiFlexItem style={{ textAlign: 'right' }}>
+        <EuiFlexItem css={{ textAlign: 'right' }}>
           <EuiIconTip content={switchText[env].help} position="left" />
         </EuiFlexItem>
       </EuiFlexGroup>

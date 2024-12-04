@@ -18,7 +18,7 @@ import type { StepDefineFormHook } from '../step_define';
 export const AdvancedPivotEditor: FC<StepDefineFormHook['advancedPivotEditor']> = memo(
   ({
     actions: { convertToJson, setAdvancedEditorConfig, setAdvancedPivotEditorApplyButtonEnabled },
-    state: { advancedEditorConfigLastApplied, advancedEditorConfig, xJsonMode },
+    state: { advancedEditorConfigLastApplied, advancedEditorConfig },
   }) => {
     return (
       <EuiFormRow

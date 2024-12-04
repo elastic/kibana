@@ -9,7 +9,6 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import {
-  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
@@ -18,6 +17,7 @@ import Chance from 'chance';
 import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
+import { waitForPluginInitialized, EsIndexDataProvider } from '../utils';
 
 const chance = new Chance();
 
@@ -28,9 +28,10 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const log = getService('log');
+  const logger = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
+  const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
 
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
     let cspBenchmarkRules: CspBenchmarkRule[] = [];
@@ -78,86 +79,21 @@ export default function (providerContext: FtrProviderContext) {
     },
   });
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
-  const index = {
-    addFindings: async <T>(findingsMock: T[]) => {
-      await Promise.all(
-        findingsMock.map((findingsDoc) =>
-          es.index({
-            index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-            body: { ...findingsDoc, '@timestamp': new Date().toISOString() },
-            refresh: true,
-          })
-        )
-      );
-    },
-
-    addScores: async <T>(scoresMock: T[]) => {
-      await Promise.all(
-        scoresMock.map((scoreDoc) =>
-          es.index({
-            index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-            body: { ...scoreDoc, '@timestamp': new Date().toISOString() },
-            refresh: true,
-          })
-        )
-      );
-    },
-
-    removeFindings: async () => {
-      const indexExists = await es.indices.exists({ index: LATEST_FINDINGS_INDEX_DEFAULT_NS });
-
-      if (indexExists) {
-        es.deleteByQuery({
-          index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-          query: { match_all: {} },
-          refresh: true,
-        });
-      }
-    },
-
-    removeScores: async () => {
-      const indexExists = await es.indices.exists({ index: BENCHMARK_SCORE_INDEX_DEFAULT_NS });
-
-      if (indexExists) {
-        es.deleteByQuery({
-          index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-          query: { match_all: {} },
-          refresh: true,
-        });
-      }
-    },
-
-    deleteFindingsIndex: async () => {
-      const indexExists = await es.indices.exists({ index: LATEST_FINDINGS_INDEX_DEFAULT_NS });
-
-      if (indexExists) {
-        await es.indices.delete({ index: LATEST_FINDINGS_INDEX_DEFAULT_NS });
-      }
-    },
-  };
-
   describe('GET /internal/cloud_security_posture/benchmarks', () => {
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
-        await index.removeFindings();
+        await findingsIndex.deleteAll();
         await kibanaServer.savedObjects.clean({
           types: ['cloud-security-posture-settings'],
         });
-        await waitForPluginInitialized();
+        await waitForPluginInitialized({ retry, logger, supertest });
+      });
+
+      afterEach(async () => {
+        await findingsIndex.deleteAll();
+        await kibanaServer.savedObjects.clean({
+          types: ['cloud-security-posture-settings'],
+        });
       });
 
       it('Verify cspm benchmark score is updated when muting rules', async () => {
@@ -166,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const cspmFinding = getMockFinding(benchmarkRules[0], 'passed');
 
-        await index.addFindings([cspmFinding]);
+        await findingsIndex.addBulk([cspmFinding]);
 
         const { body: benchmarksBeforeMute } = await supertest
           .get('/internal/cloud_security_posture/benchmarks')
@@ -219,7 +155,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const kspmFinding = getMockFinding(benchmarkRules[0], 'passed');
 
-        await index.addFindings([kspmFinding]);
+        await findingsIndex.addBulk([kspmFinding]);
         const { body: benchmarksBeforeMute } = await supertest
           .get('/internal/cloud_security_posture/benchmarks')
           .set(ELASTIC_HTTP_VERSION_HEADER, '2')
@@ -268,11 +204,18 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
-        await index.removeFindings();
+        await findingsIndex.deleteAll();
         await kibanaServer.savedObjects.clean({
           types: ['cloud-security-posture-settings'],
         });
-        await waitForPluginInitialized();
+        await waitForPluginInitialized({ retry, logger, supertest });
+      });
+
+      afterEach(async () => {
+        await findingsIndex.deleteAll();
+        await kibanaServer.savedObjects.clean({
+          types: ['cloud-security-posture-settings'],
+        });
       });
 
       it('Calling Benchmark API as User with no read access to Security', async () => {
@@ -281,7 +224,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
 
-        await index.addFindings([cspmFinding1]);
+        await findingsIndex.addBulk([cspmFinding1]);
 
         const { body: benchmarksResult } = await supertestWithoutAuth
           .get('/internal/cloud_security_posture/benchmarks')
@@ -303,7 +246,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
 
-        await index.addFindings([cspmFinding1]);
+        await findingsIndex.addBulk([cspmFinding1]);
 
         const { status } = await supertestWithoutAuth
           .get('/internal/cloud_security_posture/benchmarks')

@@ -34,5 +34,9 @@
     "@kbn/zod-helpers",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/es-types",
+    "@kbn/apm-utils",
+    "@kbn/features-plugin",
   ]
 }

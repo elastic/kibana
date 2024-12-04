@@ -851,14 +851,6 @@
               "path": "x-pack/plugins/watcher/public/plugin.ts"
             },
             {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/components/contexts/license/license_context.tsx"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/public/context/license/license_context.tsx"
-            },
-            {
               "plugin": "slo",
               "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
             }
@@ -937,6 +929,26 @@
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "licensing",
+          "id": "def-public.LicensingPluginStart.getLicense",
+          "type": "Function",
+          "tags": [],
+          "label": "getLicense",
+          "description": [
+            "\nRetrieves the {@link ILicense | licensing information}"
+          ],
+          "signature": [
+            "() => Promise<",
+            "ILicense",
+            ">"
+          ],
+          "path": "x-pack/plugins/licensing/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "licensing",
@@ -2203,10 +2215,6 @@
               "path": "x-pack/plugins/index_lifecycle_management/server/services/license.ts"
             },
             {
-              "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/plugin.ts"
-            },
-            {
               "plugin": "osquery",
               "path": "x-pack/plugins/osquery/server/handlers/action/create_action_service.ts"
             },
@@ -2312,12 +2320,7 @@
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/plugin.ts"
-            }
-          ],
+          "references": [],
           "children": [],
           "returnComment": []
         },
@@ -2376,6 +2379,26 @@
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "licensing",
+          "id": "def-server.LicensingPluginStart.getLicense",
+          "type": "Function",
+          "tags": [],
+          "label": "getLicense",
+          "description": [
+            "\nRetrieves the {@link ILicense | licensing information}"
+          ],
+          "signature": [
+            "() => Promise<",
+            "ILicense",
+            ">"
+          ],
+          "path": "x-pack/plugins/licensing/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "licensing",

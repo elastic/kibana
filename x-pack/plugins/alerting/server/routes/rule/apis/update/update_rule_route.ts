@@ -64,8 +64,10 @@ export const updateRuleRoute = (
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
+          const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
 
           // Assert versioned inputs
           const updateRuleData: UpdateRuleRequestBodyV1<RuleParamsV1> = req.body;
@@ -86,6 +88,8 @@ export const updateRuleRoute = (
               actionsClient.isSystemAction(action.id)
             );
 
+            const flappingSettings = await rulesSettingsClient.flapping().get();
+
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const updatedRule: Rule<RuleParamsV1> = (await rulesClient.update<RuleParamsV1>({
@@ -95,6 +99,7 @@ export const updateRuleRoute = (
                 actions,
                 systemActions,
               }),
+              isFlappingEnabled: flappingSettings.enabled,
             })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type

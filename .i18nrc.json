@@ -27,7 +27,7 @@
     "dataViews": "src/plugins/data_views",
     "defaultNavigation": "packages/default-nav",
     "devTools": "src/plugins/dev_tools",
-    "discover": ["src/plugins/discover", "packages/kbn-discover-utils"],
+    "discover": ["src/plugins/discover", "packages/kbn-discover-utils", "packages/kbn-discover-contextual-components"],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
     "presentationPanel": "src/plugins/presentation_panel",
@@ -109,6 +109,7 @@
     "server": "src/legacy/server",
     "share": ["src/plugins/share", "packages/kbn-reporting-share"],
     "sharedUXPackages": "packages/shared-ux",
+    "searchApiKeysComponents": "packages/kbn-search-api-keys-components",
     "searchApiPanels": "packages/kbn-search-api-panels/",
     "searchErrors": "packages/kbn-search-errors",
     "searchIndexDocuments": "packages/kbn-search-index-documents",
@@ -116,7 +117,7 @@
     "searchTypes": "packages/kbn-search-types",
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
-    "sse": [ "packages/kbn-sse-utils" ],
+    "sse": ["packages/kbn-sse-utils"],
     "coloring": "packages/kbn-coloring/src",
     "languageDocumentation": "packages/kbn-language-documentation/src",
     "esql": "src/plugins/esql",
@@ -153,7 +154,8 @@
     "unifiedDataTable": "packages/kbn-unified-data-table",
     "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "packages/kbn-unsaved-changes-prompt",
-    "managedContentBadge": "packages/kbn-managed-content-badge"
+    "managedContentBadge": "packages/kbn-managed-content-badge",
+    "responseOpsRuleForm": "packages/response-ops/rule_form"
   },
   "translations": []
 }

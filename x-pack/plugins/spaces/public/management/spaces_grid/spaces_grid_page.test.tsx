@@ -60,6 +60,7 @@ featuresStart.getFeatures.mockResolvedValue([
 const spacesGridCommonProps = {
   serverBasePath: '',
   maxSpaces: 1000,
+  isServerless: false,
 };
 
 describe('SpacesGridPage', () => {
@@ -153,12 +154,21 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spacesWithSolution);
-    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toContainEqual({
-      field: 'solution',
-      name: 'Solution view',
-      sortable: true,
-      render: expect.any(Function),
-    });
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: '', field: 'initials' }),
+        expect.objectContaining({ name: 'Space', field: 'name' }),
+        expect.objectContaining({ name: 'Description', field: 'description' }),
+        expect.objectContaining({ name: 'Solution view', field: 'solution' }),
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({ name: 'Edit', icon: 'pencil' }),
+            expect.objectContaining({ name: 'Switch', icon: 'merge' }),
+            expect.objectContaining({ name: 'Delete', icon: 'trash' }),
+          ]),
+        }),
+      ])
+    );
   });
 
   it('renders a "current" badge for the current space', async () => {
@@ -240,7 +250,7 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     const activeRow = wrapper.find('[data-test-subj="spacesListTableRow-custom-2"]');
-    const switchAction = activeRow.find('EuiButtonIcon[data-test-subj="Custom 2-switchSpace"]');
+    const switchAction = activeRow.find('EuiButtonIcon[data-test-subj="custom-2-switchSpace"]');
     expect(switchAction.prop('isDisabled')).toBe(true);
   });
 
@@ -272,7 +282,7 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     const nonActiveRow = wrapper.find('[data-test-subj="spacesListTableRow-default"]');
-    const switchAction = nonActiveRow.find('EuiButtonIcon[data-test-subj="Default-switchSpace"]');
+    const switchAction = nonActiveRow.find('EuiButtonIcon[data-test-subj="default-switchSpace"]');
     expect(switchAction.prop('isDisabled')).toBe(false);
   });
 
@@ -326,6 +336,7 @@ describe('SpacesGridPage', () => {
         maxSpaces={1}
         allowSolutionVisibility
         serverBasePath={spacesGridCommonProps.serverBasePath}
+        isServerless={false}
       />
     );
 
@@ -409,5 +420,44 @@ describe('SpacesGridPage', () => {
     expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
       title: 'Error loading spaces',
     });
+  });
+
+  it(`does not render the 'Features visible' column when serverless`, async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
+    const error = new Error('something awful happened');
+
+    const notifications = notificationServiceMock.createStartContract();
+
+    const wrapper = shallowWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager}
+        getFeatures={() => Promise.reject(error)}
+        notifications={notifications}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
+        isServerless={true}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).not.toContainEqual(
+      expect.objectContaining({
+        field: 'disabledFeatures',
+        name: 'Features visible',
+      })
+    );
   });
 });

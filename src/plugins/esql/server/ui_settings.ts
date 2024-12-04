@@ -21,15 +21,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: true,
     description: i18n.translate('esql.advancedSettings.enableESQLDescription', {
       defaultMessage:
-        'This setting enables ES|QL in Kibana. By switching it off you will hide the ES|QL user interface from various applications. However, users will be able to access existing ES|QL saved searches, visualizations, etc. If you have feedback on this experience please reach out to us on {link}',
-      values: {
-        link:
-          `<a href="https://ela.st/esql-feedback" target="_blank" rel="noopener">` +
-          i18n.translate('esql.advancedSettings.enableESQL.discussLinkText', {
-            defaultMessage: 'https://ela.st/esql-feedback',
-          }) +
-          '</a>',
-      },
+        'This setting enables ES|QL in Kibana. By switching it off you will hide the ES|QL user interface from various applications. However, users will be able to access existing ES|QL saved searches, visualizations, etc.',
     }),
     requiresPageReload: true,
     schema: schema.boolean(),

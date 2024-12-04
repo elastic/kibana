@@ -13,9 +13,9 @@ import {
   SavedObjectAttributes,
   ElasticsearchClient,
   CustomRequestHandlerContext,
-  SavedObjectReference,
   Logger,
   ISavedObjectsRepository,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import { AnySchema } from 'joi';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
@@ -57,6 +57,10 @@ export interface UnsecuredServices {
   connectorTokenClient: ConnectorTokenClient;
 }
 
+export interface HookServices {
+  scopedClusterClient: IScopedClusterClient;
+}
+
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
   listTypes: ActionTypeRegistry['list'];
@@ -83,7 +87,6 @@ export interface ActionTypeExecutorOptions<
   secrets: Secrets;
   params: Params;
   logger: Logger;
-  isEphemeral?: boolean;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
@@ -138,6 +141,44 @@ export type RenderParameterTemplates<Params extends ActionTypeParams> = (
   actionId?: string
 ) => Params;
 
+export interface PreSaveConnectorHookParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+}
+
+export interface PostSaveConnectorHookParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+  wasSuccessful: boolean;
+}
+
+export interface PostDeleteConnectorHookParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> {
+  connectorId: string;
+  config: Config;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+}
+
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -171,6 +212,9 @@ export interface ActionType<
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
+  preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
 }
 
 export interface RawAction extends Record<string, unknown> {
@@ -192,25 +236,9 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   source?: string;
 }
 
-interface PersistedActionTaskExecutorParams {
+export interface ActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
-}
-
-interface EphemeralActionTaskExecutorParams {
-  spaceId: string;
-  taskParams: ActionTaskParams;
-  references?: SavedObjectReference[];
-}
-
-export type ActionTaskExecutorParams =
-  | PersistedActionTaskExecutorParams
-  | EphemeralActionTaskExecutorParams;
-
-export function isPersistedActionTask(
-  actionTask: ActionTaskExecutorParams
-): actionTask is PersistedActionTaskExecutorParams {
-  return typeof (actionTask as PersistedActionTaskExecutorParams).actionTaskParamsId === 'string';
 }
 
 export interface ProxySettings {

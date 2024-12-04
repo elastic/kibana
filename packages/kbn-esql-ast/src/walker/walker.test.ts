@@ -36,10 +36,10 @@ test('can walk all functions', () => {
 
 test('can find assignment expression', () => {
   const query = 'METRICS source var0 = bucket(bytes, 1 hour)';
-  const { ast } = parse(query);
+  const { root } = parse(query);
   const functions: ESQLFunction[] = [];
 
-  Walker.walk(ast, {
+  Walker.walk(root, {
     visitFunction: (fn) => {
       if (fn.name === '=') {
         functions.push(fn);
@@ -342,7 +342,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'string',
+              literalType: 'keyword',
               name: '"foo"',
             },
             {
@@ -375,7 +375,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'string',
+              literalType: 'keyword',
               name: '"2"',
             },
             {
@@ -390,7 +390,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'decimal',
+              literalType: 'double',
               name: '3.14',
             },
           ]);
@@ -473,7 +473,7 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'decimal',
+                    literalType: 'double',
                     name: '3.3',
                   },
                 ],
@@ -492,7 +492,7 @@ describe('structurally can walk all nodes', () => {
               },
               {
                 type: 'literal',
-                literalType: 'decimal',
+                literalType: 'double',
                 name: '3.3',
               },
             ]);
@@ -600,27 +600,27 @@ describe('structurally can walk all nodes', () => {
             expect(literals).toMatchObject([
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"a"',
               },
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"b"',
               },
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"c"',
               },
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"d"',
               },
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"e"',
               },
             ]);
@@ -705,6 +705,25 @@ describe('structurally can walk all nodes', () => {
                 literalType: 'integer',
                 value: 123,
               },
+            },
+          ]);
+        });
+
+        test('can visit a column inside a deeply nested inline cast', () => {
+          const query =
+            'FROM index | WHERE 123 == add(1 + fn(NOT -(a.b.c)::INTEGER /* comment */))';
+          const { root } = parse(query);
+
+          const columns: ESQLColumn[] = [];
+
+          walk(root, {
+            visitColumn: (node) => columns.push(node),
+          });
+
+          expect(columns).toMatchObject([
+            {
+              type: 'column',
+              name: 'a.b.c',
             },
           ]);
         });
@@ -812,6 +831,112 @@ describe('Walker.params()', () => {
       },
     ]);
   });
+
+  test('can collect params from column names', () => {
+    const query = 'ROW ?a.?b';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'a',
+      },
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'b',
+      },
+    ]);
+  });
+
+  test('can collect params from column names, where first part is not a param', () => {
+    const query = 'ROW a.?b';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'b',
+      },
+    ]);
+  });
+
+  test('can collect all types of param from column name', () => {
+    const query = 'ROW ?.?0.?a';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'unnamed',
+      },
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'positional',
+        value: 0,
+      },
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'a',
+      },
+    ]);
+  });
+
+  test('can collect params from function names', () => {
+    const query = 'FROM a | STATS ?lala()';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'lala',
+      },
+    ]);
+  });
+
+  test('can collect params from function names (unnamed)', () => {
+    const query = 'FROM a | STATS ?()';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'unnamed',
+      },
+    ]);
+  });
+
+  test('can collect params from function names (positional)', () => {
+    const query = 'FROM a | STATS agg(test), ?123()';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'positional',
+        value: 123,
+      },
+    ]);
+  });
 });
 
 describe('Walker.find()', () => {
@@ -908,6 +1033,21 @@ describe('Walker.match()', () => {
           value: 1,
         },
       ],
+    });
+  });
+
+  test('can find a deeply nested column', () => {
+    const query =
+      'FROM index | WHERE 123 == add(1 + fn(NOT 10 + -(a.b.c::ip)::INTEGER /* comment */))';
+    const { root } = parse(query);
+    const res = Walker.match(root, {
+      type: 'column',
+      name: 'a.b.c',
+    });
+
+    expect(res).toMatchObject({
+      type: 'column',
+      name: 'a.b.c',
     });
   });
 });

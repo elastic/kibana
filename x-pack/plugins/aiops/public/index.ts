@@ -15,7 +15,7 @@ export function plugin() {
 
 export type { AiopsPluginStart, AiopsPluginSetup } from './types';
 
-export type { AiopsAppDependencies } from './hooks/use_aiops_app_context';
+export type { AiopsAppContextValue } from './hooks/use_aiops_app_context';
 export type { LogRateAnalysisAppStateProps } from './components/log_rate_analysis';
 export type { LogRateAnalysisContentWrapperProps } from './components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper';
 export type { LogCategorizationAppStateProps } from './components/log_categorization';

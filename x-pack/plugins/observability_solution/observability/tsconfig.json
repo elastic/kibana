@@ -50,7 +50,6 @@
     "@kbn/grouping",
     "@kbn/data-views-plugin",
     "@kbn/core-http-browser",
-    "@kbn/timelines-plugin",
     "@kbn/visualization-ui-components",
     "@kbn/event-annotation-components",
     "@kbn/slo-schema",
@@ -67,7 +66,6 @@
     "@kbn/discover-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/lens-plugin",
-    "@kbn/osquery-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/lens-embeddable-utils",
@@ -101,7 +99,6 @@
     "@kbn/serverless",
     "@kbn/core-application-browser",
     "@kbn/core-theme-browser",
-    "@kbn/translations-plugin",
     "@kbn/config-schema",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server",
@@ -113,7 +110,9 @@
     "@kbn/io-ts-utils",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/es-types",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/response-ops-rule-form",
+    "@kbn/streams-plugin"
   ],
   "exclude": ["target/**/*"]
 }

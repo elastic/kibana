@@ -45,8 +45,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'manualRuleRunEnabled',
-          'loggingRequestsEnabled',
+          'alertSuppressionForSequenceEqlRuleEnabled',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',

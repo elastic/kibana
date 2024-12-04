@@ -11,6 +11,8 @@ import { pick } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogRateAnalysis } from '@kbn/aiops-plugin/public';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
@@ -37,25 +39,30 @@ export const LogRateAnalysisPage: FC = () => {
           savedSearch={savedSearch}
           showContextualInsights={showContextualInsights}
           showFrozenDataTierChoice={showNodeInfo}
-          appDependencies={pick(services, [
-            'analytics',
-            'application',
-            'charts',
-            'data',
-            'executionContext',
-            'fieldFormats',
-            'http',
-            'i18n',
-            'lens',
-            'notifications',
-            'share',
-            'storage',
-            'theme',
-            'uiActions',
-            'uiSettings',
-            'unifiedSearch',
-            'observabilityAIAssistant',
-          ])}
+          appContextValue={{
+            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
+            ...pick(services, [
+              'analytics',
+              'application',
+              'charts',
+              'data',
+              'executionContext',
+              'fieldFormats',
+              'http',
+              'i18n',
+              'lens',
+              'notifications',
+              'share',
+              'storage',
+              'theme',
+              'uiActions',
+              'uiSettings',
+              'unifiedSearch',
+              'observabilityAIAssistant',
+              'embeddable',
+              'cases',
+            ]),
+          }}
         />
       )}
       <HelpMenu docLink={services.docLinks.links.ml.guide} />

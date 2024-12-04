@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  correctCommonEsqlMistakes,
-  isChatCompletionChunkEvent,
-  isOutputEvent,
-} from '@kbn/inference-plugin/common';
+import { isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import {
   FunctionVisibility,
@@ -53,7 +50,7 @@ export function registerQueryFunction({
   When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
   If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
       : undefined;
-  functions.registerInstruction({ instruction, scopes: ['all'] });
+  functions.registerInstruction(instruction);
 
   functions.registerFunction(
     {
@@ -103,8 +100,7 @@ export function registerQueryFunction({
           rows,
         },
       };
-    },
-    ['all']
+    }
   );
   functions.registerFunction(
     {
@@ -188,7 +184,6 @@ export function registerQueryFunction({
           return messageAddEvent;
         })
       );
-    },
-    ['all']
+    }
   );
 }

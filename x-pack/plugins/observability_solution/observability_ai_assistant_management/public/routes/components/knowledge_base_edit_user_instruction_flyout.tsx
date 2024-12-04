@@ -30,19 +30,18 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
   const { userInstructions, isLoading: isFetching } = useGetUserInstructions();
   const { mutateAsync: createEntry, isLoading: isSaving } = useCreateKnowledgeBaseUserInstruction();
   const [newEntryText, setNewEntryText] = useState('');
-  const [newEntryDocId, setNewEntryDocId] = useState<string>();
-  const isSubmitDisabled = newEntryText.trim() === '';
+  const [newEntryId, setNewEntryId] = useState<string>();
 
   useEffect(() => {
     const userInstruction = userInstructions?.find((entry) => !entry.public);
-    setNewEntryDocId(userInstruction?.doc_id);
     setNewEntryText(userInstruction?.text ?? '');
+    setNewEntryId(userInstruction?.id);
   }, [userInstructions]);
 
   const handleSubmit = async () => {
     await createEntry({
       entry: {
-        doc_id: newEntryDocId ?? uuidv4(),
+        id: newEntryId ?? uuidv4(),
         text: newEntryText,
         public: false, // limit user instructions to private (for now)
       },
@@ -58,7 +57,7 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
           <h2>
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPrompt.h2.editEntryLabel',
-              { defaultMessage: 'AI User Profile' }
+              { defaultMessage: 'User-specific System Prompt' }
             )}
           </h2>
         </EuiTitle>
@@ -70,7 +69,7 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
             'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPromptFlyout.personalPromptTextLabel',
             {
               defaultMessage:
-                'The AI User Profile will be appended to the system prompt. It is space-aware and will only be used for your prompts - not shared with other users.',
+                'This user-specific prompt will be appended to the system prompt. It is space-aware and will only be used for your prompts - not shared with other users.',
             }
           )}
         </EuiText>
@@ -118,7 +117,6 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
               fill
               isLoading={isSaving}
               onClick={handleSubmit}
-              isDisabled={isSubmitDisabled}
             >
               {i18n.translate(
                 'xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.saveButtonLabel',

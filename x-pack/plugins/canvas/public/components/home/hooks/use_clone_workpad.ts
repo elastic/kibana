@@ -9,16 +9,17 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { useNotifyService, useWorkpadService } from '../../../services';
+import { useNotifyService } from '../../../services';
 import { getId } from '../../../lib/get_id';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 
 export const useCloneWorkpad = () => {
-  const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
   const history = useHistory();
 
   return useCallback(
     async (workpadId: string) => {
+      const workpadService = getCanvasWorkpadService();
       try {
         let workpad = await workpadService.get(workpadId);
 
@@ -35,7 +36,7 @@ export const useCloneWorkpad = () => {
         notifyService.error(err, { title: errors.getCloneFailureErrorMessage() });
       }
     },
-    [notifyService, workpadService, history]
+    [notifyService, history]
   );
 };
 

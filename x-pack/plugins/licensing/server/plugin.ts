@@ -17,6 +17,7 @@ import {
   distinctUntilChanged,
   ReplaySubject,
   timer,
+  firstValueFrom,
 } from 'rxjs';
 import moment from 'moment';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -124,6 +125,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       clusterClient,
       logger: this.logger,
       cacheDurationMs: this.config.license_cache_duration.asMilliseconds(),
+      maxRetryDelay: pollingFrequency,
     });
 
     const { license$, refreshManually } = createLicenseUpdate(
@@ -159,6 +161,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     }
     return {
       refresh: this.refresh,
+      getLicense: async () => await firstValueFrom(this.license$!),
       license$: this.license$,
       featureUsage: this.featureUsage.start(),
       createLicensePoller: this.createLicensePoller.bind(this),

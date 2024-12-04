@@ -14,14 +14,13 @@ import {
   useEditableSettings,
 } from '@kbn/observability-shared-plugin/public';
 import {
-  enableInfrastructureContainerAssetView,
-  enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
   enableInfrastructureAssetCustomDashboards,
 } from '@kbn/observability-plugin/common';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import {
+  AlertConsumers,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -58,7 +57,12 @@ export const SourceConfigurationSettings = ({
       if (http) {
         const { ruleExecutionStatus } = await loadRuleAggregations({
           http,
-          typesFilter: [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, METRIC_THRESHOLD_ALERT_TYPE_ID],
+          ruleTypeIds: [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, METRIC_THRESHOLD_ALERT_TYPE_ID],
+          consumers: [
+            AlertConsumers.INFRASTRUCTURE,
+            AlertConsumers.ALERTS,
+            AlertConsumers.OBSERVABILITY,
+          ],
         });
         const numberOfRules = Object.values(ruleExecutionStatus).reduce(
           (acc, value) => acc + value,
@@ -87,10 +91,8 @@ export const SourceConfigurationSettings = ({
     getUnsavedChanges,
   } = useSourceConfigurationFormState(source?.configuration);
   const infraUiSettings = useEditableSettings([
-    enableInfrastructureHostsView,
     enableInfrastructureProfilingIntegration,
     enableInfrastructureAssetCustomDashboards,
-    enableInfrastructureContainerAssetView,
   ]);
 
   const resetAllUnsavedChanges = useCallback(() => {

@@ -10,7 +10,6 @@
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
   type ShowInfoContext,
-  type MetaFunctionsContext,
   type SingleStatementContext,
   type RowCommandContext,
   type FromCommandContext,
@@ -28,10 +27,10 @@ import {
   type EnrichCommandContext,
   type WhereCommandContext,
   default as esql_parser,
-  type MetaCommandContext,
   type MetricsCommandContext,
   IndexPatternContext,
   InlinestatsCommandContext,
+  JoinCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
@@ -47,6 +46,7 @@ import { getPosition } from './helpers';
 import {
   collectAllSourceIdentifiers,
   collectAllFields,
+  collectAllAggFields,
   visitByOption,
   collectAllColumnIdentifiers,
   visitRenameClauses,
@@ -59,6 +59,7 @@ import {
   getEnrichClauses,
 } from './walkers';
 import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
+import { createJoinCommand } from './factories/join';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -80,21 +81,6 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     if (textExistsAndIsValid(ctx.INFO().getText())) {
       // TODO: these probably should not be functions, instead use "column", like: INFO <identifier>?
       commandAst?.args.push(createFunction('info', ctx, getPosition(ctx.INFO().symbol)));
-    }
-  }
-
-  /**
-   * Exit a parse tree produced by the `showFunctions`
-   * labeled alternative in `esql_parser.showCommand`.
-   * @param ctx the parse tree
-   */
-  exitMetaFunctions(ctx: MetaFunctionsContext) {
-    const commandAst = createCommand('meta', ctx);
-    this.ast.push(commandAst);
-    // update the text
-    commandAst.text = ctx.getText();
-    if (textExistsAndIsValid(ctx.FUNCTIONS().getText())) {
-      commandAst?.args.push(createFunction('functions', ctx, getPosition(ctx.FUNCTIONS().symbol)));
     }
   }
 
@@ -137,7 +123,7 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     const metadataContext = ctx.metadata();
     const metadataContent =
       metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
-    if (metadataContent) {
+    if (metadataContent && metadataContent.METADATA()) {
       const option = createOption(
         metadataContent.METADATA().getText().toLowerCase(),
         metadataContent
@@ -161,8 +147,8 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
         .map((sourceCtx) => createSource(sourceCtx)),
     };
     this.ast.push(node);
-    const aggregates = collectAllFields(ctx.fields(0));
-    const grouping = collectAllFields(ctx.fields(1));
+    const aggregates = collectAllAggFields(ctx.aggFields());
+    const grouping = collectAllFields(ctx.fields());
     if (aggregates && aggregates.length) {
       node.aggregates = aggregates;
     }
@@ -192,10 +178,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
 
     // STATS expression is optional
     if (ctx._stats) {
-      command.args.push(...collectAllFields(ctx.fields(0)));
+      command.args.push(...collectAllAggFields(ctx.aggFields()));
     }
     if (ctx._grouping) {
-      command.args.push(...visitByOption(ctx, ctx._stats ? ctx.fields(1) : ctx.fields(0)));
+      command.args.push(...visitByOption(ctx, ctx.fields()));
     }
   }
 
@@ -209,10 +195,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
 
     // STATS expression is optional
     if (ctx._stats) {
-      command.args.push(...collectAllFields(ctx.fields(0)));
+      command.args.push(...collectAllAggFields(ctx.aggFields()));
     }
     if (ctx._grouping) {
-      command.args.push(...visitByOption(ctx, ctx._stats ? ctx.fields(1) : ctx.fields(0)));
+      command.args.push(...visitByOption(ctx, ctx.fields()));
     }
   }
 
@@ -311,14 +297,6 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
   }
 
   /**
-   * Enter a parse tree produced by `esql_parser.metaCommand`.
-   * @param ctx the parse tree
-   */
-  enterMetaCommand(ctx: MetaCommandContext) {
-    const command = createCommand('meta', ctx);
-    this.ast.push(command);
-  }
-  /**
    * Exit a parse tree produced by `esql_parser.enrichCommand`.
    * @param ctx the parse tree
    */
@@ -326,6 +304,23 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     const command = createCommand('enrich', ctx);
     this.ast.push(command);
     command.args.push(...getPolicyName(ctx), ...getMatchField(ctx), ...getEnrichClauses(ctx));
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.joinCommand`.
+   *
+   * Parse the JOIN command:
+   *
+   * ```
+   * <type> JOIN identifier [ AS identifier ] ON expression [, expression [, ... ]]
+   * ```
+   *
+   * @param ctx the parse tree
+   */
+  exitJoinCommand(ctx: JoinCommandContext): void {
+    const command = createJoinCommand(ctx);
+
+    this.ast.push(command);
   }
 
   enterEveryRule(ctx: ParserRuleContext): void {

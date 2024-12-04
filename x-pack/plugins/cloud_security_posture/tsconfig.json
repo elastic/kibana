@@ -65,7 +65,7 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-security-posture-common",
     "@kbn/cloud-security-posture",
-    "@kbn/analytics"
+    "@kbn/analytics",
   ],
   "exclude": ["target/**/*"]
 }

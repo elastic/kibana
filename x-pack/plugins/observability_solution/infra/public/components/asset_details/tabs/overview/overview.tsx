@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   MetadataSummaryList,
   MetadataSummaryListCompact,
@@ -22,6 +23,10 @@ import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
 import { ServicesContent } from './services';
 import { MetricsContent } from './metrics/metrics';
+import { AddMetricsCallout } from '../../add_metrics_callout';
+import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
+import { useEntitySummary } from '../../hooks/use_entity_summary';
+import { isMetricsSignal } from '../../utils/get_data_stream_types';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
@@ -33,6 +38,16 @@ export const Overview = () => {
   } = useMetadataStateContext();
   const { metrics } = useDataViewsContext();
   const isFullPageView = renderMode.mode === 'page';
+  const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
+    entityType: asset.type,
+    entityId: asset.id,
+  });
+  const addMetricsCalloutId: AddMetricsCalloutKey =
+    asset.type === 'host' ? 'hostOverview' : 'containerOverview';
+  const [dismissedAddMetricsCallout, setDismissedAddMetricsCallout] = useLocalStorage(
+    `infra.dismissedAddMetricsCallout.${addMetricsCalloutId}`,
+    false
+  );
 
   const metadataSummarySection = isFullPageView ? (
     <MetadataSummaryList metadata={metadata} loading={metadataLoading} assetType={asset.type} />
@@ -44,18 +59,42 @@ export const Overview = () => {
     />
   );
 
+  const shouldShowCallout = () => {
+    if (
+      dataStreamsStatus !== 'success' ||
+      renderMode.mode !== 'page' ||
+      dismissedAddMetricsCallout
+    ) {
+      return false;
+    }
+
+    return !isMetricsSignal(dataStreams);
+  };
+
+  const showAddMetricsCallout = shouldShowCallout();
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <KPIGrid
-          assetId={asset.id}
-          assetType={asset.type}
-          dateRange={dateRange}
-          dataView={metrics.dataView}
-        />
-        {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
-      </EuiFlexItem>
-
+      {showAddMetricsCallout ? (
+        <EuiFlexItem grow={false}>
+          <AddMetricsCallout
+            id={addMetricsCalloutId}
+            onDismiss={() => {
+              setDismissedAddMetricsCallout(true);
+            }}
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <KPIGrid
+            assetId={asset.id}
+            assetType={asset.type}
+            dateRange={dateRange}
+            dataView={metrics.dataView}
+          />
+          {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />

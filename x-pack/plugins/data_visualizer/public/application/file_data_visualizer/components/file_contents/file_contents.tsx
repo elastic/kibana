@@ -18,9 +18,10 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { TIKA_PREVIEW_CHARS, type FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
+import { FILE_FORMATS } from '../../../../../common/constants';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
 import { useGrokHighlighter } from './use_text_parser';
 import { LINE_LIMIT } from './grok_highlighter';
@@ -132,13 +133,23 @@ export const FileContents: FC<Props> = ({
 
       <EuiSpacer size="s" />
 
-      <FormattedMessage
-        id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
-        defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
-        values={{
-          numberOfLines: showHighlights ? LINE_LIMIT : numberOfLines,
-        }}
-      />
+      {format === FILE_FORMATS.TIKA ? (
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileContents.characterCount"
+          defaultMessage="Preview limited to the first {numberOfChars} characters"
+          values={{
+            numberOfChars: TIKA_PREVIEW_CHARS,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
+          defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
+          values={{
+            numberOfLines: showHighlights ? LINE_LIMIT : numberOfLines,
+          }}
+        />
+      )}
 
       <EuiSpacer size="s" />
 

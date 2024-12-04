@@ -25,17 +25,55 @@ export type IndexPattern = z.infer<typeof IndexPattern>;
 export const IndexPattern = z.string();
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
-export const EngineStatus = z.enum(['installing', 'started', 'stopped']);
+export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
 export type EngineStatusEnum = typeof EngineStatus.enum;
 export const EngineStatusEnum = EngineStatus.enum;
 
 export type EngineDescriptor = z.infer<typeof EngineDescriptor>;
 export const EngineDescriptor = z.object({
-  type: EntityType.optional(),
-  indexPattern: IndexPattern.optional(),
-  status: EngineStatus.optional(),
+  type: EntityType,
+  indexPattern: IndexPattern,
+  status: EngineStatus,
   filter: z.string().optional(),
+  fieldHistoryLength: z.number().int(),
+  error: z.object({}).optional(),
 });
+
+export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
+export const EngineComponentResource = z.enum([
+  'entity_engine',
+  'entity_definition',
+  'index',
+  'component_template',
+  'index_template',
+  'ingest_pipeline',
+  'enrich_policy',
+  'task',
+  'transform',
+]);
+export type EngineComponentResourceEnum = typeof EngineComponentResource.enum;
+export const EngineComponentResourceEnum = EngineComponentResource.enum;
+
+export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
+export const EngineComponentStatus = z.object({
+  id: z.string(),
+  installed: z.boolean(),
+  resource: EngineComponentResource,
+  health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
+  errors: z
+    .array(
+      z.object({
+        title: z.string().optional(),
+        message: z.string().optional(),
+      })
+    )
+    .optional(),
+});
+
+export type StoreStatus = z.infer<typeof StoreStatus>;
+export const StoreStatus = z.enum(['not_installed', 'installing', 'running', 'stopped', 'error']);
+export type StoreStatusEnum = typeof StoreStatus.enum;
+export const StoreStatusEnum = StoreStatus.enum;
 
 export type InspectQuery = z.infer<typeof InspectQuery>;
 export const InspectQuery = z.object({

@@ -88,6 +88,19 @@ export default ({ getService }: FtrProviderContext): void => {
             required: false,
             defaultValue: true,
           },
+          {
+            key: 'number_1',
+            label: 'number 1',
+            type: CustomFieldTypes.NUMBER,
+            required: false,
+          },
+          {
+            key: 'number_2',
+            label: 'number 2',
+            type: CustomFieldTypes.NUMBER,
+            required: true,
+            defaultValue: 2,
+          },
         ],
       };
 
@@ -116,6 +129,12 @@ export default ({ getService }: FtrProviderContext): void => {
           type: CustomFieldTypes.TOGGLE,
           required: false,
         },
+        {
+          key: 'number_field_1',
+          label: '#3',
+          type: CustomFieldTypes.NUMBER,
+          required: false,
+        },
       ];
 
       const templates = [
@@ -134,6 +153,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_field_1',
                 value: false,
                 type: CustomFieldTypes.TOGGLE,
+              },
+              {
+                key: 'number_field_1',
+                value: 3,
+                type: CustomFieldTypes.NUMBER,
               },
             ],
           },
@@ -160,6 +184,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_field_1',
                 value: true,
                 type: CustomFieldTypes.TOGGLE,
+              },
+              {
+                key: 'number_field_1',
+                value: 4,
+                type: CustomFieldTypes.NUMBER,
               },
             ],
             connector: {
@@ -188,6 +217,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_field_1',
                 value: false,
                 type: CustomFieldTypes.TOGGLE,
+              },
+              {
+                key: 'number_field_1',
+                value: 5,
+                type: CustomFieldTypes.NUMBER,
               },
             ],
           },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { Capabilities, Logger } from '@kbn/core/server';
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
@@ -13,7 +13,13 @@ import { MetadataFieldsRepository } from './repositories/metadata_fields_reposit
 import { IntegrationFieldsSearchParams } from './repositories/types';
 import { FindFieldsMetadataOptions, IFieldsMetadataClient } from './types';
 
+interface FleetCapabilities {
+  fleet: Capabilities[string];
+  fleetv2: Capabilities[string];
+}
+
 interface FieldsMetadataClientDeps {
+  capabilities: FleetCapabilities;
   logger: Logger;
   ecsFieldsRepository: EcsFieldsRepository;
   metadataFieldsRepository: MetadataFieldsRepository;
@@ -22,6 +28,7 @@ interface FieldsMetadataClientDeps {
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
   private constructor(
+    private readonly capabilities: FleetCapabilities,
     private readonly logger: Logger,
     private readonly ecsFieldsRepository: EcsFieldsRepository,
     private readonly metadataFieldsRepository: MetadataFieldsRepository,
@@ -43,7 +50,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     }
 
     // 2. Try searching for the fiels in the Elastic Package Registry
-    if (!field && integration) {
+    if (!field && this.hasFleetPermissions(this.capabilities)) {
       field = await this.integrationFieldsRepository.getByName(fieldName, { integration, dataset });
     }
 
@@ -74,13 +81,21 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     return FieldsMetadataDictionary.create(fields);
   }
 
+  private hasFleetPermissions(capabilities: FleetCapabilities) {
+    const { fleet, fleetv2 } = capabilities;
+
+    return fleet.read && fleetv2.read;
+  }
+
   public static create({
+    capabilities,
     logger,
     ecsFieldsRepository,
     metadataFieldsRepository,
     integrationFieldsRepository,
   }: FieldsMetadataClientDeps) {
     return new FieldsMetadataClient(
+      capabilities,
       logger,
       ecsFieldsRepository,
       metadataFieldsRepository,

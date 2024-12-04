@@ -48,6 +48,17 @@ export class BreadcrumbService {
         }),
       },
     ],
+    manage_processors: [
+      {
+        text: homeBreadcrumbText,
+        href: `/`,
+      },
+      {
+        text: i18n.translate('xpack.ingestPipelines.breadcrumb.manageProcessorsLabel', {
+          defaultMessage: 'Manage processors',
+        }),
+      },
+    ],
   };
 
   private setBreadcrumbsHandler?: SetBreadcrumbs;
@@ -56,7 +67,7 @@ export class BreadcrumbService {
     this.setBreadcrumbsHandler = setBreadcrumbsHandler;
   }
 
-  public setBreadcrumbs(type: 'create' | 'home' | 'edit'): void {
+  public setBreadcrumbs(type: 'create' | 'home' | 'edit' | 'manage_processors'): void {
     if (!this.setBreadcrumbsHandler) {
       throw new Error('Breadcrumb service has not been initialized');
     }

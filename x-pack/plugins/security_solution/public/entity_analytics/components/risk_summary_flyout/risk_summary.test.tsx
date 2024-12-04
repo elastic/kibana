@@ -17,6 +17,7 @@ import type {
   LensAttributes,
   VisualizationEmbeddableProps,
 } from '../../../common/components/visualization_actions/types';
+import type { Query } from '@kbn/es-query';
 
 const mockVisualizationEmbeddable = jest
   .fn()
@@ -27,53 +28,12 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
     mockVisualizationEmbeddable(props),
 }));
 
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    useUiSetting$: () => mockUseUiSetting(),
-  };
-});
-
 describe('FlyoutRiskSummary', () => {
   beforeEach(() => {
     mockVisualizationEmbeddable.mockClear();
   });
 
-  it('renders risk summary table with alerts only', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <FlyoutRiskSummary
-          riskScoreData={mockHostRiskScoreState}
-          queryId={'testQuery'}
-          openDetailsPanel={() => {}}
-          recalculatingScore={false}
-        />
-      </TestProviders>
-    );
-
-    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-
-    // Alerts
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
-    );
-
-    // Context
-    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_2_count}`
-    );
-
-    // Result row doesn't exist if alerts are the only category
-    expect(queryByTestId('risk-summary-result-count')).not.toBeInTheDocument();
-    expect(queryByTestId('risk-summary-result-score')).not.toBeInTheDocument();
-  });
-
   it('renders risk summary table with context and totals', () => {
-    mockUseUiSetting.mockReturnValue([true]);
-
     const { getByTestId } = render(
       <TestProviders>
         <FlyoutRiskSummary
@@ -200,7 +160,7 @@ describe('FlyoutRiskSummary', () => {
     );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
-    expect(lensAttributes.state.query.query).toEqual('host.name: test');
+    expect((lensAttributes.state.query as Query).query).toEqual('host.name: test');
     expect(firstColumn).toEqual(
       expect.objectContaining({
         sourceField: 'host.risk.calculated_score_norm',
@@ -271,7 +231,7 @@ describe('FlyoutRiskSummary', () => {
     );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
-    expect(lensAttributes.state.query.query).toEqual('user.name: test');
+    expect((lensAttributes.state.query as Query).query).toEqual('user.name: test');
     expect(firstColumn).toEqual(
       expect.objectContaining({
         sourceField: 'user.risk.calculated_score_norm',

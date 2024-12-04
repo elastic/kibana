@@ -11,7 +11,7 @@
         "label": "TabbedTableListView",
         "description": [],
         "signature": [
-          "({ title, description, headingId, children, tabs, activeTabId, changeActiveTab, }: TabbedTableListViewProps) => JSX.Element"
+          "({ title, description, headingId, children, tabs, activeTabId, changeActiveTab, }: TabbedTableListViewProps) => React.JSX.Element"
         ],
         "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
         "deprecated": false,

@@ -10,7 +10,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import React, { useMemo } from 'react';
 import { ErrorMessage } from '../../components/error_message';
 import { useKibana } from '../../hooks/use_kibana';

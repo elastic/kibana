@@ -25,8 +25,7 @@ import { HelpMenu } from '../../../components/help_menu';
 class NewCalendarUI extends Component {
   static propTypes = {
     calendarId: PropTypes.string,
-    canCreateCalendar: PropTypes.bool.isRequired,
-    canDeleteCalendar: PropTypes.bool.isRequired,
+    isDst: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -66,7 +65,12 @@ class NewCalendarUI extends Component {
         application: { navigateToUrl },
       },
     } = this.props.kibana;
-    await navigateToUrl(`${basePath.get()}/app/ml/${ML_PAGES.CALENDARS_MANAGE}`, true);
+    await navigateToUrl(
+      `${basePath.get()}/app/ml/${
+        this.props.isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE
+      }`,
+      true
+    );
   };
 
   async formSetup() {
@@ -219,6 +223,11 @@ class NewCalendarUI extends Component {
       description: event.description,
       start_time: event.start_time,
       end_time: event.end_time,
+      ...(event.skip_result !== undefined ? { skip_result: event.skip_result } : {}),
+      ...(event.skip_model_update !== undefined
+        ? { skip_model_update: event.skip_model_update }
+        : {}),
+      ...(event.force_time_shift !== undefined ? { force_time_shift: event.force_time_shift } : {}),
     }));
 
     // set up calendar
@@ -308,6 +317,19 @@ class NewCalendarUI extends Component {
     }));
   };
 
+  addEvents = (events) => {
+    this.setState((prevState) => ({
+      events: [...prevState.events, ...events],
+      isNewEventModalVisible: false,
+    }));
+  };
+
+  clearEvents = () => {
+    this.setState(() => ({
+      events: [],
+    }));
+  };
+
   addImportedEvents = (events) => {
     this.setState((prevState) => ({
       events: [...prevState.events, ...events],
@@ -354,16 +376,14 @@ class NewCalendarUI extends Component {
           <EuiPageBody>
             <CalendarForm
               calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
-              canCreateCalendar={this.props.canCreateCalendar}
-              canDeleteCalendar={this.props.canDeleteCalendar}
               description={selectedCalendar ? selectedCalendar.description : description}
               eventsList={events}
-              groupIds={groupIdOptions}
+              groupIdOptions={groupIdOptions}
               isEdit={selectedCalendar !== undefined}
               isNewCalendarIdValid={
                 selectedCalendar || isNewCalendarIdValid === null ? true : isNewCalendarIdValid
               }
-              jobIds={jobIdOptions}
+              jobIdOptions={jobIdOptions}
               onCalendarIdChange={this.onCalendarIdChange}
               onCreate={this.onCreate}
               onDescriptionChange={this.onDescriptionChange}
@@ -380,6 +400,9 @@ class NewCalendarUI extends Component {
               showNewEventModal={this.showNewEventModal}
               isGlobalCalendar={isGlobalCalendar}
               onGlobalCalendarChange={this.onGlobalCalendarChange}
+              addEvents={this.addEvents}
+              clearEvents={this.clearEvents}
+              isDst={this.props.isDst}
             />
             {modal}
           </EuiPageBody>

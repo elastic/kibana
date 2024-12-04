@@ -5,14 +5,28 @@
  * 2.0.
  */
 
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoint_helper';
+import * as i18n from './translations';
 
 export interface EndpointInfoProps {
   inferenceId: string;
 }
 
 export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId }) => (
-  <span>
-    <strong>{inferenceId}</strong>
-  </span>
+  <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexItem grow={false}>
+      <span>
+        <strong>{inferenceId}</strong>
+      </span>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <span>
+        {isEndpointPreconfigured(inferenceId) ? (
+          <EuiBetaBadge label={i18n.PRECONFIGURED_LABEL} size="s" color="hollow" />
+        ) : null}
+      </span>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );

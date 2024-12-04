@@ -7,11 +7,11 @@
 
 import { createBrowserHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
-
+import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
 import type { PublicAppInfo } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { LensApi, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type { Services } from './types';
 
 const coreStart = coreMock.createStart();
@@ -39,24 +39,16 @@ export const mockLensAttributes = {
 export const getMockLensApi = (
   { from, to = 'now' }: { from: string; to: string } = { from: 'now-24h', to: 'now' }
 ): LensApi =>
-  ({
-    type: 'lens',
-    getSavedVis: () => {},
-    canViewUnderlyingData: () => {},
-    getViewUnderlyingDataArgs: () => {},
+  getLensApiMock({
     getFullAttributes: () => {
       return mockLensAttributes;
     },
-    panelTitle: new BehaviorSubject('myPanel'),
-    hidePanelTitle: new BehaviorSubject('false'),
-    timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
+    panelTitle: new BehaviorSubject<string | undefined>('myPanel'),
     timeRange$: new BehaviorSubject<TimeRange | undefined>({
       from,
       to,
     }),
-    filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-    query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
-  } as unknown as LensApi);
+  });
 
 export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('securitySolutionUI');
 export const getMockApplications$ = () =>

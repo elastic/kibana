@@ -11,6 +11,7 @@ export enum TelemetryEventType {
   IntegrationAssistantOpen = 'integration_assistant_open',
   IntegrationAssistantStepComplete = 'integration_assistant_step_complete',
   IntegrationAssistantGenerationComplete = 'integration_assistant_generation_complete',
+  IntegrationAssistantCelGenerationComplete = 'integration_assistant_cel_generation_complete',
   IntegrationAssistantComplete = 'integration_assistant_complete',
 }
 
@@ -36,6 +37,15 @@ interface IntegrationAssistantStepCompleteData {
 interface IntegrationAssistantGenerationCompleteData {
   sessionId: string;
   sampleRows: number;
+  durationMs: number;
+  actionTypeId: string;
+  model: string;
+  provider: string;
+  errorMessage?: string;
+}
+
+interface IntegrationAssistantCelGenerationCompleteData {
+  sessionId: string;
   durationMs: number;
   actionTypeId: string;
   model: string;
@@ -69,6 +79,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventType> =
     ? IntegrationAssistantStepCompleteData
     : T extends TelemetryEventType.IntegrationAssistantGenerationComplete
     ? IntegrationAssistantGenerationCompleteData
+    : T extends TelemetryEventType.IntegrationAssistantCelGenerationComplete
+    ? IntegrationAssistantCelGenerationCompleteData
     : T extends TelemetryEventType.IntegrationAssistantComplete
     ? IntegrationAssistantCompleteData
     : never;

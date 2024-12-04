@@ -25,9 +25,9 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
+
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
@@ -56,13 +56,11 @@ const augmentAlerts = async <T>({
   options,
   kibanaVersion,
   currentTimeOverride,
-  intendedTimestamp,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
-  intendedTimestamp: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
   const maintenanceWindowIds: string[] =
@@ -77,9 +75,6 @@ const augmentAlerts = async <T>({
         [ALERT_RULE_EXECUTION_TIMESTAMP]: currentDate,
         [ALERT_START]: timestampOverrideOrCurrent,
         [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
-        [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp
-          ? intendedTimestamp
-          : timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
         ...(maintenanceWindowIds.length
           ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
@@ -309,17 +304,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
-                let intendedTimestamp;
-                if (options.startedAtOverridden) {
-                  intendedTimestamp = options.startedAt;
-                }
-
                 const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
-                  intendedTimestamp,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -398,11 +387,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
 
               let alertsWereTruncated = false;
-
-              let intendedTimestamp;
-              if (options.startedAtOverridden) {
-                intendedTimestamp = options.startedAt;
-              }
 
               if (writeAlerts && alerts.length > 0) {
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
@@ -488,9 +472,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }, {});
 
                 // filter out alerts that were already suppressed
-                // alert was suppressed if its suppression ends is older than suppression end of existing alert
-                // if existing alert was created earlier during the same rule execution - then alerts can be counted as not suppressed yet
-                // as they are processed for the first against this existing alert
+                // alert was suppressed if its suppression ends is older
+                // than suppression end of existing alert
+                // if existing alert was created earlier during the same
+                // rule execution - then alerts can be counted as not suppressed yet
+                // as they are processed for the first time against this existing alert
                 const nonSuppressedAlerts = filteredDuplicates.filter((alert) => {
                   const existingAlert =
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
@@ -561,7 +547,15 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   ];
                 });
 
-                let enrichedAlerts = newAlerts;
+                // we can now augment and enrich
+                // the sub alerts (if any) the same as we would
+                // any other newAlert
+                let enrichedAlerts = newAlerts.some((newAlert) => newAlert.subAlerts != null)
+                  ? newAlerts.flatMap((newAlert) => {
+                      const { subAlerts, ...everything } = newAlert;
+                      return [everything, ...(subAlerts ?? [])];
+                    })
+                  : newAlerts;
 
                 if (enrichAlerts) {
                   try {
@@ -583,12 +577,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
-                  intendedTimestamp,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({
                   body: [...duplicateAlertUpdates, ...mapAlertsToBulkCreate(augmentedAlerts)],
-                  refresh: true,
+                  // On serverless we can force a refresh to we don't wait for the longer refresh interval
+                  // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
+                  refresh: options.isServerless ? true : 'wait_for',
                 });
 
                 if (bulkResponse == null) {
