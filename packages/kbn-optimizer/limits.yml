@@ -2,10 +2,9 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
-  aiops: 17680
+  aiops: 32733
   alerting: 106936
   apm: 64385
-  assetInventory: 18478
   banners: 17946
   bfetch: 22837
   canvas: 29355
@@ -193,7 +192,7 @@ pageLoadAssetSize:
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
   visTypeTimeseries: 55203
-  visTypeVega: 571074
+  visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 46868
   visualizations: 90000

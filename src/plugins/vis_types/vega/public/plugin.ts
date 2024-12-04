@@ -17,7 +17,6 @@ import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
-import { scheme } from 'vega';
 import {
   setNotifications,
   setData,
@@ -102,7 +101,9 @@ export class VegaPlugin implements Plugin<void, void> {
   ) {
     core.theme.theme$
       .subscribe({
-        next(theme) {
+        async next(theme) {
+          const { scheme } = await import('vega');
+
           const palettes = getKbnPalettes(theme);
           scheme('elastic', palettes.get(KbnPalette.Default).colors());
         },
