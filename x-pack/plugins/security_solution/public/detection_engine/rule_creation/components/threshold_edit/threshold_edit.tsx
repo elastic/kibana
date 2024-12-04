@@ -22,6 +22,11 @@ interface ThresholdEditProps {
 }
 
 export function ThresholdEdit({ path, esFields }: ThresholdEditProps): JSX.Element {
+  const aggregatableFields = useMemo(
+    () => esFields.filter((field) => field.aggregatable === true),
+    [esFields]
+  );
+
   const ThresholdInputChildren = useCallback(
     ({
       thresholdField,
@@ -30,14 +35,14 @@ export function ThresholdEdit({ path, esFields }: ThresholdEditProps): JSX.Eleme
       thresholdCardinalityValue,
     }: Record<string, FieldHook>) => (
       <ThresholdInput
-        browserFields={esFields}
+        browserFields={aggregatableFields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
         thresholdCardinalityField={thresholdCardinalityField}
         thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
-    [esFields]
+    [aggregatableFields]
   );
 
   const cardinalityFieldConfig = useMemo(() => getCardinalityFieldConfig(path), [path]);
