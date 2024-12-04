@@ -51,11 +51,9 @@ export const setKibanaServices = (
   embeddableService = deps.embeddable;
   expressionsService = deps.expressions;
   presentationUtilService = deps.presentationUtil;
-  reportingService = Boolean(
-    deps.reporting?.usesUiCapabilities() && !kibanaCore.application.capabilities.canvas?.generatePdf
-  )
-    ? undefined
-    : deps.reporting;
+  reportingService = Boolean(kibanaCore.application.capabilities.canvas?.generatePdf)
+    ? deps.reporting
+    : undefined;
   spacesService = deps.spaces;
   uiActionsService = deps.uiActions;
   visualizationsService = deps.visualizations;
