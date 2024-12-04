@@ -15,7 +15,7 @@ export function getTimestampRangeInSeconds(startDate: number, endDate: number, i
     if (isDevMode) {
       // eslint-disable-next-line no-console
       console.error(
-        'Failed to calculate the range in seconds. rangeFrom is older than the endDate'
+        'Failed to calculate the range in seconds. startDate is older than the endDate'
       );
     }
     return undefined;
