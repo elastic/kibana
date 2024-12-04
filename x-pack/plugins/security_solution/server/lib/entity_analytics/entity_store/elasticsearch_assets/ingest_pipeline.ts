@@ -55,8 +55,7 @@ const buildIngestPipeline = ({
     version: description.version,
   });
 
-  return [
-    ...(debugMode ? [debugDeepCopyContextStep()] : []),
+  const processors = [
     {
       enrich: {
         policy_name: enrichPolicyName,
@@ -93,6 +92,13 @@ const buildIngestPipeline = ({
         ]
       : []),
   ];
+
+  const extraSteps =
+    typeof description.pipeline === 'function'
+      ? description.pipeline(processors)
+      : description.pipeline;
+
+  return [...(debugMode ? [debugDeepCopyContextStep()] : []), ...extraSteps, ...processors];
 };
 
 // developing the pipeline is a bit tricky, so we have a debug mode
