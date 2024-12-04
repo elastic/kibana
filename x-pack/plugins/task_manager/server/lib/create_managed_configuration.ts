@@ -141,14 +141,16 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
           }
         } else {
           if (previousPollInterval === INTERVAL_AFTER_BLOCK_EXCEPTION) {
-            previousPollInterval = startingPollInterval;
+            newPollInterval = startingPollInterval;
+          } else {
+            // Decrease poll interval by POLL_INTERVAL_DECREASE_PERCENTAGE and use Math.floor to
+            // make sure the number is different than previous while not being a decimal value.
+            newPollInterval = Math.max(
+              startingPollInterval,
+              Math.floor(previousPollInterval * POLL_INTERVAL_DECREASE_PERCENTAGE)
+            );
           }
-          // Decrease poll interval by POLL_INTERVAL_DECREASE_PERCENTAGE and use Math.floor to
-          // make sure the number is different than previous while not being a decimal value.
-          newPollInterval = Math.max(
-            startingPollInterval,
-            Math.floor(previousPollInterval * POLL_INTERVAL_DECREASE_PERCENTAGE)
-          );
+
           if (!Number.isSafeInteger(newPollInterval) || newPollInterval < 0) {
             logger.error(
               `Poll interval configuration had an issue calculating the new poll interval: Math.max(${startingPollInterval}, Math.floor(${previousPollInterval} * ${POLL_INTERVAL_DECREASE_PERCENTAGE})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
@@ -160,11 +162,11 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
 
       if (newPollInterval !== previousPollInterval) {
         logger.debug(
-          `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${errorCount} "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s)`
+          `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${errorCount} "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).`
         );
         if (previousPollInterval === startingPollInterval) {
           logger.warn(
-            `Poll interval configuration is temporarily increased after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script and/or "cluster_block_exception"" error(s).`
+            `Poll interval configuration is temporarily increased after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).`
           );
         }
       }

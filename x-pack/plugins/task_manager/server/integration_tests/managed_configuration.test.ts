@@ -13,6 +13,7 @@ import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration'
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from '../config';
+import { BulkUpdateError } from '../lib/bulk_update_error';
 
 describe('managed configuration', () => {
   let taskManagerStart: TaskManagerStartContract;
@@ -130,12 +131,39 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
+        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3600ms');
+    });
+
+    test('should increase poll interval when Elasticsearch returns a cluster_block_exception error', async () => {
+      savedObjectsClient.create.mockRejectedValueOnce(
+        new BulkUpdateError({
+          statusCode: 403,
+          message: 'index is blocked',
+          type: 'cluster_block_exception',
+        })
+      );
+
+      await expect(
+        taskManagerStart.schedule({
+          taskType: 'foo',
+          state: {},
+          params: {},
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"index is blocked"`);
+      clock.tick(100000);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Poll interval configuration changing from 3000 to 61000 after seeing 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
+      );
+      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 61000ms');
     });
 
     test('should increase poll interval when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
@@ -151,10 +179,10 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
+        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3600ms');
     });
