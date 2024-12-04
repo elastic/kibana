@@ -30,12 +30,3 @@ export function isValidDateMath(input: string, ctx: z.RefinementCtx) {
     });
   }
 }
-
-export function isNonEmptyString(input: string, ctx: z.RefinementCtx) {
-  if (typeof input === 'string' && input.trim() === '') {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'No empty strings allowed',
-    });
-  }
-}

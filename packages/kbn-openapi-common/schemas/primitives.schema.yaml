@@ -8,9 +8,7 @@ components:
   schemas:
     NonEmptyString:
       type: string
-      # pattern: ^(?! *$).+$
       minLength: 1
-      # format: trim
       format: nonempty
       description: A string that is not empty and does not contain only whitespace
 

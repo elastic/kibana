@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/array_from_string';
-export * from './src/boolean_from_string';
-export * from './src/expect_parse_error';
-export * from './src/expect_parse_success';
-export * from './src/is_valid_date_math';
-export * from './src/required_optional';
-export * from './src/safe_parse_result';
-export * from './src/stringify_zod_error';
-export * from './src/build_route_validation_with_zod';
-export * from './src/non_empty_string';
+import * as z from '@kbn/zod';
+export function isNonEmptyString(input: string, ctx: z.RefinementCtx) {
+  if (typeof input === 'string' && input.trim() === '') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'No empty strings allowed',
+    });
+  }
+}
