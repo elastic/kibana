@@ -85,6 +85,15 @@ describe(
       }
     });
 
+    afterEach(function () {
+      if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
+        cy.task('captureHostVmAgentDiagnostics', {
+          hostname: createdHost.hostname,
+          fileNamePrefix: this.currentTest?.fullTitle(),
+        });
+      }
+    });
+
     it('should open responder from alert details flyout', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       toggleRuleOffAndOn(ruleName);

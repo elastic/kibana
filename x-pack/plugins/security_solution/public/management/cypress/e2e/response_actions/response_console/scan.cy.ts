@@ -81,6 +81,15 @@ describe(
         }
       });
 
+      afterEach(function () {
+        if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
+          cy.task('captureHostVmAgentDiagnostics', {
+            hostname: createdHost.hostname,
+            fileNamePrefix: this.currentTest?.fullTitle(),
+          });
+        }
+      });
+
       [
         ['file', filePath],
         ['folder', homeFilePath],
