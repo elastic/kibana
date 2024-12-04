@@ -8,6 +8,7 @@
 import type { StartServicesAccessor, Logger } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
+import type { EndpointAppContext } from '../endpoint/types';
 import type { SecuritySolutionPluginRouter } from '../types';
 
 import { registerFleetIntegrationsRoutes } from '../lib/detection_engine/fleet_integrations';
@@ -41,6 +42,7 @@ import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { registerResolverRoutes } from '../endpoint/routes/resolver';
+import { registerWorkflowInsightsRoutes } from '../endpoint/routes/workflow_insights';
 import {
   createEsIndexRoute,
   createPrebuiltSavedObjectsRoute,
@@ -78,7 +80,8 @@ export const initRoutes = (
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
   previewTelemetryReceiver: ITelemetryReceiver,
-  isServerless: boolean
+  isServerless: boolean,
+  endpointContext: EndpointAppContext
 ) => {
   registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -154,4 +157,6 @@ export const initRoutes = (
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
+
+  registerWorkflowInsightsRoutes(router, config, endpointContext);
 };
