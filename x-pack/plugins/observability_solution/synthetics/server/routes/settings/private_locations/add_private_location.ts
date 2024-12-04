@@ -27,9 +27,11 @@ export const PrivateLocationSchema = schema.object({
       lon: schema.number(),
     })
   ),
-  spaces: schema.maybe(schema.arrayOf(schema.string()), {
-    minSize: 1,
-  }),
+  spaces: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      minSize: 1,
+    })
+  ),
 });
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
@@ -45,8 +47,7 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, savedObjectsClient, syntheticsMonitorClient, server, spaceId } =
-      routeContext;
+    const { response, request, savedObjectsClient, syntheticsMonitorClient, server } = routeContext;
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
 
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
@@ -102,6 +103,6 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       }
     );
 
-    return toClientContract(result.attributes, agentPolicies);
+    return toClientContract(result, agentPolicies);
   },
 });

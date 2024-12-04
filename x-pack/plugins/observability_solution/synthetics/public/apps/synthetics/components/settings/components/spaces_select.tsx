@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
+
 import { ClientPluginsStart } from '../../../../../plugin';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 
@@ -79,11 +81,25 @@ export const SpaceSelector: React.FC = () => {
             onChange={(selected) => {
               const selectedIds = selected.map((option) => option.id);
 
-              if (selectedIds.includes(allSpacesOption.id)) {
-                field.onChange([allSpacesOption.id]);
-              } else {
-                field.onChange(selectedIds);
+              // if last value is not all spaces, remove all spaces value
+              if (
+                selectedIds.length > 0 &&
+                selectedIds[selectedIds.length - 1] !== allSpacesOption.id
+              ) {
+                field.onChange(selectedIds.filter((id) => id !== allSpacesOption.id));
+                return;
               }
+
+              // if last value is all spaces, remove all other values
+              if (
+                selectedIds.length > 0 &&
+                selectedIds[selectedIds.length - 1] === allSpacesOption.id
+              ) {
+                field.onChange([allSpacesOption.id]);
+                return;
+              }
+
+              field.onChange(selectedIds);
             }}
           />
         )}
@@ -92,11 +108,13 @@ export const SpaceSelector: React.FC = () => {
   );
 };
 
+export const ALL_SPACES_LABEL = i18n.translate('xpack.synthetics.spaceList.allSpacesLabel', {
+  defaultMessage: `* All spaces`,
+});
+
 const allSpacesOption = {
-  id: '*',
-  label: i18n.translate('xpack.synthetics.spaceList.allSpacesLabel', {
-    defaultMessage: `* All spaces`,
-  }),
+  id: ALL_SPACES_ID,
+  label: ALL_SPACES_LABEL,
 };
 
 const SPACES_LABEL = i18n.translate('xpack.synthetics.privateLocation.spacesLabel', {

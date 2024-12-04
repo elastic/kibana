@@ -6,7 +6,6 @@
  */
 import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
 import { ManageEmptyState } from './manage_empty_state';
@@ -27,8 +26,6 @@ export const ManagePrivateLocations = () => {
     (val: boolean) => dispatch(setAddingNewPrivateLocation(val)),
     [dispatch]
   );
-
-  const { space } = useKibanaSpace();
 
   const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = usePrivateLocationsAPI();
 
@@ -66,7 +63,6 @@ export const ManagePrivateLocations = () => {
           onSubmit={handleSubmit}
           privateLocations={privateLocations}
           isLoading={loading}
-          spaceId={space?.id}
         />
       ) : null}
     </>
