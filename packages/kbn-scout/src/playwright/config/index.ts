@@ -8,9 +8,9 @@
  */
 
 import { defineConfig, PlaywrightTestConfig, devices } from '@playwright/test';
-import { scoutPlaywrightReporter } from '../../reporting';
+import { scoutPlaywrightReporter } from '@kbn/scout-reporting';
+import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
-import { SCOUT_SERVERS_ROOT } from '../../paths';
 
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
   return defineConfig<ScoutTestOptions>({

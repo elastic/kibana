@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Runner, Test } from '@kbn/test/src/functional_test_runner/fake_mocha_types';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '.';
-import { environmentMetadata } from '../datasources';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '../paths';
+import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import {
+  generateTestRunId,
+  getTestIDForTitle,
+  ScoutReport,
+  ScoutReportEventAction,
+  datasources,
+} from '@kbn/scout-reporting';
+import { Runner, Test } from '../../../fake_mocha_types';
 
 /**
  * Configuration options for the Scout Mocha reporter
  */
-export interface ScoutMochaReporterOptions {
+export interface ScoutFTRReporterOptions {
   name?: string;
   outputPath?: string;
 }
@@ -25,19 +30,19 @@ export interface ScoutMochaReporterOptions {
 /**
  * Scout Mocha reporter
  */
-export class ScoutMochaReporter {
+export class ScoutFTRReporter {
   readonly log: ToolingLog;
   readonly name: string;
   readonly runId: string;
   private report: ScoutReport;
 
-  constructor(private runner: Runner, private reporterOptions: ScoutMochaReporterOptions = {}) {
+  constructor(private runner: Runner, private reporterOptions: ScoutFTRReporterOptions = {}) {
     this.log = new ToolingLog({
       level: 'info',
       writeTo: process.stdout,
     });
 
-    this.name = this.reporterOptions.name || 'unknown';
+    this.name = this.reporterOptions.name || 'ftr';
     this.runId = generateTestRunId();
     this.log.info(`Scout test run ID: ${this.runId}`);
 
@@ -59,7 +64,7 @@ export class ScoutMochaReporter {
    */
   public get reportRootPath(): string {
     const outputPath = this.reporterOptions.outputPath || SCOUT_REPORT_OUTPUT_ROOT;
-    return path.join(outputPath, `scout-mocha-${this.runId}`);
+    return path.join(outputPath, `scout-ftr-${this.runId}`);
   }
 
   onRunStart = () => {
@@ -67,7 +72,7 @@ export class ScoutMochaReporter {
      * Root suite execution began (all files have been parsed and hooks/tests are ready for execution)
      */
     this.report.logEvent({
-      ...environmentMetadata,
+      ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
         type: 'mocha',
@@ -86,7 +91,7 @@ export class ScoutMochaReporter {
      * Test execution started
      */
     this.report.logEvent({
-      ...environmentMetadata,
+      ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
         type: 'mocha',
@@ -114,7 +119,7 @@ export class ScoutMochaReporter {
      * Test execution ended
      */
     this.report.logEvent({
-      ...environmentMetadata,
+      ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
         type: 'mocha',
@@ -148,7 +153,7 @@ export class ScoutMochaReporter {
      * Root suite execution has ended
      */
     this.report.logEvent({
-      ...environmentMetadata,
+      ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
         type: 'mocha',

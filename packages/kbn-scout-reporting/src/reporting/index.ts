@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'node:path';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { createHash, randomBytes } from 'node:crypto';
 import type { ReporterDescription } from 'playwright/test';
 import type { ScoutPlaywrightReporterOptions } from './playwright';
-import type { ScoutJestReporterOptions } from './jest';
 
 export * from './report';
 
@@ -29,17 +26,5 @@ export function getTestIDForTitle(title: string) {
 export const scoutPlaywrightReporter = (
   options?: ScoutPlaywrightReporterOptions
 ): ReporterDescription => {
-  return ['@kbn/scout/src/reporting/playwright.ts', options];
+  return ['@kbn/scout-reporting/src/reporting/playwright.ts', options];
 };
-
-// Jest reporting
-export const scoutJestReporter = (options?: ScoutJestReporterOptions) => {
-  if (process.env.ENABLE_SCOUT_REPORTER !== 'true') {
-    return [];
-  }
-
-  return [path.resolve(REPO_ROOT, 'packages/kbn-scout/src/reporting/jest.ts'), options];
-};
-
-// Mocha reporting
-export { ScoutMochaReporter } from './mocha';

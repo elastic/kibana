@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { RunWithCommands } from '@kbn/dev-cli-runner';
-import { initializeReportDatastream } from './initialize-report-datastream';
+import { cli as reportingCLI } from '@kbn/scout-reporting';
 import { startServer } from './start_server';
 import { runTests } from './run_tests';
-import { uploadEvents } from './upload_events';
 
 export async function run() {
   await new RunWithCommands(
     {
       description: 'Scout CLI',
     },
-    [startServer, runTests, initializeReportDatastream, uploadEvents]
+    [startServer, runTests, reportingCLI.initializeReportDatastream, reportingCLI.uploadEvents]
   ).execute();
 }
