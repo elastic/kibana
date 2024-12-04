@@ -74,11 +74,11 @@ describe('Endpoints RBAC', { tags: ['@ess'] }, () => {
 
               loadPage(APP_ENDPOINTS_PATH);
 
-              cy.getByTestSubj('policyOnboardingInstructions', { timeout: 3000 }).should('exist');
+              cy.getByTestSubj('policyOnboardingInstructions').should('exist');
               if (shouldAllowOnboarding) {
-                cy.getByTestSubj('onboardingStartButton', { timeout: 3000 }).should('exist');
+                cy.getByTestSubj('onboardingStartButton').should('exist');
               } else {
-                cy.getByTestSubj('onboardingStartButton', { timeout: 3000 }).should('not.exist');
+                cy.getByTestSubj('onboardingStartButton').should('not.exist');
               }
             });
           }
@@ -127,12 +127,12 @@ describe('Endpoints RBAC', { tags: ['@ess'] }, () => {
               loadPage(APP_ENDPOINTS_PATH);
 
               if (shouldShowOnboardingSteps) {
-                cy.getByTestSubj('emptyHostsTable', { timeout: 3000 }).should('exist');
-                cy.getByTestSubj('onboardingSteps', { timeout: 3000 }).should('exist');
+                cy.getByTestSubj('emptyHostsTable').should('exist');
+                cy.getByTestSubj('onboardingSteps').should('exist');
               } else {
                 // without correct privileges, fall back to empty policy table note showing that Fleet privilege is required
-                cy.getByTestSubj('emptyPolicyTable', { timeout: 3000 }).should('exist');
-                cy.getByTestSubj('onboardingStartButton', { timeout: 3000 }).should('not.exist');
+                cy.getByTestSubj('emptyPolicyTable').should('exist');
+                cy.getByTestSubj('onboardingStartButton').should('not.exist');
               }
             });
           }
@@ -184,8 +184,8 @@ describe('Endpoints RBAC', { tags: ['@ess'] }, () => {
 
               loadPage(APP_ENDPOINTS_PATH);
 
-              cy.getByTestSubj('policyNameCellLink', { timeout: 3000 }).should('exist');
-              cy.getByTestSubj('policyNameCellLink', { timeout: 3000 }).within(() => {
+              cy.getByTestSubj('policyNameCellLink').should('exist');
+              cy.getByTestSubj('policyNameCellLink').within(() => {
                 if (shouldProvidePolicyLink) {
                   cy.get('a').should('have.attr', 'href');
                 } else {
