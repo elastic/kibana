@@ -33,7 +33,7 @@ export interface Props {
 export function InvestigationNotes({ user }: Props) {
   const theme = useTheme();
   const { investigation } = useInvestigation();
-  const { data: notes, isLoading } = useFetchInvestigationNotes({
+  const { data: notes } = useFetchInvestigationNotes({
     investigationId: investigation!.id,
   });
   const { mutate: addNote, isLoading: isAddingNote } = useAddInvestigationNote();
