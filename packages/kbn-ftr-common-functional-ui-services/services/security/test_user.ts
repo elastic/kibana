@@ -59,7 +59,7 @@ export class TestUser extends FtrService {
      * Test user is configured to get `defaultRole` which is being overridden in `fips_overrides.ts` to the most privileged
      * roles available so that more tests can be run successfully
      */
-    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
+    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true' && (!roles || !roles.length)) {
       this.log.debug(
         `FTR is running in FIPS mode and does not allow for Test User's roles to be overridden`
       );
