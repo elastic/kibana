@@ -8,9 +8,14 @@
  */
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
-import { default as v8Light } from '@elastic/eui/dist/eui_theme_light.json';
+import { default as v8Light } from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
-import { default as v8Dark } from '@elastic/eui/dist/eui_theme_dark.json';
+import { default as v8Dark } from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
+
+/* eslint-disable-next-line @kbn/eslint/module_migration */
+import { default as borealisLight } from '@elastic/eui/dist/eui_theme_borealis_light.json';
+/* eslint-disable-next-line @kbn/eslint/module_migration */
+import { default as borealisDark } from '@elastic/eui/dist/eui_theme_borealis_dark.json';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
 
@@ -25,20 +30,41 @@ export const version = 8;
 /** @deprecated theme can be dynamic now, access is discouraged */
 export const darkMode = tag.endsWith('dark');
 
-export const euiLightVars: Theme = v8Light;
-export const euiDarkVars: Theme = v8Dark;
-
 let isDarkMode = darkMode;
 export const _setDarkMode = (mode: boolean) => {
   isDarkMode = mode;
 };
 
+const getThemeVars = (): { light: Theme; dark: Theme } => {
+  if (globals?.__kbnThemeTag__?.includes('borealis')) {
+    return {
+      light: borealisLight,
+      dark: borealisDark,
+    };
+  }
+
+  return {
+    light: v8Light,
+    dark: v8Dark,
+  };
+};
+
+export const euiLightVars: Theme = getThemeVars().light;
+export const euiDarkVars: Theme = getThemeVars().dark;
+
 /**
  * EUI Theme vars that automatically adjust to light/dark theme
  * @deprecated Use `useEuiTheme` from `@elastic/eui` instead (see more: https://github.com/elastic/kibana/issues/199715#json-tokens)
  */
-export const euiThemeVars: Theme = new Proxy(isDarkMode ? euiDarkVars : euiLightVars, {
-  get(accessedTarget, accessedKey, ...rest) {
-    return Reflect.get(isDarkMode ? euiDarkVars : euiLightVars, accessedKey, ...rest);
-  },
-});
+export const euiThemeVars: Theme = new Proxy(
+  isDarkMode ? getThemeVars().dark : getThemeVars().light,
+  {
+    get(accessedTarget, accessedKey, ...rest) {
+      return Reflect.get(
+        isDarkMode ? getThemeVars().dark : getThemeVars().light,
+        accessedKey,
+        ...rest
+      );
+    },
+  }
+);

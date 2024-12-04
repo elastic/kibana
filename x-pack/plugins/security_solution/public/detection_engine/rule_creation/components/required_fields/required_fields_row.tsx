@@ -44,14 +44,6 @@ export const RequiredFieldRow = ({
   const rowFieldConfig: FieldConfig<RequiredField | RequiredFieldInput, {}, RequiredFieldInput> =
     useMemo(
       () => ({
-        deserializer: (value) => {
-          const rowValueWithoutEcs: RequiredFieldInput = {
-            name: value.name,
-            type: value.type,
-          };
-
-          return rowValueWithoutEcs;
-        },
         validations: [{ validator: makeValidateRequiredField(parentFieldPath) }],
         defaultValue: { name: '', type: '' },
       }),

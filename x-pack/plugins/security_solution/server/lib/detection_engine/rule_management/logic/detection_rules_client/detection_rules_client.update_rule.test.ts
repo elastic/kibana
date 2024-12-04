@@ -50,6 +50,7 @@ describe('DetectionRulesClient.updateRule', () => {
       rulesClient,
       mlAuthz,
       savedObjectsClient,
+      isRuleCustomizationEnabled: true,
     });
   });
 

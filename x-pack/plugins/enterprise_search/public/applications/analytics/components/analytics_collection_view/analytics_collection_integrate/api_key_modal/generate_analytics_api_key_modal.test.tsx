@@ -9,9 +9,10 @@ import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logi
 
 import React from 'react';
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiModal, EuiFieldText, EuiCodeBlock } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 const mockActions = { makeRequest: jest.fn(), setKeyName: jest.fn() };
 
@@ -47,7 +48,9 @@ describe('GenerateAnalyticsApiKeyModal', () => {
     });
 
     it('pre-set the key name with collection name', () => {
-      mount(<GenerateAnalyticsApiKeyModal collectionName="puggles" onClose={onCloseMock} />);
+      mountWithIntl(
+        <GenerateAnalyticsApiKeyModal collectionName="puggles" onClose={onCloseMock} />
+      );
       expect(mockActions.setKeyName).toHaveBeenCalledWith('puggles API key');
     });
 

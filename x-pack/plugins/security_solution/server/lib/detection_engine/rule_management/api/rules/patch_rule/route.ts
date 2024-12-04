@@ -26,8 +26,10 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
     .patch({
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -50,7 +52,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const params = request.body;
-          const rulesClient = (await context.alerting).getRulesClient();
+          const rulesClient = await (await context.alerting).getRulesClient();
           const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
 
           const existingRule = await readRules({

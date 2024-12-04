@@ -28,6 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
+  const dataGrid = getService('dataGrid');
 
   // FLAKY: https://github.com/elastic/kibana/issues/195955
   describe.skip('discover async search', () => {
@@ -95,16 +96,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigation to context cleans the session', async () => {
-      const table = await discover.getDocTable();
-      const isLegacy = await discover.useLegacyTable();
-      await table.clickRowToggle({ rowIndex: 0 });
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
 
       await retry.try(async () => {
-        const rowActions = await table.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        const idxToClick = isLegacy ? 0 : 1;
+        const idxToClick = 1;
         await rowActions[idxToClick].click();
       });
 
@@ -115,6 +114,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('relative timerange works', async () => {
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
+      const url = await browser.getCurrentUrl();
+
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');
       const searchSessionId = await getSearchSessionId();
@@ -125,8 +126,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await searchSessionsManagement.goTo();
       const searchSessionListBeforeRestore = await searchSessionsManagement.getList();
       const searchesCountBeforeRestore = searchSessionListBeforeRestore[0].searchesCount;
+
       // navigate to Discover
-      await searchSessionListBeforeRestore[0].view();
+      // Instead of clicking the link to navigate to Discover, we load Discover from scratch (just like we did when we
+      // ran the search session before saving). This ensures that the same number of requests are made.
+      // await searchSessionListBeforeRestore[0].view();
+      const restoreUrl = new URL(searchSessionListBeforeRestore[0].mainUrl, url).href;
+      await browser.navigateTo(restoreUrl);
+
       await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       expect(await discover.hasNoResults()).to.be(true);

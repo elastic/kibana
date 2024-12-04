@@ -68,7 +68,7 @@ import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import type { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -446,7 +446,7 @@ describe('utils', () => {
   });
 
   describe('getRuleRangeTuples', () => {
-    let alerting: PluginSetupContract;
+    let alerting: AlertingServerSetup;
 
     beforeEach(() => {
       alerting = alertsMock.createSetup();

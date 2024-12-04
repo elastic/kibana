@@ -27,6 +27,9 @@ export * from './attack_discovery/get_attack_discovery_route.gen';
 export * from './attack_discovery/post_attack_discovery_route.gen';
 export * from './attack_discovery/cancel_attack_discovery_route.gen';
 
+// Defend insight Schemas
+export * from './defend_insights';
+
 // Chat Schemas
 export * from './chat/post_chat_complete_route.gen';
 
@@ -49,6 +52,7 @@ export * from './actions_connector/post_actions_connector_execute_route.gen';
 
 // Knowledge Base Schemas
 export * from './knowledge_base/crud_kb_route.gen';
+export * from './knowledge_base/get_knowledge_base_indices_route.gen';
 export * from './knowledge_base/entries/bulk_crud_knowledge_base_entries_route.gen';
 export * from './knowledge_base/entries/common_attributes.gen';
 export * from './knowledge_base/entries/crud_knowledge_base_entries_route.gen';

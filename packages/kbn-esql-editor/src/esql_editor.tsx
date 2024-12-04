@@ -25,7 +25,14 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ESQLLang, ESQL_LANG_ID, ESQL_THEME_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
+import {
+  ESQLLang,
+  ESQL_LANG_ID,
+  ESQL_DARK_THEME_ID,
+  ESQL_LIGHT_THEME_ID,
+  monaco,
+  type ESQLCallbacks,
+} from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -91,7 +98,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
   } = kibana.services;
-  const timeZone = core?.uiSettings?.get('dateFormat:tz');
+  const darkMode = core.theme?.getTheme().darkMode;
+
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -456,11 +464,10 @@ export const ESQLEditor = memo(function ESQLEditor({
       validateQuery();
       addQueriesToCache({
         queryString: code,
-        timeZone,
         status: clientParserStatus,
       });
     }
-  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code, timeZone]);
+  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
@@ -578,7 +585,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     lightbulb: {
       enabled: false,
     },
-    lineDecorationsWidth: 12,
+    lineDecorationsWidth: 20,
     lineNumbers: 'on',
     lineNumbersMinChars: 3,
     minimap: { enabled: false },
@@ -594,10 +601,12 @@ export const ESQLEditor = memo(function ESQLEditor({
     renderLineHighlightOnlyWhenFocus: true,
     scrollbar: {
       horizontal: 'hidden',
+      horizontalScrollbarSize: 6,
       vertical: 'auto',
+      verticalScrollbarSize: 6,
     },
     scrollBeyondLastLine: false,
-    theme: ESQL_THEME_ID,
+    theme: darkMode ? ESQL_DARK_THEME_ID : ESQL_LIGHT_THEME_ID,
     wordWrap: 'on',
     wrappingIndent: 'none',
   };

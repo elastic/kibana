@@ -74,7 +74,10 @@ export const find = (
   }
 
   const predicate: Predicate<[ESQLColumn, unknown]> = ([field]) =>
-    cmpArr(field.parts, fieldName as string[]);
+    cmpArr(
+      field.args.map((arg) => (arg.type === 'identifier' ? arg.name : '')),
+      fieldName as string[]
+    );
 
   return findByPredicate(list(ast), predicate);
 };
@@ -128,7 +131,12 @@ export const remove = (
     fieldName = [fieldName];
   }
 
-  return removeByPredicate(ast, (field) => cmpArr(field.parts, fieldName as string[]));
+  return removeByPredicate(ast, (field) =>
+    cmpArr(
+      field.args.map((arg) => (arg.type === 'identifier' ? arg.name : '')),
+      fieldName as string[]
+    )
+  );
 };
 
 /**
@@ -161,7 +169,8 @@ export const insert = (
   }
 
   const parts: string[] = typeof fieldName === 'string' ? [fieldName] : fieldName;
-  const column = Builder.expression.column({ parts });
+  const args = parts.map((part) => Builder.identifier({ name: part }));
+  const column = Builder.expression.column({ args });
 
   if (index === -1) {
     option.args.push(column);
@@ -195,7 +204,12 @@ export const upsert = (
     const parts = Array.isArray(fieldName) ? fieldName : [fieldName];
     const existing = Walker.find(
       option,
-      (node) => node.type === 'column' && cmpArr(node.parts, parts)
+      (node) =>
+        node.type === 'column' &&
+        cmpArr(
+          node.args.map((arg) => (arg.type === 'identifier' ? arg.name : '')),
+          parts
+        )
     );
     if (existing) {
       return undefined;

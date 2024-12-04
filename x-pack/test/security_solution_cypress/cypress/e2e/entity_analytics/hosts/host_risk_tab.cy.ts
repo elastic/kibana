@@ -46,7 +46,7 @@ describe('risk tab', { tags: ['@ess'] }, () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', 'siem-kibana');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Mar 10, 2021 @ 14:51:05.766');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '21');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '21.00');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Low');
     });
 
@@ -93,7 +93,7 @@ describe('risk tab', { tags: ['@ess'] }, () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', 'siem-kibana');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Mar 10, 2021 @ 14:51:05.766');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '90');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '90.00');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Critical');
     });
 

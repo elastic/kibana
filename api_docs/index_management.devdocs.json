@@ -392,6 +392,20 @@
             "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.IndexMappingProps.hasUpdateMappingsPrivilege",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasUpdateMappingsPrivilege",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3143,6 +3157,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.indexMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "indexMode",
+            "description": [],
+            "signature": [
+              "\"standard\" | \"time_series\" | \"logsdb\""
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.ilmPolicy",
             "type": "Object",
             "tags": [],
@@ -3671,6 +3699,21 @@
         "description": [],
         "signature": [
           "\"green\" | \"yellow\" | \"red\""
+        ],
+        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.IndexMode",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexMode",
+        "description": [],
+        "signature": [
+          "\"standard\" | \"time_series\" | \"logsdb\""
         ],
         "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
         "deprecated": false,

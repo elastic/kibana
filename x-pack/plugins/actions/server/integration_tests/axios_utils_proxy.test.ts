@@ -366,7 +366,6 @@ async function rejectUnauthorizedTargetProxyTest(opts: RunTestOptions) {
   await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
       proxyUrl: proxyInstance.url,
-      rejectUnauthorized: false,
       customHostSettings: [{ url: target.url, ssl: { verificationMode: 'none' } }],
     });
 
@@ -582,14 +581,12 @@ const BaseActionsConfig: ActionsConfig = {
   preconfigured: {},
   proxyUrl: undefined,
   proxyHeaders: undefined,
-  proxyRejectUnauthorizedCertificates: true,
   ssl: {
     proxyVerificationMode: 'full',
     verificationMode: 'full',
   },
   proxyBypassHosts: undefined,
   proxyOnlyHosts: undefined,
-  rejectUnauthorized: true,
   maxResponseContentLength: ByteSizeValue.parse('1mb'),
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,

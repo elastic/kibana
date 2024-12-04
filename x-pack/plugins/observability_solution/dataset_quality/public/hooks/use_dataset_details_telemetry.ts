@@ -42,7 +42,7 @@ export function useDatasetDetailsTelemetry() {
         breakdownField,
         isNonAggregatable,
         isBreakdownFieldEcs,
-        integration: integrationDetails.integration,
+        integration: integrationDetails.integration?.integration,
       });
     }
 
@@ -57,7 +57,7 @@ export function useDatasetDetailsTelemetry() {
     breakdownField,
     isNonAggregatable,
     isBreakdownFieldEcs,
-    integrationDetails.integration,
+    integrationDetails.integration?.integration,
   ]);
 
   const startTracking = useCallback(() => {

@@ -128,7 +128,7 @@ export const SvgDefsMarker = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <svg style={{ position: 'absolute', top: 0, left: 0 }}>
+    <svg css={{ position: 'absolute', width: 0, height: 0 }}>
       <defs>
         <Marker id="primary" color={euiTheme.colors.primary} />
         <Marker id="danger" color={euiTheme.colors.danger} />

@@ -15,8 +15,10 @@ export const registerCreateRoute = (router: IRouter) => {
   router.post(
     {
       path: `${KBN_CLIENT_API_PREFIX}/{type}/{id?}`,
-      options: {
-        tags: ['access:ftrApis'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ftrApis'],
+        },
       },
       validate: {
         params: schema.object({

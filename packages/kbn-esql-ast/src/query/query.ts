@@ -9,16 +9,21 @@
 
 import type { Token } from 'antlr4';
 import { ParseOptions, parse } from '../parser';
-import type { ESQLAstQueryExpression } from '../types';
+import type { ESQLAstQueryExpression, EditorError } from '../types';
 import {
   WrappingPrettyPrinter,
   WrappingPrettyPrinterOptions,
 } from '../pretty_print/wrapping_pretty_printer';
 
+/**
+ * Represents a parsed or programmatically created ES|QL query. Keeps track of
+ * the AST, source code, and optionally lexer tokens.
+ */
 export class EsqlQuery {
   public static readonly fromSrc = (src: string, opts?: ParseOptions): EsqlQuery => {
-    const { root, tokens } = parse(src, opts);
-    return new EsqlQuery(root, src, tokens);
+    const { root, tokens, errors } = parse(src, opts);
+
+    return new EsqlQuery(root, src, tokens, errors);
   };
 
   constructor(
@@ -39,7 +44,12 @@ export class EsqlQuery {
      * Optional array of ANTLR tokens, in case the query was parsed from a
      * source code.
      */
-    public readonly tokens: Token[] = []
+    public readonly tokens: Token[] = [],
+
+    /**
+     * Parsing errors.
+     */
+    public readonly errors: EditorError[] = []
   ) {}
 
   public print(opts?: WrappingPrettyPrinterOptions): string {

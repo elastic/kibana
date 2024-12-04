@@ -122,6 +122,81 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.EntityV2",
+        "type": "Interface",
+        "tags": [],
+        "label": "EntityV2",
+        "description": [],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/entities-schema",
+            "id": "def-common.EntityV2.entity.id",
+            "type": "string",
+            "tags": [],
+            "label": "'entity.id'",
+            "description": [],
+            "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/entities-schema",
+            "id": "def-common.EntityV2.entity.type",
+            "type": "string",
+            "tags": [],
+            "label": "'entity.type'",
+            "description": [],
+            "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/entities-schema",
+            "id": "def-common.EntityV2.entity.display_name",
+            "type": "string",
+            "tags": [],
+            "label": "'entity.display_name'",
+            "description": [],
+            "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/entities-schema",
+            "id": "def-common.EntityV2.entity.last_seen_timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "'entity.last_seen_timestamp'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/entities-schema",
+            "id": "def-common.EntityV2.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[metadata: string]: any",
+            "description": [],
+            "signature": [
+              "[metadata: string]:  any"
+            ],
+            "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
         "id": "def-common.MetadataRecord",
         "type": "Interface",
         "tags": [],
@@ -273,6 +348,36 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; identityFields?: ({ field: string; optional: false; } | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/schema/entity_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.EntityInstance",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityInstance",
+        "description": [],
+        "signature": [
+          "{ entity: { id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; metrics?: Record<string, number> | undefined; }; } & Metadata"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.EntityMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityMetadata",
+        "description": [],
+        "signature": [
+          "Metadata"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -515,7 +620,7 @@
         "label": "entityBaseSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodString; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; display_name: Zod.ZodString; metrics: Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; identity_fields: string[]; }, { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; identity_fields: string[]; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodString; identity_fields: Zod.ZodUnion<[Zod.ZodArray<Zod.ZodString, \"many\">, Zod.ZodString]>; display_name: Zod.ZodString; metrics: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; metrics?: Record<string, number> | undefined; }, { id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; metrics?: Record<string, number> | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
         "deprecated": false,
@@ -672,7 +777,7 @@
         "label": "entityLatestSchema",
         "description": [],
         "signature": [
-          "Zod.ZodIntersection<Zod.ZodObject<{ entity: Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; display_name: Zod.ZodString; metrics: Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; }, { last_seen_timestamp: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; last_seen_timestamp: string; identity_fields: string[]; }, { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; last_seen_timestamp: string; identity_fields: string[]; }>; }, \"strip\", Zod.ZodTypeAny, { entity: { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; last_seen_timestamp: string; identity_fields: string[]; }; }, { entity: { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; last_seen_timestamp: string; identity_fields: string[]; }; }>, Zod.ZodType<Metadata, Zod.ZodTypeDef, Metadata>>"
+          "Zod.ZodIntersection<Zod.ZodObject<{ entity: Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; identity_fields: Zod.ZodUnion<[Zod.ZodArray<Zod.ZodString, \"many\">, Zod.ZodString]>; display_name: Zod.ZodString; metrics: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; }, { last_seen_timestamp: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; metrics?: Record<string, number> | undefined; }, { id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; metrics?: Record<string, number> | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { entity: { id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; metrics?: Record<string, number> | undefined; }; }, { entity: { id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; metrics?: Record<string, number> | undefined; }; }>, Zod.ZodType<Metadata, Zod.ZodTypeDef, Metadata>>"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
         "deprecated": false,

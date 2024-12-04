@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../../types';
-import { TelemetryEventTypes } from '../../constants';
+import type { OnboardingHubTelemetryEvent } from './types';
+import { OnboardingHubEventTypes } from './types';
 
-export const onboardingHubStepOpenEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.OnboardingHubStepOpen,
+export const onboardingHubStepOpenEvent: OnboardingHubTelemetryEvent = {
+  eventType: OnboardingHubEventTypes.OnboardingHubStepOpen,
   schema: {
     stepId: {
       type: 'keyword',
@@ -28,8 +28,8 @@ export const onboardingHubStepOpenEvent: TelemetryEvent = {
   },
 };
 
-export const onboardingHubStepLinkClickedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.OnboardingHubStepLinkClicked,
+export const onboardingHubStepLinkClickedEvent: OnboardingHubTelemetryEvent = {
+  eventType: OnboardingHubEventTypes.OnboardingHubStepLinkClicked,
   schema: {
     originStepId: {
       type: 'keyword',
@@ -48,8 +48,8 @@ export const onboardingHubStepLinkClickedEvent: TelemetryEvent = {
   },
 };
 
-export const onboardingHubStepFinishedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.OnboardingHubStepFinished,
+export const onboardingHubStepFinishedEvent: OnboardingHubTelemetryEvent = {
+  eventType: OnboardingHubEventTypes.OnboardingHubStepFinished,
   schema: {
     stepId: {
       type: 'keyword',
@@ -74,3 +74,9 @@ export const onboardingHubStepFinishedEvent: TelemetryEvent = {
     },
   },
 };
+
+export const onboardingHubTelemetryEvents = [
+  onboardingHubStepOpenEvent,
+  onboardingHubStepLinkClickedEvent,
+  onboardingHubStepFinishedEvent,
+];

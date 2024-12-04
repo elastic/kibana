@@ -7,6 +7,16 @@
 import { ShortIdTable } from './short_id_table';
 
 describe('shortIdTable', () => {
+  it('generates a short id from a uuid', () => {
+    const table = new ShortIdTable();
+
+    const uuid = 'd877f65c-4036-42c4-b105-19e2f1a1c045';
+    const shortId = table.take(uuid);
+
+    expect(shortId.length).toBe(4);
+    expect(table.lookup(shortId)).toBe(uuid);
+  });
+
   it('generates at least 10k unique ids consistently', () => {
     const ids = new Set();
 

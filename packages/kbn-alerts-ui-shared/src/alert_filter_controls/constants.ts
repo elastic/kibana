@@ -70,6 +70,7 @@ export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<OptionsListControlState
   hideSort: true,
   placeholder: '',
   width: 'small',
+  grow: true,
 };
 
 export const TIMEOUTS = {

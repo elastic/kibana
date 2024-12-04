@@ -426,6 +426,17 @@ describe('requests_utils', () => {
       expect(request).toEqual({ method: 'GET', url: '_search', data: ['{\n  "query": {}\n}'] });
     });
 
+    it('correctly handles nested braces', () => {
+      const content = ['GET _search', '{', '  "query": "{a} {b}"', '}', '{', '  "query": {}', '}'];
+      const model = getMockModel(content);
+      const request = getRequestFromEditor(model, 1, 7);
+      expect(request).toEqual({
+        method: 'GET',
+        url: '_search',
+        data: ['{\n  "query": "{a} {b}"\n}', '{\n  "query": {}\n}'],
+      });
+    });
+
     it('works for several request bodies', () => {
       const content = ['GET _search', '{', '  "query": {}', '}', '{', '  "query": {}', '}'];
       const model = getMockModel(content);

@@ -65,6 +65,7 @@ export const queryExecutor = async ({
     const hasPlatinumLicense = license.hasAtLeast('platinum');
 
     const result =
+      // TODO: replace this with getIsAlertSuppressionActive function
       ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
         ? await groupAndBulkCreate({
             runOpts,

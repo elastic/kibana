@@ -34,7 +34,6 @@ export const HISTOGRAM_BAR_TARGET_ID = 'histogram:barTarget';
 export const HISTOGRAM_MAX_BARS_ID = 'histogram:maxBars';
 export const HISTORY_LIMIT_ID = 'history:limit';
 export const META_FIELDS_ID = 'metaFields';
-export const METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID = 'metrics:allowCheckingForFailedShards';
 export const METRICS_ALLOW_STRING_INDICES_ID = 'metrics:allowStringIndices';
 export const METRICS_MAX_BUCKETS_ID = 'metrics:max_buckets';
 export const QUERY_ALLOW_LEADING_WILDCARDS_ID = 'query:allowLeadingWildcards';
@@ -46,6 +45,7 @@ export const SHORT_DOTS_ENABLE_ID = 'shortDots:enable';
 export const SORT_OPTIONS_ID = 'sort:options';
 export const STATE_STORE_IN_SESSION_STORAGE_ID = 'state:storeInSessionStorage';
 export const THEME_DARK_MODE_ID = 'theme:darkMode';
+export const THEME_NAME_ID = 'theme:name';
 export const TIMEPICKER_QUICK_RANGES_ID = 'timepicker:quickRanges';
 export const TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_ID = 'timepicker:refreshIntervalDefaults';
 export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
@@ -87,8 +87,6 @@ export const DISCOVER_SHOW_MULTI_FIELDS_ID = 'discover:showMultiFields';
 export const DISCOVER_SORT_DEFAULT_ORDER_ID = 'discover:sort:defaultOrder';
 export const DOC_TABLE_HIDE_TIME_COLUMNS_ID = 'doc_table:hideTimeColumn';
 export const DOC_TABLE_HIGHLIGHT_ID = 'doc_table:highlight';
-export const DOC_TABLE_LEGACY_ID = 'doc_table:legacy';
-export const TRUNCATE_MAX_HEIGHT_ID = 'truncate:maxHeight';
 
 // Machine learning settings
 export const ML_ANOMALY_DETECTION_RESULTS_ENABLE_TIME_DEFAULTS_ID =

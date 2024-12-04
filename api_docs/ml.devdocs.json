@@ -996,7 +996,7 @@
             "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1249,9 +1249,7 @@
         "MlPutDatafeedResponse",
         ">; updateDatafeed({ datafeedId, datafeedConfig, }: { datafeedId: string; datafeedConfig: Partial<",
         "MlDatafeed",
-        ">; }): Promise<any>; deleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceDeleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; startDatafeed({ datafeedId, start, end, }: { datafeedId: string; start?: number | undefined; end?: number | undefined; }): Promise<any>; stopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceStopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; datafeedPreview({ datafeedId }: { datafeedId: string; }): Promise<any>; validateDetector({ detector }: { detector: ",
-        "MlDetector",
-        "; }): Promise<any>; forecast({ jobId, duration, neverExpires, }: { jobId: string; duration?: string | undefined; neverExpires?: boolean | undefined; }): Promise<any>; deleteForecast({ jobId, forecastId }: { jobId: string; forecastId: string; }): Promise<",
+        ">; }): Promise<any>; deleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceDeleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; startDatafeed({ datafeedId, start, end, }: { datafeedId: string; start?: number | undefined; end?: number | undefined; }): Promise<any>; stopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceStopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; datafeedPreview({ datafeedId }: { datafeedId: string; }): Promise<any>; forecast({ jobId, duration, neverExpires, }: { jobId: string; duration?: string | undefined; neverExpires?: boolean | undefined; }): Promise<any>; deleteForecast({ jobId, forecastId }: { jobId: string; forecastId: string; }): Promise<",
         "DeleteForecastResponse",
         ">; overallBuckets({ jobId, topN, bucketSpan, start, end, overallScore, }: { jobId: string[]; topN: string; bucketSpan: string; start: number; end: number; overallScore?: number | undefined; }): Promise<",
         "MlGetOverallBucketsResponse",
@@ -3184,6 +3182,21 @@
           "MlJob"
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.ML_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "ML_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "(\"xpack.ml.anomaly_detection_alert\" | \"xpack.ml.anomaly_detection_jobs_health\")[]"
+        ],
+        "path": "x-pack/plugins/ml/common/constants/alerts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

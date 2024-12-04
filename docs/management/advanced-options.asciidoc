@@ -20,7 +20,7 @@ indicator is displayed:
 [role="screenshot"]
 image::images/settings-read-only-badge.png[Example of Advanced Settings Management's read only access indicator in Kibana's header]
 
-To add the privilege, open the main menu, then click *Stack Management > Roles*.
+To add the privilege, go to the *Roles* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 For more information on granting access to {kib}, refer to <<xpack-security-authorization>>.
 
@@ -30,7 +30,7 @@ For more information on granting access to {kib}, refer to <<xpack-security-auth
 
 Change the settings that apply only to {kib} spaces.
 
-. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Go to the *Advanced settings* page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 . Click *Space Settings*.
 . Scroll or search for the setting.
 . Make your change, then click *Save changes*.
@@ -208,10 +208,6 @@ The default refresh interval for the time filter. Example:
 [[timepicker-timedefaults]]`timepicker:timeDefaults`::
 The default selection in the time filter.
 
-[[truncate-maxheight]]`truncate:maxHeight`::
-deprecated:[8.16.0]The maximum height that a cell occupies in a table. Set to 0 to disable
-truncation.
-
 [[enableESQL]]`enableESQL`::
 This setting enables ES|QL in Kibana.
 
@@ -339,14 +335,6 @@ Hides the "Time" column in *Discover* and in all saved searches on dashboards.
 [[doctable-highlight]]`doc_table:highlight`::
 Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
-
-[[doctable-legacy]]`doc_table:legacy`::
-deprecated:[8.15.0] Controls the way the document table looks and works.
-To use the new *Document Explorer* instead of the classic view, turn off this option.
-The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
-
-[[truncate-max-height]]`truncate:maxHeight`::
-The maximum height that a cell in a table can occupy. To disable truncation, set to 0.
 
 
 [float]
@@ -644,7 +632,7 @@ Disable this option if you prefer to use the new heatmap charts with improved pe
 
 Change the settings that apply only to {kib} spaces.
 
-. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Go to the *Advanced settings* page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 . Click *Global Settings*.
 . Scroll or search for the setting.
 . Make your change, then click *Save changes*.

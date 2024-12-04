@@ -33,8 +33,10 @@ export const requestDocumentation = ({
 }) => {
   const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
 
-  return outputApi('request_documentation', {
+  return outputApi({
+    id: 'request_documentation',
     connectorId,
+    stream: true,
     functionCalling,
     system,
     previousMessages: messages,

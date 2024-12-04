@@ -107,19 +107,13 @@ export const getAssistantSubFeaturesMap = (
 ): Map<AssistantSubFeatureId, SubFeatureConfig> => {
   const assistantSubFeaturesList: Array<[AssistantSubFeatureId, SubFeatureConfig]> = [
     [AssistantSubFeatureId.updateAnonymization, updateAnonymizationSubFeature],
+    [AssistantSubFeatureId.manageGlobalKnowledgeBase, manageGlobalKnowledgeBaseSubFeature],
   ];
 
   // Use the following code to add feature based on feature flag
   // if (experimentalFeatures.featureFlagName) {
   //   assistantSubFeaturesList.push([AssistantSubFeatureId.featureId, featureSubFeature]);
   // }
-
-  if (experimentalFeatures.assistantKnowledgeBaseByDefault) {
-    assistantSubFeaturesList.push([
-      AssistantSubFeatureId.manageGlobalKnowledgeBase,
-      manageGlobalKnowledgeBaseSubFeature,
-    ]);
-  }
 
   const assistantSubFeaturesMap = new Map<AssistantSubFeatureId, SubFeatureConfig>(
     assistantSubFeaturesList

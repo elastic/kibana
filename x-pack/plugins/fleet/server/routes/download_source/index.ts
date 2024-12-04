@@ -39,7 +39,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: (authz) => {
         return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
       },
-      description: `List agent binary download sources`,
+      summary: `Get agent binary download sources`,
       options: {
         tags: ['oas-tag:Elastic Agent binary download sources'],
       },
@@ -68,7 +68,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: (authz) => {
         return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
       },
-      description: `Get agent binary download source by ID`,
+      summary: `Get an agent binary download source`,
+      description: `Get an agent binary download source by ID.`,
       options: {
         tags: ['oas-tag:Elastic Agent binary download sources'],
       },
@@ -97,7 +98,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
-      description: `Update agent binary download source by ID`,
+      summary: `Update an agent binary download source`,
+      description: `Update an agent binary download source by ID.`,
       options: {
         tags: ['oas-tag:Elastic Agent binary download sources'],
       },
@@ -126,7 +128,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
-      description: `Create agent binary download source`,
+      summary: `Create an agent binary download source`,
       options: {
         tags: ['oas-tag:Elastic Agent binary download sources'],
       },
@@ -155,7 +157,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
-      description: `Delete agent binary download source by ID`,
+      summary: `Delete an agent binary download source`,
+      description: `Delete an agent binary download source by ID.`,
       options: {
         tags: ['oas-tag:Elastic Agent binary download sources'],
       },

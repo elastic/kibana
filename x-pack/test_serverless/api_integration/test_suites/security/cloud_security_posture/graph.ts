@@ -12,6 +12,7 @@ import {
 } from '@kbn/core-http-common';
 import { result } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
 import type { Agent } from 'supertest';
+import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -19,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestViewer: Pick<Agent, 'post'>;
 
-  const postGraph = (agent: Pick<Agent, 'post'>, body: any) => {
+  const postGraph = (agent: Pick<Agent, 'post'>, body: GraphRequest) => {
     const req = agent
       .post('/internal/cloud_security_posture/graph')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -48,7 +49,6 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return an empty graph', async () => {
         const response = await postGraph(supertestViewer, {
           query: {
-            actorIds: [],
             eventIds: [],
             start: 'now-1d/d',
             end: 'now/d',
@@ -57,20 +57,26 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(0);
         expect(response.body).to.have.property('edges').length(0);
+        expect(response.body).not.to.have.property('messages');
       });
 
       it('should return a graph with nodes and edges by actor', async () => {
         const response = await postGraph(supertestViewer, {
           query: {
-            actorIds: ['admin@example.com'],
             eventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [{ match_phrase: { 'actor.entity.id': 'admin@example.com' } }],
+              },
+            },
           },
         }).expect(result(200));
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');
