@@ -34,7 +34,7 @@ export async function untarBuffer(
 
     await finished(inflateStream);
   } catch (error) {
-    appContextService.getLogger().error('UntarBuffer failed: no stream found');
+    appContextService.getLogger().warn(`UntarBuffer error: ${error}`);
   }
 }
 

@@ -389,45 +389,46 @@ export async function getPackage(
 export async function getPackageFieldsMetadata(
   params: { packageName: string; datasetName?: string },
   options: { excludedFieldsAssets?: string[] } = {}
-): Promise<ExtractedIntegrationFields | null> {
+): Promise<ExtractedIntegrationFields | undefined> {
   const { packageName, datasetName } = params;
   const { excludedFieldsAssets = ['ecs.yml'] } = options;
 
   // Attempt retrieving latest package name and version
   const latestPackage = await fetchFindLatestPackageOrThrow(packageName);
   const { name, version } = latestPackage;
+  try {
+    // Attempt retrieving latest package
+    const resolvedPackage = await getPackage(name, version);
 
-  // Attempt retrieving latest package
-  const resolvedPackage = await getPackage(name, version);
+    // We need to collect all the available data streams for the package.
+    // In case a dataset is specified from the parameter, it will load the fields only for that specific dataset.
+    // As a fallback case, we'll try to read the fields for all the data streams in the package.
+    const dataStreamsMap = resolveDataStreamsMap(resolvedPackage.packageInfo.data_streams);
 
-  // We need to collect all the available data streams for the package.
-  // In case a dataset is specified from the parameter, it will load the fields only for that specific dataset.
-  // As a fallback case, we'll try to read the fields for all the data streams in the package.
-  const dataStreamsMap = resolveDataStreamsMap(resolvedPackage?.packageInfo.data_streams);
+    const assetsMap = resolvedPackage.assetsMap;
 
-  // resolvedPackage can be null in case of airGapped installs
-  const assetsMap = resolvedPackage?.assetsMap;
-  if (!assetsMap) return null;
+    const dataStream = datasetName ? dataStreamsMap.get(datasetName) : null;
 
-  const dataStream = datasetName ? dataStreamsMap.get(datasetName) : null;
-
-  if (dataStream) {
-    // Resolve a single data stream fields when the `datasetName` parameter is specified
-    return resolveDataStreamFields({ dataStream, assetsMap, excludedFieldsAssets });
-  } else {
-    // Resolve and merge all the integration data streams fields otherwise
-    return [...dataStreamsMap.values()].reduce(
-      (packageDataStreamsFields, currentDataStream) =>
-        Object.assign(
-          packageDataStreamsFields,
-          resolveDataStreamFields({
-            dataStream: currentDataStream,
-            assetsMap,
-            excludedFieldsAssets,
-          })
-        ),
-      {}
-    );
+    if (dataStream) {
+      // Resolve a single data stream fields when the `datasetName` parameter is specified
+      return resolveDataStreamFields({ dataStream, assetsMap, excludedFieldsAssets });
+    } else {
+      // Resolve and merge all the integration data streams fields otherwise
+      return [...dataStreamsMap.values()].reduce(
+        (packageDataStreamsFields, currentDataStream) =>
+          Object.assign(
+            packageDataStreamsFields,
+            resolveDataStreamFields({
+              dataStream: currentDataStream,
+              assetsMap,
+              excludedFieldsAssets,
+            })
+          ),
+        {}
+      );
+    }
+  } catch (error) {
+    appContextService.getLogger().warn(`getPackageFieldsMetadata error: ${error}`);
   }
 }
 

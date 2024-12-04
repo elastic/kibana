@@ -776,17 +776,21 @@ export async function getPackageAssetsMap({
     logger,
   });
 
-  let assetsMap: AssetsMap | undefined;
-  if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
-    // Try to get from registry
-    const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version, {
-      ignoreUnverified,
-    });
-    assetsMap = pkg.assetsMap;
-  } else {
-    assetsMap = installedPackageWithAssets.assetsMap;
-  }
-  setPackageAssetsMapCache(packageInfo.name, packageInfo.version, assetsMap);
+  try {
+    let assetsMap: AssetsMap | undefined;
+    if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
+      // Try to get from registry
+      const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version, {
+        ignoreUnverified,
+      });
+      assetsMap = pkg.assetsMap;
+    } else {
+      assetsMap = installedPackageWithAssets.assetsMap;
+    }
+    setPackageAssetsMapCache(packageInfo.name, packageInfo.version, assetsMap);
 
-  return assetsMap;
+    return assetsMap;
+  } catch (error) {
+    appContextService.getLogger().warn(`getPackageAssetsMap error: ${error}`);
+  }
 }

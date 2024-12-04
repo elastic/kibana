@@ -10,6 +10,8 @@ import type { FieldsMetadataServerSetup } from '@kbn/fields-metadata-plugin/serv
 
 import type { FleetStartContract, FleetStartDeps } from '../plugin';
 
+import { appContextService } from '.';
+
 interface RegistrationDeps {
   core: CoreSetup<FleetStartDeps, FleetStartContract>;
   fieldsMetadata: FieldsMetadataServerSetup;
@@ -17,12 +19,16 @@ interface RegistrationDeps {
 
 export const registerFieldsMetadataExtractors = ({ core, fieldsMetadata }: RegistrationDeps) => {
   fieldsMetadata.registerIntegrationFieldsExtractor(async ({ integration, dataset }) => {
-    const [_core, _startDeps, { packageService }] = await core.getStartServices();
+    try {
+      const [_core, _startDeps, { packageService }] = await core.getStartServices();
 
-    return packageService.asInternalUser.getPackageFieldsMetadata({
-      packageName: integration,
-      datasetName: dataset,
-    });
+      return packageService.asInternalUser.getPackageFieldsMetadata({
+        packageName: integration,
+        datasetName: dataset,
+      });
+    } catch (error) {
+      appContextService.getLogger().warn(`registerIntegrationFieldsExtractor error: ${error}`);
+    }
   });
 
   fieldsMetadata.registerIntegrationListExtractor(async () => {

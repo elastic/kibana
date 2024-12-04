@@ -19,7 +19,7 @@ export type ExtractedDatasetFields = Record<DatasetName, FieldMetadataPlain>;
 
 export type IntegrationFieldsExtractor = (
   params: IntegrationFieldsSearchParams
-) => Promise<ExtractedIntegrationFields>;
+) => Promise<ExtractedIntegrationFields | undefined>;
 
 export interface ExtractedIntegration {
   id: string;
