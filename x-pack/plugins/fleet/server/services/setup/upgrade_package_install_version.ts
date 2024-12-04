@@ -9,7 +9,11 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import pMap from 'p-map';
 import type { Logger } from '@kbn/logging';
 
-import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import {
+  MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../constants';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../constants/fleet_es_assets';
 import type { Installation } from '../../types';
 
@@ -59,6 +63,6 @@ export async function upgradePackageInstallVersion({
         }
       });
     },
-    { concurrency: 10 }
+    { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
   );
 }

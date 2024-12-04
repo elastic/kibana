@@ -22,7 +22,7 @@ import {
   TELEMETRY_INTEGRATION_CARD,
 } from './constants';
 import type { GetAppUrl, NavigateTo } from '../../../../../common/lib/kibana';
-import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 const addPathParamToUrl = (url: string, onboardingLink: string) => {
   const encoded = encodeURIComponent(onboardingLink);
