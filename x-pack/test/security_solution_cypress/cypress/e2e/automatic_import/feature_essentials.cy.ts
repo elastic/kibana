@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { AI_ASSISTANT_BUTTON } from '../../screens/ai_assistant';
+import { ASSISTANT_BUTTON, CREATE_INTEGRATION_LANDING_PAGE } from '../../screens/automatic_import';
 import { login } from '../../tasks/login';
-import { visitGetStartedPage } from '../../tasks/navigation';
 
 describe(
   'App Features for Security Essentials',
@@ -27,9 +26,9 @@ describe(
       login();
     });
 
-    it('should not have AI Assistant available', () => {
-      visitGetStartedPage();
-      cy.get(AI_ASSISTANT_BUTTON).should('not.exist');
+    it('should not have Automatic Import available', () => {
+      cy.visit(CREATE_INTEGRATION_LANDING_PAGE);
+      cy.get(ASSISTANT_BUTTON).should('not.exist');
     });
   }
 );
