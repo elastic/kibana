@@ -13782,7 +13782,7 @@ asap@^2.0.0, asap@^2.0.3:
   resolved "https://registry.yarnpkg.com/asap/-/asap-2.0.6.tgz#e50347611d7e690943208bbdafebcbc2fb866d46"
   integrity sha1-5QNHYR1+aQlDIIu9r+vLwvuGbUY=
 
-asn1.js@^5.2.0:
+asn1.js@^5.0.0, asn1.js@^5.2.0:
   version "5.4.1"
   resolved "https://registry.yarnpkg.com/asn1.js/-/asn1.js-5.4.1.tgz#11a980b84ebb91781ce35b0fdc2ee294e3783f07"
   integrity sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA==
@@ -25955,10 +25955,12 @@ opener@^1.5.2:
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
-openpgp@6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-6.0.1.tgz#ab3a2c08a3e23ac7f85c4fc62a3e715d50dc08fb"
-  integrity sha512-3lReDKjgWsKFArZT4Y/yj7/Q0q6/VhXarn4WqKEkyiBWckNjrThSGoB1t0IKo3Ke0ClvBpyQfTwumkGUkxOwww==
+openpgp@5.10.1:
+  version "5.10.1"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.10.1.tgz#3b137470187b79281719ced16fb9e60b822cfd24"
+  integrity sha512-SR5Ft+ej51d0+p53ld5Ney0Yiz0y8Mh1YYLJrvpRMbTaNhvS1QcDX0Oq1rW9sjBnQXtgrpWw2Zve3rm7K5C/pw==
+  dependencies:
+    asn1.js "^5.0.0"
 
 opentracing@^0.14.3:
   version "0.14.4"
