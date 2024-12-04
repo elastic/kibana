@@ -190,5 +190,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/sse-utils-server",
     "@kbn/gen-ai-functional-testing",
+    "@kbn/integration-assistant-plugin"
   ]
 }

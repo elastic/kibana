@@ -67,7 +67,6 @@ enabled:
   - test/functional/apps/dashboard/group5/config.ts
   - test/functional/apps/dashboard/group6/config.ts
   - test/functional/apps/discover/ccs_compatibility/config.ts
-  - test/functional/apps/discover/classic/config.ts
   - test/functional/apps/discover/embeddable/config.ts
   - test/functional/apps/discover/esql/config.ts
   - test/functional/apps/discover/group1/config.ts
