@@ -11,6 +11,10 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
+// This is a Cypress module and only used by Cypress, so disabling "should" be safe
+// eslint-disable-next-line import/no-nodejs-modules
+import { mkdir } from 'node:fs/promises';
 import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import {
   deleteIndexedEndpointHeartbeats,
@@ -53,6 +57,7 @@ import type {
   LoadUserAndRoleCyTaskOptions,
   CreateUserAndRoleCyTaskOptions,
   LogItTaskOptions,
+  CaptureHostVmAgentDiagnosticsOptions,
 } from '../types';
 import type {
   DeletedIndexedEndpointRuleAlerts,
@@ -532,6 +537,66 @@ ${s1Info.status}
     startEndpointHost: async (hostName) => {
       await startEndpointHost(hostName);
       return null;
+    },
+
+    /**
+     * Generates an Agent Diagnostics archive (ZIP) directly on the Host VM and saves it to a directory
+     * that is then included with the list of Artifacts that are captured with Buildkite job.
+     *
+     * ### Usage:
+     *
+     * This task is best used from a `afterEach()` by checking if the test failed and if so (and it
+     * was a test that was running against a host VM), then capture the diagnostics file
+     *
+     * @param hostname
+     *
+     * @example
+     *
+     * describe('something', () => {
+     *   let hostVm;
+     *
+     *   afterEach(function() { // << Important: Note the use of `function()` here instead of arrow function
+     *     if (this.currentTest?.isFailed() && hostVm) {
+     *       cy.task('captureHostVmAgentDiagnostics', { hostname: hostVm.hostname });
+     *     }
+     *   });
+     *
+     *   //...
+     * })
+     */
+    captureHostVmAgentDiagnostics: async ({
+      hostname,
+      fileNamePrefix = '',
+    }: CaptureHostVmAgentDiagnosticsOptions) => {
+      const { log } = await stackServicesPromise;
+
+      log.info(`Capturing agent diagnostics for host VM [${hostname}]`);
+
+      const vmClient = getHostVmClient(hostname, undefined, undefined, log);
+      const fileName = `elastic-agent-diagnostics-${hostname}-${new Date()
+        .toISOString()
+        .replace(/:/g, '.')}.zip`;
+      const vmDiagnosticsFile = `/tmp/${fileName}`;
+      const localDiagnosticsDir = `${REPO_ROOT}/target/test_failures`;
+      const localDiagnosticsFile = `${localDiagnosticsDir}/${
+        fileNamePrefix
+          ? // Insure the file name prefix does not have characters that can't be used in file names
+            `${fileNamePrefix.replace(/[><:"/\\|?*'`{}]/g, '_')}-`
+          : ''
+      }${fileName}`;
+
+      await mkdir(localDiagnosticsDir, { recursive: true });
+
+      // generate diagnostics file on the host and then download it
+      await vmClient.exec(
+        `sudo /opt/Elastic/Agent/elastic-agent diagnostics --file ${vmDiagnosticsFile}`
+      );
+      return vmClient.download(vmDiagnosticsFile, localDiagnosticsFile).then((response) => {
+        log.info(`Agent diagnostic file for host [${hostname}] has been downloaded and is available at:
+  ${response.filePath}
+`);
+        return { filePath: response.filePath };
+      });
     },
   });
 };
