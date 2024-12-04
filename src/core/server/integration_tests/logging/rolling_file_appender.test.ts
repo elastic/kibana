@@ -50,7 +50,11 @@ describe('RollingFileAppender', () => {
 
   afterEach(async () => {
     if (testDir) {
-      await rm(testDir, { recursive: true });
+      try {
+        await rm(testDir, { recursive: true, force: true, retryDelay: 1000, maxRetries: 3 });
+      } catch (err) {
+        throw new Error(`Failed to remove test directory: ${err}`);
+      }
     }
 
     if (root) {
