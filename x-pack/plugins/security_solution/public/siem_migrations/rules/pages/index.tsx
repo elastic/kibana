@@ -34,13 +34,11 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
 
     const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
 
-    const migrationsIds = useMemo(() => {
+    const filnishedRuleMigrationsStats = useMemo(() => {
       if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
         return [];
       }
-      return ruleMigrationsStatsAll
-        .filter((migration) => migration.status === 'finished')
-        .map((migration) => migration.id);
+      return ruleMigrationsStatsAll.filter((migration) => migration.status === 'finished');
     }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
     useEffect(() => {
@@ -49,27 +47,30 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       }
 
       // Navigate to landing page if there are no migrations
-      if (!migrationsIds.length) {
+      if (!filnishedRuleMigrationsStats.length) {
         navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
         return;
       }
 
       // Navigate to the most recent migration if none is selected
       if (!migrationId) {
-        navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: migrationsIds[0] });
+        navigateTo({
+          deepLinkId: SecurityPageName.siemMigrationsRules,
+          path: filnishedRuleMigrationsStats[0].id,
+        });
       }
-    }, [isLoadingMigrationsStats, migrationId, migrationsIds, navigateTo]);
+    }, [isLoadingMigrationsStats, migrationId, filnishedRuleMigrationsStats, navigateTo]);
 
     const onMigrationIdChange = (selectedId?: string) => {
       navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
     };
 
     const content = useMemo(() => {
-      if (!migrationId || !migrationsIds.includes(migrationId)) {
+      if (!migrationId || !filnishedRuleMigrationsStats.some((stats) => stats.id === migrationId)) {
         return <UnknownMigration />;
       }
       return <MigrationRulesTable migrationId={migrationId} />;
-    }, [migrationId, migrationsIds]);
+    }, [migrationId, filnishedRuleMigrationsStats]);
 
     return (
       <>
@@ -79,7 +80,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <HeaderButtons
-              migrationsIds={migrationsIds}
+              ruleMigrationsStats={filnishedRuleMigrationsStats}
               selectedMigrationId={migrationId}
               onMigrationIdChange={onMigrationIdChange}
             />

@@ -7,7 +7,6 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo, useState, useEffect } from 'react';
-import styled from 'styled-components';
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
@@ -26,8 +25,8 @@ import {
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
 import {
-  DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
+  DEFAULT_TRANSLATION_FIELDS,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
@@ -46,66 +45,15 @@ import {
 } from './constants';
 import { TranslationTab } from './translation_tab';
 
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  .euiFlyoutBody__overflow {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-
-    .euiFlyoutBody__overflowContent {
-      flex: 1;
-      overflow: hidden;
-      padding: ${({ theme }) => `0 ${theme.eui.euiSizeL} 0`};
-    }
-  }
-`;
-
-const StyledFlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
-`;
-
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    flex: 1 0 0;
-    overflow: hidden;
-  }
-`;
-
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  overflow: hidden;
-
-  > [role='tabpanel'] {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    overflow: hidden;
-    overflow-y: auto;
-
-    ::-webkit-scrollbar {
-      -webkit-appearance: none;
-      width: 7px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      border-radius: 4px;
-      background-color: rgba(0, 0, 0, 0.5);
-      -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
-    }
-  }
-`;
-
 /*
  * Fixes tabs to the top and allows the content to scroll.
  */
 const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
-  <StyledFlexGroup direction="column" gutterSize="none">
-    <StyledEuiFlexItem grow={true}>
-      <StyledEuiTabbedContent {...props} />
-    </StyledEuiFlexItem>
-  </StyledFlexGroup>
+  <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexItem grow={true}>
+      <EuiTabbedContent {...props} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
 
 const tabPaddingClassName = css`
@@ -143,13 +91,9 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         description: ruleMigration.elastic_rule?.description,
         query: ruleMigration.elastic_rule?.query,
 
-        // Default values
+        ...DEFAULT_TRANSLATION_FIELDS,
         severity:
           (ruleMigration.elastic_rule?.severity as Severity) ?? DEFAULT_TRANSLATION_SEVERITY,
-        risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
-        from: 'now-360s',
-        to: 'now',
-        interval: '5m',
       } as RuleResponse; // TODO: we need to adjust RuleOverviewTab to allow partial RuleResponse as a parameter
     }, [ruleMigration]);
 
@@ -226,13 +170,13 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           </EuiTitle>
           <EuiSpacer size="l" />
         </EuiFlyoutHeader>
-        <StyledEuiFlyoutBody>
+        <EuiFlyoutBody>
           <ScrollableFlyoutTabbedContent
             tabs={tabs}
             selectedTab={selectedTab}
             onTabClick={onTabClick}
           />
-        </StyledEuiFlyoutBody>
+        </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
