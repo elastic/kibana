@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Searchprofiler', function () {
     it('Can retrive has indices', async () => {
       const { body } = await supertest.get(`${API_BASE_PATH}/has_indices`).expect(200);
-      expect(body).toStrictEqual({ hasIndices: true, ok: true });
+      expect(body).toStrictEqual({ hasIndices: true });
     });
   });
 }

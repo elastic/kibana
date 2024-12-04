@@ -92,7 +92,6 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
 
         return response.ok({
           body: {
-            ok: true,
             hasIndices,
           },
         });
