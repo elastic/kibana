@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
-
+import { css } from '@emotion/css';
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual } from 'lodash';
@@ -126,6 +126,10 @@ interface StepDefineRuleReadOnlyProps {
   defaultValues: DefineStepRule;
   indexPattern: DataViewBase;
 }
+
+const customMlJobButtonClassName = css`
+  padding-top: 20px;
+`;
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
   height: 18px;
@@ -677,7 +681,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   <EuiFlexItem>
                     <MachineLearningJobIdEdit path="machineLearningJobId" />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} className={customMlJobButtonClassName}>
                     <CreateCustomMlJobButton />
                   </EuiFlexItem>
                 </EuiFlexGroup>
