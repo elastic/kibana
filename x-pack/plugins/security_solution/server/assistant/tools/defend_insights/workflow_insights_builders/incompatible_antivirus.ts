@@ -21,7 +21,7 @@ import {
 } from '../../../../../common/endpoint/types/workflow_insights';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../../../common/endpoint/constants';
 
-export function buildIncompatibleAntivirusWorkflowInsight(
+export function buildIncompatibleAntivirusWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): SecurityWorkflowInsight[] {
   const currentTime = moment();

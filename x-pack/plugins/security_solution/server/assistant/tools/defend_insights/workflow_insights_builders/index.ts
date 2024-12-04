@@ -12,7 +12,7 @@ import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 
 import { InvalidDefendInsightTypeError } from '../errors';
-import { buildIncompatibleAntivirusWorkflowInsight } from './incompatible_antivirus';
+import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
 export interface BuildWorkflowInsightParams {
   defendInsights: DefendInsight[];
@@ -23,7 +23,7 @@ export function buildWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): SecurityWorkflowInsight[] {
   if (params.request.body.insightType === DefendInsightType.Enum.incompatible_antivirus) {
-    return buildIncompatibleAntivirusWorkflowInsight(params);
+    return buildIncompatibleAntivirusWorkflowInsights(params);
   }
 
   throw new InvalidDefendInsightTypeError();

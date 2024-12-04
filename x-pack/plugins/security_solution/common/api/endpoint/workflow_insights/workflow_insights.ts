@@ -13,7 +13,7 @@ const arrayWithNonEmptyString = (field: string) =>
       minLength: 1,
       validate: (id) => {
         if (id.trim() === '') {
-          return `${field} can not be an empty string`;
+          return `${field} cannot be an empty string`;
         }
       },
     })
@@ -25,7 +25,7 @@ export const UpdateWorkflowInsightRequestSchema = {
       minLength: 1,
       validate: (id) => {
         if (id.trim() === '') {
-          return 'insightId can not be an empty string';
+          return 'insightId cannot be an empty string';
         }
       },
     }),
@@ -108,13 +108,15 @@ export const GetWorkflowInsightsRequestSchema = {
     sourceIds: schema.maybe(arrayWithNonEmptyString('sourceId')),
     targetTypes: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('endpoint')]))),
     targetIds: schema.maybe(arrayWithNonEmptyString('targetId')),
-    actionTypes: schema.arrayOf(
-      schema.oneOf([
-        schema.literal('refreshed'),
-        schema.literal('remediated'),
-        schema.literal('suppressed'),
-        schema.literal('dismissed'),
-      ])
+    actionTypes: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal('refreshed'),
+          schema.literal('remediated'),
+          schema.literal('suppressed'),
+          schema.literal('dismissed'),
+        ])
+      )
     ),
   }),
 };
