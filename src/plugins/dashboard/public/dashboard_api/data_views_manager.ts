@@ -43,10 +43,7 @@ export function initializeDataViewsManager(
   const dataViewsSubscription = combineLatest([controlGroupDataViewsPipe, childDataViewsPipe])
     .pipe(
       switchMap(async ([controlGroupDataViews, childDataViews]) => {
-        const allDataViews = [
-          ...(controlGroupDataViews ?? []),
-          ...childDataViews,
-        ];
+        const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews];
         if (allDataViews.length === 0) {
           try {
             const defaultDataView = await dataService.dataViews.getDefaultDataView();
