@@ -194,7 +194,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             css={css`
               ${euiFullHeight()}
               ${useEuiOverflowScroll('y', false)}
-                  ${useEuiOverflowScroll('x', false)}
+              ${useEuiOverflowScroll('x', false)}
             `}
           >
             {panelContents}
