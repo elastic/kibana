@@ -31,6 +31,7 @@ export class IgnoreNotFoundExportPlugin {
     if (compiler.hooks) {
       compiler.hooks.done.tap('IgnoreNotFoundExportPlugin', doneHook);
     } else {
+      // @ts-ignore
       compiler.plugin('done', doneHook);
     }
   }

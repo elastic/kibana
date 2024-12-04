@@ -52,6 +52,7 @@ export class PopulateBundleCachePlugin {
     compiler.hooks.emit.tap(
       {
         name: 'PopulateBundleCachePlugin',
+        // @ts-ignore
         before: ['BundleMetricsPlugin'],
       },
       (compilation) => {
