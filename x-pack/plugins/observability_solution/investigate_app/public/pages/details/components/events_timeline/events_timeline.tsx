@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment from 'moment';
-import React, { useMemo, useRef } from 'react';
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiSkeletonText } from '@elastic/eui';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { Group } from '@kbn/observability-alerting-rule-utils';
-import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { getBrushData } from '@kbn/observability-utils-browser/chart/utils';
-import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { assertNever } from '@kbn/std';
+import moment from 'moment';
+import React, { useMemo, useRef } from 'react';
 import { useFetchEvents } from '../../../../hooks/use_fetch_events';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInvestigation } from '../../contexts/investigation_context';
@@ -29,20 +26,12 @@ interface Props {
 export const EventsTimeline = ({ eventTypes }: Props) => {
   const { dependencies } = useKibana();
   const baseTheme = dependencies.start.charts.theme.useChartsBaseTheme();
-  const { globalParams, updateInvestigationParams, alert } = useInvestigation();
+  const { globalParams, updateInvestigationParams } = useInvestigation();
   const chartRef = useRef(null);
-
-  const filter = useMemo(() => {
-    const group = (alert?.[ALERT_GROUP] as unknown as Group[])?.find(
-      ({ field }) => field === SERVICE_NAME
-    );
-    return group ? `{"${SERVICE_NAME}":"${alert?.[SERVICE_NAME]}"}` : '';
-  }, [alert]);
 
   const { data: events, isLoading } = useFetchEvents({
     rangeFrom: globalParams.timeRange.from,
     rangeTo: globalParams.timeRange.to,
-    filter,
     eventTypes,
   });
 
