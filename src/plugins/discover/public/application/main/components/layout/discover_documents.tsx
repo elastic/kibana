@@ -580,5 +580,7 @@ const highlightUiSearchResults = (gridElement: Element | undefined, nextUiSearch
 
   const searchResultsHighlight = new Highlight(...ranges.flat());
 
+  // TODO: experiment with highlighting one of matches differently to make it look like it's currently in focus
+  // and allow to navigate this way between matches
   CSS.highlights.set('search-results', searchResultsHighlight);
 };
