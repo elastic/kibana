@@ -28,9 +28,9 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
     installTranslatedRule,
     installSelectedRule,
   }) => {
-    const showInstallTranslatedRulesButton = numberOfTranslatedRules > 0;
+    const disableInstallTranslatedRulesButton = isTableLoading || !numberOfTranslatedRules;
     const showInstallSelectedRulesButton =
-      showInstallTranslatedRulesButton && numberOfSelectedRules > 0;
+      disableInstallTranslatedRulesButton && numberOfSelectedRules > 0;
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         {showInstallSelectedRulesButton ? (
@@ -46,21 +46,21 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
             </EuiButton>
           </EuiFlexItem>
         ) : null}
-        {showInstallTranslatedRulesButton ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              data-test-subj="installTranslatedRulesButton"
-              onClick={installTranslatedRule}
-              disabled={isTableLoading}
-              aria-label={i18n.INSTALL_ALL_ARIA_LABEL}
-            >
-              {i18n.INSTALL_ALL_RULES(numberOfTranslatedRules)}
-              {isTableLoading && <EuiLoadingSpinner size="s" />}
-            </EuiButton>
-          </EuiFlexItem>
-        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            data-test-subj="installTranslatedRulesButton"
+            onClick={installTranslatedRule}
+            disabled={disableInstallTranslatedRulesButton}
+            aria-label={i18n.INSTALL_TRANSLATED_ARIA_LABEL}
+          >
+            {numberOfTranslatedRules > 0
+              ? i18n.INSTALL_TRANSLATED_RULES(numberOfTranslatedRules)
+              : i18n.INSTALL_TRANSLATED_RULES_EMPTY_STATE}
+            {isTableLoading && <EuiLoadingSpinner size="s" />}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

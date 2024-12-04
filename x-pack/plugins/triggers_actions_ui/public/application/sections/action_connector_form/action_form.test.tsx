@@ -399,6 +399,7 @@ describe('action_form', () => {
         }
         actionTypeRegistry={actionTypeRegistry}
         setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+        ruleTypeId=".es-query"
       />
     );
 
