@@ -15,7 +15,6 @@ import { identity } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import {
   DEFAULT_COLUMNS_SETTING,
-  DOC_TABLE_LEGACY,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
   SAMPLE_SIZE_SETTING,
@@ -39,8 +38,6 @@ export const uiSettingsMock = {
       return 10;
     } else if (key === DEFAULT_COLUMNS_SETTING) {
       return ['default_column'];
-    } else if (key === DOC_TABLE_LEGACY) {
-      return false;
     } else if (key === SEARCH_FIELDS_FROM_SOURCE) {
       return false;
     } else if (key === SHOW_MULTIFIELDS) {

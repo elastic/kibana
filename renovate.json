@@ -144,7 +144,9 @@
         "nyc",
         "oboe",
         "pixelmatch",
+        "@playwright/test",
         "playwright",
+        "playwright-chromium",
         "pngjs",
         "sharp",
         "superagent",
@@ -376,21 +378,24 @@
       "minimumReleaseAge": "7 days"
     },
     {
-      "groupName": "@elastic/kibana-visualizations test dependencies",
+      "groupName": "@elastic/kibana-data-discovery dependencies",
       "matchDepNames": [
-        "@types/faker",
-        "faker"
+        "@elastic/datemath",
+        "diff",
+        "fastest-levenshtein",
+        "usng.js",
+        "@types/diff"
       ],
       "reviewers": [
-        "team:visualizations"
+        "team:kibana-data-discovery"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Visualizations",
+        "Team:DataDiscovery",
         "release_note:skip",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "enabled": true,
       "minimumReleaseAge": "7 days"
@@ -1304,9 +1309,7 @@
     {
       "groupName": "Security Engineering Productivity",
       "matchDepNames": [
-        "dotenv",
-        "playwright-chromium",
-        "@playwright/test"
+        "dotenv"
       ],
       "reviewers": [
         "team:security-engineering-productivity"
