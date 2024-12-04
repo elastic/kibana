@@ -35,18 +35,15 @@ export function initializeSearchContext(
   );
 
   const attributes = internalApi.attributes$.getValue();
-
+  // These are observables for the panel-specific search context
   const [lastReloadRequestTime] = buildObservableVariable<number | undefined>(undefined);
-
   const [filters$] = buildObservableVariable<Filter[] | undefined>(attributes.state.filters);
-
   const [query$] = buildObservableVariable<Query | AggregateQuery | undefined>(
     attributes.state.query
   );
-
   const [timeslice$] = buildObservableVariable<[number, number] | undefined>(undefined);
-
   const timeRange = initializeTimeRange(initialState);
+
   return {
     api: {
       searchSessionId$,

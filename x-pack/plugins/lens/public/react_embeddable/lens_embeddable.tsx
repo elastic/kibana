@@ -15,7 +15,7 @@ import {
   LensSerializedState,
 } from './types';
 
-import { loadEmbeddableData } from './data_loader';
+import { loadEmbeddableData } from './loader/setup';
 import { isTextBasedLanguage, deserializeState } from './helper';
 import { initializeEditApi } from './initializers/initialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
@@ -160,7 +160,6 @@ export const createLensEmbeddableFactory = (
       // Inside a subscription will be updated based on each unifiedSearch change
       // and as side effect update few observables as  expressionParams$, expressionAbortController$ and renderCount$ with the new values upon updates
       const expressionConfig = loadEmbeddableData(
-        uuid,
         getState,
         api,
         parentApi,

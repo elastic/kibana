@@ -65,6 +65,7 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -364,6 +365,8 @@ export type LensApi = Simplify<
     PublishesBlockingError &
     // This is used by dashboard/container to show filters/queries on the panel
     PublishesUnifiedSearch &
+    // Let the container know the search session id
+    PublishesSearchSession &
     // Let the container know the loading state
     PublishesDataLoading &
     // Let the container know when the rendering has completed rendering

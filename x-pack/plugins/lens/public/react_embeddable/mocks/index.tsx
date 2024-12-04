@@ -116,6 +116,7 @@ const LensApiMock: LensApi = {
   disabledActionIds: new BehaviorSubject<string[] | undefined>(undefined),
   setDisabledActionIds: jest.fn(),
   rendered$: new BehaviorSubject<boolean>(false),
+  searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
 };
 
 const LensSerializedStateMock: LensSerializedState = createEmptyLensState(
@@ -350,5 +351,18 @@ export function createUnifiedSearchApi(
     filters$: new BehaviorSubject<Filter[] | undefined>(filters),
     query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
     timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
+  };
+}
+
+export function createParentApi({
+  unifiedSearch,
+  searchSessionId,
+}: {
+  unifiedSearch: boolean;
+  searchSessionId: boolean;
+}) {
+  return {
+    ...(unifiedSearch ? createUnifiedSearchApi() : {}),
+    ...(searchSessionId ? { searchSessionId: '0' } : {}),
   };
 }
