@@ -356,6 +356,7 @@ import type {
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   GetAllStatsRuleMigrationResponse,
+  GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
   GetRuleMigrationResourcesRequestQueryInput,
@@ -363,6 +364,8 @@ import type {
   GetRuleMigrationResourcesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
+  GetRuleMigrationTranslationStatsRequestParamsInput,
+  GetRuleMigrationTranslationStatsResponse,
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
   InstallMigrationRulesResponse,
@@ -1435,6 +1438,8 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1466,6 +1471,24 @@ finalize it.
     return this.kbnClient
       .request<GetRuleMigrationStatsResponse>({
         path: replaceParams('/internal/siem_migrations/rules/{migration_id}/stats', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the translation stats of a SIEM rules migration using the migration id provided
+   */
+  async getRuleMigrationTranslationStats(props: GetRuleMigrationTranslationStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationTranslationStats`);
+    return this.kbnClient
+      .request<GetRuleMigrationTranslationStatsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/translation_stats',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2357,6 +2380,7 @@ export interface GetRuleExecutionResultsProps {
   params: GetRuleExecutionResultsRequestParamsInput;
 }
 export interface GetRuleMigrationProps {
+  query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
 }
 export interface GetRuleMigrationResourcesProps {
@@ -2365,6 +2389,9 @@ export interface GetRuleMigrationResourcesProps {
 }
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;
+}
+export interface GetRuleMigrationTranslationStatsProps {
+  params: GetRuleMigrationTranslationStatsRequestParamsInput;
 }
 export interface GetTimelineProps {
   query: GetTimelineRequestQueryInput;
