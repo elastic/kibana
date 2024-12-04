@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it(`loads the log pattern analysis flyout and hides patterns in discover`, async () => {
       await ml.navigation.navigateToDiscoverViaAppsMenu();
-      await PageObjects.discover.selectIndexPattern('logs-*');
+      await PageObjects.discover.selectIndexPattern('log*');
       await PageObjects.timePicker.pauseAutoRefresh();
       await PageObjects.timePicker.setAbsoluteRange(
         'Sep 20, 2015 @ 00:00:00.000',

@@ -293,7 +293,7 @@ export default function (ctx: FtrProviderContext) {
       it(`doesn't show visualize button`, async () => {
         await common.navigateToApp('discover');
         await common.waitForTopNavToBeVisible();
-        await discover.selectIndexPattern('log*');
+        await discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
         await unifiedFieldList.clickFieldListItem('bytes');
         await unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
@@ -355,6 +355,7 @@ export default function (ctx: FtrProviderContext) {
       it(`shows the visualize button`, async () => {
         await common.navigateToApp('discover');
         await common.waitForTopNavToBeVisible();
+        await discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
         await unifiedFieldList.clickFieldListItem('bytes');
         await unifiedFieldList.expectFieldListItemVisualize('bytes');
