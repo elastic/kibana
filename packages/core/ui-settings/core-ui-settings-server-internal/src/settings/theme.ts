@@ -104,9 +104,10 @@ export const getThemeSettings = (
         }),
       },
       value: 'amsterdam',
-      readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
-        ? !options.isThemeSwitcherEnabled
-        : true,
+      // TODO: (tonyghiani) Remove after design QA on deployment
+      // readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
+      //   ? !options.isThemeSwitcherEnabled
+      //   : true,
       requiresPageReload: true,
       schema: schema.oneOf([
         schema.literal('amsterdam'),
