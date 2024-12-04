@@ -2982,7 +2982,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
       });
 
-      it('does not suppress alerts outside of duration', async () => {
+      // Skipped here: https://github.com/elastic/kibana/issues/202945
+      it.skip('does not suppress alerts outside of duration', async () => {
         const id = uuidv4();
         // this timestamp is 1 minute in the past
         const firstTimestamp = new Date(Date.now() - 5000).toISOString();
@@ -3170,7 +3171,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+      // Skipped here: https://github.com/elastic/kibana/issues/202945
+      it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
         const dateNow = Date.now();
         const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
