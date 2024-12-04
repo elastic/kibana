@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { PublishesPanelTitle, PublishingSubject } from '@kbn/presentation-publishing';
+import type { ESQLControlState as ControlState } from '@kbn/esql/public';
 import type { DefaultControlState } from '../../../common';
 import type { DefaultControlApi } from '../types';
 
@@ -14,13 +15,9 @@ interface PublishesSelectedOptions {
   selectedOptions$: PublishingSubject<string[]>;
 }
 
-export interface ESQLControlState extends DefaultControlState {
-  availableOptions: string[];
-  selectedOptions: string[];
-  variableName: string;
-  variableType: string; // here must be the enum
-  esqlQuery: string;
-}
+export interface ESQLControlState
+  extends DefaultControlState,
+    Omit<ControlState, 'width' | 'title'> {}
 
 export type ESQLControlApi = DefaultControlApi &
   Pick<PublishesPanelTitle, 'defaultPanelTitle'> &

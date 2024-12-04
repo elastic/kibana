@@ -89,7 +89,12 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { ESQLCallbacks, ESQLSourceResult, ESQLVariables } from '../shared/types';
+import type {
+  ESQLCallbacks,
+  ESQLSourceResult,
+  ESQLControlVariable,
+  EsqlControlType,
+} from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getQueryForFields,
@@ -1037,7 +1042,7 @@ async function getFunctionArgsSuggestions(
   getFieldsMap: GetFieldsMapFn,
   fullText: string,
   offset: number,
-  getVariablesByType?: (type: string) => ESQLVariables[],
+  getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[],
   supportsVariables?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);

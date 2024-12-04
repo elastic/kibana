@@ -8,20 +8,15 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-
-interface ESQLVariables {
-  key: string;
-  value: string;
-  type: string;
-}
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 
 export class EsqlVariablesService {
-  esqlVariables$: BehaviorSubject<ESQLVariables[]>;
+  esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
   esqlQueryWithVariables: string;
-  esqlVariables: ESQLVariables[] = [];
+  esqlVariables: ESQLControlVariable[] = [];
 
   constructor() {
-    this.esqlVariables$ = new BehaviorSubject<ESQLVariables[]>([]);
+    this.esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
     this.esqlVariables = [];
     this.esqlQueryWithVariables = '';
   }
@@ -34,7 +29,7 @@ export class EsqlVariablesService {
     return this.esqlQueryWithVariables;
   }
 
-  addVariable(variable: ESQLVariables): void {
+  addVariable(variable: ESQLControlVariable): void {
     const variables = [...this.esqlVariables];
     const variableExists = variables.find((v) => v.key === variable.key);
     if (variableExists) {
@@ -53,11 +48,11 @@ export class EsqlVariablesService {
     return this.esqlVariables.find((variable) => variable.key === key);
   }
 
-  getVariablesByType(type: string) {
+  getVariablesByType(type: ESQLControlVariable['type']) {
     return this.esqlVariables.filter((variable) => variable.type === type);
   }
 
-  updateVariable(key: string, value: string, type: string) {
+  updateVariable(key: string, value: string, type: ESQLControlVariable['type']) {
     const variables = this.esqlVariables.map((variable) => {
       if (variable.key === key) {
         return { ...variable, value, type };

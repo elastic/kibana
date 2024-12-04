@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlControlType } from '../shared/types';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -67,12 +68,6 @@ export interface SuggestionRawDefinition {
     start: number;
     end: number;
   };
-}
-
-export enum EsqlControlType {
-  TIME_LITERAL = 'time_literal',
-  FIELDS = 'fields',
-  VALUES = 'values',
 }
 
 export interface EditorContext {

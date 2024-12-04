@@ -26,11 +26,11 @@ import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
-import { EsqlControlType } from './types';
 import { isNumericType } from '../shared/esql_types';
-import type { ESQLVariables } from '../shared/types';
+import type { ESQLControlVariable } from '../shared/types';
 import { getTestFunctions } from '../shared/test_functions';
 import { builtinFunctions } from '../definitions/builtin';
+import { EsqlControlType } from '../shared/types';
 
 const techPreviewLabel = i18n.translate(
   'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
@@ -225,7 +225,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     controlType?: EsqlControlType;
     supportsVariables?: boolean;
   },
-  getVariablesByType?: (type: string) => ESQLVariables[]
+  getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[]
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
@@ -488,7 +488,7 @@ export function getCompatibleLiterals(
     addComma?: boolean;
     supportsVariables?: boolean;
   },
-  getVariablesByType?: (type: string) => ESQLVariables[]
+  getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[]
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
   if (types.some(isNumericType)) {

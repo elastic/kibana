@@ -13,22 +13,11 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '@kbn/monaco';
-import type { EsqlControlType } from './types';
+import type { ESQLControlState } from './types';
 
 const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
-
-// should move to one place
-interface ESQLControlState {
-  grow?: boolean;
-  width?: string;
-  title?: string;
-  availableOptions: string[];
-  selectedOptions: string[];
-  variableName: string;
-  variableType: string;
-  esqlQuery?: string;
-}
 
 interface Context {
   queryString: string;

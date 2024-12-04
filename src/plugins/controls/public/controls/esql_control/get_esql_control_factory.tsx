@@ -14,7 +14,9 @@ import { EuiComboBox } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
   getUnchangingComparator,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
+import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import { esqlVariablesService } from '@kbn/esql/common';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlState, ESQLControlApi } from './types';
@@ -36,13 +38,18 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
       const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
-      const variableType$ = new BehaviorSubject<string>(initialState.variableType ?? '');
+      const variableType$ = new BehaviorSubject<EsqlControlType>(
+        initialState.variableType ?? EsqlControlType.VALUES
+      );
       // initialize the variable
       esqlVariablesService.addVariable({
         key: initialState.variableName,
         value: initialState.selectedOptions[0],
         type: initialState.variableType,
       });
+      const hasSelections$ = new BehaviorSubject<boolean>(
+        Boolean(initialState.selectedOptions?.length)
+      );
       const defaultControl = initializeDefaultControlApi({ ...initialState });
 
       const selections = initializeESQLControlSelections(initialState);
@@ -87,6 +94,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
           clearVariables: () => {
             esqlVariablesService.removeVariable(initialState.variableName);
           },
+          hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         },
         {
           ...defaultControl.comparators,

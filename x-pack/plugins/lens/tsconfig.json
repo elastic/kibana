@@ -113,7 +113,6 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/es-types",
     "@kbn/esql-datagrid",
-    "@kbn/esql-variables",
     "@kbn/transpose-utils",
     "@kbn/core-application-browser",
     "@kbn/core-chrome-browser",

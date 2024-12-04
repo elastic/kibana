@@ -81,8 +81,7 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-mount-utils-browser",
     "@kbn/visualization-utils",
-    "@kbn/core-rendering-browser",
-    "@kbn/esql-variables"
+    "@kbn/core-rendering-browser"
   ],
   "exclude": ["target/**/*"]
 }

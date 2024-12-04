@@ -48,7 +48,7 @@ import { EDITOR_MARKER } from '../shared/constants';
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { listCompleteItem } from './complete_items';
 import { removeMarkerArgFromArgsList } from '../shared/context';
-import { EsqlControlType } from './types';
+import { EsqlControlType } from '../shared/types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);

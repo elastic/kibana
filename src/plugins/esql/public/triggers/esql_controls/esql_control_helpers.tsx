@@ -13,28 +13,17 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { monaco } from '@kbn/monaco';
 import { ESQLControlsFlyout } from './esql_controls_flyout';
-import type { EsqlControlType } from './types';
 import { esqlVariablesService } from '../../../common';
 import { untilPluginStartServicesReady } from '../../kibana_services';
+import type { ESQLControlState } from './types';
 
 import './flyout.scss';
-
-// should move to one place
-interface ESQLControlState {
-  grow?: boolean;
-  width?: string;
-  title?: string;
-  availableOptions: string[];
-  selectedOptions: string[];
-  variableName: string;
-  variableType: string;
-  esqlQuery?: string;
-}
 
 interface Context {
   queryString: string;
@@ -76,7 +65,7 @@ export async function executeAction({
   const addToESQLVariablesService = (
     variableName: string,
     variableValue: string,
-    variableType: string,
+    variableType: EsqlControlType,
     query: string
   ) => {
     esqlVariablesService.addVariable({

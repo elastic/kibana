@@ -28,6 +28,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import ESQLEditor from '@kbn/esql-editor';
 import type { ISearchGeneric } from '@kbn/search-types';
 import {
@@ -38,18 +39,7 @@ import {
 import { type ESQLColumn, parse, walk } from '@kbn/esql-ast';
 import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { EsqlControlType, EsqlControlFlyoutType } from './types';
-
-interface ESQLControlState {
-  grow?: boolean;
-  width?: string;
-  title?: string;
-  availableOptions: string[];
-  selectedOptions: string[];
-  variableName: string;
-  variableType: string;
-  esqlQuery?: string;
-}
+import { EsqlControlFlyoutType, type ESQLControlState } from './types';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
@@ -63,7 +53,7 @@ interface ESQLControlsFlyoutProps {
   addToESQLVariablesService: (
     variable: string,
     variableValue: string,
-    controlType: string,
+    controlType: EsqlControlType,
     query: string
   ) => void;
   openEditFlyout: (embeddable: unknown) => Promise<void>;

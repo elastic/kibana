@@ -18,7 +18,7 @@ import type {
 import { esqlVariablesService } from '@kbn/esql/common';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getStartEndParams } from '@kbn/esql-utils';
+import { getNamedParams } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
@@ -171,22 +171,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
-
-            const namedParams: ESQLSearchParams['params'] = getStartEndParams(
-              query,
-              input.timeRange
-            );
             const variables = esqlVariablesService.getVariables();
 
-            if (variables?.length) {
-              variables?.forEach(({ key, value, type }) => {
-                if (type === 'fields') {
-                  namedParams.push({ [key]: { identifier: value } });
-                } else {
-                  namedParams.push({ [key]: value });
-                }
-              });
-            }
+            const namedParams = getNamedParams(query, input.timeRange, variables);
 
             if (namedParams.length) {
               params.params = namedParams;

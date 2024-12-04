@@ -27,6 +27,7 @@
     "@kbn/content-management-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/esql-variables",
+    "@kbn/esql-validation-autocomplete"
   ],
   "exclude": [
     "target/**/*",

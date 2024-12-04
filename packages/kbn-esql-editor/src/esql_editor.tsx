@@ -39,6 +39,7 @@ import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -65,6 +66,26 @@ import './overwrite.scss';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
+
+const triggerControl = async (
+  queryString: string,
+  controlType: EsqlControlType,
+  position: monaco.Position | null | undefined,
+  uiActions: ESQLEditorDeps['uiActions'],
+  panelId?: string,
+  dashboardApi?: ESQLEditorProps['dashboardApi']
+) => {
+  if (!dashboardApi) {
+    return;
+  }
+  await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+    queryString,
+    controlType,
+    dashboardApi,
+    panelId,
+    cursorPosition: position,
+  });
+};
 
 export const ESQLEditor = memo(function ESQLEditor({
   query,
@@ -253,45 +274,39 @@ export const ESQLEditor = memo(function ESQLEditor({
   });
 
   monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
-    if (!dashboardApi) {
-      return;
-    }
     const position = editor1.current?.getPosition();
-    await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-      queryString: query.esql,
-      controlType: 'time_literal',
-      dashboardApi,
+    await triggerControl(
+      query.esql,
+      EsqlControlType.TIME_LITERAL,
+      position,
+      uiActions,
       panelId,
-      cursorPosition: position,
-    });
+      dashboardApi
+    );
   });
 
   monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
-    if (!dashboardApi) {
-      return;
-    }
     const position = editor1.current?.getPosition();
-    await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-      queryString: query.esql,
-      controlType: 'fields',
-      dashboardApi,
+    await triggerControl(
+      query.esql,
+      EsqlControlType.FIELDS,
+      position,
+      uiActions,
       panelId,
-      cursorPosition: position,
-    });
+      dashboardApi
+    );
   });
 
   monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
-    if (!dashboardApi) {
-      return;
-    }
     const position = editor1.current?.getPosition();
-    await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-      queryString: query.esql,
-      controlType: 'values',
-      dashboardApi,
+    await triggerControl(
+      query.esql,
+      EsqlControlType.VALUES,
+      position,
+      uiActions,
       panelId,
-      cursorPosition: position,
-    });
+      dashboardApi
+    );
   });
 
   const styles = esqlEditorStyles(
@@ -437,7 +452,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
-      getVariablesByType: (type: string) => {
+      getVariablesByType: (type: EsqlControlType) => {
         return esqlService.getVariablesByType(type);
       },
       canSuggestVariables: () => {

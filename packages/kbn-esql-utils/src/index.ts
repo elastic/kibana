@@ -31,6 +31,7 @@ export {
   formatESQLColumns,
   getStartEndParams,
   hasStartEndParams,
+  getNamedParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,

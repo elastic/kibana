@@ -57,27 +57,4 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
       return idMap[column.id].map((originalColumn) => ({ ...column, id: originalColumn.id }));
     }),
   };
-
-  // return {
-  //   ...data,
-  //   rows: data.rows.map((row) => {
-  //     const mappedRow: Record<string, unknown> = {};
-
-  //     for (const id in row) {
-  //       if (id in idMap) {
-  //         for (const cachedEntry of idMap[id]) {
-  //           mappedRow[cachedEntry.id] = row[id];
-  //         }
-  //       }
-  //     }
-
-  //     return mappedRow;
-  //   }),
-  //   columns: data.columns.flatMap((column) => {
-  //     if (!(column.id in idMap)) {
-  //       return [];
-  //     }
-  //     return idMap[column.id].map((originalColumn) => ({ ...column, id: originalColumn.id }));
-  //   }),
-  // };
 };

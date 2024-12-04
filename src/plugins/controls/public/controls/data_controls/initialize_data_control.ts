@@ -238,15 +238,13 @@ export const initializeDataControl = <EditorState extends object = {}>(
           fieldName: fieldName.getValue(),
           title: panelTitle.getValue(),
         },
-        references: dataViewId.getValue()
-          ? [
-              {
-                name: getReferenceName(controlId, referenceNameSuffix),
-                type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                id: dataViewId.getValue(),
-              },
-            ]
-          : [],
+        references: [
+          {
+            name: getReferenceName(controlId, referenceNameSuffix),
+            type: DATA_VIEW_SAVED_OBJECT_TYPE,
+            id: dataViewId.getValue(),
+          },
+        ],
       };
     },
   };
