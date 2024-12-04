@@ -32,7 +32,7 @@ export const NotFoundErrors = ({ type, docLinks }: NotFoundErrors) => {
         return (
           <FormattedMessage
             id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
-            defaultMessage="The saved search associated with this object no longer exists."
+            defaultMessage="The Discover Session associated with this object no longer exists."
           />
         );
       case 'index-pattern':

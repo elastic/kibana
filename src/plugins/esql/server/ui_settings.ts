@@ -21,7 +21,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: true,
     description: i18n.translate('esql.advancedSettings.enableESQLDescription', {
       defaultMessage:
-        'This setting enables ES|QL in Kibana. By switching it off you will hide the ES|QL user interface from various applications. However, users will be able to access existing ES|QL saved searches, visualizations, etc.',
+        'This setting enables ES|QL in Kibana. By switching it off you will hide the ES|QL user interface from various applications. However, users will be able to access existing ES|QL sessions, visualizations, etc.',
     }),
     requiresPageReload: true,
     schema: schema.boolean(),
