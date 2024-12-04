@@ -20,10 +20,7 @@ import { z } from '@kbn/zod';
  * A string that is not empty and does not contain only whitespace
  */
 export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z
-  .string()
-  .min(1)
-  .regex(/^(?! *$).+$/);
+export const NonEmptyString = z.string().min(1).regex(/\S+/);
 
 /**
  * The GenAI connector id to use.

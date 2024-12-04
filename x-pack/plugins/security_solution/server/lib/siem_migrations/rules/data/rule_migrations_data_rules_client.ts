@@ -50,6 +50,8 @@ export interface RuleMigrationFilterOptions {
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
 const BULK_MAX_SIZE = 500 as const;
+/* The default number of rule migrations to retrieve in a single GET request. */
+const DEFAULT_GET_SIZE = 20 as const;
 
 const getInstallableConditions = (): QueryDslQueryContainer[] => {
   return [
@@ -130,7 +132,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   async get(
     filters: RuleMigrationFilterOptions,
     from?: number,
-    size?: number
+    size: number = DEFAULT_GET_SIZE
   ): Promise<{ total: number; data: StoredRuleMigration[] }> {
     const index = await this.getIndexName();
     const query = this.getFilterQuery(filters);

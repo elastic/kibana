@@ -13,6 +13,7 @@ import { rulesCardConfig } from './cards/rules';
 import { alertsCardConfig } from './cards/alerts';
 import { assistantCardConfig } from './cards/assistant';
 import { aiConnectorCardConfig } from './cards/siem_migrations/ai_connector';
+import { startMigrationCardConfig } from './cards/siem_migrations/start_migration';
 
 export const defaultBodyConfig: OnboardingGroupConfig[] = [
   {
@@ -42,5 +43,11 @@ export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
       defaultMessage: 'Configure',
     }),
     cards: [aiConnectorCardConfig],
+  },
+  {
+    title: i18n.translate('xpack.securitySolution.onboarding.migrate.title', {
+      defaultMessage: 'Migrate rules & add data',
+    }),
+    cards: [startMigrationCardConfig],
   },
 ];

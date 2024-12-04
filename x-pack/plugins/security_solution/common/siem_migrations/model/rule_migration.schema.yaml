@@ -12,6 +12,17 @@ components:
       enum:
         - splunk
 
+    OriginalRuleAnnotations:
+      type: object
+      description: The original rule annotations containing additional information.
+      additionalProperties: true
+      properties:
+        mitre_attack:
+          type: array
+          description: The original rule Mitre Attack IDs.
+          items:
+            type: string
+
     OriginalRule:
       type: object
       description: The original rule to migrate.
@@ -30,22 +41,21 @@ components:
           description: The original rule vendor identifier.
           $ref: '#/components/schemas/OriginalRuleVendor'
         title:
-          type: string
           description: The original rule name.
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
         description:
           type: string
           description: The original rule description.
         query:
           type: string
+          minLength: 1
           description: The original rule query.
         query_language:
           type: string
           description: The original rule query language.
-        mitre_attack_ids:
-          type: array
-          items:
-            type: string
-          description: The original rule Mitre Attack technique IDs.
+        annotations:
+          description: The original rule annotations containing additional information.
+          $ref: '#/components/schemas/OriginalRuleAnnotations'
 
     ElasticRule:
       type: object

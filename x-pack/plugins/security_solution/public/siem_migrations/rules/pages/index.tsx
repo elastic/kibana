@@ -20,7 +20,7 @@ import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/c
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
 import { UnknownMigration } from '../components/unknown_migration';
-import { useLatestStats } from '../hooks/use_latest_stats';
+import { useLatestStats } from '../service/hooks/use_latest_stats';
 
 type RulesMigrationPageProps = RouteComponentProps<{ migrationId?: string }>;
 

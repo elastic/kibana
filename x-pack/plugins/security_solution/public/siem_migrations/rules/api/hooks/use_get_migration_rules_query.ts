@@ -11,15 +11,10 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 import { useCallback } from 'react';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
-import { getRuleMigrations } from '../api';
+import { getRuleMigrations, type GetRuleMigrationParams } from '../api';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 
-interface UseGetMigrationRulesQueryProps {
-  migrationId: string;
-  page?: number;
-  perPage?: number;
-  searchTerm?: string;
-}
+type UseGetMigrationRulesQueryProps = Omit<GetRuleMigrationParams, 'signal'>;
 
 export interface MigrationRulesQueryResponse {
   ruleMigrations: RuleMigration[];

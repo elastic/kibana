@@ -17,19 +17,27 @@
 import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
+import { NonEmptyString, ConnectorId, LangSmithOptions } from '../../common.gen';
 import {
-  OriginalRule,
   ElasticRulePartial,
   RuleMigrationTranslationResult,
   RuleMigrationComments,
   RuleMigrationTaskStats,
+  OriginalRule,
   RuleMigration,
   RuleMigrationTranslationStats,
   RuleMigrationResourceData,
   RuleMigrationResourceType,
   RuleMigrationResource,
 } from '../../rule_migration.gen';
-import { NonEmptyString, ConnectorId, LangSmithOptions } from '../../common.gen';
+
+export type CreateRuleMigrationRequestParams = z.infer<typeof CreateRuleMigrationRequestParams>;
+export const CreateRuleMigrationRequestParams = z.object({
+  migration_id: NonEmptyString.optional(),
+});
+export type CreateRuleMigrationRequestParamsInput = z.input<
+  typeof CreateRuleMigrationRequestParams
+>;
 
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
 export const CreateRuleMigrationRequestBody = z.array(OriginalRule);
