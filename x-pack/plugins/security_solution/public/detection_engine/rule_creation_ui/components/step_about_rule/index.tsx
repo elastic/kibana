@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
@@ -45,7 +45,6 @@ import { EsqlAutocomplete } from '../esql_autocomplete';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { MaxSignals } from '../max_signals';
-import { TooltipFormWrapper } from '../tooltip_form_wrapper';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -284,9 +283,14 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <EuiSpacer size="l" />
-            <TooltipFormWrapper
-              content={I18n.AUTHOR_IMMUTABLE_FIELD_TOOLTIP_TEXT}
-              shouldShowTooltip={ruleSource?.type === 'external'}
+            <EuiToolTip
+              content={
+                ruleSource?.type === 'external'
+                  ? I18n.AUTHOR_IMMUTABLE_FIELD_TOOLTIP_TEXT
+                  : undefined
+              }
+              display="block"
+              position="right"
             >
               <CommonUseField
                 path="author"
@@ -300,11 +304,16 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   },
                 }}
               />
-            </TooltipFormWrapper>
+            </EuiToolTip>
             <EuiSpacer size="l" />
-            <TooltipFormWrapper
-              content={I18n.LICENSE_IMMUTABLE_FIELD_TOOLTIP_TEXT}
-              shouldShowTooltip={ruleSource?.type === 'external'}
+            <EuiToolTip
+              content={
+                ruleSource?.type === 'external'
+                  ? I18n.LICENSE_IMMUTABLE_FIELD_TOOLTIP_TEXT
+                  : undefined
+              }
+              display="block"
+              position="right"
             >
               <CommonUseField
                 path="license"
@@ -318,7 +327,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   },
                 }}
               />
-            </TooltipFormWrapper>
+            </EuiToolTip>
             <EuiSpacer size="l" />
             <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
               <CommonUseField
