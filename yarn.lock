@@ -5758,6 +5758,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/gen-ai-functional-testing@link:packages/kbn-gen-ai-functional-testing":
+  version "0.0.0"
+  uid ""
+
 "@kbn/gen-ai-streaming-response-example-plugin@link:x-pack/examples/gen_ai_streaming_response_example":
   version "0.0.0"
   uid ""

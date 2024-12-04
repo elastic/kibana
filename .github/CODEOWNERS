@@ -1413,6 +1413,7 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 
 # AppEx AI Infra
 /x-pack/plugins/inference @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
+/x-pack/test/functional_gen_ai/inference @elastic/appex-ai-infra
 
 # AppEx Platform Services Security
 x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
