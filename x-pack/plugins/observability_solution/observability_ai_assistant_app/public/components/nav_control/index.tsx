@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
@@ -54,6 +54,7 @@ export function NavControl() {
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
+          serverless,
         },
       },
     },
@@ -140,22 +141,41 @@ export function NavControl() {
   return (
     <>
       <EuiToolTip content={buttonLabel}>
-        <EuiButton
-          aria-label={buttonLabel}
-          data-test-subj="observabilityAiAssistantAppNavControlButton"
-          css={buttonCss}
-          onClick={() => {
-            service.conversations.openNewConversation({
-              messages: [],
-            });
-          }}
-          color="primary"
-          size="s"
-          fullWidth={false}
-          minWidth={0}
-        >
-          {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
-        </EuiButton>
+        {serverless ? (
+          <EuiButtonEmpty
+            aria-label={buttonLabel}
+            data-test-subj="observabilityAiAssistantAppNavControlButton"
+            css={css`
+              padding: 0px 8px;
+            `}
+            onClick={() => {
+              service.conversations.openNewConversation({
+                messages: [],
+              });
+            }}
+            color="primary"
+            size="s"
+          >
+            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiButton
+            aria-label={buttonLabel}
+            data-test-subj="observabilityAiAssistantAppNavControlButton"
+            css={buttonCss}
+            onClick={() => {
+              service.conversations.openNewConversation({
+                messages: [],
+              });
+            }}
+            color="primary"
+            size="s"
+            fullWidth={false}
+            minWidth={0}
+          >
+            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
+          </EuiButton>
+        )}
       </EuiToolTip>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>

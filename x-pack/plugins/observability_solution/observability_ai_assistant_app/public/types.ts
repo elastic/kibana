@@ -31,6 +31,7 @@ import type {
   AIAssistantManagementSelectionPluginPublicStart,
   AIAssistantManagementSelectionPluginPublicSetup,
 } from '@kbn/ai-assistant-management-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppPublicStart {}
@@ -49,6 +50,7 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
@@ -62,4 +64,5 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   ml: MlPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicSetup;
+  serverless?: ServerlessPluginStart;
 }
