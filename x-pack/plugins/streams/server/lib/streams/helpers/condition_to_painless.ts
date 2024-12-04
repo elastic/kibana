@@ -7,30 +7,12 @@
 
 import { isBoolean, isString } from 'lodash';
 import {
-  AndCondition,
   BinaryFilterCondition,
   Condition,
-  conditionSchema,
   FilterCondition,
-  filterConditionSchema,
-  RerouteOrCondition,
   UnaryFilterCondition,
 } from '../../../../common/types';
-
-function isFilterCondition(subject: any): subject is FilterCondition {
-  const result = filterConditionSchema.safeParse(subject);
-  return result.success;
-}
-
-function isAndCondition(subject: any): subject is AndCondition {
-  const result = conditionSchema.safeParse(subject);
-  return result.success && subject.and != null;
-}
-
-function isOrCondition(subject: any): subject is RerouteOrCondition {
-  const result = conditionSchema.safeParse(subject);
-  return result.success && subject.or != null;
-}
+import { isAndCondition, isFilterCondition, isOrCondition } from './condition_guards';
 
 function safePainlessField(condition: FilterCondition) {
   return `ctx.${condition.field.split('.').join('?.')}`;
