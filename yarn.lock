@@ -5389,7 +5389,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/doc-links@link:packages/kbn-doc-links":
+"@kbn/doc-links@link:src/platform/packages/shared/kbn-doc-links":
   version "0.0.0"
   uid ""
 
