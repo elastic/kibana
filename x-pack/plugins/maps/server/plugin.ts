@@ -169,31 +169,58 @@ export class MapsPlugin implements Plugin {
       registerIntegrations(core, customIntegrations);
     }
 
-    const baseMapsFeature: Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> = {
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      app: [APP_ID, 'kibana'],
-      catalogue: [APP_ID],
-      privileges: {
-        all: {
-          app: [APP_ID, 'kibana'],
-          catalogue: [APP_ID],
-          savedObject: {
-            all: [MAP_SAVED_OBJECT_TYPE, 'query'],
-            read: ['index-pattern', 'tag'],
+    const getBaseMapsFeature = (
+      version: 'v1' | 'v2'
+    ): Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> => {
+      const savedObjectAllPrivileges = [MAP_SAVED_OBJECT_TYPE];
+      const uiAllPrivileges = ['save', 'show'];
+      const savedObjectReadPrivileges = [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'tag'];
+
+      if (version === 'v1') {
+        savedObjectAllPrivileges.push('query');
+        uiAllPrivileges.push('saveQuery');
+        savedObjectReadPrivileges.push('query');
+      }
+
+      return {
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+        app: [APP_ID, 'kibana'],
+        catalogue: [APP_ID],
+        privileges: {
+          all: {
+            app: [APP_ID, 'kibana'],
+            catalogue: [APP_ID],
+            savedObject: {
+              all: savedObjectAllPrivileges,
+              read: ['index-pattern', 'tag'],
+            },
+            ui: uiAllPrivileges,
+            ...(version === 'v1' && {
+              replacedBy: [
+                { feature: 'maps_v2', privileges: ['all'] },
+                { feature: 'savedQueryManagement', privileges: ['all'] },
+              ],
+            }),
           },
-          ui: ['save', 'show', 'saveQuery'],
-        },
-        read: {
-          app: [APP_ID, 'kibana'],
-          catalogue: [APP_ID],
-          savedObject: {
-            all: [],
-            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query', 'tag'],
+          read: {
+            app: [APP_ID, 'kibana'],
+            catalogue: [APP_ID],
+            savedObject: {
+              all: [],
+              read: savedObjectReadPrivileges,
+            },
+            ui: ['show'],
+            ...(version === 'v1' && {
+              replacedBy: [
+                { feature: 'maps_v2', privileges: ['read'] },
+                // TODO: should be read when available
+                { feature: 'savedQueryManagement', privileges: ['all'] },
+              ],
+            }),
           },
-          ui: ['show'],
         },
-      },
+      };
     };
 
     features.registerKibanaFeature({
@@ -209,7 +236,7 @@ export class MapsPlugin implements Plugin {
         defaultMessage: 'Maps (DEPRECATED)',
       }),
       order: 400,
-      ...baseMapsFeature,
+      ...getBaseMapsFeature('v1'),
     });
 
     features.registerKibanaFeature({
@@ -218,7 +245,7 @@ export class MapsPlugin implements Plugin {
         defaultMessage: 'Maps',
       }),
       order: 401,
-      ...baseMapsFeature,
+      ...getBaseMapsFeature('v2'),
     });
 
     setupSavedObjects(core, getFilterMigrations, getDataViewMigrations);
