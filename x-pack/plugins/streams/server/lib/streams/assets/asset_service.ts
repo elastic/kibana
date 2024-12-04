@@ -37,12 +37,11 @@ export class AssetService {
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<AssetClient> {
     const [coreStart, pluginsStart] = await this.coreSetup.getStartServices();
 
-    return lastValueFrom(this.adapter$).then((adapter) => {
-      return new AssetClient({
-        storageClient: adapter.getClient(),
-        soClient: coreStart.savedObjects.getScopedClient(request),
-        rulesClient: pluginsStart.alerting.getRulesClientWithRequest(request),
-      });
+    const adapter = await lastValueFrom(this.adapter$);
+    return new AssetClient({
+      storageClient: adapter.getClient(),
+      soClient: coreStart.savedObjects.getScopedClient(request),
+      rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
     });
   }
 }
