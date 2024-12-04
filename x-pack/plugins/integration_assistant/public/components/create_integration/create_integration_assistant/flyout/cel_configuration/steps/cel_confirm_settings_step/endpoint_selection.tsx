@@ -7,7 +7,16 @@
 
 import React from 'react';
 import type { EuiRadioGroupOption, EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiRadioGroup,
+  EuiText,
+} from '@elastic/eui';
+import * as i18n from './translations';
 import type { IntegrationSettings } from '../../../../types';
 
 const loadPaths = (integrationSettings: IntegrationSettings | undefined): string[] => {
@@ -42,16 +51,28 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
     const otherPathOptions = allPaths.map<EuiComboBoxOptionOption>((p) => ({ label: p }));
 
     const options = pathSuggestions
-      .concat(['Enter manually'])
+      .concat([i18n.ENTER_MANUALLY])
       .map<EuiRadioGroupOption>((option, index) =>
         // The LLM returns the path in preference order, so we know the first option is the recommended one
         index === 0
-          ? { id: option, label: `${option} (recommended)` }
+          ? {
+              id: option,
+              label: (
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiText size="s">{option}</EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{i18n.RECOMMENDED}</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+            }
           : { id: option, label: option }
       );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmSettingsStep">
+      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmPath">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiRadioGroup
@@ -63,7 +84,7 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
         </EuiFlexGroup>
         {useOtherEndpoint && (
           <EuiFlexGroup direction="column">
-            <EuiFormRow label={'Choose API endpoint'} fullWidth>
+            <EuiFormRow fullWidth>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 fullWidth

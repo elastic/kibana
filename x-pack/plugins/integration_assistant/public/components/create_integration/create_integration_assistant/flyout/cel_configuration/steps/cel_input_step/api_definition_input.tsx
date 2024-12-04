@@ -160,9 +160,9 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
               onChange={onChangeApiDefinition}
               display="large"
               aria-label="Upload API definition file"
-              isLoading={isParsing || isGenerating}
+              isLoading={isParsing}
               data-test-subj="apiDefinitionFilePicker"
-              data-loading={isParsing || isGenerating}
+              data-loading={isParsing}
             />
           </>
         </EuiFormRow>

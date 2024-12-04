@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { KeyedSecuritySchemeObject, SecurityType } from 'oas/dist/types.cjs';
 import type { CelAuthType } from '../../../../../../../../common';
 import { useActions, type State } from '../../../../state';
 import type { OnComplete } from './generation_modal';
@@ -32,6 +31,10 @@ interface CelConfirmStepProps {
   suggestedPaths: string[];
 }
 
+export const translatedAuthValue = (auth: string): string => {
+  return auth === 'API Token' ? 'Header' : auth;
+};
+
 export const CelConfirmStep = React.memo<CelConfirmStepProps>(
   ({ integrationSettings, connector, isFlyoutGenerating, suggestedPaths }) => {
     const {
@@ -46,19 +49,15 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
     const [useOtherPath, setUseOtherPath] = useState<boolean>(false);
 
     const [selectedAuth, setSelectedAuth] = useState<string | undefined>();
-    const [specDefinedAuthMethods, setSpecDefinedAuthMethods] = useState<
-      Record<SecurityType, KeyedSecuritySchemeObject[]> | undefined
-    >();
+    const [specifiedAuthForPath, setSpecifiedAuthForPath] = useState<string[]>([]);
     const [invalidAuth, setInvalidAuth] = useState<boolean>(false);
 
-    // const [successfulCelGeneration, setSuccessfulGeneration] = useState<boolean>(false);
-
     useEffect(() => {
-      const path = selectedPath ? selectedPath : selectedOtherPath;
+      const path = selectedPath !== i18n.ENTER_MANUALLY ? selectedPath : selectedOtherPath;
       if (path) {
         const authMethods = integrationSettings?.apiSpec?.operation(path, 'get').prepareSecurity();
-        setSpecDefinedAuthMethods(authMethods);
-        // setSelectedAuth(authMethods ? Object.keys(authMethods)[0] : '');
+        const specifiedAuth = authMethods ? Object.keys(authMethods) : [];
+        setSpecifiedAuthForPath(specifiedAuth);
       }
     }, [selectedPath, selectedOtherPath, integrationSettings?.apiSpec]);
 
@@ -71,8 +70,8 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
     const onChangeSuggestedPath = useCallback(
       (path: string) => {
         setSelectedPath(path);
-        setUseOtherPath(path === 'Enter manually');
-        if (path !== 'Enter manually') {
+        setUseOtherPath(path === i18n.ENTER_MANUALLY);
+        if (path !== i18n.ENTER_MANUALLY) {
           setSelectedOtherPath(undefined);
           setIntegrationValues({ celPath: path });
         }
@@ -94,14 +93,18 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
         const auth = field && field.length ? field[0].label : undefined;
         setSelectedAuth(auth);
 
-        const authType = auth?.toLowerCase() as CelAuthType;
-        setIntegrationValues({ celAuth: authType });
-
-        if (specDefinedAuthMethods && auth) {
-          setInvalidAuth(!Object.keys(specDefinedAuthMethods).includes(auth));
+        if (auth) {
+          const translatedAuth = translatedAuthValue(auth);
+          setIntegrationValues({ celAuth: translatedAuth.toLowerCase() as CelAuthType });
+          if (specifiedAuthForPath) {
+            setInvalidAuth(!specifiedAuthForPath.includes(translatedAuth));
+          }
+        } else {
+          setIntegrationValues({ celAuth: undefined });
+          setInvalidAuth(false);
         }
       },
-      [setSelectedAuth, setIntegrationValues, setInvalidAuth, specDefinedAuthMethods]
+      [setIntegrationValues, specifiedAuthForPath]
     );
 
     const onGenerationCompleted = useCallback<OnComplete>(
@@ -109,7 +112,6 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
         if (result) {
           setCelInputResult(result);
           setIsFlyoutGenerating(false);
-          // setSuccessfulGeneration(true);
           setShowCelCreateFlyout(false);
         }
       },
@@ -120,7 +122,7 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
     }, [setIsFlyoutGenerating]);
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="celInputStep">
+      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="celConfirmStep">
         <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiFlexItem>
             <EuiTitle size="s">
@@ -149,7 +151,7 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
             <EuiSpacer size="m" />
             <AuthSelection
               selectedAuth={selectedAuth}
-              authOptions={authOptions}
+              specifiedAuthForPath={specifiedAuthForPath}
               invalidAuth={invalidAuth}
               onChangeAuth={onChangeAuth}
             />
@@ -159,20 +161,10 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
           <GenerationModal
             integrationSettings={integrationSettings}
             connector={connector}
-            // setSuccessfulGeneration={setSuccessfulGeneration}
             onComplete={onGenerationCompleted}
             onClose={onGenerationClosed}
           />
         )}
-        {/* {successfulCelGeneration && (
-          <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="celInputStep">
-            <EuiFlexItem fullWidth>
-              <EuiPanel hasShadow={false} hasBorder={false}>
-                <EuiCallOut title="Good news, everyone!" color="success" iconType="check" />
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )} */}
       </EuiFlexGroup>
     );
   }

@@ -67,6 +67,10 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
     const onClose = useCallback(() => {
       setShowCelCreateFlyout(false);
       // // Clear the flyout
+      // setIntegrationSettings({
+      //   ...integrationSettings,
+      //   apiSpec: undefined,
+      // });
       // setSuggestedPaths([]);
       // setCelInputResult(undefined);
     }, [setShowCelCreateFlyout]);

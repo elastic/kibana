@@ -7,25 +7,42 @@
 
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
+import { EuiBadge, EuiCallOut, EuiComboBox, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 import * as i18n from './translations';
+import { translatedAuthValue } from './cel_confirm_step';
+
+const AUTH_OPTIONS = ['Basic', 'OAuth2', 'Digest', 'API Token'];
+
+const isRecommended = (auth: string, specDefinedAuthTypes: string[]): boolean => {
+  return specDefinedAuthTypes.includes(translatedAuthValue(auth));
+};
 
 interface AuthSelectionProps {
   selectedAuth: string | undefined;
-  authOptions: EuiComboBoxOptionOption[];
+  specifiedAuthForPath: string[];
   invalidAuth: boolean;
   onChangeAuth(update: EuiComboBoxOptionOption[]): void;
 }
 
 export const AuthSelection = React.memo<AuthSelectionProps>(
-  ({ selectedAuth, authOptions, invalidAuth, onChangeAuth }) => {
+  ({ selectedAuth, specifiedAuthForPath, invalidAuth, onChangeAuth }) => {
+    const options = AUTH_OPTIONS.map<EuiComboBoxOptionOption>((option) =>
+      isRecommended(option, specifiedAuthForPath)
+        ? {
+            id: option,
+            label: option,
+            append: <EuiBadge>{i18n.RECOMMENDED}</EuiBadge>,
+          }
+        : { id: option, label: option }
+    );
+
     return (
-      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmSettingsStep">
-        <EuiFormRow label={'Preferred method'} fullWidth>
+      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmAuth">
+        <EuiFormRow label={i18n.AUTH_SELECTION_TITLE} fullWidth>
           <EuiComboBox
             singleSelection={{ asPlainText: true }}
             fullWidth
-            options={authOptions}
+            options={options}
             selectedOptions={selectedAuth === undefined ? undefined : [{ label: selectedAuth }]}
             onChange={onChangeAuth}
           />

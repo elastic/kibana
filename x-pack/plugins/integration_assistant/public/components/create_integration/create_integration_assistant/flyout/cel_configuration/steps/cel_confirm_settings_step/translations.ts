@@ -14,6 +14,19 @@ export const ANALYZING = i18n.translate(
   }
 );
 
+export const RECOMMENDED = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.step.celConfirm.recommended',
+  {
+    defaultMessage: 'Recommended',
+  }
+);
+export const ENTER_MANUALLY = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.step.celConfirm.enterManually',
+  {
+    defaultMessage: 'Enter manually',
+  }
+);
+
 export const CONFIRM_ENDPOINT = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.celConfirm.confirmEndpoint',
   {
@@ -23,7 +36,7 @@ export const CONFIRM_ENDPOINT = i18n.translate(
 export const CONFIRM_ENDPOINT_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.celConfirm.confirmEndpointDescription',
   {
-    defaultMessage: 'Recommended API endpoints (chosen from your spec file)',
+    defaultMessage: 'Recommended API endpoints (chosen from your spec file):',
   }
 );
 
@@ -37,6 +50,12 @@ export const CONFIRM_AUTH_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.celConfirm.confirmAuthDescription',
   {
     defaultMessage: 'Please select the authentication method for the selected API endpoint.',
+  }
+);
+export const AUTH_SELECTION_TITLE = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.step.celConfirm.authSelectionTitle',
+  {
+    defaultMessage: 'Preferred method',
   }
 );
 

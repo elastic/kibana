@@ -179,7 +179,6 @@ const useModalCss = () => {
 interface GenerationModalProps {
   integrationSettings: State['integrationSettings'];
   connector: State['connector'];
-  // setSuccessfulGeneration: (success: boolean) => void;
   onComplete: OnComplete;
   onClose: () => void;
 }
