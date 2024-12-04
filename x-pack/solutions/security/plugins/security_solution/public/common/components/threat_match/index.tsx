@@ -97,7 +97,7 @@ export const ThreatMatchComponent = ({
   }, [mappingEntries, onMappingEntriesChange]);
 
   const andLogicIncluded = useMemo(
-    () => mappingEntries.filter(({ entries }) => entries.length > 1).length > 0,
+    () => mappingEntries.some(({ entries }) => entries.length > 1),
     [mappingEntries]
   );
 
