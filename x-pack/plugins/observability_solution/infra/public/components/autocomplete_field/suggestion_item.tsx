@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { Theme } from '@emotion/react';
+import type { Theme } from '@emotion/react';
 import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
 import { transparentize } from 'polished';
 

@@ -5,18 +5,29 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from '@emotion/styled';
+import { EuiFlexGroup, type EuiFlexGroupProps, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
+import React from 'react';
 
-export const LogStatusbar = styled(EuiFlexGroup)`
-  padding: ${(props) => props.theme.euiTheme.size.s};
-  border-top: ${(props) => props.theme.euiTheme.border.thin};
-  max-height: 48px;
-  min-height: 48px;
-  background-color: ${(props) => props.theme.euiTheme.colors.emptyShade};
-  flex-direction: row;
-`;
+export const LogStatusbar = (props: EuiFlexGroupProps) => {
+  const { euiTheme } = useEuiTheme();
 
-LogStatusbar.defaultProps = { alignItems: 'center', gutterSize: 'none', justifyContent: 'flexEnd' };
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      justifyContent="flexEnd"
+      css={css`
+        padding: ${euiTheme.size.s};
+        border-top: ${euiTheme.border.thin};
+        max-height: 48px;
+        min-height: 48px;
+        background-color: ${euiTheme.colors.emptyShade};
+        flex-direction: row;
+      `}
+      {...props}
+    />
+  );
+};
 
 export const LogStatusbarItem = EuiFlexItem;

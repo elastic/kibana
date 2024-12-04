@@ -7,7 +7,7 @@
 
 import rt from 'io-ts';
 import { PropsWithChildren } from 'react';
-import { WithEuiThemeProps } from '@elastic/eui';
+import type { WithEuiThemeProps } from '@elastic/eui';
 import { InventoryFormatterTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsTimeInput } from './hooks/use_metrics_time';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
