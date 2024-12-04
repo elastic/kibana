@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -42,14 +42,20 @@ export const AssistantHeaderLink = () => {
 
   return (
     <EuiToolTip content={TOOLTIP_CONTENT}>
-      <EuiHeaderLink data-test-subj="assistantHeaderLink" color="primary" onClick={showOverlay}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <AssistantAvatar size="xs" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiHeaderLink>
+        <EuiButton
+          onClick={showOverlay}
+          color="primary"
+          fill
+          size="s"
+          data-test-subj="assistantHeaderLink"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <AssistantAvatar size="xs" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiButton>
     </EuiToolTip>
   );
 };

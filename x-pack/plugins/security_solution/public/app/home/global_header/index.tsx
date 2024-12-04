@@ -99,7 +99,6 @@ export const GlobalHeader = React.memo(() => {
             {showSourcerer && !showTimeline && (
               <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
             )}
-            <AssistantHeaderLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
