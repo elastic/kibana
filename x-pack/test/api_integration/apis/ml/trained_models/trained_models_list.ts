@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
-    it('returns a foramtted list of trained model with stats, associated pipelines and indices', async () => {
+    it('returns a formatted list of trained model with stats, associated pipelines and indices', async () => {
       const { body, status } = await supertest
         .get(`/internal/ml/trained_models_list`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
