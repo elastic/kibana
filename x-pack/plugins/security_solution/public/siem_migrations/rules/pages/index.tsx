@@ -9,6 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -34,11 +35,13 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
 
     const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
 
-    const filnishedRuleMigrationsStats = useMemo(() => {
+    const finishedRuleMigrationsStats = useMemo(() => {
       if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
         return [];
       }
-      return ruleMigrationsStatsAll.filter((migration) => migration.status === 'finished');
+      return ruleMigrationsStatsAll.filter(
+        (migration) => migration.status === SiemMigrationTaskStatus.FINISHED
+      );
     }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
     useEffect(() => {
@@ -47,7 +50,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       }
 
       // Navigate to landing page if there are no migrations
-      if (!filnishedRuleMigrationsStats.length) {
+      if (!finishedRuleMigrationsStats.length) {
         navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
         return;
       }
@@ -56,21 +59,21 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       if (!migrationId) {
         navigateTo({
           deepLinkId: SecurityPageName.siemMigrationsRules,
-          path: filnishedRuleMigrationsStats[0].id,
+          path: finishedRuleMigrationsStats[0].id,
         });
       }
-    }, [isLoadingMigrationsStats, migrationId, filnishedRuleMigrationsStats, navigateTo]);
+    }, [isLoadingMigrationsStats, migrationId, finishedRuleMigrationsStats, navigateTo]);
 
     const onMigrationIdChange = (selectedId?: string) => {
       navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
     };
 
     const content = useMemo(() => {
-      if (!migrationId || !filnishedRuleMigrationsStats.some((stats) => stats.id === migrationId)) {
+      if (!migrationId || !finishedRuleMigrationsStats.some((stats) => stats.id === migrationId)) {
         return <UnknownMigration />;
       }
       return <MigrationRulesTable migrationId={migrationId} />;
-    }, [migrationId, filnishedRuleMigrationsStats]);
+    }, [migrationId, finishedRuleMigrationsStats]);
 
     return (
       <>
@@ -80,7 +83,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <HeaderButtons
-              ruleMigrationsStats={filnishedRuleMigrationsStats}
+              ruleMigrationsStats={finishedRuleMigrationsStats}
               selectedMigrationId={migrationId}
               onMigrationIdChange={onMigrationIdChange}
             />
