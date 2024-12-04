@@ -215,7 +215,7 @@ export interface HealthIndicatorAction {
 
 export interface EnrichedDeprecationInfo
   extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
-  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator';
+  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator' | 'data_streams';
   isCritical: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
@@ -296,4 +296,5 @@ export interface FeatureSet {
   migrateSystemIndices: boolean;
   mlSnapshots: boolean;
   reindexCorrectiveActions: boolean;
+  migrateDataStreams: boolean;
 }

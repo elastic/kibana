@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
-const UnknownMigrationComponent = () => {
+export const UnknownMigration: React.FC = React.memo(() => {
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -23,12 +23,10 @@ const UnknownMigrationComponent = () => {
           title={<h2>{i18n.UNKNOWN_MIGRATION}</h2>}
           titleSize="s"
           body={i18n.UNKNOWN_MIGRATION_BODY}
-          data-test-subj="noMigrationsAvailable"
+          data-test-subj="unknownMigration"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-export const UnknownMigration = React.memo(UnknownMigrationComponent);
+});
 UnknownMigration.displayName = 'UnknownMigration';
