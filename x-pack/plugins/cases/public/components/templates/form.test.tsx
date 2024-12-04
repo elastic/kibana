@@ -164,7 +164,7 @@ describe('TemplateForm', () => {
 
   // TODO: This test needs revisiting, it likely times out because of slow user events after
   // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
-  it.skip('serializes the template field data correctly', async () => {
+  it('serializes the template field data correctly', async () => {
     let formState: FormState<TemplateFormProps>;
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);

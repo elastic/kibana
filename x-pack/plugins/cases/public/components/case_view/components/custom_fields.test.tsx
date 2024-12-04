@@ -17,7 +17,7 @@ import userEvent from '@testing-library/user-event';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 
 // Failing: See https://github.com/elastic/kibana/issues/185046
-describe.skip('Case View Page files tab', () => {
+describe('Case View Page files tab', () => {
   const onSubmit = jest.fn();
   let appMockRender: AppMockRenderer;
 
