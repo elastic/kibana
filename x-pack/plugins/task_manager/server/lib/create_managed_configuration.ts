@@ -148,6 +148,9 @@ export function createPollIntervalScan(
           }`
         );
       }
+      if (newPollInterval === startingPollInterval) {
+        logger.debug(`Poll interval has been set to the default (${startingPollInterval}ms)`);
+      }
     }
     return newPollInterval;
   }, startingPollInterval);
