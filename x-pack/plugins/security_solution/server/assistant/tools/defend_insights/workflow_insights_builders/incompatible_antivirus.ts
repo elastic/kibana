@@ -7,9 +7,10 @@
 
 import moment from 'moment';
 
-import { DefendInsight } from '@kbn/elastic-assistant-common';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
+import type { DefendInsight } from '@kbn/elastic-assistant-common';
+import type { BuildWorkflowInsightParams } from '.';
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 
 import {
@@ -18,7 +19,6 @@ import {
   SourceType,
   TargetType,
 } from '../../../../../common/endpoint/types/workflow_insights';
-import { BuildWorkflowInsightParams } from '.';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../../../common/endpoint/constants';
 
 export function buildIncompatibleAntivirusWorkflowInsight(

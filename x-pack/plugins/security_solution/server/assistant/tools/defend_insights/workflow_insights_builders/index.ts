@@ -6,10 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
 
-import { DefendInsight, DefendInsightType } from '@kbn/elastic-assistant-common';
-
+import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 
 import { InvalidDefendInsightTypeError } from '../errors';
