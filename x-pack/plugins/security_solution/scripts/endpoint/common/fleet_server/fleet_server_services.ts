@@ -277,6 +277,7 @@ const startFleetServerWithDocker = async ({
   const isServerless = await isServerlessKibanaFlavor(kbnClient);
   const esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
   const containerName = `dev-fleet-server.${port}`;
+  let fleetServerVersionInfo = '';
 
   log.info(
     `Starting a new fleet server using Docker\n    Agent version: ${agentVersion}\n    Server URL: ${fleetServerUrl}`
@@ -284,10 +285,11 @@ const startFleetServerWithDocker = async ({
 
   let retryAttempt = isServerless ? 0 : 1;
   const attemptServerlessFleetServerSetup = async (): Promise<StartedServer> => {
+    fleetServerVersionInfo = '';
+
     return log.indent(4, async () => {
       const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
       let containerId = '';
-      let fleetServerVersionInfo = '';
 
       if (isLocalhost(esURL.hostname)) {
         esURL.hostname = localhostRealIp;
@@ -433,7 +435,7 @@ Kill container:       ${chalk.cyan(`docker kill ${containerId}`)}
 
   const response: StartedServer = await attemptServerlessFleetServerSetup();
 
-  log.info(`Done. Fleet server up and running`);
+  log.info(`Done. Fleet server up and running (version: ${fleetServerVersionInfo})`);
 
   return response;
 };
