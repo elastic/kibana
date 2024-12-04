@@ -253,8 +253,8 @@ When a test fails on CI, automation will apply `.skip` to the top-level describe
 ## Migrating existing tests
 If your tests align with the outlined criteria and requirements, you can migrate them to deployment-agnostic by following these steps:
 
-1. Move your tests to `the x-pack/test/api_integration/deployment_agnostic/apis/<plugin>` directory.
-2. Update each test file to use the `DeploymentAgnosticFtrProviderContext` to load the required FTR services it provides.
+1. Move your tests to the `x-pack/test/api_integration/deployment_agnostic/apis/<plugin>` directory.
+2. Update each test file to use the `DeploymentAgnosticFtrProviderContext` context and load the required FTR services it provides.
 3. Ensure the `roleScopedSupertest` or `samlAuth` service is used instead for `supertest` for authentication and test API calls.
 4. Remove all usage of the `supertest` service. It is the main cuase of test failure on Cloud becuase of system index superuser priveleges.
 5. Avoid modifying `config` files, as this could disrupt test runs in Cloud environments.
