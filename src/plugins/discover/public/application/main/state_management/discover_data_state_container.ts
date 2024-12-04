@@ -288,6 +288,13 @@ export function getDataStateContainer({
               ...commonFetchDeps,
             },
             async () => {
+              const { resetDefaultProfileState: currentResetDefaultProfileState } =
+                internalStateContainer.getState();
+
+              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
+                return;
+              }
+
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = defaultProfileState?.getPostFetchState({
