@@ -244,10 +244,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'truncate:maxHeight': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'timepicker:timeDefaults': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -421,10 +417,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:visualize:legacyHeatmapChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'doc_table:legacy': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
