@@ -43,7 +43,7 @@ const SECURITY_RULE_TYPES = [
 
 const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [SERVER_APP_ID],
+  consumers: [SECURITY_FEATURE_ID_V2],
 }));
 
 export const getSecurityV2BaseKibanaFeature = ({

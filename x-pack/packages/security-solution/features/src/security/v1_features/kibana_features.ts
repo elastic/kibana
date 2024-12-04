@@ -43,6 +43,11 @@ const SECURITY_RULE_TYPES = [
   NEW_TERMS_RULE_TYPE_ID,
 ];
 
+const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [SERVER_APP_ID],
+}));
+
 export const getSecurityBaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
@@ -74,7 +79,7 @@ export const getSecurityBaseKibanaFeature = ({
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: SECURITY_RULE_TYPES,
+  alerting: alertingFeatures,
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.securityGroupDescription',
     {
@@ -108,10 +113,10 @@ export const getSecurityBaseKibanaFeature = ({
       },
       alerting: {
         rule: {
-          all: SECURITY_RULE_TYPES,
+          all: alertingFeatures,
         },
         alert: {
-          all: SECURITY_RULE_TYPES,
+          all: alertingFeatures,
         },
       },
       management: {
@@ -135,10 +140,10 @@ export const getSecurityBaseKibanaFeature = ({
       },
       alerting: {
         rule: {
-          read: SECURITY_RULE_TYPES,
+          read: alertingFeatures,
         },
         alert: {
-          all: SECURITY_RULE_TYPES,
+          all: alertingFeatures,
         },
       },
       management: {

@@ -234,8 +234,12 @@ export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabiliti
   if (CASES_SUB_PLUGIN_KEY === pluginKey) {
     return capabilities[CASES_FEATURE_ID].read_cases === true;
   }
-  return capabilities[SERVER_APP_ID].show === true;
+  return hasAccessToSecuritySolution(capabilities);
 };
+
+export function hasAccessToSecuritySolution(capabilities: Capabilities) {
+  return capabilities[SERVER_APP_ID].show === true;
+}
 
 const siemSignalsFieldMappings: Record<string, string> = {
   [ALERT_RULE_UUID]: 'signal.rule.id',
