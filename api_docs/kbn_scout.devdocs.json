@@ -17,7 +17,1369 @@
     "objects": []
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.Client",
+        "type": "Class",
+        "tags": [],
+        "label": "Client",
+        "description": [],
+        "signature": [
+          "default",
+          " extends ",
+          "default"
+        ],
+        "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Client.diagnostic",
+            "type": "Object",
+            "tags": [],
+            "label": "diagnostic",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Client.name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | symbol"
+            ],
+            "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Client.connectionPool",
+            "type": "Object",
+            "tags": [],
+            "label": "connectionPool",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Client.transport",
+            "type": "Object",
+            "tags": [],
+            "label": "transport",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Client.serializer",
+            "type": "Object",
+            "tags": [],
+            "label": "serializer",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Client.helpers",
+            "type": "Object",
+            "tags": [],
+            "label": "helpers",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Client.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.Client.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "ClientOptions"
+                ],
+                "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Client.child",
+            "type": "Function",
+            "tags": [],
+            "label": "child",
+            "description": [],
+            "signature": [
+              "(opts: ",
+              "ClientOptions",
+              ") => ",
+              "default"
+            ],
+            "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.Client.child.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "ClientOptions"
+                ],
+                "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Client.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.KbnClient",
+        "type": "Class",
+        "tags": [],
+        "label": "KbnClient",
+        "description": [],
+        "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.status",
+            "type": "Object",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "KbnClientStatus"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [],
+            "signature": [
+              "KbnClientPlugins"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.version",
+            "type": "Object",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "KbnClientVersion"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [],
+            "signature": [
+              "KbnClientSavedObjects"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              "KbnClientSpaces"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "KbnClientUiSettings"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.importExport",
+            "type": "Object",
+            "tags": [],
+            "label": "importExport",
+            "description": [],
+            "signature": [
+              "KbnClientImportExport"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nBasic Kibana server client that implements common behaviors for talking\nto the Kibana server from dev tooling."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KbnClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClientOptions",
+                    "text": "KbnClientOptions"
+                  }
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.request",
+            "type": "Function",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nMake a direct request to the Kibana server"
+            ],
+            "signature": [
+              "<T>(options: ",
+              "ReqOptions",
+              ") => Promise<",
+              "AxiosResponse",
+              "<T, any>>"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KbnClient.request.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ReqOptions"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KbnClient.resolveUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "resolveUrl",
+            "description": [],
+            "signature": [
+              "(relativeUrl: string) => string"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KbnClient.resolveUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "relativeUrl",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.KibanaUrl",
+        "type": "Class",
+        "tags": [],
+        "label": "KibanaUrl",
+        "description": [],
+        "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaUrl.baseUrl",
+            "type": "Object",
+            "tags": [],
+            "label": "#baseUrl",
+            "description": [],
+            "signature": [
+              "URL"
+            ],
+            "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaUrl.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KibanaUrl.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "baseUrl",
+                "description": [],
+                "signature": [
+                  "URL"
+                ],
+                "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaUrl.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGet an absolute URL based on Kibana's URL"
+            ],
+            "signature": [
+              "(rel?: string | undefined, options?: ",
+              "PathOptions",
+              " | undefined) => string"
+            ],
+            "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KibanaUrl.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "rel",
+                "description": [
+                  "relative url, resolved relative to Kibana's url"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KibanaUrl.get.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "optional modifications to apply to the URL"
+                ],
+                "signature": [
+                  "PathOptions",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaUrl.app",
+            "type": "Function",
+            "tags": [],
+            "label": "app",
+            "description": [
+              "\nGet the URL for an app"
+            ],
+            "signature": [
+              "(appName: string, options?: ",
+              "PathOptions",
+              " | undefined) => string"
+            ],
+            "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KibanaUrl.app.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appName",
+                "description": [
+                  "name of the app to get the URL for"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KibanaUrl.app.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "optional modifications to apply to the URL"
+                ],
+                "signature": [
+                  "PathOptions",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaUrl.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.SamlSessionManager",
+        "type": "Class",
+        "tags": [],
+        "label": "SamlSessionManager",
+        "description": [
+          "\nManages cookies associated with user roles"
+        ],
+        "path": "packages/kbn-test/src/auth/session_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SamlSessionManager.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.SamlSessionManager.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.SamlSessionManagerOptions",
+                    "text": "SamlSessionManagerOptions"
+                  }
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SamlSessionManager.getApiCredentialsForRole",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiCredentialsForRole",
+            "description": [],
+            "signature": [
+              "(role: string, options?: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.GetCookieOptions",
+                "text": "GetCookieOptions"
+              },
+              " | undefined) => Promise<{ Cookie: string; }>"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.SamlSessionManager.getApiCredentialsForRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.SamlSessionManager.getApiCredentialsForRole.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope",
+            "type": "Function",
+            "tags": [],
+            "label": "getInteractiveUserSessionCookieWithRoleScope",
+            "description": [],
+            "signature": [
+              "(role: string, options?: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.GetCookieOptions",
+                "text": "GetCookieOptions"
+              },
+              " | undefined) => Promise<string>"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SamlSessionManager.getEmail",
+            "type": "Function",
+            "tags": [],
+            "label": "getEmail",
+            "description": [],
+            "signature": [
+              "(role: string) => Promise<string>"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.SamlSessionManager.getEmail.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SamlSessionManager.getUserData",
+            "type": "Function",
+            "tags": [],
+            "label": "getUserData",
+            "description": [],
+            "signature": [
+              "(role: string) => Promise<",
+              "UserProfile",
+              ">"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.SamlSessionManager.getUserData.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.ToolingLog",
+        "type": "Class",
+        "tags": [],
+        "label": "ToolingLog",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/some-dev-log",
+            "scope": "common",
+            "docId": "kibKbnSomeDevLogPluginApi",
+            "section": "def-common.SomeDevLog",
+            "text": "SomeDevLog"
+          }
+        ],
+        "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "writerConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLogTextWriterConfig",
+                    "text": "ToolingLogTextWriterConfig"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLogOptions",
+                    "text": "ToolingLogOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.getIndent",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndent",
+            "description": [
+              "\nGet the current indentation level of the ToolingLog"
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.indent",
+            "type": "Function",
+            "tags": [],
+            "label": "indent",
+            "description": [],
+            "signature": [
+              "{ (delta: number): void; <T>(delta: number, block: () => Promise<T>): Promise<T>; <T>(delta: number, block: () => T): T; }"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.indent.$1",
+                "type": "number",
+                "tags": [],
+                "label": "delta",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.indent.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "block",
+                "description": [],
+                "signature": [
+                  "(() => T | Promise<T>) | undefined"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.verbose",
+            "type": "Function",
+            "tags": [],
+            "label": "verbose",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.verbose.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.debug",
+            "type": "Function",
+            "tags": [],
+            "label": "debug",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.debug.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.info",
+            "type": "Function",
+            "tags": [],
+            "label": "info",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.info.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.success",
+            "type": "Function",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.success.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.warning",
+            "type": "Function",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.warning.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.error",
+            "type": "Function",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "(error: string | Error) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.error.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "string | Error"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.write.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.getWriters",
+            "type": "Function",
+            "tags": [],
+            "label": "getWriters",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Writer",
+                "text": "Writer"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.setWriters",
+            "type": "Function",
+            "tags": [],
+            "label": "setWriters",
+            "description": [],
+            "signature": [
+              "(writers: ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Writer",
+                "text": "Writer"
+              },
+              "[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.setWriters.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "writers",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.Writer",
+                    "text": "Writer"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.getWritten$",
+            "type": "Function",
+            "tags": [],
+            "label": "getWritten$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ToolingLog.withType",
+            "type": "Function",
+            "tags": [],
+            "label": "withType",
+            "description": [
+              "\nCreate a new ToolingLog which sets a different \"type\", allowing messages to be filtered out by \"source\""
+            ],
+            "signature": [
+              "(type: string) => ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.ToolingLog.withType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "A string that will be passed along with messages from this logger which can be used to filter messages with `ignoreSources`"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "@kbn/scout",
@@ -289,7 +1651,13 @@
             "text": "ScoutPage"
           },
           "; kbnUrl: ",
-          "KibanaUrl",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
           "; } & ",
           {
             "pluginId": "@kbn/scout",
@@ -319,6 +1687,84 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.EsArchiverFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsArchiverFixture",
+        "description": [],
+        "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.EsArchiverFixture.loadIfNeeded",
+            "type": "Function",
+            "tags": [],
+            "label": "loadIfNeeded",
+            "description": [],
+            "signature": [
+              "(name: string, performance?: ",
+              {
+                "pluginId": "@kbn/es-archiver",
+                "scope": "common",
+                "docId": "kibKbnEsArchiverPluginApi",
+                "section": "def-common.LoadActionPerfOptions",
+                "text": "LoadActionPerfOptions"
+              },
+              " | undefined) => Promise<Record<string, ",
+              "IndexStats",
+              ">>"
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.EsArchiverFixture.loadIfNeeded.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.EsArchiverFixture.loadIfNeeded.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "performance",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.LoadActionPerfOptions",
+                    "text": "LoadActionPerfOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/scout",
         "id": "def-common.PageObjects",
@@ -353,6 +1799,34 @@
             "description": [],
             "signature": [
               "DiscoverApp"
+            ],
+            "path": "packages/kbn-scout/src/playwright/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.PageObjects.dashboard",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboard",
+            "description": [],
+            "signature": [
+              "DashboardApp"
+            ],
+            "path": "packages/kbn-scout/src/playwright/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.PageObjects.filterBar",
+            "type": "Object",
+            "tags": [],
+            "label": "filterBar",
+            "description": [],
+            "signature": [
+              "FilterBar"
             ],
             "path": "packages/kbn-scout/src/playwright/page_objects/index.ts",
             "deprecated": false,
@@ -448,13 +1922,17 @@
               "Page",
               " & { gotoApp: (appName: string, options?: { referer?: string | undefined; timeout?: number | undefined; waitUntil?: \"load\" | \"domcontentloaded\" | \"networkidle\" | \"commit\" | undefined; } | undefined) => Promise<",
               "Response",
-              " | null>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
+              " | null>; waitForLoadingIndicatorHidden: () => Promise<",
+              "ElementHandle",
+              "<HTMLElement | SVGElement> | null>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isVisible: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
               "Locator",
               " | undefined; hasNot?: ",
               "Locator",
               " | undefined; hasNotText?: string | RegExp | undefined; hasText?: string | RegExp | undefined; } | undefined) => ",
               "Locator",
-              "; }; }"
+              "; waitForSelector: (selector: string, options?: PageWaitForSelectorOptions | undefined) => Promise<",
+              "ElementHandle",
+              "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; }; }"
             ],
             "path": "packages/kbn-scout/src/playwright/fixtures/types/test_scope.ts",
             "deprecated": false,
@@ -583,7 +2061,13 @@
             "label": "kbnUrl",
             "description": [],
             "signature": [
-              "KibanaUrl"
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.KibanaUrl",
+                "text": "KibanaUrl"
+              }
             ],
             "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
             "deprecated": false,
@@ -625,13 +2109,33 @@
           },
           {
             "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutWorkerFixtures.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "UiSettingsFixture"
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
             "id": "def-common.ScoutWorkerFixtures.esArchiver",
             "type": "Object",
             "tags": [],
             "label": "esArchiver",
             "description": [],
             "signature": [
-              "EsArchiverFixture"
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.EsArchiverFixture",
+                "text": "EsArchiverFixture"
+              }
             ],
             "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
             "deprecated": false,
@@ -669,18 +2173,24 @@
         "type": "Type",
         "tags": [],
         "label": "ScoutPage",
-        "description": [],
+        "description": [
+          "\nExtends the Playwright 'Page' interface with methods specific to Kibana.\nReasons to use 'ReturnType' instead of Explicit Typings:\n- DRY Principle: automatically stays in sync with the Playwright API, reducing maintenance overhead.\n- Future-Proofing: If Playwright changes the return type of methods, these types will update accordingly.\nRecommendation: define Explicit Types as return types only if methods (e.g. 'typeWithDelay')\nhave any additional logic or Kibana-specific behavior."
+        ],
         "signature": [
           "Page",
           " & { gotoApp: (appName: string, options?: { referer?: string | undefined; timeout?: number | undefined; waitUntil?: \"load\" | \"domcontentloaded\" | \"networkidle\" | \"commit\" | undefined; } | undefined) => Promise<",
           "Response",
-          " | null>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
+          " | null>; waitForLoadingIndicatorHidden: () => Promise<",
+          "ElementHandle",
+          "<HTMLElement | SVGElement> | null>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isVisible: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
           "Locator",
           " | undefined; hasNot?: ",
           "Locator",
           " | undefined; hasNotText?: string | RegExp | undefined; hasText?: string | RegExp | undefined; } | undefined) => ",
           "Locator",
-          "; }; }"
+          "; waitForSelector: (selector: string, options?: PageWaitForSelectorOptions | undefined) => Promise<",
+          "ElementHandle",
+          "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; }; }"
         ],
         "path": "packages/kbn-scout/src/playwright/fixtures/types/test_scope.ts",
         "deprecated": false,

@@ -23,6 +23,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Enrich policies tab', function () {
     before(async () => {
       await log.debug('Creating required index and enrich policy');
+
+      try {
+        await es.indices.delete({ index: ENRICH_INDEX_NAME });
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
+
       try {
         await es.indices.create({
           index: ENRICH_INDEX_NAME,
@@ -94,7 +100,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await successToast.getVisibleText()).to.contain(`Executed ${ENRICH_POLICY_NAME}`);
     });
 
+    it('read only access', async () => {
+      await security.testUser.setRoles(['index_management_monitor_enrich_only']);
+      await pageObjects.common.navigateToApp('indexManagement');
+      await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.missingOrFail('createPolicyButton');
+      await testSubjects.missingOrFail('deletePolicyButton');
+    });
+
     it('can delete a policy', async () => {
+      await security.testUser.setRoles(['index_management_user']);
+      await pageObjects.common.navigateToApp('indexManagement');
+      // Navigate to the enrich policies tab
+      await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       // Since we disabled wait_for_completion in the server request, we dont know when
       // a given policy will finish executing. Until that happens the policy cannot
       // be deleted. 2s seems to be plenty enough to guarantee that, at least for this
@@ -104,8 +125,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickDeleteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getElementByIndex(2);
+      const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
+    });
+
+    it('no access', async () => {
+      await security.testUser.setRoles(['index_management_monitor_only']);
+      await pageObjects.common.navigateToApp('indexManagement');
+      await testSubjects.missingOrFail('enrich_policiesTab');
     });
   });
 };
