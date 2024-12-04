@@ -13,6 +13,7 @@ import { getSampleLayout } from './test_utils/sample_layout';
 import { GridLayout, GridLayoutProps } from './grid_layout';
 import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
 import { cloneDeep } from 'lodash';
+import { GridLayoutData } from './types';
 
 describe('GridLayout', () => {
   const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
@@ -66,6 +67,25 @@ describe('GridLayout', () => {
     'panel9',
     'panel10',
   ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it(`'renderPanelContents' is not called during dragging`, () => {
+    renderGridLayout();
+
+    expect(mockRenderPanelContents).toHaveBeenCalledTimes(10); // renderPanelContents is called for each of 10 panels
+    jest.clearAllMocks();
+
+    const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
+    startDragging(panel1DragHandle);
+    moveTo({ clientX: 256, clientY: 128 });
+    expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called during dragging
+
+    drop(panel1DragHandle);
+    expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called after reordering
+  });
 
   describe('panels order: panels are rendered from left to right, from top to bottom', () => {
     it('focus management - tabbing through the panels', async () => {
