@@ -43,7 +43,7 @@ import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import {
   isAlertSavedObjectNotFoundError,
-  isClusterBlockedError,
+  isClusterBlockError,
   isEsUnavailableError,
 } from '../lib/is_alerting_error';
 import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
@@ -728,7 +728,7 @@ export class TaskRunner<
             this.logger.debug(message, {
               tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
             });
-          } else if (isClusterBlockedError(err)) {
+          } else if (isClusterBlockError(err)) {
             this.logger.debug('Index is blocked', {
               tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
             });
@@ -765,7 +765,7 @@ export class TaskRunner<
               : retryInterval;
         }
 
-        if (isClusterBlockedError(error)) {
+        if (isClusterBlockError(error)) {
           retryInterval = CLUSTER_BLOCKED_EXCEPTION_RETRY_INTERVAL;
         }
 

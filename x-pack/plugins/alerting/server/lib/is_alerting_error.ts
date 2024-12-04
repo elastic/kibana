@@ -24,7 +24,7 @@ export function isEsUnavailableError(err: Error, ruleId: string) {
   return SavedObjectsErrorHelpers.isEsUnavailableError(actualError);
 }
 
-export function isClusterBlockedError(err: Error) {
+export function isClusterBlockError(err: Error) {
   return isErrorWithReason(err)
     ? getReasonFromError(err) === RuleExecutionStatusErrorReasons.Blocked
     : false;
