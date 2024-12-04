@@ -34,7 +34,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         logger,
       });
       await observability.alerts.common.navigateToRulesPage();
-      // TODO Remove when it's fixed https://github.com/elastic/kibana/issues/201805
     });
 
     after(async () => {
