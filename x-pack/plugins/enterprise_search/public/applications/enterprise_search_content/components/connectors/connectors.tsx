@@ -93,7 +93,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                 defaultMessage: 'Elasticsearch connectors',
               })
             : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
-                defaultMessage: 'Elasticsearch web crawlers',
+                defaultMessage: 'Elastic Web Crawler',
               }),
           rightSideGroupProps: {
             gutterSize: 's',
