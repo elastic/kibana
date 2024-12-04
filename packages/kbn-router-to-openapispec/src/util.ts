@@ -128,7 +128,16 @@ export const prepareRoutes = <
     if (filters.pathStartsWith && !filters.pathStartsWith.some((p) => route.path.startsWith(p))) {
       return false;
     }
-    if (filters.access && route.options.access !== filters.access) return false;
+    if (filters.access === 'public' && route.options.access !== 'public') {
+      return false;
+    }
+    if (
+      filters.access === 'internal' &&
+      route.options.access != null &&
+      route.options.access !== 'internal'
+    ) {
+      return false;
+    }
     return true;
   });
 };

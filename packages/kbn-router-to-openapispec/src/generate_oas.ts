@@ -24,9 +24,9 @@ export interface GenerateOpenApiDocumentOptionsFilters {
   access: 'public' | 'internal';
   /**
    * We generate spec for one version at a time
-   * @default '2023-10-31'
+   * @default '2023-10-31' if access is public, otherwise undefined
    */
-  version: string;
+  version?: string;
 }
 
 export interface GenerateOpenApiDocumentOptions {
@@ -43,7 +43,10 @@ export const generateOpenApiDocument = (
   appRouters: { routers: Router[]; versionedRouters: CoreVersionedRouter[] },
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document => {
-  const { filters = { access: 'public', version: SERVERLESS_VERSION_2023_10_31 } } = opts;
+  let { filters = { access: 'public' } } = opts;
+  if (filters.access === 'public' && !filters.version) {
+    filters = { ...filters, version: SERVERLESS_VERSION_2023_10_31 };
+  }
   const converter = new OasConverter();
   const paths: OpenAPIV3.PathsObject = {};
   const getOpId = createOpIdGenerator();
