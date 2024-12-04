@@ -9,8 +9,8 @@
     ]
   },
   "include": [
-    "index.js",
-    "types.ts"
+    "**/*.ts",
+    "**/*.js"
   ],
   "exclude": [
     "target/**/*",
