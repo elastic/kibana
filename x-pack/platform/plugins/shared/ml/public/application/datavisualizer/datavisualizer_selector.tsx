@@ -95,7 +95,7 @@ export const DatavisualizerSelector: FC = () => {
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.ml.datavisualizer.selector.dataVisualizerDescription"
-                defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data,
+                defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data
                   by analyzing the metrics and fields in a log file or an existing Elasticsearch index."
               />
             </EuiText>
@@ -211,6 +211,52 @@ export const DatavisualizerSelector: FC = () => {
               />
             </EuiFlexItem>
           ) : null}
+          <EuiFlexItem>
+            <EuiCard
+              hasBorder
+              icon={<EuiIcon size="xxl" type="visTagCloud" />}
+              title={
+                <>
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.selectDataDriftTitle"
+                    defaultMessage="Visualize data using data drift"
+                  />{' '}
+                  <EuiBetaBadge
+                    label=""
+                    iconType="beaker"
+                    size="m"
+                    color="hollow"
+                    tooltipContent={
+                      <FormattedMessage
+                        id="xpack.ml.datavisualizer.selector.dataDriftTechnicalPreviewBadge.titleMsg"
+                        defaultMessage="Data drift visualizer is in technical preview."
+                      />
+                    }
+                    tooltipPosition={'right'}
+                  />
+                </>
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.dataDriftDescription"
+                  defaultMessage="Visualize changes in the model input data."
+                />
+              }
+              footer={
+                <EuiButton
+                  target="_self"
+                  onClick={() => navigateToPath('/data_drift_index_select')}
+                  data-test-subj="mlDataVisualizerSelectDataDriftButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
+                    defaultMessage="Select data view"
+                  />
+                </EuiButton>
+              }
+              data-test-subj="mlDataVisualizerCardDataDriftData"
+            />
+          </EuiFlexItem>
         </EuiFlexGrid>
         {startTrialVisible === true && (
           <Fragment>

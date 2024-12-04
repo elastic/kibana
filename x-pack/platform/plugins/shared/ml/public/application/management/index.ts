@@ -14,34 +14,64 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { MlStartDependencies } from '../../plugin';
 
-export function registerManagementSection(
+export function registerManagementSections(
   management: ManagementSetup,
   core: CoreSetup<MlStartDependencies>,
   deps: { usageCollection?: UsageCollectionSetup },
   isServerless: boolean,
   mlFeatures: MlFeatures
 ) {
-  const appName = i18n.translate('xpack.ml.management.jobsListTitle', {
-    defaultMessage: 'Machine Learning',
+  const overviewTitle = i18n.translate('xpack.ml.management.overviewTitle', {
+    defaultMessage: 'Overview',
   });
+  const anomalyDetectionJobsTitle = i18n.translate(
+    'xpack.ml.management.anomalyDetectionJobsTitle',
+    {
+      defaultMessage: 'Anomaly Detection Jobs',
+    }
+  );
 
-  return management.sections.section.insightsAndAlerting.registerApp({
-    id: 'jobsListLink',
-    title: appName,
-    order: 4,
-    async mount(params: ManagementAppMountParams) {
-      const [{ chrome }] = await core.getStartServices();
-      const { docTitle } = chrome;
+  management.sections.section.machineLearning
+    .registerApp({
+      id: 'jobsListLink', // TODO: will need to update this
+      title: overviewTitle,
+      order: 1,
+      async mount(params: ManagementAppMountParams) {
+        const [{ chrome }] = await core.getStartServices();
+        const { docTitle } = chrome;
 
-      docTitle.change(appName);
+        docTitle.change(overviewTitle);
 
-      const { mountApp } = await import('./jobs_list');
-      const unmountAppCallback = await mountApp(core, params, deps, isServerless, mlFeatures);
+        const { mountApp } = await import('./overview');
+        const unmountAppCallback = await mountApp(core, params, deps, isServerless, mlFeatures);
 
-      return () => {
-        docTitle.reset();
-        unmountAppCallback();
-      };
-    },
-  });
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
+      },
+    })
+    .enable();
+
+  management.sections.section.machineLearning
+    .registerApp({
+      id: 'anomalyDetectionJobsLink',
+      title: anomalyDetectionJobsTitle,
+      order: 2,
+      async mount(params: ManagementAppMountParams) {
+        const [{ chrome }] = await core.getStartServices();
+        const { docTitle } = chrome;
+
+        docTitle.change(overviewTitle);
+
+        const { mountApp } = await import('./anomaly_detection_jobs');
+        const unmountAppCallback = await mountApp(core, params, deps, isServerless, mlFeatures);
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
+      },
+    })
+    .enable();
 }
