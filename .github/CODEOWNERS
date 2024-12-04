@@ -370,6 +370,7 @@ packages/kbn-formatters @elastic/obs-ux-logs-team
 packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ftr-common-functional-ui-services @elastic/appex-qa
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
+packages/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management
 packages/kbn-generate-csv @elastic/appex-sharedux
@@ -1819,6 +1820,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # AppEx AI Infra
 /x-pack/plugins/inference @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
+/x-pack/test/functional_gen_ai/inference @elastic/appex-ai-infra
 
 # AppEx Platform Services Security
 //x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
