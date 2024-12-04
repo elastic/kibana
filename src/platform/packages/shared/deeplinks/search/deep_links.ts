@@ -60,6 +60,8 @@ export type SearchInferenceEndpointsLinkId = 'inferenceEndpoints';
 
 export type SynonymsLinkId = 'synonyms';
 
+export type SynonymsLinkId = 'synonyms';
+
 export type SearchIndicesLinkId = typeof SEARCH_INDICES_CREATE_INDEX;
 
 export type DeepLinkId =
