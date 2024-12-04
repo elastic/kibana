@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { StreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition, StreamDefinition } from '@kbn/streams-plugin/common';
+import { css } from '@emotion/css';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiText } from '@elastic/eui';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
@@ -26,7 +27,7 @@ export function StreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition?: StreamDefinition;
+  definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
   const {
@@ -91,7 +92,13 @@ export function StreamDetailManagement({
   const selectedTabObject = tabs[subtab];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      className={css`
+        max-width: 100%;
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
           legend="Management tabs"
@@ -108,7 +115,14 @@ export function StreamDetailManagement({
           }))}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow>{selectedTabObject.content}</EuiFlexItem>
+      <EuiFlexItem
+        className={css`
+          overflow: auto;
+        `}
+        grow
+      >
+        {selectedTabObject.content}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

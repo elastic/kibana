@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import { pick } from 'lodash';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
   EuiCodeBlock,
-  EuiText,
-  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import {
-  transformUpdateRuleBody as rewriteUpdateBodyRequest,
   UPDATE_FIELDS_WITH_ACTIONS,
-} from '@kbn/alerts-ui-shared/src/common/apis/update_rule';
-import { transformCreateRuleBody as rewriteCreateBodyRequest } from '@kbn/alerts-ui-shared/src/common/apis/create_rule';
-import * as i18n from '../translations';
+  transformCreateRuleBody as rewriteCreateBodyRequest,
+  transformUpdateRuleBody as rewriteUpdateBodyRequest,
+} from '@kbn/response-ops-rule-form';
+import { pick } from 'lodash';
+import React from 'react';
 import { RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
+import * as i18n from '../translations';
 
 const stringify = (rule: RuleUpdates, edit: boolean): string => {
   try {
