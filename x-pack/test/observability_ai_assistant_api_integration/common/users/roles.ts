@@ -51,21 +51,4 @@ export interface Role {
   };
 }
 
-const kibanaPrivileges = [
-  {
-    feature: {
-      observabilityAIAssistant: ['all'],
-      actions: ['read'],
-    },
-    spaces: ['*'],
-  },
-];
-
-export const aiAssistantRole: Role = {
-  name: AI_ASSISTANT_ROLE_NAME,
-  privileges: {
-    kibana: kibanaPrivileges,
-  },
-};
-
-export const allRoles = [aiAssistantRole];
+export const allRoles = [];

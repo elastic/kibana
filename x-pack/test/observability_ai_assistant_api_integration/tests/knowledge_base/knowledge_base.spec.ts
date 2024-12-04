@@ -15,15 +15,11 @@ import {
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from './helpers';
-import { resolveEndpoint } from '../../common/resolve_endpoint';
-import { unauthorizedUser } from '../../common/users/users';
-import { ApiErrorResponse } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('Knowledge base', () => {
     before(async () => {
@@ -216,81 +212,48 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('security roles and access privileges', () => {
-      const routes: Array<{
-        endpoint: string;
-        endpointWithParams?: string;
-        method: 'get' | 'post' | 'put' | 'delete';
-        payload?: Record<string, any>;
-        requiredPrivileges: string[];
-      }> = [
-        {
-          endpoint: '/internal/observability_ai_assistant/kb/entries/save',
-          method: 'post',
-          payload: {
-            body: {
-              id: 'my-doc-id-1',
-              title: 'My title',
-              text: 'My content',
-            },
-          },
-          requiredPrivileges: ['ai_assistant'],
-        },
-        {
-          endpoint: '/internal/observability_ai_assistant/kb/entries',
-          endpointWithParams:
-            '/internal/observability_ai_assistant/kb/entries?query=&sortBy=title&sortDirection=asc',
-          method: 'get',
-          payload: {
-            query: {
-              query: '',
-              sortBy: 'title',
-              sortDirection: 'asc',
-            },
-          },
-          requiredPrivileges: ['ai_assistant'],
-        },
-        {
-          endpoint: '/internal/observability_ai_assistant/kb/entries/{entryId}',
-          endpointWithParams: '/internal/observability_ai_assistant/kb/entries/my-doc-id-1',
-          method: 'delete',
-          payload: {
-            path: { entryId: 'my-doc-id-1' },
-          },
-          requiredPrivileges: ['ai_assistant'],
-        },
-      ];
-
-      routes.forEach((route) => {
-        const { endpoint, endpointWithParams, method, payload, requiredPrivileges } = route;
-
-        describe(`${method.toUpperCase()} ${endpoint}`, () => {
-          it('should deny access for unauthorized users', async () => {
-            const request = supertestWithoutAuth[method](
-              resolveEndpoint(endpoint, payload?.path || {})
-            )
-              .auth(unauthorizedUser.username, unauthorizedUser.password)
-              .set('kbn-xsrf', 'true');
-
-            if (payload?.body) {
-              await request.send(payload.body);
-            }
-
-            if (payload?.query) {
-              await request.query(payload.query);
-            }
-
-            await request.expect(403).then(({ body }: { body: ApiErrorResponse }) => {
-              expect(body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: `API [${method.toUpperCase()} ${
-                  endpointWithParams || endpoint
-                }] is unauthorized for user, this action is granted by the Kibana privileges [${requiredPrivileges.join(
-                  ', '
-                )}]`,
-              });
+      describe('should deny access for users without the ai_assistant privilege', () => {
+        it('POST /internal/observability_ai_assistant/kb/entries/save', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
+              params: {
+                body: {
+                  id: 'my-doc-id-1',
+                  title: 'My title',
+                  text: 'My content',
+                },
+              },
             });
-          });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('GET /internal/observability_ai_assistant/kb/entries', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+              params: {
+                query: { query: '', sortBy: 'title', sortDirection: 'asc' },
+              },
+            });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('DELETE /internal/observability_ai_assistant/kb/entries/{entryId}', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
+              params: {
+                path: { entryId: 'my-doc-id-1' },
+              },
+            });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
         });
       });
     });

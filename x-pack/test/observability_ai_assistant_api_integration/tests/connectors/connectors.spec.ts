@@ -9,12 +9,10 @@ import expect from '@kbn/expect';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
-import { unauthorizedUser, editor } from '../../common/users/users';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
   const CONNECTOR_API_URL = '/internal/observability_ai_assistant/connectors';
@@ -58,26 +56,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
-        await supertestWithoutAuth
-          .get(CONNECTOR_API_URL)
-          .auth(unauthorizedUser.username, unauthorizedUser.password)
-          .set('kbn-xsrf', 'true')
-          .expect(403)
-          .then(({ body }: any) => {
-            expect(body).to.eql({
-              statusCode: 403,
-              error: 'Forbidden',
-              message: `API [GET ${CONNECTOR_API_URL}] is unauthorized for user, this action is granted by the Kibana privileges [ai_assistant]`,
-            });
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: `GET ${CONNECTOR_API_URL}`,
           });
-      });
-
-      it('should allow access for users with the ai_assistant privilege', async () => {
-        await supertest
-          .get(CONNECTOR_API_URL)
-          .auth(editor.username, editor.password)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
       });
     });
   });

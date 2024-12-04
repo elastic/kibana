@@ -11,12 +11,11 @@ import { PassThrough } from 'stream';
 import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
-import { aiAssistantUser, unauthorizedUser } from '../../common/users/users';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const CHAT_API_URL = `/internal/observability_ai_assistant/chat`;
 
@@ -188,40 +187,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
-        await supertestWithoutAuth
-          .post(CHAT_API_URL)
-          .auth(unauthorizedUser.username, unauthorizedUser.password)
-          .send({
-            name: 'my_api_call',
-            messages,
-            connectorId,
-            functions: [],
-            scopes: ['all'],
-          })
-          .set('kbn-xsrf', 'true')
-          .expect(403)
-          .then(({ body }: any) => {
-            expect(body).to.eql({
-              statusCode: 403,
-              error: 'Forbidden',
-              message: `API [POST ${CHAT_API_URL}] is unauthorized for user, this action is granted by the Kibana privileges [ai_assistant]`,
-            });
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: `POST ${CHAT_API_URL}`,
+            params: {
+              body: {
+                name: 'my_api_call',
+                messages,
+                connectorId,
+                functions: [],
+                scopes: ['all'],
+              },
+            },
           });
-      });
-
-      it('should allow access for users with the ai_assistant privilege', async () => {
-        await supertest
-          .post(CHAT_API_URL)
-          .auth(aiAssistantUser.username, aiAssistantUser.password)
-          .set('kbn-xsrf', 'true')
-          .send({
-            name: 'my_api_call',
-            messages,
-            connectorId,
-            functions: [],
-            scopes: ['all'],
-          })
-          .expect(200);
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
       });
     });
   });

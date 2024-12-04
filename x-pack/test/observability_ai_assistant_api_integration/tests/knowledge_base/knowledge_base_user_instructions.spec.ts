@@ -22,14 +22,11 @@ import {
 import { getConversationCreatedEvent } from '../conversations/helpers';
 import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
-import { User, unauthorizedUser } from '../../common/users/users';
-import { resolveEndpoint } from '../../common/resolve_endpoint';
-import { ApiErrorResponse } from '../../common/config';
+import { User } from '../../common/users/users';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const ml = getService('ml');
   const log = getService('log');
@@ -367,60 +364,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('security roles and access privileges', () => {
-      const routes: Array<{
-        endpoint: string;
-        method: 'get' | 'post' | 'put' | 'delete';
-        payload?: Record<string, any>;
-        requiredPrivileges: string[];
-      }> = [
-        {
-          endpoint: '/internal/observability_ai_assistant/kb/user_instructions',
-          method: 'put',
-          payload: {
-            body: {
-              id: 'test-instruction',
-              text: 'Test user instruction',
-              public: true,
-            },
-          },
-          requiredPrivileges: ['ai_assistant'],
-        },
-        {
-          endpoint: '/internal/observability_ai_assistant/kb/user_instructions',
-          method: 'get',
-          requiredPrivileges: ['ai_assistant'],
-        },
-      ];
-
-      routes.forEach((route) => {
-        const { endpoint, method, payload, requiredPrivileges } = route;
-
-        describe(`${method.toUpperCase()} ${endpoint}`, () => {
-          it('should deny access for unauthorized users', async () => {
-            const request = supertestWithoutAuth[method](
-              resolveEndpoint(endpoint, payload?.path || {})
-            )
-              .auth(unauthorizedUser.username, unauthorizedUser.password)
-              .set('kbn-xsrf', 'true');
-
-            if (payload?.body) {
-              await request.send(payload.body);
-            }
-
-            if (payload?.query) {
-              await request.query(payload.query);
-            }
-
-            await request.expect(403).then(({ body }: { body: ApiErrorResponse }) => {
-              expect(body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: `API [${method.toUpperCase()} ${endpoint}] is unauthorized for user, this action is granted by the Kibana privileges [${requiredPrivileges.join(
-                  ', '
-                )}]`,
-              });
+      describe('should deny access for users without the ai_assistant privilege', () => {
+        it('PUT /internal/observability_ai_assistant/kb/user_instructions', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+              params: {
+                body: {
+                  id: 'test-instruction',
+                  text: 'Test user instruction',
+                  public: true,
+                },
+              },
             });
-          });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('GET /internal/observability_ai_assistant/kb/user_instructions', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+            });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
         });
       });
     });

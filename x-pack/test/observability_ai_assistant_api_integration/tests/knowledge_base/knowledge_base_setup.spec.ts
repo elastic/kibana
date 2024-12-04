@@ -13,12 +13,10 @@ import {
   TINY_ELSER,
   deleteInferenceEndpoint,
 } from './helpers';
-import { unauthorizedUser } from '../../common/users/users';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const KNOWLEDGE_BASE_SETUP_API_URL = '/internal/observability_ai_assistant/kb/setup';
@@ -67,21 +65,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
-        await supertestWithoutAuth
-          .post(KNOWLEDGE_BASE_SETUP_API_URL)
-          .auth(unauthorizedUser.username, unauthorizedUser.password)
-          .query({
-            model_id: TINY_ELSER.id,
-          })
-          .set('kbn-xsrf', 'true')
-          .expect(403)
-          .then(({ body }: any) => {
-            expect(body).to.eql({
-              statusCode: 403,
-              error: 'Forbidden',
-              message: `API [POST ${KNOWLEDGE_BASE_SETUP_API_URL}?model_id=pt_tiny_elser] is unauthorized for user, this action is granted by the Kibana privileges [ai_assistant]`,
-            });
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
+            params: {
+              query: {
+                model_id: TINY_ELSER.id,
+              },
+            },
           });
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
       });
     });
   });

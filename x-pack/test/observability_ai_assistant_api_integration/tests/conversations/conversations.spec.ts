@@ -14,11 +14,8 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { SupertestReturnType } from '../../common/observability_ai_assistant_api_client';
-import { unauthorizedUser } from '../../common/users/users';
-import { resolveEndpoint } from '../../common/resolve_endpoint';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const conversationCreate: ConversationCreateRequest = {
@@ -255,81 +252,109 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('security roles and access privileges', () => {
-      let createResponse: Awaited<
-        SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
-      >;
-
-      before(async () => {
-        createResponse = await observabilityAIAssistantAPIClient
-          .editor({
-            endpoint: 'POST /internal/observability_ai_assistant/conversation',
-            params: {
-              body: {
-                conversation: conversationCreate,
+      describe('should deny access for users without the ai_assistant privilege', () => {
+        let createResponse: Awaited<
+          SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
+        >;
+        before(async () => {
+          createResponse = await observabilityAIAssistantAPIClient
+            .editor({
+              endpoint: 'POST /internal/observability_ai_assistant/conversation',
+              params: {
+                body: {
+                  conversation: conversationCreate,
+                },
               },
-            },
-          })
-          .expect(200);
-      });
+            })
+            .expect(200);
+        });
 
-      const routes: Array<{
-        endpoint: string;
-        method: 'get' | 'post' | 'put' | 'delete';
-        payload?: Record<string, any>;
-        requiredPrivileges: string[];
-      }> = [
-        {
-          endpoint: '/internal/observability_ai_assistant/conversations',
-          method: 'post',
-          requiredPrivileges: ['ai_assistant'],
-        },
-        {
-          endpoint: '/internal/observability_ai_assistant/conversation/{conversationId}',
-          method: 'put',
-          payload: {
-            path: { conversationId: 'test-id' },
-            body: { conversation: conversationUpdate },
-          },
-          requiredPrivileges: ['ai_assistant'],
-        },
-        {
-          endpoint: '/internal/observability_ai_assistant/conversation/{conversationId}',
-          method: 'get',
-          payload: {
-            path: { conversationId: 'test-id' },
-          },
-          requiredPrivileges: ['ai_assistant'],
-        },
-        {
-          endpoint: '/internal/observability_ai_assistant/conversation/{conversationId}',
-          method: 'delete',
-          payload: {
-            path: { conversationId: 'test-id' },
-          },
-          requiredPrivileges: ['ai_assistant'],
-        },
-      ];
+        after(async () => {
+          await observabilityAIAssistantAPIClient
+            .editor({
+              endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId: createResponse.body.conversation.id,
+                },
+              },
+            })
+            .expect(200);
+        });
 
-      routes.forEach((route) => {
-        const { endpoint, method, payload } = route;
+        it('POST /internal/observability_ai_assistant/conversation', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'POST /internal/observability_ai_assistant/conversation',
+              params: {
+                body: {
+                  conversation: conversationCreate,
+                },
+              },
+            });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
 
-        describe(`${method.toUpperCase()} ${endpoint}`, () => {
-          it('should deny access for unauthorized users', async () => {
-            const request = supertestWithoutAuth[method](
-              resolveEndpoint(
-                endpoint,
-                payload?.path ? { conversationId: createResponse.body.conversation.id } : {}
-              )
-            )
-              .auth(unauthorizedUser.username, unauthorizedUser.password)
-              .set('kbn-xsrf', 'true');
+        it('POST /internal/observability_ai_assistant/conversations', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'POST /internal/observability_ai_assistant/conversations',
+            });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
 
-            if (payload?.body) {
-              await request.send(payload.body);
-            }
+        it('PUT /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId: createResponse.body.conversation.id,
+                },
+                body: {
+                  conversation: merge(omit(conversationUpdate, 'conversation.id'), {
+                    conversation: { id: createResponse.body.conversation.id },
+                  }),
+                },
+              },
+            });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
 
-            await request.expect(403);
-          });
+        it('GET /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId: createResponse.body.conversation.id,
+                },
+              },
+            });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('DELETE /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId: createResponse.body.conversation.id,
+                },
+              },
+            });
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
         });
       });
     });

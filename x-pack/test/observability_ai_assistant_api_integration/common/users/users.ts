@@ -6,7 +6,6 @@
  */
 
 import { kbnTestConfig } from '@kbn/test';
-import { AI_ASSISTANT_ROLE_NAME } from './roles';
 
 const password = kbnTestConfig.getUrlParts().password!;
 
@@ -51,10 +50,4 @@ export const unauthorizedUser: User = {
   roles: [],
 };
 
-export const aiAssistantUser: User = {
-  username: AI_ASSISTANT_USER_NAME,
-  password: AI_ASSISTANT_USER_PASSWORD,
-  roles: [AI_ASSISTANT_ROLE_NAME],
-};
-
-export const allUsers = [editor, secondaryEditor, viewer, unauthorizedUser, aiAssistantUser];
+export const allUsers = [editor, secondaryEditor, viewer, unauthorizedUser];
