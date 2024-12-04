@@ -19,7 +19,7 @@ import { HostLimitOptions } from '../../types';
 
 export const UnifiedSearchBar = () => {
   const {
-    services: { unifiedSearch, application },
+    services: { unifiedSearch },
   } = useKibanaContextForPlugin();
   const { metricsView } = useMetricsDataViewContext();
   const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit } =
