@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { CustomHttpRequestError } from '../utils/custom_http_request_error';
-import { BaseError } from '../common/errors';
+import { BaseError, NoIndicesMeteringError, NoPrivilegeMeteringError } from '../common/errors';
 import { AutoOpsError } from '../services/errors';
 
 export class NotFoundError extends BaseError {}
@@ -41,6 +41,22 @@ export const errorHandler = <E extends Error>(
 
   if (error instanceof NotFoundError) {
     return res.notFound({ body: error });
+  }
+
+  if (error.message.includes('security_exception')) {
+    return res.forbidden({
+      body: {
+        message: NoPrivilegeMeteringError,
+      },
+    });
+  }
+
+  if (error.message.includes('index_not_found_exception')) {
+    return res.notFound({
+      body: {
+        message: NoIndicesMeteringError,
+      },
+    });
   }
 
   // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
