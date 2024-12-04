@@ -8,9 +8,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import {
-  useAlertsHistory,
-} from './use_alerts_history';
+import { useAlertsHistory } from './use_alerts_history';
 
 const queryClient = new QueryClient({
   logger: {
