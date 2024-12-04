@@ -37,15 +37,20 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
   ): IndexManagementPluginSetup {
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
-      management: {
-        data: ['index_management'],
-      },
       privileges: [
+        {
+          requiredClusterPrivileges: ['monitor_enrich'],
+          ui: ['monitorEnrich'],
+        },
+        {
+          requiredClusterPrivileges: ['manage_enrich'],
+          ui: ['manageEnrich'],
+        },
         {
           // manage_index_templates is also required, but we will disable specific parts of the
           // UI if this privilege is missing.
           requiredClusterPrivileges: ['monitor'],
-          ui: [],
+          ui: ['monitor'],
         },
       ],
     });

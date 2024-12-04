@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import type {
+  ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_INSTANCE_ID,
+  ALERT_SUPPRESSION_TERMS,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
+} from '@kbn/rule-data-utils';
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
 import { intersection as lodashIntersection, isArray } from 'lodash';
 
@@ -30,6 +37,35 @@ import type {
   EqlShellFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
+import type { SuppressionTerm } from '../utils';
+
+export interface ExtraFieldsForShellAlert {
+  [ALERT_INSTANCE_ID]: string;
+  [ALERT_SUPPRESSION_TERMS]: SuppressionTerm[];
+  [ALERT_SUPPRESSION_START]: Date;
+  [ALERT_SUPPRESSION_END]: Date;
+  [ALERT_SUPPRESSION_DOCS_COUNT]: number;
+}
+
+export interface BuildAlertGroupFromSequence {
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  sequence: EqlSequence<SignalSource>;
+  completeRule: CompleteRule<RuleParams>;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  spaceId: string | null | undefined;
+  buildReasonMessage: BuildReasonMessage;
+  indicesToQuery: string[];
+  alertTimestampOverride: Date | undefined;
+  applyOverrides?: boolean;
+  publicBaseUrl?: string;
+  intendedTimestamp?: Date;
+}
+
+// eql shell alerts can have a subAlerts property
+// when suppression is used in EQL sequence queries
+export type WrappedEqlShellOptionalSubAlertsType = WrappedFieldsLatest<EqlShellFieldsLatest> & {
+  subAlerts?: Array<WrappedFieldsLatest<EqlShellFieldsLatest>>;
+};
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
@@ -38,25 +74,30 @@ import type {
  * @param sequence The raw ES documents that make up the sequence
  * @param completeRule object representing the rule that found the sequence
  */
-export const buildAlertGroupFromSequence = (
-  ruleExecutionLogger: IRuleExecutionLogForExecutors,
-  sequence: EqlSequence<SignalSource>,
-  completeRule: CompleteRule<RuleParams>,
-  mergeStrategy: ConfigType['alertMergeStrategy'],
-  spaceId: string | null | undefined,
-  buildReasonMessage: BuildReasonMessage,
-  indicesToQuery: string[],
-  alertTimestampOverride: Date | undefined,
-  publicBaseUrl?: string,
-  intendedTimestamp?: Date
-): Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>> => {
+export const buildAlertGroupFromSequence = ({
+  ruleExecutionLogger,
+  sequence,
+  completeRule,
+  mergeStrategy,
+  spaceId,
+  buildReasonMessage,
+  indicesToQuery,
+  alertTimestampOverride,
+  publicBaseUrl,
+  intendedTimestamp,
+}: BuildAlertGroupFromSequence): {
+  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest> | undefined;
+  buildingBlocks: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+} => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
-    return [];
+    return { shellAlert: undefined, buildingBlocks: [] };
   }
 
-  // The "building block" alerts start out as regular BaseFields. We'll add the group ID and index fields
-  // after creating the shell alert later on, since that's when the group ID is determined.
+  // The "building block" alerts start out as regular BaseFields.
+  // We'll add the group ID and index fields
+  // after creating the shell alert later on
+  // since that's when the group ID is determined.
   let baseAlerts: BaseFieldsLatest[] = [];
   try {
     baseAlerts = sequence.events.map((event) =>
@@ -79,7 +120,7 @@ export const buildAlertGroupFromSequence = (
     );
   } catch (error) {
     ruleExecutionLogger.error(error);
-    return [];
+    return { shellAlert: undefined, buildingBlocks: [] };
   }
 
   // The ID of each building block alert depends on all of the other building blocks as well,
@@ -99,16 +140,16 @@ export const buildAlertGroupFromSequence = (
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
-  const shellAlert = buildAlertRoot(
-    wrappedBaseFields,
+  const shellAlert = buildAlertRoot({
+    wrappedBuildingBlocks: wrappedBaseFields,
     completeRule,
     spaceId,
     buildReasonMessage,
     indicesToQuery,
     alertTimestampOverride,
     publicBaseUrl,
-    intendedTimestamp
-  );
+    intendedTimestamp,
+  });
   const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
@@ -139,19 +180,30 @@ export const buildAlertGroupFromSequence = (
     }
   );
 
-  return [...wrappedBuildingBlocks, sequenceAlert];
+  return { shellAlert: sequenceAlert, buildingBlocks: wrappedBuildingBlocks };
 };
 
-export const buildAlertRoot = (
-  wrappedBuildingBlocks: Array<WrappedFieldsLatest<BaseFieldsLatest>>,
-  completeRule: CompleteRule<RuleParams>,
-  spaceId: string | null | undefined,
-  buildReasonMessage: BuildReasonMessage,
-  indicesToQuery: string[],
-  alertTimestampOverride: Date | undefined,
-  publicBaseUrl?: string,
-  intendedTimestamp?: Date
-): EqlShellFieldsLatest => {
+export interface BuildAlertRootParams {
+  wrappedBuildingBlocks: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+  completeRule: CompleteRule<RuleParams>;
+  spaceId: string | null | undefined;
+  buildReasonMessage: BuildReasonMessage;
+  indicesToQuery: string[];
+  alertTimestampOverride: Date | undefined;
+  publicBaseUrl?: string;
+  intendedTimestamp?: Date;
+}
+
+export const buildAlertRoot = ({
+  wrappedBuildingBlocks,
+  completeRule,
+  spaceId,
+  buildReasonMessage,
+  indicesToQuery,
+  alertTimestampOverride,
+  publicBaseUrl,
+  intendedTimestamp,
+}: BuildAlertRootParams): EqlShellFieldsLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({
     name: completeRule.ruleConfig.name,
