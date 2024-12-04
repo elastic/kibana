@@ -111,7 +111,8 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/es-types",
     "@kbn/logging-mocks",
-    "@kbn/streams-plugin",
+    "@kbn/response-ops-rule-form",
+    "@kbn/streams-plugin"
   ],
   "exclude": ["target/**/*"]
 }

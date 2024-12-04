@@ -28,7 +28,11 @@ import type { EditorRequest } from '../../types';
 
 import { useServicesContext } from '../../../../contexts';
 import { StorageKeys } from '../../../../../services';
-import { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from '../../../../../../common/constants';
+import {
+  DEFAULT_LANGUAGE,
+  AVAILABLE_LANGUAGES,
+  KIBANA_API_PREFIX,
+} from '../../../../../../common/constants';
 
 interface Props {
   getRequests: () => Promise<EditorRequest[]>;
@@ -90,9 +94,24 @@ export const ContextMenu = ({
     // Get all the selected requests
     const requests = await getRequests();
 
+    // If we have any kbn requests, we should not allow the user to copy as
+    // anything other than curl
+    const hasKbnRequests = requests.some((req) => req.url.startsWith(KIBANA_API_PREFIX));
+
+    if (hasKbnRequests && withLanguage !== 'curl') {
+      notifications.toasts.addDanger({
+        title: i18n.translate('console.consoleMenu.copyAsMixedRequestsMessage', {
+          defaultMessage: 'Kibana requests can only be copied as curl',
+        }),
+      });
+
+      return;
+    }
+
     const { data: requestsAsCode, error: requestError } = await convertRequestToLanguage({
       language: withLanguage,
       esHost: esHostService.getHost(),
+      kibanaHost: window.location.origin,
       requests,
     });
 

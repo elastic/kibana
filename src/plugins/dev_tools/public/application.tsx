@@ -75,7 +75,7 @@ function DevToolsWrapper({
 
   return (
     <main className="devApp">
-      <EuiTabs style={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
+      <EuiTabs css={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
         {devTools.map((currentDevTool) => (
           <EuiTab
             key={currentDevTool.id}
