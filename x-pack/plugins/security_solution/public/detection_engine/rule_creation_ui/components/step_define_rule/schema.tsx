@@ -11,8 +11,6 @@ import { EuiText } from '@elastic/eui';
 import React from 'react';
 
 import {
-  isEqlRule,
-  isEqlSequenceQuery,
   isEsqlRule,
   isNewTermsRule,
   isThresholdRule,
@@ -33,13 +31,13 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
-import {
-  INDEX_HELPER_TEXT,
-  THREAT_MATCH_REQUIRED,
-  THREAT_MATCH_EMPTIES,
-  EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
-} from './translations';
+import { INDEX_HELPER_TEXT } from './translations';
+import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
+import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
+
+export const schema: FormSchema<DefineStepRule> = {
   index: {
+    defaultValue: [],
     fieldsToValidateOnChange: ['index', 'queryBar'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
