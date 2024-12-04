@@ -40,6 +40,7 @@ import { SelfManagePreference } from './create_connector';
 
 interface StartStepProps {
   error?: string | React.ReactNode;
+  isRunningLocally: boolean;
   onSelfManagePreferenceChange(preference: SelfManagePreference): void;
   selfManagePreference: SelfManagePreference;
   setCurrentStep: Function;
@@ -48,6 +49,7 @@ interface StartStepProps {
 
 export const StartStep: React.FC<StartStepProps> = ({
   title,
+  isRunningLocally,
   selfManagePreference,
   setCurrentStep,
   onSelfManagePreferenceChange,
@@ -206,14 +208,15 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Elastic managed' }
                   )}
                   checked={selfManagePreference === 'native'}
-                  disabled={selectedConnector?.isNative === false}
+                  disabled={selectedConnector?.isNative === false || isRunningLocally}
                   onChange={() => onSelfManagePreferenceChange('native')}
                   name="setUp"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ConnectorDescriptionPopover
-                  isDisabled={selectedConnector?.isNative === false}
+                  showIsOnlySelfManaged={selectedConnector?.isNative === false}
+                  isRunningLocally={isRunningLocally}
                   isNative
                 />
               </EuiFlexItem>
@@ -231,7 +234,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ConnectorDescriptionPopover isDisabled={false} isNative={false} />
+                <ConnectorDescriptionPopover showIsOnlySelfManaged={false} isNative={false} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
