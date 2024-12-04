@@ -30,6 +30,10 @@ def id = ctx.entity.id;
 for (meta in ctx.collected.metadata) {
     Object json = Processors.json(meta);
     
+   if (((Map)json)[id] == null) {
+     continue;
+   }
+
     for (entry in ((Map)json)[id].entrySet()) {
       String key = entry.getKey();
       Object value = entry.getValue();
