@@ -627,7 +627,6 @@ function UserPasswordEditor({
 }
 
 const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
-  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
@@ -811,6 +810,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   <EuiFlexGroup alignItems="flexStart" css={rightSideItemsCSS}>
                     {rightSideItems.map((item) => (
                       <EuiDescriptionList
+                        key={item.testSubj}
                         textStyle="reverse"
                         listItems={[
                           {
