@@ -70,9 +70,7 @@ export async function executeAction({
   }
 
   const openEditFlyout = async (embeddable: unknown) => {
-    await uiActions.getTrigger('EDIT_IN_DASH_TRIGGER').exec({
-      embeddable,
-    });
+    await (embeddable as { onEdit: () => Promise<void> }).onEdit();
   };
 
   const addToESQLVariablesService = (

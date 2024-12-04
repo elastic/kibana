@@ -363,7 +363,7 @@ export function getTextBasedDatasource({
     getUsedDataViews: (state) => {
       return Object.values(state.layers)
         .map(({ index }) => index)
-        .filter((index) => index !== undefined) as string[];
+        .filter(nonNullable);
     },
 
     getPersistableState({ layers }: TextBasedPrivateState) {

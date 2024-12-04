@@ -11,13 +11,18 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 
 export interface CanClearSelections {
   clearSelections: () => void;
+  hasSelections$: PublishingSubject<boolean | undefined>;
 }
 
 export const isClearableControl = (control: unknown): control is CanClearSelections => {
-  return typeof (control as CanClearSelections).clearSelections === 'function';
+  return (
+    typeof (control as CanClearSelections).clearSelections === 'function' &&
+    Boolean((control as CanClearSelections).hasSelections$)
+  );
 };
 
 export interface CanClearVariables {
