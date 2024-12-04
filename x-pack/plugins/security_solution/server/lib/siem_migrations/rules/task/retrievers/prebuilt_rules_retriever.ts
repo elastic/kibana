@@ -6,18 +6,18 @@
  */
 
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
-import type { PrebuiltRuleQueryResponse } from '../../types';
+import type { RuleMigrationPrebuiltRule } from '../../types';
 
 export class PrebuiltRulesRetriever {
   constructor(private readonly dataClient: RuleMigrationsDataClient) {}
 
-  public async getRules(semanticString: string): Promise<PrebuiltRuleQueryResponse[]> {
+  public async getRules(semanticString: string): Promise<RuleMigrationPrebuiltRule[]> {
     return this.prebuiltRulesRetriever(semanticString);
   }
 
   private prebuiltRulesRetriever = async (
     semanticString: string
-  ): Promise<PrebuiltRuleQueryResponse[]> => {
+  ): Promise<RuleMigrationPrebuiltRule[]> => {
     const rules = await this.dataClient.prebuiltRules.retrieveRules(semanticString);
 
     return rules;

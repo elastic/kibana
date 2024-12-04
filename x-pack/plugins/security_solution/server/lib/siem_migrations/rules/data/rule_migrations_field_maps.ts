@@ -67,4 +67,5 @@ export const prebuiltRulesFieldMap: FieldMap = {
   name: { type: 'text', required: true },
   description: { type: 'text', required: true },
   elser_embedding: { type: 'semantic_text', required: true },
+  rule_id: { type: 'keyword', required: true },
 };

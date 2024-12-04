@@ -23,8 +23,9 @@ export interface Integration {
   elser_embedding: string;
 }
 
-export interface PrebuiltRuleQueryResponse {
+export interface RuleMigrationPrebuiltRule {
   rule_id: string;
   name: string;
   description: string;
+  elser_embedding: string;
 }

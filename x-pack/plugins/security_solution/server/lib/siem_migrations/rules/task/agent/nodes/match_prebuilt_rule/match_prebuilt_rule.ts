@@ -42,13 +42,13 @@ export const getMatchPrebuiltRuleNode =
       ruleTitle: state.original_rule.title,
     })) as GetMatchedRuleResponse;
     if (response.match) {
-      const rule = prebuiltRules.find((r) => r.name === response.match);
-      if (rule) {
+      const matchedRule = prebuiltRules.find((r) => r.name === response.match);
+      if (matchedRule) {
         return {
           elastic_rule: {
-            title: rule.name,
-            description: rule.description,
-            prebuilt_rule_id: rule.rule_id,
+            title: matchedRule.name,
+            description: matchedRule.description,
+            prebuilt_rule_id: matchedRule.rule_id,
           },
           translation_result: SiemMigrationRuleTranslationResult.FULL,
         };

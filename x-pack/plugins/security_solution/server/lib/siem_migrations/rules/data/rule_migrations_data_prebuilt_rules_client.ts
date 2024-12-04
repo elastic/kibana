@@ -11,19 +11,12 @@ import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebui
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
 import { getRuleGroups } from '../../../detection_engine/prebuilt_rules/model/rule_groups/get_rule_groups';
-import type { PrebuiltRuleQueryResponse } from '../types';
+import type { RuleMigrationPrebuiltRule } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 interface RetrievePrebuiltRulesParams {
   soClient: SavedObjectsClientContract;
   rulesClient: RulesClient;
-}
-
-interface FilteredRule {
-  ruleId: string;
-  name: string;
-  description: string;
-  elser_embedding: string;
 }
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
@@ -53,26 +46,24 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
     if (totalAvailableRules.length === 0) {
       throw new Error(NO_RULES_FOUND_MESSAGE);
     }
-    const filteredRules: FilteredRule[] = [];
+    const filteredRules: RuleMigrationPrebuiltRule[] = [];
     totalAvailableRules.forEach((rule) => {
       filteredRules.push({
-        ruleId: rule.rule_id,
-        name: rule.name,
-        description: rule.description,
+        ...rule,
         elser_embedding: `${rule.name} - ${rule.description}`,
       });
     });
 
     const index = await this.getIndexName();
     const createdAt = new Date().toISOString();
-    let prebuiltRuleSlice: FilteredRule[];
+    let prebuiltRuleSlice: RuleMigrationPrebuiltRule[];
     while ((prebuiltRuleSlice = filteredRules.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk(
           {
             refresh: 'wait_for',
             operations: prebuiltRuleSlice.flatMap((prebuiltRule) => [
-              { update: { _index: index, _id: prebuiltRule.ruleId } },
+              { update: { _index: index, _id: prebuiltRule.rule_id } },
               {
                 doc: {
                   ...prebuiltRule,
@@ -92,7 +83,7 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
   }
 
   /** Based on a LLM generated semantic string, returns the 5 best results with a score above 40 */
-  async retrieveRules(semanticString: string): Promise<PrebuiltRuleQueryResponse[]> {
+  async retrieveRules(semanticString: string): Promise<RuleMigrationPrebuiltRule[]> {
     const index = await this.getIndexName();
     const query = {
       bool: {
@@ -115,7 +106,7 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
       },
     };
     const results = await this.esClient
-      .search<PrebuiltRuleQueryResponse>({
+      .search<RuleMigrationPrebuiltRule>({
         index,
         query,
         size: RETURNED_RULES,
