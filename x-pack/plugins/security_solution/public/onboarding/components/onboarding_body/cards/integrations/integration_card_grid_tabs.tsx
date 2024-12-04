@@ -7,13 +7,11 @@
 import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef, useState } from 'react';
 
 import {
-  EuiButton,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiPortal,
   EuiSkeletonText,
@@ -80,8 +78,9 @@ const FleetIntegrationsStateContextProvider = lazy(async () => ({
 const integrationStepMap = {
   0: 'Add integration',
   1: 'Install Elastic Agent',
-  2: 'Confirm incoming data',
-}
+  2: 'Add Fleet server',
+  3: 'Confirm incoming data',
+};
 
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
@@ -265,26 +264,30 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
               `}
               maxWidth="90%"
             >
-              {modalView === 'configure-integration' && (<EuiModalHeader>{`step indicator place holder. Integration step: ${integrationStepMap[integrationStep]}`}</EuiModalHeader>)}
+              {modalView === 'configure-integration' && (
+                <EuiModalHeader>{`step indicator place holder. Integration step: ${integrationStepMap[integrationStep]}`}</EuiModalHeader>
+              )}
               <EuiModalBody>
                 <FleetIntegrationsStateContextProvider
-                  values={{ startServices, useMultiPageLayoutProp: true }}
+                  values={{ startServices, useMultiPageLayoutProp: true, kibanaVersion: '9.0.0' }}
                 >
                   {modalView === 'overview' && (
                     <Detail
                       onAddIntegrationPolicyClick={onAddIntegrationPolicyClick}
-                      originFrom="onboarding-integration"
+                      originFrom="onboarding-hub"
                       routesEnabled={false}
                     />
                   )}
                   {modalView === 'configure-integration' && (
                     <CreatePackagePolicyPage
                       useMultiPageLayoutProp={true}
-                      originFrom="onboarding-integration"
+                      originFrom="onboarding-hub"
                       propPolicyId=""
                       integrationName={integrationName}
                       setIntegrationStep={setIntegrationStep}
-                      onCanceled={closeModal}
+                      onCancel={closeModal}
+                      withHeader={false}
+                      withBreadcrumb={false}
                     />
                   )}
                 </FleetIntegrationsStateContextProvider>

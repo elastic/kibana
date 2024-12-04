@@ -10,16 +10,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
-import { IntegrationBreadcrumb } from '../../components';
-import { pkgKeyFromPackageInfo } from '../../../../../services';
-import { Error } from '../../../../../components';
-import { WithHeaderLayout } from '../../../../../layouts';
+import { IntegrationBreadcrumb } from '../components';
+import { PageSteps } from '../multi_page_layout/components';
+import type { MultiPageStepLayoutProps } from '../multi_page_layout/types';
+import { Error } from '../../../../components';
+import { pkgKeyFromPackageInfo } from '../../../../services';
+import { WithHeaderLayout } from '../../../../layouts';
 
-import type { MultiPageStepLayoutProps } from '../types';
-
-import { PageSteps } from '.';
-
-export const MultiPageStepsLayout: React.FunctionComponent<MultiPageStepLayoutProps> = (props) => {
+export const EmbeddedIntegrationStepsLayout: React.FunctionComponent<MultiPageStepLayoutProps> = (
+  props
+) => {
   const {
     packageInfo,
     integrationInfo,

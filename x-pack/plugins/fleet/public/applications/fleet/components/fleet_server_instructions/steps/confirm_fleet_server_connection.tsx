@@ -18,9 +18,11 @@ import { useFleetStatus, useFlyoutContext } from '../../../hooks';
 export function getConfirmFleetServerConnectionStep({
   disabled,
   hasRecentlyEnrolledFleetServers,
+  handleContinueAddingAgentClick,
 }: {
   disabled: boolean;
   hasRecentlyEnrolledFleetServers: boolean;
+  handleContinueAddingAgentClick?: () => void;
 }): EuiStepProps {
   return {
     title: hasRecentlyEnrolledFleetServers
@@ -34,6 +36,7 @@ export function getConfirmFleetServerConnectionStep({
     children: !disabled && (
       <ConfirmFleetServerConnectionStepContent
         hasRecentlyEnrolledFleetServers={hasRecentlyEnrolledFleetServers}
+        handleContinueAddingAgentClick={handleContinueAddingAgentClick}
       />
     ),
   };
@@ -41,7 +44,8 @@ export function getConfirmFleetServerConnectionStep({
 
 const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
   hasRecentlyEnrolledFleetServers: boolean;
-}> = ({ hasRecentlyEnrolledFleetServers }) => {
+  handleContinueAddingAgentClick?: () => void;
+}> = ({ handleContinueAddingAgentClick, hasRecentlyEnrolledFleetServers }) => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
 
@@ -64,7 +68,7 @@ const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
 
       <EuiButton
         color="primary"
-        onClick={handleContinueClick}
+        onClick={handleContinueAddingAgentClick ?? handleContinueClick}
         data-test-subj="fleetServerFlyoutContinueEnrollingButton"
       >
         <FormattedMessage

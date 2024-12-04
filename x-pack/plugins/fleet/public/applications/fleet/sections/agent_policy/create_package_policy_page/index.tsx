@@ -14,6 +14,7 @@ import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 
 import { CreatePackagePolicySinglePage } from './single_page_layout';
 import { CreatePackagePolicyMultiPage } from './multi_page_layout';
+import { EmbeddedIntegrationFlow } from './embedded_integration_flow';
 
 export const CreatePackagePolicyPage: React.FC<{
   useMultiPageLayoutProp?: boolean;
@@ -21,14 +22,18 @@ export const CreatePackagePolicyPage: React.FC<{
   propPolicyId?: string;
   integrationName?: string;
   setIntegrationStep?: (step: number) => void;
-  onCanceled?: () => void;
+  onCancel?: () => void;
+  withHeader?: boolean;
+  withBreadcrumb?: boolean;
 }> = ({
   useMultiPageLayoutProp,
   originFrom,
   propPolicyId,
   integrationName,
   setIntegrationStep,
-  onCanceled,
+  onCancel,
+  withHeader,
+  withBreadcrumb,
 }) => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
@@ -73,8 +78,14 @@ export const CreatePackagePolicyPage: React.FC<{
     integrationName,
     prerelease,
     setIntegrationStep,
-    onCanceled,
+    onCancel,
+    withHeader,
+    withBreadcrumb,
   };
+
+  if (from === 'onboarding-hub') {
+    return <EmbeddedIntegrationFlow {...pageParams} />;
+  }
 
   if (useMultiPageLayout) {
     return <CreatePackagePolicyMultiPage {...pageParams} />;

@@ -656,7 +656,7 @@ export function Detail({
         isSelected: panel === 'overview',
         'data-test-subj': `tab-overview`,
         href:
-          originFrom !== 'onboarding-integration'
+          originFrom !== 'onboarding-hub'
             ? getHref('integration_details_overview', {
                 pkgkey: packageInfoKey,
                 ...(integration ? { integration } : {}),

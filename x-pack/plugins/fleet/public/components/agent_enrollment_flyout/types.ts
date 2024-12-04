@@ -67,13 +67,21 @@ export interface FlyOutProps extends BaseProps {
   selectedAgentPolicies?: AgentPolicy[];
 }
 
+export interface AgentPolicySelectionProps extends BaseProps {
+  onCancel?: () => void;
+  defaultMode?: FlyoutMode;
+  selectedAgentPolicies?: AgentPolicy[];
+  onNext: () => void;
+  setEnrolledAgentIds: (ids: string[]) => void;
+}
 export interface InstructionProps extends BaseProps {
   agentPolicies: AgentPolicy[];
   selectedPolicy: AgentPolicy | undefined;
   setSelectedPolicyId: (policyId?: string) => void;
   refreshAgentPolicies: () => void;
   isLoadingAgentPolicies?: boolean;
-  onClickViewAgents: () => void;
+  onClickViewAgents?: () => void;
+  onClickViewIncomingData?: () => void;
   mode: FlyoutMode;
   setMode: (v: FlyoutMode) => void;
   selectionType: SelectionType;
@@ -85,4 +93,5 @@ export interface InstructionProps extends BaseProps {
   downloadSource?: DownloadSource;
   downloadSourceProxy?: FleetProxy;
   hasIncomingDataStep?: boolean;
+  handleAddFleetServer?: () => void;
 }
