@@ -26,7 +26,8 @@ import {
 describe(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
   {
-    tags: ['@ess', '@serverless', '@serverlessMKI'],
+    // TODO:PR Remove `'@skipInServerlessMKI` once PR merges to `main` and feature flag is enabled in prod.
+    tags: ['@ess', '@serverless', '@serverlessMKI', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [
