@@ -14,7 +14,7 @@ exports[`OpenSearchPanel render 1`] = `
     >
       <h2>
         <MemoizedFormattedMessage
-          defaultMessage="Open search"
+          defaultMessage="Open Discover Session"
           id="discover.topNav.openSearchPanel.openSearchTitle"
         />
       </h2>
@@ -25,7 +25,7 @@ exports[`OpenSearchPanel render 1`] = `
       id="discoverOpenSearch"
       noItemsMessage={
         <Memo(MemoizedFormattedMessage)
-          defaultMessage="No matching searches found."
+          defaultMessage="No matching Discover Sessions found."
           id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
         />
       }
@@ -34,7 +34,7 @@ exports[`OpenSearchPanel render 1`] = `
         Array [
           Object {
             "getIconForSavedObject": [Function],
-            "name": "Saved search",
+            "name": "Discover Session",
             "type": "search",
           },
         ]
@@ -59,11 +59,11 @@ exports[`OpenSearchPanel render 1`] = `
         <EuiButton
           data-test-subj="manageSearchesBtn"
           fill={true}
-          href="/app/management/kibana/objects?initialQuery=type:(search)"
+          href="/app/management/kibana/objects?initialQuery=type:(\\"discover session / search\\")"
           onClick={[MockFunction]}
         >
           <MemoizedFormattedMessage
-            defaultMessage="Manage searches"
+            defaultMessage="Manage Discover Sessions"
             id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
           />
         </EuiButton>

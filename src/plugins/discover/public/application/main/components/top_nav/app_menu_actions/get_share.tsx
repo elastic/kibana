@@ -34,7 +34,7 @@ export const getShareAppMenuItem = ({
         defaultMessage: 'Share',
       }),
       description: i18n.translate('discover.localMenu.shareSearchDescription', {
-        defaultMessage: 'Share Search',
+        defaultMessage: 'Share Discover Session',
       }),
       iconType: 'share',
       testId: 'shareTopNavButton',
@@ -108,7 +108,7 @@ export const getShareAppMenuItem = ({
           objectType: 'search',
           objectTypeMeta: {
             title: i18n.translate('discover.share.shareModal.title', {
-              defaultMessage: 'Share this search',
+              defaultMessage: 'Share this Discover Session',
             }),
           },
           sharingData: {
@@ -119,7 +119,7 @@ export const getShareAppMenuItem = ({
             title:
               savedSearch.title ||
               i18n.translate('discover.localMenu.fallbackReportTitle', {
-                defaultMessage: 'Untitled discover search',
+                defaultMessage: 'Untitled Discover Session',
               }),
           },
           isDirty: !savedSearch.id || stateContainer.appState.hasChanged(),

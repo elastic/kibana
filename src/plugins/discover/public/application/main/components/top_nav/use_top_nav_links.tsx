@@ -192,7 +192,7 @@ export const useTopNavLinks = ({
           defaultMessage: 'Save',
         }),
         description: i18n.translate('discover.localMenu.saveSearchDescription', {
-          defaultMessage: 'Save Search',
+          defaultMessage: 'Save Discover Session',
         }),
         testId: 'discoverSaveButton',
         iconType: 'save',
