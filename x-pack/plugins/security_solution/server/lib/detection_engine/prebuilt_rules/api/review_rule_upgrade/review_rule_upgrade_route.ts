@@ -57,7 +57,7 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
         try {
           const ctx = await context.resolve(['core', 'alerting']);
           const soClient = ctx.core.savedObjects.client;
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
