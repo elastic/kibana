@@ -89,6 +89,10 @@ export const ElasticRule = z.object({
    */
   prebuilt_rule_id: NonEmptyString.optional(),
   /**
+   * The Elastic integration IDs related to the rule.
+   */
+  integration_ids: z.array(z.string()).optional(),
+  /**
    * The Elastic rule id installed as a result.
    */
   id: NonEmptyString.optional(),
@@ -109,7 +113,7 @@ export type RuleMigrationTranslationResultEnum = typeof RuleMigrationTranslation
 export const RuleMigrationTranslationResultEnum = RuleMigrationTranslationResult.enum;
 
 /**
- * The status of the rule migration process.
+ * The status of each rule migration.
  */
 export type RuleMigrationStatus = z.infer<typeof RuleMigrationStatus>;
 export const RuleMigrationStatus = z.enum(['pending', 'processing', 'completed', 'failed']);
@@ -183,6 +187,14 @@ export const RuleMigration = z
   .merge(RuleMigrationData);
 
 /**
+ * The status of the migration task.
+ */
+export type RuleMigrationTaskStatus = z.infer<typeof RuleMigrationTaskStatus>;
+export const RuleMigrationTaskStatus = z.enum(['ready', 'running', 'stopped', 'finished']);
+export type RuleMigrationTaskStatusEnum = typeof RuleMigrationTaskStatus.enum;
+export const RuleMigrationTaskStatusEnum = RuleMigrationTaskStatus.enum;
+
+/**
  * The rule migration task stats object.
  */
 export type RuleMigrationTaskStats = z.infer<typeof RuleMigrationTaskStats>;
@@ -194,7 +206,7 @@ export const RuleMigrationTaskStats = z.object({
   /**
    * Indicates if the migration task status.
    */
-  status: z.enum(['ready', 'running', 'stopped', 'finished']),
+  status: RuleMigrationTaskStatus,
   /**
    * The rules migration stats.
    */
@@ -228,6 +240,38 @@ export const RuleMigrationTaskStats = z.object({
    * The moment of the last update.
    */
   last_updated_at: z.string(),
+});
+
+/**
+ * The rule migration translation stats object.
+ */
+export type RuleMigrationTranslationStats = z.infer<typeof RuleMigrationTranslationStats>;
+export const RuleMigrationTranslationStats = z.object({
+  /**
+   * The migration id
+   */
+  id: NonEmptyString,
+  /**
+   * The rules migration translation stats.
+   */
+  rules: z.object({
+    /**
+     * The total number of rules to migrate.
+     */
+    total: z.number().int(),
+    /**
+     * The number of rules that matched Elastic prebuilt rules.
+     */
+    prebuilt: z.number().int(),
+    /**
+     * The number of rules that did not match Elastic prebuilt rules and will be installed as custom rules.
+     */
+    custom: z.number().int(),
+    /**
+     * The number of rules that can be installed.
+     */
+    installable: z.number().int(),
+  }),
 });
 
 /**

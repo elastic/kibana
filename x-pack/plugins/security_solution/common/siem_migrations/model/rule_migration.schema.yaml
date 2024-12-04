@@ -73,6 +73,11 @@ components:
         prebuilt_rule_id:
           description: The Elastic prebuilt rule id matched.
           $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        integration_ids:
+          type: array
+          items:
+            type: string
+          description: The Elastic integration IDs related to the rule.
         id:
           description: The Elastic rule id installed as a result.
           $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
@@ -150,13 +155,8 @@ components:
           description: The migration id
           $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
         status:
-          type: string
           description: Indicates if the migration task status.
-          enum:
-            - ready
-            - running
-            - stopped
-            - finished
+          $ref: '#/components/schemas/RuleMigrationTaskStatus'
         rules:
           type: object
           description: The rules migration stats.
@@ -189,6 +189,47 @@ components:
           type: string
           description: The moment of the last update.
 
+    RuleMigrationTaskStatus:
+      type: string
+      description: The status of the migration task.
+      enum: # should match SiemMigrationTaskStatus enum at ../constants.ts
+        - ready
+        - running
+        - stopped
+        - finished
+
+    RuleMigrationTranslationStats:
+      type: object
+      description: The rule migration translation stats object.
+      required:
+        - id
+        - rules
+      properties:
+        id:
+          description: The migration id
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        rules:
+          type: object
+          description: The rules migration translation stats.
+          required:
+            - total
+            - prebuilt
+            - custom
+            - installable
+          properties:
+            total:
+              type: integer
+              description: The total number of rules to migrate.
+            prebuilt:
+              type: integer
+              description: The number of rules that matched Elastic prebuilt rules.
+            custom:
+              type: integer
+              description: The number of rules that did not match Elastic prebuilt rules and will be installed as custom rules.
+            installable:
+              type: integer
+              description: The number of rules that can be installed.
+
     RuleMigrationTranslationResult:
       type: string
       description: The rule translation result.
@@ -199,7 +240,7 @@ components:
 
     RuleMigrationStatus:
       type: string
-      description: The status of the rule migration process.
+      description: The status of each rule migration.
       enum: # should match SiemMigrationsStatus enum at ../constants.ts
         - pending
         - processing

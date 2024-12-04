@@ -15,7 +15,7 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe.skip('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', {
       archiveName: 'process_ancestry',

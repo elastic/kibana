@@ -61,7 +61,6 @@ import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -134,7 +133,7 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
 };
 
-export interface PluginSetupContract {
+export interface AlertingServerSetup {
   registerConnectorAdapter<
     RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
     ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
@@ -169,19 +168,15 @@ export interface PluginSetupContract {
   getDataStreamAdapter: () => DataStreamAdapter;
 }
 
-export interface PluginStartContract {
+export interface AlertingServerStart {
   listTypes: RuleTypeRegistry['list'];
-
   getAllTypes: RuleTypeRegistry['getAllTypes'];
   getType: RuleTypeRegistry['get'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
-
-  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
-
+  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
-  ): PublicMethodsOf<AlertingAuthorization>;
-
+  ): Promise<PublicMethodsOf<AlertingAuthorization>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 
@@ -198,7 +193,6 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   unifiedSearch: UnifiedSearchServerPluginSetup;
-  serverless?: ServerlessPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -213,7 +207,6 @@ export interface AlertingPluginsStart {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
-  serverless?: ServerlessPluginSetup;
 }
 
 export class AlertingPlugin {
@@ -239,6 +232,7 @@ export class AlertingPlugin {
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
   private backfillClient?: BackfillClient;
+  private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
@@ -256,19 +250,20 @@ export class AlertingPlugin {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
-  ): PluginSetupContract {
+  ): AlertingServerSetup {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
 
     const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
-    const useDataStreamForAlerts = !!plugins.serverless;
+    const useDataStreamForAlerts = this.isServerless;
     this.dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts });
 
     core.capabilities.registerProvider(() => {
@@ -282,7 +277,7 @@ export class AlertingPlugin {
       };
     });
 
-    plugins.features.registerKibanaFeature(getRulesSettingsFeature(!!plugins.serverless));
+    plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
 
     plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
@@ -330,6 +325,7 @@ export class AlertingPlugin {
             .getStartServices()
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
           elasticsearchAndSOAvailability$,
+          isServerless: this.isServerless,
         });
       }
     }
@@ -410,7 +406,8 @@ export class AlertingPlugin {
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
-      isServerless: !!plugins.serverless,
+      isServerless: this.isServerless,
+      docLinks: core.docLinks,
     });
 
     return {
@@ -490,7 +487,7 @@ export class AlertingPlugin {
     };
   }
 
-  public start(core: CoreStart, plugins: AlertingPluginsStart): PluginStartContract {
+  public start(core: CoreStart, plugins: AlertingPluginsStart): AlertingServerStart {
     const {
       isESOCanEncrypt,
       logger,
@@ -517,7 +514,6 @@ export class AlertingPlugin {
 
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
-      securityPluginSetup: security,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getActiveSpace(request);
@@ -561,7 +557,7 @@ export class AlertingPlugin {
       logger: this.logger,
       savedObjectsService: core.savedObjects,
       securityService: core.security,
-      isServerless: !!plugins.serverless,
+      isServerless: this.isServerless,
     });
 
     maintenanceWindowClientFactory.initialize({
@@ -571,7 +567,7 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
     });
 
-    const getRulesClientWithRequest = (request: KibanaRequest) => {
+    const getRulesClientWithRequest = async (request: KibanaRequest) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
@@ -580,7 +576,7 @@ export class AlertingPlugin {
       return rulesClientFactory!.create(request, core.savedObjects);
     };
 
-    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
+    const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
@@ -619,7 +615,7 @@ export class AlertingPlugin {
       rulesSettingsService: new RulesSettingsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
         getRulesSettingsClientWithRequest,
-        isServerless: !!plugins.serverless,
+        isServerless: this.isServerless,
         logger,
       }),
       savedObjects: core.savedObjects,
@@ -628,14 +624,17 @@ export class AlertingPlugin {
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
+      isServerless: this.isServerless,
     });
 
     this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {
-      const client = getRulesClientWithRequest(request);
-      return (objects?: SavedObjectsBulkGetObject[]) =>
-        objects
+      return async (objects?: SavedObjectsBulkGetObject[]) => {
+        const client = await getRulesClientWithRequest(request);
+
+        return objects
           ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
           : Promise.resolve([]);
+      };
     });
 
     this.eventLogService!.isEsContextReady()
