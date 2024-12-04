@@ -23,7 +23,9 @@ const definitionsIndexTemplate = {
       hidden: true,
     },
     aliases: {
-      [DEFINITIONS_ALIAS]: {},
+      [DEFINITIONS_ALIAS]: {
+        is_hidden: true,
+      },
     },
     mappings: {
       dynamic: false,
