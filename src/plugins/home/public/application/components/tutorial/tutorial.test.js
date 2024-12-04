@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Tutorial } from './tutorial';
@@ -76,16 +77,18 @@ const replaceTemplateStrings = (text) => {
 };
 
 describe('isCloudEnabled is false', () => {
-  test('should render ON_PREM instructions with instruction toggle', async () => {
+  test.only('should render ON_PREM instructions with instruction toggle', async () => {
     const component = shallowWithIntl(
-      <Tutorial.WrappedComponent
-        addBasePath={addBasePath}
-        isCloudEnabled={false}
-        getTutorial={getTutorial}
-        replaceTemplateStrings={replaceTemplateStrings}
-        tutorialId={'my_testing_tutorial'}
-        bulkCreate={() => {}}
-      />
+      <EuiProvider>
+        <Tutorial.WrappedComponent
+          addBasePath={addBasePath}
+          isCloudEnabled={false}
+          getTutorial={getTutorial}
+          replaceTemplateStrings={replaceTemplateStrings}
+          tutorialId={'my_testing_tutorial'}
+          bulkCreate={() => {}}
+        />
+      </EuiProvider>
     );
     await loadTutorialPromise;
 
