@@ -28,7 +28,6 @@ export const storybookAliases = {
   dashboard: 'src/plugins/dashboard/.storybook',
   data: 'src/plugins/data/.storybook',
   discover: 'src/plugins/discover/.storybook',
-  embeddable: 'src/plugins/embeddable/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
   es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
   expandable_flyout: 'packages/kbn-expandable-flyout/.storybook',
