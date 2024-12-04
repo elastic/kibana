@@ -52808,8 +52808,8 @@ components:
       type: string
     Security_Endpoint_Exceptions_API_NonEmptyString:
       description: A string that is not empty and does not contain only whitespace
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -54294,8 +54294,8 @@ components:
       type: string
     Security_Exceptions_API_NonEmptyString:
       description: A string that is not empty and does not contain only whitespace
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -54540,8 +54540,8 @@ components:
       type: string
     Security_Lists_API_NonEmptyString:
       description: A string that is not empty and does not contain only whitespace
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Lists_API_PlatformErrorResponse:
       type: object
