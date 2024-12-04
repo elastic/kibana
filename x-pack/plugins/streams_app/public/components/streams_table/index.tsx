@@ -46,10 +46,10 @@ export function StreamsTable({
         name: i18n.translate('xpack.streams.streamsTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        render: (_, { id }) => {
+        render: (_, { id, managed }) => {
           return (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiIcon type="branch" />
+              <EuiIcon type={managed ? 'branch' : 'bullseye'} />
               <EuiLink
                 data-test-subj="logsaiColumnsLink"
                 href={router.link('/{key}', { path: { key: id } })}

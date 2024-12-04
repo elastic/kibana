@@ -30,7 +30,7 @@ const StatusBadgeComponent: React.FC<Props> = ({
   installedRuleId,
   'data-test-subj': dataTestSubj = 'translation-result',
 }) => {
-  const translationResult = installedRuleId || !value ? 'full' : value;
+  const translationResult = installedRuleId ? 'full' : value ?? 'untranslatable';
   const displayValue = convertTranslationResultIntoText(translationResult);
   const color = statusToColorMap[translationResult];
 
