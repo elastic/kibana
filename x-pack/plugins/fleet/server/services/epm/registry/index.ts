@@ -46,6 +46,7 @@ import {
   RegistryResponseError,
   PackageFailedVerificationError,
   PackageUnsupportedMediaTypeError,
+  ArchiveNotFoundError,
 } from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
@@ -231,6 +232,12 @@ export async function getFile(
 }
 
 export async function fetchFile(filePath: string): Promise<Response | null> {
+  if (appContextService.getConfig()?.isAirGapped) {
+    appContextService
+      .getLogger()
+      .debug('fetchFile: isAirGapped enabled, not reaching package registry');
+    return null;
+  }
   const registryUrl = getRegistryUrl();
   return getResponse(`${registryUrl}${filePath}`);
 }
@@ -381,7 +388,7 @@ export async function getPackage(
 
     return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
   } catch (error) {
-    logger.error(`getPackage error: ${error}`);
+    logger.warn(`getPackage error: ${error}`);
     throw error;
   }
 }
@@ -471,8 +478,8 @@ export async function fetchArchiveBuffer({
   try {
     const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
     if (!archiveBuffer) {
-      logger.error(`Archive Buffer not found`);
-      throw new Error('Archive Buffer not found');
+      logger.warn(`Archive Buffer not found`);
+      throw new ArchiveNotFoundError('Archive Buffer not found');
     }
 
     if (shouldVerify) {
@@ -490,7 +497,7 @@ export async function fetchArchiveBuffer({
     }
     return { archiveBuffer, archivePath };
   } catch (error) {
-    logger.error(`fetchArchiveBuffer error: ${error}`);
+    logger.warn(`fetchArchiveBuffer error: ${error}`);
     throw error;
   }
 }

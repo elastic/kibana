@@ -125,6 +125,8 @@ export class SigningServiceNotFoundError extends FleetNotFoundError {}
 export class InputNotFoundError extends FleetNotFoundError {}
 export class OutputNotFoundError extends FleetNotFoundError {}
 export class PackageNotFoundError extends FleetNotFoundError {}
+export class ArchiveNotFoundError extends FleetNotFoundError {}
+export class ResponseStreamNotFoundError extends FleetNotFoundError {}
 export class PackagePolicyNotFoundError extends FleetNotFoundError<{
   /** The package policy ID that was not found */
   packagePolicyId: string;

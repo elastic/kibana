@@ -12,7 +12,6 @@ import yauzl from 'yauzl';
 
 import { bufferToStream, streamToBuffer } from '../streams';
 import type { ArchiveEntry } from '../../../../common/types';
-import { appContextService } from '../..';
 
 export async function untarBuffer(
   buffer: Buffer,
@@ -21,21 +20,17 @@ export async function untarBuffer(
 ) {
   const deflatedStream = bufferToStream(buffer);
   // use tar.list vs .extract to avoid writing to disk
-  try {
-    const inflateStream = tar.list().on('entry', (entry) => {
-      const path = entry.path || '';
-      if (!filter({ path })) return;
-      streamToBuffer(entry as unknown as NodeJS.ReadableStream)
-        .then((entryBuffer) => onEntry({ buffer: entryBuffer, path }))
-        .catch(() => {});
-    });
+  const inflateStream = tar.list().on('entry', (entry) => {
+    const path = entry.path || '';
+    if (!filter({ path })) return;
+    streamToBuffer(entry as unknown as NodeJS.ReadableStream)
+      .then((entryBuffer) => onEntry({ buffer: entryBuffer, path }))
+      .catch(() => {});
+  });
 
-    deflatedStream.pipe(inflateStream);
+  deflatedStream.pipe(inflateStream);
 
-    await finished(inflateStream);
-  } catch (error) {
-    appContextService.getLogger().warn(`UntarBuffer error: ${error}`);
-  }
+  await finished(inflateStream);
 }
 
 export async function unzipBuffer(

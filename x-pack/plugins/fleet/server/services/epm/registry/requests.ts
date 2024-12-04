@@ -11,7 +11,12 @@ import pRetry from 'p-retry';
 
 import { streamToString } from '../streams';
 import { appContextService } from '../../app_context';
-import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+import {
+  RegistryError,
+  RegistryConnectionError,
+  RegistryResponseError,
+  ResponseStreamNotFoundError,
+} from '../../../errors';
 
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
@@ -78,12 +83,12 @@ export async function getResponse(url: string, retries: number = 5): Promise<Res
 export async function getResponseStream(
   url: string,
   retries?: number
-): Promise<NodeJS.ReadableStream | null> {
+): Promise<NodeJS.ReadableStream> {
   const res = await getResponse(url, retries);
   if (res) {
     return res?.body;
   }
-  throw new Error('Response stream not found');
+  throw new ResponseStreamNotFoundError('Response stream not found');
 }
 
 export async function fetchUrl(url: string, retries?: number): Promise<string> {
@@ -91,7 +96,7 @@ export async function fetchUrl(url: string, retries?: number): Promise<string> {
   try {
     return getResponseStream(url, retries).then(streamToString);
   } catch (error) {
-    logger.error('getResponseStream failed: no stream found');
+    logger.warn('getResponseStream failed: no stream found');
     throw error;
   }
 }
