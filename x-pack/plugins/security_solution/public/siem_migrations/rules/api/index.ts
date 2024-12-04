@@ -25,7 +25,6 @@ import type {
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import type { InstallTranslatedRulesProps, InstallRulesProps } from '../types';
 
 /**
  * Retrieves the stats for all the existing migrations, aggregated by `migration_id`.
@@ -134,7 +133,11 @@ export const installMigrationRules = async ({
   migrationId,
   ids,
   signal,
-}: InstallRulesProps): Promise<InstallMigrationRulesResponse> => {
+}: {
+  migrationId: string;
+  ids: string[];
+  signal?: AbortSignal;
+}): Promise<InstallMigrationRulesResponse> => {
   return KibanaServices.get().http.fetch<InstallMigrationRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATION_INSTALL_PATH, { migration_id: migrationId }),
     {
@@ -149,7 +152,10 @@ export const installMigrationRules = async ({
 export const installTranslatedMigrationRules = async ({
   migrationId,
   signal,
-}: InstallTranslatedRulesProps): Promise<InstallTranslatedMigrationRulesResponse> => {
+}: {
+  migrationId: string;
+  signal?: AbortSignal;
+}): Promise<InstallTranslatedMigrationRulesResponse> => {
   return KibanaServices.get().http.fetch<InstallTranslatedMigrationRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH, { migration_id: migrationId }),
     {
