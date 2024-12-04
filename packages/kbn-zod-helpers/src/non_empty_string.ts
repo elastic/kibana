@@ -9,7 +9,7 @@
 
 import * as z from '@kbn/zod';
 export function isNonEmptyString(input: string, ctx: z.RefinementCtx) {
-  if (typeof input === 'string' && input.trim() === '') {
+  if (input.trim() === '') {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'No empty strings allowed',
