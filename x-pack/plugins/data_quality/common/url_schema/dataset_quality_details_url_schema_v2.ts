@@ -14,12 +14,15 @@ export const urlSchemaRT = rt.exact(
       dataStream: dataStreamRT,
     }),
     rt.partial({
-      v: rt.literal(1),
+      v: rt.literal(2),
       timeRange: timeRangeRT,
       qualityIssuesChart: qualityIssuesRT,
       breakdownField: rt.string,
       degradedFields: degradedFieldRT,
-      expandedDegradedField: rt.string,
+      expandedQualityIssue: rt.type({
+        name: rt.string,
+        type: qualityIssuesRT,
+      }),
       showCurrentQualityIssues: rt.boolean,
     }),
   ])
