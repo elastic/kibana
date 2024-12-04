@@ -13,7 +13,6 @@ import { getSampleLayout } from './test_utils/sample_layout';
 import { GridLayout, GridLayoutProps } from './grid_layout';
 import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
 import { cloneDeep } from 'lodash';
-import { GridLayoutData } from './types';
 
 describe('GridLayout', () => {
   const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
