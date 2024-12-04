@@ -38,5 +38,6 @@
     "@kbn/mock-idp-utils",
     "@kbn/code-owners",
     "@kbn/scout-reporting",
+    "@kbn/scout-info",
   ]
 }
