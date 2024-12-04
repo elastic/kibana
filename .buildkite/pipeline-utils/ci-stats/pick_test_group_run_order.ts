@@ -10,18 +10,15 @@
 import * as Fs from 'fs';
 
 import * as globby from 'globby';
-import minimatch from 'minimatch';
 
-import { load as loadYaml } from 'js-yaml';
-
-import { BuildkiteClient, BuildkiteStep } from '../buildkite';
+import { BuildkiteClient } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
-import { serverless, stateful } from '../../ftr_configs_manifests.json';
+// import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { expandAgentQueue } from '#pipeline-utils';
 
-const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
+// const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
@@ -108,119 +105,119 @@ function getTrackedBranch(): string {
   return branch;
 }
 
-function isObj(x: unknown): x is Record<string, unknown> {
-  return typeof x === 'object' && x !== null;
-}
+// function isObj(x: unknown): x is Record<string, unknown> {
+//   return typeof x === 'object' && x !== null;
+// }
+//
+// interface FtrConfigsManifest {
+//   defaultQueue?: string;
+//   disabled?: string[];
+//   enabled?: Array<string | { [configPath: string]: { queue: string } }>;
+// }
 
-interface FtrConfigsManifest {
-  defaultQueue?: string;
-  disabled?: string[];
-  enabled?: Array<string | { [configPath: string]: { queue: string } }>;
-}
-
-function getEnabledFtrConfigs(patterns?: string[]) {
-  const configs: {
-    enabled: Array<string | { [configPath: string]: { queue: string } }>;
-    defaultQueue: string | undefined;
-  } = { enabled: [], defaultQueue: undefined };
-  const uniqueQueues = new Set<string>();
-
-  for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
-    try {
-      const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
-      if (!isObj(ymlData)) {
-        throw new Error('expected yaml file to parse to an object');
-      }
-      const manifest = ymlData as FtrConfigsManifest;
-
-      configs.enabled.push(...(manifest?.enabled ?? []));
-      if (manifest.defaultQueue) {
-        uniqueQueues.add(manifest.defaultQueue);
-      }
-    } catch (_) {
-      const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-      throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
-    }
-  }
-
-  try {
-    if (configs.enabled.length === 0) {
-      throw new Error('expected yaml files to have at least 1 "enabled" key');
-    }
-    if (uniqueQueues.size !== 1) {
-      throw Error(
-        `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
-          ...uniqueQueues,
-        ].join(' ')}`
-      );
-    }
-    configs.defaultQueue = uniqueQueues.values().next().value;
-
-    if (
-      !Array.isArray(configs.enabled) ||
-      !configs.enabled.every(
-        (p): p is string | { [configPath: string]: { queue: string } } =>
-          typeof p === 'string' ||
-          (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
-      )
-    ) {
-      throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
-  - {configPath}:
-      queue: {queueName}`);
-    }
-    if (typeof configs.defaultQueue !== 'string') {
-      throw new Error('expected yaml file to have a string "defaultQueue" key');
-    }
-
-    const defaultQueue = configs.defaultQueue;
-    const ftrConfigsByQueue = new Map<string, string[]>();
-    for (const enabled of configs.enabled) {
-      const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
-      const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
-
-      if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
-        continue;
-      }
-
-      const group = ftrConfigsByQueue.get(queue);
-      if (group) {
-        group.push(path);
-      } else {
-        ftrConfigsByQueue.set(queue, [path]);
-      }
-    }
-    return { defaultQueue, ftrConfigsByQueue };
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
-  }
-}
+// function getEnabledFtrConfigs(patterns?: string[]) {
+//   const configs: {
+//     enabled: Array<string | { [configPath: string]: { queue: string } }>;
+//     defaultQueue: string | undefined;
+//   } = { enabled: [], defaultQueue: undefined };
+//   const uniqueQueues = new Set<string>();
+//
+//   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
+//     try {
+//       const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
+//       if (!isObj(ymlData)) {
+//         throw new Error('expected yaml file to parse to an object');
+//       }
+//       const manifest = ymlData as FtrConfigsManifest;
+//
+//       configs.enabled.push(...(manifest?.enabled ?? []));
+//       if (manifest.defaultQueue) {
+//         uniqueQueues.add(manifest.defaultQueue);
+//       }
+//     } catch (_) {
+//       const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+//       throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
+//     }
+//   }
+//
+//   try {
+//     if (configs.enabled.length === 0) {
+//       throw new Error('expected yaml files to have at least 1 "enabled" key');
+//     }
+//     if (uniqueQueues.size !== 1) {
+//       throw Error(
+//         `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
+//           ...uniqueQueues,
+//         ].join(' ')}`
+//       );
+//     }
+//     configs.defaultQueue = uniqueQueues.values().next().value;
+//
+//     if (
+//       !Array.isArray(configs.enabled) ||
+//       !configs.enabled.every(
+//         (p): p is string | { [configPath: string]: { queue: string } } =>
+//           typeof p === 'string' ||
+//           (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
+//       )
+//     ) {
+//       throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
+//   - {configPath}:
+//       queue: {queueName}`);
+//     }
+//     if (typeof configs.defaultQueue !== 'string') {
+//       throw new Error('expected yaml file to have a string "defaultQueue" key');
+//     }
+//
+//     const defaultQueue = configs.defaultQueue;
+//     const ftrConfigsByQueue = new Map<string, string[]>();
+//     for (const enabled of configs.enabled) {
+//       const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
+//       const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
+//
+//       if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
+//         continue;
+//       }
+//
+//       const group = ftrConfigsByQueue.get(queue);
+//       if (group) {
+//         group.push(path);
+//       } else {
+//         ftrConfigsByQueue.set(queue, [path]);
+//       }
+//     }
+//     return { defaultQueue, ftrConfigsByQueue };
+//   } catch (_) {
+//     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+//     throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
+//   }
+// }
 
 /**
  * Collects environment variables from labels on the PR
  * TODO: extract this (and other functions from this big file) to a separate module
  */
-function collectEnvFromLabels() {
-  const LABEL_MAPPING: Record<string, Record<string, string>> = {
-    'ci:use-chrome-beta': {
-      USE_CHROME_BETA: 'true',
-    },
-  };
-
-  const envFromlabels: Record<string, string> = {};
-  if (!process.env.GITHUB_PR_LABELS) {
-    return envFromlabels;
-  } else {
-    const labels = process.env.GITHUB_PR_LABELS.split(',');
-    labels.forEach((label) => {
-      const env = LABEL_MAPPING[label];
-      if (env) {
-        Object.assign(envFromlabels, env);
-      }
-    });
-    return envFromlabels;
-  }
-}
+// function collectEnvFromLabels() {
+//   const LABEL_MAPPING: Record<string, Record<string, string>> = {
+//     'ci:use-chrome-beta': {
+//       USE_CHROME_BETA: 'true',
+//     },
+//   };
+//
+//   const envFromlabels: Record<string, string> = {};
+//   if (!process.env.GITHUB_PR_LABELS) {
+//     return envFromlabels;
+//   } else {
+//     const labels = process.env.GITHUB_PR_LABELS.split(',');
+//     labels.forEach((label) => {
+//       const env = LABEL_MAPPING[label];
+//       if (env) {
+//         Object.assign(envFromlabels, env);
+//       }
+//     });
+//     return envFromlabels;
+//   }
+// }
 
 export async function pickTestGroupRunOrder() {
   const bk = new BuildkiteClient();
@@ -228,8 +225,8 @@ export async function pickTestGroupRunOrder() {
 
   // these keys are synchronized in a few placed by storing them in the env during builds
   const UNIT_TYPE = getRequiredEnv('TEST_GROUP_TYPE_UNIT');
-  const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
-  const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
+  // const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
+  // const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
 
   const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
     ? parseFloat(process.env.JEST_MAX_MINUTES)
@@ -238,12 +235,12 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
   }
 
-  const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
-    ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
-    : 37;
-  if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
-    throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
-  }
+  // const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
+  //   ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
+  //   : 37;
+  // if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
+  //   throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
+  // }
 
   /**
    * This env variable corresponds to the env stanza within
@@ -260,30 +257,30 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : ['unit', 'integration', 'functional'];
 
-  const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
-    ? process.env.FTR_CONFIG_PATTERNS.split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
-    : undefined;
+  // const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
+  //   ? process.env.FTR_CONFIG_PATTERNS.split(',')
+  //       .map((t) => t.trim())
+  //       .filter(Boolean)
+  //   : undefined;
 
-  const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
-    ? parseFloat(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN)
-    : undefined;
-  if (
-    FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined &&
-    Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)
-  ) {
-    throw new Error(
-      `invalid FUNCTIONAL_MINIMUM_ISOLATION_MIN: ${process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN}`
-    );
-  }
-
-  const FTR_CONFIGS_RETRY_COUNT = process.env.FTR_CONFIGS_RETRY_COUNT
-    ? parseInt(process.env.FTR_CONFIGS_RETRY_COUNT, 10)
-    : 1;
-  if (Number.isNaN(FTR_CONFIGS_RETRY_COUNT)) {
-    throw new Error(`invalid FTR_CONFIGS_RETRY_COUNT: ${process.env.FTR_CONFIGS_RETRY_COUNT}`);
-  }
+  // const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
+  //   ? parseFloat(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN)
+  //   : undefined;
+  // if (
+  //   FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined &&
+  //   Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)
+  // ) {
+  //   throw new Error(
+  //     `invalid FUNCTIONAL_MINIMUM_ISOLATION_MIN: ${process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN}`
+  //   );
+  // }
+  //
+  // const FTR_CONFIGS_RETRY_COUNT = process.env.FTR_CONFIGS_RETRY_COUNT
+  //   ? parseInt(process.env.FTR_CONFIGS_RETRY_COUNT, 10)
+  //   : 1;
+  // if (Number.isNaN(FTR_CONFIGS_RETRY_COUNT)) {
+  //   throw new Error(`invalid FTR_CONFIGS_RETRY_COUNT: ${process.env.FTR_CONFIGS_RETRY_COUNT}`);
+  // }
   const JEST_CONFIGS_RETRY_COUNT = process.env.JEST_CONFIGS_RETRY_COUNT
     ? parseInt(process.env.JEST_CONFIGS_RETRY_COUNT, 10)
     : 1;
@@ -291,23 +288,23 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid JEST_CONFIGS_RETRY_COUNT: ${process.env.JEST_CONFIGS_RETRY_COUNT}`);
   }
 
-  const FTR_CONFIGS_DEPS =
-    process.env.FTR_CONFIGS_DEPS !== undefined
-      ? process.env.FTR_CONFIGS_DEPS.split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : ['build'];
-
-  const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
-    ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
-    : {};
-  const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
-  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
-
-  const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
-
-  if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
+  // const FTR_CONFIGS_DEPS =
+  //   process.env.FTR_CONFIGS_DEPS !== undefined
+  //     ? process.env.FTR_CONFIGS_DEPS.split(',')
+  //         .map((t) => t.trim())
+  //         .filter(Boolean)
+  //     : ['build'];
+  //
+  // const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
+  //   ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
+  //   : {};
+  // const envFromlabels: Record<string, string> = collectEnvFromLabels();
+  //
+  // const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
+  //
+  // const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
+  //
+  // if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
   const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
     ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
@@ -317,17 +314,17 @@ export async function pickTestGroupRunOrder() {
       })
     : [];
 
-  const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
-        cwd: process.cwd(),
-        absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
-      })
-    : [];
+  // const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
+  //   ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
+  //       cwd: process.cwd(),
+  //       absolute: false,
+  //       ignore: DISABLED_JEST_CONFIGS,
+  //     })
+  //   : [];
 
-  if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
-    throw new Error('unable to find any unit, integration, or FTR configs');
-  }
+  // if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
+  //   throw new Error('unable to find any unit, integration, or FTR configs');
+  // }
 
   const trackedBranch = getTrackedBranch();
   const ownBranch = process.env.BUILDKITE_BRANCH as string;
@@ -391,22 +388,22 @@ export async function pickTestGroupRunOrder() {
         overheadMin: 0.2,
         names: jestUnitConfigs,
       },
-      {
-        type: INTEGRATION_TYPE,
-        defaultMin: 60,
-        maxMin: JEST_MAX_MINUTES,
-        overheadMin: 0.2,
-        names: jestIntegrationConfigs,
-      },
-      ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
-        type: FUNCTIONAL_TYPE,
-        defaultMin: 60,
-        queue,
-        maxMin: FUNCTIONAL_MAX_MINUTES,
-        minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 1.5,
-        names,
-      })),
+      // {
+      //   type: INTEGRATION_TYPE,
+      //   defaultMin: 60,
+      //   maxMin: JEST_MAX_MINUTES,
+      //   overheadMin: 0.2,
+      //   names: jestIntegrationConfigs,
+      // },
+      // ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
+      //   type: FUNCTIONAL_TYPE,
+      //   defaultMin: 60,
+      //   queue,
+      //   maxMin: FUNCTIONAL_MAX_MINUTES,
+      //   minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
+      //   overheadMin: 1.5,
+      //   names,
+      // })),
     ],
   });
 
@@ -414,66 +411,66 @@ export async function pickTestGroupRunOrder() {
   console.dir(sources, { depth: Infinity, maxArrayLength: Infinity });
 
   const unit = getRunGroup(bk, types, UNIT_TYPE);
-  const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
+  // const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
 
-  let configCounter = 0;
-  let groupCounter = 0;
+  // let configCounter = 0;
+  // let groupCounter = 0;
 
   // the relevant data we will use to define the pipeline steps
-  const functionalGroups: Array<{
-    title: string;
-    key: string;
-    sortBy: number | string;
-    queue: string;
-  }> = [];
-  // the map that we will write to the artifacts for informing ftr config jobs of what they should do
-  const ftrRunOrder: Record<
-    string,
-    { title: string; expectedDurationMin: number; names: string[] }
-  > = {};
-
-  if (ftrConfigsByQueue.size) {
-    for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
-      for (const group of groups) {
-        if (!group.names.length) {
-          continue;
-        }
-
-        const key = `ftr_configs_${configCounter++}`;
-        let sortBy;
-        let title;
-        if (group.names.length === 1) {
-          title = group.names[0];
-          sortBy = title;
-        } else {
-          sortBy = ++groupCounter;
-          title = `FTR Configs #${sortBy}`;
-        }
-
-        functionalGroups.push({
-          title,
-          key,
-          sortBy,
-          queue: queue ?? defaultQueue,
-        });
-        ftrRunOrder[key] = {
-          title,
-          expectedDurationMin: group.durationMin,
-          names: group.names,
-        };
-      }
-    }
-  }
+  // const functionalGroups: Array<{
+  //   title: string;
+  //   key: string;
+  //   sortBy: number | string;
+  //   queue: string;
+  // }> = [];
+  // // the map that we will write to the artifacts for informing ftr config jobs of what they should do
+  // const ftrRunOrder: Record<
+  //   string,
+  //   { title: string; expectedDurationMin: number; names: string[] }
+  // > = {};
+  //
+  // if (ftrConfigsByQueue.size) {
+  //   for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
+  //     for (const group of groups) {
+  //       if (!group.names.length) {
+  //         continue;
+  //       }
+  //
+  //       const key = `ftr_configs_${configCounter++}`;
+  //       let sortBy;
+  //       let title;
+  //       if (group.names.length === 1) {
+  //         title = group.names[0];
+  //         sortBy = title;
+  //       } else {
+  //         sortBy = ++groupCounter;
+  //         title = `FTR Configs #${sortBy}`;
+  //       }
+  //
+  //       functionalGroups.push({
+  //         title,
+  //         key,
+  //         sortBy,
+  //         queue: queue ?? defaultQueue,
+  //       });
+  //       ftrRunOrder[key] = {
+  //         title,
+  //         expectedDurationMin: group.durationMin,
+  //         names: group.names,
+  //       };
+  //     }
+  //   }
+  // }
 
   // write the config for each step to an artifact that can be used by the individual jest jobs
-  Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
+  Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit }, null, 2));
   bk.uploadArtifacts('jest_run_order.json');
 
-  if (ftrConfigsIncluded) {
-    // write the config for functional steps to an artifact that can be used by the individual functional jobs
-    Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
-    bk.uploadArtifacts('ftr_run_order.json');
-  }
+  // if (ftrConfigsIncluded) {
+  //   // write the config for functional steps to an artifact that can be used by the individual functional jobs
+  //   Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
+  //   bk.uploadArtifacts('ftr_run_order.json');
+  // }
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(
@@ -496,65 +493,65 @@ export async function pickTestGroupRunOrder() {
             },
           }
         : [],
-      integration.count > 0
-        ? {
-            label: 'Jest Integration Tests',
-            command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
-            parallelism: integration.count,
-            timeout_in_minutes: 120,
-            key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot'),
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
-      functionalGroups.length
-        ? {
-            group: 'FTR Configs',
-            key: 'ftr-configs',
-            depends_on: FTR_CONFIGS_DEPS,
-            steps: functionalGroups
-              .sort((a, b) =>
-                // if both groups are sorted by number then sort by that
-                typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
-                  ? a.sortBy - b.sortBy
-                  : // if both groups are sorted by string, sort by that
-                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
-                  ? a.sortBy.localeCompare(b.sortBy)
-                  : // if a is sorted by number then order it later than b
-                  typeof a.sortBy === 'number'
-                  ? 1
-                  : -1
-              )
-              .map(
-                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
-                  label: title,
-                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
-                  agents: expandAgentQueue(queue),
-                  env: {
-                    FTR_CONFIG_GROUP_KEY: key,
-                    ...ftrExtraArgs,
-                    ...envFromlabels,
-                  },
-                  retry: {
-                    automatic: [
-                      { exit_status: '-1', limit: 3 },
-                      ...(FTR_CONFIGS_RETRY_COUNT > 0
-                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                        : []),
-                    ],
-                  },
-                })
-              ),
-          }
-        : [],
+      // integration.count > 0
+      //   ? {
+      //       label: 'Jest Integration Tests',
+      //       command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
+      //       parallelism: integration.count,
+      //       timeout_in_minutes: 120,
+      //       key: 'jest-integration',
+      //       agents: expandAgentQueue('n2-4-spot'),
+      //       retry: {
+      //         automatic: [
+      //           { exit_status: '-1', limit: 3 },
+      //           ...(JEST_CONFIGS_RETRY_COUNT > 0
+      //             ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+      //             : []),
+      //         ],
+      //       },
+      //     }
+      //   : [],
+      // functionalGroups.length
+      //   ? {
+      //       group: 'FTR Configs',
+      //       key: 'ftr-configs',
+      //       depends_on: FTR_CONFIGS_DEPS,
+      //       steps: functionalGroups
+      //         .sort((a, b) =>
+      //           // if both groups are sorted by number then sort by that
+      //           typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
+      //             ? a.sortBy - b.sortBy
+      //             : // if both groups are sorted by string, sort by that
+      //             typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
+      //             ? a.sortBy.localeCompare(b.sortBy)
+      //             : // if a is sorted by number then order it later than b
+      //             typeof a.sortBy === 'number'
+      //             ? 1
+      //             : -1
+      //         )
+      //         .map(
+      //           ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+      //             label: title,
+      //             command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+      //             timeout_in_minutes: 90,
+      //             agents: expandAgentQueue(queue),
+      //             env: {
+      //               FTR_CONFIG_GROUP_KEY: key,
+      //               ...ftrExtraArgs,
+      //               ...envFromlabels,
+      //             },
+      //             retry: {
+      //               automatic: [
+      //                 { exit_status: '-1', limit: 3 },
+      //                 ...(FTR_CONFIGS_RETRY_COUNT > 0
+      //                   ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+      //                   : []),
+      //               ],
+      //             },
+      //           })
+      //         ),
+      //     }
+      //   : [],
     ].flat()
   );
 }
