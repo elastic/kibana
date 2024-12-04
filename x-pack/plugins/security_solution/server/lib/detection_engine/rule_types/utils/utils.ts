@@ -545,6 +545,19 @@ export const getCatchupTuples = ({
 };
 
 /**
+ * Takes the rule schedule fields `interval` and `lookback` and uses them to calculate the `from` value for a rule
+ *
+ * @param interval moment.Duration representing the interval on which the rule runs
+ * @param lookback moment.Moment representing the rule's additional lookback
+ * @returns moment.Moment representing the rule's 'from' property
+ */
+export const calculateFromValueWithRuleScheduleFields = (interval: string, lookback: string) => {
+  const parsedInterval = parseInterval(interval) ?? moment.duration(0);
+  const parsedFrom = parseInterval(lookback) ?? moment.duration(0);
+  return parsedFrom.asSeconds() + parsedInterval.asSeconds();
+};
+
+/**
  * Given errors from a search query this will return an array of strings derived from the errors.
  * @param errors The errors to derive the strings from
  */

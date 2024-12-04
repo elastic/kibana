@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
 import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
@@ -17,6 +15,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
+import { calculateFromValueWithRuleScheduleFields } from '../../../rule_types/utils/utils';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -256,10 +255,10 @@ const applyBulkActionEditToRuleParams = (
     }
     // update look-back period in from and meta.from fields
     case BulkActionEditTypeEnum.set_schedule: {
-      const interval = parseInterval(action.value.interval) ?? moment.duration(0);
-      const parsedFrom = parseInterval(action.value.lookback) ?? moment.duration(0);
-
-      const from = parsedFrom.asSeconds() + interval.asSeconds();
+      const from = calculateFromValueWithRuleScheduleFields(
+        action.value.interval,
+        action.value.lookback
+      );
 
       ruleParams = {
         ...ruleParams,
