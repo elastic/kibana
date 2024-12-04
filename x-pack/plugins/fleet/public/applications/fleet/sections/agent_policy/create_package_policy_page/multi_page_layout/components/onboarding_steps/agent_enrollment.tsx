@@ -5,49 +5,43 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
+import React from 'react';
+
+import type { MultiPageStepLayoutProps } from '../../types';
+import type {
+  FlyoutMode,
+  SelectionType,
+} from '../../../../../../../../components/agent_enrollment_flyout/types';
 import {
   useAgentEnrollmentFlyoutData,
-  useAuthz,
   useFleetServerHostsForPolicy,
-  useFleetStatus,
-  useStartServices,
 } from '../../../../../../hooks';
 import {
   useAgentPolicyWithPackagePolicies,
   useCloudSecurityIntegration,
   useIsK8sPolicy,
 } from '../../../../../../../../components/agent_enrollment_flyout/hooks';
-import { Instructions, Loading } from '../../../../../../components';
+import { usePollingAgentCount } from '../../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
 import type { PackagePolicy } from '../../../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../constants';
-import type {
-  FlyOutProps,
-  FlyoutMode,
-  SelectionType,
-} from '../../../../../../../../components/agent_enrollment_flyout/types';
-import { usePollingAgentCount } from '../../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
+import { Instructions, Loading } from '../../../../../../components';
 
-export const AgentEnrollmentStep = ({
-  onClose,
+export const AgentEnrollmentFromOnboardingHub = ({
   agentPolicy,
   selectedAgentPolicies,
-  defaultMode = 'managed',
+  isManaged,
   isIntegrationFlow,
   installedPackagePolicy,
   onNext,
   setEnrolledAgentIds,
-}: FlyOutProps) => {
-  const authz = useAuthz();
-
-  const fleetStatus = useFleetStatus();
-  const { docLinks } = useStartServices();
-
+  steps,
+}: MultiPageStepLayoutProps) => {
   const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
   const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
-  const [mode, setMode] = useState<FlyoutMode>(defaultMode);
+  const [mode, setMode] = useState<FlyoutMode>(isManaged ? 'managed' : 'standalone');
   const [selectionType, setSelectionType] = useState<SelectionType>();
 
   const {
@@ -62,29 +56,27 @@ export const AgentEnrollmentStep = ({
 
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
 
-  const {
-    fleetServerHost,
-    fleetProxy,
-    downloadSource,
-    isLoadingInitialRequest,
-    downloadSourceProxy,
-  } = useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
+  const { fleetServerHost, fleetProxy, downloadSource, downloadSourceProxy } =
+    useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
 
   const selectedPolicy = agentPolicyWithPackagePolicies
     ? agentPolicyWithPackagePolicies
     : undefined;
-
-  const hasNoFleetServerHost = fleetStatus.isReady && !fleetServerHost;
 
   const { enrolledAgentIds } = usePollingAgentCount(selectedPolicyId || '', {
     noLowerTimeLimit: true,
     pollImmediately: true,
   });
 
-  const handleNext = () => {
+  const onClickViewIncomingData = useCallback(() => {
+    setEnrolledAgentIds(enrolledAgentIds);
+    onNext({ toStep: steps.length - 1 });
+  }, [enrolledAgentIds, onNext, setEnrolledAgentIds, steps.length]);
+
+  const handleNext = useCallback(() => {
     setEnrolledAgentIds(enrolledAgentIds);
     onNext();
-  };
+  }, [enrolledAgentIds, onNext, setEnrolledAgentIds]);
 
   useEffect(() => {
     if (selectedPolicy) {
@@ -102,6 +94,7 @@ export const AgentEnrollmentStep = ({
 
   const { isK8s } = useIsK8sPolicy(selectedPolicy ?? undefined);
   const { cloudSecurityIntegration } = useCloudSecurityIntegration(selectedPolicy ?? undefined);
+
   return isLoadingInitialAgentPolicies || isLoadingAgentPolicies ? (
     <Loading size="l" />
   ) : (
@@ -126,9 +119,10 @@ export const AgentEnrollmentStep = ({
       isIntegrationFlow={isIntegrationFlow}
       selectedApiKeyId={selectedApiKeyId}
       setSelectedAPIKeyId={setSelectedAPIKeyId}
-      onClickViewAgents={handleNext}
+      onClickViewIncomingData={onClickViewIncomingData}
       installedPackagePolicy={installedPackagePolicy}
       hasIncomingDataStep={false}
+      handleAddFleetServer={handleNext}
     />
   );
 };

@@ -157,6 +157,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   setMode,
   selectionType,
   onClickViewAgents,
+  onClickViewIncomingData,
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
@@ -266,6 +267,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         AgentEnrollmentConfirmationStep({
           selectedPolicyId: selectedPolicy?.id,
           onClickViewAgents,
+          onClickViewIncomingData,
           troubleshootLink: link,
           agentCount: enrolledAgentIds.length,
           isLongEnrollment: cloudSecurityIntegration !== undefined,
@@ -305,6 +307,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     gcpProjectId,
     isK8s,
     onClickViewAgents,
+    onClickViewIncomingData,
     link,
     enrolledAgentIds,
     agentDataConfirmed,

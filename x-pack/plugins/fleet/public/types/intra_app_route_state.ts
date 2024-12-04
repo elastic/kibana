@@ -35,6 +35,9 @@ export interface CreatePackagePolicyRouteState {
   onSaveQueryParams?: {
     [key in OnSaveQueryParamKeys]?: OnSaveQueryParamOpts;
   };
+  pkgkey?: string;
+
+  panel?: string;
 }
 
 /**
@@ -58,6 +61,10 @@ export interface IntegrationsAppBrowseRouteState {
   forAgentPolicyId: string;
   /** The integration tab the user navigated to details from */
   fromIntegrations: 'installed' | 'updates_available' | undefined;
+
+  pkgkey?: string;
+
+  panel?: string;
 }
 
 /**

@@ -6,6 +6,9 @@
  */
 
 import type React from 'react';
+
+import type { AgentPolicy } from '../../../types';
+
 export type EditPackagePolicyFrom =
   | 'package'
   | 'package-edit'
@@ -14,7 +17,7 @@ export type EditPackagePolicyFrom =
   | 'upgrade-from-fleet-policy-list'
   | 'upgrade-from-integrations-policy-list'
   | 'upgrade-from-extension'
-  | 'onboarding-integration';
+  | 'onboarding-hub';
 
 export type PackagePolicyFormState =
   | 'VALID'
@@ -39,5 +42,9 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
   propPolicyId?: string;
   integrationName?: string;
   prerelease: boolean;
-  onNext?: () => void;
+  onNext?: (params?: { selectedAgentPolicies?: AgentPolicy[] }) => void;
+  onCancel?: () => void;
+  setIntegrationStep?: (step: number) => void;
+  withHeader?: boolean;
+  withBreadcrumb?: boolean;
 }>;

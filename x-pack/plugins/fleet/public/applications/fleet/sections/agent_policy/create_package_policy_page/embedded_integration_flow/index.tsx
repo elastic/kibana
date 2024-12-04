@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
@@ -14,51 +13,21 @@ import {
   useGetPackageInfoByKeyQuery,
   useLink,
   useFleetServerHostsForPolicy,
+  useStartServices,
 } from '../../../../hooks';
 
-import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
+import type { CreatePackagePolicyParams } from '../types';
 
 import { useIntegrationsStateContext } from '../../../../../integrations/hooks';
 
 import type { AgentPolicy } from '../../../../types';
+import { useGetAgentPolicyOrDefault } from '../multi_page_layout/hooks';
+import { onboardingSteps } from '../multi_page_layout/components/onboarding_steps';
+import { Loading } from '../../../../components';
 
-import { useGetAgentPolicyOrDefault } from './hooks';
+import { EmbeddedIntegrationStepsLayout } from './embedded_integration_steps_layout';
 
-import {
-  AddFirstIntegrationSplashScreen,
-  MultiPageStepsLayout,
-  InstallElasticAgentPageStep,
-  AddIntegrationPageStep,
-  ConfirmDataPageStep,
-} from './components';
-import { onboardingSteps } from './components/onboarding_steps';
-
-const installAgentStep = {
-  title: i18n.translate('xpack.fleet.createFirstPackagePolicy.installAgentStepTitle', {
-    defaultMessage: 'Install Elastic Agent',
-  }),
-  component: InstallElasticAgentPageStep,
-};
-
-const addIntegrationStep = {
-  title: i18n.translate('xpack.fleet.createFirstPackagePolicy.addIntegrationStepTitle', {
-    defaultMessage: 'Add the integration',
-  }),
-  component: AddIntegrationPageStep,
-};
-
-const confirmDataStep = {
-  title: i18n.translate('xpack.fleet.createFirstPackagePolicy.confirmDataStepTitle', {
-    defaultMessage: 'Confirm incoming data',
-  }),
-  component: ConfirmDataPageStep,
-};
-
-const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep];
-
-const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
-
-export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
+export const EmbeddedIntegrationFlow: CreatePackagePolicyParams = ({
   queryParamsPolicyId,
   prerelease,
   from,
@@ -68,13 +37,11 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   withHeader,
   withBreadcrumb,
 }) => {
-  const { params } = useRouteMatch<AddToPolicyParams>();
-  // fixme
-  const { pkgkey: pkgkeyParam, policyId, integration: integrationParam } = params;
+  const { notifications } = useStartServices();
+
   const { pkgkey: pkgKeyContext } = useIntegrationsStateContext();
-  const pkgkey = pkgkeyParam || pkgKeyContext || '';
+  const pkgkey = pkgKeyContext || '';
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-  const [onSplash, setOnSplash] = useState(from !== 'onboarding-hub');
   const [currentStep, setCurrentStep] = useState(0);
   const [isManaged, setIsManaged] = useState(true);
   const { getHref } = useLink();
@@ -85,8 +52,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setCurrentStep(0);
   };
 
-  const integration = integrationName || integrationParam;
-  const agentPolicyId = selectedAgentPolicies?.[0]?.id || policyId || queryParamsPolicyId;
+  const integration = integrationName;
+  const agentPolicyId = selectedAgentPolicies?.[0]?.id;
   const {
     data: packageInfoData,
     error: packageInfoError,
@@ -109,12 +76,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     );
   }, [packageInfo?.policy_templates, integration]);
 
-  const splashScreenNext = () => {
-    setOnSplash(false);
-  };
-
-  const { fleetServerHost, fleetProxy, downloadSource, isLoadingInitialRequest } =
-    useFleetServerHostsForPolicy(agentPolicy);
+  const { fleetServerHost, fleetProxy, downloadSource } = useFleetServerHostsForPolicy(agentPolicy);
 
   const cancelUrl = getHref('add_integration_to_policy', {
     pkgkey,
@@ -123,33 +85,20 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     ...(agentPolicyId ? { agentPolicyId } : {}),
   });
 
-  const steps =
-    from === 'onboarding-hub' ? onboardingSteps : isManaged ? fleetManagedSteps : standaloneSteps;
+  const stepsNext = useCallback(
+    (props?: { selectedAgentPolicies?: AgentPolicy[]; toStep?: number }) => {
+      if (currentStep === onboardingSteps.length - 1) {
+        return;
+      }
 
-  if (onSplash || !packageInfo) {
-    return (
-      <AddFirstIntegrationSplashScreen
-        isLoading={isPackageInfoLoading || isLoadingInitialRequest || isAgentPolicyLoading}
-        error={packageInfoError || agentPolicyError}
-        integrationInfo={integrationInfo}
-        packageInfo={packageInfo}
-        cancelUrl={cancelUrl}
-        onNext={splashScreenNext}
-      />
-    );
-  }
-
-  const stepsNext = (props?: { selectedAgentPolicies?: AgentPolicy[]; toStep?: number }) => {
-    if (currentStep === steps.length - 1) {
-      return;
-    }
-
-    setCurrentStep(props?.toStep ?? currentStep + 1);
-    setIntegrationStep?.(props?.toStep ?? currentStep + 1);
-    if (props?.selectedAgentPolicies) {
-      setSelectedAgentPolicies(props?.selectedAgentPolicies);
-    }
-  };
+      setCurrentStep(props?.toStep ?? currentStep + 1);
+      setIntegrationStep?.(props?.toStep ?? currentStep + 1);
+      if (props?.selectedAgentPolicies) {
+        setSelectedAgentPolicies(props?.selectedAgentPolicies);
+      }
+    },
+    [currentStep, setIntegrationStep]
+  );
 
   const stepsBack = () => {
     if (currentStep === 0) {
@@ -159,15 +108,37 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setCurrentStep(currentStep - 1);
   };
 
-  return (
-    <MultiPageStepsLayout
+  useEffect(() => {
+    if (!isPackageInfoLoading && packageInfoError) {
+      notifications.toasts.addError(packageInfoError, {
+        title: i18n.translate('xpack.fleet.createPackagePolicy.errorLoadingPackageTitle', {
+          defaultMessage: 'Error loading package information',
+        }),
+        toastMessage: packageInfoError.message,
+      });
+    }
+  }, [isPackageInfoLoading, notifications.toasts, packageInfoError]);
+
+  useEffect(() => {
+    if (!isAgentPolicyLoading && agentPolicyError) {
+      notifications.toasts.addError(agentPolicyError, {
+        title: i18n.translate('xpack.fleet.createPackagePolicy.errorLoadingAgentPolicyTitle', {
+          defaultMessage: 'Error loading agent policy information',
+        }),
+        toastMessage: agentPolicyError.message,
+      });
+    }
+  }, [isAgentPolicyLoading, notifications.toasts, agentPolicyError]);
+
+  return !isPackageInfoLoading && packageInfo ? (
+    <EmbeddedIntegrationStepsLayout
       fleetServerHost={fleetServerHost}
       fleetProxy={fleetProxy}
       downloadSource={downloadSource}
       agentPolicy={selectedAgentPolicies?.[0] ?? agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}
-      steps={steps}
+      steps={onboardingSteps}
       packageInfo={packageInfo}
       integrationInfo={integrationInfo}
       cancelUrl={cancelUrl}
@@ -183,5 +154,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
       withHeader={withHeader}
       withBreadcrumb={withBreadcrumb}
     />
+  ) : (
+    <Loading />
   );
 };
