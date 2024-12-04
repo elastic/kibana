@@ -56,6 +56,7 @@ import {
   getPackages,
   installPackage,
   getTemplateInputs,
+  getPackageInfo,
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
@@ -112,6 +113,11 @@ export interface PackageClient {
     params: Parameters<typeof getPackageFieldsMetadata>['0'],
     options?: Parameters<typeof getPackageFieldsMetadata>['1']
   ): ReturnType<typeof getPackageFieldsMetadata>;
+
+  getLatestPackageInfo(
+    packageName: string,
+    prerelease?: boolean
+  ): ReturnType<typeof getPackageInfo>;
 
   getPackages(params?: {
     excludeInstallStatus?: false;
@@ -326,6 +332,16 @@ class PackageClientImpl implements PackageClient {
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackageFieldsMetadata(params, options);
+  }
+
+  public async getLatestPackageInfo(packageName: string, prerelease?: boolean) {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+    return getPackageInfo({
+      savedObjectsClient: this.internalSoClient,
+      pkgName: packageName,
+      pkgVersion: '',
+      prerelease,
+    });
   }
 
   public async getPackages(params?: {

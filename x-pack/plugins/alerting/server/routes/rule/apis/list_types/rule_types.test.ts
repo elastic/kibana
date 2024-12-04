@@ -97,7 +97,7 @@ describe('ruleTypesRoute', () => {
         has_fields_for_a_a_d: false,
       },
     ];
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
 
@@ -183,7 +183,7 @@ describe('ruleTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -240,7 +240,7 @@ describe('ruleTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

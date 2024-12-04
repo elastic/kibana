@@ -7,7 +7,7 @@
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-export function StreamsAppPageHeaderTitle({ title }: { title: string }) {
+export function StreamsAppPageHeaderTitle({ title }: { title: React.ReactNode }) {
   return (
     <EuiTitle size="l">
       <h1>{title}</h1>

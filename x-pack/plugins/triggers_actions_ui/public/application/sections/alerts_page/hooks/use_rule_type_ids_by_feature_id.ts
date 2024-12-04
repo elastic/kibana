@@ -12,7 +12,7 @@ import { observabilityFeatureIds, stackFeatureIds } from '../../alerts_table/con
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../../constants';
 import { RuleTypeIndex } from '../../../../types';
 
-type RuleTypeIdsByFeatureId<T = string[]> = Partial<
+export type RuleTypeIdsByFeatureId<T = string[]> = Partial<
   Record<
     | typeof AlertConsumers.SIEM
     | typeof AlertConsumers.OBSERVABILITY
@@ -22,17 +22,20 @@ type RuleTypeIdsByFeatureId<T = string[]> = Partial<
   >
 >;
 
+const EMPTY_OBJECT = {};
+
 /**
  * Groups all rule type ids under their respective feature id
  */
 export const useRuleTypeIdsByFeatureId = (ruleTypesIndex: RuleTypeIndex) =>
   useMemo((): RuleTypeIdsByFeatureId => {
     if (!ruleTypesIndex?.size) {
-      return {};
+      return EMPTY_OBJECT;
     }
+
     const map = Array.from(ruleTypesIndex.entries()).reduce<RuleTypeIdsByFeatureId<Set<string>>>(
-      (types, [key, value]) => {
-        let producer = value.producer as keyof RuleTypeIdsByFeatureId;
+      (types, [ruleTypeId, ruleType]) => {
+        let producer = ruleType.producer as keyof RuleTypeIdsByFeatureId;
         // Some o11y apps are listed under 'observability' to create a grouped filter
         if (observabilityFeatureIds.includes(producer)) {
           producer = AlertConsumers.OBSERVABILITY;
@@ -41,14 +44,15 @@ export const useRuleTypeIdsByFeatureId = (ruleTypesIndex: RuleTypeIndex) =>
         if (stackFeatureIds.includes(producer)) {
           producer = AlertConsumers.STACK_ALERTS;
         }
+
         // Multi consumer rule type ids should be listed both in Observability and Stack alerts
-        if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(value.id)) {
+        if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
           (types[AlertConsumers.OBSERVABILITY] =
-            types[AlertConsumers.OBSERVABILITY] || new Set()).add(key);
+            types[AlertConsumers.OBSERVABILITY] || new Set()).add(ruleTypeId);
           (types[AlertConsumers.STACK_ALERTS] =
-            types[AlertConsumers.STACK_ALERTS] || new Set()).add(key);
+            types[AlertConsumers.STACK_ALERTS] || new Set()).add(ruleTypeId);
         } else {
-          (types[producer] = types[producer] || new Set()).add(key);
+          (types[producer] = types[producer] || new Set()).add(ruleTypeId);
         }
         return types;
       },
