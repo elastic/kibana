@@ -60,7 +60,8 @@
     "@kbn/rison",
     "@kbn/task-manager-plugin",
     "@kbn/core-application-browser",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/logging"
   ],
   "exclude": [
     "target/**/*"
