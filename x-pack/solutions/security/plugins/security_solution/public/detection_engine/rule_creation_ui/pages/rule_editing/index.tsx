@@ -145,10 +145,14 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [defineStepData.index, esqlIndex, defineStepData.ruleType]
   );
 
+  const defineStepFormFields = defineStepForm.getFields();
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType: defineStepData.ruleType,
     isQueryBarValid,
-    isThreatQueryBarValid: defineStepForm.getFields().threatQueryBar?.isValid,
+    isThreatQueryBarValid:
+      defineStepFormFields.threatIndex?.isValid &&
+      defineStepFormFields.threatQueryBar?.isValid &&
+      defineStepFormFields.threatMapping?.isValid,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
     dataSourceType: defineStepData.dataSourceType,
