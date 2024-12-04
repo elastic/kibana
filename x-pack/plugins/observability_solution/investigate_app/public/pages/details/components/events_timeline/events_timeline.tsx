@@ -22,7 +22,11 @@ import { AlertEvent } from './alert_event';
 import { AnnotationEvent } from './annotation_event';
 import { TIMELINE_THEME } from './timeline_theme';
 
-export const EventsTimeLine = () => {
+interface Props {
+  eventTypes: string[];
+}
+
+export const EventsTimeline = ({ eventTypes }: Props) => {
   const { dependencies } = useKibana();
   const baseTheme = dependencies.start.charts.theme.useChartsBaseTheme();
   const { globalParams, updateInvestigationParams, alert } = useInvestigation();
@@ -39,7 +43,7 @@ export const EventsTimeLine = () => {
     rangeFrom: globalParams.timeRange.from,
     rangeTo: globalParams.timeRange.to,
     filter,
-    eventTypes: ['alert', 'annotation'],
+    eventTypes,
   });
 
   const handleCursorUpdate = useActiveCursor(dependencies.start.charts.activeCursor, chartRef, {

@@ -7,8 +7,8 @@
 
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
-import { EventsTimeLine } from '../events_timeline/events_timeline';
+import React, { useState } from 'react';
+import { EventsTimeline } from '../events_timeline/events_timeline';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { AddInvestigationItem } from '../add_investigation_item/add_investigation_item';
 import { InvestigationItemsList } from '../investigation_items_list/investigation_items_list';
@@ -17,11 +17,13 @@ import { AssistantHypothesis } from '../assistant_hypothesis/assistant_hypothesi
 
 export function InvestigationItems() {
   const { globalParams, updateInvestigationParams, investigation } = useInvestigation();
+  const [eventTypes, setEventTypes] = useState<string[]>([]);
 
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="s">
         <InvestigationSearchBar
+          onEventTypesSelected={(selected: string[]) => setEventTypes(selected)}
           dateRangeFrom={globalParams.timeRange.from}
           dateRangeTo={globalParams.timeRange.to}
           onQuerySubmit={async ({ dateRange }) => {
@@ -35,7 +37,7 @@ export function InvestigationItems() {
         />
 
         <EuiFlexItem grow={false}>
-          <EventsTimeLine />
+          <EventsTimeline eventTypes={eventTypes} />
         </EuiFlexItem>
 
         {investigation?.id && (

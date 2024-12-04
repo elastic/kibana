@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { css } from '@emotion/css';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
+import type { SearchBar } from '@kbn/unified-search-plugin/public';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-
-const parentClassName = css`
-  width: 100%;
-`;
+import { InvestigationEventTypesFilter } from './investigation_event_types_filter';
 
 interface Props {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   onQuerySubmit: (payload: { dateRange: TimeRange }, isUpdate?: boolean) => void;
   onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
+  onEventTypesSelected: (eventTypes: string[]) => void;
 }
 
 export function InvestigationSearchBar({
@@ -26,31 +25,50 @@ export function InvestigationSearchBar({
   dateRangeTo,
   onQuerySubmit,
   onRefresh,
+  onEventTypesSelected,
 }: Props) {
   const {
     dependencies: {
-      start: { unifiedSearch },
+      start: {
+        unifiedSearch: {
+          ui: { SearchBar },
+        },
+      },
     },
   } = useKibana();
 
   return (
-    <div className={parentClassName}>
-      <unifiedSearch.ui.SearchBar
-        appName="investigate"
-        onQuerySubmit={({ dateRange }) => {
-          onQuerySubmit({ dateRange });
-        }}
-        showQueryInput={false}
-        showFilterBar={false}
-        showQueryMenu={false}
-        showDatePicker
-        showSubmitButton={true}
-        dateRangeFrom={dateRangeFrom}
-        dateRangeTo={dateRangeTo}
-        onRefresh={onRefresh}
-        displayStyle="inPage"
-        disableQueryLanguageSwitcher
-      />
-    </div>
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="s"
+      alignItems="flexStart"
+      justifyContent="flexEnd"
+      css={css`
+        max-height: fit-content;
+      `}
+    >
+      <EuiFlexItem grow={false}>
+        <InvestigationEventTypesFilter onSelected={onEventTypesSelected} />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <SearchBar
+          appName="investigate"
+          onQuerySubmit={({ dateRange }) => {
+            onQuerySubmit({ dateRange });
+          }}
+          showQueryInput={false}
+          showFilterBar={false}
+          showQueryMenu={false}
+          showDatePicker
+          showSubmitButton={true}
+          dateRangeFrom={dateRangeFrom}
+          dateRangeTo={dateRangeTo}
+          onRefresh={onRefresh}
+          displayStyle="inPage"
+          disableQueryLanguageSwitcher
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
