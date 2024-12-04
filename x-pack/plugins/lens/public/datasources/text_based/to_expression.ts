@@ -9,7 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
+import { ValueFormatConfig } from '../form_based/operations/definitions/column_types';
+import {
+  TextBasedPrivateState,
+  TextBasedLayer,
+  IndexPatternRef,
+  TextBasedLayerColumn,
+} from './types';
 import type { OriginalColumn } from '../../../common/types';
 
 function getExpressionForLayer(
@@ -25,7 +31,6 @@ function getExpressionForLayer(
   layer.columns.forEach((col) => {
     if (idMapper[col.fieldName]) {
       idMapper[col.fieldName].push({
-        // ...col,
         id: col.columnId,
         label: col.customLabel ? col.label : col.fieldName,
       } as OriginalColumn);
@@ -34,7 +39,6 @@ function getExpressionForLayer(
         ...idMapper,
         [col.fieldName]: [
           {
-            // ...col,
             id: col.columnId,
             label: col.customLabel ? col.label : col.fieldName,
           } as OriginalColumn,
@@ -47,7 +51,6 @@ function getExpressionForLayer(
   const formatterOverrides: ExpressionAstFunction[] = layer.columns
     .filter((col) => col.params?.format)
     .map((col) => {
-      // TODO: improve the type handling here
       const format = col.params!.format!;
 
       const base: ExpressionAstFunction = {

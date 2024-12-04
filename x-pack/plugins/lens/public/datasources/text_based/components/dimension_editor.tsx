@@ -174,41 +174,42 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           {props.dataSectionExtra}
         </div>
       )}
-      {!isFullscreen && (
+      {!isFullscreen && selectedField && (
         <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
-          {selectedField && (
-            <EuiText
-              size="s"
-              css={css`
-                margin-bottom: ${euiTheme.size.base};
-              `}
-            >
-              <h4>
-                {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
-                  defaultMessage: 'Appearance',
-                })}
-              </h4>
-            </EuiText>
-          )}
-          <>
-            {selectedField && (
-              <NameInput
-                value={selectedField.label || ''}
-                defaultValue={''}
-                onChange={(value) => {
-                  updateLayer(updateColumnLabel({ layer: state.layers[layerId], columnId, value }));
-                }}
-              />
-            )}
+          <EuiText
+            size="s"
+            css={css`
+              margin-bottom: ${euiTheme.size.base};
+            `}
+          >
+            <h4>
+              {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
+                defaultMessage: 'Appearance',
+              })}
+            </h4>
+          </EuiText>
 
-            {selectedField && selectedField.meta?.type === 'number' ? (
-              <FormatSelector
-                selectedColumn={selectedField}
-                onChange={onFormatChange}
-                docLinks={props.core.docLinks}
-              />
-            ) : null}
-          </>
+          <NameInput
+            value={selectedField.label || ''}
+            defaultValue={''}
+            onChange={(value) => {
+              updateLayer(
+                updateColumnLabel({
+                  layer: state.layers[layerId],
+                  columnId,
+                  value,
+                })
+              );
+            }}
+          />
+
+          {selectedField.meta?.type === 'number' ? (
+            <FormatSelector
+              selectedColumn={selectedField}
+              onChange={onFormatChange}
+              docLinks={props.core.docLinks}
+            />
+          ) : null}
         </div>
       )}
     </>
