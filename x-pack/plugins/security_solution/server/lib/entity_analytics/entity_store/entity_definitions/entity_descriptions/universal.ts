@@ -49,7 +49,6 @@ ctx = merged;
 export const universalEntityEngineDescription: EntityDescription = {
   version: UNIVERSAL_DEFINITION_VERSION,
   entityType: 'universal',
-  indexPatterns: ['logs-store'],
   identityFields: [UNIVERSAL_IDENTITY_FIELD],
   fields: [collect({ source: 'entities.keyword', destination: 'collected.metadata' })],
   settings: {
