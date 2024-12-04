@@ -20,7 +20,7 @@ import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
 import { setupCiStatsFtrTestGroupReporter } from './ci_stats_ftr_reporter';
-import { ScoutMochaReporter } from '@kbn/scout';
+import { ScoutFTRReporter } from './scout_ftr_reporter';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
@@ -68,7 +68,7 @@ export function MochaReporterProvider({ getService }) {
       }
 
       if (config.get('scoutReporter.enabled')) {
-        new ScoutMochaReporter(runner, { name: 'ftr' });
+        new ScoutFTRReporter(runner);
       }
     }
 

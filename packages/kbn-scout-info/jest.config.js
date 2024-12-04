@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as cli from './src/cli';
-export { expect, test, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
-export type {
-  ScoutPage,
-  ScoutPlaywrightOptions,
-  ScoutTestOptions,
-  PageObjects,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  EsArchiverFixture,
-} from './src/playwright';
-
-export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-scout-info'],
+};
