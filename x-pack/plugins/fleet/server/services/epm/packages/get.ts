@@ -39,7 +39,10 @@ import type {
   PackageSpecManifest,
   AssetsMap,
 } from '../../../../common/types';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import {
+  PACKAGES_SAVED_OBJECT_TYPE,
+  MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
+} from '../../../constants';
 import type {
   ArchivePackage,
   RegistryPackage,
@@ -142,7 +145,7 @@ export async function getPackages(
           );
         }
       },
-      { concurrency: 10 }
+      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
     )
   ).filter((p): p is Installable<any> => p !== null);
 
