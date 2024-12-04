@@ -29,7 +29,7 @@ import { Alert } from '@kbn/alerts-as-data-utils';
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { AlertsHealth } from '@kbn/alerting-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
-import { PluginSetupContract, PluginStartContract } from './plugin';
+import { AlertingServerSetup, AlertingServerStart } from './plugin';
 import { RulesClient } from './rules_client';
 import {
   RulesSettingsClient,
@@ -62,7 +62,7 @@ export type { RuleTypeParams };
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
-  getRulesClient: () => RulesClient;
+  getRulesClient: () => Promise<RulesClient>;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
   listTypes: RuleTypeRegistry['list'];
@@ -133,6 +133,7 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
+  isServerless: boolean;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -361,8 +362,8 @@ export type PartialRuleWithLegacyId<Params extends RuleTypeParams = never> = Pic
   Partial<Omit<RuleWithLegacyId<Params>, 'id'>>;
 
 export interface AlertingPlugin {
-  setup: PluginSetupContract;
-  start: PluginStartContract;
+  setup: AlertingServerSetup;
+  start: AlertingServerStart;
 }
 
 export interface AlertsConfigType {

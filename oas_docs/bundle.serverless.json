@@ -9785,9 +9785,6 @@
                                 "type": "number"
                               }
                             },
-                            "required": [
-                              "enabled"
-                            ],
                             "type": "object"
                           },
                           "monitoring_output_id": {
@@ -10554,9 +10551,6 @@
                         "type": "number"
                       }
                     },
-                    "required": [
-                      "enabled"
-                    ],
                     "type": "object"
                   },
                   "monitoring_output_id": {
@@ -10815,9 +10809,6 @@
                               "type": "number"
                             }
                           },
-                          "required": [
-                            "enabled"
-                          ],
                           "type": "object"
                         },
                         "monitoring_output_id": {
@@ -11614,9 +11605,6 @@
                                 "type": "number"
                               }
                             },
-                            "required": [
-                              "enabled"
-                            ],
                             "type": "object"
                           },
                           "monitoring_output_id": {
@@ -12674,9 +12662,6 @@
                               "type": "number"
                             }
                           },
-                          "required": [
-                            "enabled"
-                          ],
                           "type": "object"
                         },
                         "monitoring_output_id": {
@@ -13442,9 +13427,6 @@
                         "type": "number"
                       }
                     },
-                    "required": [
-                      "enabled"
-                    ],
                     "type": "object"
                   },
                   "monitoring_output_id": {
@@ -13703,9 +13685,6 @@
                               "type": "number"
                             }
                           },
-                          "required": [
-                            "enabled"
-                          ],
                           "type": "object"
                         },
                         "monitoring_output_id": {
@@ -14503,9 +14482,6 @@
                               "type": "number"
                             }
                           },
-                          "required": [
-                            "enabled"
-                          ],
                           "type": "object"
                         },
                         "monitoring_output_id": {
@@ -16516,6 +16492,7 @@
                           },
                           "upgrade_details": {
                             "additionalProperties": false,
+                            "nullable": true,
                             "properties": {
                               "action_id": {
                                 "type": "string"
@@ -18708,6 +18685,7 @@
                         },
                         "upgrade_details": {
                           "additionalProperties": false,
+                          "nullable": true,
                           "properties": {
                             "action_id": {
                               "type": "string"
@@ -19196,6 +19174,7 @@
                         },
                         "upgrade_details": {
                           "additionalProperties": false,
+                          "nullable": true,
                           "properties": {
                             "action_id": {
                               "type": "string"
