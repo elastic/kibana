@@ -41,10 +41,13 @@ export class ObservabilityAIAssistantAppPlugin
 {
   logger: Logger;
   appService: AIAssistantAppService | undefined;
+  isServerless: boolean;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
+
   setup(
     coreSetup: CoreSetup,
     _: ObservabilityAIAssistantAppPluginSetupDependencies
@@ -111,7 +114,7 @@ export class ObservabilityAIAssistantAppPlugin
               appService={appService}
               coreStart={coreStart}
               pluginsStart={pluginsStart}
-              isServerless={!!pluginsStart.serverless}
+              isServerless={this.isServerless}
             />,
             element,
             () => {}
