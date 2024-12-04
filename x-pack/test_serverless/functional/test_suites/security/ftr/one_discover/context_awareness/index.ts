@@ -11,10 +11,10 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['timePicker', 'svlCommonPage']);
-  const from = '2024-06-10T14:00:00.000Z';
+  const from = '2017-06-10T14:00:00.000Z';
   const to = '2024-06-10T16:30:00.000Z';
 
-  describe('discover/context_awareness', function () {
+  describe('discover/security/context_awareness', function () {
     this.tags(['esGate']);
 
     before(async () => {

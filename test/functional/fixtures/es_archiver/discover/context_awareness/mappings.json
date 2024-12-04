@@ -1,7 +1,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": "my-example-logs",
     "mappings": {
       "properties": {
@@ -68,7 +69,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": "my-example-metrics",
     "mappings": {
       "properties": {
@@ -107,18 +109,6 @@
           }
         },
         "service": {
-          "properties": {
-            "name": {
-              "fields": {
-                "text": {
-                  "type": "match_only_text"
-                }
-              },
-              "type": "keyword"
-            }
-          }
-        },
-        "host": {
           "properties": {
             "name": {
               "fields": {
