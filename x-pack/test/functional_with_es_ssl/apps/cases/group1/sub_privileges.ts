@@ -133,6 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       afterEach(async () => {
         await cases.api.deleteAllCases();
       });
+
       for (const user of [casesReadAndEditSettingsUser, casesAllUser]) {
         describe(`logging in with user ${user.username}`, () => {
           before(async () => {
@@ -159,6 +160,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       }
 
+      // below users do not have access to settings
       for (const user of [casesNoDeleteUser, casesReadDeleteUser]) {
         describe(`cannot access settings page with user ${user.username}`, () => {
           before(async () => {
