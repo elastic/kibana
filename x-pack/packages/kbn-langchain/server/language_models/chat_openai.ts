@@ -14,8 +14,12 @@ import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { DEFAULT_OPEN_AI_MODEL } from './constants';
-import { InvokeAIActionParamsSchema, RunActionParamsSchema } from './types';
+import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
+import {
+  InferenceChatCompleteParamsSchema,
+  InvokeAIActionParamsSchema,
+  RunActionParamsSchema,
+} from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
 
@@ -185,7 +189,10 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   ): {
     actionId: string;
     params: {
-      subActionParams: InvokeAIActionParamsSchema | RunActionParamsSchema;
+      subActionParams:
+        | InvokeAIActionParamsSchema
+        | RunActionParamsSchema
+        | InferenceChatCompleteParamsSchema;
       subAction: string;
     };
     signal?: AbortSignal;
@@ -220,18 +227,27 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         completionRequest.stream
         ? 'invokeAsyncIterator'
         : 'run';
-    console.log('==> body', body);
     // create a new connector request body with the assistant message:
+    const subActionParams =
+      llmType === 'inference'
+        ? {
+            input: body.messages.reduce((acc, i) => {
+              return `${acc + i.content}\n`;
+            }, ''),
+          }
+        : {
+            ...(completionRequest.stream ? body : { body: JSON.stringify(body) }),
+            signal: this.#signal,
+            // This timeout is large because LangChain prompts can be complicated and take a long time
+            timeout: this.#timeout ?? DEFAULT_TIMEOUT,
+          };
+    console.log('==> body', JSON.stringify(body, null, 2));
+    console.log('==> subActionParams', JSON.stringify(subActionParams, null, 2));
     return {
       actionId: this.#connectorId,
       params: {
         subAction,
-        subActionParams: {
-          ...(completionRequest.stream ? body : { input: 'hello world' }), //  JSON.stringify(body) }),
-          // signal: this.#signal,
-          // // This timeout is large because LangChain prompts can be complicated and take a long time
-          // timeout: this.#timeout ?? DEFAULT_TIMEOUT,
-        },
+        subActionParams,
       },
       signal: this.#signal,
     };
