@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
@@ -26,7 +27,12 @@ export interface InternalState {
   customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
   isESQLToDataViewTransitionModalVisible?: boolean;
-  resetDefaultProfileState: { columns: boolean; rowHeight: boolean };
+  resetDefaultProfileState: {
+    resetId: string;
+    columns: boolean;
+    rowHeight: boolean;
+    breakdownField: boolean;
+  };
 }
 
 export interface InternalStateTransitions {
@@ -56,7 +62,9 @@ export interface InternalStateTransitions {
   ) => (isVisible: boolean) => InternalState;
   setResetDefaultProfileState: (
     state: InternalState
-  ) => (resetDefaultProfileState: InternalState['resetDefaultProfileState']) => InternalState;
+  ) => (
+    resetDefaultProfileState: Omit<InternalState['resetDefaultProfileState'], 'resetId'>
+  ) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -77,7 +85,12 @@ export function getInternalStateContainer() {
       expandedDoc: undefined,
       customFilters: [],
       overriddenVisContextAfterInvalidation: undefined,
-      resetDefaultProfileState: { columns: false, rowHeight: false },
+      resetDefaultProfileState: {
+        resetId: '',
+        columns: false,
+        rowHeight: false,
+        breakdownField: false,
+      },
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -151,9 +164,12 @@ export function getInternalStateContainer() {
       }),
       setResetDefaultProfileState:
         (prevState: InternalState) =>
-        (resetDefaultProfileState: InternalState['resetDefaultProfileState']) => ({
+        (resetDefaultProfileState: Omit<InternalState['resetDefaultProfileState'], 'resetId'>) => ({
           ...prevState,
-          resetDefaultProfileState,
+          resetDefaultProfileState: {
+            ...resetDefaultProfileState,
+            resetId: uuidv4(),
+          },
         }),
     },
     {},

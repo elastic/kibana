@@ -12,7 +12,7 @@
         "parents",
         "none"
       ],
-      "node_id": "",
+      "nodes": [],
       "parent_task_id": "",
       "master_timeout": [
         "30s",

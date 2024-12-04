@@ -9,7 +9,6 @@ import type {
   CoreSetup,
   CustomRequestHandlerContext,
   CoreStart,
-  RouteConfigOptions,
   IScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -17,14 +16,12 @@ import type {
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
   alerting: {
-    // Pick<AlertingApiRequestHandlerContext, 'getRulesClient'> is a superset of this
-    // and incompatible with the start contract from the alerting plugin
-    getRulesClient: () => RulesClientApi;
+    getRulesClient: () => Promise<RulesClientApi>;
   };
   rac: Pick<RacApiRequestHandlerContext, 'getAlertsClient'>;
 }>;
@@ -48,21 +45,18 @@ export type MinimalApmPluginRequestHandlerContext = Omit<
 };
 
 export interface APMRouteCreateOptions {
-  options: {
-    tags: Array<
-      | 'access:apm'
-      | 'access:apm_write'
-      | 'access:apm_settings_write'
-      | 'access:ml:canGetJobs'
-      | 'access:ml:canCreateJob'
-      | 'access:ml:canCloseJob'
-      | 'access:ai_assistant'
-      | 'oas-tag:APM agent keys'
-      | 'oas-tag:APM annotations'
-    >;
-    body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
-    disableTelemetry?: boolean;
-  } & RouteConfigOptions<any>;
+  tags: Array<
+    | 'access:apm'
+    | 'access:apm_write'
+    | 'access:apm_settings_write'
+    | 'access:ml:canGetJobs'
+    | 'access:ml:canCreateJob'
+    | 'access:ml:canCloseJob'
+    | 'access:ai_assistant'
+    | 'oas-tag:APM agent keys'
+    | 'oas-tag:APM annotations'
+  >;
+  disableTelemetry?: boolean;
 }
 
 export type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;

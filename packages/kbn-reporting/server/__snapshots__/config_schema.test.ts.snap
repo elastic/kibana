@@ -7,7 +7,6 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
     "escapeFormulaValues": false,
     "maxConcurrentShardRequests": 5,
     "maxSizeBytes": ByteSizeValue {
@@ -51,12 +50,6 @@ Object {
     "pollIntervalErrorMultiplier": 10,
     "timeout": "PT4M",
   },
-  "roles": Object {
-    "allow": Array [
-      "reporting_user",
-    ],
-    "enabled": true,
-  },
   "statefulSettings": Object {
     "enabled": true,
   },
@@ -70,7 +63,6 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
     "escapeFormulaValues": false,
     "maxConcurrentShardRequests": 5,
     "maxSizeBytes": ByteSizeValue {
@@ -112,12 +104,6 @@ Object {
     "pollInterval": "PT3S",
     "pollIntervalErrorMultiplier": 10,
     "timeout": "PT4M",
-  },
-  "roles": Object {
-    "allow": Array [
-      "reporting_user",
-    ],
-    "enabled": true,
   },
   "statefulSettings": Object {
     "enabled": true,
