@@ -16,10 +16,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type {
-  PluginSetupContract as AlertingPluginSetup,
-  PluginStartContract as AlertingPluginStart,
-} from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -39,7 +36,7 @@ export interface ElasticsearchAccessorOptions {
 export interface StreamsPluginSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
 }
 
 export interface StreamsPluginStartDependencies {
@@ -47,5 +44,5 @@ export interface StreamsPluginStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
-  alerting: AlertingPluginStart;
+  alerting: AlertingServerStart;
 }
