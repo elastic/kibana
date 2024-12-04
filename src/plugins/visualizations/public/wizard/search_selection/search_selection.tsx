@@ -61,7 +61,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
             savedObjectMetaData={[
               {
                 type: 'search',
-                getIconForSavedObject: () => 'search',
+                getIconForSavedObject: () => 'discoverApp',
                 name: i18n.translate(
                   'visualizations.newVisWizard.searchSelection.savedObjectType.search',
                   {
