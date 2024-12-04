@@ -71,7 +71,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
   );
   router.get(
     {
-      path: `${API_BASE_PATH}/get_Indices`,
+      path: `${API_BASE_PATH}/has_indices`,
       validate: false,
     },
     async (ctx, _request, response) => {

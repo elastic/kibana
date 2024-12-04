@@ -14,10 +14,10 @@ interface ReturnValue {
   ok: boolean;
 }
 
-export const useIndices = () => {
+export const useHasIndices = () => {
   const { http } = useAppContext();
   return useRequest<ReturnValue>(http, {
-    path: `${API_BASE_PATH}/get_Indices`,
+    path: `${API_BASE_PATH}/has_indices`,
     method: 'get',
   });
 };

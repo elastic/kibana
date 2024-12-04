@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, memo, useCallback, useState, useEffect } from 'react';
+import React, { useRef, memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiForm,
@@ -21,7 +21,7 @@ import {
 
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
-import { useIndices, useRequestProfile } from '../../hooks';
+import { useHasIndices, useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
 import { Editor, type EditorProps } from './editor';
@@ -42,13 +42,12 @@ const INITIAL_EDITOR_VALUE = `{
 export const ProfileQueryEditor = memo(() => {
   const editorPropsRef = useRef<EditorProps>(null as any);
   const indexInputRef = useRef<HTMLInputElement>(null as any);
-  const [hasIndices, setHasIndices] = useState(false);
 
   const dispatch = useProfilerActionContext();
 
   const { getLicenseStatus, notifications, location } = useAppContext();
 
-  const { data: indicesData } = useIndices();
+  const { data: indicesData, isLoading, error: indicesDataError } = useHasIndices();
 
   const queryParams = new URLSearchParams(location.search);
   const indexName = queryParams.get('index');
@@ -90,9 +89,7 @@ export const ProfileQueryEditor = memo(() => {
   );
   const licenseEnabled = getLicenseStatus().valid;
 
-  useEffect(() => {
-    setHasIndices(indicesData?.ok ? indicesData?.hasIndices : false);
-  }, [indicesData]);
+  const hasIndices = isLoading || indicesDataError ? false : indicesData?.hasIndices;
 
   const isDisabled = !licenseEnabled || !hasIndices;
   const tooltipContent = !licenseEnabled
