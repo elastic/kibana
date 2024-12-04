@@ -135,7 +135,7 @@ export const AgentPolicyBaseSchema = {
   monitoring_pprof_enabled: schema.maybe(schema.boolean()),
   monitoring_http: schema.maybe(
     schema.object({
-      enabled: schema.boolean(),
+      enabled: schema.maybe(schema.boolean()),
       host: schema.maybe(schema.string({ defaultValue: 'localhost' })),
       port: schema.maybe(schema.number({ min: 0, max: 65353, defaultValue: 6791 })),
       buffer: schema.maybe(schema.object({ enabled: schema.boolean({ defaultValue: false }) })),

@@ -5,7 +5,7 @@
     "@elastic/kibana-presentation"
   ],
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "description": "Extends embeddable plugin with more functionality",
   "plugin": {
     "id": "embeddableEnhanced",

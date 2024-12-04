@@ -16,7 +16,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
@@ -35,41 +34,38 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
+const authorizedRuleTypes = new Map([
+  [
+    'apm.error_rate',
+    {
+      producer: 'apm',
+      id: 'apm.error_rate',
+      alerts: {
+        context: 'observability.apm',
+      },
+      authorizedConsumers: {},
+    },
+  ],
+]);
 
 beforeEach(() => {
   jest.resetAllMocks();
   alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
-  // @ts-expect-error
-  alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
-    Promise.resolve({ filter: [] })
-  );
-
-  // @ts-expect-error
-  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
-    const authorizedRuleTypes = new Set();
-    authorizedRuleTypes.add({ producer: 'apm' });
-    return Promise.resolve({ authorizedRuleTypes });
+  alertingAuthMock.getAuthorizationFilter.mockResolvedValue({
+    filter: undefined,
+    ensureRuleTypeIsAuthorized: jest.fn(),
+  });
+  alertingAuthMock.getAllAuthorizedRuleTypes.mockResolvedValue({
+    hasAllRequested: true,
+    authorizedRuleTypes,
   });
 
-  alertingAuthMock.ensureAuthorized.mockImplementation(
-    // @ts-expect-error
-    async ({
-      ruleTypeId,
-      consumer,
-      operation,
-      entity,
-    }: {
-      ruleTypeId: string;
-      consumer: string;
-      operation: string;
-      entity: typeof AlertingAuthorizationEntity.Alert;
-    }) => {
-      if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
-        return Promise.resolve();
-      }
-      return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+  alertingAuthMock.ensureAuthorized.mockImplementation(async ({ ruleTypeId, consumer }) => {
+    if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
+      return Promise.resolve();
     }
-  );
+    return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+  });
 });
 
 describe('update()', () => {

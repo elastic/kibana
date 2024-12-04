@@ -7,13 +7,16 @@
 
 import createContainer from 'constate';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GetInfraAssetCountResponsePayloadRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useHostCount = () => {
-  const { buildQuery, parsedDateRange } = useUnifiedSearchContext();
+  const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { services } = useKibanaContextForPlugin();
+  const { telemetry } = services;
 
   const payload = useMemo(
     () =>
@@ -36,6 +39,16 @@ export const useHostCount = () => {
     },
     [payload]
   );
+
+  useEffect(() => {
+    if (data && !error) {
+      telemetry.reportHostsViewTotalHostCountRetrieved({
+        total: data.count ?? 0,
+        with_query: !!searchCriteria.query.query,
+        with_filters: searchCriteria.filters.length > 0 || searchCriteria.panelFilters.length > 0,
+      });
+    }
+  }, [data, error, payload, searchCriteria, telemetry]);
 
   return {
     errors: error,

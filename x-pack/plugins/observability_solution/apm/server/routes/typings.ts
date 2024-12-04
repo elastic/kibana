@@ -16,14 +16,12 @@ import type {
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
   alerting: {
-    // Pick<AlertingApiRequestHandlerContext, 'getRulesClient'> is a superset of this
-    // and incompatible with the start contract from the alerting plugin
-    getRulesClient: () => RulesClientApi;
+    getRulesClient: () => Promise<RulesClientApi>;
   };
   rac: Pick<RacApiRequestHandlerContext, 'getAlertsClient'>;
 }>;

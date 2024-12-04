@@ -42,6 +42,7 @@ export type CheckCompleteResponse<TMetadata extends {} = {}> =
 
 export type SetComplete = (isComplete: boolean) => void;
 export type IsCardComplete = (cardId: OnboardingCardId) => boolean;
+export type IsCardAvailable = (cardId: OnboardingCardId) => boolean;
 export type SetExpandedCardId = (
   cardId: OnboardingCardId | null,
   options?: { scroll?: boolean }
@@ -60,6 +61,10 @@ export type OnboardingCardComponent<TMetadata extends {} = {}> = React.Component
    * Function to check if a specific card is complete.
    */
   isCardComplete: IsCardComplete;
+  /**
+   * Function to check if a specific card is rendered.
+   */
+  isCardAvailable: IsCardAvailable;
   /**
    * Function to expand a specific card ID and scroll to it.
    */

@@ -13,7 +13,8 @@
     "requiredPlugins": [
       "security",
       "encryptedSavedObjects",
-      "licensing"
+      "licensing",
+      "features"
     ],
     "requiredBundles": []
   }

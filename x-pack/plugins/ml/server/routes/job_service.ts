@@ -135,7 +135,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
         try {
           const alerting = await context.alerting;
-          const rulesClient = alerting?.getRulesClient();
+          const rulesClient = await alerting?.getRulesClient();
           const { deleteJobs } = jobServiceProvider(client, mlClient, rulesClient);
 
           const { jobIds, deleteUserAnnotations, deleteAlertingRules } = request.body;
@@ -283,7 +283,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
         try {
           const alerting = await context.alerting;
-          const { jobsSummary } = jobServiceProvider(client, mlClient, alerting?.getRulesClient());
+          const rulesClient = await alerting?.getRulesClient();
+          const { jobsSummary } = jobServiceProvider(client, mlClient, rulesClient);
           const { jobIds } = request.body;
           const resp = await jobsSummary(jobIds);
 
@@ -317,11 +318,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response, context }) => {
         try {
           const alerting = await context.alerting;
-          const { getJobIdsWithGeo } = jobServiceProvider(
-            client,
-            mlClient,
-            alerting?.getRulesClient()
-          );
+          const rulesClient = await alerting?.getRulesClient();
+          const { getJobIdsWithGeo } = jobServiceProvider(client, mlClient, rulesClient);
 
           const resp = await getJobIdsWithGeo();
 
@@ -425,11 +423,9 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
         try {
           const alerting = await context.alerting;
-          const { createFullJobsList } = jobServiceProvider(
-            client,
-            mlClient,
-            alerting?.getRulesClient()
-          );
+          const rulesClient = await alerting?.getRulesClient();
+
+          const { createFullJobsList } = jobServiceProvider(client, mlClient, rulesClient);
           const { jobIds } = request.body;
           const resp = await createFullJobsList(jobIds);
 

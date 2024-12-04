@@ -331,5 +331,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(conversation.messages.length).to.be(5);
       });
     });
+
+    describe('Instructions can be saved and cleared again', () => {
+      async function updateInstruction(text: string) {
+        await observabilityAIAssistantAPIClient
+          .editor({
+            endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+            params: {
+              body: {
+                id: 'my-instruction-that-will-be-cleared',
+                text,
+                public: false,
+              },
+            },
+          })
+          .expect(200);
+
+        const res = await observabilityAIAssistantAPIClient
+          .editor({ endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions' })
+          .expect(200);
+
+        return res.body.userInstructions[0].text;
+      }
+
+      it('can clear the instruction', async () => {
+        const res1 = await updateInstruction('This is a user instruction that will be cleared');
+        expect(res1).to.be('This is a user instruction that will be cleared');
+
+        const res2 = await updateInstruction('');
+        expect(res2).to.be('');
+      });
+    });
   });
 }

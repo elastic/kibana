@@ -7,7 +7,7 @@
 import apmAgent from 'elastic-apm-node';
 
 import type { Plugin, CoreSetup } from '@kbn/core/server';
-import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server/plugin';
+import { AlertingServerSetup } from '@kbn/alerting-plugin/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -16,7 +16,7 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
 }
 
 export interface FixtureStartDeps {
@@ -34,8 +34,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
+      alerting: [{ ruleTypeId: 'test.executionContext', consumers: ['fecAlertsTestPlugin'] }],
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      alerting: ['test.executionContext'],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
@@ -45,7 +45,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              all: ['test.executionContext'],
+              all: [{ ruleTypeId: 'test.executionContext', consumers: ['fecAlertsTestPlugin'] }],
             },
           },
           ui: [],
@@ -58,7 +58,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              read: ['test.executionContext'],
+              read: [{ ruleTypeId: 'test.executionContext', consumers: ['fecAlertsTestPlugin'] }],
             },
           },
           ui: [],

@@ -24,15 +24,17 @@
     "misc": [
       {
         "parentPluginId": "uptime",
-        "id": "def-common.UPTIME_RULE_TYPES",
+        "id": "def-common.UPTIME_RULE_TYPE_IDS",
         "type": "Array",
         "tags": [],
-        "label": "UPTIME_RULE_TYPES",
-        "description": [],
+        "label": "UPTIME_RULE_TYPE_IDS",
+        "description": [
+          "\nUptime rule types"
+        ],
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/plugins/observability_solution/uptime/common/constants/uptime_alerts.ts",
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -15,10 +15,8 @@ import { setAlertsToUntracked } from './set_alerts_to_untracked';
 let clusterClient: ElasticsearchClientMock;
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
-const getAuthorizedRuleTypesMock = jest.fn();
-
+const getAllAuthorizedRuleTypesFindOperationMock = jest.fn();
 const getAlertIndicesAliasMock = jest.fn();
-
 const ensureAuthorizedMock = jest.fn();
 
 describe('setAlertsToUntracked()', () => {
@@ -362,11 +360,16 @@ describe('setAlertsToUntracked()', () => {
   });
 
   test('should untrack by query', async () => {
-    getAuthorizedRuleTypesMock.mockResolvedValue([
-      {
-        id: 'test-rule-type',
-      },
-    ]);
+    getAllAuthorizedRuleTypesFindOperationMock.mockResolvedValue(
+      new Map([
+        [
+          'test-rule-type',
+          {
+            id: 'test-rule-type',
+          },
+        ],
+      ])
+    );
     getAlertIndicesAliasMock.mockResolvedValue(['test-alert-index']);
 
     clusterClient.search.mockResponseOnce({
@@ -441,9 +444,9 @@ describe('setAlertsToUntracked()', () => {
           },
         },
       ],
-      featureIds: ['o11y'],
+      ruleTypeIds: ['my-rule-type-id'],
       spaceId: 'default',
-      getAuthorizedRuleTypes: getAuthorizedRuleTypesMock,
+      getAllAuthorizedRuleTypesFindOperation: getAllAuthorizedRuleTypesFindOperationMock,
       getAlertIndicesAlias: getAlertIndicesAliasMock,
       ensureAuthorized: ensureAuthorizedMock,
       logger,
@@ -527,11 +530,16 @@ describe('setAlertsToUntracked()', () => {
   });
 
   test('should return an empty array if the search returns zero results', async () => {
-    getAuthorizedRuleTypesMock.mockResolvedValue([
-      {
-        id: 'test-rule-type',
-      },
-    ]);
+    getAllAuthorizedRuleTypesFindOperationMock.mockResolvedValue(
+      new Map([
+        [
+          'test-rule-type',
+          {
+            id: 'test-rule-type',
+          },
+        ],
+      ])
+    );
     getAlertIndicesAliasMock.mockResolvedValue(['test-alert-index']);
 
     clusterClient.search.mockResponseOnce({
@@ -575,9 +583,9 @@ describe('setAlertsToUntracked()', () => {
           },
         },
       ],
-      featureIds: ['o11y'],
+      ruleTypeIds: ['my-rule-type-id'],
       spaceId: 'default',
-      getAuthorizedRuleTypes: getAuthorizedRuleTypesMock,
+      getAllAuthorizedRuleTypesFindOperation: getAllAuthorizedRuleTypesFindOperationMock,
       getAlertIndicesAlias: getAlertIndicesAliasMock,
       ensureAuthorized: ensureAuthorizedMock,
       logger,

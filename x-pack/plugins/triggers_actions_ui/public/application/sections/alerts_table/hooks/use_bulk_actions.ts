@@ -7,7 +7,7 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
   AlertsTableConfigurationRegistry,
@@ -40,7 +40,7 @@ interface BulkActionsProps {
   casesConfig?: AlertsTableConfigurationRegistry['cases'];
   useBulkActionsConfig?: UseBulkActionsRegistry;
   refresh: () => void;
-  featureIds?: ValidFeatureId[];
+  ruleTypeIds?: string[];
   hideBulkActions?: boolean;
 }
 
@@ -57,7 +57,7 @@ export interface UseBulkActions {
 type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
   Pick<UseBulkActions, 'clearSelection'>;
 
-type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'refresh' | 'query' | 'featureIds'> &
+type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'refresh' | 'query' | 'ruleTypeIds'> &
   Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'> & {
     isAllSelected: boolean;
   };
@@ -191,7 +191,7 @@ export const useBulkUntrackActions = ({
   refresh,
   clearSelection,
   query,
-  featureIds = [],
+  ruleTypeIds = [],
   isAllSelected,
 }: UseBulkUntrackActionsProps) => {
   const onSuccess = useCallback(() => {
@@ -217,7 +217,7 @@ export const useBulkUntrackActions = ({
       try {
         setIsBulkActionsLoading(true);
         if (isAllSelected) {
-          await untrackAlertsByQuery({ query, featureIds });
+          await untrackAlertsByQuery({ query, ruleTypeIds });
         } else {
           await untrackAlerts({ indices, alertUuids });
         }
@@ -228,7 +228,7 @@ export const useBulkUntrackActions = ({
     },
     [
       query,
-      featureIds,
+      ruleTypeIds,
       isAllSelected,
       onSuccess,
       setIsBulkActionsLoading,
@@ -277,7 +277,7 @@ export function useBulkActions({
   query,
   refresh,
   useBulkActionsConfig = () => [],
-  featureIds,
+  ruleTypeIds,
   hideBulkActions,
 }: BulkActionsProps): UseBulkActions {
   const {
@@ -300,13 +300,14 @@ export function useBulkActions({
     refresh,
     clearSelection,
     query,
-    featureIds,
+    ruleTypeIds,
     isAllSelected: bulkActionsState.isAllSelected,
   });
 
   const initialItems = useMemo(() => {
-    return [...caseBulkActions, ...(featureIds?.includes('siem') ? [] : untrackBulkActions)];
-  }, [caseBulkActions, featureIds, untrackBulkActions]);
+    return [...caseBulkActions, ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions)];
+  }, [caseBulkActions, ruleTypeIds, untrackBulkActions]);
+
   const bulkActions = useMemo(() => {
     if (hideBulkActions) {
       return [];

@@ -8,15 +8,11 @@ import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
+export { INFRA_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { SnapshotCustomMetricInput } from '../../http_api';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
-
-export enum InfraRuleType {
-  MetricThreshold = 'metrics.alert.threshold',
-  InventoryThreshold = 'metrics.alert.inventory.threshold',
-}
 
 export enum Aggregators {
   COUNT = 'count',

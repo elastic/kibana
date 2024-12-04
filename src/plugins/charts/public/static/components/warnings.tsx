@@ -86,7 +86,7 @@ export function Warnings({
           )
         }
       >
-        <div style={{ maxWidth: 512 }}>
+        <div css={{ maxWidth: 512 }}>
           {warnings.map((w, i) => (
             <React.Fragment key={i}>
               <div

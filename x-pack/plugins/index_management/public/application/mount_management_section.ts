@@ -73,6 +73,8 @@ export function getIndexManagementDependencies({
 }): AppDependencies {
   const { docLinks, application, uiSettings, settings } = core;
   const { url } = startDependencies.share;
+  const { monitor, manageEnrich, monitorEnrich } = application.capabilities.index_management;
+
   return {
     core: {
       getUrlForApp: application.getUrlForApp,
@@ -103,6 +105,11 @@ export function getIndexManagementDependencies({
     kibanaVersion,
     overlays: core.overlays,
     canUseSyntheticSource,
+    privs: {
+      monitor: !!monitor,
+      manageEnrich: !!manageEnrich,
+      monitorEnrich: !!monitorEnrich,
+    },
   };
 }
 

@@ -17,12 +17,14 @@ interface ApplyRuleUpdateProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   existingRule: RuleResponse;
   ruleUpdate: RuleUpdateProps;
+  isRuleCustomizationEnabled: boolean;
 }
 
 export const applyRuleUpdate = async ({
   prebuiltRuleAssetClient,
   existingRule,
   ruleUpdate,
+  isRuleCustomizationEnabled,
 }: ApplyRuleUpdateProps): Promise<RuleResponse> => {
   const nextRule: RuleResponse = {
     ...applyRuleDefaults(ruleUpdate),
@@ -46,6 +48,7 @@ export const applyRuleUpdate = async ({
   nextRule.rule_source = await calculateRuleSource({
     rule: nextRule,
     prebuiltRuleAssetClient,
+    isRuleCustomizationEnabled,
   });
 
   return nextRule;

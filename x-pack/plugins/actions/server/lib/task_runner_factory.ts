@@ -32,7 +32,6 @@ import {
   ActionTaskParams,
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
-  isPersistedActionTask,
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
@@ -128,7 +127,6 @@ export class TaskRunnerFactory {
           executorResult = await actionExecutor.execute({
             params,
             actionId: actionId as string,
-            isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
             taskInfo,
             executionId,
@@ -209,19 +207,17 @@ export class TaskRunnerFactory {
       },
       cleanup: async () => {
         // Cleanup action_task_params object now that we're done with it
-        if (isPersistedActionTask(actionTaskExecutorParams)) {
-          try {
-            await savedObjectsRepository.delete(
-              ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              actionTaskExecutorParams.actionTaskParamsId,
-              { refresh: false, namespace: spaceIdToNamespace(actionTaskExecutorParams.spaceId) }
-            );
-          } catch (e) {
-            // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
-            logger.error(
-              `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
-            );
-          }
+        try {
+          await savedObjectsRepository.delete(
+            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+            actionTaskExecutorParams.actionTaskParamsId,
+            { refresh: false, namespace: spaceIdToNamespace(actionTaskExecutorParams.spaceId) }
+          );
+        } catch (e) {
+          // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
+          logger.error(
+            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
+          );
         }
       },
     };
@@ -252,45 +248,41 @@ async function getActionTaskParams(
 ): Promise<TaskParams> {
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
-  if (isPersistedActionTask(executorParams)) {
-    try {
-      const actionTask =
-        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-          executorParams.actionTaskParamsId,
-          { namespace }
-        );
-      const {
-        attributes: { relatedSavedObjects },
-        references,
-      } = actionTask;
-
-      const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
-        injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
-
-      return {
-        ...actionTask,
-        attributes: {
-          ...actionTask.attributes,
-          ...(actionId ? { actionId } : {}),
-          ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
-        },
-      };
-    } catch (e) {
-      const errorSource = SavedObjectsErrorHelpers.isNotFoundError(e)
-        ? TaskErrorSource.USER
-        : TaskErrorSource.FRAMEWORK;
-      logger.error(
-        `Failed to load action task params ${executorParams.actionTaskParamsId}: ${e.message}`,
-        { tags: ['connector-run-failed', `${errorSource}-error`] }
+  try {
+    const actionTask =
+      await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        executorParams.actionTaskParamsId,
+        { namespace }
       );
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw createRetryableError(createTaskRunError(e, errorSource), true);
-      }
+    const {
+      attributes: { relatedSavedObjects },
+      references,
+    } = actionTask;
+
+    const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
+      injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
+
+    return {
+      ...actionTask,
+      attributes: {
+        ...actionTask.attributes,
+        ...(actionId ? { actionId } : {}),
+        ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
+      },
+    };
+  } catch (e) {
+    const errorSource = SavedObjectsErrorHelpers.isNotFoundError(e)
+      ? TaskErrorSource.USER
+      : TaskErrorSource.FRAMEWORK;
+    logger.error(
+      `Failed to load action task params ${executorParams.actionTaskParamsId}: ${e.message}`,
+      { tags: ['connector-run-failed', `${errorSource}-error`] }
+    );
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       throw createRetryableError(createTaskRunError(e, errorSource), true);
     }
-  } else {
-    return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
+    throw createRetryableError(createTaskRunError(e, errorSource), true);
   }
 }
 

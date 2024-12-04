@@ -25,6 +25,7 @@ import { DiscoverStateContainer } from '../state_management/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
 import { buildDataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { omit } from 'lodash';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,
@@ -501,7 +502,7 @@ describe('useEsqlMode', () => {
       FetchStatus.LOADING
     );
     const documents$ = stateContainer.dataState.data$.documents$;
-    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+    expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
@@ -516,7 +517,7 @@ describe('useEsqlMode', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         rowHeight: true,
         breakdownField: true,
@@ -537,7 +538,7 @@ describe('useEsqlMode', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
@@ -553,7 +554,7 @@ describe('useEsqlMode', () => {
       query: { esql: 'from pattern2' },
     });
     await waitFor(() =>
-      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         rowHeight: true,
         breakdownField: true,
@@ -570,7 +571,7 @@ describe('useEsqlMode', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
-    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+    expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
@@ -581,7 +582,7 @@ describe('useEsqlMode', () => {
       result: result1,
     });
     await waitFor(() =>
-      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
@@ -593,7 +594,7 @@ describe('useEsqlMode', () => {
       result: result2,
     });
     await waitFor(() =>
-      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         rowHeight: false,
         breakdownField: false,

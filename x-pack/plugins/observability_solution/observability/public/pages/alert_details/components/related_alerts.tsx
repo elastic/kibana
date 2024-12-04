@@ -29,7 +29,10 @@ import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 import { ObservabilityFields } from '../../../../common/utils/alerting/types';
 
-import { observabilityAlertFeatureIds } from '../../../../common/constants';
+import {
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+  observabilityAlertFeatureIds,
+} from '../../../../common/constants';
 import {
   getRelatedAlertKuery,
   getSharedFields,
@@ -125,7 +128,8 @@ export function InternalRelatedAlerts({ alert }: Props) {
       <EuiFlexItem>
         {esQuery && (
           <AlertsGrouping<AlertsByGroupingAgg>
-            featureIds={observabilityAlertFeatureIds}
+            ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+            consumers={observabilityAlertFeatureIds}
             defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS}
             from={alertSearchBarStateProps.rangeFrom}
             to={alertSearchBarStateProps.rangeTo}
@@ -149,7 +153,8 @@ export function InternalRelatedAlerts({ alert }: Props) {
               return (
                 <AlertsStateTable
                   id={ALERTS_TABLE_ID}
-                  featureIds={observabilityAlertFeatureIds}
+                  ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                  consumers={observabilityAlertFeatureIds}
                   configurationId={RELATED_ALERTS_TABLE_CONFIG_ID}
                   query={mergeBoolQueries(esQuery, groupQuery)}
                   showAlertStatusWithFlapping

@@ -28,7 +28,8 @@ export const findRulesOptionsSchema = schema.object(
     filter: schema.maybe(
       schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())])
     ),
-    filterConsumers: schema.maybe(schema.arrayOf(schema.string())),
+    ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
+    consumers: schema.maybe(schema.arrayOf(schema.string())),
   },
   { unknowns: 'allow' }
 );
@@ -37,5 +38,4 @@ export const findRulesParamsSchema = schema.object({
   options: schema.maybe(findRulesOptionsSchema),
   excludeFromPublicApi: schema.maybe(schema.boolean()),
   includeSnoozeData: schema.maybe(schema.boolean()),
-  featureIds: schema.maybe(schema.arrayOf(schema.string())),
 });

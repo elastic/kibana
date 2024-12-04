@@ -22,7 +22,6 @@ const createActionsClientMock = () => {
     getBulk: jest.fn(),
     getOAuthAccessToken: jest.fn(),
     execute: jest.fn(),
-    ephemeralEnqueuedExecution: jest.fn(),
     bulkEnqueueExecution: jest.fn(),
     listTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),

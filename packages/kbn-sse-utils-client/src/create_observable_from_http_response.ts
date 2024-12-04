@@ -29,8 +29,8 @@ export function createObservableFromHttpResponse<T extends ServerSentEvent = nev
   }
 
   return new Observable<T>((subscriber) => {
-    const parser = createParser((event) => {
-      if (event.type === 'event')
+    const parser = createParser({
+      onEvent: (event) => {
         try {
           const data = JSON.parse(event.data);
           if (event.event === 'error') {
@@ -48,6 +48,7 @@ export function createObservableFromHttpResponse<T extends ServerSentEvent = nev
         } catch (error) {
           subscriber.error(createSSEInternalError(`Failed to parse JSON`));
         }
+      },
     });
 
     const readStream = async () => {

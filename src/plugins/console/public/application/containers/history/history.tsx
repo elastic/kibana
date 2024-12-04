@@ -160,7 +160,7 @@ export function History() {
       data-test-subj="consoleHistoryPanel"
     >
       <EuiResizableContainer
-        style={{ height: '100%' }}
+        css={{ height: '100%' }}
         direction={isVerticalLayout ? 'vertical' : 'horizontal'}
       >
         {(EuiResizablePanel, EuiResizableButton) => (

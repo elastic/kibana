@@ -9,6 +9,7 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
+import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {
   SLO_MODEL_VERSION,
@@ -46,8 +47,10 @@ export class CreateSLO {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
-    await this.assertSLOInexistant(slo);
-    await assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient);
+    await Promise.all([
+      this.assertSLOInexistant(slo),
+      assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient),
+    ]);
 
     const rollbackOperations = [];
     const createPromise = this.repository.create(slo);
@@ -201,11 +204,14 @@ export class CreateSLO {
     return {
       ...params,
       id: params.id ?? uuidv4(),
-      settings: {
-        syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
-        frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
-        preventInitialBackfill: params.settings?.preventInitialBackfill ?? false,
-      },
+      settings: merge(
+        {
+          syncDelay: new Duration(1, DurationUnit.Minute),
+          frequency: new Duration(1, DurationUnit.Minute),
+          preventInitialBackfill: false,
+        },
+        params.settings
+      ),
       revision: params.revision ?? 1,
       enabled: true,
       tags: params.tags ?? [],

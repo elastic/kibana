@@ -105,7 +105,7 @@ export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
         return { default: DataViewIllustration };
       })
     ),
-    <EuiPanel color="subdued" style={{ width: 226, height: 206 }} />
+    <EuiPanel color="subdued" css={{ width: 226, height: 206 }} />
   );
 
   return (

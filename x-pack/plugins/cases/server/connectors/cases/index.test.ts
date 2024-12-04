@@ -366,7 +366,7 @@ describe('getCasesConnectorType', () => {
 
         expect(
           adapter.getKibanaPrivileges?.({
-            consumer: 'alerting',
+            consumer: 'not-exist',
             producer: AlertConsumers.LOGS,
           })
         ).toEqual([
@@ -387,7 +387,7 @@ describe('getCasesConnectorType', () => {
 
         expect(
           adapter.getKibanaPrivileges?.({
-            consumer: 'alerting',
+            consumer: 'alerts',
             producer: AlertConsumers.LOGS,
           })
         ).toEqual([

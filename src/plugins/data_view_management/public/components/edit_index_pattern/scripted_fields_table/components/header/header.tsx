@@ -37,7 +37,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
               defaultMessage="Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched."
             />
             <br />
-            <EuiIcon type="warning" color="warning" style={{ marginRight: '4px' }} />
+            <EuiIcon type="warning" color="warning" css={{ marginRight: '4px' }} />
             <FormattedMessage
               id="indexPatternManagement.editIndexPattern.deprecation"
               tagName="span"

@@ -31,9 +31,11 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
     },
   },
   handler: async (routeContext) => {
-    await migrateLegacyPrivateLocations(routeContext);
+    const { savedObjectsClient, syntheticsMonitorClient, request, response, server } = routeContext;
 
-    const { savedObjectsClient, syntheticsMonitorClient, request, response } = routeContext;
+    const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
+    await migrateLegacyPrivateLocations(internalSOClient, server.logger);
+
     const { id } = request.params as { id?: string };
 
     const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(

@@ -12,6 +12,7 @@ import {
   type IScopedClusterClient,
   SavedObjectsClient,
 } from '@kbn/core/server';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
 import type { TrainedModelJob, MLSavedObjectService } from './service';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
@@ -86,7 +87,9 @@ export function mlFunctionsFactory(client: IScopedClusterClient) {
     },
     async getTrainedModels() {
       try {
-        return await client.asInternalUser.ml.getTrainedModels();
+        return await client.asInternalUser.ml.getTrainedModels({
+          size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+        });
       } catch (error) {
         return null;
       }

@@ -91,7 +91,14 @@ export default function ({ getService }: FtrProviderContext) {
         'execute_operations_all',
         'scan_operations_all',
       ],
-      uptime: ['all', 'read', 'minimal_all', 'minimal_read', 'elastic_managed_locations_enabled'],
+      uptime: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'elastic_managed_locations_enabled',
+        'can_manage_private_locations',
+      ],
       securitySolutionAssistant: [
         'all',
         'read',
@@ -173,6 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
       inventory: ['all', 'read', 'minimal_all', 'minimal_read'],
+      entityManager: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };

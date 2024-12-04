@@ -81,7 +81,8 @@ export const useDegradedDocsChart = () => {
   useEffect(() => {
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
     const datasetTitle =
-      integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? datasetDetails.name;
+      integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ??
+      datasetDetails.name;
 
     const lensAttributes = getLensAttributes({
       color: euiTheme.colors.danger,
@@ -95,7 +96,7 @@ export const useDegradedDocsChart = () => {
     euiTheme.colors.danger,
     setAttributes,
     dataStream,
-    integrationDetails?.integration?.datasets,
+    integrationDetails?.integration?.integration?.datasets,
     datasetDetails.name,
   ]);
 

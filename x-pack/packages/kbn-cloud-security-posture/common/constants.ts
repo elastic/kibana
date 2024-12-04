@@ -47,3 +47,8 @@ export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   CRITICAL: 'CRITICAL',
   UNKNOWN: 'UNKNOWN',
 };
+
+export const MISCONFIGURATION_STATUS: Record<string, string> = {
+  PASSED: 'passed',
+  FAILED: 'failed',
+};

@@ -16,11 +16,13 @@ import { calculateIsCustomized } from './calculate_is_customized';
 interface CalculateRuleSourceProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   rule: RuleResponse;
+  isRuleCustomizationEnabled: boolean;
 }
 
 export async function calculateRuleSource({
   prebuiltRuleAssetClient,
   rule,
+  isRuleCustomizationEnabled,
 }: CalculateRuleSourceProps): Promise<RuleSource> {
   if (rule.immutable) {
     // This is a prebuilt rule and, despite the name, they are not immutable. So
@@ -33,7 +35,11 @@ export async function calculateRuleSource({
     ]);
     const baseRule: PrebuiltRuleAsset | undefined = prebuiltRulesResponse.at(0);
 
-    const isCustomized = calculateIsCustomized(baseRule, rule);
+    const isCustomized = calculateIsCustomized({
+      baseRule,
+      nextRule: rule,
+      isRuleCustomizationEnabled,
+    });
 
     return {
       type: 'external',

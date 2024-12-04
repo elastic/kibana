@@ -19,7 +19,7 @@ import {
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-import { LOG_THRESHOLD_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
+import { AlertConsumers, LOG_THRESHOLD_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
 
 import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
 import { EuiLink } from '@elastic/eui';
@@ -93,7 +93,8 @@ export const IndicesConfigurationPanel = React.memo<{
       if (http) {
         const { ruleExecutionStatus } = await loadRuleAggregations({
           http,
-          typesFilter: [LOG_THRESHOLD_ALERT_TYPE_ID],
+          ruleTypeIds: [LOG_THRESHOLD_ALERT_TYPE_ID],
+          consumers: [AlertConsumers.LOGS, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
         });
         const numberOfRules = Object.values(ruleExecutionStatus).reduce(
           (acc, value) => acc + value,

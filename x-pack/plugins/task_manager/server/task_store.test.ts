@@ -555,7 +555,14 @@ describe('TaskStore', () => {
         body: {
           size: 0,
           query: {
-            bool: { filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }] },
+            bool: {
+              filter: {
+                bool: {
+                  must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                  must_not: [{ term: { 'task.status': 'unrecognized' } }],
+                },
+              },
+            },
           },
           aggs: { testAgg: { terms: { field: 'task.taskType' } } },
         },
@@ -578,7 +585,12 @@ describe('TaskStore', () => {
               must: [
                 {
                   bool: {
-                    filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                    filter: {
+                      bool: {
+                        must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                        must_not: [{ term: { 'task.status': 'unrecognized' } }],
+                      },
+                    },
                   },
                 },
                 { term: { 'task.taskType': 'bar' } },
@@ -600,7 +612,14 @@ describe('TaskStore', () => {
         body: {
           size: 0,
           query: {
-            bool: { filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }] },
+            bool: {
+              filter: {
+                bool: {
+                  must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                  must_not: [{ term: { 'task.status': 'unrecognized' } }],
+                },
+              },
+            },
           },
           aggs: { testAgg: { terms: { field: 'task.taskType' } } },
           runtime_mappings: { testMapping: { type: 'long', script: { source: `` } } },

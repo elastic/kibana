@@ -69,6 +69,7 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
     await page.click('span >> text="Journey / Page"');
     await page.click('[aria-label="Apply the selected filters for Type"]');
     expect(page.url()).toBe(`${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D`);
+    await page.waitForTimeout(5000);
     await page.click('[placeholder="Search by name, URL, host, tag, project or location"]');
     await Promise.all([
       page.waitForNavigation({

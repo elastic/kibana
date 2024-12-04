@@ -8,6 +8,7 @@
 import {
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
@@ -16,6 +17,7 @@ import {
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { firstValueFrom } from 'rxjs';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { builtInDefinitions } from './lib/entities/built_in';
 import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
@@ -29,6 +31,14 @@ import {
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
+import { setupEntityDefinitionsIndex } from './lib/v2/definitions/setup_entity_definitions_index';
+import {
+  CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+  CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+  READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+  READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+  READ_ENTITIES_PRIVILEGE,
+} from './lib/v2/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -63,6 +73,46 @@ export class EntityManagerServerPlugin
     core: CoreSetup,
     plugins: EntityManagerPluginSetupDependencies
   ): EntityManagerServerPluginSetup {
+    const ENTITY_MANAGER_FEATURE_ID = 'entityManager';
+    plugins.features.registerKibanaFeature({
+      id: ENTITY_MANAGER_FEATURE_ID,
+      name: 'Entity Manager',
+      description: 'All features related to the Elastic Entity model',
+      category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      app: [ENTITY_MANAGER_FEATURE_ID],
+      privileges: {
+        all: {
+          app: [ENTITY_MANAGER_FEATURE_ID],
+          api: [
+            CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+            CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+            READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+            READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+            READ_ENTITIES_PRIVILEGE,
+          ],
+          ui: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
+        read: {
+          app: [ENTITY_MANAGER_FEATURE_ID],
+          api: [
+            READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+            READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+            READ_ENTITIES_PRIVILEGE,
+          ],
+          ui: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
+      },
+    });
+
     core.savedObjects.registerType(entityDefinition);
     core.savedObjects.registerType(EntityDiscoveryApiKeyType);
     plugins.encryptedSavedObjects.registerType({
@@ -99,9 +149,9 @@ export class EntityManagerServerPlugin
     request: KibanaRequest;
     coreStart: CoreStart;
   }) {
-    const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+    const clusterClient = coreStart.elasticsearch.client.asScoped(request);
     const soClient = coreStart.savedObjects.getScopedClient(request);
-    return new EntityClient({ esClient, soClient, logger: this.logger });
+    return new EntityClient({ clusterClient, soClient, logger: this.logger });
   }
 
   public start(
@@ -117,6 +167,7 @@ export class EntityManagerServerPlugin
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
+    // Setup v1 definitions index
     installEntityManagerTemplates({ esClient, logger: this.logger })
       .then(async () => {
         // the api key validation requires a check against the cluster license
@@ -132,6 +183,11 @@ export class EntityManagerServerPlugin
         }
       })
       .catch((err) => this.logger.error(err));
+
+    // Setup v2 definitions index
+    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger).catch((error) => {
+      this.logger.error(error);
+    });
 
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {

@@ -168,6 +168,11 @@ describe('index table', () => {
         enableIndexActions: true,
         enableIndexStats: true,
       },
+      privs: {
+        monitor: true,
+        manageEnrich: true,
+        monitorEnrich: true,
+      },
     };
 
     component = (

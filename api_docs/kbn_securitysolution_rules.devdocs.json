@@ -298,6 +298,21 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-common.SECURITY_SOLUTION_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "(\"siem.eqlRule\" | \"siem.esqlRule\" | \"siem.indicatorRule\" | \"siem.mlRule\" | \"siem.queryRule\" | \"siem.savedQueryRule\" | \"siem.thresholdRule\" | \"siem.newTermsRule\")[]"
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
         "id": "def-common.SIGNALS_ID",
         "type": "string",
         "tags": [],

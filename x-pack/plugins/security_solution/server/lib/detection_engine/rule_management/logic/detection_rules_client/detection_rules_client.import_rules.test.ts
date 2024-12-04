@@ -32,6 +32,7 @@ describe('detectionRulesClient.importRules', () => {
       rulesClient: rulesClientMock.create(),
       mlAuthz: buildMlAuthz(),
       savedObjectsClient: savedObjectsClientMock.create(),
+      isRuleCustomizationEnabled: true,
     });
 
     (checkRuleExceptionReferences as jest.Mock).mockReturnValue([[], []]);

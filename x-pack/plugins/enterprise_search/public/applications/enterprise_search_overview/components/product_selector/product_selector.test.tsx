@@ -11,8 +11,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ErrorStateCallout } from '../../../shared/error_state';
-
 import { TrialCallout } from '../trial_callout';
 
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
@@ -32,23 +30,6 @@ describe('ProductSelector', () => {
     const wrapper = shallow(<ProductSelector />);
 
     expect(wrapper.find(TrialCallout)).toHaveLength(1);
-  });
-
-  it('does not render connection error callout without an error', () => {
-    setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
-    const wrapper = shallow(<ProductSelector />);
-
-    expect(wrapper.find(ErrorStateCallout)).toHaveLength(0);
-  });
-
-  it('does render connection error callout with an error', () => {
-    setMockValues({
-      config: { canDeployEntSearch: true, host: 'localhost' },
-      errorConnectingMessage: '502 Bad Gateway',
-    });
-    const wrapper = shallow(<ProductSelector />);
-
-    expect(wrapper.find(ErrorStateCallout)).toHaveLength(1);
   });
 
   describe('access checks when host is set', () => {

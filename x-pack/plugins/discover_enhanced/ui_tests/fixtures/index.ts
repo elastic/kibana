@@ -14,14 +14,23 @@ import {
 } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 
-interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
+export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     demo: DemoPage;
   };
 }
 
 export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async ({ pageObjects, page }, use) => {
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: ExtendedScoutTestFixtures['pageObjects'];
+      page: ExtendedScoutTestFixtures['page'];
+    },
+    use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
+  ) => {
     const extendedPageObjects = {
       ...pageObjects,
       demo: createLazyPageObject(DemoPage, page),
@@ -30,3 +39,6 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
     await use(extendedPageObjects);
   },
 });
+
+export * as testData from './constants';
+export * as assertionMessages from './assertion_messages';

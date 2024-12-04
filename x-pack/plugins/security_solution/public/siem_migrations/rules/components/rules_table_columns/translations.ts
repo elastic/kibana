@@ -69,3 +69,10 @@ export const COLUMN_SEVERITY = i18n.translate(
     defaultMessage: 'Severity',
   }
 );
+
+export const COLUMN_UPDATED = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.tableColumn.updatedLabel',
+  {
+    defaultMessage: 'Updated',
+  }
+);

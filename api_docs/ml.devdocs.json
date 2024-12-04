@@ -996,7 +996,7 @@
             "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -3182,6 +3182,21 @@
           "MlJob"
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.ML_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "ML_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "(\"xpack.ml.anomaly_detection_alert\" | \"xpack.ml.anomaly_detection_jobs_health\")[]"
+        ],
+        "path": "x-pack/plugins/ml/common/constants/alerts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

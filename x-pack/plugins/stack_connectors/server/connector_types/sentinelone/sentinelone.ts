@@ -43,6 +43,7 @@ import {
   SentinelOneGetRemoteScriptResultsParamsSchema,
   SentinelOneDownloadRemoteScriptResultsParamsSchema,
   SentinelOneDownloadRemoteScriptResultsResponseSchema,
+  SentinelOneBaseApiResponseSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import {
@@ -400,6 +401,11 @@ export class SentinelOneConnector extends SubActionConnector<
     const response = await this.request<R>(
       {
         ...req,
+        // We don't validate responses from SentinelOne API's because we do not want failures for cases
+        // where the external system might add/remove/change values in the response that we have no
+        // control over.
+        responseSchema:
+          SentinelOneBaseApiResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
         params: {
           ...req.params,
           APIToken: this.secrets.token,

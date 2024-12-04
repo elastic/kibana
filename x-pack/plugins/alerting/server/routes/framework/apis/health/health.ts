@@ -48,8 +48,9 @@ export const healthRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
           const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
           // Verify that user has access to at least one rule type
-          const ruleTypes = Array.from(await alertingContext.getRulesClient().listRuleTypes());
+          const ruleTypes = Array.from(await rulesClient.listRuleTypes());
           if (ruleTypes.length > 0) {
             const alertingFrameworkHealth = await alertingContext.getFrameworkHealth();
 

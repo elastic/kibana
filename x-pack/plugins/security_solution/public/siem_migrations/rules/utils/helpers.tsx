@@ -11,6 +11,22 @@ import {
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
+export const convertTranslationResultIntoColor = (status?: RuleMigrationTranslationResult) => {
+  switch (status) {
+    case RuleMigrationTranslationResultEnum.full:
+      return 'primary';
+
+    case RuleMigrationTranslationResultEnum.partial:
+      return 'warning';
+
+    case RuleMigrationTranslationResultEnum.untranslatable:
+      return 'danger';
+
+    default:
+      throw new Error(i18n.SIEM_TRANSLATION_RESULT_UNKNOWN_ERROR(status));
+  }
+};
+
 export const convertTranslationResultIntoText = (status?: RuleMigrationTranslationResult) => {
   switch (status) {
     case RuleMigrationTranslationResultEnum.full:
@@ -23,6 +39,6 @@ export const convertTranslationResultIntoText = (status?: RuleMigrationTranslati
       return i18n.SIEM_TRANSLATION_RESULT_UNTRANSLATABLE_LABEL;
 
     default:
-      return i18n.SIEM_TRANSLATION_RESULT_UNKNOWN_LABEL;
+      throw new Error(i18n.SIEM_TRANSLATION_RESULT_UNKNOWN_ERROR(status));
   }
 };

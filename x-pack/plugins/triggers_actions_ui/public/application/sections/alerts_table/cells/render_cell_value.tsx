@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import {
   ALERT_DURATION,
-  AlertConsumers,
   ALERT_RULE_NAME,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -25,6 +24,7 @@ import {
 import { EuiBadge, EuiLink, RenderCellValue } from '@elastic/eui';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { useKibana } from '../../../../common/lib/kibana';
+import { AlertsTableSupportedConsumers } from '../types';
 
 export const getMappedNonEcsValue = ({
   data,
@@ -136,7 +136,7 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
         );
       case ALERT_RULE_CONSUMER:
         const producer = rowData?.find(({ field }) => field === ALERT_RULE_PRODUCER)?.value?.[0];
-        const consumer: AlertConsumers = observabilityFeatureIds.includes(producer)
+        const consumer: AlertsTableSupportedConsumers = observabilityFeatureIds.includes(producer)
           ? 'observability'
           : producer && (value === 'alerts' || value === 'stackAlerts' || value === 'discover')
           ? producer

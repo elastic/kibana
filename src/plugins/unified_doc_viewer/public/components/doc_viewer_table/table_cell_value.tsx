@@ -21,9 +21,7 @@ import {
 import classnames from 'classnames';
 import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { IgnoredReason, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
-import { FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
-import { getUnifiedDocViewerServices } from '../../plugin';
+import { IgnoredReason } from '@kbn/discover-utils';
 
 const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
 
@@ -96,14 +94,14 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
   );
 });
 
-type TableFieldValueProps = Pick<FieldRecordLegacy['field'], 'field'> & {
-  formattedValue: FieldRecordLegacy['value']['formattedValue'];
+interface TableFieldValueProps {
+  field: string;
+  formattedValue: string;
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
   isDetails?: boolean; // true when inside EuiDataGrid cell popover
-  isLegacy?: boolean; // true when inside legacy table
   isHighlighted?: boolean; // whether it's matching a search term
-};
+}
 
 export const TableFieldValue = ({
   formattedValue,
@@ -111,14 +109,10 @@ export const TableFieldValue = ({
   rawValue,
   ignoreReason,
   isDetails,
-  isLegacy,
   isHighlighted,
 }: TableFieldValueProps) => {
   const { euiTheme } = useEuiTheme();
-  const { uiSettings } = getUnifiedDocViewerServices();
-  const truncationHeight = isLegacy
-    ? uiSettings.get(TRUNCATE_MAX_HEIGHT)
-    : DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT;
+  const truncationHeight = DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT;
 
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   useResizeObserver(containerRef);

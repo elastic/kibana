@@ -228,54 +228,6 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
 
-        it('should handle enable alert request appropriately when consumer is not the producer', async () => {
-          const { body: createdRule } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                rule_type_id: 'test.restricted-noop',
-                consumer: 'alertsFixture',
-              })
-            )
-            .expect(200);
-          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
-
-          const response = await supertestWithoutAuth
-            .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
-            .set('kbn-xsrf', 'foo')
-            .send({ ids: [createdRule.id] })
-            .auth(user.username, user.password);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
-                statusCode: 403,
-              });
-              expect(response.statusCode).to.eql(403);
-              break;
-            case 'space_1_all at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'global_read at space1':
-              expect(response.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                message: 'No rules found for bulk enable',
-              });
-              expect(response.statusCode).to.eql(400);
-              break;
-            case 'superuser at space1':
-              expect(response.statusCode).to.eql(200);
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
-
         it('should handle enable alert request appropriately when consumer is "alerts"', async () => {
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -308,7 +260,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);

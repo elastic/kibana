@@ -15,10 +15,12 @@ import {
   SIEM_RULE_MIGRATION_INSTALL_PATH,
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_START_PATH,
+  SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationResponse,
+  GetRuleMigrationTranslationStatsResponse,
   InstallTranslatedMigrationRulesResponse,
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
@@ -68,6 +70,31 @@ export const startRuleMigration = async ({
 };
 
 /**
+ * Retrieves the translation stats for the migraion.
+ *
+ * @param migrationId `id` of the migration to retrieve translation stats for
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getRuleMigrationTranslationStats = async ({
+  migrationId,
+  signal,
+}: {
+  migrationId: string;
+  signal: AbortSignal | undefined;
+}): Promise<GetRuleMigrationTranslationStatsResponse> => {
+  return KibanaServices.get().http.fetch<GetRuleMigrationTranslationStatsResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH, { migration_id: migrationId }),
+    {
+      method: 'GET',
+      version: '1',
+      signal,
+    }
+  );
+};
+
+/**
  * Retrieves all the migration rule documents of a specific migration.
  *
  * @param migrationId `id` of the migration to retrieve rule documents for
@@ -77,14 +104,29 @@ export const startRuleMigration = async ({
  */
 export const getRuleMigrations = async ({
   migrationId,
+  page,
+  perPage,
+  searchTerm,
   signal,
 }: {
   migrationId: string;
+  page?: number;
+  perPage?: number;
+  searchTerm?: string;
   signal: AbortSignal | undefined;
 }): Promise<GetRuleMigrationResponse> => {
   return KibanaServices.get().http.fetch<GetRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
-    { method: 'GET', version: '1', signal }
+    {
+      method: 'GET',
+      version: '1',
+      query: {
+        page,
+        per_page: perPage,
+        search_term: searchTerm,
+      },
+      signal,
+    }
   );
 };
 

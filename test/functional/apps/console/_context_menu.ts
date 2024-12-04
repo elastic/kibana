@@ -70,6 +70,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       });
 
+      it('doesnt allow to copy kbn requests as anything other than curl', async () => {
+        const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
+
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('GET _search\n');
+
+        // Add a kbn request
+        // pressEnter
+        await PageObjects.console.enterText('GET kbn:/api/spaces/space');
+        // Make sure to select the es and kbn request
+        await PageObjects.console.selectAllRequests();
+
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.clickCopyAsButton();
+
+        let resultToast = await toasts.getElementByIndex(1);
+        let toastText = await resultToast.getVisibleText();
+
+        expect(toastText).to.be('Requests copied to clipboard as curl');
+
+        // Check if the clipboard has the curl request
+        if (canReadClipboard) {
+          const clipboardText = await browser.getClipboardValue();
+          expect(clipboardText).to.contain('curl -X GET');
+        }
+
+        // Wait until async operation is done
+        await PageObjects.common.sleep(1000);
+
+        // Focus editor once again
+        await PageObjects.console.focusInputEditor();
+
+        // Try to copy as javascript
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.changeLanguageAndCopy('javascript');
+
+        resultToast = await toasts.getElementByIndex(2);
+        toastText = await resultToast.getVisibleText();
+
+        expect(toastText).to.be('Kibana requests can only be copied as curl');
+
+        // Since we tried to copy as javascript, the clipboard should still have
+        // the curl request
+        if (canReadClipboard) {
+          const clipboardText = await browser.getClipboardValue();
+          expect(clipboardText).to.contain('curl -X GET');
+        }
+      });
+
       it.skip('allows to change default language', async () => {
         await PageObjects.console.clickContextMenu();
 

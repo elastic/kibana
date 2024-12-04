@@ -8,7 +8,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
-import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import {
+  AlertConsumers,
+  SLO_RULE_TYPE_IDS,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
 import { ActiveAlerts } from './active_alerts';
@@ -57,7 +60,8 @@ export function useFetchActiveAlerts({
       try {
         const response = await http.post<FindApiResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
           body: JSON.stringify({
-            feature_ids: [AlertConsumers.SLO, AlertConsumers.OBSERVABILITY],
+            rule_type_ids: SLO_RULE_TYPE_IDS,
+            consumers: [AlertConsumers.SLO, AlertConsumers.OBSERVABILITY, AlertConsumers.ALERTS],
             size: 0,
             query: {
               bool: {
@@ -67,11 +71,6 @@ export function useFetchActiveAlerts({
                       '@timestamp': {
                         gte: rangeFrom,
                       },
-                    },
-                  },
-                  {
-                    term: {
-                      'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
                     },
                   },
                   {

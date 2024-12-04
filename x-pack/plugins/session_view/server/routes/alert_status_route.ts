@@ -11,6 +11,7 @@ import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import {
   ALERT_STATUS_ROUTE,
   ALERT_UUID_PROPERTY,
@@ -65,9 +66,9 @@ export const registerAlertStatusRoute = (
 };
 
 export const searchAlertByUuid = async (client: AlertsClient, alertUuid: string) => {
-  const indices = (await client.getAuthorizedAlertsIndices(['siem']))?.filter(
-    (index) => index !== PREVIEW_ALERTS_INDEX
-  );
+  const indices = (
+    await client.getAuthorizedAlertsIndices(SECURITY_SOLUTION_RULE_TYPE_IDS)
+  )?.filter((index) => index !== PREVIEW_ALERTS_INDEX);
 
   if (!indices) {
     return { events: [] };
