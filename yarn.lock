@@ -2304,25 +2304,25 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.3.tgz#a84c59009a331acd711ed14729237a9f348a14b5"
-  integrity sha512-aO+41iq3igDC852ZUiCkbI44TAt44buxaw3bQS1/Cy50oYlG7TAGEm4f7WZbEnMRK6EeqCNs3Hj+rU5HMDi9vA==
+"@elastic/eui-theme-borealis@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.4.tgz#5a1e8d5cd02f25634928106c9845389f6b8568bb"
+  integrity sha512-6RV49J0saf2zjcf1uXYpoU9AgRlWs+ot+GszZz6iCBavPl7MdMlR13x5WdT7ewtx7cju9taEWhS1YDVfGVCFSA==
 
-"@elastic/eui-theme-common@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.3.tgz#55b916229bed02276d4cf8dc9dfb1f72fc47c482"
-  integrity sha512-I7x5/Z1xxhNvlWj4oUKbbExUBD3tbfIPMvcijeGy44uXOa10Bs0duAcuOdDsQZqQdB7V44KyT5rH2dTqU5ogQw==
+"@elastic/eui-theme-common@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.4.tgz#83db50a46251c75e6a3c07df0dee3eedb5d49e17"
+  integrity sha512-IDQ15ytDwlB5OO2UlPKccUR37QnRp1xZE8zPy8LoCPQAX8hgDYjikk8gjA2eixCuTm9+t6Suz+Xuha69VcMMZg==
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@98.0.0-borealis.1":
-  version "98.0.0-borealis.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.0.0-borealis.1.tgz#0f4e6a1a0afc3270ad1419f540e0d6d709899d63"
-  integrity sha512-npPTj62wkG2Hvqi/4bkWGi9R8LYsa6cjNBbwj60u9GQbovzR45ZGSjxWfRxrgR3ajqLqf22MnqCKab5hnu/7Mg==
+"@elastic/eui@98.1.0-borealis.0":
+  version "98.1.0-borealis.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.1.0-borealis.0.tgz#b0db1416d81863816939ae4dc067cc089a9f9789"
+  integrity sha512-DMu+H0j5WrByhJr3Xc3strmsIiwKHLYCOKsTWOqv9CS8tcRFaYa2zHhwhgVhRuBE7XdX++uCsV4vVGrd8qJMVw==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.3"
+    "@elastic/eui-theme-common" "0.0.4"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -5778,6 +5778,10 @@
   uid ""
 
 "@kbn/functional-with-es-ssl-cases-test-plugin@link:x-pack/test/functional_with_es_ssl/plugins/cases":
+  version "0.0.0"
+  uid ""
+
+"@kbn/gen-ai-functional-testing@link:packages/kbn-gen-ai-functional-testing":
   version "0.0.0"
   uid ""
 
