@@ -269,7 +269,6 @@ packages/deeplinks/search @elastic/search-kibana
 packages/deeplinks/security @elastic/security-solution
 packages/deeplinks/shared @elastic/appex-sharedux
 packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
-packages/default-nav/management @elastic/kibana-management
 packages/default-nav/ml @elastic/ml-ui
 packages/home/sample_data_card @elastic/appex-sharedux
 packages/home/sample_data_tab @elastic/appex-sharedux
@@ -620,6 +619,7 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
+src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/kbn-doc-links @elastic/docs
