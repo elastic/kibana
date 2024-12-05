@@ -49,6 +49,7 @@ import { getCurrentNamespace } from '../../services/spaces/get_current_namespace
 import { getPackageInfo } from '../../services/epm/packages';
 import { generateTemplateIndexPattern } from '../../services/epm/elasticsearch/template/template';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
+import { getAgentFields } from '../../services/agents/agent_fields';
 
 async function verifyNamespace(agent: Agent, namespace?: string) {
   if (!(await isAgentInNamespace(agent, namespace))) {
@@ -354,6 +355,14 @@ export const getAgentStatusRuntimeFieldHandler: RequestHandler = async (
   const runtimeFields = await buildAgentStatusRuntimeField();
 
   return response.ok({ body: (runtimeFields.status.script as Script)!.source! });
+};
+
+export const getAgentFieldsHandler: RequestHandler = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asCurrentUser;
+  const fields = await getAgentFields(esClient);
+
+  return response.ok({ body: fields });
 };
 
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {

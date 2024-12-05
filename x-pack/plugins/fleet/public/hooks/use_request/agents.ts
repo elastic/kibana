@@ -364,3 +364,17 @@ export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: b
     enabled: options.enabled,
   });
 }
+
+export function sendGetAgentExportFields() {
+  return sendRequestForRq<Array<{ field: string }>>({
+    method: 'get',
+    path: '/internal/fleet/agents/fields',
+    version: API_VERSIONS.internal.v1,
+  });
+}
+
+export function useGetAgentExportFieldsQuery(options: Partial<{ enabled: boolean }> = {}) {
+  return useQuery(['agent_fields'], () => sendGetAgentExportFields(), {
+    enabled: options.enabled,
+  });
+}
