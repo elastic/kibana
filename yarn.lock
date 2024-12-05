@@ -7664,7 +7664,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/transform-plugin@link:x-pack/plugins/transform":
+"@kbn/transform-plugin@link:x-pack/platform/plugins/private/transform":
   version "0.0.0"
   uid ""
 

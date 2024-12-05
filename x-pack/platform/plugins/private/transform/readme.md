@@ -69,7 +69,7 @@ These data sets are now ready to be used for creating transforms in Kibana.
 
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
-Run the test following jest tests from `kibana/x-pack/plugins/transform.
+Run the test following jest tests from `kibana/x-pack/platform/plugins/private/transform.
 
 New snapshots, all plugins:   
 

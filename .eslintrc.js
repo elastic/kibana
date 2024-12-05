@@ -1076,7 +1076,7 @@ module.exports = {
         'x-pack/platform/plugins/shared/aiops/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/ml/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
