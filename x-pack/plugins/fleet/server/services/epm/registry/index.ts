@@ -388,7 +388,7 @@ export async function getPackage(
 
     return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
   } catch (error) {
-    logger.warn(`getPackage error: ${error}`);
+    logger.warn(`getPackage failed with error: ${error}`);
     throw error;
   }
 }
@@ -498,7 +498,7 @@ export async function fetchArchiveBuffer({
     }
     return { archiveBuffer, archivePath };
   } catch (error) {
-    logger.warn(`fetchArchiveBuffer error: ${error}`);
+    logger.warn(`fetchArchiveBuffer failed with error: ${error}`);
     throw error;
   }
 }

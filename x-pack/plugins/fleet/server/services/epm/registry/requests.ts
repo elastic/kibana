@@ -11,12 +11,7 @@ import pRetry from 'p-retry';
 
 import { streamToString } from '../streams';
 import { appContextService } from '../../app_context';
-import {
-  RegistryError,
-  RegistryConnectionError,
-  RegistryResponseError,
-  ResponseStreamNotFoundError,
-} from '../../../errors';
+import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
 
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
@@ -88,7 +83,7 @@ export async function getResponseStream(
   if (res) {
     return res?.body;
   }
-  throw new ResponseStreamNotFoundError('Response stream not found');
+  throw new RegistryResponseError('isAirGapped config enabled, registry not reacheable');
 }
 
 export async function fetchUrl(url: string, retries?: number): Promise<string> {
