@@ -584,7 +584,7 @@ describe('case transforms', () => {
     });
 
     it('returns observables array when it is defined', () => {
-      const CaseSOResponseWithoutObservables = createCaseSavedObjectResponse({
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
         overrides: {
           observables: [
             {
@@ -600,7 +600,7 @@ describe('case transforms', () => {
       });
 
       expect(
-        transformSavedObjectToExternalModel(CaseSOResponseWithoutObservables).attributes.observables
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.observables
       ).toMatchInlineSnapshot(`
         Array [
           Object {
