@@ -1910,7 +1910,7 @@ module.exports = {
         'src/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
-        'x-pack/plugins/global_search/**',
+        'x-pack/platform/plugins/shared/global_search/**',
         'x-pack/plugins/cloud/**',
         'packages/kbn-config-schema',
         'src/plugins/status_page/**',

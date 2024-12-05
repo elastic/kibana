@@ -47,7 +47,7 @@
     "xpack.exploratoryView": "plugins/observability_solution/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": [
-      "plugins/global_search"
+      "platform/plugins/shared/global_search"
     ],
     "xpack.globalSearchBar": [
       "platform/plugins/private/global_search_bar"
