@@ -4,9 +4,9 @@ An abstraction on top of `EuiDataGrid` dedicated to rendering alert documents.
 
 ## Usage
 
-In addition to `EuiDataGrid`'s functionality, the table manages the paginated and cached fetching of alerts based on the
-provided `featureIds` (the final query can be refined through the `query` and `initialSort` props). The `id` prop is
-required in order to persist the table state in `localStorage`.
+In addition to `EuiDataGrid`'s functionality, the table manages the paginated and cached fetching of alerts, based on
+the provided `ruleTypeIds` and `consumers` (the final query can be refined through the `query` and `initialSort` props).
+The `id` prop is used to persist the table state in `localStorage`.
 
 ```tsx
 <AlertsTable
@@ -75,6 +75,14 @@ You can add properties to this context by means of the `additionalContext` prop:
 The context type is inferred based on the `additionalContext` prop and all render functions props are typed accordingly.
 To avoid prop drilling, you can use the `useAlertsTableContext` hook to access the same context in any sub-component.
 
+```tsx
+const CustomCellValue = ({ alert }) => {
+  const { alertsCount, myCustomProperty } = useAlertsTableContext<MyAdditionalContext>();
+
+  // ...
+};
+```
+
 In order to define your custom sub-components separately from the table but still benefit from the context type
 inference, you may want to extract props from the `AlertsTableProps` type. The `GetAlertsTableProp` utility type is
 provided for this: it extracts the type of a specific prop from the `AlertsTableProps` type, excluding `undefined` in
@@ -130,8 +138,7 @@ The table relies on the following Kibana services, expected in the `services` pr
 
 The table has built-in integration with Maintenance Windows and Cases. If alerts have maintenance windows or cases
 associated to them, they will be loaded and made available through the `maintenanceWindows` and `cases` properties of
-the
-render context.
+the render context.
 A special cell renderer is used by default for the `kibana.alert.maintenance_window_ids` and `kibana.alert.case_ids`
 columns.
 
@@ -145,17 +152,17 @@ you can assert the type of the lazy loaded component using a type import:
 ```tsx
 import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
 
-const AlertsTable = React.lazy(() => import('@kbn/response-ops-alerts-table')) as typeof AlertsTableType;
+const AlertsTable = React.lazy(() => import('@kbn/response-ops-alerts-table')) as AlertsTableType;
 ```
 
 ## Mocking
 
 When mocking the table, keep in mind that the component is manually typed as a normal function component (to keep its
-generic types), but it's actually a memoized, forward-refed component. To mock it properly, mock the entire module:
+generic types), but it's actually a memoized, forwardRef'ed component. To mock it properly, mock the entire module:
 
 ```tsx
 jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn().mockImplementation(() => <div />),
+  AlertsTable: jest.fn().mockImplementation(() => <div data-test-subj="alerts-table"/>),
 }));
 ```
 

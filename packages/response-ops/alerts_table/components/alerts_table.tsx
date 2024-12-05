@@ -377,7 +377,11 @@ const AlertsTableContent = typedForwardRef(
     );
 
     const bulkActionsStore = useMemo(
-      () => [bulkActionsState, dispatchBulkAction],
+      () =>
+        [bulkActionsState, dispatchBulkAction] as [
+          typeof bulkActionsState,
+          typeof dispatchBulkAction
+        ],
       [bulkActionsState, dispatchBulkAction]
     );
 
