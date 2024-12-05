@@ -14,6 +14,7 @@ import { EuiPageTemplate } from '@elastic/eui';
 import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 import type { ChromeDocTitle, ThemeServiceSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 import type { RedirectManager } from '../redirect_manager';
 import { RedirectEmptyPrompt } from './empty_prompt';
@@ -25,6 +26,7 @@ export interface PageProps {
   customBranding: CustomBrandingSetup;
   manager: Pick<RedirectManager, 'error$'>;
   theme: ThemeServiceSetup;
+  userProfile: UserProfileService;
 }
 
 export const Page: React.FC<PageProps> = ({
@@ -32,14 +34,14 @@ export const Page: React.FC<PageProps> = ({
   homeHref,
   customBranding,
   docTitle,
-  theme,
+  ...startServices
 }) => {
   const error = useObservable(manager.error$);
   const hasCustomBranding = useObservable(customBranding.hasCustomBranding$);
 
   if (error) {
     return (
-      <KibanaThemeProvider theme={theme}>
+      <KibanaThemeProvider {...startServices}>
         <EuiPageTemplate>
           <RedirectEmptyPrompt docTitle={docTitle} error={error} homeHref={homeHref} />
         </EuiPageTemplate>
@@ -48,7 +50,7 @@ export const Page: React.FC<PageProps> = ({
   }
 
   return (
-    <KibanaThemeProvider theme={theme}>
+    <KibanaThemeProvider {...startServices}>
       <EuiPageTemplate>
         <Spinner showPlainSpinner={Boolean(hasCustomBranding)} />
       </EuiPageTemplate>

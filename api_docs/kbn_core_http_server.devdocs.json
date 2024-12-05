@@ -4194,6 +4194,10 @@
                 "path": "x-pack/plugins/inference/server/routes/connectors.ts"
               },
               {
+                "plugin": "productDocBase",
+                "path": "x-pack/plugins/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/get_searchable_types.ts"
               },
@@ -4790,6 +4794,10 @@
                 "path": "x-pack/plugins/search_playground/server/routes.ts"
               },
               {
+                "plugin": "searchprofiler",
+                "path": "x-pack/plugins/searchprofiler/server/routes/profile.ts"
+              },
+              {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
@@ -4968,10 +4976,6 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/plugins/watcher/server/routes/api/register_load_history_route.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/plugins/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
                 "plugin": "customBranding",
@@ -6884,6 +6888,14 @@
                 "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
               },
               {
+                "plugin": "productDocBase",
+                "path": "x-pack/plugins/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/plugins/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/find.ts"
               },
@@ -7558,14 +7570,6 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/plugins/watcher/server/routes/api/register_list_fields_route.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/plugins/ai_infra/product_doc_base/server/routes/installation.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/plugins/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
                 "plugin": "grokdebugger",
@@ -15487,6 +15491,46 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/calendars.ts"
               },
               {
@@ -15668,42 +15712,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/system.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -16008,6 +16016,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/index/read_alerts_index_exists_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/workflow_insights/get_insights.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16526,6 +16538,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/annotations.ts"
               },
               {
@@ -16559,10 +16575,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -16619,6 +16631,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/update_rule/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/workflow_insights/update_insight.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16969,6 +16985,34 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/annotations.ts"
               },
               {
@@ -17230,34 +17274,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/system.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -18159,6 +18175,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/annotations.ts"
               },
               {
@@ -18188,10 +18208,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -20755,7 +20771,7 @@
           "\nHttp response headers to set."
         ],
         "signature": [
-          "Record<string, string | string[]> | Record<\"date\" | \"allow\" | \"warning\" | \"location\" | \"authorization\" | \"from\" | \"host\" | \"range\" | \"etag\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"expires\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>"
+          "Record<\"date\" | \"allow\" | \"warning\" | \"location\" | \"authorization\" | \"from\" | \"host\" | \"range\" | \"etag\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"expires\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]>"
         ],
         "path": "packages/core/http/core-http-server/src/router/headers.ts",
         "deprecated": false,
