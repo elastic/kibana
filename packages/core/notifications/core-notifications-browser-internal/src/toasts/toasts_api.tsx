@@ -24,7 +24,8 @@ import type {
   ToastInputFields,
   ToastOptions,
 } from '@kbn/core-notifications-browser';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { ErrorToast } from './error_toast';
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
@@ -36,6 +37,14 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
   return omitBy(toastOrTitle, isUndefined);
 };
 
+interface StartDeps {
+  analytics: AnalyticsServiceStart;
+  overlays: OverlayStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
+}
+
 /**
  * Methods for adding and removing global toast messages.
  * @public
@@ -45,28 +54,15 @@ export class ToastsApi implements IToasts {
   private idCounter = 0;
   private uiSettings: IUiSettingsClient;
 
-  private overlays?: OverlayStart;
-  private analytics?: AnalyticsServiceStart;
-  private i18n?: I18nStart;
-  private theme?: ThemeServiceStart;
+  private startDeps?: StartDeps;
 
   constructor(deps: { uiSettings: IUiSettingsClient }) {
     this.uiSettings = deps.uiSettings;
   }
 
   /** @internal */
-  public start({
-    overlays,
-    i18n,
-    theme,
-  }: {
-    overlays: OverlayStart;
-    i18n: I18nStart;
-    theme: ThemeServiceStart;
-  }) {
-    this.overlays = overlays;
-    this.i18n = i18n;
-    this.theme = theme;
+  public start(startDeps: StartDeps) {
+    this.startDeps = startDeps;
   }
 
   /** Observable of the toast messages to show to the user. */
@@ -190,9 +186,7 @@ export class ToastsApi implements IToasts {
           error={error}
           title={options.title}
           toastMessage={message}
-          analytics={this.analytics!}
-          i18n={this.i18n!}
-          theme={this.theme!}
+          {...this.startDeps!}
         />
       ),
       ...options,
@@ -202,12 +196,13 @@ export class ToastsApi implements IToasts {
   private openModal(
     ...args: Parameters<OverlayStart['openModal']>
   ): ReturnType<OverlayStart['openModal']> {
-    if (!this.overlays) {
+    const { overlays } = this.startDeps ?? {};
+    if (!overlays) {
       // This case should never happen because no rendering should be occurring
       // before the ToastService is started.
       throw new Error(`Modal opened before ToastService was started.`);
     }
 
-    return this.overlays.openModal(...args);
+    return overlays.openModal(...args);
   }
 }
