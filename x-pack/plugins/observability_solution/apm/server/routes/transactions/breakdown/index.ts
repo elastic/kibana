@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flatten, orderBy, last } from 'lodash';
+import { flatten, orderBy, last, clamp, round } from 'lodash';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asPercent } from '../../../../common/utils/formatters';
@@ -145,9 +145,15 @@ export async function getTransactionBreakdown({
         const type = bucket.key as string;
 
         return bucket.subtypes.buckets.map((subBucket) => {
+          const percentageRaw =
+            (subBucket.total_self_time_per_subtype.value || 0) / sumAllSelfTimes;
+          // limit percentage from 0% to 100% and
+          // round to 8 decimal points (results in 6 decimal points after converting to percentages) to prevent displaying scientific notation in charts
+          const percentage = round(clamp(percentageRaw, 0, 1), 8);
+
           return {
             name: (subBucket.key as string) || type,
-            percentage: (subBucket.total_self_time_per_subtype.value || 0) / sumAllSelfTimes,
+            percentage,
           };
         });
       })

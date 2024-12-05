@@ -157,11 +157,20 @@ xpack.fleet.internal.registry.excludePackages: [
     'cloud_defend',
     'security_detection_engine',
 
-    # Removed in 8.11 integrations
+    # Deprecated security integrations
+    'bluecoat',
     'cisco',
-    'microsoft',
-    'symantec',
     'cyberark',
+    'cylance',
+    'f5',
+    'fortinet_forticlient',
+    'juniper_junos',
+    'juniper_netscreen',
+    'microsoft',
+    'netscout',
+    'radware',
+    'symantec',
+    'tomcat',
 
     # ML integrations
     'dga',
