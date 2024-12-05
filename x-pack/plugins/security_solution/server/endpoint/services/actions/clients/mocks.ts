@@ -49,6 +49,7 @@ import type {
   ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
   ScanActionRequestBody,
+  RunScriptActionRequestBody,
 } from '../../../../../common/api/endpoint';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
@@ -70,6 +71,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     getFileInfo: jest.fn().mockReturnValue(Promise.resolve()),
     getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
     scan: jest.fn().mockReturnValue(Promise.resolve()),
+    runscript: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
@@ -240,6 +242,18 @@ const createScanOptionsMock = (
   return merge(options, overrides);
 };
 
+const createRunScriptOptionsMock = (
+  overrides: Partial<RunScriptActionRequestBody> = {}
+): RunScriptActionRequestBody => {
+  const options: RunScriptActionRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      Raw: 'ls',
+    },
+  };
+  return merge(options, overrides);
+};
+
 const createConnectorMock = (
   overrides: DeepPartial<ConnectorWithExtraFindData> = {}
 ): ConnectorWithExtraFindData => {
@@ -316,6 +330,7 @@ export const responseActionsClientMock = Object.freeze({
   createExecuteOptions: createExecuteOptionsMock,
   createUploadOptions: createUploadOptionsMock,
   createScanOptions: createScanOptionsMock,
+  createRunScriptOptions: createRunScriptOptionsMock,
 
   createIndexedResponse: createEsIndexTransportResponseMock,
 

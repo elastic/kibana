@@ -26,9 +26,12 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
+  RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type {
@@ -294,6 +297,19 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  public async runscript(
+    actionRequest: RunScriptActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+  > {
+    // TODO: just a placeholder for now
+    return Promise.resolve({ output: 'runscript', code: 200 }) as never as ActionDetails<
+      ResponseActionRunScriptOutputContent,
+      ResponseActionRunScriptParameters
+    >;
   }
 
   private async completeCrowdstrikeAction(

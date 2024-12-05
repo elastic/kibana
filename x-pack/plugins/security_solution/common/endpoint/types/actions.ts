@@ -96,6 +96,11 @@ export interface ResponseActionScanOutputContent {
   code: string;
 }
 
+export interface ResponseActionRunScriptOutputContent {
+  output: string;
+  code: string;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -216,13 +221,29 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
+// Currently reflecting CrowdStrike's RunScript parameters
+interface ActionsRunScriptParametersBase {
+  Raw?: string;
+  HostPath?: string;
+  CloudFile?: string;
+  CommandLine?: string;
+  Timeout?: number;
+}
+
+// Enforce at least one of the script parameters is required
+export type ResponseActionRunScriptParameters = AtLeastOne<
+  ActionsRunScriptParametersBase,
+  'Raw' | 'HostPath' | 'CloudFile'
+>;
+
 export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithProcessData
   | ResponseActionsExecuteParameters
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters
-  | ResponseActionScanParameters;
+  | ResponseActionScanParameters
+  | ResponseActionRunScriptParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -233,7 +254,8 @@ export type EndpointActionResponseDataOutput =
   | GetProcessesActionOutputContent
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent
-  | ResponseActionScanOutputContent;
+  | ResponseActionScanOutputContent
+  | ResponseActionRunScriptOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
@@ -571,3 +593,7 @@ export interface ResponseActionUploadOutputContent {
   /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */
   disk_free_space: number;
 }
+
+type AtLeastOne<T, K extends keyof T = keyof T> = K extends keyof T
+  ? Required<Pick<T, K>> & Partial<Omit<T, K>>
+  : never;

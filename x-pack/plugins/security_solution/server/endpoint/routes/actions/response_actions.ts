@@ -6,31 +6,29 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-
-import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
-import { stringify } from '../../utils/stringify';
-import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
-import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type {
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
-} from '../../../../common/api/endpoint';
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../common/endpoint/service/response_actions/constants';
+import type { RunScriptActionRequestBody } from '../../../../common/api/endpoint';
 import {
   EndpointActionGetFileSchema,
   type ExecuteActionRequestBody,
   ExecuteActionRequestSchema,
   GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
+  type KillProcessRequestBody,
   KillProcessRouteRequestSchema,
   type ResponseActionGetFileRequestBody,
   type ResponseActionsRequestBody,
   type ScanActionRequestBody,
   ScanActionRequestSchema,
+  type SuspendProcessRequestBody,
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
   type UploadActionApiRequestBody,
   UploadActionRequestSchema,
+  RunScriptActionRequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
@@ -39,29 +37,32 @@ import {
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  RUN_SCRIPT_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
-  ActionDetails,
-  EndpointActionDataParameterTypes,
   ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
+  EndpointActionDataParameterTypes,
+  ActionDetails,
+  ResponseActionRunScriptParameters,
 } from '../../../../common/endpoint/types';
-import type {
-  ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
-} from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { stringify } from '../../utils/stringify';
 import { errorHandler } from '../error_handler';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type { ResponseActionsClient } from '../../services';
+import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
+import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -307,6 +308,33 @@ export function registerResponseActionRoutes(
         responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
       )
     );
+  router.versioned
+    .post({
+      access: 'public',
+      path: RUN_SCRIPT_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: RunScriptActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionRunScriptParameters>(
+          endpointContext,
+          'runscript'
+        )
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -412,6 +440,8 @@ async function handleActionCreation(
       return responseActionsClient.upload(body as UploadActionApiRequestBody);
     case 'scan':
       return responseActionsClient.scan(body as ScanActionRequestBody);
+    case 'runscript':
+      return responseActionsClient.runscript(body as RunScriptActionRequestBody);
     default:
       throw new CustomHttpRequestError(
         `No handler found for response action command: [${command}]`,
