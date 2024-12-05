@@ -33,6 +33,7 @@ describe('checkRuleTypeEnabled', () => {
       authorizedConsumers: {},
       minimumLicenseRequired: 'basic',
       enabledInLicense: true,
+      category: 'my-category',
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
           Object {
@@ -57,6 +58,7 @@ describe('checkRuleTypeEnabled', () => {
       authorizedConsumers: {},
       minimumLicenseRequired: 'gold',
       enabledInLicense: false,
+      category: 'my-category',
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
       Object {

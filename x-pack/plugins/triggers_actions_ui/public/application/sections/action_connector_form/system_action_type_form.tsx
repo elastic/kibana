@@ -27,8 +27,7 @@ import {
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
-import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
-import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/rule_form/utils/check_action_type_enabled';
+import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import {
   IErrorObject,

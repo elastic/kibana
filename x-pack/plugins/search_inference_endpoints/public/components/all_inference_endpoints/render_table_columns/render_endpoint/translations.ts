@@ -13,3 +13,10 @@ export const PRECONFIGURED_LABEL = i18n.translate(
     defaultMessage: 'PRECONFIGURED',
   }
 );
+
+export const TECH_PREVIEW_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.techPreview',
+  {
+    defaultMessage: 'TECH PREVIEW',
+  }
+);
