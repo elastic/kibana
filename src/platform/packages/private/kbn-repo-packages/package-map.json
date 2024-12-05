@@ -2973,7 +2973,7 @@
   ],
   [
     "@kbn/rison",
-    "packages/kbn-rison"
+    "src/platform/packages/shared/kbn-rison"
   ],
   [
     "@kbn/rollup",

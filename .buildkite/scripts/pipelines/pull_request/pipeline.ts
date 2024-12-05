@@ -290,7 +290,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-expandable-flyout/,
         /^packages\/kbn-grouping/,
         /^packages\/kbn-resizable-layout/,
-        /^packages\/kbn-rison/,
+        /^src\/platform\/packages\/shared\/kbn-rison/,
         /^packages\/kbn-rule-data-utils/,
         /^packages\/kbn-safer-lodash-set/,
         /^packages\/kbn-search-types/,
