@@ -43,7 +43,7 @@
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
-    "xpack.dataVisualizer": "plugins/data_visualizer",
+    "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "plugins/observability_solution/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": [

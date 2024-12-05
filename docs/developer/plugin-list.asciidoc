@@ -545,7 +545,7 @@ Plugin server-side only. Plugin has three main functions:
 |Serverless only plugin for users to view data usage
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/data_visualizer/README.md[dataVisualizer]
 |The data_visualizer plugin enables you to explore the fields in your data.
 
 

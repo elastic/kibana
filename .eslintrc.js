@@ -1074,7 +1074,7 @@ module.exports = {
     {
       files: [
         'x-pack/platform/plugins/shared/aiops/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/data_visualizer/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/ml/**/*.{js,mjs,ts,tsx}',

@@ -864,6 +864,7 @@ x-pack/platform/packages/private/ml/aiops_test_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
+x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
@@ -886,7 +887,6 @@ x-pack/plugins/custom_branding @elastic/appex-sharedux
 x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 x-pack/plugins/data_usage @elastic/obs-ai-assistant @elastic/security-solution
-x-pack/plugins/data_visualizer @elastic/ml-ui
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore

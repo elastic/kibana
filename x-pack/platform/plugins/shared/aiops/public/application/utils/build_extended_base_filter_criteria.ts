@@ -6,7 +6,7 @@
  */
 
 // TODO Consolidate with duplicate query utils in
-// `x-pack/plugins/data_visualizer/common/utils/query_utils.ts`
+// `x-pack/platform/plugins/private/data_visualizer/common/utils/query_utils.ts`
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
