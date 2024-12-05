@@ -1,0 +1,34 @@
+steps:
+  # - command: .buildkite/scripts/lifecycle/pre_build.sh
+  #   label: Pre-Build
+  #   timeout_in_minutes: 10
+  #   agents:
+  #     machineType: n2-standard-2
+
+  # - wait
+
+  # - command: .buildkite/scripts/steps/build_kibana.sh
+  #   label: Build Kibana Distribution
+  #   agents:
+  #     machineType: n2-standard-8
+  #     preemptible: true
+  #     diskSizeGb: 125
+  #   key: build
+  #   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+  #   timeout_in_minutes: 90
+  #   retry:
+  #     automatic:
+  #       - exit_status: '-1'
+  #         limit: 3
+
+  - command: .buildkite/scripts/steps/quick_checks.sh
+    label: 'Quick Checks'
+    agents:
+      machineType: n2-highcpu-8
+      preemptible: true
+    key: quick_checks
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
