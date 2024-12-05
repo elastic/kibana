@@ -1340,6 +1340,98 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.generateConnectorName",
+        "type": "Function",
+        "tags": [],
+        "label": "generateConnectorName",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", connectorType: string, isNative: boolean, userConnectorName?: string | undefined) => Promise<{ connectorName: string; indexName: string; }>"
+        ],
+        "path": "packages/kbn-search-connectors/lib/generate_connector_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.generateConnectorName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/lib/generate_connector_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.generateConnectorName.$2",
+            "type": "string",
+            "tags": [],
+            "label": "connectorType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-search-connectors/lib/generate_connector_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.generateConnectorName.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "isNative",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-search-connectors/lib/generate_connector_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.generateConnectorName.$4",
+            "type": "string",
+            "tags": [],
+            "label": "userConnectorName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/lib/generate_connector_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.getConnectorsDict",
         "type": "Function",
         "tags": [],
@@ -7158,6 +7250,21 @@
           "\"MINUTE\" | \"HOUR\" | \"DAY\" | \"WEEK\" | \"MONTH\" | \"YEAR\""
         ],
         "path": "packages/kbn-search-connectors/types/cron_editor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.MANAGED_CONNECTOR_INDEX_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "MANAGED_CONNECTOR_INDEX_PREFIX",
+        "description": [],
+        "signature": [
+          "\"content-\""
+        ],
+        "path": "packages/kbn-search-connectors/constants/connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

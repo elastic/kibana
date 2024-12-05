@@ -110,6 +110,7 @@ export const useGridLayoutEvents = ({
         bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
         right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
       };
+
       gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
       // find the grid that the preview rect is over

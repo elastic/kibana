@@ -38,6 +38,7 @@
     "@kbn/shared-ux-router",
     "@kbn/usage-collection-plugin",
     "@kbn/analytics",
+    "@kbn/securitysolution-rules",
   ],
   "exclude": [
     "target/**/*",

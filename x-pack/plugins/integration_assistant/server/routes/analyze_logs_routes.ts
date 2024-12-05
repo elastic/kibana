@@ -19,6 +19,7 @@ import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse, UnsupportedLogFormatError } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
 import { GenerationErrorCode } from '../../common/constants';
+import { CefError } from '../lib/errors/cef_error';
 
 export function registerAnalyzeLogsRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -102,9 +103,16 @@ export function registerAnalyzeLogsRoutes(
             .withConfig({ runName: 'Log Format' })
             .invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
-          if (graphLogFormat === 'unsupported') {
-            throw new UnsupportedLogFormatError(GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT);
+
+          switch (graphLogFormat) {
+            case 'unsupported':
+              throw new UnsupportedLogFormatError(
+                GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT
+              );
+            case 'cef':
+              throw new CefError(GenerationErrorCode.CEF_ERROR);
           }
+
           return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
         } catch (err) {
           try {
