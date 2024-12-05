@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ModelItem } from '../models_list';
+import type { TrainedModelItem } from '../../../../common/types/trained_models';
 import { TestTrainedModelContent } from '../test_models/test_trained_model_content';
 import { useMlKibana } from '../../contexts/kibana';
 import { type InferecePipelineCreationState } from './state';
 
 interface ContentProps {
-  model: ModelItem;
+  model: TrainedModelItem;
   handlePipelineConfigUpdate: (configUpdate: Partial<InferecePipelineCreationState>) => void;
   externalPipelineConfig?: estypes.IngestPipeline;
 }

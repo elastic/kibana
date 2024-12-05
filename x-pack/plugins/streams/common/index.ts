@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { StreamDefinition } from './types';
+export type { StreamDefinition, ReadStreamDefinition } from './types';
