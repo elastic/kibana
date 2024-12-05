@@ -63,7 +63,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #logger: Logger;
   #actionResultData: string;
   #traceId: string;
-  #signal: AbortSignal;
+  #signal?: AbortSignal;
   #timeout?: number;
 
   constructor({
@@ -102,7 +102,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.#timeout = timeout;
     this.#actionResultData = '';
     this.streaming = streaming;
-    this.#signal = signal ?? new AbortController().signal;
+    this.#signal = signal;
     this.model = model ?? DEFAULT_OPEN_AI_MODEL;
     // to be passed to the actions client
     this.#temperature = temperature;
@@ -140,7 +140,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       | OpenAI.ChatCompletionCreateParamsNonStreaming
   ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk> | OpenAI.ChatCompletion> {
     return this.caller.call(async () => {
-      console.log('==> this.llmType', this.llmType);
       const requestBody = this.formatRequestForActionsClient(completionRequest, this.llmType);
       this.#logger.debug(
         () =>
