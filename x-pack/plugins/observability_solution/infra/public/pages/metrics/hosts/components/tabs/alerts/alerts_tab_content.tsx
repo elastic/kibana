@@ -6,11 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  AlertConsumers,
-  INFRA_RULE_TYPE_IDS,
-  OBSERVABILITY_RULE_TYPE_IDS,
-} from '@kbn/rule-data-utils';
+import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
@@ -31,12 +27,12 @@ import { CreateAlertRuleButton } from '../../../../../../components/shared/alert
 import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/links/link_to_alerts_page';
 import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
 import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
-
-const HOST_NAME_ALERTS_QUERY = 'host.name: *';
+import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();
   const { featureFlags } = usePluginConfig();
+  const { hostNodes } = useHostsViewContext();
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
@@ -47,6 +43,7 @@ export const AlertsTabContent = () => {
 
   const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
     triggersActionsUi;
+  const hostsWithAlertsKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
 
   return (
     <HeightRetainer>
@@ -68,7 +65,7 @@ export const AlertsTabContent = () => {
               <LinkToAlertsPage
                 dateRange={searchCriteria.dateRange}
                 data-test-subj="infraHostAlertsTabAlertsShowAllButton"
-                kuery={HOST_NAME_ALERTS_QUERY}
+                kuery={hostsWithAlertsKuery}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -141,7 +138,7 @@ const MemoAlertSummaryWidget = React.memo(
     return (
       <AlertSummaryWidget
         chartProps={chartProps}
-        ruleTypeIds={INFRA_RULE_TYPE_IDS}
+        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
         consumers={INFRA_ALERT_CONSUMERS}
         filter={alertsQuery}
         fullSize
