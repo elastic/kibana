@@ -298,14 +298,17 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       icon: 'pencil',
       onClick: () => setDataStreamsToEditDataRetention(selection),
     },
-    {
+  ];
+
+  if (selection.every((dataStream: DataStream) => dataStream.privileges.delete_index)) {
+    dataStreamActions.push({
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.deleteDataStreamsButtonLabel', {
         defaultMessage: 'Delete data streams',
       }),
       icon: 'trash',
       onClick: () => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name)),
-    },
-  ];
+    });
+  }
 
   const searchConfig = {
     query: filters,
