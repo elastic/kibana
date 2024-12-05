@@ -85,6 +85,7 @@ tags:
       description: Connector documentation
       url: https://www.elastic.co/guide/en/kibana/current/action-types.html
     x-displayName: Connectors
+  - name: Dashboards
   - name: Data streams
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
@@ -7465,6 +7466,2316 @@ paths:
       summary: Get case tags
       tags:
         - cases
+  /api/dashboards/dashboard:
+    get:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: get-dashboards-dashboard
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: The page number to return. Default is "1".
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of dashboards to display on each page (max 1000). Default is "20".
+          in: query
+          name: perPage
+          required: false
+          schema:
+            maximum: 1000
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        attributes:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              default: ''
+                              description: A short description.
+                              type: string
+                            timeRestore:
+                              default: false
+                              description: Whether to restore time upon viewing this dashboard
+                              type: boolean
+                            title:
+                              description: A human-readable title for the dashboard
+                              type: string
+                          required:
+                            - title
+                        createdAt:
+                          type: string
+                        createdBy:
+                          type: string
+                        error:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            error:
+                              type: string
+                            message:
+                              type: string
+                            metadata:
+                              additionalProperties: true
+                              type: object
+                              properties: {}
+                            statusCode:
+                              type: number
+                          required:
+                            - error
+                            - message
+                            - statusCode
+                        id:
+                          type: string
+                        managed:
+                          type: boolean
+                        namespaces:
+                          items:
+                            type: string
+                          type: array
+                        originId:
+                          type: string
+                        references:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                              - name
+                              - type
+                              - id
+                          type: array
+                        type:
+                          type: string
+                        updatedAt:
+                          type: string
+                        updatedBy:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - id
+                        - type
+                        - attributes
+                        - references
+                    type: array
+                  total:
+                    type: number
+                required:
+                  - items
+                  - total
+      summary: Get a list of dashboards
+      tags:
+        - Dashboards
+      x-state: Technical Preview
+  /api/dashboards/dashboard/{id}:
+    delete:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: delete-dashboards-dashboard-id
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: A unique identifier for the dashboard.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: Delete a dashboard
+      tags:
+        - Dashboards
+      x-state: Technical Preview
+    get:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: get-dashboards-dashboard-id
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A unique identifier for the dashboard.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: true
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          controlGroupInput:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              autoApplySelections:
+                                default: true
+                                description: Show apply selections button in controls.
+                                type: boolean
+                              chainingSystem:
+                                default: HIERARCHICAL
+                                description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                                enum:
+                                  - NONE
+                                  - HIERARCHICAL
+                                type: string
+                              controls:
+                                default: []
+                                description: An array of control panels and their state in the control group.
+                                items:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    controlConfig:
+                                      additionalProperties: {}
+                                      type: object
+                                    grow:
+                                      default: false
+                                      description: Expand width of the control panel to fit available space.
+                                      type: boolean
+                                    id:
+                                      description: The unique ID of the control.
+                                      type: string
+                                    order:
+                                      description: The order of the control panel in the control group.
+                                      type: number
+                                    type:
+                                      description: The type of the control panel.
+                                      type: string
+                                    width:
+                                      default: medium
+                                      description: Minimum width of the control panel in the control group.
+                                      enum:
+                                        - small
+                                        - medium
+                                        - large
+                                      type: string
+                                  required:
+                                    - type
+                                    - order
+                                type: array
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              ignoreParentSettings:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  ignoreFilters:
+                                    default: false
+                                    description: Ignore global filters in controls.
+                                    type: boolean
+                                  ignoreQuery:
+                                    default: false
+                                    description: Ignore the global query bar in controls.
+                                    type: boolean
+                                  ignoreTimerange:
+                                    default: false
+                                    description: Ignore the global time range in controls.
+                                    type: boolean
+                                  ignoreValidations:
+                                    default: false
+                                    description: Ignore validations in controls.
+                                    type: boolean
+                              labelPosition:
+                                default: oneLine
+                                description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                                enum:
+                                  - oneLine
+                                  - twoLine
+                                type: string
+                            required:
+                              - ignoreParentSettings
+                          description:
+                            default: ''
+                            description: A short description.
+                            type: string
+                          kibanaSavedObjectMeta:
+                            additionalProperties: false
+                            default: {}
+                            description: A container for various metadata
+                            type: object
+                            properties:
+                              searchSource:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  filter:
+                                    items:
+                                      additionalProperties: false
+                                      description: A filter for the search source.
+                                      type: object
+                                      properties:
+                                        $state:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            store:
+                                              description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                              enum:
+                                                - appState
+                                                - globalState
+                                              type: string
+                                          required:
+                                            - store
+                                        meta:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            alias:
+                                              nullable: true
+                                              type: string
+                                            controlledBy:
+                                              type: string
+                                            disabled:
+                                              type: boolean
+                                            field:
+                                              type: string
+                                            group:
+                                              type: string
+                                            index:
+                                              type: string
+                                            isMultiIndex:
+                                              type: boolean
+                                            key:
+                                              type: string
+                                            negate:
+                                              type: boolean
+                                            params: {}
+                                            type:
+                                              type: string
+                                            value:
+                                              type: string
+                                          required:
+                                            - params
+                                        query:
+                                          additionalProperties: {}
+                                          type: object
+                                      required:
+                                        - meta
+                                    type: array
+                                  query:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      language:
+                                        description: The query language such as KQL or Lucene.
+                                        type: string
+                                      query:
+                                        anyOf:
+                                          - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                            type: string
+                                          - additionalProperties: {}
+                                            type: object
+                                    required:
+                                      - query
+                                      - language
+                                  sort:
+                                    items:
+                                      additionalProperties:
+                                        anyOf:
+                                          - enum:
+                                              - asc
+                                              - desc
+                                            type: string
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              numeric_type:
+                                                enum:
+                                                  - double
+                                                  - long
+                                                  - date
+                                                  - date_nanos
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                      type: object
+                                    type: array
+                                  type:
+                                    type: string
+                          options:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              hidePanelTitles:
+                                default: false
+                                description: Hide the panel titles in the dashboard.
+                                type: boolean
+                              syncColors:
+                                default: true
+                                description: Synchronize colors between related panels in the dashboard.
+                                type: boolean
+                              syncCursor:
+                                default: true
+                                description: Synchronize cursor position between related panels in the dashboard.
+                                type: boolean
+                              syncTooltips:
+                                default: true
+                                description: Synchronize tooltips between related panels in the dashboard.
+                                type: boolean
+                              useMargins:
+                                default: true
+                                description: Show margins between panels in the dashboard layout.
+                                type: boolean
+                          panels:
+                            default: []
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                gridData:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    h:
+                                      default: 15
+                                      description: The height of the panel in grid units
+                                      minimum: 1
+                                      type: number
+                                    i:
+                                      type: string
+                                    w:
+                                      default: 24
+                                      description: The width of the panel in grid units
+                                      maximum: 48
+                                      minimum: 1
+                                      type: number
+                                    x:
+                                      description: The x coordinate of the panel in grid units
+                                      type: number
+                                    'y':
+                                      description: The y coordinate of the panel in grid units
+                                      type: number
+                                  required:
+                                    - x
+                                    - 'y'
+                                    - i
+                                id:
+                                  description: The saved object id for by reference panels
+                                  type: string
+                                panelConfig:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    description:
+                                      description: The description of the panel
+                                      type: string
+                                    enhancements:
+                                      additionalProperties: {}
+                                      type: object
+                                    hidePanelTitles:
+                                      description: Set to true to hide the panel title in its container.
+                                      type: boolean
+                                    savedObjectId:
+                                      description: The unique id of the library item to construct the embeddable.
+                                      type: string
+                                    title:
+                                      description: The title of the panel
+                                      type: string
+                                    version:
+                                      description: The version of the embeddable in the panel.
+                                      type: string
+                                panelIndex:
+                                  type: string
+                                panelRefName:
+                                  type: string
+                                title:
+                                  description: The title of the panel
+                                  type: string
+                                type:
+                                  description: The embeddable type
+                                  type: string
+                                version:
+                                  deprecated: true
+                                  description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                  type: string
+                              required:
+                                - panelConfig
+                                - type
+                                - gridData
+                                - panelIndex
+                            type: array
+                          refreshInterval:
+                            additionalProperties: false
+                            description: A container for various refresh interval settings
+                            type: object
+                            properties:
+                              display:
+                                deprecated: true
+                                description: A human-readable string indicating the refresh frequency. No longer used.
+                                type: string
+                              pause:
+                                description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                                type: boolean
+                              section:
+                                deprecated: true
+                                description: No longer used.
+                                type: number
+                              value:
+                                description: A numeric value indicating refresh frequency in milliseconds.
+                                type: number
+                            required:
+                              - pause
+                              - value
+                          timeFrom:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          timeRestore:
+                            default: false
+                            description: Whether to restore time upon viewing this dashboard
+                            type: boolean
+                          timeTo:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          title:
+                            description: A human-readable title for the dashboard
+                            type: string
+                          version:
+                            deprecated: true
+                            type: number
+                        required:
+                          - title
+                          - options
+                      createdAt:
+                        type: string
+                      createdBy:
+                        type: string
+                      error:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                          message:
+                            type: string
+                          metadata:
+                            additionalProperties: true
+                            type: object
+                            properties: {}
+                          statusCode:
+                            type: number
+                        required:
+                          - error
+                          - message
+                          - statusCode
+                      id:
+                        type: string
+                      managed:
+                        type: boolean
+                      namespaces:
+                        items:
+                          type: string
+                        type: array
+                      originId:
+                        type: string
+                      references:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - name
+                            - type
+                            - id
+                        type: array
+                      type:
+                        type: string
+                      updatedAt:
+                        type: string
+                      updatedBy:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - id
+                      - type
+                      - attributes
+                      - references
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      aliasPurpose:
+                        enum:
+                          - savedObjectConversion
+                          - savedObjectImport
+                        type: string
+                      aliasTargetId:
+                        type: string
+                      outcome:
+                        enum:
+                          - exactMatch
+                          - aliasMatch
+                          - conflict
+                        type: string
+                    required:
+                      - outcome
+                required:
+                  - item
+                  - meta
+      summary: Get a dashboard
+      tags:
+        - Dashboards
+      x-state: Technical Preview
+    post:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: post-dashboards-dashboard-id
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: A unique identifier for the dashboard.
+          in: path
+          name: id
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                attributes:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    controlGroupInput:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        autoApplySelections:
+                          default: true
+                          description: Show apply selections button in controls.
+                          type: boolean
+                        chainingSystem:
+                          default: HIERARCHICAL
+                          description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                          enum:
+                            - NONE
+                            - HIERARCHICAL
+                          type: string
+                        controls:
+                          default: []
+                          description: An array of control panels and their state in the control group.
+                          items:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              controlConfig:
+                                additionalProperties: {}
+                                type: object
+                              grow:
+                                default: false
+                                description: Expand width of the control panel to fit available space.
+                                type: boolean
+                              id:
+                                description: The unique ID of the control.
+                                type: string
+                              order:
+                                description: The order of the control panel in the control group.
+                                type: number
+                              type:
+                                description: The type of the control panel.
+                                type: string
+                              width:
+                                default: medium
+                                description: Minimum width of the control panel in the control group.
+                                enum:
+                                  - small
+                                  - medium
+                                  - large
+                                type: string
+                            required:
+                              - type
+                              - order
+                          type: array
+                        enhancements:
+                          additionalProperties: {}
+                          type: object
+                        ignoreParentSettings:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            ignoreFilters:
+                              default: false
+                              description: Ignore global filters in controls.
+                              type: boolean
+                            ignoreQuery:
+                              default: false
+                              description: Ignore the global query bar in controls.
+                              type: boolean
+                            ignoreTimerange:
+                              default: false
+                              description: Ignore the global time range in controls.
+                              type: boolean
+                            ignoreValidations:
+                              default: false
+                              description: Ignore validations in controls.
+                              type: boolean
+                        labelPosition:
+                          default: oneLine
+                          description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                          enum:
+                            - oneLine
+                            - twoLine
+                          type: string
+                      required:
+                        - ignoreParentSettings
+                    description:
+                      default: ''
+                      description: A short description.
+                      type: string
+                    kibanaSavedObjectMeta:
+                      additionalProperties: false
+                      default: {}
+                      description: A container for various metadata
+                      type: object
+                      properties:
+                        searchSource:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            filter:
+                              items:
+                                additionalProperties: false
+                                description: A filter for the search source.
+                                type: object
+                                properties:
+                                  $state:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      store:
+                                        description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                        enum:
+                                          - appState
+                                          - globalState
+                                        type: string
+                                    required:
+                                      - store
+                                  meta:
+                                    additionalProperties: true
+                                    type: object
+                                    properties:
+                                      alias:
+                                        nullable: true
+                                        type: string
+                                      controlledBy:
+                                        type: string
+                                      disabled:
+                                        type: boolean
+                                      field:
+                                        type: string
+                                      group:
+                                        type: string
+                                      index:
+                                        type: string
+                                      isMultiIndex:
+                                        type: boolean
+                                      key:
+                                        type: string
+                                      negate:
+                                        type: boolean
+                                      params: {}
+                                      type:
+                                        type: string
+                                      value:
+                                        type: string
+                                    required:
+                                      - params
+                                  query:
+                                    additionalProperties: {}
+                                    type: object
+                                required:
+                                  - meta
+                              type: array
+                            query:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                language:
+                                  description: The query language such as KQL or Lucene.
+                                  type: string
+                                query:
+                                  anyOf:
+                                    - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                      type: string
+                                    - additionalProperties: {}
+                                      type: object
+                              required:
+                                - query
+                                - language
+                            sort:
+                              items:
+                                additionalProperties:
+                                  anyOf:
+                                    - enum:
+                                        - asc
+                                        - desc
+                                      type: string
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        format:
+                                          type: string
+                                        order:
+                                          enum:
+                                            - asc
+                                            - desc
+                                          type: string
+                                      required:
+                                        - order
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        numeric_type:
+                                          enum:
+                                            - double
+                                            - long
+                                            - date
+                                            - date_nanos
+                                          type: string
+                                        order:
+                                          enum:
+                                            - asc
+                                            - desc
+                                          type: string
+                                      required:
+                                        - order
+                                type: object
+                              type: array
+                            type:
+                              type: string
+                    options:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        hidePanelTitles:
+                          default: false
+                          description: Hide the panel titles in the dashboard.
+                          type: boolean
+                        syncColors:
+                          default: true
+                          description: Synchronize colors between related panels in the dashboard.
+                          type: boolean
+                        syncCursor:
+                          default: true
+                          description: Synchronize cursor position between related panels in the dashboard.
+                          type: boolean
+                        syncTooltips:
+                          default: true
+                          description: Synchronize tooltips between related panels in the dashboard.
+                          type: boolean
+                        useMargins:
+                          default: true
+                          description: Show margins between panels in the dashboard layout.
+                          type: boolean
+                    panels:
+                      default: []
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          gridData:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              h:
+                                default: 15
+                                description: The height of the panel in grid units
+                                minimum: 1
+                                type: number
+                              i:
+                                description: The unique identifier of the panel
+                                type: string
+                              w:
+                                default: 24
+                                description: The width of the panel in grid units
+                                maximum: 48
+                                minimum: 1
+                                type: number
+                              x:
+                                description: The x coordinate of the panel in grid units
+                                type: number
+                              'y':
+                                description: The y coordinate of the panel in grid units
+                                type: number
+                            required:
+                              - x
+                              - 'y'
+                          id:
+                            description: The saved object id for by reference panels
+                            type: string
+                          panelConfig:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                description: The description of the panel
+                                type: string
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              hidePanelTitles:
+                                description: Set to true to hide the panel title in its container.
+                                type: boolean
+                              savedObjectId:
+                                description: The unique id of the library item to construct the embeddable.
+                                type: string
+                              title:
+                                description: The title of the panel
+                                type: string
+                              version:
+                                description: The version of the embeddable in the panel.
+                                type: string
+                          panelIndex:
+                            description: The unique ID of the panel.
+                            type: string
+                          panelRefName:
+                            type: string
+                          title:
+                            description: The title of the panel
+                            type: string
+                          type:
+                            description: The embeddable type
+                            type: string
+                          version:
+                            deprecated: true
+                            description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                            type: string
+                        required:
+                          - panelConfig
+                          - type
+                          - gridData
+                      type: array
+                    refreshInterval:
+                      additionalProperties: false
+                      description: A container for various refresh interval settings
+                      type: object
+                      properties:
+                        display:
+                          deprecated: true
+                          description: A human-readable string indicating the refresh frequency. No longer used.
+                          type: string
+                        pause:
+                          description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                          type: boolean
+                        section:
+                          deprecated: true
+                          description: No longer used.
+                          type: number
+                        value:
+                          description: A numeric value indicating refresh frequency in milliseconds.
+                          type: number
+                      required:
+                        - pause
+                        - value
+                    timeFrom:
+                      description: An ISO string indicating when to restore time from
+                      type: string
+                    timeRestore:
+                      default: false
+                      description: Whether to restore time upon viewing this dashboard
+                      type: boolean
+                    timeTo:
+                      description: An ISO string indicating when to restore time from
+                      type: string
+                    title:
+                      description: A human-readable title for the dashboard
+                      type: string
+                    version:
+                      deprecated: true
+                      type: number
+                  required:
+                    - title
+                    - options
+                references:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - name
+                      - type
+                      - id
+                  type: array
+                spaces:
+                  items:
+                    type: string
+                  type: array
+              required:
+                - attributes
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: true
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          controlGroupInput:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              autoApplySelections:
+                                default: true
+                                description: Show apply selections button in controls.
+                                type: boolean
+                              chainingSystem:
+                                default: HIERARCHICAL
+                                description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                                enum:
+                                  - NONE
+                                  - HIERARCHICAL
+                                type: string
+                              controls:
+                                default: []
+                                description: An array of control panels and their state in the control group.
+                                items:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    controlConfig:
+                                      additionalProperties: {}
+                                      type: object
+                                    grow:
+                                      default: false
+                                      description: Expand width of the control panel to fit available space.
+                                      type: boolean
+                                    id:
+                                      description: The unique ID of the control.
+                                      type: string
+                                    order:
+                                      description: The order of the control panel in the control group.
+                                      type: number
+                                    type:
+                                      description: The type of the control panel.
+                                      type: string
+                                    width:
+                                      default: medium
+                                      description: Minimum width of the control panel in the control group.
+                                      enum:
+                                        - small
+                                        - medium
+                                        - large
+                                      type: string
+                                  required:
+                                    - type
+                                    - order
+                                type: array
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              ignoreParentSettings:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  ignoreFilters:
+                                    default: false
+                                    description: Ignore global filters in controls.
+                                    type: boolean
+                                  ignoreQuery:
+                                    default: false
+                                    description: Ignore the global query bar in controls.
+                                    type: boolean
+                                  ignoreTimerange:
+                                    default: false
+                                    description: Ignore the global time range in controls.
+                                    type: boolean
+                                  ignoreValidations:
+                                    default: false
+                                    description: Ignore validations in controls.
+                                    type: boolean
+                              labelPosition:
+                                default: oneLine
+                                description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                                enum:
+                                  - oneLine
+                                  - twoLine
+                                type: string
+                            required:
+                              - ignoreParentSettings
+                          description:
+                            default: ''
+                            description: A short description.
+                            type: string
+                          kibanaSavedObjectMeta:
+                            additionalProperties: false
+                            default: {}
+                            description: A container for various metadata
+                            type: object
+                            properties:
+                              searchSource:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  filter:
+                                    items:
+                                      additionalProperties: false
+                                      description: A filter for the search source.
+                                      type: object
+                                      properties:
+                                        $state:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            store:
+                                              description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                              enum:
+                                                - appState
+                                                - globalState
+                                              type: string
+                                          required:
+                                            - store
+                                        meta:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            alias:
+                                              nullable: true
+                                              type: string
+                                            controlledBy:
+                                              type: string
+                                            disabled:
+                                              type: boolean
+                                            field:
+                                              type: string
+                                            group:
+                                              type: string
+                                            index:
+                                              type: string
+                                            isMultiIndex:
+                                              type: boolean
+                                            key:
+                                              type: string
+                                            negate:
+                                              type: boolean
+                                            params: {}
+                                            type:
+                                              type: string
+                                            value:
+                                              type: string
+                                          required:
+                                            - params
+                                        query:
+                                          additionalProperties: {}
+                                          type: object
+                                      required:
+                                        - meta
+                                    type: array
+                                  query:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      language:
+                                        description: The query language such as KQL or Lucene.
+                                        type: string
+                                      query:
+                                        anyOf:
+                                          - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                            type: string
+                                          - additionalProperties: {}
+                                            type: object
+                                    required:
+                                      - query
+                                      - language
+                                  sort:
+                                    items:
+                                      additionalProperties:
+                                        anyOf:
+                                          - enum:
+                                              - asc
+                                              - desc
+                                            type: string
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              numeric_type:
+                                                enum:
+                                                  - double
+                                                  - long
+                                                  - date
+                                                  - date_nanos
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                      type: object
+                                    type: array
+                                  type:
+                                    type: string
+                          options:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              hidePanelTitles:
+                                default: false
+                                description: Hide the panel titles in the dashboard.
+                                type: boolean
+                              syncColors:
+                                default: true
+                                description: Synchronize colors between related panels in the dashboard.
+                                type: boolean
+                              syncCursor:
+                                default: true
+                                description: Synchronize cursor position between related panels in the dashboard.
+                                type: boolean
+                              syncTooltips:
+                                default: true
+                                description: Synchronize tooltips between related panels in the dashboard.
+                                type: boolean
+                              useMargins:
+                                default: true
+                                description: Show margins between panels in the dashboard layout.
+                                type: boolean
+                          panels:
+                            default: []
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                gridData:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    h:
+                                      default: 15
+                                      description: The height of the panel in grid units
+                                      minimum: 1
+                                      type: number
+                                    i:
+                                      type: string
+                                    w:
+                                      default: 24
+                                      description: The width of the panel in grid units
+                                      maximum: 48
+                                      minimum: 1
+                                      type: number
+                                    x:
+                                      description: The x coordinate of the panel in grid units
+                                      type: number
+                                    'y':
+                                      description: The y coordinate of the panel in grid units
+                                      type: number
+                                  required:
+                                    - x
+                                    - 'y'
+                                    - i
+                                id:
+                                  description: The saved object id for by reference panels
+                                  type: string
+                                panelConfig:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    description:
+                                      description: The description of the panel
+                                      type: string
+                                    enhancements:
+                                      additionalProperties: {}
+                                      type: object
+                                    hidePanelTitles:
+                                      description: Set to true to hide the panel title in its container.
+                                      type: boolean
+                                    savedObjectId:
+                                      description: The unique id of the library item to construct the embeddable.
+                                      type: string
+                                    title:
+                                      description: The title of the panel
+                                      type: string
+                                    version:
+                                      description: The version of the embeddable in the panel.
+                                      type: string
+                                panelIndex:
+                                  type: string
+                                panelRefName:
+                                  type: string
+                                title:
+                                  description: The title of the panel
+                                  type: string
+                                type:
+                                  description: The embeddable type
+                                  type: string
+                                version:
+                                  deprecated: true
+                                  description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                  type: string
+                              required:
+                                - panelConfig
+                                - type
+                                - gridData
+                                - panelIndex
+                            type: array
+                          refreshInterval:
+                            additionalProperties: false
+                            description: A container for various refresh interval settings
+                            type: object
+                            properties:
+                              display:
+                                deprecated: true
+                                description: A human-readable string indicating the refresh frequency. No longer used.
+                                type: string
+                              pause:
+                                description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                                type: boolean
+                              section:
+                                deprecated: true
+                                description: No longer used.
+                                type: number
+                              value:
+                                description: A numeric value indicating refresh frequency in milliseconds.
+                                type: number
+                            required:
+                              - pause
+                              - value
+                          timeFrom:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          timeRestore:
+                            default: false
+                            description: Whether to restore time upon viewing this dashboard
+                            type: boolean
+                          timeTo:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          title:
+                            description: A human-readable title for the dashboard
+                            type: string
+                          version:
+                            deprecated: true
+                            type: number
+                        required:
+                          - title
+                          - options
+                      createdAt:
+                        type: string
+                      createdBy:
+                        type: string
+                      error:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                          message:
+                            type: string
+                          metadata:
+                            additionalProperties: true
+                            type: object
+                            properties: {}
+                          statusCode:
+                            type: number
+                        required:
+                          - error
+                          - message
+                          - statusCode
+                      id:
+                        type: string
+                      managed:
+                        type: boolean
+                      namespaces:
+                        items:
+                          type: string
+                        type: array
+                      originId:
+                        type: string
+                      references:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - name
+                            - type
+                            - id
+                        type: array
+                      type:
+                        type: string
+                      updatedAt:
+                        type: string
+                      updatedBy:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - id
+                      - type
+                      - attributes
+                      - references
+                required:
+                  - item
+      summary: Create a dashboard
+      tags:
+        - Dashboards
+      x-state: Technical Preview
+    put:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: put-dashboards-dashboard-id
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: A unique identifier for the dashboard.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                attributes:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    controlGroupInput:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        autoApplySelections:
+                          default: true
+                          description: Show apply selections button in controls.
+                          type: boolean
+                        chainingSystem:
+                          default: HIERARCHICAL
+                          description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                          enum:
+                            - NONE
+                            - HIERARCHICAL
+                          type: string
+                        controls:
+                          default: []
+                          description: An array of control panels and their state in the control group.
+                          items:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              controlConfig:
+                                additionalProperties: {}
+                                type: object
+                              grow:
+                                default: false
+                                description: Expand width of the control panel to fit available space.
+                                type: boolean
+                              id:
+                                description: The unique ID of the control.
+                                type: string
+                              order:
+                                description: The order of the control panel in the control group.
+                                type: number
+                              type:
+                                description: The type of the control panel.
+                                type: string
+                              width:
+                                default: medium
+                                description: Minimum width of the control panel in the control group.
+                                enum:
+                                  - small
+                                  - medium
+                                  - large
+                                type: string
+                            required:
+                              - type
+                              - order
+                          type: array
+                        enhancements:
+                          additionalProperties: {}
+                          type: object
+                        ignoreParentSettings:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            ignoreFilters:
+                              default: false
+                              description: Ignore global filters in controls.
+                              type: boolean
+                            ignoreQuery:
+                              default: false
+                              description: Ignore the global query bar in controls.
+                              type: boolean
+                            ignoreTimerange:
+                              default: false
+                              description: Ignore the global time range in controls.
+                              type: boolean
+                            ignoreValidations:
+                              default: false
+                              description: Ignore validations in controls.
+                              type: boolean
+                        labelPosition:
+                          default: oneLine
+                          description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                          enum:
+                            - oneLine
+                            - twoLine
+                          type: string
+                      required:
+                        - ignoreParentSettings
+                    description:
+                      default: ''
+                      description: A short description.
+                      type: string
+                    kibanaSavedObjectMeta:
+                      additionalProperties: false
+                      default: {}
+                      description: A container for various metadata
+                      type: object
+                      properties:
+                        searchSource:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            filter:
+                              items:
+                                additionalProperties: false
+                                description: A filter for the search source.
+                                type: object
+                                properties:
+                                  $state:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      store:
+                                        description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                        enum:
+                                          - appState
+                                          - globalState
+                                        type: string
+                                    required:
+                                      - store
+                                  meta:
+                                    additionalProperties: true
+                                    type: object
+                                    properties:
+                                      alias:
+                                        nullable: true
+                                        type: string
+                                      controlledBy:
+                                        type: string
+                                      disabled:
+                                        type: boolean
+                                      field:
+                                        type: string
+                                      group:
+                                        type: string
+                                      index:
+                                        type: string
+                                      isMultiIndex:
+                                        type: boolean
+                                      key:
+                                        type: string
+                                      negate:
+                                        type: boolean
+                                      params: {}
+                                      type:
+                                        type: string
+                                      value:
+                                        type: string
+                                    required:
+                                      - params
+                                  query:
+                                    additionalProperties: {}
+                                    type: object
+                                required:
+                                  - meta
+                              type: array
+                            query:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                language:
+                                  description: The query language such as KQL or Lucene.
+                                  type: string
+                                query:
+                                  anyOf:
+                                    - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                      type: string
+                                    - additionalProperties: {}
+                                      type: object
+                              required:
+                                - query
+                                - language
+                            sort:
+                              items:
+                                additionalProperties:
+                                  anyOf:
+                                    - enum:
+                                        - asc
+                                        - desc
+                                      type: string
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        format:
+                                          type: string
+                                        order:
+                                          enum:
+                                            - asc
+                                            - desc
+                                          type: string
+                                      required:
+                                        - order
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        numeric_type:
+                                          enum:
+                                            - double
+                                            - long
+                                            - date
+                                            - date_nanos
+                                          type: string
+                                        order:
+                                          enum:
+                                            - asc
+                                            - desc
+                                          type: string
+                                      required:
+                                        - order
+                                type: object
+                              type: array
+                            type:
+                              type: string
+                    options:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        hidePanelTitles:
+                          default: false
+                          description: Hide the panel titles in the dashboard.
+                          type: boolean
+                        syncColors:
+                          default: true
+                          description: Synchronize colors between related panels in the dashboard.
+                          type: boolean
+                        syncCursor:
+                          default: true
+                          description: Synchronize cursor position between related panels in the dashboard.
+                          type: boolean
+                        syncTooltips:
+                          default: true
+                          description: Synchronize tooltips between related panels in the dashboard.
+                          type: boolean
+                        useMargins:
+                          default: true
+                          description: Show margins between panels in the dashboard layout.
+                          type: boolean
+                    panels:
+                      default: []
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          gridData:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              h:
+                                default: 15
+                                description: The height of the panel in grid units
+                                minimum: 1
+                                type: number
+                              i:
+                                description: The unique identifier of the panel
+                                type: string
+                              w:
+                                default: 24
+                                description: The width of the panel in grid units
+                                maximum: 48
+                                minimum: 1
+                                type: number
+                              x:
+                                description: The x coordinate of the panel in grid units
+                                type: number
+                              'y':
+                                description: The y coordinate of the panel in grid units
+                                type: number
+                            required:
+                              - x
+                              - 'y'
+                          id:
+                            description: The saved object id for by reference panels
+                            type: string
+                          panelConfig:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                description: The description of the panel
+                                type: string
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              hidePanelTitles:
+                                description: Set to true to hide the panel title in its container.
+                                type: boolean
+                              savedObjectId:
+                                description: The unique id of the library item to construct the embeddable.
+                                type: string
+                              title:
+                                description: The title of the panel
+                                type: string
+                              version:
+                                description: The version of the embeddable in the panel.
+                                type: string
+                          panelIndex:
+                            description: The unique ID of the panel.
+                            type: string
+                          panelRefName:
+                            type: string
+                          title:
+                            description: The title of the panel
+                            type: string
+                          type:
+                            description: The embeddable type
+                            type: string
+                          version:
+                            deprecated: true
+                            description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                            type: string
+                        required:
+                          - panelConfig
+                          - type
+                          - gridData
+                      type: array
+                    refreshInterval:
+                      additionalProperties: false
+                      description: A container for various refresh interval settings
+                      type: object
+                      properties:
+                        display:
+                          deprecated: true
+                          description: A human-readable string indicating the refresh frequency. No longer used.
+                          type: string
+                        pause:
+                          description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                          type: boolean
+                        section:
+                          deprecated: true
+                          description: No longer used.
+                          type: number
+                        value:
+                          description: A numeric value indicating refresh frequency in milliseconds.
+                          type: number
+                      required:
+                        - pause
+                        - value
+                    timeFrom:
+                      description: An ISO string indicating when to restore time from
+                      type: string
+                    timeRestore:
+                      default: false
+                      description: Whether to restore time upon viewing this dashboard
+                      type: boolean
+                    timeTo:
+                      description: An ISO string indicating when to restore time from
+                      type: string
+                    title:
+                      description: A human-readable title for the dashboard
+                      type: string
+                    version:
+                      deprecated: true
+                      type: number
+                  required:
+                    - title
+                    - options
+                references:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - name
+                      - type
+                      - id
+                  type: array
+              required:
+                - attributes
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: true
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          controlGroupInput:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              autoApplySelections:
+                                default: true
+                                description: Show apply selections button in controls.
+                                type: boolean
+                              chainingSystem:
+                                default: HIERARCHICAL
+                                description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                                enum:
+                                  - NONE
+                                  - HIERARCHICAL
+                                type: string
+                              controls:
+                                default: []
+                                description: An array of control panels and their state in the control group.
+                                items:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    controlConfig:
+                                      additionalProperties: {}
+                                      type: object
+                                    grow:
+                                      default: false
+                                      description: Expand width of the control panel to fit available space.
+                                      type: boolean
+                                    id:
+                                      description: The unique ID of the control.
+                                      type: string
+                                    order:
+                                      description: The order of the control panel in the control group.
+                                      type: number
+                                    type:
+                                      description: The type of the control panel.
+                                      type: string
+                                    width:
+                                      default: medium
+                                      description: Minimum width of the control panel in the control group.
+                                      enum:
+                                        - small
+                                        - medium
+                                        - large
+                                      type: string
+                                  required:
+                                    - type
+                                    - order
+                                type: array
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              ignoreParentSettings:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  ignoreFilters:
+                                    default: false
+                                    description: Ignore global filters in controls.
+                                    type: boolean
+                                  ignoreQuery:
+                                    default: false
+                                    description: Ignore the global query bar in controls.
+                                    type: boolean
+                                  ignoreTimerange:
+                                    default: false
+                                    description: Ignore the global time range in controls.
+                                    type: boolean
+                                  ignoreValidations:
+                                    default: false
+                                    description: Ignore validations in controls.
+                                    type: boolean
+                              labelPosition:
+                                default: oneLine
+                                description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                                enum:
+                                  - oneLine
+                                  - twoLine
+                                type: string
+                            required:
+                              - ignoreParentSettings
+                          description:
+                            default: ''
+                            description: A short description.
+                            type: string
+                          kibanaSavedObjectMeta:
+                            additionalProperties: false
+                            default: {}
+                            description: A container for various metadata
+                            type: object
+                            properties:
+                              searchSource:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  filter:
+                                    items:
+                                      additionalProperties: false
+                                      description: A filter for the search source.
+                                      type: object
+                                      properties:
+                                        $state:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            store:
+                                              description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                              enum:
+                                                - appState
+                                                - globalState
+                                              type: string
+                                          required:
+                                            - store
+                                        meta:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            alias:
+                                              nullable: true
+                                              type: string
+                                            controlledBy:
+                                              type: string
+                                            disabled:
+                                              type: boolean
+                                            field:
+                                              type: string
+                                            group:
+                                              type: string
+                                            index:
+                                              type: string
+                                            isMultiIndex:
+                                              type: boolean
+                                            key:
+                                              type: string
+                                            negate:
+                                              type: boolean
+                                            params: {}
+                                            type:
+                                              type: string
+                                            value:
+                                              type: string
+                                          required:
+                                            - params
+                                        query:
+                                          additionalProperties: {}
+                                          type: object
+                                      required:
+                                        - meta
+                                    type: array
+                                  query:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      language:
+                                        description: The query language such as KQL or Lucene.
+                                        type: string
+                                      query:
+                                        anyOf:
+                                          - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                            type: string
+                                          - additionalProperties: {}
+                                            type: object
+                                    required:
+                                      - query
+                                      - language
+                                  sort:
+                                    items:
+                                      additionalProperties:
+                                        anyOf:
+                                          - enum:
+                                              - asc
+                                              - desc
+                                            type: string
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              numeric_type:
+                                                enum:
+                                                  - double
+                                                  - long
+                                                  - date
+                                                  - date_nanos
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                      type: object
+                                    type: array
+                                  type:
+                                    type: string
+                          options:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              hidePanelTitles:
+                                default: false
+                                description: Hide the panel titles in the dashboard.
+                                type: boolean
+                              syncColors:
+                                default: true
+                                description: Synchronize colors between related panels in the dashboard.
+                                type: boolean
+                              syncCursor:
+                                default: true
+                                description: Synchronize cursor position between related panels in the dashboard.
+                                type: boolean
+                              syncTooltips:
+                                default: true
+                                description: Synchronize tooltips between related panels in the dashboard.
+                                type: boolean
+                              useMargins:
+                                default: true
+                                description: Show margins between panels in the dashboard layout.
+                                type: boolean
+                          panels:
+                            default: []
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                gridData:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    h:
+                                      default: 15
+                                      description: The height of the panel in grid units
+                                      minimum: 1
+                                      type: number
+                                    i:
+                                      type: string
+                                    w:
+                                      default: 24
+                                      description: The width of the panel in grid units
+                                      maximum: 48
+                                      minimum: 1
+                                      type: number
+                                    x:
+                                      description: The x coordinate of the panel in grid units
+                                      type: number
+                                    'y':
+                                      description: The y coordinate of the panel in grid units
+                                      type: number
+                                  required:
+                                    - x
+                                    - 'y'
+                                    - i
+                                id:
+                                  description: The saved object id for by reference panels
+                                  type: string
+                                panelConfig:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    description:
+                                      description: The description of the panel
+                                      type: string
+                                    enhancements:
+                                      additionalProperties: {}
+                                      type: object
+                                    hidePanelTitles:
+                                      description: Set to true to hide the panel title in its container.
+                                      type: boolean
+                                    savedObjectId:
+                                      description: The unique id of the library item to construct the embeddable.
+                                      type: string
+                                    title:
+                                      description: The title of the panel
+                                      type: string
+                                    version:
+                                      description: The version of the embeddable in the panel.
+                                      type: string
+                                panelIndex:
+                                  type: string
+                                panelRefName:
+                                  type: string
+                                title:
+                                  description: The title of the panel
+                                  type: string
+                                type:
+                                  description: The embeddable type
+                                  type: string
+                                version:
+                                  deprecated: true
+                                  description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                  type: string
+                              required:
+                                - panelConfig
+                                - type
+                                - gridData
+                                - panelIndex
+                            type: array
+                          refreshInterval:
+                            additionalProperties: false
+                            description: A container for various refresh interval settings
+                            type: object
+                            properties:
+                              display:
+                                deprecated: true
+                                description: A human-readable string indicating the refresh frequency. No longer used.
+                                type: string
+                              pause:
+                                description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                                type: boolean
+                              section:
+                                deprecated: true
+                                description: No longer used.
+                                type: number
+                              value:
+                                description: A numeric value indicating refresh frequency in milliseconds.
+                                type: number
+                            required:
+                              - pause
+                              - value
+                          timeFrom:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          timeRestore:
+                            default: false
+                            description: Whether to restore time upon viewing this dashboard
+                            type: boolean
+                          timeTo:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          title:
+                            description: A human-readable title for the dashboard
+                            type: string
+                          version:
+                            deprecated: true
+                            type: number
+                        required:
+                          - title
+                          - options
+                      createdAt:
+                        type: string
+                      createdBy:
+                        type: string
+                      error:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                          message:
+                            type: string
+                          metadata:
+                            additionalProperties: true
+                            type: object
+                            properties: {}
+                          statusCode:
+                            type: number
+                        required:
+                          - error
+                          - message
+                          - statusCode
+                      id:
+                        type: string
+                      managed:
+                        type: boolean
+                      namespaces:
+                        items:
+                          type: string
+                        type: array
+                      originId:
+                        type: string
+                      references:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - name
+                            - type
+                            - id
+                        type: array
+                      type:
+                        type: string
+                      updatedAt:
+                        type: string
+                      updatedBy:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - id
+                      - type
+                      - attributes
+                      - references
+                required:
+                  - item
+      summary: Update an existing dashboard
+      tags:
+        - Dashboards
+      x-state: Technical Preview
   /api/data_views:
     get:
       operationId: getAllDataViewsDefault

@@ -223,6 +223,7 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'url_create',
               'store_search_session',
+              'generate_report',
             ],
             visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
             dashboard: [
@@ -232,6 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'url_create',
               'store_search_session',
+              'download_csv_report',
             ],
             dev_tools: ['all', 'read', 'minimal_all', 'minimal_read'],
             advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],

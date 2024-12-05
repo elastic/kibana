@@ -179,6 +179,9 @@ steps:
     timeout_in_minutes: 50
     parallelism: 1
     agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
       machineType: n2-standard-4
       preemptible: true
     retry:
