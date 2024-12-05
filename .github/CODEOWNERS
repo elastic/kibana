@@ -400,7 +400,6 @@ packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-content-badge @elastic/kibana-visualizations
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
-packages/kbn-management/settings/application @elastic/kibana-management
 packages/kbn-management/settings/components/field_category @elastic/kibana-management
 packages/kbn-management/settings/components/field_input @elastic/kibana-management
 packages/kbn-management/settings/components/field_row @elastic/kibana-management
@@ -619,6 +618,7 @@ packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
 src/platform/packages/private/default-nav/management @elastic/kibana-management
+src/platform/packages/private/kbn-management/settings/application @elastic/kibana-management
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/kbn-doc-links @elastic/docs

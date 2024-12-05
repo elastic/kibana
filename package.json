@@ -632,7 +632,7 @@
     "@kbn/managed-content-badge": "link:packages/kbn-managed-content-badge",
     "@kbn/management-cards-navigation": "link:src/platform/packages/shared/kbn-management/cards_navigation",
     "@kbn/management-plugin": "link:src/platform/plugins/shared/management",
-    "@kbn/management-settings-application": "link:packages/kbn-management/settings/application",
+    "@kbn/management-settings-application": "link:src/platform/packages/private/kbn-management/settings/application",
     "@kbn/management-settings-components-field-category": "link:packages/kbn-management/settings/components/field_category",
     "@kbn/management-settings-components-field-input": "link:packages/kbn-management/settings/components/field_input",
     "@kbn/management-settings-components-field-row": "link:packages/kbn-management/settings/components/field_row",
