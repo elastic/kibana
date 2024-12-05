@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { SLOGroupingValueSelector } from './slo_grouping_value_selector';
@@ -18,7 +19,16 @@ export function SLOGroupings({ slo }: { slo: SLOWithSummaryResponse }) {
   }
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s">
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">
+          <h4>
+            {i18n.translate('xpack.slo.sloDetails.groupings.title', {
+              defaultMessage: 'Instance',
+            })}
+          </h4>
+        </EuiText>
+      </EuiFlexItem>
       {groupings.map(([groupingKey, groupingValue]) => {
         return (
           <SLOGroupingValueSelector
