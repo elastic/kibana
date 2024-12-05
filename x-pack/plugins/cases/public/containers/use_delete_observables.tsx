@@ -27,7 +27,7 @@ export const useDeleteObservable = (caseId: string, observableId: string) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
       onSuccess: () => {
-        refreshCases();
+        refreshCaseViewPage();
       },
     }
   );
