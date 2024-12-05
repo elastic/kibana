@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { keyBy } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import { keyBy } from 'lodash';
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -19,9 +18,6 @@ import {
   RuleTypeIndexWithDescriptions,
   RuleTypeWithDescription,
 } from '@kbn/triggers-actions-ui-types';
-import { useQuery } from '@tanstack/react-query';
-import { keyBy } from 'lodash';
-import { useMemo } from 'react';
 import { fetchRuleTypes } from '../apis/fetch_rule_types';
 import { ALERTS_FEATURE_ID } from '../constants';
 
