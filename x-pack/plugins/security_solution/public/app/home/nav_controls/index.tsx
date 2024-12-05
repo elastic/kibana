@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
 
 import { useNavigationContext } from '@kbn/security-solution-navigation/src/context';
-import { AssistantHeaderLink } from '../../../assistant/header_link';
+import { AssistantNavLink } from '../../../assistant/nav_link';
 
 export default function NavControls() {
   const services = useNavigationContext();
@@ -33,7 +33,7 @@ export default function NavControls() {
 
   return (
     <InPortal node={portalNode}>
-      <AssistantHeaderLink />
+      <AssistantNavLink />
     </InPortal>
   );
 }

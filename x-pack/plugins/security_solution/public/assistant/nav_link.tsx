@@ -26,9 +26,9 @@ const LINK_LABEL = i18n.translate('xpack.securitySolution.globalHeader.assistant
 });
 
 /**
- * Elastic AI Assistant header link
+ * Elastic AI Assistant nav link
  */
-export const AssistantHeaderLink = () => {
+export const AssistantNavLink = () => {
   const { showAssistantOverlay, assistantAvailability } = useAssistantContext();
 
   const showOverlay = useCallback(
@@ -47,7 +47,7 @@ export const AssistantHeaderLink = () => {
         color="primary"
         fill
         size="s"
-        data-test-subj="assistantHeaderLink"
+        data-test-subj="assistantNavLink"
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { AssistantHeaderLink } from './header_link';
+import { AssistantNavLink } from './nav_link';
 
 const mockShowAssistantOverlay = jest.fn();
 const mockAssistantAvailability = jest.fn(() => ({
@@ -19,28 +19,28 @@ jest.mock('@kbn/elastic-assistant/impl/assistant_context', () => ({
   }),
 }));
 
-describe('AssistantHeaderLink', () => {
+describe('AssistantNavLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render the header link text', () => {
-    const { queryByText, queryByTestId } = render(<AssistantHeaderLink />);
-    expect(queryByTestId('assistantHeaderLink')).toBeInTheDocument();
+    const { queryByText, queryByTestId } = render(<AssistantNavLink />);
+    expect(queryByTestId('assistantNavLink')).toBeInTheDocument();
     expect(queryByText('AI Assistant')).toBeInTheDocument();
   });
 
   it('should not render the header link if not authorized', () => {
     mockAssistantAvailability.mockReturnValueOnce({ hasAssistantPrivilege: false });
 
-    const { queryByText, queryByTestId } = render(<AssistantHeaderLink />);
-    expect(queryByTestId('assistantHeaderLink')).not.toBeInTheDocument();
+    const { queryByText, queryByTestId } = render(<AssistantNavLink />);
+    expect(queryByTestId('assistantNavLink')).not.toBeInTheDocument();
     expect(queryByText('AI Assistant')).not.toBeInTheDocument();
   });
 
   it('should call the assistant overlay to show on click', () => {
-    const { queryByTestId } = render(<AssistantHeaderLink />);
-    queryByTestId('assistantHeaderLink')?.click();
+    const { queryByTestId } = render(<AssistantNavLink />);
+    queryByTestId('assistantNavLink')?.click();
     expect(mockShowAssistantOverlay).toHaveBeenCalledTimes(1);
     expect(mockShowAssistantOverlay).toHaveBeenCalledWith({ showOverlay: true });
   });
