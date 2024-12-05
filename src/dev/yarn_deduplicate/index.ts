@@ -16,7 +16,7 @@ const yarnLock = readFileSync(yarnLockFile, 'utf-8');
 const output = fixDuplicates(yarnLock, {
   useMostCommon: false,
   excludeScopes: ['@types'],
-  excludePackages: ['axe-core', '@babel/types'],
+  excludePackages: ['axe-core', '@babel/types', 'csstype', 'yaml'],
 });
 
 writeFileSync(yarnLockFile, output);
