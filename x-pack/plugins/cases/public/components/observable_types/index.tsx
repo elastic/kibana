@@ -41,12 +41,12 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   const canAddObservableTypes = !disabled && permissions.settings;
   const [error, setError] = useState<boolean>(false);
 
-  const onAddCustomField = useCallback(() => {
+  const onAddObservableType = useCallback(() => {
     handleAddObservableType();
     setError(false);
   }, [handleAddObservableType, setError]);
 
-  const onEditCustomField = useCallback(
+  const onEditObservableType = useCallback(
     (key: string) => {
       setError(false);
       handleEditObservableType(key);
@@ -74,7 +74,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
             <ObservableTypesList
               observableTypes={observableTypes}
               onDeleteObservableType={handleDeleteObservableType}
-              onEditObservableType={onEditCustomField}
+              onEditObservableType={onEditObservableType}
             />
           </>
         ) : null}
@@ -93,7 +93,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
               isLoading={isLoading}
               isDisabled={disabled || error}
               size="s"
-              onClick={onAddCustomField}
+              onClick={onAddObservableType}
               iconType="plusInCircle"
               data-test-subj="add-observable-type"
             >
