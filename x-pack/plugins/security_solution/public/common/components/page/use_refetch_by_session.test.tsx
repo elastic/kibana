@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MutableRefObject } from 'react';
 import React from 'react';
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { useKibana } from '../../lib/kibana';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from './use_refetch_by_session';
 import { inputsActions } from '../../store/actions';
-import type { Refetch } from '../../store/inputs/model';
-import type { ISessionService } from '@kbn/data-plugin/public';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>{children}</TestProviders>
@@ -45,13 +42,8 @@ jest.mock('../../store/actions', () => {
 
 describe(`useRefetchByRestartingSession`, () => {
   let res: RenderHookResult<
-    {
-      children: React.ReactNode;
-    },
-    {
-      session: MutableRefObject<ISessionService>;
-      refetchByRestartingSession: Refetch;
-    }
+    ReturnType<typeof useRefetchByRestartingSession>,
+    Parameters<typeof useRefetchByRestartingSession>[0]
   >;
   const mockSessionStart = jest.fn().mockReturnValue('mockSessionId');
   const mockSession = {

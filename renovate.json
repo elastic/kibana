@@ -144,7 +144,9 @@
         "nyc",
         "oboe",
         "pixelmatch",
+        "@playwright/test",
         "playwright",
+        "playwright-chromium",
         "pngjs",
         "sharp",
         "superagent",
@@ -392,6 +394,50 @@
       ],
       "labels": [
         "Team:DataDiscovery",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-management dependencies",
+      "matchDepNames": [
+        "@mapbox/vector-tile",
+        "cronstrue",
+        "file-saver",
+        "@types/mapbox__vector-tile"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Kibana Management",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "moment-duration-format",
+      "matchDepNames": [
+        "moment-duration-format",
+        "@types/moment-duration-format"
+      ],
+      "reviewers": [
+        "team:kibana-management",
+        "team:stack-monitoring"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Kibana Management",
+        "Team:Monitoring",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -1327,9 +1373,7 @@
     {
       "groupName": "Security Engineering Productivity",
       "matchDepNames": [
-        "dotenv",
-        "playwright-chromium",
-        "@playwright/test"
+        "dotenv"
       ],
       "reviewers": [
         "team:security-engineering-productivity"
