@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ml/field_stats_flyout'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/private/ml/field_stats_flyout'],
 };
