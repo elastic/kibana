@@ -78,7 +78,7 @@ strategies]
 *** Use the `esSearchStrategy` to make raw queries to ES that will
 support async searching and partial results, as well as injecting the
 right advanced settings like whether to include frozen indices or not.
-* {kib-repo}blob/{branch}/src/plugins/embeddable/README.md[Embeddables]
+* {kib-repo}blob/{branch}/src/platform/plugins/shared/embeddable/README.md[Embeddables]
 ** Rendering maps, visualizations, dashboards in your application
 ** Register new widgets that will can be added to a dashboard or Canvas
 workpad, or rendered in another plugin.

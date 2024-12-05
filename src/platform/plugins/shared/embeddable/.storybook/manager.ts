@@ -15,7 +15,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Kibana Embeddable Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/plugins/embeddable',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/embeddable',
   }),
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,

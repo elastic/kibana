@@ -625,6 +625,7 @@ src/core @elastic/kibana-core
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/plugins/shared/controls @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
+src/platform/plugins/shared/embeddable @elastic/kibana-presentation
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
@@ -648,7 +649,6 @@ src/plugins/data_views @elastic/kibana-data-discovery
 src/plugins/dev_tools @elastic/kibana-management
 src/plugins/discover @elastic/kibana-data-discovery
 src/plugins/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
-src/plugins/embeddable @elastic/kibana-presentation
 src/plugins/es_ui_shared @elastic/kibana-management
 src/plugins/esql @elastic/kibana-esql
 src/plugins/esql_datagrid @elastic/kibana-esql
