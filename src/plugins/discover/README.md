@@ -1,6 +1,6 @@
 # Discover
 
-Contains the Discover application and the Discover Session embeddable (former Saved Search embeddable).
+Contains the Discover application and the Discover Session embeddable (formerly the Saved Search embeddable).
 
 ## Project tree
 
