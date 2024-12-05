@@ -728,13 +728,12 @@
         "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "typescript",
       "matchDepNames": [
-        "typescript",
-        "@types/node"
+        "typescript"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -770,7 +769,7 @@
       "enabled": true
     },
     {
-      "groupName": "jdom",
+      "groupName": "jsdom",
       "matchDepNames": [
         "jsdom",
         "@types/jsdom"
@@ -892,26 +891,9 @@
       "enabled": true
     },
     {
-      "groupName": "typescript-eslint",
-      "matchDepPatterns": [
-        "^@typescript-eslint"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "eslint",
       "matchDepNames": [
+        "^@typescript-eslint",
         "@elastic/eslint-plugin-eui",
         "eslint",
         "eslint-plugin-ban",
@@ -1033,32 +1015,14 @@
         "cli-progress",
         "cli-table3",
         "commander",
+        "dedent",
         "getopts",
         "listr2",
         "ora",
         "@parcel/watcher",
         "@types/cli-progress",
+        "@types/dedent",
         "@types/ora"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "dedent",
-      "matchDepNames": [
-        "dedent",
-        "@types/dedent"
       ],
       "reviewers": [
         "team:kibana-operations"
