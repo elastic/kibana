@@ -183,7 +183,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.slmWarningDescription"
-                defaultMessage="Policies are not executed. You must restart SLM {slmDocLink}"
+                defaultMessage="Policies are not being executed. You must restart SLM {slmDocLink}"
                 values={{
                   slmDocLink: (
                     <EuiLink
@@ -192,7 +192,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
                       target="_blank"
                     >
                       {i18n.translate('xpack.snapshotRestore.slmDocLink', {
-                        defaultMessage: 'by using the API.',
+                        defaultMessage: 'using the API.',
                       })}
                     </EuiLink>
                   ),

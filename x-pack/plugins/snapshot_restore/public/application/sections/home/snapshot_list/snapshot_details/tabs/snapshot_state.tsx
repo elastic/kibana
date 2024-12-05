@@ -24,7 +24,7 @@ export const SnapshotState: React.FC<Props> = ({ state, displayTooltipIcon }) =>
     [SNAPSHOT_STATE.IN_PROGRESS]: {
       color: 'primary',
       label: i18n.translate('xpack.snapshotRestore.snapshotState.inProgressLabel', {
-        defaultMessage: 'In Progress',
+        defaultMessage: 'In progress',
       }),
     },
     [SNAPSHOT_STATE.SUCCESS]: {
