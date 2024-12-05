@@ -78,7 +78,6 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
     const parameters = this.invocationParams(options);
     const data = await this.connection.formatData(messages, parameters);
     const stream = await this.caller.callWithOptions({ signal: options?.signal }, async () => {
-      console.log('==> stream signal', options?.signal);
       const systemPart: GeminiPartText | undefined = data?.systemInstruction
         ?.parts?.[0] as unknown as GeminiPartText;
       const systemInstruction = systemPart?.text.length
@@ -94,6 +93,7 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
             tools: data?.tools,
             temperature: this.temperature,
             ...systemInstruction,
+            signal: options?.signal,
           },
         },
       };
