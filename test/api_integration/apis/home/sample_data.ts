@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const SPACES = ['default', 'other'];
   /**
    * default ID of the flights overview dashboard
-   * @see {@link src/plugins/home/server/services/sample_data/data_sets/flights/index.ts}
+   * @see {@link src/platform/plugins/shared/home/server/services/sample_data/data_sets/flights/index.ts}
    */
   const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d';
 
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         describe('dates', () => {
           // dates being compared are not arbitrary, but rather the dates of the earliest and latest timestamp of the flight sample data
-          // this can be verified in the flight data archive here {@link src/plugins/home/server/services/sample_data/data_sets/flights/flights.json.gz}
+          // this can be verified in the flight data archive here {@link src/platform/plugins/shared/home/server/services/sample_data/data_sets/flights/flights.json.gz}
           const sampleDataTimeIntervalInMS = differenceInMilliseconds(
             new Date('2018-02-11T14:54:34'),
             new Date('2018-01-01T00:00:00')

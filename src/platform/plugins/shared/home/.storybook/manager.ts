@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/home'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/home',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/home/{common,public,server}/**/*.{js,ts,tsx}'],
-};
+import { addons } from '@storybook/addons';
+import { create } from '@storybook/theming';
+import { PANEL_ID } from '@storybook/addon-actions';
+
+addons.setConfig({
+  theme: create({
+    base: 'light',
+    brandTitle: 'Home Storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/home',
+  }),
+  showPanel: true.valueOf,
+  selectedPanel: PANEL_ID,
+});
