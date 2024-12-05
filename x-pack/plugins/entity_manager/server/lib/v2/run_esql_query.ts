@@ -25,7 +25,7 @@ export async function runESQLQuery<T>(
     esClient: ElasticsearchClient;
     logger: Logger;
     query: string;
-    filter: QueryDslQueryContainer;
+    filter?: QueryDslQueryContainer;
   }
 ): Promise<T[]> {
   logger.trace(
