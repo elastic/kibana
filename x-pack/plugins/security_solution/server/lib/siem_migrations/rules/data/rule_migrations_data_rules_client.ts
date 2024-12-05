@@ -364,7 +364,7 @@ const conditions = {
   isFullyTranslated(): QueryDslQueryContainer {
     return { term: { translation_result: SiemMigrationRuleTranslationResult.FULL } };
   },
-  isInstalled(): QueryDslQueryContainer {
+  isNotInstalled(): QueryDslQueryContainer {
     return {
       nested: {
         path: 'elastic_rule',
@@ -389,6 +389,6 @@ const conditions = {
     };
   },
   isInstallable(): QueryDslQueryContainer[] {
-    return [this.isFullyTranslated(), this.isInstalled()];
+    return [this.isFullyTranslated(), this.isNotInstalled()];
   },
 };
