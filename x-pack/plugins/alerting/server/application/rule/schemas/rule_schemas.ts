@@ -133,6 +133,15 @@ export const monitoringSchema = schema.object({
             })
           )
         ),
+        unfilled_gaps_ms: schema.maybe(
+          schema.nullable(
+            schema.object({
+              last_1d: schema.number(),
+              last_3d: schema.number(),
+              last_7d: schema.number(),
+            })
+          )
+        ),
       }),
     }),
   }),
