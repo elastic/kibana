@@ -93,6 +93,10 @@ export type ChatCompleteOptions<
    * Function calling mode, defaults to "native".
    */
   functionCalling?: FunctionCallingMode;
+  /**
+   * Optional signal that can be used to forcefully cancel the request.
+   */
+  abortSignal?: AbortSignal;
 } & TToolOptions;
 
 /**

@@ -96,6 +96,10 @@ export interface OutputOptions<
    * Defaults to false.
    */
   stream?: TStream;
+  /**
+   * Optional signal that can be used to forcefully cancel the request.
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**

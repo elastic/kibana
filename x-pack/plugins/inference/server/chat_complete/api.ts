@@ -6,13 +6,14 @@
  */
 
 import { last } from 'lodash';
-import { defer, switchMap, throwError } from 'rxjs';
+import { Subject, defer, switchMap, takeUntil, throwError, finalize } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   type ChatCompleteAPI,
   type ChatCompleteCompositeResponse,
   createInferenceRequestError,
+  createInferenceRequestAbortedError,
   type ToolOptions,
   ChatCompleteOptions,
 } from '@kbn/inference-common';
@@ -37,11 +38,17 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
     system,
     functionCalling,
     stream,
+    abortSignal,
   }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
     ToolOptions,
     boolean
   > => {
-    const obs$ = defer(async () => {
+    const stop$ = new Subject<void>();
+    abortSignal?.addEventListener('abort', () => {
+      stop$.next();
+    });
+
+    const inference$ = defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
       const connector = await getConnectorById({ connectorId, actionsClient });
       const executor = createInferenceExecutor({ actionsClient, connector });
@@ -68,6 +75,7 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
           tools,
           logger,
           functionCalling,
+          abortSignal,
         });
       }),
       chunksIntoMessage({
@@ -76,13 +84,19 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
           tools,
         },
         logger,
+      }),
+      takeUntil(stop$),
+      finalize(() => {
+        if (abortSignal?.aborted) {
+          throw createInferenceRequestAbortedError('Request was aborted');
+        }
       })
     );
 
     if (stream) {
-      return obs$;
+      return inference$;
     } else {
-      return streamToResponse(obs$);
+      return streamToResponse(inference$);
     }
   };
 }
