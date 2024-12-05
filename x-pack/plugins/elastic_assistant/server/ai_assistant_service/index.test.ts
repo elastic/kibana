@@ -122,6 +122,12 @@ describe('AI Assistant Service', () => {
       kibanaVersion: '8.8.0',
       ml,
       taskManager: taskManagerMock.createSetup(),
+      productDocManager: Promise.resolve({
+        getStatus: jest.fn(),
+        install: jest.fn(),
+        update: jest.fn(),
+        uninstall: jest.fn(),
+      }),
     };
   });
 

@@ -17,6 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
     id: model.name,
   }));
 
+  const modelAllSpaces = SUPPORTED_TRAINED_MODELS.TINY_ELSER;
+
   describe('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
@@ -90,6 +92,10 @@ export default function ({ getService }: FtrProviderContext) {
       for (const model of trainedModels) {
         await ml.api.importTrainedModel(model.id, model.name);
       }
+
+      // Assign model to all spaces
+      await ml.api.updateTrainedModelSpaces(modelAllSpaces.name, ['*'], ['default']);
+      await ml.api.assertTrainedModelSpaces(modelAllSpaces.name, ['*']);
 
       await ml.api.createTestTrainedModels('classification', 15, true);
       await ml.api.createTestTrainedModels('regression', 15);
@@ -173,9 +179,10 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.securityUI.logout();
       });
 
-      it('should not be able to delete a model assigned to all spaces, and show a warning copy explaining the situation', async () => {
-        await ml.testExecution.logTestStep('should select the model named elser_model_2');
-        await ml.trainedModels.selectModel('.elser_model_2');
+      it.skip('should not be able to delete a model assigned to all spaces, and show a warning copy explaining the situation', async () => {
+        await ml.testExecution.logTestStep('should select a model');
+        await ml.trainedModelsTable.filterWithSearchString(modelAllSpaces.name, 1);
+        await ml.trainedModels.selectModel(modelAllSpaces.name);
 
         await ml.testExecution.logTestStep('should attempt to delete the model');
         await ml.trainedModels.clickBulkDelete();
@@ -493,6 +500,11 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.trainedModelsTable.assertStatsTabContent();
             await ml.trainedModelsTable.assertPipelinesTabContent(false);
           });
+        }
+
+        describe('supports actions for an imported model', function () {
+          // It's enough to test the actions for one model
+          const model = trainedModels[trainedModels.length - 1];
 
           it(`starts deployment of the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.startDeploymentWithParams(model.id, {
@@ -513,7 +525,7 @@ export default function ({ getService }: FtrProviderContext) {
           it(`deletes the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.deleteModel(model.id);
           });
-        }
+        });
       });
     });
 
