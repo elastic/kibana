@@ -854,11 +854,11 @@ x-pack/packages/security-solution/navigation @elastic/security-threat-hunting-ex
 x-pack/packages/security-solution/side_nav @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/storybook/config @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/upselling @elastic/security-threat-hunting-explore
-x-pack/packages/security/ui_components @elastic/kibana-security
 x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/private/security/authorization_core @elastic/kibana-security
 x-pack/platform/packages/private/security/authorization_core_common @elastic/kibana-security
 x-pack/platform/packages/private/security/role_management_model @elastic/kibana-security
+x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
