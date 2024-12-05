@@ -50,26 +50,28 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
     const allPaths = loadPaths(integrationSettings);
     const otherPathOptions = allPaths.map<EuiComboBoxOptionOption>((p) => ({ label: p }));
 
-    const options = pathSuggestions
-      .concat([i18n.ENTER_MANUALLY])
-      .map<EuiRadioGroupOption>((option, index) =>
-        // The LLM returns the path in preference order, so we know the first option is the recommended one
-        index === 0
-          ? {
-              id: option,
-              label: (
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiText size="s">{option}</EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>{i18n.RECOMMENDED}</EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-            }
-          : { id: option, label: option }
-      );
+    const isShowingAllOptions = pathSuggestions.length === allPaths.length;
+
+    const options = (
+      isShowingAllOptions ? pathSuggestions : pathSuggestions.concat([i18n.ENTER_MANUALLY])
+    ).map<EuiRadioGroupOption>((option, index) =>
+      // The LLM returns the path in preference order, so we know the first option is the recommended one
+      index === 0
+        ? {
+            id: option,
+            label: (
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiText size="s">{option}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>{i18n.RECOMMENDED}</EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+          }
+        : { id: option, label: option }
+    );
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmPath">
@@ -82,7 +84,7 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {useOtherEndpoint && (
+        {useOtherEndpoint && !isShowingAllOptions && (
           <EuiFlexGroup direction="column">
             <EuiFormRow fullWidth>
               <EuiComboBox

@@ -60,7 +60,6 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
         // If the user tries to navigate to the next step without completing the current step.
         return;
       }
-      // telemetry.reportAssistantStepComplete({ step: state.step, stepName });
       setIsFlyoutGenerating(true);
     }, [isThisStepReadyToComplete, setIsFlyoutGenerating]);
 
