@@ -969,7 +969,7 @@
     "@kbn/triggers-actions-ui-types": "link:packages/kbn-triggers-actions-ui-types",
     "@kbn/try-in-console": "link:packages/kbn-try-in-console",
     "@kbn/typed-react-router-config": "link:packages/kbn-typed-react-router-config",
-    "@kbn/ui-actions-browser": "link:packages/kbn-ui-actions-browser",
+    "@kbn/ui-actions-browser": "link:src/platform/packages/shared/kbn-ui-actions-browser",
     "@kbn/ui-actions-enhanced-examples-plugin": "link:x-pack/examples/ui_actions_enhanced_examples",
     "@kbn/ui-actions-enhanced-plugin": "link:src/plugins/ui_actions_enhanced",
     "@kbn/ui-actions-examples-plugin": "link:examples/ui_action_examples",
