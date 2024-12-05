@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { startCase, uniqBy } from 'lodash';
 
-import { useGetAgentExportFieldsQuery } from '../../../../../../hooks';
+import { AGENT_FIELDS_TO_EXPORT, INITIAL_AGENT_FIELDS_TO_EXPORT } from './columns';
 
 export interface ExportField {
   field: string;
@@ -36,21 +36,11 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
   onSubmit,
   agentCount,
 }) => {
-  const fields = [
-    { field: 'agent.id' },
-    { field: 'status' },
-    { field: 'local_metadata.host.hostname' },
-    { field: 'policy_id' }, // policy name would need to be enriched
-    { field: 'last_checkin' },
-    { field: 'local_metadata.elastic.agent.version' },
-  ];
+  const [selection, setSelection] = useState<ExportField[]>(INITIAL_AGENT_FIELDS_TO_EXPORT);
 
-  const [selection, setSelection] = useState<ExportField[]>(fields);
-
-  const { data: fieldsData } = useGetAgentExportFieldsQuery({
-    enabled: true,
-  });
-  const items = fieldsData ? uniqBy([...fields, ...fieldsData], 'field') : fields;
+  const items = AGENT_FIELDS_TO_EXPORT
+    ? uniqBy([...INITIAL_AGENT_FIELDS_TO_EXPORT, ...AGENT_FIELDS_TO_EXPORT], 'field')
+    : INITIAL_AGENT_FIELDS_TO_EXPORT;
 
   const columns: Array<EuiBasicTableColumn<ExportField>> = [
     {
@@ -59,13 +49,11 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
       render: (field: string) => {
         return startCase(field.slice(field.lastIndexOf('.') + 1));
       },
-      sortable: true,
       truncateText: true,
     },
     {
       field: 'field',
       name: 'Field',
-      sortable: true,
       truncateText: true,
     },
   ];
@@ -75,7 +63,7 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
     onSelectionChange: (newSelection) => {
       setSelection(newSelection);
     },
-    initialSelected: fields,
+    initialSelected: INITIAL_AGENT_FIELDS_TO_EXPORT,
   };
 
   const search: EuiSearchBarProps = {

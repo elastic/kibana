@@ -78,7 +78,6 @@ import {
   postAgentReassignHandler,
   postRetrieveAgentsByActionsHandler,
   getAgentStatusRuntimeFieldHandler,
-  getAgentFieldsHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -838,37 +837,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           },
         },
         getAgentStatusRuntimeFieldHandler
-      );
-
-    router.versioned
-      .get({
-        path: '/internal/fleet/agents/fields',
-        access: 'internal',
-        fleetAuthz: {
-          fleet: { readAgents: true },
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.internal.v1,
-          validate: {
-            request: {},
-            response: {
-              200: {
-                body: () =>
-                  schema.arrayOf(
-                    schema.object({
-                      field: schema.string(),
-                    })
-                  ),
-              },
-              400: {
-                body: genericErrorResponse,
-              },
-            },
-          },
-        },
-        getAgentFieldsHandler
       );
   }
 };
