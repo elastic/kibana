@@ -530,7 +530,6 @@ packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
-packages/kbn-visualization-utils @elastic/kibana-visualizations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-xstate-utils @elastic/obs-ux-logs-team
@@ -623,6 +622,7 @@ src/platform/packages/shared/kbn-event-annotation-components @elastic/kibana-vis
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizations
 src/platform/packages/shared/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
