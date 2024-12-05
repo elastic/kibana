@@ -146,7 +146,6 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
   },
 }))<{ $isVisible: boolean }>``;
 
-// eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   dataSourceType,
   defaultSavedQuery,
@@ -173,7 +172,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     watch: ['ruleType', 'queryBar', 'machineLearningJobId'],
   });
 
-  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
@@ -358,10 +356,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * purpose and so are treated as if the field is always selected.  */
   const areSuppressionFieldsSelected = isThresholdRule || Boolean(alertSuppressionFields?.length);
 
-  const areSuppressionFieldsDisabledBySequence =
-    isEqlRule(ruleType) &&
-    isEqlSequenceQuery(queryBar?.query?.query as string) &&
-    alertSuppressionFields?.length === 0;
+  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(
+    isEqlSequenceQuery(queryBar?.query?.query as string)
+  );
 
   /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
@@ -369,30 +366,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   /** Suppression fields are generally disabled if either:
    * - License is insufficient (i.e. less than platinum)
-   * - An EQL Sequence is used
    * - ML Field information is not available
    */
   const areSuppressionFieldsDisabled =
-    !isAlertSuppressionLicenseValid ||
-    areSuppressionFieldsDisabledBySequence ||
-    areSuppressionFieldsDisabledByMlFields;
+    !isAlertSuppressionLicenseValid || areSuppressionFieldsDisabledByMlFields;
 
   const isSuppressionGroupByDisabled =
     (areSuppressionFieldsDisabled || isEsqlSuppressionLoading) && !areSuppressionFieldsSelected;
 
   const suppressionGroupByDisabledText = useMemo(() => {
-    if (areSuppressionFieldsDisabledBySequence) {
-      return i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP;
-    } else if (areSuppressionFieldsDisabledByMlFields) {
+    if (areSuppressionFieldsDisabledByMlFields) {
       return i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL;
     } else {
       return alertSuppressionUpsellingMessage;
     }
-  }, [
-    alertSuppressionUpsellingMessage,
-    areSuppressionFieldsDisabledByMlFields,
-    areSuppressionFieldsDisabledBySequence,
-  ]);
+  }, [alertSuppressionUpsellingMessage, areSuppressionFieldsDisabledByMlFields]);
 
   const suppressionGroupByFields = useMemo(() => {
     if (isEsqlRule(ruleType)) {
@@ -808,13 +796,14 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
 }) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
   const transformFields = useExperimentalFeatureFieldsTransform();
+  const fieldsToDisplay = transformFields(dataForDescription);
 
   return (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
         schema={filterRuleFieldsForType(schema, data.ruleType)}
-        data={filterRuleFieldsForType(transformFields(dataForDescription), data.ruleType)}
+        data={filterRuleFieldsForType(fieldsToDisplay, data.ruleType)}
         indexPatterns={indexPattern}
       />
     </StepContentWrapper>

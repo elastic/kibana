@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const DEFAULT_LOG_SOURCES = ['logs-*-*', 'logs-*', 'filebeat-*', 'kibana_sample_data_logs*'];
+export const DEFAULT_LOG_SOURCES = ['logs-*-*', 'logs-*', 'filebeat-*'];

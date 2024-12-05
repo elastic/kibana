@@ -15,7 +15,11 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     {
@@ -228,8 +232,10 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
     "@kbn/langchain",
+    "@kbn/discover-shared-plugin",
     "@kbn/react-hooks",
     "@kbn/index-adapter",
-    "@kbn/core-http-server-utils"
+    "@kbn/core-http-server-utils",
+    "@kbn/llm-tasks-plugin"
   ]
 }

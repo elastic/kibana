@@ -187,7 +187,7 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
           </EuiText>
         ),
       }}
-      style={{ maxWidth: `80%` }}
+      css={{ maxWidth: `80%` }}
     >
       {triggers.map((trigger) => (
         <React.Fragment key={trigger}>

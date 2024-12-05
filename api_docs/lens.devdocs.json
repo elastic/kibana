@@ -361,21 +361,21 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; executionContext?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
-          " | undefined; style?: React.CSSProperties | undefined; className?: string | undefined; noPadding?: boolean | undefined; viewMode?: ",
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.ViewMode",
             "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
           },
           " | undefined; enhancements?: { dynamicActions: ",
           {
@@ -567,7 +567,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -665,7 +665,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -903,7 +903,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1135,7 +1135,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -6868,7 +6868,7 @@
                 "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
-              " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+              " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -7382,7 +7382,7 @@
               },
               " | undefined; textBased?: ",
               "TextBasedPersistedState",
-              " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
+              " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7667,7 +7667,7 @@
                     "section": "def-public.ViewMode",
                     "text": "ViewMode"
                   },
-                  " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+                  " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
                     "scope": "common",
@@ -8181,7 +8181,7 @@
                   },
                   " | undefined; textBased?: ",
                   "TextBasedPersistedState",
-                  " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
+                  " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -8539,21 +8539,21 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; executionContext?: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
-              " | undefined; style?: React.CSSProperties | undefined; className?: string | undefined; noPadding?: boolean | undefined; viewMode?: ",
+              "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
                 "section": "def-public.ViewMode",
                 "text": "ViewMode"
+              },
+              " | undefined; executionContext?: ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
               },
               " | undefined; enhancements?: { dynamicActions: ",
               {
@@ -8791,21 +8791,21 @@
                     "section": "def-common.PaletteOutput",
                     "text": "PaletteOutput"
                   },
-                  "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; executionContext?: ",
-                  {
-                    "pluginId": "@kbn/core-execution-context-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                    "section": "def-common.KibanaExecutionContext",
-                    "text": "KibanaExecutionContext"
-                  },
-                  " | undefined; style?: React.CSSProperties | undefined; className?: string | undefined; noPadding?: boolean | undefined; viewMode?: ",
+                  "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "public",
                     "docId": "kibKbnPresentationPublishingPluginApi",
                     "section": "def-public.ViewMode",
                     "text": "ViewMode"
+                  },
+                  " | undefined; executionContext?: ",
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
                   },
                   " | undefined; enhancements?: { dynamicActions: ",
                   {
@@ -16068,7 +16068,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -16582,7 +16582,7 @@
           },
           " | undefined; textBased?: ",
           "TextBasedPersistedState",
-          " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
+          " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -16852,7 +16852,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -17366,7 +17366,7 @@
           },
           " | undefined; textBased?: ",
           "TextBasedPersistedState",
-          " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
+          " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -17985,21 +17985,21 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; executionContext?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
-          " | undefined; style?: React.CSSProperties | undefined; className?: string | undefined; noPadding?: boolean | undefined; viewMode?: ",
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.ViewMode",
             "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
           },
           " | undefined; enhancements?: { dynamicActions: ",
           {
@@ -18191,7 +18191,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -18289,7 +18289,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18527,7 +18527,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -18759,7 +18759,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -20539,21 +20539,21 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; executionContext?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
-          " | undefined; style?: React.CSSProperties | undefined; className?: string | undefined; noPadding?: boolean | undefined; viewMode?: ",
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.ViewMode",
             "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
           },
           " | undefined; enhancements?: { dynamicActions: ",
           {
@@ -20745,7 +20745,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -20843,7 +20843,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -21081,7 +21081,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -21313,7 +21313,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -21818,7 +21818,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -22332,7 +22332,7 @@
           },
           " | undefined; textBased?: ",
           "TextBasedPersistedState",
-          " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
+          " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -22611,7 +22611,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -22955,21 +22955,21 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; executionContext?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
-          " | undefined; style?: React.CSSProperties | undefined; className?: string | undefined; noPadding?: boolean | undefined; viewMode?: ",
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.ViewMode",
             "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
           },
           " | undefined; enhancements?: { dynamicActions: ",
           {
