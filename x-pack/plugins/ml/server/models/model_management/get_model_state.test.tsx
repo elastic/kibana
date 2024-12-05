@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getModelDeploymentState } from './get_model_state';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
-import type { ModelItem } from './models_list';
+import type { NLPModelItem } from '../../../common/types/trained_models';
+import { getModelDeploymentState } from './get_model_state';
 
 describe('getModelDeploymentState', () => {
   it('returns STARTED if any deployment is in STARTED state', () => {
@@ -37,7 +37,7 @@ describe('getModelDeploymentState', () => {
           },
         ],
       },
-    } as unknown as ModelItem;
+    } as unknown as NLPModelItem;
     const result = getModelDeploymentState(model);
     expect(result).toEqual(MODEL_STATE.STARTED);
   });
@@ -69,7 +69,7 @@ describe('getModelDeploymentState', () => {
           },
         ],
       },
-    } as unknown as ModelItem;
+    } as unknown as NLPModelItem;
     const result = getModelDeploymentState(model);
     expect(result).toEqual(MODEL_STATE.STARTING);
   });
@@ -96,7 +96,7 @@ describe('getModelDeploymentState', () => {
           },
         ],
       },
-    } as unknown as ModelItem;
+    } as unknown as NLPModelItem;
     const result = getModelDeploymentState(model);
     expect(result).toEqual(MODEL_STATE.STOPPING);
   });
@@ -112,7 +112,7 @@ describe('getModelDeploymentState', () => {
 
         deployment_stats: [],
       },
-    } as unknown as ModelItem;
+    } as unknown as NLPModelItem;
     const result = getModelDeploymentState(model);
     expect(result).toEqual(undefined);
   });

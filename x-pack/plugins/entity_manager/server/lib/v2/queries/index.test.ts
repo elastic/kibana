@@ -29,9 +29,10 @@ describe('getEntityInstancesQuery', () => {
 
       expect(query).toEqual(
         'FROM logs-*, metrics-* | ' +
-          'WHERE service.name IS NOT NULL | ' +
+          'WHERE service.name::keyword IS NOT NULL | ' +
           'WHERE custom_timestamp_field >= "2024-11-20T19:00:00.000Z" AND custom_timestamp_field <= "2024-11-20T20:00:00.000Z" | ' +
-          'STATS host.name = VALUES(host.name), entity.last_seen_timestamp = MAX(custom_timestamp_field), service.id = MAX(service.id) BY service.name | ' +
+          'STATS host.name = VALUES(host.name::keyword), entity.last_seen_timestamp = MAX(custom_timestamp_field), service.id = MAX(service.id::keyword) BY service.name::keyword | ' +
+          'RENAME `service.name::keyword` AS service.name | ' +
           'EVAL entity.type = "service", entity.id = service.name, entity.display_name = COALESCE(service.id, entity.id) | ' +
           'SORT entity.id DESC | ' +
           'LIMIT 5'
