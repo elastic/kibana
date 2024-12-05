@@ -58,7 +58,7 @@ describe('addObservable', () => {
     );
   });
 
-  it('should throw an error if obsrvable type is invalid', async () => {
+  it('should throw an error if observable type is invalid', async () => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
 
     await expect(
