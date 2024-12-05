@@ -47,14 +47,13 @@ export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
             const savedObjectsClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
 
-            const result = await ruleMigrationsClient.data.rules.get(
-              {
-                migrationId,
+            const result = await ruleMigrationsClient.data.rules.get(migrationId, {
+              filters: {
                 prebuiltRulesOnly: true,
               },
-              0,
-              MAX_PREBUILT_RULES_TO_FETCH
-            );
+              from: 0,
+              size: MAX_PREBUILT_RULES_TO_FETCH,
+            });
 
             const prebuiltRulesIds = result.data
               .flatMap((rule) => rule.elastic_rule?.prebuilt_rule_id ?? [])
