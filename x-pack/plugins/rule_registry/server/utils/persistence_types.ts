@@ -45,6 +45,10 @@ export type SuppressedAlertService = <T extends SuppressionFieldsLatest>(
   alerts: Array<{
     _id: string;
     _source: T;
+    subAlerts?: Array<{
+      _id: string;
+      _source: T;
+    }>;
   }>,
   suppressionWindow: string,
   enrichAlerts?: (

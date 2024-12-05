@@ -7,6 +7,7 @@
 
 import {
   ClusterPutComponentTemplateRequest,
+  MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { StreamDefinition } from '../../../../common/types';
@@ -21,16 +22,22 @@ export function generateLayer(
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
   definition.fields.forEach((field) => {
-    properties[field.name] = {
+    const property: MappingProperty = {
       type: field.type,
     };
+    if (field.name === '@timestamp') {
+      // @timestamp can't ignore malformed dates as it's used for sorting in logsdb
+      (property as MappingDateProperty).ignore_malformed = false;
+    }
+    properties[field.name] = property;
   });
   return {
     name: getComponentTemplateName(id),
     template: {
       settings: isRoot(definition.id) ? logsSettings : {},
       mappings: {
-        subobjects: false,
+        subobjects: true, // TODO set to false once this works on Elasticsearch side - right now fields are not properly indexed.
+        dynamic: false,
         properties,
       },
     },

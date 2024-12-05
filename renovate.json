@@ -137,16 +137,16 @@
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
         "cheerio",
-        "@types/faker",
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
         "babel-plugin-istanbul",
-        "faker",
         "nyc",
         "oboe",
         "pixelmatch",
+        "@playwright/test",
         "playwright",
+        "playwright-chromium",
         "pngjs",
         "sharp",
         "superagent",
@@ -303,6 +303,163 @@
         "Team:Cloud Security",
         "release_note:skip",
         "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "formatjs dependencies",
+      "matchDepNames": [
+        "@formatjs/icu-messageformat-parser",
+        "@formatjs/intl",
+        "@formatjs/intl-pluralrules",
+        "@formatjs/intl-relativetimeformat",
+        "@formatjs/intl-utils",
+        "@formatjs/ts-transformer"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Core",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-core dependencies",
+      "matchDepNames": [
+        "@elastic/request-crypto",
+        "ansi-regex",
+        "axios",
+        "cacheable-lookup",
+        "getos",
+        "has-ansi",
+        "joi-to-json",
+        "json5",
+        "load-json-file",
+        "mime-types",
+        "mock-fs",
+        "node-fetch",
+        "react-intl",
+        "reflect-metadata",
+        "type-detect",
+        "utility-types",
+        "@types/getos",
+        "@types/hapi__cookie",
+        "@types/hapi__h2o2",
+        "@types/hapi__hapi",
+        "@types/hapi__inert",
+        "@types/has-ansi",
+        "@types/json5",
+        "@types/mime",
+        "@types/mime-types",
+        "@types/mock-fs",
+        "@types/node-fetch",
+        "@types/type-detect"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Core",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-data-discovery dependencies",
+      "matchDepNames": [
+        "@elastic/datemath",
+        "diff",
+        "fastest-levenshtein",
+        "usng.js",
+        "@types/diff"
+      ],
+      "reviewers": [
+        "team:kibana-data-discovery"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:DataDiscovery",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-management dependencies",
+      "matchDepNames": [
+        "@mapbox/vector-tile",
+        "cronstrue",
+        "file-saver",
+        "@types/mapbox__vector-tile"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Kibana Management",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "moment-duration-format",
+      "matchDepNames": [
+        "moment-duration-format",
+        "@types/moment-duration-format"
+      ],
+      "reviewers": [
+        "team:kibana-management",
+        "team:stack-monitoring"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Kibana Management",
+        "Team:Monitoring",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-visualizations test dependencies",
+      "matchDepNames": [
+        "@types/faker",
+        "faker"
+      ],
+      "reviewers": [
+        "team:visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Visualizations",
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "enabled": true,
       "minimumReleaseAge": "7 days"
@@ -487,7 +644,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:skip"
+        "backport:all-open"
       ],
       "enabled": true
     },
@@ -511,28 +668,11 @@
       "enabled": true
     },
     {
-      "groupName": "ansi-regex",
-      "matchDepNames": [
-        "ansi-regex"
-      ],
-      "reviewers": [
-        "team:kibana-core"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Core",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "OpenAPI Spec",
       "matchDepNames": [
-        "@redocly/cli"
+        "@apidevtools/swagger-parser",
+        "@redocly/cli",
+        "openapi-types"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -543,7 +683,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:skip"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1233,9 +1373,7 @@
     {
       "groupName": "Security Engineering Productivity",
       "matchDepNames": [
-        "dotenv",
-        "playwright-chromium",
-        "@playwright/test"
+        "dotenv"
       ],
       "reviewers": [
         "team:security-engineering-productivity"

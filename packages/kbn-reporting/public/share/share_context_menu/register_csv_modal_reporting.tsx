@@ -24,7 +24,6 @@ export const reportingCsvShareProvider = ({
   apiClient,
   application,
   license,
-  usesUiCapabilities,
   startServices$,
 }: ExportModalShareOpts) => {
   const getShareMenuItems = ({ objectType, sharingData, toasts }: ShareContext) => {
@@ -76,12 +75,7 @@ export const reportingCsvShareProvider = ({
     const licenseHasCsvReporting = licenseCheck.showLinks;
     const licenseDisabled = !licenseCheck.enableLinks;
 
-    let capabilityHasCsvReporting = false;
-    if (usesUiCapabilities) {
-      capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
-    } else {
-      capabilityHasCsvReporting = true; // deprecated
-    }
+    const capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
 
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
