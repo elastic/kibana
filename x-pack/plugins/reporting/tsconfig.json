@@ -30,7 +30,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/rison",
     "@kbn/task-manager-plugin",
-    "@kbn/config",
     "@kbn/core-http-server",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/safer-lodash-set",
