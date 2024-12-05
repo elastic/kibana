@@ -42,7 +42,7 @@ export const Threshold = ({
   warning,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const color = euiTheme.colors.danger;
+  const color = euiTheme.colors.backgroundBaseDanger;
 
   return (
     <EuiPanel

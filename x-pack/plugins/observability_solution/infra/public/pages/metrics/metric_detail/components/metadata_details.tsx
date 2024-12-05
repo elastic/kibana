@@ -166,10 +166,8 @@ export const MetadataDetails = (props: Props) => {
 };
 
 const MetadataContainer = styled.div`
-  border-top: ${(props) => props.theme.euiTheme.border.thin} solid
-    ${(props) => props.theme.euiTheme.border.color};
-  border-bottom: ${(props) => props.theme.euiTheme.border.thin} solid
-    ${(props) => props.theme.euiTheme.border.color};
+  border-top: ${(props) => props.theme.euiTheme.border.thin};
+  border-bottom: ${(props) => props.theme.euiTheme.border.thin};
   padding: ${(props) => props.theme.euiTheme.size.m} 0;
   margin-bottom: ${(props) => props.theme.euiTheme.size.m};
   display: flex;

@@ -27,15 +27,15 @@ export const SingleMetricComparison: React.FunctionComponent<{
   } else if (changeFactor > 0 && Number.isFinite(changeFactor)) {
     return (
       <NoWrapSpan>
-        <EuiIcon type="sortUp" color="accentSecondary" />
-        <EuiTextColor color="accentSecondary">{formatPercentage(changeFactor)}</EuiTextColor>
+        <EuiIcon type="sortUp" color="success" />
+        <EuiTextColor color="success">{formatPercentage(changeFactor)}</EuiTextColor>
       </NoWrapSpan>
     );
   } else if (changeFactor > 0 && !Number.isFinite(changeFactor)) {
     return (
       <NoWrapSpan>
-        <EuiIcon type="sortUp" color="accentSecondary" />
-        <EuiTextColor color="accentSecondary">{newCategoryTrendLabel}</EuiTextColor>
+        <EuiIcon type="sortUp" color="success" />
+        <EuiTextColor color="success">{newCategoryTrendLabel}</EuiTextColor>
       </NoWrapSpan>
     );
   }

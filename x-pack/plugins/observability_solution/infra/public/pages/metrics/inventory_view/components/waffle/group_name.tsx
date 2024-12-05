@@ -71,7 +71,7 @@ interface InnerProps {
 }
 
 const Inner = styled.div<InnerProps>`
-  border: 1px solid ${(props) => props.theme.euiTheme.border.color};
+  border: ${(props) => props.theme.euiTheme.border.thin};
   background-color: ${(props) =>
     props.isChild
       ? props.theme.euiTheme.colors.lightestShade
@@ -94,7 +94,7 @@ const Name = styled.div`
 
 const Count = styled.div`
   flex: 0 0 auto;
-  border-left: 1px solid ${(props) => props.theme.euiTheme.border.color};
+  border-left: ${(props) => props.theme.euiTheme.border.thin};
   padding: 6px 10px;
   font-size: 0.85em;
   font-weight: normal;

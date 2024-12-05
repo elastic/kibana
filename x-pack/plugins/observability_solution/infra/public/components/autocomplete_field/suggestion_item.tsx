@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiFontSize } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { Theme } from '@emotion/react';
 import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
@@ -42,7 +42,7 @@ const SuggestionItemContainer = styled.div<{
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${({ theme }) => theme.euiTheme.size.m};
+  font-size: ${() => useEuiFontSize('m').fontSize};
   height: ${({ theme }) => theme.euiTheme.size.xl};
   white-space: nowrap;
   background-color: ${(props) =>

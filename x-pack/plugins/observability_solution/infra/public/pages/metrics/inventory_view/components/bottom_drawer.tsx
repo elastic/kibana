@@ -121,7 +121,7 @@ const BottomActionContainer = styled.div`
   position: sticky;
   bottom: 0;
   left: 0;
-  background: ${(props) => props.theme.euiTheme.colors.ghost};
+  background: ${(props) => props.theme.euiTheme.colors.backgroundBasePlain};
   width: calc(100% + ${(props) => props.theme.euiTheme.size.l} * 2);
   margin-left: -${(props) => props.theme.euiTheme.size.l};
 `; // Additional width comes from the padding on the EuiPageBody and inner nodes container

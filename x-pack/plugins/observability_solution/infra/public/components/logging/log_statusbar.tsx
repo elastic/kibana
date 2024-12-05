@@ -20,8 +20,8 @@ export const LogStatusbar = (props: EuiFlexGroupProps) => {
       css={css`
         padding: ${euiTheme.size.s};
         border-top: ${euiTheme.border.thin};
-        max-height: 48px;
-        min-height: 48px;
+        max-height: ${euiTheme.size.xxxl};
+        min-height: ${euiTheme.size.xxxl};
         background-color: ${euiTheme.colors.emptyShade};
         flex-direction: row;
       `}

@@ -161,7 +161,7 @@ export const CustomMetricForm = withEuiTheme(
           <div
             style={{
               padding: theme?.euiTheme.size.m,
-              borderBottom: `${theme?.euiTheme.border.thin} solid ${theme?.euiTheme.border.color}`,
+              borderBottom: `${theme?.euiTheme.border.thin}`,
             }}
           >
             <EuiFormRow
