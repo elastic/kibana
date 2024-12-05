@@ -93,7 +93,7 @@
       "packages/ml/field_stats_flyout",
       "platform/packages/private/ml/inference_integration_flyout",
       "packages/ml/trained_models_utils",
-      "packages/ml/category_validator",
+      "platform/packages/private/ml/category_validator",
       "packages/ml/ui_actions",
       "plugins/ml"
     ],

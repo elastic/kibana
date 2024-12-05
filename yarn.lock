@@ -6280,7 +6280,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-category-validator@link:x-pack/packages/ml/category_validator":
+"@kbn/ml-category-validator@link:x-pack/platform/packages/private/ml/category_validator":
   version "0.0.0"
   uid ""
 

@@ -652,7 +652,7 @@
     "@kbn/ml-agg-utils": "link:x-pack/platform/packages/private/ml/agg_utils",
     "@kbn/ml-anomaly-utils": "link:x-pack/platform/packages/shared/ml/anomaly_utils",
     "@kbn/ml-cancellable-search": "link:x-pack/platform/packages/private/ml/cancellable_search",
-    "@kbn/ml-category-validator": "link:x-pack/packages/ml/category_validator",
+    "@kbn/ml-category-validator": "link:x-pack/platform/packages/private/ml/category_validator",
     "@kbn/ml-chi2test": "link:x-pack/packages/ml/chi2test",
     "@kbn/ml-creation-wizard-utils": "link:x-pack/packages/ml/creation_wizard_utils",
     "@kbn/ml-data-frame-analytics-utils": "link:x-pack/packages/ml/data_frame_analytics_utils",
