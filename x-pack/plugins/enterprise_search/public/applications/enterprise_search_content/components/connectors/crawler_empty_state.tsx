@@ -49,6 +49,7 @@ export const CrawlerEmptyState: React.FC = () => {
               fill
               iconType={GithubIcon}
               href={'https://github.com/elastic/crawler'}
+              target="_blank"
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.crawlerEmptyState.openSourceCrawlerButtonLabel',

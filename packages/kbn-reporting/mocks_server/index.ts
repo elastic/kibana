@@ -33,10 +33,6 @@ export const createMockConfigSchema = (
       scroll: { size: 500, duration: '30s' },
       ...overrides.csv,
     },
-    roles: {
-      enabled: false,
-      ...overrides.roles,
-    },
     capture: { maxAttempts: 1 },
     export_types: {
       pdf: { enabled: true },
