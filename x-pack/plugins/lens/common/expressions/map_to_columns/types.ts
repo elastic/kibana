@@ -8,8 +8,8 @@
 import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 export type OriginalColumn = { id: string; label: string; params?: unknown } & (
-  | { operationType: 'date_histogram'; sourceField: string }
-  | { operationType: string; sourceField: never }
+  | { operationType: 'date_histogram'; sourceField: string; interval: number }
+  | { operationType: string; sourceField?: string; interval: never }
 );
 
 export type MapToColumnsExpressionFunction = ExpressionFunctionDefinition<

@@ -17,13 +17,18 @@ import {
   type AggregateQuery,
 } from '@kbn/es-query';
 import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
+import moment from 'moment';
+import {
+  buildSimpleExistFilter,
+  buildSimpleRangeFilter,
+} from '@kbn/es-query/src/filters/build_filters';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
 interface ValueClickDataContext {
   data: Array<{
-    table: Pick<Datatable, 'rows' | 'columns'>;
+    table: Pick<Datatable, 'rows' | 'columns' | 'meta'>;
     column: number;
     row: number;
     value: any;
@@ -129,6 +134,68 @@ export const createFilter = async (
   return filter;
 };
 
+export const createFilterESQL = async (
+  table: Pick<Datatable, 'rows' | 'columns'>,
+  columnIndex: number,
+  rowIndex: number
+) => {
+  if (
+    !table ||
+    !table.columns ||
+    !table.columns[columnIndex] ||
+    !table.columns[columnIndex].meta ||
+    !table.columns[columnIndex].meta.sourceParams?.sourceField
+  ) {
+    return;
+  }
+  const column = table.columns[columnIndex];
+  const { indexPattern, sourceField, operationType, interval } = table.columns[columnIndex].meta
+    .sourceParams as {
+    indexPattern: string;
+    sourceField: string;
+    operationType: string;
+    interval: number;
+  };
+
+  const value: any = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+  if (value === null || value === undefined) {
+    return;
+  }
+
+  const filters: Filter[] = [];
+
+  if (operationType === 'date_histogram') {
+    filters.push(
+      buildSimpleRangeFilter(
+        sourceField,
+        {
+          gte: moment(value).toISOString(),
+          lt: moment(value).add(interval).toISOString(),
+          format: 'strict_date_optional_time',
+        },
+        indexPattern,
+        value
+      )
+    );
+  } else if (operationType === 'histogram') {
+    filters.push(
+      buildSimpleRangeFilter(
+        sourceField,
+        {
+          gte: value,
+          lt: value + interval,
+        },
+        indexPattern,
+        value
+      )
+    );
+  } else if (sourceField) {
+    filters.push(buildSimpleExistFilter(sourceField, indexPattern));
+  }
+
+  return filters;
+};
+
 /** @public */
 export const createFiltersFromValueClickAction = async ({
   data,
@@ -141,7 +208,10 @@ export const createFiltersFromValueClickAction = async ({
       .filter((point) => point)
       .map(async (val) => {
         const { table, column, row } = val;
-        const filter: Filter[] = (await createFilter(table, column, row)) || [];
+        const filter =
+          table.meta?.type === 'es_ql'
+            ? await createFilterESQL(table, column, row)
+            : (await createFilter(table, column, row)) || [];
         if (filter) {
           filter.forEach((f) => {
             if (negate) {

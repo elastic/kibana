@@ -17,7 +17,7 @@ import type {
 } from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getStartEndParams } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
@@ -326,6 +326,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           const lookup = new Set(
             hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []
           );
+          const indexPattern = getIndexPatternFromESQLQuery(query);
+
           const allColumns =
             (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
               id: name,
@@ -335,6 +337,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 esType: type,
                 sourceParams: {
                   appliedTimeRange: input?.timeRange,
+                  indexPattern,
                   params: {},
                 },
               },
@@ -353,6 +356,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             type: 'datatable',
             meta: {
               type: ESQL_TABLE_TYPE,
+              query,
               statistics: {
                 totalCount: body.values.length,
               },

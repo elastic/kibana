@@ -7,18 +7,18 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { getUserTimeZone } from '@kbn/data-plugin/common';
+import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugin/common';
+import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
+import moment from 'moment';
 import { ValueFormatConfig } from './operations/definitions/column_types';
 import { convertToAbsoluteDateRange } from '../../utils';
-import type { DateRange } from '../../../common/types';
+import { DateRange, OriginalColumn } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
 import { DateHistogramIndexPatternColumn } from './operations/definitions';
 import type { IndexPattern } from '../../types';
 import { resolveTimeShift } from './time_shift_utils';
 import { FormBasedLayer } from '../..';
-
-export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -86,6 +86,7 @@ export function getESQLForLayer(
           ...col,
           id: colId,
           params: { format: format as unknown as ValueFormatConfig },
+          interval: undefined as never,
           label: col.customLabel
             ? col.label
             : operationDefinitionMap[col.operationType].getDefaultLabel(
@@ -157,8 +158,18 @@ export function getESQLForLayer(
         ? `col_${index + (col.isBucketed ? 0 : 1)}-${aggId}`
         : `col_${index}_${aggId}`;
 
+      let interval: number | undefined;
       if (col.operationType === 'date_histogram') {
-        esAggsId = (col as DateHistogramIndexPatternColumn).sourceField;
+        const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
+        const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+
+        esAggsId = dateHistogramColumn.sourceField;
+        const kibanaInterval =
+          dateHistogramColumn.params.interval === 'auto'
+            ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
+            : dateHistogramColumn.params.interval;
+        const esInterval = convertIntervalToEsInterval(kibanaInterval);
+        interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
       }
 
       if (!def.toESQL) return undefined;
@@ -178,6 +189,8 @@ export function getESQLForLayer(
           ...col,
           id: colId,
           params: { format: format as unknown as ValueFormatConfig },
+          interval: interval as never,
+          ...('sourceField' in col ? { sourceField: col.sourceField! } : {}),
           label: col.customLabel
             ? col.label
             : operationDefinitionMap[col.operationType].getDefaultLabel(
