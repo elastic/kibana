@@ -83,7 +83,7 @@ and field lists across the various Kibana apps. It's typically used in conjuncti
 <DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
 
 
-|{kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/dev_tools/README.md[devTools]
 |The ui/registry/dev_tools is removed in favor of the devTools plugin which exposes a register method in the setup contract.
 Registering app works mostly the same as registering apps in core.application.register.
 Routing will be handled by the id of the dev tool - your dev tool will be mounted when the URL matches /app/dev_tools#/<YOUR ID>.

@@ -26,7 +26,7 @@
     "observabilityAlertDetails": "x-pack/packages/observability/alert_details",
     "dataViews": "src/plugins/data_views",
     "defaultNavigation": "packages/default-nav",
-    "devTools": "src/plugins/dev_tools",
+    "devTools": "src/platform/plugins/shared/dev_tools",
     "discover": ["src/plugins/discover", "packages/kbn-discover-utils", "packages/kbn-discover-contextual-components"],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",

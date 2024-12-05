@@ -5352,7 +5352,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-tools-plugin@link:src/plugins/dev_tools":
+"@kbn/dev-tools-plugin@link:src/platform/plugins/shared/dev_tools":
   version "0.0.0"
   uid ""
 
