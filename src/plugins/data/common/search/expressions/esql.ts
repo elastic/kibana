@@ -16,9 +16,13 @@ import type {
   ISearchGeneric,
 } from '@kbn/search-types';
 import { esqlVariablesService } from '@kbn/esql/common';
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type {
+  Datatable,
+  DatatableColumn,
+  ExpressionFunctionDefinition,
+} from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getNamedParams } from '@kbn/esql-utils';
+import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
@@ -320,14 +324,19 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               name,
               meta: { type: esFieldTypeToKibanaFieldType(type), esType: type },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
-              variable: variables?.find((variable) => variable.value === name)?.key,
             })) ?? [];
+
+          const updatedWithVariablesColumns = mapVariableToColumn(
+            query,
+            variables,
+            allColumns as DatatableColumn[]
+          );
 
           // sort only in case of empty columns to correctly align columns to items in values array
           if (hasEmptyColumns) {
-            allColumns.sort((a, b) => Number(a.isNull) - Number(b.isNull));
+            updatedWithVariablesColumns.sort((a, b) => Number(a.isNull) - Number(b.isNull));
           }
-          const columnNames = allColumns?.map(({ name }) => name);
+          const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
           const rows = body.values.map((row) => zipObject(columnNames, row));
 
@@ -336,7 +345,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             meta: {
               type: ESQL_TABLE_TYPE,
             },
-            columns: allColumns,
+            columns: updatedWithVariablesColumns,
             rows,
             warning,
           } as Datatable;

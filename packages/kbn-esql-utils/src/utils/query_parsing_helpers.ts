@@ -15,6 +15,8 @@ import type {
   ESQLSingleAstItem,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
+import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -146,4 +148,42 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
   });
 
   return columns.map((column) => column.name);
+};
+
+export const mapVariableToColumn = (
+  esql: string,
+  variables: ESQLControlVariable[],
+  columns: DatatableColumn[]
+) => {
+  const queryHasTransformationalCommands = hasTransformationalCommand(esql);
+  const { root } = parse(esql);
+  let usedVariablesInQuery = Walker.params(root).map((param) => param);
+
+  if (queryHasTransformationalCommands) {
+    const transformationalCommands = root.commands.filter(({ name }) =>
+      ['stats', 'keep'].includes(name)
+    );
+
+    const lastCommand = transformationalCommands.length
+      ? transformationalCommands[transformationalCommands.length - 1]
+      : null;
+
+    if (lastCommand) {
+      usedVariablesInQuery = Walker.params(lastCommand).map((param) => param);
+    }
+  }
+
+  const uniqueVariablesInQyery = new Set<string>();
+  usedVariablesInQuery.forEach((variable) => {
+    uniqueVariablesInQyery.add(variable.text.replace('?', ''));
+  });
+
+  columns.map((column) => {
+    if (variables.some((variable) => variable.value === column.id)) {
+      const potentialColumnVariables = variables.filter((variable) => variable.value === column.id);
+      const variable = potentialColumnVariables.find((v) => uniqueVariablesInQyery.has(v.key));
+      column.variable = variable?.key ?? '';
+    }
+  });
+  return columns;
 };

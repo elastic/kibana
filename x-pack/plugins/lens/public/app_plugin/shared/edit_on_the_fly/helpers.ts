@@ -9,8 +9,10 @@ import {
   getESQLAdHocDataview,
   getESQLResults,
   formatESQLColumns,
+  mapVariableToColumn,
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -49,7 +51,7 @@ export const getGridAttrs = async (
   adHocDataViews: DataViewSpec[],
   deps: LensPluginStartDependencies,
   abortController?: AbortController,
-  esqlVariables: Array<{ key: string; value: string; type: string }> = []
+  esqlVariables: ESQLControlVariable[] = []
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
@@ -90,7 +92,7 @@ export const getSuggestions = async (
   setErrors: (errors: Error[]) => void,
   abortController?: AbortController,
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
-  esqlVariables: Array<{ key: string; value: string; type: string }> = []
+  esqlVariables: ESQLControlVariable[] = []
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
@@ -100,23 +102,18 @@ export const getSuggestions = async (
       abortController,
       esqlVariables
     );
-
-    columns.map((column) => {
-      if (esqlVariables.some((variable) => variable.value === column.id)) {
-        column.variable = esqlVariables.find((variable) => variable.value === column.id)?.key;
-      }
-    });
+    const updatedWithVariablesColumns = mapVariableToColumn(query.esql, esqlVariables, columns);
 
     setDataGridAttrs?.({
       rows,
       dataView,
-      columns,
+      columns: updatedWithVariablesColumns,
     });
 
     const context = {
       dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
-      textBasedColumns: columns,
+      textBasedColumns: updatedWithVariablesColumns,
       query,
     };
 

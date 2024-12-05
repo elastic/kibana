@@ -35,6 +35,7 @@ export {
   isESQLFieldGroupable,
   TextBasedLanguages,
   queryCannotBeSampled,
+  mapVariableToColumn,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

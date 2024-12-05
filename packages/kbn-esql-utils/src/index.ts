@@ -21,6 +21,7 @@ export {
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
+  mapVariableToColumn,
 } from './utils/query_parsing_helpers';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
 export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
