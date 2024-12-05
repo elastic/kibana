@@ -96,7 +96,7 @@ export const Aiops: FC<AiopsProps> = ({ field }) => {
   if (significantData) {
     return (
       <>
-        {significantData.map((d) => {
+        {significantData.slice(0, 1).map((d) => {
           const value = d.value as string;
           const isSelected = Object.values(filters).includes(`${field}=="${value}"`);
           return (
@@ -106,6 +106,7 @@ export const Aiops: FC<AiopsProps> = ({ field }) => {
                 onClick={() => toggleItem(`${field}=="${d.value}"`)}
               >
                 {field}:{value}
+                {significantData.length > 1 ? ` +${significantData.length - 1}` : ''}
               </EuiBadge>
             </div>
           );
