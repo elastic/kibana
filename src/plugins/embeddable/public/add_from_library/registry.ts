@@ -8,7 +8,6 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CanAddNewPanel } from '@kbn/presentation-containers';
 import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
@@ -41,10 +40,7 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
 }) => {
   if (registry.has(savedObjectType)) {
     throw new Error(
-      i18n.translate('embeddableApi.embeddableSavedObjectRegistry.keyAlreadyExistsError', {
-        defaultMessage: `Embeddable type {embeddableType} already exists in the registry.`,
-        values: { embeddableType: savedObjectType },
-      })
+      `Saved object type '${savedObjectType}' already exists in the 'Add from Library' registry.`
     );
   }
 
