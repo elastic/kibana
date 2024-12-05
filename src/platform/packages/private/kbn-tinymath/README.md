@@ -65,11 +65,11 @@ parse('1 + random()')
 ### Building kbn-tinymath
 
 This package is rebuilt when running `yarn kbn bootstrap`, but can also be build directly
-using `yarn build` from the `packages/kbn-tinymath` directory.
+using `yarn build` from the `src/platform/packages/private/kbn-tinymath` directory.
 
 ### Running tests
 
-To test `@kbn/tinymath` from Kibana, run `node scripts/jest --config packages/kbn-tinymath/jest.config.js` from
+To test `@kbn/tinymath` from Kibana, run `node scripts/jest --config src/platform/packages/private/kbn-tinymath/jest.config.js` from
 the top level of Kibana.
 
 To test grammar changes it is required to run a build task before the test suite.
