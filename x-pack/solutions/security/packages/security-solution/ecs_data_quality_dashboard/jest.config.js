@@ -19,7 +19,9 @@ module.exports = {
   ],
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/packages/security-solution/ecs_data_quality_dashboard'],
+  roots: [
+    '<rootDir>/x-pack/solutions/security/packages/security-solution/ecs_data_quality_dashboard',
+  ],
   setupFilesAfterEnv: [
     '<rootDir>/x-pack/solutions/security/packages/security-solution/ecs_data_quality_dashboard/setup_tests.ts',
   ],

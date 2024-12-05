@@ -11,9 +11,9 @@ import { EuiSpacer } from '@elastic/eui';
 import type { HistoricalResult as HistoricalResultType } from '../../../../../../../types';
 import { IndexStatsPanel } from '../../../index_stats_panel';
 import { HistoricalCheckFields } from './historical_check_fields';
-// eslint-disable-next-line no-restricted-imports
+
 import { isNonLegacyHistoricalResult } from './utils/is_non_legacy_historical_result';
-// eslint-disable-next-line no-restricted-imports
+
 import { LegacyHistoricalCheckFields } from './legacy_historical_check_fields';
 
 export interface Props {

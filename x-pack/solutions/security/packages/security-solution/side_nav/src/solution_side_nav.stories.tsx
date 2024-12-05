@@ -201,7 +201,6 @@ export const SolutionSideNav = (params: SolutionSideNavProps) => (
       icon={'logoSecurity'}
       isOpenOnDesktop={true}
       canBeCollapsed={false}
-      // eslint-disable-next-line react/no-children-prop
       children={
         <SolutionSideNavComponent
           items={params.items}
