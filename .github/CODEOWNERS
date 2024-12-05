@@ -623,7 +623,7 @@ packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
-src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
+src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
