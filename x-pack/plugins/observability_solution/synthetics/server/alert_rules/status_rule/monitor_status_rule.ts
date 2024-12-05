@@ -10,16 +10,14 @@ import { isEmpty } from 'lodash';
 import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import apm from 'elastic-apm-node';
+import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
 import { StatusRuleExecutorOptions } from './types';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { StatusRulePramsSchema } from '../../../common/rules/status_rule';
-import {
-  MONITOR_STATUS,
-  SYNTHETICS_ALERT_RULE_TYPES,
-} from '../../../common/constants/synthetics_alerts';
+import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
 import {
   setRecoveredAlertsContext,
   updateState,

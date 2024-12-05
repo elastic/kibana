@@ -9,7 +9,7 @@ import type { LensRuntimeState } from '../types';
 import { getLensRuntimeStateMock, getLensInternalApiMock, makeEmbeddableServices } from '../mocks';
 import { initializeStateManagement } from './initialize_state_management';
 import { initializeDashboardServices } from './initialize_dashboard_services';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { createEmptyLensState } from '../helper';
 
 function setupDashboardServicesApi(runtimeOverrides?: Partial<LensRuntimeState>) {
@@ -30,7 +30,7 @@ function setupDashboardServicesApi(runtimeOverrides?: Partial<LensRuntimeState>)
 
 describe('Transformation API', () => {
   it("should not save to library if there's already a saveObjectId", async () => {
-    const api = setupDashboardServicesApi({ savedObjectId: faker.random.uuid() });
+    const api = setupDashboardServicesApi({ savedObjectId: faker.string.uuid() });
     expect(await api.canLinkToLibrary()).toBe(false);
   });
 

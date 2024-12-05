@@ -1117,7 +1117,11 @@ function validateCommand(
   // do not check the command exists, the grammar is already picking that up
   const commandDef = getCommandDefinition(command.name);
 
-  if (commandDef?.validate) {
+  if (!commandDef) {
+    return messages;
+  }
+
+  if (commandDef.validate) {
     messages.push(...commandDef.validate(command));
   }
 

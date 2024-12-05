@@ -67,6 +67,19 @@ const inferenceEndpoints = [
     },
     task_settings: {},
   },
+  {
+    inference_id: 'elastic-rerank',
+    task_type: 'rerank',
+    service: 'elasticsearch',
+    service_settings: {
+      num_allocations: 1,
+      num_threads: 1,
+      model_id: '.rerank-v1',
+    },
+    task_settings: {
+      return_documents: true,
+    },
+  },
 ] as InferenceAPIConfigResponse[];
 
 jest.mock('../../hooks/use_delete_endpoint', () => ({
@@ -82,9 +95,10 @@ describe('When the tabular page is loaded', () => {
     const rows = screen.getAllByRole('row');
     expect(rows[1]).toHaveTextContent('.elser-2-elasticsearch');
     expect(rows[2]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
-    expect(rows[3]).toHaveTextContent('local-model');
-    expect(rows[4]).toHaveTextContent('my-elser-model-05');
-    expect(rows[5]).toHaveTextContent('third-party-model');
+    expect(rows[3]).toHaveTextContent('elastic-rerank');
+    expect(rows[4]).toHaveTextContent('local-model');
+    expect(rows[5]).toHaveTextContent('my-elser-model-05');
+    expect(rows[6]).toHaveTextContent('third-party-model');
   });
 
   it('should display all service and model ids in the table', () => {
@@ -98,13 +112,16 @@ describe('When the tabular page is loaded', () => {
     expect(rows[2]).toHaveTextContent('.multilingual-e5-small');
 
     expect(rows[3]).toHaveTextContent('Elasticsearch');
-    expect(rows[3]).toHaveTextContent('.own_model');
+    expect(rows[3]).toHaveTextContent('.rerank-v1');
 
     expect(rows[4]).toHaveTextContent('Elasticsearch');
-    expect(rows[4]).toHaveTextContent('.elser_model_2');
+    expect(rows[4]).toHaveTextContent('.own_model');
 
-    expect(rows[5]).toHaveTextContent('OpenAI');
-    expect(rows[5]).toHaveTextContent('.own_model');
+    expect(rows[5]).toHaveTextContent('Elasticsearch');
+    expect(rows[5]).toHaveTextContent('.elser_model_2');
+
+    expect(rows[6]).toHaveTextContent('OpenAI');
+    expect(rows[6]).toHaveTextContent('.own_model');
   });
 
   it('should only disable delete action for preconfigured endpoints', () => {
@@ -130,5 +147,19 @@ describe('When the tabular page is loaded', () => {
     expect(rows[3]).not.toHaveTextContent(preconfigured);
     expect(rows[4]).not.toHaveTextContent(preconfigured);
     expect(rows[5]).not.toHaveTextContent(preconfigured);
+  });
+
+  it('should show tech preview badge only for reranker-v1 model', () => {
+    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+
+    const techPreview = 'TECH PREVIEW';
+
+    const rows = screen.getAllByRole('row');
+    expect(rows[1]).not.toHaveTextContent(techPreview);
+    expect(rows[2]).not.toHaveTextContent(techPreview);
+    expect(rows[3]).toHaveTextContent(techPreview);
+    expect(rows[4]).not.toHaveTextContent(techPreview);
+    expect(rows[5]).not.toHaveTextContent(techPreview);
+    expect(rows[6]).not.toHaveTextContent(techPreview);
   });
 });
