@@ -34,7 +34,6 @@
     "@kbn/data-views-plugin",
     "@kbn/user-profile-components",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/elastic-assistant",
     "@kbn/core-chrome-browser-internal",
   ]
 }

@@ -26,6 +26,6 @@
     "@kbn/core",
     "@kbn/core-notifications-browser",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/core-chrome-browser-internal",
+    "@kbn/core-chrome-browser-mocks",
   ]
 }
