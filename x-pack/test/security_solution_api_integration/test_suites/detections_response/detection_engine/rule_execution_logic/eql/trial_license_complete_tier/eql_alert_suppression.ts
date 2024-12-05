@@ -2875,7 +2875,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInServerless sequence queries with suppression duration', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/202940
+    describe.skip('@skipInServerless sequence queries with suppression duration', () => {
       it('suppresses alerts across two rule executions when the suppression duration exceeds the rule interval', async () => {
         const id = uuidv4();
         const firstTimestamp = new Date(Date.now() - 1000).toISOString();
