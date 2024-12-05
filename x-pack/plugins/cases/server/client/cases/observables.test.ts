@@ -75,6 +75,40 @@ describe('addObservable', () => {
     );
   });
 
+  it('should throw an error if duplicate observable is posted', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+    mockCaseService.getCase.mockResolvedValue({
+      ...caseSO,
+      attributes: {
+        ...caseSO.attributes,
+        observables: [
+          {
+            value: '127.0.0.1',
+            typeKey: OBSERVABLE_TYPE_IPV4.key,
+            id: '5c431380-c6ef-459f-b0fe-1699e978517b',
+            description: null,
+            createdAt: '2024-12-05',
+            updatedAt: '2024-12-05',
+          },
+        ],
+      },
+    });
+
+    await expect(
+      addObservable(
+        'case-id',
+        { observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '127.0.0.1', description: '' } },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow(
+      Boom.badRequest(
+        'Failed to add observable: {"observable":{"typeKey":"observable-type-ipv4","value":"127.0.0.1","description":""}}: Error: Invalid duplicated observables in request.'
+      )
+    );
+  });
+
   it('should handle errors and throw boom', async () => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
     mockCaseService.getCase.mockRejectedValue(new Error('Case not found'));
