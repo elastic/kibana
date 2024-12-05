@@ -40,16 +40,16 @@ export async function findBackfill(
 
     let authorizationTuple;
     try {
-      authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-        AlertingAuthorizationEntity.Rule,
-        {
+      authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+        authorizationEntity: AlertingAuthorizationEntity.Rule,
+        filterOpts: {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
             ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
             consumer: 'ad_hoc_run_params.attributes.rule.consumer',
           },
-        }
-      );
+        },
+      });
     } catch (error) {
       context.auditLogger?.log(
         adHocRunAuditEvent({

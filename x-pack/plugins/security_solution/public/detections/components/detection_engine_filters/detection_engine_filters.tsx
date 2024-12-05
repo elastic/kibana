@@ -7,12 +7,12 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { AlertFilterControlsProps } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useHistory } from 'react-router-dom';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
@@ -78,7 +78,7 @@ export const DetectionEngineFilters = ({
       controlsUrlState={filterControlsUrlState}
       setControlsUrlState={setFilterControlsUrlState}
       spaceId={spaceId}
-      featureIds={[AlertConsumers.SIEM]}
+      ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
       chainingSystem="HIERARCHICAL"
       defaultControls={DEFAULT_DETECTION_PAGE_FILTERS}
       dataViewSpec={dataViewSpec}
