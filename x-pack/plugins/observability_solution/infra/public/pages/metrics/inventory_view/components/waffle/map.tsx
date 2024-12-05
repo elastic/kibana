@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
@@ -99,7 +98,7 @@ export const Map: React.FC<Props> = ({
   );
 };
 
-const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number; staticHeight: boolean }>`
+const WaffleMapOuterContainer = styled.div<{ bottomMargin: number; staticHeight: boolean }>`
   flex: 1 0 0%;
   display: flex;
   justify-content: flex-start;
@@ -111,7 +110,7 @@ const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number; staticHeig
   ${(props) => props.staticHeight && 'min-height: 300px;'}
 `;
 
-const WaffleMapInnerContainer = euiStyled.div`
+const WaffleMapInnerContainer = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

@@ -6,7 +6,8 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiStyled, keyframes } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
+import { keyframes } from '@emotion/react';
 import { LogEntriesSummaryHighlightsBucket, LogEntryTime } from '@kbn/logs-shared-plugin/common';
 import * as React from 'react';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
@@ -101,14 +102,14 @@ const fadeInAnimation = keyframes`
   }
 `;
 
-const SearchMarkerGroup = euiStyled.g`
-  animation: ${fadeInAnimation} ${(props) => props.theme.eui.euiAnimSpeedExtraSlow} ease-in both;
+const SearchMarkerGroup = styled.g`
+  animation: ${fadeInAnimation} ${(props) => props.theme.euiTheme.animation.extraSlow} ease-in both;
 `;
 
-const SearchMarkerBackgroundRect = euiStyled.rect`
-  fill: ${(props) => props.theme.eui.euiColorAccent};
+const SearchMarkerBackgroundRect = styled.rect`
+  fill: ${(props) => props.theme.euiTheme.colors.accent};
   opacity: 0;
-  transition: opacity ${(props) => props.theme.eui.euiAnimSpeedNormal} ease-in;
+  transition: opacity ${(props) => props.theme.euiTheme.animation.normal} ease-in;
   cursor: pointer;
 
   ${SearchMarkerGroup}:hover & {
@@ -116,6 +117,6 @@ const SearchMarkerBackgroundRect = euiStyled.rect`
   }
 `;
 
-const SearchMarkerForegroundRect = euiStyled.rect`
-  fill: ${(props) => props.theme.eui.euiColorAccent};
+const SearchMarkerForegroundRect = styled.rect`
+  fill: ${(props) => props.theme.euiTheme.colors.accent};
 `;
