@@ -19,6 +19,7 @@ import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
 import { DataUsageService } from '../../services';
+import { NoPrivilegeMeteringError, NoIndicesMeteringError } from '../../errors';
 
 const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes[] =>
   typeof value === 'string' ? [value] : value;
@@ -77,6 +78,14 @@ export const getUsageMetricsHandler = (
           dataStreamsResponse = chunkedDataStreams.flatMap((ds) => ds.data_streams);
         }
       } catch (error) {
+        if (error.message.includes('security_exception')) {
+          return errorHandler(logger, response, new NoPrivilegeMeteringError());
+        }
+
+        if (error.message.includes('index_not_found_exception')) {
+          return errorHandler(logger, response, new NoIndicesMeteringError());
+        }
+
         return errorHandler(
           logger,
           response,

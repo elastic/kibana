@@ -7,10 +7,12 @@
 
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { CustomHttpRequestError } from '../utils/custom_http_request_error';
-import { BaseError, NoIndicesMeteringError, NoPrivilegeMeteringError } from '../common/errors';
-import { AutoOpsError } from '../services/errors';
-
-export class NotFoundError extends BaseError {}
+import {
+  AutoOpsError,
+  NoPrivilegeMeteringError,
+  NoIndicesMeteringError,
+  NotFoundError,
+} from '../errors';
 
 /**
  * Default Data Usage Routes error handler
@@ -43,19 +45,15 @@ export const errorHandler = <E extends Error>(
     return res.notFound({ body: error });
   }
 
-  if (error.message.includes('security_exception')) {
+  if (error instanceof NoPrivilegeMeteringError) {
     return res.forbidden({
-      body: {
-        message: NoPrivilegeMeteringError,
-      },
+      body: error,
     });
   }
 
-  if (error.message.includes('index_not_found_exception')) {
+  if (error instanceof NoIndicesMeteringError) {
     return res.notFound({
-      body: {
-        message: NoIndicesMeteringError,
-      },
+      body: error,
     });
   }
 

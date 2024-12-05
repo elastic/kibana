@@ -12,7 +12,7 @@ import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
   NoIndicesMeteringError,
   NoPrivilegeMeteringError,
-} from '@kbn/data-usage-plugin/server/common/errors';
+} from '@kbn/data-usage-plugin/server/errors';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

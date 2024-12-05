@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export class BaseError<MetaType = unknown> extends Error {
+export class DataUsageError<MetaType = unknown> extends Error {
   constructor(message: string, public readonly meta?: MetaType) {
     super(message);
     // For debugging - capture name of subclasses
@@ -16,9 +16,3 @@ export class BaseError<MetaType = unknown> extends Error {
     }
   }
 }
-
-export const NoPrivilegeMeteringError =
-  'You do not have the necessary privileges to access data stream statistics. Please contact your administrator.';
-
-export const NoIndicesMeteringError =
-  'No data streams or indices are available for the current user. Ensure that the data streams or indices you are authorized to access have been created and contain data. If you believe this is an error, please contact your administrator.';

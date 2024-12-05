@@ -21,7 +21,7 @@ import {
   type UsageMetricsRequestBody,
 } from '../../common/rest_types';
 import { AutoOpsConfig } from '../types';
-import { AutoOpsError } from './errors';
+import { AutoOpsError } from '../errors';
 import { appContextService } from './app_context';
 
 const AGENT_CREATION_FAILED_ERROR = 'AutoOps API could not create the autoops agent';
