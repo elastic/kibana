@@ -95,7 +95,7 @@ export const ObservablesTable = ({ caseData, isLoading }: ObservablesTableProps)
   return isLoading || loadingCaseConfigure ? (
     <>
       <EuiSpacer size="l" />
-      <EuiSkeletonText data-test-subj="cases-files-table-loading" lines={10} />
+      <EuiSkeletonText data-test-subj="cases-observables-table-loading" lines={10} />
     </>
   ) : (
     <>
