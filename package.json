@@ -681,7 +681,7 @@
     "@kbn/ml-trained-models-utils": "link:x-pack/platform/packages/shared/ml/trained_models_utils",
     "@kbn/ml-ui-actions": "link:x-pack/platform/packages/private/ml/ui_actions",
     "@kbn/ml-url-state": "link:x-pack/platform/packages/private/ml/url_state",
-    "@kbn/ml-validators": "link:x-pack/packages/ml/validators",
+    "@kbn/ml-validators": "link:x-pack/platform/packages/private/ml/validators",
     "@kbn/monaco": "link:packages/kbn-monaco",
     "@kbn/monitoring-collection-plugin": "link:x-pack/plugins/monitoring_collection",
     "@kbn/monitoring-plugin": "link:x-pack/plugins/monitoring",

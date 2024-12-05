@@ -6396,7 +6396,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-validators@link:x-pack/packages/ml/validators":
+"@kbn/ml-validators@link:x-pack/platform/packages/private/ml/validators":
   version "0.0.0"
   uid ""
 
