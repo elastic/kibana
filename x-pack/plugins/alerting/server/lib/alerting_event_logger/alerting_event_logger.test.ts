@@ -1148,6 +1148,68 @@ describe('AlertingEventLogger', () => {
       expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
     });
 
+    test('should set fields from backfill even when no rule data is provided', () => {
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+
+      alertingEventLogger.done({
+        backfill: {
+          id: 'abc',
+          start: '2024-03-13T00:00:00.000Z',
+          interval: '1h',
+        },
+        status: {
+          lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
+          status: 'error',
+          error: {
+            reason: RuleExecutionStatusErrorReasons.Execute,
+            message: 'something went wrong',
+          },
+        },
+      });
+
+      const event = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [adHocRunSO]);
+      const loggedEvent = {
+        ...event,
+        event: {
+          ...event?.event,
+          outcome: 'failure',
+          reason: RuleExecutionStatusErrorReasons.Execute,
+        },
+        error: {
+          message: 'something went wrong',
+        },
+        message: 'def: execution failed',
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              execution: {
+                ...event.kibana?.alert?.rule?.execution,
+                backfill: {
+                  id: 'abc',
+                  start: '2024-03-13T00:00:00.000Z',
+                  interval: '1h',
+                },
+              },
+            },
+          },
+          alerting: {
+            outcome: 'failure',
+            status: 'error',
+          },
+        },
+      };
+
+      expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+    });
+
     test('should set fields from execution metrics if provided', () => {
       alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({

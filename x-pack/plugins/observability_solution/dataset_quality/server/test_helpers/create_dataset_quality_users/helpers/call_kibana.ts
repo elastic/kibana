@@ -24,14 +24,18 @@ export async function callKibana<T>({
     ...options,
     baseURL: baseUrl,
     auth: { username, password },
-    headers: { 'kbn-xsrf': 'true', ...options.headers },
+    headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana', ...options.headers },
   });
   return data;
 }
 
 const getBaseUrl = once(async (kibanaHostname: string) => {
   try {
-    await axios.request({ url: kibanaHostname, maxRedirects: 0 });
+    await axios.request({
+      url: kibanaHostname,
+      maxRedirects: 0,
+      headers: { 'x-elastic-internal-origin': 'kibana' },
+    });
   } catch (e) {
     if (isAxiosError(e)) {
       const location = e.response?.headers?.location ?? '';
