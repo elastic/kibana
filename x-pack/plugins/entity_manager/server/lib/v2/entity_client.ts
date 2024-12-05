@@ -110,7 +110,7 @@ export class EntityClient {
           limit,
         });
         this.options.logger.debug(
-          `Entity query:\n${query}\nfilter:${JSON.stringify(filter, null, 2)}`
+          `Entity query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
         );
 
         const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
