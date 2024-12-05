@@ -42,6 +42,9 @@ disabled:
   # Default http2 config to use for performance journeys
   - x-pack/performance/configs/http2_config.ts
 
+  # Gen AI suites, running with their own pipeline
+  - x-pack/test/functional_gen_ai/inference/config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -288,7 +291,6 @@ enabled:
   - x-pack/test/plugin_functional/config.ts
   - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/test/reporting_api_integration/reporting_without_security.config.ts
-  - x-pack/test/reporting_functional/reporting_and_deprecated_security.config.ts
   - x-pack/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/test/reporting_functional/reporting_without_security.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
