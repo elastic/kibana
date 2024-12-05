@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-expandable-flyout'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-expandable-flyout'],
 };
