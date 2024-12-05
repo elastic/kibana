@@ -557,7 +557,7 @@
     "@kbn/grouping": "link:packages/kbn-grouping",
     "@kbn/guided-onboarding": "link:src/platform/packages/shared/kbn-guided-onboarding",
     "@kbn/guided-onboarding-example-plugin": "link:examples/guided_onboarding_example",
-    "@kbn/guided-onboarding-plugin": "link:src/plugins/guided_onboarding",
+    "@kbn/guided-onboarding-plugin": "link:src/platform/plugins/shared/guided_onboarding",
     "@kbn/handlebars": "link:packages/kbn-handlebars",
     "@kbn/hapi-mocks": "link:packages/kbn-hapi-mocks",
     "@kbn/hardening-plugin": "link:test/plugin_functional/plugins/hardening",
