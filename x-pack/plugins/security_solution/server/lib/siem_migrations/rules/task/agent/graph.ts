@@ -24,7 +24,6 @@ export function getRuleMigrationAgent({
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
     model,
     ruleMigrationsRetriever,
-    logger,
   });
   const translationSubGraph = getTranslateRuleGraph({
     inferenceClient,
