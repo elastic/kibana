@@ -86,7 +86,6 @@ export async function getServicesAlerts({
     },
   };
 
-
   const result = await apmAlertsClient.search(params);
 
   const filterAggBuckets = result.aggregations?.services.buckets ?? [];
