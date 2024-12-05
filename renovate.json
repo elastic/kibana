@@ -2041,30 +2041,12 @@
     {
       "groupName": "minify",
       "matchDepNames": [
+        "gulp-brotli",
+        "gulp-postcss",
         "gulp-terser",
         "terser",
-        "terser-webpack-plugin"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "gulp",
-      "matchDepNames": [
-        "@types/gulp",
-        "gulp-brotli",
-        "gulp-postcss"
+        "terser-webpack-plugin",
+        "@types/gulp"
       ],
       "reviewers": [
         "team:kibana-operations"
