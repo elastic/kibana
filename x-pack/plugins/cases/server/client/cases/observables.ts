@@ -135,7 +135,7 @@ export const updateObservable = async (
 
   if (!hasPlatinumLicenseOrGreater) {
     throw Boom.forbidden(
-      'In order to update an observable, you must be subscribed to an Elastic Platinum license'
+      'In order to update observables in cases, you must be subscribed to an Elastic Platinum license'
     );
   }
 
