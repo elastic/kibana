@@ -45,15 +45,20 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
   const columns: Array<EuiBasicTableColumn<ExportField>> = [
     {
       field: 'field',
-      name: 'Title',
-      render: (field: string) => {
-        return startCase(field.slice(field.lastIndexOf('.') + 1));
-      },
+      name: 'Field',
       truncateText: true,
     },
     {
       field: 'field',
-      name: 'Field',
+      name: 'Description',
+      render: (field: string) => {
+        const lastSlice = field.slice(field.lastIndexOf('.') + 1);
+        const firstSlice = field.slice(0, field.lastIndexOf('.'));
+        const secondToLastSlice = firstSlice.slice(firstSlice.lastIndexOf('.') + 1);
+        const lastTwoSlices =
+          firstSlice === secondToLastSlice ? lastSlice : `${secondToLastSlice}.${lastSlice}`;
+        return startCase(lastTwoSlices);
+      },
       truncateText: true,
     },
   ];
