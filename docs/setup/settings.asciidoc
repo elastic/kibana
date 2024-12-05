@@ -650,6 +650,7 @@ Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 Set this value to change the {kib} interface language.
 Valid locales are: `en`, `zh-CN`, `ja-JP`, `fr-FR`. *Default: `en`*
 
+include::{kibana-root}/docs/settings/ai-assistant-settings.asciidoc[]
 include::{kibana-root}/docs/settings/alert-action-settings.asciidoc[leveloffset=+1]
 include::{kibana-root}/docs/settings/apm-settings.asciidoc[]
 include::{kibana-root}/docs/settings/banners-settings.asciidoc[]
@@ -669,4 +670,3 @@ include::{kibana-root}/docs/settings/spaces-settings.asciidoc[]
 include::{kibana-root}/docs/settings/task-manager-settings.asciidoc[]
 include::{kibana-root}/docs/settings/telemetry-settings.asciidoc[]
 include::{kibana-root}/docs/settings/url-drilldown-settings.asciidoc[]
-include::{kibana-root}/docs/settings/ai-assistant-settings.asciidoc[]
