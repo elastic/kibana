@@ -6356,7 +6356,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-query-utils@link:x-pack/packages/ml/query_utils":
+"@kbn/ml-query-utils@link:x-pack/platform/packages/private/ml/query_utils":
   version "0.0.0"
   uid ""
 
