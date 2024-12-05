@@ -206,7 +206,7 @@
     "@kbn/cases-plugin": "link:x-pack/plugins/cases",
     "@kbn/cbor": "link:packages/kbn-cbor",
     "@kbn/cell-actions": "link:packages/kbn-cell-actions",
-    "@kbn/chart-expressions-common": "link:src/plugins/chart_expressions/common",
+    "@kbn/chart-expressions-common": "link:src/platform/packages/shared/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/src/plugins/chart_expressions/common",
     "@kbn/chart-icons": "link:packages/kbn-chart-icons",
     "@kbn/charts-plugin": "link:src/plugins/charts",
     "@kbn/cloud": "link:packages/cloud",
