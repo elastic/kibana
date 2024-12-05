@@ -27,27 +27,27 @@ import {
 } from '@elastic/eui';
 import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
   SCHEDULE_TITLE,
   SCHEDULE_DESCRIPTION_TEXT,
   SCHEDULE_TOOLTIP_TEXT,
-  ALERT_DELAY_TITLE,
   SCOPE_TITLE,
   SCOPE_DESCRIPTION_TEXT,
   ADVANCED_OPTIONS_TITLE,
   ALERT_DELAY_DESCRIPTION_TEXT,
   ALERT_DELAY_HELP_TEXT,
+  ALERT_DELAY_TITLE,
+  FEATURE_NAME_MAP,
   ALERT_FLAPPING_DETECTION_TITLE,
   ALERT_FLAPPING_DETECTION_DESCRIPTION,
 } from '../translations';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
-import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { getAuthorizedConsumers } from '../utils';
 import { RuleSettingsFlappingTitleTooltip } from '../../rule_settings/rule_settings_flapping_title_tooltip';
 import { RuleSettingsFlappingForm } from '../../rule_settings/rule_settings_flapping_form';
@@ -114,15 +114,18 @@ export const RuleDefinition = () => {
     if (!canShowConsumerSelection) {
       return false;
     }
-    if (!authorizedConsumers.length) {
+
+    /*
+     * This will filter out values like 'alerts' and 'observability' that will not be displayed
+     * in the drop down. It will allow us to hide the consumer select when there is only one
+     * selectable value.
+     */
+    const authorizedValidConsumers = authorizedConsumers.filter((c) => c in FEATURE_NAME_MAP);
+
+    if (authorizedValidConsumers.length <= 1) {
       return false;
     }
-    if (
-      authorizedConsumers.length <= 1 ||
-      authorizedConsumers.includes(AlertConsumers.OBSERVABILITY)
-    ) {
-      return false;
-    }
+
     return !!(ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleTypeId));
   }, [ruleTypeId, authorizedConsumers, canShowConsumerSelection]);
 
