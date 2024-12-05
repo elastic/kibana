@@ -14,7 +14,7 @@ and share them in a link or CVS form.
 Saved queries are different than <<save-open-search,saved searches>>,
 which include the *Discover* configuration&mdash;selected columns in the document table, sort order, and
 {data-source}&mdash;in addition to the query.
-Saved searches are primarily used for adding search results to a dashboard. In UI Saved searches are now called as Discover Sessions.
+Saved searches are primarily used for adding search results to a dashboard. In UI saved searches are now called Discover Sessions.
 
 [role="xpack"]
 ==== Read-only access

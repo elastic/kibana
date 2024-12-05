@@ -133,7 +133,7 @@ A saved query is a portable collection of query text and filters that you can re
 * View the results of the same query in multiple apps
 * Share your query
 
-Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved Discover Session>> instead.
+Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, Discover Session>> instead.
 
 [role="xpack"]
 ==== Read-only access

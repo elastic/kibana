@@ -122,7 +122,7 @@ PUT <kibana host>:<port>/api/security/role/custom_reporting_user
 
 <1> Grants access to generate PNG and PDF reports in *Dashboard*.
 <2> Grants access to generate CSV reports from saved Discover Session panels in *Dashboard*.
-<3> Grants access to generate CSV reports from saved Discover Session in *Discover*.
+<3> Grants access to generate CSV reports from saved Discover Sessions in *Discover*.
 <4> Grants access to generate PDF reports in *Canvas*.
 <5> Grants access to generate PNG and PDF reports in *Visualize Library*.
 
@@ -157,7 +157,7 @@ PUT localhost:5601/api/security/role/custom_reporting_user
 ---------------------------------------------------------------
 // CONSOLE
 
-<1> Grants access to generate CSV reports from saved Discover Session in *Discover*.
+<1> Grants access to generate CSV reports from saved Discover Sessions in *Discover*.
 <2> Grants access to generate CSV reports from saved Discover Session panels in *Dashboard*.
 
 [float]

@@ -47,4 +47,4 @@ used for the saved Discover Session is also automatically selected.
 . Open or create the dashboard, then click *Edit*.
 . Click *Add from library*.
 . From the *Types* dropdown, select *Discover Session*.
-. Select the saved Discover Session that you want to visualize, then click *X* to close the list.
+. Select the saved Discover Session that you want to add, then click *X* to close the list.

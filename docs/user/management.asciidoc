@@ -85,7 +85,7 @@ You can add and remove remote clusters, and check their connectivity.
 
 | <<reporting-getting-started, Reporting>>
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
-A report can contain a dashboard, visualization, table with results, or Canvas workpad.
+A report can contain a dashboard, visualization, table with search results, or Canvas workpad.
 
 | Machine Learning Jobs
 | View, export, and import your <<xpack-ml-anomalies,{anomaly-detect}>> and

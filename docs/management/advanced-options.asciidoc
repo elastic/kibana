@@ -333,7 +333,7 @@ The default sort direction for time-based data views.
 Hides the "Time" column in *Discover* and in all Discover Session panels on dashboards.
 
 [[doctable-highlight]]`doc_table:highlight`::
-Highlights search results in tables on *Discover* and *Dashboard* pages. Highlighting
+Highlights search results in *Discover* and Discover Session panels on dashboards. Highlighting
 slows requests when working on big documents.
 
 

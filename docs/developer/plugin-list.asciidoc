@@ -309,7 +309,7 @@ oss plugins.
 
 |{kib-repo}blob/{branch}/src/plugins/saved_search/README.md[savedSearch]
 |Contains the saved search saved object definition and helpers.
-It's called Discover Session in UI.
+This object is created when a user saves current session in the Discover app.
 
 
 |{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]

@@ -1,4 +1,4 @@
 # Saved search
 
 Contains the saved search saved object definition and helpers.
-It's called Discover Session in UI.
+This object is created when a user saves current session in the Discover app.
