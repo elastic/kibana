@@ -224,6 +224,7 @@ function handleWindowedResult(
         from: new Date(bucket.from_as_string!),
         to: new Date(bucket.to_as_string!),
       };
+
       const totalSlices = computeTotalSlicesFromDateRange(
         dateRange,
         slo.objective.timesliceWindow!

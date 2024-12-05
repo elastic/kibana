@@ -7,9 +7,10 @@
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
-import { BurnRateRuleParams, WindowSchema } from '../types';
 import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../../../../domain/services/get_lookback_date_range';
+import { computeTotalSlicesFromDateRange } from '../../../../services/utils/compute_total_slices_from_date_range';
+import { BurnRateRuleParams, WindowSchema } from '../types';
 
 type BurnRateWindowWithDuration = WindowSchema & {
   longDuration: Duration;
@@ -47,6 +48,7 @@ const TIMESLICE_AGGS = {
   good: { sum: { field: 'slo.isGoodSlice' } },
   total: { value_count: { field: 'slo.isGoodSlice' } },
 };
+
 const OCCURRENCE_AGGS = {
   good: { sum: { field: 'slo.numerator' } },
   total: { sum: { field: 'slo.denominator' } },
@@ -59,9 +61,42 @@ function buildWindowAgg(
   slo: SLODefinition,
   dateRange: { from: Date; to: Date }
 ) {
-  const aggs = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-    ? TIMESLICE_AGGS
-    : OCCURRENCE_AGGS;
+  const isTimesliceBudgetingMethod = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod);
+
+  const aggs = isTimesliceBudgetingMethod ? TIMESLICE_AGGS : OCCURRENCE_AGGS;
+  const burnRateAgg = isTimesliceBudgetingMethod
+    ? {
+        bucket_script: {
+          buckets_path: {
+            good: `${generateStatsKey(id, type)}>good`,
+            total: `${generateStatsKey(id, type)}>total`,
+          },
+          script: {
+            source:
+              'params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0',
+            params: {
+              target: slo.objective.target,
+              totalSlices: computeTotalSlicesFromDateRange(
+                dateRange,
+                slo.objective.timesliceWindow!
+              ),
+            },
+          },
+        },
+      }
+    : {
+        bucket_script: {
+          buckets_path: {
+            good: `${generateStatsKey(id, type)}>good`,
+            total: `${generateStatsKey(id, type)}>total`,
+          },
+          script: {
+            source:
+              'params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0',
+            params: { target: slo.objective.target },
+          },
+        },
+      };
 
   return {
     [generateStatsKey(id, type)]: {
@@ -75,19 +110,7 @@ function buildWindowAgg(
       },
       aggs,
     },
-    [generateBurnRateKey(id, type)]: {
-      bucket_script: {
-        buckets_path: {
-          good: `${generateStatsKey(id, type)}>good`,
-          total: `${generateStatsKey(id, type)}>total`,
-        },
-        script: {
-          source:
-            'params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0',
-          params: { target: slo.objective.target },
-        },
-      },
-    },
+    [generateBurnRateKey(id, type)]: burnRateAgg,
     [generateAboveThresholdKey(id, type)]: {
       bucket_script: {
         buckets_path: { burnRate: generateBurnRateKey(id, type) },
