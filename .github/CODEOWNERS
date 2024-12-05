@@ -387,7 +387,6 @@ packages/kbn-import-resolver @elastic/kibana-operations
 packages/kbn-index-adapter @elastic/security-threat-hunting
 packages/kbn-interpreter @elastic/kibana-visualizations
 packages/kbn-investigation-shared @elastic/obs-ux-management-team
-packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
 packages/kbn-item-buffer @elastic/appex-sharedux
 packages/kbn-jest-serializers @elastic/kibana-operations
@@ -623,6 +622,7 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/shared/kbn-doc-links @elastic/docs
+src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
