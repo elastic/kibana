@@ -6372,7 +6372,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-runtime-field-utils@link:x-pack/packages/ml/runtime_field_utils":
+"@kbn/ml-runtime-field-utils@link:x-pack/platform/packages/shared/ml/runtime_field_utils":
   version "0.0.0"
   uid ""
 
