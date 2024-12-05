@@ -199,6 +199,9 @@ const AlertsTableContent = typedForwardRef(
     }: AlertsTableProps<AC>,
     ref: Ref<AlertsTableImperativeApi>
   ) => {
+    // Memoized so that consumers can pass an inline object without causing re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const memoizedServices = useMemo(() => services, Object.values(services));
     const { casesConfiguration, showInspectButton } = publicDataGridProps;
     const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
@@ -368,7 +371,15 @@ const AlertsTableContent = typedForwardRef(
       toggleColumn: onToggleColumn,
     }));
 
-    const bulkActionsStore = useReducer(bulkActionsReducer, initialBulkActionsState);
+    const [bulkActionsState, dispatchBulkAction] = useReducer(
+      bulkActionsReducer,
+      initialBulkActionsState
+    );
+
+    const bulkActionsStore = useMemo(
+      () => [bulkActionsState, dispatchBulkAction],
+      [bulkActionsState, dispatchBulkAction]
+    );
 
     const onSortChange = useCallback(
       (_sort: EuiDataGridSorting['columns']) => {
@@ -456,7 +467,7 @@ const AlertsTableContent = typedForwardRef(
           renderFlyoutHeader,
           renderFlyoutBody,
           renderFlyoutFooter,
-          services,
+          services: memoizedServices,
         } as RenderContext<AC>),
       [
         additionalContext,
@@ -486,7 +497,7 @@ const AlertsTableContent = typedForwardRef(
         renderFlyoutHeader,
         renderFlyoutBody,
         renderFlyoutFooter,
-        services,
+        memoizedServices,
       ]
     );
 
