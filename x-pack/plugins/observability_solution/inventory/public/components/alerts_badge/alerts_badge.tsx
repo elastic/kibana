@@ -15,21 +15,16 @@ export function AlertsBadge({ entity }: { entity: InventoryEntity }) {
   const {
     services: {
       http: { basePath },
-      entityManager,
     },
   } = useKibana();
 
   const activeAlertsHref = basePath.prepend(
     `/app/observability/alerts?_a=${rison.encode({
-      kuery: entityManager.entityClient.asKqlFilter({
-        entity: {
-          identity_fields: entity.entityIdentityFields,
-        },
-        ...entity,
-      }),
+      kuery: `"${entity.entityId}"`,
       status: 'active',
     })}`
   );
+
   return (
     <EuiToolTip
       position="bottom"

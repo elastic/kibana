@@ -14,7 +14,7 @@ import { ProjectMonitor } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
-const MAX_PAYLOAD_SIZE = 1048576 * 50; // 20MiB
+const MAX_PAYLOAD_SIZE = 1048576 * 50; // 50MiB
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',

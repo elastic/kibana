@@ -9545,7 +9545,7 @@
             "label": "onData$",
             "description": [],
             "signature": [
-              "(<TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
+              "(<TData, TInspectorAdapters extends unknown>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,

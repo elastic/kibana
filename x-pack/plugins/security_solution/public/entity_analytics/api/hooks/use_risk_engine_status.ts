@@ -38,7 +38,7 @@ export const useIsNewRiskScoreModuleInstalled = (): RiskScoreModuleStatus => {
   return { isLoading: false, installed: !!riskEngineStatus?.isNewRiskScoreModuleInstalled };
 };
 
-interface RiskEngineStatus extends RiskEngineStatusResponse {
+export interface RiskEngineStatus extends RiskEngineStatusResponse {
   isUpdateAvailable: boolean;
   isNewRiskScoreModuleInstalled: boolean;
   isNewRiskScoreModuleAvailable: boolean;

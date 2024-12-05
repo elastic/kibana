@@ -120,15 +120,14 @@ describe('Task Runner Factory', () => {
     logger: loggingSystemMock.create().get(),
     maintenanceWindowsService,
     maxAlerts: 1000,
-    maxEphemeralActionsPerRule: 10,
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
     rulesSettingsService,
     savedObjects: savedObjectsService,
     share: {} as SharePluginStart,
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    supportsEphemeralTasks: true,
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
+    isServerless: false,
   };
 
   beforeEach(() => {

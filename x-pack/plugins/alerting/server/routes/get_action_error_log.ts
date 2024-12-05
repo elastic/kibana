@@ -69,7 +69,8 @@ export const getActionErrorLogRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const { id } = req.params;
         const withAuth = req.query.with_auth;
         const rewrittenReq = rewriteReq({ id, ...req.query });

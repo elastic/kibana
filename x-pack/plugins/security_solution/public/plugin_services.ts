@@ -153,7 +153,7 @@ export class PluginServices {
       customDataService,
       timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
-      siemMigrations: await createSiemMigrationsService(coreStart),
+      siemMigrations: await createSiemMigrationsService(coreStart, startPlugins),
       ...(params && {
         onAppLeave: params.onAppLeave,
         setHeaderActionMenu: params.setHeaderActionMenu,

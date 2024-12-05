@@ -8,7 +8,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -49,7 +49,7 @@ import {
 const LensApiMock: LensApi = {
   // Static props
   type: DOC_TYPE,
-  uuid: faker.random.uuid(),
+  uuid: faker.string.uuid(),
   // Shared Embeddable Observables
   panelTitle: new BehaviorSubject<string | undefined>(faker.lorem.words()),
   hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
@@ -94,7 +94,7 @@ const LensApiMock: LensApi = {
   setPanelTitle: jest.fn(),
   setHidePanelTitle: jest.fn(),
   phase$: new BehaviorSubject<PhaseEvent | undefined>({
-    id: faker.random.uuid(),
+    id: faker.string.uuid(),
     status: 'rendered',
     timeToEvent: 1000,
   }),
@@ -115,6 +115,7 @@ const LensApiMock: LensApi = {
   viewMode: new BehaviorSubject<ViewMode>('view'),
   disabledActionIds: new BehaviorSubject<string[] | undefined>(undefined),
   setDisabledActionIds: jest.fn(),
+  rendered$: new BehaviorSubject<boolean>(false),
 };
 
 const LensSerializedStateMock: LensSerializedState = createEmptyLensState(
@@ -137,7 +138,7 @@ export function getLensApiMock(overrides: Partial<LensApi> = {}) {
 
 export function getLensSerializedStateMock(overrides: Partial<LensSerializedState> = {}) {
   return {
-    savedObjectId: faker.random.uuid(),
+    savedObjectId: faker.string.uuid(),
     ...LensSerializedStateMock,
     ...overrides,
   };
@@ -308,6 +309,7 @@ const LensInternalApiMock: LensInternalApi = {
   dispatchError: jest.fn(),
   updateValidationMessages: jest.fn(),
   setAsCreated: jest.fn(),
+  getDisplayOptions: jest.fn(() => ({})),
 };
 
 export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {

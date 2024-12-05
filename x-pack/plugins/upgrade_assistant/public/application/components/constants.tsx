@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EnrichedDeprecationInfo } from '../../../common/types';
 
-export const DEPRECATION_TYPE_MAP = {
+export const DEPRECATION_TYPE_MAP: Record<EnrichedDeprecationInfo['type'], string> = {
   cluster_settings: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.clusterDeprecationTypeLabel',
     {
@@ -32,6 +33,9 @@ export const DEPRECATION_TYPE_MAP = {
       defaultMessage: 'Health Indicator',
     }
   ),
+  data_streams: i18n.translate('xpack.upgradeAssistant.esDeprecations.dataStreamsTypeLabel', {
+    defaultMessage: 'Data Stream',
+  }),
 };
 
 export const PAGINATION_CONFIG = {

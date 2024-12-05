@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useStoredExpandedCardId } from '../../../hooks/use_stored_state';
 import { HEIGHT_ANIMATION_DURATION } from '../onboarding_card_panel.styles';
-import type { OnboardingCardId } from '../../../constants';
+import { type OnboardingCardId } from '../../../constants';
 import type { SetExpandedCardId } from '../../../types';
-import { useOnboardingContext } from '../../onboarding_context';
+import { getCardIdFromHash, useUrlDetail } from '../../hooks/use_url_detail';
 
 const HEADER_OFFSET = 40;
 
@@ -25,59 +24,36 @@ const scrollToCard = (cardId: OnboardingCardId) => {
   }, HEIGHT_ANIMATION_DURATION);
 };
 
-const setHash = (cardId: OnboardingCardId | null) => {
-  history.replaceState(null, '', cardId == null ? ' ' : `#${cardId}`);
-};
-
 /**
  * This hook manages the expanded card id state in the LocalStorage and the hash in the URL.
  */
 export const useExpandedCard = () => {
-  const { spaceId, reportCardOpen } = useOnboardingContext();
-  const [expandedCardId, setStorageExpandedCardId] = useStoredExpandedCardId(spaceId);
-  const location = useLocation();
+  const { setCardDetail } = useUrlDetail();
+  const { hash } = useLocation();
+  const cardIdFromHash = useMemo(() => getCardIdFromHash(hash), [hash]);
 
-  const [documentReadyState, setReadyState] = useState(document.readyState);
+  const [cardId, setCardId] = useState<OnboardingCardId | null>(null);
 
+  // This effect implements auto-scroll in the initial render.
   useEffect(() => {
-    const readyStateListener = () => setReadyState(document.readyState);
-    document.addEventListener('readystatechange', readyStateListener);
-    return () => document.removeEventListener('readystatechange', readyStateListener);
-  }, []);
-
-  // This effect implements auto-scroll in the initial render, further changes in the hash should not trigger this effect
-  useEffect(() => {
-    if (documentReadyState !== 'complete') return; // Wait for page to finish loading before scrolling
-    let cardIdFromHash = location.hash.split('?')[0].replace('#', '') as OnboardingCardId | '';
-    if (!cardIdFromHash) {
-      if (expandedCardId == null) return;
-      // If the hash is empty, but it is defined the storage we use the storage value
-      cardIdFromHash = expandedCardId;
-      setHash(cardIdFromHash);
+    if (cardIdFromHash) {
+      setCardId(cardIdFromHash);
+      scrollToCard(cardIdFromHash);
     }
-
-    // If the hash is defined and different from the storage, the hash takes precedence
-    if (expandedCardId !== cardIdFromHash) {
-      setStorageExpandedCardId(cardIdFromHash);
-      reportCardOpen(cardIdFromHash, { auto: true });
-    }
-    scrollToCard(cardIdFromHash);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documentReadyState]);
+    // cardIdFromHash is only defined once on page load
+    // it does not change with subsequent url hash changes since history.replaceState is used
+  }, [cardIdFromHash]);
 
   const setExpandedCardId = useCallback<SetExpandedCardId>(
-    (cardId, options) => {
-      setStorageExpandedCardId(cardId);
-      setHash(cardId);
-      if (cardId != null) {
-        reportCardOpen(cardId);
-        if (options?.scroll) {
-          scrollToCard(cardId);
-        }
+    (newCardId, options) => {
+      setCardId(newCardId);
+      setCardDetail(newCardId);
+      if (newCardId != null && options?.scroll) {
+        scrollToCard(newCardId);
       }
     },
-    [setStorageExpandedCardId, reportCardOpen]
+    [setCardDetail]
   );
 
-  return { expandedCardId, setExpandedCardId };
+  return { expandedCardId: cardId, setExpandedCardId };
 };
