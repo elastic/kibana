@@ -18,7 +18,7 @@ exports[`RiskScoreConfigurationSection renders correctly 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Styled(div) />
+      <VerticalSeparator />
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
