@@ -46,7 +46,6 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
     optionsOrCb?: HttpHandlerOptions | ((err: unknown, data: unknown) => void)
   ) {
     const options = typeof optionsOrCb !== 'function' ? optionsOrCb : {};
-    console.log('==> stream vsignal', options);
     if (command.input.messages) {
       // without this, our human + human messages do not work and result in error:
       // A conversation must alternate between user and assistant roles.

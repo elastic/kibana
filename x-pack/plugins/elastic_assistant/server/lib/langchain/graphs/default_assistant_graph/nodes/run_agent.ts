@@ -43,21 +43,22 @@ export async function runAgent({
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const knowledgeHistory = await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries();
-
-  const agentOutcome = await agentRunnable.withConfig({ tags: [AGENT_NODE_TAG] }).invoke(
-    {
-      ...state,
-      knowledge_history: `${KNOWLEDGE_HISTORY_PREFIX}\n${
-        knowledgeHistory?.length
-          ? JSON.stringify(knowledgeHistory.map((e) => e.text))
-          : NO_KNOWLEDGE_HISTORY
-      }`,
-      // prepend any user prompt (gemini)
-      input: formatLatestUserMessage(state.input, state.llmType),
-      chat_history: state.messages, // TODO: Message de-dupe with ...state spread
-    },
-    config
-  );
+  const agentOutcome = await agentRunnable
+    .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
+    .invoke(
+      {
+        ...state,
+        knowledge_history: `${KNOWLEDGE_HISTORY_PREFIX}\n${
+          knowledgeHistory?.length
+            ? JSON.stringify(knowledgeHistory.map((e) => e.text))
+            : NO_KNOWLEDGE_HISTORY
+        }`,
+        // prepend any user prompt (gemini)
+        input: formatLatestUserMessage(state.input, state.llmType),
+        chat_history: state.messages, // TODO: Message de-dupe with ...state spread
+      },
+      config
+    );
 
   return {
     agentOutcome,

@@ -445,7 +445,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     { signal, command }: ConverseActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ConverseActionResponse> {
-    console.log('==> bedrockClientSend signal', signal);
     connectorUsageCollector.addRequestBodyBytes(undefined, command);
     const res = await this.bedrockClient.send(command, {
       abortSignal: signal,

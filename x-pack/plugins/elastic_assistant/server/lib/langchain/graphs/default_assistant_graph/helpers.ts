@@ -65,7 +65,6 @@ export const streamGraph = async ({
 
   let didEnd = false;
   const handleStreamEnd = (finalResponse: string, isError = false) => {
-    console.log('===> handleStreamEnd', { finalResponse, isError });
     if (onLlmResponse) {
       onLlmResponse(
         finalResponse,
