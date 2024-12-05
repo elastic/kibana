@@ -14,7 +14,7 @@ export interface SavedObjectsClientArg {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-const getDefaultRiskEngineConfiguration = ({
+export const getDefaultRiskEngineConfiguration = ({
   namespace,
 }: {
   namespace: string;
@@ -26,6 +26,8 @@ const getDefaultRiskEngineConfiguration = ({
   interval: '1h',
   pageSize: 3_500,
   range: { start: 'now-30d', end: 'now' },
+  // Upgrade this property when changing mappings
+  mappingsVersion: 2,
 });
 
 const getConfigurationSavedObject = async ({
@@ -41,9 +43,7 @@ export const updateSavedObjectAttribute = async ({
   savedObjectsClient,
   attributes,
 }: SavedObjectsClientArg & {
-  attributes: {
-    enabled: boolean;
-  };
+  attributes: Partial<RiskEngineConfiguration>;
 }) => {
   const savedObjectConfiguration = await getConfigurationSavedObject({
     savedObjectsClient,
