@@ -839,7 +839,6 @@ x-pack/packages/observability/observability_utils/observability_utils_common @el
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
 x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/packages/rollup @elastic/kibana-management
-x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
@@ -985,6 +984,7 @@ x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
+x-pack/solutions/search/packages/search/shared_ui @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
