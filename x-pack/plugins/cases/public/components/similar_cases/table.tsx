@@ -19,7 +19,6 @@ import { useSimilarCasesColumns } from './use_similar_cases_columns';
 interface SimilarCasesTableProps {
   data: CasesSimilarResponseUI;
   isCasesLoading: boolean;
-  tableRef?: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<SimilarCaseUI>['rowProps'];
   onChange: EuiBasicTableProps<SimilarCaseUI>['onChange'];
   pagination: Pagination;
