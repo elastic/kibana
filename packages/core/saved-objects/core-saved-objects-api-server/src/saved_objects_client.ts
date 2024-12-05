@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server/src/extensions/spaces';
 import type { SavedObject } from '..';
 import type {
   SavedObjectsBaseOptions,
@@ -429,7 +428,11 @@ export interface SavedObjectsClientContract {
    */
   getCurrentNamespace(): string | undefined;
 
-  getSearchableNamespaces: ISavedObjectsSpacesExtension['getSearchableNamespaces'];
+  /**
+   * Given a list of namespace strings, returns a subset that the user is authorized to search in.
+   * If a wildcard '*' is used, it is expanded to an explicit list of namespace strings.
+   */
+  getSearchableNamespaces: (namespaces: string[] | undefined) => Promise<string[]>;
 
   /**
    * Returns a new Saved Objects client scoped to the new namespace.
