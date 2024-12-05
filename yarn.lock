@@ -3868,7 +3868,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-log-pattern-analysis@link:x-pack/packages/ml/aiops_log_pattern_analysis":
+"@kbn/aiops-log-pattern-analysis@link:x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis":
   version "0.0.0"
   uid ""
 
