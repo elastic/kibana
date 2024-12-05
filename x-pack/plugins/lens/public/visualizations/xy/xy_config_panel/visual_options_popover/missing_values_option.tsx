@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { EuiFormRow, EuiIconTip, EuiSuperSelect, EuiSwitch, EuiText } from '@elastic/eui';
 import type { FittingFunction, EndValue } from '@kbn/expression-xy-plugin/common';
 import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
