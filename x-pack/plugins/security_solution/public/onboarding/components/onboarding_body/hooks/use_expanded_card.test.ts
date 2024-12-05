@@ -39,7 +39,8 @@ describe('useExpandedCard Hook', () => {
     jest.clearAllMocks();
   });
 
-  describe('when the page is completely loaded', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/202147
+  describe.skip('when the page is completely loaded', () => {
     beforeEach(() => {
       renderHook(useExpandedCard);
     });

@@ -226,7 +226,8 @@ export class MlServerPlugin
       getDataViews,
       () => this.auditService,
       () => this.isMlReady,
-      this.compatibleModuleType
+      this.compatibleModuleType,
+      this.enabledFeatures
     );
 
     const routeInit: RouteInitialization = {
