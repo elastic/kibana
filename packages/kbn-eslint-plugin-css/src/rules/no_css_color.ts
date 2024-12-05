@@ -218,9 +218,18 @@ export const NoCssColor: Rule.RuleModule = {
         ) {
           const styleVariableName = node.value.expression.name;
 
-          const variableDeclarationMatches = context.sourceCode
-            .getScope(node.value.expression)
-            .variables.find((variable) => variable.name === styleVariableName);
+          const nodeScope = context.sourceCode.getScope(node.value.expression);
+
+          let variableDeclarationMatches = nodeScope.variables.find(
+            (variable) => variable.name === styleVariableName
+          );
+
+          if (!variableDeclarationMatches) {
+            // identifier was probably not declared in the current scope, hence we'll give it another try to find it in the parent scope
+            variableDeclarationMatches = nodeScope.upper?.variables.find(
+              (variable) => variable.name === styleVariableName
+            );
+          }
 
           // we assume there's only one definition of the variable
           const variableInitializationNode = variableDeclarationMatches?.defs?.[0]?.node?.init;
