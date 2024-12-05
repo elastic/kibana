@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/kbn-reporting/get_csv_panel_actions'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-reporting/get_csv_panel_actions'],
 };
