@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './collapsible_nav.scss';
 import {
   EuiThemeProvider,
   EuiCollapsibleNav,
@@ -18,6 +17,7 @@ import {
   EuiListGroupItem,
   EuiCollapsibleNavProps,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
@@ -36,6 +36,7 @@ import {
   createEuiButtonItem,
   createOverviewLink,
 } from './nav_link';
+import { getCollapsibleNavStyles } from './get_collapsible_nav_styles';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -149,6 +150,7 @@ export function CollapsibleNav({
       ...(needsIcon && { basePath }),
     });
   };
+  const styles = getCollapsibleNavStyles(useEuiTheme());
 
   return (
     <EuiCollapsibleNav
@@ -162,7 +164,7 @@ export function CollapsibleNav({
       button={button}
       ownFocus={false}
       size={248}
-      className="kbnCollapsibleNav"
+      css={styles.navCss}
     >
       {customNavLink && (
         <>
@@ -275,14 +277,14 @@ export function CollapsibleNav({
             color="subdued"
             gutterSize="none"
             size="s"
-            className="kbnCollapsibleNav__recentsListGroup"
+            css={styles.navRecentsListGroupCss}
           />
         </EuiCollapsibleNavGroup>
       )}
 
       <EuiHorizontalRule margin="none" />
 
-      <EuiFlexItem className="kbnCollapsibleNav__solutions">
+      <EuiFlexItem css={styles.navSolutions}>
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
@@ -294,11 +296,12 @@ export function CollapsibleNav({
               iconType={category.euiIconType}
               iconSize="m"
               buttonElement={overviewLink ? 'div' : 'button'}
-              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              css={styles.navSolutionGroupButton}
               title={
                 overviewLink ? (
                   <a
-                    className="eui-textInheritColor kbnCollapsibleNav__solutionGroupLink"
+                    className="eui-textInheritColor"
+                    css={styles.navSolutionGroupLink}
                     {...createOverviewLink({
                       link: overviewLink,
                       navigateToUrl,
