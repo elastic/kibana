@@ -68,7 +68,7 @@ We keep state internally in the `ElasticHandlebarsVisitor` object using the foll
 The tests for `@kbn/handlebars` are integrated into the regular test suite of Kibana and are all jest tests. To run them all, simply do:
 
 ```sh
-node scripts/jest packages/kbn-handlebars
+node scripts/jest src/platform/packages/private/kbn-handlebars
 ```
 
 By default, each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. To isolate a test run to just one or the other, you can use the following environment variables:
@@ -78,10 +78,10 @@ By default, each test will run both the original `handlebars` code and the modif
 
 ## Development
 
-Some of the tests have been copied from the upstream `handlebars` project and modified to fit our use-case, test-suite, and coding conventions. They are all located under the `packages/kbn-handlebars/src/spec` directory. To check if any of the copied files have received updates upstream that we might want to include in our copies, you can run the following script:
+Some of the tests have been copied from the upstream `handlebars` project and modified to fit our use-case, test-suite, and coding conventions. They are all located under the `src/platform/packages/private/kbn-handlebars/src/spec` directory. To check if any of the copied files have received updates upstream that we might want to include in our copies, you can run the following script:
 
 ```sh
-./packages/kbn-handlebars/scripts/check_for_upstream_updates.sh
+./src/platform/packages/private/kbn-handlebars/scripts/check_for_upstream_updates.sh
 ```
 
 _Note: This will look for changes in the `4.x` branch of the `handlebars.js` repo only. Changes in the `master` branch are ignored._
@@ -89,10 +89,10 @@ _Note: This will look for changes in the `4.x` branch of the `handlebars.js` rep
 Once all updates have been manually merged with our versions of the files, run the following script to "lock" us into the new updates:
 
 ```sh
-./packages/kbn-handlebars/scripts/update_upstream_git_hash.sh
+./src/platform/packages/private/kbn-handlebars/scripts/update_upstream_git_hash.sh
 ```
 
-This will update file `packages/kbn-handlebars/src/spec/.upstream_git_hash`. Make sure to commit changes to this file as well.
+This will update file `src/platform/packages/private/kbn-handlebars/src/spec/.upstream_git_hash`. Make sure to commit changes to this file as well.
 
 ## Debugging
 
@@ -101,13 +101,13 @@ This will update file `packages/kbn-handlebars/src/spec/.upstream_git_hash`. Mak
 To output the generated AST object structure in a somewhat readable form, use the following script:
 
 ```sh
-./packages/kbn-handlebars/scripts/print_ast.js
+./src/platform/packages/private/kbn-handlebars/scripts/print_ast.js
 ```
 
 Example:
 
 ```sh
-./packages/kbn-handlebars/scripts/print_ast.js '{{value}}'
+./src/platform/packages/private/kbn-handlebars/scripts/print_ast.js '{{value}}'
 ```
 
 Output:

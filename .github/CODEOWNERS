@@ -376,7 +376,6 @@ packages/kbn-get-repo-files @elastic/kibana-operations
 packages/kbn-grid-layout @elastic/kibana-presentation
 packages/kbn-grouping @elastic/response-ops
 packages/kbn-guided-onboarding @elastic/appex-sharedux
-packages/kbn-handlebars @elastic/kibana-security
 packages/kbn-hapi-mocks @elastic/kibana-core
 packages/kbn-health-gateway-server @elastic/kibana-core
 packages/kbn-i18n @elastic/kibana-core
@@ -621,6 +620,7 @@ packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
+src/platform/packages/private/kbn-handlebars @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management

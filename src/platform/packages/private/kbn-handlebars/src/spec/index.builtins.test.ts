@@ -2,7 +2,7 @@
  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
- * See `packages/kbn-handlebars/LICENSE` for more information.
+ * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.
  */
 
 /* eslint-disable max-classes-per-file */
