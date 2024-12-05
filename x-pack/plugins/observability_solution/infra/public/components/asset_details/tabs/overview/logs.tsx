@@ -8,14 +8,15 @@
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import {
   findInventoryFields,
   type InventoryItemType,
 } from '@kbn/metrics-data-access-plugin/common';
-import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
-import { useSearchSessionContext } from '../../../../../hooks/use_search_session';
-import { LogsKpiCharts } from '../../../components/kpis/logs_kpi_charts';
+import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
+import { useSearchSessionContext } from '../../../../hooks/use_search_session';
+import { useLogsCharts } from '../../hooks/use_log_charts';
+import { Kpi } from '../../components/kpis/kpi';
 
 interface Props {
   dataView?: DataView;
@@ -24,7 +25,7 @@ interface Props {
   dateRange: TimeRange;
 }
 
-export const LogsGrid = ({ assetId, assetType, dataView, dateRange }: Props) => {
+export const LogsContent = ({ assetId, assetType, dataView, dateRange }: Props) => {
   const { searchSessionId } = useSearchSessionContext();
 
   const filters = useMemo(() => {
@@ -37,14 +38,24 @@ export const LogsGrid = ({ assetId, assetType, dataView, dateRange }: Props) => 
     ];
   }, [dataView, assetId, assetType]);
 
+  const { euiTheme } = useEuiTheme();
+  const { charts } = useLogsCharts({
+    dataViewId: dataView?.id,
+    seriesColor: euiTheme.colors.backgroundLightText,
+  });
+
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsLogsGrid">
-      <LogsKpiCharts
-        dateRange={dateRange}
-        dataView={dataView}
-        searchSessionId={searchSessionId}
-        filters={filters}
-      />
+      {charts.map((chartProps, index) => (
+        <EuiFlexItem key={index}>
+          <Kpi
+            {...chartProps}
+            dateRange={dateRange}
+            filters={filters}
+            searchSessionId={searchSessionId}
+          />
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

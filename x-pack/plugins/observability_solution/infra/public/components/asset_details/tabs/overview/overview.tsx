@@ -26,8 +26,8 @@ import { MetricsContent } from './metrics/metrics';
 import { AddMetricsCallout } from '../../add_metrics_callout';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { useEntitySummary } from '../../hooks/use_entity_summary';
-import { isMetricsSignal } from '../../utils/get_data_stream_types';
-import { LogsGrid } from './kpis/logs_grid';
+import { isMetricsSignal, isLogsSignal } from '../../utils/get_data_stream_types';
+import { LogsContent } from './logs';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
@@ -60,7 +60,9 @@ export const Overview = () => {
     />
   );
 
-  const isLogsOnly = !isMetricsSignal(dataStreams);
+  const isMetrics = isMetricsSignal(dataStreams);
+  const isLogs = isLogsSignal(dataStreams);
+  const isLogsOnly = !isMetrics && isLogs;
 
   const shouldShowCallout = () => {
     if (
@@ -71,7 +73,7 @@ export const Overview = () => {
       return false;
     }
 
-    return isLogsOnly;
+    return !isMetrics;
   };
 
   const showAddMetricsCallout = shouldShowCallout();
@@ -90,7 +92,7 @@ export const Overview = () => {
       )}
       {isLogsOnly ? (
         <EuiFlexItem grow={false}>
-          <LogsGrid
+          <LogsContent
             assetId={asset.id}
             assetType={asset.type}
             dateRange={dateRange}
@@ -124,7 +126,7 @@ export const Overview = () => {
           <SectionSeparator />
         </EuiFlexItem>
       ) : null}
-      {!isLogsOnly ? (
+      {isMetrics ? (
         <EuiFlexItem grow={false}>
           <MetricsContent
             assetId={asset.id}

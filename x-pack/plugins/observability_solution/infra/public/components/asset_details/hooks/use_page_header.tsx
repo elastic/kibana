@@ -148,24 +148,25 @@ const useLogsOnlyTabs = () => {
     entityType: asset.type,
     entityId: asset.id,
   });
-  const isLogsOnly = !isMetricsSignal(dataStreams);
 
-  const isLogsOnlyTab = useCallback(
+  const isMetrics = isMetricsSignal(dataStreams);
+
+  const hasMetricsTab = useCallback(
     (tabItem: Tab) => {
-      return (isLogsOnly && tabItem.id !== ContentTabIds.METRICS) || !isLogsOnly;
+      return isMetrics || tabItem.id !== ContentTabIds.METRICS;
     },
-    [isLogsOnly]
+    [isMetrics]
   );
 
   return {
-    isLogsOnlyTab,
+    hasMetricsTab,
   };
 };
 
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
   const { isTabEnabled } = useFeatureFlagTabs();
-  const { isLogsOnlyTab } = useLogsOnlyTabs();
+  const { hasMetricsTab } = useLogsOnlyTabs();
 
   const onTabClick = useCallback(
     (tabId: TabIds) => {
@@ -178,7 +179,7 @@ const useTabs = (tabs: Tab[]) => {
     () =>
       tabs
         .filter(isTabEnabled)
-        .filter(isLogsOnlyTab)
+        .filter(hasMetricsTab)
         .map(({ name, ...tab }) => {
           return {
             ...tab,
@@ -188,7 +189,7 @@ const useTabs = (tabs: Tab[]) => {
             label: name,
           };
         }),
-    [activeTabId, isTabEnabled, isLogsOnlyTab, onTabClick, tabs]
+    [activeTabId, isTabEnabled, hasMetricsTab, onTabClick, tabs]
   );
 
   return { tabEntries };

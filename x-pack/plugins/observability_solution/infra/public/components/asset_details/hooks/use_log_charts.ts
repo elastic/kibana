@@ -42,7 +42,13 @@ export const logErrorMetric: LensConfig & { id: string } = {
   normalizeByUnit: 's',
 };
 
-export const useLogsCharts = ({ dataViewId }: { dataViewId?: string }) => {
+export const useLogsCharts = ({
+  dataViewId,
+  seriesColor,
+}: {
+  dataViewId?: string;
+  seriesColor?: string;
+}) => {
   return useMemo(() => {
     const dataset = dataViewId && {
       dataset: {
@@ -55,12 +61,14 @@ export const useLogsCharts = ({ dataViewId }: { dataViewId?: string }) => {
         {
           ...logMetric,
           ...dataset,
+          seriesColor,
         },
         {
           ...logErrorMetric,
           ...dataset,
+          seriesColor,
         },
       ],
     };
-  }, [dataViewId]);
+  }, [dataViewId, seriesColor]);
 };
