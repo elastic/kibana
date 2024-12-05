@@ -34,6 +34,8 @@ const createRepositoryMock = () => {
     collectMultiNamespaceReferences: jest.fn(),
     updateObjectsSpaces: jest.fn(),
     getCurrentNamespace: jest.fn(),
+    getSearchableNamespaces: jest.fn(),
+    asScopedToNamespace: jest.fn().mockImplementation(createRepositoryMock),
   };
 
   return mock;

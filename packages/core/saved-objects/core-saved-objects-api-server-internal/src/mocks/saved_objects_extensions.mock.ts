@@ -47,6 +47,7 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
 const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => ({
   getCurrentNamespace: jest.fn(),
   getSearchableNamespaces: jest.fn(),
+  asScopedToNamespace: jest.fn(),
 });
 
 const create = () => ({
