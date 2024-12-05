@@ -377,6 +377,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Search source Alert', function () {
+    // Failing: https://github.com/elastic/kibana/issues/203045
+    this.tags(['skipSvlOblt']);
+
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
@@ -432,8 +435,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       outputDataViewId = outputDataViewResponse.body.data_view.id;
     });
 
-    // Failing: https://github.com/elastic/kibana/issues/203045
-    it.skip('should show time field validation error', async () => {
+    it('should show time field validation error', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await dataViews.switchToAndValidate(SOURCE_DATA_VIEW);
