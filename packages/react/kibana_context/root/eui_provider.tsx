@@ -19,13 +19,15 @@ import {
   getThemeConfigByName,
   DEFAULT_THEME_CONFIG,
 } from '@kbn/react-kibana-context-common';
-import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
 /**
  * Props for the KibanaEuiProvider.
  */
 export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
+  userProfile?: Pick<UserProfileService, 'getUserProfile$'>; // TODO: use this to access a "high contrast mode" flag from user settings. Pass the flag to EuiProvider, when it is supported in EUI.
   globalStyles?: boolean;
 }
 
@@ -87,7 +89,14 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
 
   return (
     <EuiProvider
-      {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles, theme }}
+      {...{
+        cache,
+        modify,
+        colorMode,
+        globalStyles,
+        utilityClasses: globalStyles,
+        theme,
+      }}
     >
       {children}
     </EuiProvider>

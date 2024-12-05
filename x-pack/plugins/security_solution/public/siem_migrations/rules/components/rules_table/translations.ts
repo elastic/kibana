@@ -7,10 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SEARCH_PLACEHOLDER = i18n.translate(
+export const SEARCH_MIGRATION_RULES = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.searchAriaLabel',
+  {
+    defaultMessage: 'Search migration rules',
+  }
+);
+
+export const SEARCH_MIGRATION_RULES_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.searchBarPlaceholder',
   {
-    defaultMessage: 'Search by rule name',
+    defaultMessage: 'Search by migration rule name',
   }
 );
 
@@ -42,12 +49,22 @@ export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
   });
 };
 
-export const INSTALL_ALL_RULES = (numberOfAllRules: number) => {
-  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.installAllRules', {
-    defaultMessage:
-      'Install translated {numberOfAllRules, plural, one {rule} other {rules}} ({numberOfAllRules})',
-    values: { numberOfAllRules },
-  });
+export const INSTALL_TRANSLATED_RULES_EMPTY_STATE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRulesEmptyState',
+  {
+    defaultMessage: 'Install translated rules',
+  }
+);
+
+export const INSTALL_TRANSLATED_RULES = (numberOfAllRules: number) => {
+  return i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRules',
+    {
+      defaultMessage:
+        'Install translated {numberOfAllRules, plural, one {rule} other {rules}} ({numberOfAllRules})',
+      values: { numberOfAllRules },
+    }
+  );
 };
 
 export const INSTALL_SELECTED_ARIA_LABEL = i18n.translate(
@@ -57,8 +74,8 @@ export const INSTALL_SELECTED_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const INSTALL_ALL_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installAllButtonAriaLabel',
+export const INSTALL_TRANSLATED_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedButtonAriaLabel',
   {
     defaultMessage: 'Install all translated rules',
   }
