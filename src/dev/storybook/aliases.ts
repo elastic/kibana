@@ -18,7 +18,7 @@ export const storybookAliases = {
   cell_actions: 'packages/kbn-cell-actions/.storybook',
   cloud_security_posture_packages: 'x-pack/packages/kbn-cloud-security-posture/storybook/config',
   cloud: 'packages/cloud/.storybook',
-  coloring: 'packages/kbn-coloring/.storybook',
+  coloring: 'src/platform/packages/shared/kbn-coloring/.storybook',
   language_documentation_popover: 'packages/kbn-language-documentation/.storybook',
   chart_icons: 'src/platform/packages/shared/kbn-chart-icons/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
