@@ -23,13 +23,13 @@ export const OPEN_API_SPEC_TITLE = i18n.translate(
 export const LOADING = i18n.translate('xpack.integrationAssistant.celFlyout.footer.loading', {
   defaultMessage: 'Loading',
 });
-export const CONTINUE = i18n.translate('xpack.integrationAssistant.celFlyout.footer.continue', {
-  defaultMessage: 'Continue',
+export const ANALYZE = i18n.translate('xpack.integrationAssistant.celFlyout.footer.analyze', {
+  defaultMessage: 'Analyze',
 });
 export const SAVE_AND_CONTINUE = i18n.translate(
   'xpack.integrationAssistant.celFlyout.footer.saveAndContinue',
   {
-    defaultMessage: 'Save and Continue',
+    defaultMessage: 'Save & Continue',
   }
 );
 // export const ANALYZE_API = i18n.translate('xpack.integrationAssistant.bottomBar.analyzeApi', {
@@ -40,7 +40,4 @@ export const SAVE_AND_CONTINUE = i18n.translate(
 // });
 export const CLOSE = i18n.translate('xpack.integrationAssistant.celFlyout.footer.close', {
   defaultMessage: 'Close',
-});
-export const NEXT = i18n.translate('xpack.integrationAssistant.celFlyout.footer.next', {
-  defaultMessage: 'Next',
 });

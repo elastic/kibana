@@ -19,7 +19,7 @@ import type { CelFlyoutStepName } from './create_cel_config';
 
 const AnalyzeApiButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
   if (!isGenerating) {
-    return <>{i18n.CONTINUE}</>;
+    return <>{i18n.ANALYZE}</>;
   }
   return (
     <>
@@ -83,7 +83,7 @@ export const Footer = React.memo<FooterProps>(
             isDisabled={!isNextStepEnabled}
             data-test-subj="buttonsFooter-nextButton"
           >
-            {nextButtonText || i18n.NEXT}
+            {nextButtonText}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
