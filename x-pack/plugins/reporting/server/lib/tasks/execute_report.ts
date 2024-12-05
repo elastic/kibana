@@ -502,7 +502,9 @@ export class ExecuteReportTask implements ReportingTask {
 
             stream.end();
 
+            this.logger.debug(`Begin waiting for the stream's pending callbacks...`);
             await finishedWithNoPendingCallbacks(stream);
+            this.logger.info(`The stream's pending callbacks have completed.`);
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
