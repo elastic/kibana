@@ -61,11 +61,11 @@ export const UpgradeFlyoutSubHeader = memo(function UpgradeFlyoutSubHeader({
     <EuiText size="s">
       <strong>
         {i18n.FIELD_UPDATES}
-        {':'}{' '}
-        {fieldsNamesWithUpdates
-          .map((fieldName) => fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName)))
-          .join(', ')}
-      </strong>
+        {':'}
+      </strong>{' '}
+      {fieldsNamesWithUpdates
+        .map((fieldName) => fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName)))
+        .join(', ')}
     </EuiText>
   );
 
