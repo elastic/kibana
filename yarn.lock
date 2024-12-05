@@ -6348,7 +6348,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-parse-interval@link:x-pack/packages/ml/parse_interval":
+"@kbn/ml-parse-interval@link:x-pack/platform/packages/private/ml/parse_interval":
   version "0.0.0"
   uid ""
 
