@@ -134,14 +134,15 @@ function buildEvaluation(burnRateWindows: BurnRateWindowWithDuration[]) {
     };
   }, {});
 
-  const source = burnRateWindows.reduce((acc, _windDef, index) => {
-    const windowId = `${WINDOW}_${index}`;
-    const OP = acc ? ' || ' : '';
-    return `${acc}${OP}(params.${generateAboveThresholdKey(
-      windowId,
-      SHORT_WINDOW
-    )} == 1 && params.${generateAboveThresholdKey(windowId, LONG_WINDOW)} == 1)`;
-  }, '');
+  const source = burnRateWindows
+    .map((_windDef, index) => {
+      const windowId = `${WINDOW}_${index}`;
+      return `(params.${generateAboveThresholdKey(
+        windowId,
+        SHORT_WINDOW
+      )} == 1 && params.${generateAboveThresholdKey(windowId, LONG_WINDOW)} == 1)`;
+    })
+    .join(' || ');
 
   return {
     evaluation: {
