@@ -64,24 +64,50 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
     state.actions.setFilter({ id: iframeID, filter });
   }, 50);
 
-  const esqlWithFilters = useMemo(() => {
+  const rangeEsqlWithFilters = useMemo(() => {
     if (esql === '') return null;
+
+    const els = esql.split('|').map((d) => d.trim());
+    els.push(`STATS min = MIN(${field}),max = MAX(${field})`);
+
+    return els.join('\n| ');
+  }, [esql, field]);
+
+  const rangeDataWithFilters = useFetchESQL(rangeEsqlWithFilters);
+
+  const bucketCount = useMemo(() => {
+    if (!rangeDataWithFilters) return null;
+
+    const min = rangeDataWithFilters.values[0][0];
+    const max = rangeDataWithFilters.values[0][1];
+
+    const diff = new Date(max).getTime() - new Date(min).getTime();
+
+    const buckets = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    console.log('overall', buckets);
+
+    if (buckets === 1) return 24 * 60;
+    return buckets > 5 ? 1 : 24;
+  }, [rangeDataWithFilters]);
+
+  const esqlWithFilters = useMemo(() => {
+    if (esql === '' || bucketCount === null) return null;
 
     const els = esql.split('|').map((d) => d.trim());
 
     if (Object.values(panelFilters).length === 0) {
       els.push(
-        `STATS count = COUNT(*), context = COUNT(*) WHERE ${field}=="1970-01-01T00:00:00.000Z", total = COUNT(*) BY date = BUCKET(${field}, 1, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
+        `STATS count = COUNT(*), context = COUNT(*) WHERE ${field}=="1970-01-01T00:00:00.000Z", total = COUNT(*) BY date = BUCKET(${field}, ${bucketCount}, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
       );
     } else {
       const filter = Object.values(panelFilters).join(' AND ');
       els.push(
-        `STATS count = COUNT(*) WHERE ${filter}, context = COUNT(*) WHERE NOT(${filter}), total = COUNT(*) BY date = BUCKET(${field}, 1, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
+        `STATS count = COUNT(*) WHERE ${filter}, context = COUNT(*) WHERE NOT(${filter}), total = COUNT(*) BY date = BUCKET(${field}, ${bucketCount}, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
       );
     }
 
     return els.join('\n| ');
-  }, [esql, field, panelFilters]);
+  }, [bucketCount, esql, field, panelFilters]);
 
   const rawDataWithFilters = useFetchESQL(esqlWithFilters);
 
