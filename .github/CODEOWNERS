@@ -865,6 +865,7 @@ x-pack/platform/packages/private/security/authorization_core_common @elastic/kib
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
+x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/plugins/ai_infra/product_doc_base @elastic/appex-ai-infra
@@ -971,7 +972,6 @@ x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
 x-pack/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/plugins/searchprofiler @elastic/kibana-management
-x-pack/plugins/security @elastic/kibana-security
 x-pack/plugins/security_solution @elastic/security-solution
 x-pack/plugins/security_solution_ess @elastic/security-solution
 x-pack/plugins/security_solution_serverless @elastic/security-solution
