@@ -185,7 +185,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
         closureType,
         customFields,
         templates,
-        observableTypes: [],
         id: configurationId,
         version: configurationVersion,
       });
