@@ -16,6 +16,7 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
   MAX_TEMPLATES_LENGTH,
+  OBSERVABLE_TYPE_IPV4,
 } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common';
 import type { TemplatesConfiguration } from '../../../common/types/domain';
@@ -1199,6 +1200,45 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             'Failed to get patch configure in route: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+          );
+        });
+      });
+
+      describe('observableTypes', () => {
+        it('throws when trying to set duplicate observableTypes', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  tags: ['foo', 'bar'],
+                  caseFields: null,
+                },
+              ],
+            },
+          });
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                observableTypes: [
+                  {
+                    key: 'e638af17-ebb6-4678-a937-b734bffee36a',
+                    label: OBSERVABLE_TYPE_IPV4.label,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: Invalid duplicated observable types in request: ipv4'
           );
         });
       });
