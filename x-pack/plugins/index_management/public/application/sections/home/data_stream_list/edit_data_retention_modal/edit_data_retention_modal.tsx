@@ -56,7 +56,10 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 }) => {
   const lifecycle = dataStreams[0]?.lifecycle;
 
-  const { history } = useAppContext();
+  const {
+    history,
+    plugins: { cloud },
+  } = useAppContext();
   const isSingleDataStream = dataStreams.length === 1;
   const dataStreamNames = dataStreams.map(({ name }: DataStream) => name as string);
   const globalMaxRetention = deserializeGlobalMaxRetention(lifecycle?.globalMaxRetention);
@@ -198,19 +201,21 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             </>
           )}
 
-          {enableProjectLevelRetentionChecks && lifecycle?.globalMaxRetention && (
-            <>
-              <FormattedMessage
-                id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
-                defaultMessage="Maximum data retention period is {maxRetention} {unitText}"
-                values={{
-                  maxRetention: globalMaxRetention.size,
-                  unitText: globalMaxRetention.unitText,
-                }}
-              />
-              <EuiSpacer />
-            </>
-          )}
+          {enableProjectLevelRetentionChecks &&
+            isSingleDataStream &&
+            lifecycle?.globalMaxRetention && (
+              <>
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
+                  defaultMessage="Maximum data retention period is {maxRetention} {unitText}"
+                  values={{
+                    maxRetention: globalMaxRetention.size,
+                    unitText: globalMaxRetention.unitText,
+                  }}
+                />
+                <EuiSpacer />
+              </>
+            )}
 
           {enableTogglingDataRetention && (
             <UseField
@@ -238,6 +243,29 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                   )}
                 </EuiLink>
               </EuiText>
+            }
+            helpText={
+              !isSingleDataStream &&
+              globalMaxRetention && (
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText"
+                  defaultMessage="Maximum data retention period for this project is {maxRetention} {unitText}. {manageSettingsLink}"
+                  values={{
+                    maxRetention: globalMaxRetention.size,
+                    unitText: globalMaxRetention.unitText,
+                    manageSettingsLink: (
+                      <EuiLink href={cloud?.deploymentUrl} external>
+                        {i18n.translate(
+                          'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.manageProjectSettingsLinkText',
+                          {
+                            defaultMessage: 'Manage project settings.',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              )
             }
             componentProps={{
               fullWidth: !isSingleDataStream,

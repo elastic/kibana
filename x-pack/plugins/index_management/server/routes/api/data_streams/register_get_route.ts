@@ -146,6 +146,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
 
       try {
         const { data_streams: dataStreams } = await getDataStreams(client);
+        const dataStreamNames = dataStreams.map((dataStream) => dataStream.name);
 
         let dataStreamsStats;
         let dataStreamsPrivileges;
@@ -168,11 +169,15 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         const { index_templates: indexTemplates } =
           await client.asCurrentUser.indices.getIndexTemplate();
 
+        const lifecycle = await getDataStreamLifecycle(client, dataStreams[0].name);
+        const globalMaxRetention = lifecycle?.global_retention?.max_retention;
+
         const enhancedDataStreams = enhanceDataStreams({
           dataStreams,
           dataStreamsStats,
           meteringStats,
           dataStreamsPrivileges,
+          globalMaxRetention,
           indexTemplates,
         });
 
