@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-cell-actions'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-cell-actions'],
 };
