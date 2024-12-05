@@ -434,3 +434,39 @@ paths:
                 type: array
                 items:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResource'
+
+  /internal/siem_migrations/rules/{migration_id}/resources/missing:
+    get:
+      summary: Gets missing rule migration resources for a migration
+      operationId: GetRuleMigrationResourcesMissing
+      x-codegen-enabled: true
+      x-internal: true
+      description: Identifies missing resources from all the rules of an existing SIEM rules migration
+      tags:
+        - SIEM Rule Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to attach the resources
+            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates missing migration resources have been identified correctly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  macro:
+                    type: array
+                    description: The macro resources missing
+                    items:
+                      type: string
+                  list:
+                    type: array
+                    description: The list resources missing
+                    items:
+                      type: string

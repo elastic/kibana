@@ -25,6 +25,8 @@ export const SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/install_translated` as const;
 
 export const SIEM_RULE_MIGRATION_RESOURCES_PATH = `${SIEM_RULE_MIGRATION_PATH}/resources` as const;
+export const SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH =
+  `${SIEM_RULE_MIGRATION_RESOURCES_PATH}/missing` as const;
 
 export enum SiemMigrationTaskStatus {
   READY = 'ready',

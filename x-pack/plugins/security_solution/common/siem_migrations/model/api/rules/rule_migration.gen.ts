@@ -99,6 +99,30 @@ export type GetRuleMigrationResourcesRequestParamsInput = z.input<
 export type GetRuleMigrationResourcesResponse = z.infer<typeof GetRuleMigrationResourcesResponse>;
 export const GetRuleMigrationResourcesResponse = z.array(RuleMigrationResource);
 
+export type GetRuleMigrationResourcesMissingRequestParams = z.infer<
+  typeof GetRuleMigrationResourcesMissingRequestParams
+>;
+export const GetRuleMigrationResourcesMissingRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetRuleMigrationResourcesMissingRequestParamsInput = z.input<
+  typeof GetRuleMigrationResourcesMissingRequestParams
+>;
+
+export type GetRuleMigrationResourcesMissingResponse = z.infer<
+  typeof GetRuleMigrationResourcesMissingResponse
+>;
+export const GetRuleMigrationResourcesMissingResponse = z.object({
+  /**
+   * The macro resources missing
+   */
+  macro: z.array(z.string()).optional(),
+  /**
+   * The list resources missing
+   */
+  list: z.array(z.string()).optional(),
+});
+
 export type GetRuleMigrationStatsRequestParams = z.infer<typeof GetRuleMigrationStatsRequestParams>;
 export const GetRuleMigrationStatsRequestParams = z.object({
   migration_id: NonEmptyString,
