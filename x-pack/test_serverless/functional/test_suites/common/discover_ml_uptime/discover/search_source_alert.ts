@@ -222,7 +222,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const openDiscoverAlertFlyout = async () => {
     await testSubjects.click('discoverAlertsButton');
-    await testSubjects.click('discoverCreateAlertButton');
+    // Different create rule buttons in serverless
+    if (await testSubjects.exists('discoverCreateAlertButton')) {
+      await testSubjects.click('discoverCreateAlertButton');
+    } else {
+      await testSubjects.click('discoverAppMenuCustomThresholdRule');
+    }
   };
 
   const openManagementAlertFlyout = async () => {
@@ -427,7 +432,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       outputDataViewId = outputDataViewResponse.body.data_view.id;
     });
 
-    it('should show time field validation error', async () => {
+    // Failing: https://github.com/elastic/kibana/issues/203045
+    it.skip('should show time field validation error', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await dataViews.switchToAndValidate(SOURCE_DATA_VIEW);
