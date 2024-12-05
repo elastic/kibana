@@ -1528,7 +1528,7 @@ components:
         - text
       type: string
     NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
       format: nonempty
       minLength: 1
       type: string
