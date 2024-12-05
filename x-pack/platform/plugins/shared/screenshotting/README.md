@@ -24,7 +24,7 @@ Here is an example of how you can take a screenshot of a Kibana URL.
 ```typescript
 import { lastValueFrom } from 'rxjs';
 import type { CoreSetup, Plugin } from 'src/core/server';
-import type { ScreenshottingStart } from 'x-pack/plugins/screenshotting/server';
+import type { ScreenshottingStart } from 'x-pack/platform/plugins/shared/screenshotting/server';
 
 
 interface StartDeps {
