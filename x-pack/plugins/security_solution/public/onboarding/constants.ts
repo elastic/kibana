@@ -21,4 +21,5 @@ export enum OnboardingCardId {
 
   // siem_migrations topic cards
   siemMigrationsAiConnectors = 'ai_connectors',
+  siemMigrationsStart = 'start',
 }

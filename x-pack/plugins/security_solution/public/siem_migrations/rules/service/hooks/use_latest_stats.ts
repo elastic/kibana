@@ -7,7 +7,7 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { useEffect, useMemo } from 'react';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
 export const useLatestStats = () => {
   const { siemMigrations } = useKibana().services;
