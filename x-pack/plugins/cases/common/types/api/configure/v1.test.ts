@@ -1017,7 +1017,7 @@ describe('configure', () => {
 
     it('should invalidate an observable types configuration with observableTypes count exceeding max', () => {
       const invalidData = new Array(MAX_CUSTOM_OBSERVABLE_TYPES + 1).fill({
-        key: 'a'.repeat(MAX_OBSERVABLE_TYPE_KEY_LENGTH),
+        key: 'foo'),
         label: 'label',
       });
 
