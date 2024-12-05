@@ -848,7 +848,6 @@ x-pack/packages/rollup @elastic/kibana-management
 x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
-x-pack/packages/security-solution/navigation @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/side_nav @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/storybook/config @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/upselling @elastic/security-threat-hunting-explore
@@ -993,6 +992,7 @@ x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/security/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/security-solution/features @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/security-solution/navigation @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/test
 x-pack/test_serverless

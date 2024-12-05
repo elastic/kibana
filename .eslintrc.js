@@ -1307,7 +1307,7 @@ module.exports = {
         {
           files: [
             'x-pack/solutions/security/packages/security-solution/features/**/*.{js,mjs,ts,tsx}',
-            'x-pack/packages/security-solution/navigation/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/security-solution/navigation/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
