@@ -231,6 +231,7 @@
     "@kbn/langchain",
     "@kbn/react-hooks",
     "@kbn/index-adapter",
-    "@kbn/core-http-server-utils"
+    "@kbn/core-http-server-utils",
+    "@kbn/llm-tasks-plugin"
   ]
 }
