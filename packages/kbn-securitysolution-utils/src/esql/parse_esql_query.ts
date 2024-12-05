@@ -1,21 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstQueryExpression, ESQLCommandOption, EditorError } from '@kbn/esql-ast';
-import { parse } from '@kbn/esql-ast';
+import { type ESQLAstQueryExpression, parse, ESQLCommandOption, EditorError } from '@kbn/esql-ast';
 import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete';
-import { isAggregatingQuery } from '@kbn/securitysolution-utils';
+import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 
-interface ParseEsqlQueryResult {
+export interface ParseEsqlQueryResult {
   errors: EditorError[];
   isEsqlQueryAggregating: boolean;
   hasMetadataOperator: boolean;
 }
 
+/**
+ * check if esql query valid for Security rule:
+ * - if it's non aggregation query it must have metadata operator
+ */
+export const parseEsqlQuery = (query: string): ParseEsqlQueryResult => {
+  const { root, errors } = parse(query);
+  const isEsqlQueryAggregating = isAggregatingQuery(root);
+
+  return {
+    errors,
+    isEsqlQueryAggregating,
+    hasMetadataOperator: computeHasMetadataOperator(root),
+  };
+};
+
+/**
+ * checks whether query has metadata _id operator
+ */
 function computeHasMetadataOperator(astExpression: ESQLAstQueryExpression): boolean {
   // Check whether the `from` command has `metadata` operator
   const metadataOption = getMetadataOption(astExpression);
@@ -50,13 +69,3 @@ function getMetadataOption(astExpression: ESQLAstQueryExpression): ESQLCommandOp
 
   return undefined;
 }
-
-export const parseEsqlQuery = (query: string): ParseEsqlQueryResult => {
-  const { root, errors } = parse(query);
-  const isEsqlQueryAggregating = isAggregatingQuery(root);
-  return {
-    errors,
-    isEsqlQueryAggregating,
-    hasMetadataOperator: computeHasMetadataOperator(root),
-  };
-};
