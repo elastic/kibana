@@ -6,7 +6,7 @@
       "platform/packages/shared/ml/aiops_common",
       "platform/packages/private/ml/aiops_components",
       "platform/packages/shared/ml/aiops_log_pattern_analysis",
-      "packages/ml/aiops_log_rate_analysis",
+      "platform/packages/shared/ml/aiops_log_rate_analysis",
       "plugins/aiops"
     ],
     "xpack.aiAssistant": "packages/kbn-ai-assistant",
