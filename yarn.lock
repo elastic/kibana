@@ -5320,7 +5320,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-devtools@link:packages/default-nav/devtools":
+"@kbn/default-nav-devtools@link:src/platform/packages/private/default-nav/devtools":
   version "0.0.0"
   uid ""
 
