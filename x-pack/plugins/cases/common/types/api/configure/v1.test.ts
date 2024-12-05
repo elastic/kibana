@@ -1017,12 +1017,34 @@ describe('configure', () => {
 
     it('should invalidate an observable types configuration with observableTypes count exceeding max', () => {
       const invalidData = new Array(MAX_CUSTOM_OBSERVABLE_TYPES + 1).fill({
-        key: 'foo'),
+        key: 'foo',
         label: 'label',
       });
 
       const result = ObservableTypesConfigurationRt.decode(invalidData);
       expect(PathReporter.report(result).join()).not.toContain('No errors!');
+    });
+
+    it('accepts a uuid as an key', () => {
+      const key = uuidv4();
+
+      const query = ObservableTypesConfigurationRt.decode([{ key, label: 'Observable Label 1' }]);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: [{ key, label: 'Observable Label 1' }],
+      });
+    });
+
+    it('accepts a slug as an key', () => {
+      const key = 'abc_key-1';
+
+      const query = ObservableTypesConfigurationRt.decode([{ key, label: 'Observable Label 1' }]);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: [{ key, label: 'Observable Label 1' }],
+      });
     });
   });
 });
