@@ -32,7 +32,7 @@ const FTR_CSP_API = 'x-pack/test/cloud_security_posture_api';
 const FTR_CSP_FUNCTIONAL = 'x-pack/test/cloud_security_posture_functional';
 
 // Unit tests
-const UNIT_TEST_CSP = 'x-pack/plugins/cloud_security_posture';
+const UNIT_TEST_CSP = 'x-pack/solutions/security/plugins/cloud_security_posture';
 
 // KBN Package
 const KBN_CSP_PACKAGE = 'x-pack/packages/kbn-cloud-security-posture';
@@ -51,7 +51,7 @@ const directoryPaths = [
 
 // Output directories and file paths
 const MD_FILE_PATH = path.join(
-  'x-pack/plugins/cloud_security_posture/common/dev_docs',
+  'x-pack/solutions/security/plugins/cloud_security_posture/common/dev_docs',
   '__auto_generated_csp_requirements_test_coverage.md'
 );
 const CSP_TEST_LOGS_FILE_PATH = path.join(__dirname, '__auto_generated_csp_test_log.json');
