@@ -6,12 +6,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useExpandedCard } from './use_expanded_card';
-import { HEIGHT_ANIMATION_DURATION } from '../onboarding_card_panel.styles';
-import type { OnboardingCardId } from '../../../constants';
 import { waitFor } from '@testing-library/react';
-
-const scrollTimeout = HEIGHT_ANIMATION_DURATION + 50;
+import type { OnboardingCardId } from '../../../constants';
+import { useExpandedCard } from './use_expanded_card';
 
 const mockSetCardDetail = jest.fn();
 jest.mock('../../hooks/use_url_detail', () => ({
@@ -28,6 +25,7 @@ describe('useExpandedCard Hook', () => {
   const mockCardId = 'card-1' as OnboardingCardId;
   const mockScrollTo = jest.fn();
   global.window.scrollTo = mockScrollTo;
+  jest.useFakeTimers();
 
   const mockGetElementById = jest.fn().mockReturnValue({
     focus: jest.fn(),
@@ -39,21 +37,17 @@ describe('useExpandedCard Hook', () => {
     jest.clearAllMocks();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/202147
-  describe.skip('when the page is completely loaded', () => {
+  describe('when the page is completely loaded', () => {
     beforeEach(() => {
       renderHook(useExpandedCard);
     });
 
     it('should scroll to the expanded card id from the hash', async () => {
       // Ensure that scroll and focus were triggered
-      await waitFor(
-        () => {
-          expect(mockGetElementById).toHaveBeenCalledWith(mockCardId);
-          expect(mockScrollTo).toHaveBeenCalledWith({ top: 60, behavior: 'smooth' });
-        },
-        { timeout: scrollTimeout }
-      );
+      await waitFor(() => {
+        expect(mockGetElementById).toHaveBeenCalledWith(mockCardId);
+        expect(mockScrollTo).toHaveBeenCalledWith({ top: 60, behavior: 'smooth' });
+      });
     });
   });
 
@@ -79,13 +73,10 @@ describe('useExpandedCard Hook', () => {
 
       it('should not scroll', async () => {
         // Ensure that scroll and focus were triggered
-        await waitFor(
-          () => {
-            expect(mockGetElementById).not.toHaveBeenCalled();
-            expect(mockScrollTo).not.toHaveBeenCalled();
-          },
-          { timeout: scrollTimeout }
-        );
+        await waitFor(() => {
+          expect(mockGetElementById).not.toHaveBeenCalled();
+          expect(mockScrollTo).not.toHaveBeenCalled();
+        });
       });
     });
 
@@ -103,13 +94,10 @@ describe('useExpandedCard Hook', () => {
 
       it('should scroll', async () => {
         // Ensure that scroll and focus were triggered
-        await waitFor(
-          () => {
-            expect(mockGetElementById).toHaveBeenCalledWith(mockCardId);
-            expect(mockScrollTo).toHaveBeenCalledWith({ top: 160, behavior: 'smooth' });
-          },
-          { timeout: scrollTimeout }
-        );
+        await waitFor(() => {
+          expect(mockGetElementById).toHaveBeenCalledWith(mockCardId);
+          expect(mockScrollTo).toHaveBeenCalledWith({ top: 160, behavior: 'smooth' });
+        });
       });
     });
   });
