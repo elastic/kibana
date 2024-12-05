@@ -205,7 +205,7 @@ export const deleteObservable = async (
 
   if (!hasPlatinumLicenseOrGreater) {
     throw Boom.forbidden(
-      'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
+      'In order to delete observables from cases, you must be subscribed to an Elastic Platinum license'
     );
   }
 

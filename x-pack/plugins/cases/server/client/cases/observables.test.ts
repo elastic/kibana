@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { addObservable, updateObservable } from './observables';
+import { addObservable, deleteObservable, updateObservable } from './observables';
 import Boom from '@hapi/boom';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
@@ -187,6 +187,44 @@ describe('updateObservable', () => {
         mockClientArgs,
         mockCasesClient
       )
+    ).rejects.toThrow();
+  });
+});
+
+describe('deleteObservable', () => {
+  beforeEach(() => {
+    mockCaseService.patchCase.mockResolvedValue(caseSOWithObservables);
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+    jest.clearAllMocks();
+  });
+
+  it('should delete an observable successfully', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    await deleteObservable('case-id', mockObservable.id, mockClientArgs, mockCasesClient);
+
+    expect(mockLicensingService.notifyUsage).toHaveBeenCalledWith(
+      LICENSING_CASE_OBSERVABLES_FEATURE
+    );
+  });
+
+  it('should throw an error if license is not platinum', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+    await expect(
+      deleteObservable('case-id', 'observable-id', mockClientArgs, mockCasesClient)
+    ).rejects.toThrow(
+      Boom.forbidden(
+        'In order to delete observables from cases, you must be subscribed to an Elastic Platinum license'
+      )
+    );
+  });
+
+  it('should handle errors and throw boom', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockCaseService.getCase.mockRejectedValue(new Error('Case not found'));
+
+    await expect(
+      deleteObservable('case-id', 'observable-id', mockClientArgs, mockCasesClient)
     ).rejects.toThrow();
   });
 });
