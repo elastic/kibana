@@ -94,7 +94,7 @@
       "platform/packages/private/ml/inference_integration_flyout",
       "platform/packages/shared/ml/trained_models_utils",
       "platform/packages/private/ml/category_validator",
-      "packages/ml/ui_actions",
+      "platform/packages/private/ml/ui_actions",
       "platform/plugins/shared/ml"
     ],
     "xpack.monitoring": [
