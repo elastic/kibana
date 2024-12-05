@@ -66,6 +66,15 @@ describe('Response console', { tags: ['@ess', '@serverless', '@skipInServerlessM
       }
     });
 
+    afterEach(function () {
+      if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
+        cy.task('captureHostVmAgentDiagnostics', {
+          hostname: createdHost.hostname,
+          fileNamePrefix: this.currentTest?.fullTitle(),
+        });
+      }
+    });
+
     it('"processes" - should obtain a list of processes', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
