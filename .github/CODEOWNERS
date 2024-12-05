@@ -626,6 +626,7 @@ src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/plugins/shared/data_view_editor @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_field_editor @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_management @elastic/kibana-data-discovery
+src/platform/plugins/shared/data_views @elastic/kibana-data-discovery
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
@@ -644,7 +645,6 @@ src/plugins/controls @elastic/kibana-presentation
 src/plugins/custom_integrations @elastic/fleet
 src/plugins/dashboard @elastic/kibana-presentation
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
-src/plugins/data_views @elastic/kibana-data-discovery
 src/plugins/dev_tools @elastic/kibana-management
 src/plugins/discover @elastic/kibana-data-discovery
 src/plugins/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
