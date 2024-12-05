@@ -160,7 +160,7 @@ export const streamGraph = async ({
               finalMessage += msg.content;
             }
           } else if (event.event === 'on_llm_end' && !didEnd) {
-            handleStreamEnd(event.data.output?.generations[0]?.text ?? finalMessage);
+            handleStreamEnd(event.data.output?.generations[0][0]?.text ?? finalMessage);
           }
         }
       }
