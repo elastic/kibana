@@ -9,7 +9,8 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-describe('When defining a kibana role for Endpoint security access', { tags: '@ess' }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/200967
+describe.skip('When defining a kibana role for Endpoint security access', { tags: '@ess' }, () => {
   const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
     return cy
       .get('#featurePrivilegeControls_siem')
