@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, type ComponentProps } from 'react';
 import {
   EuiFieldNumber,
   EuiFormRow,
@@ -18,6 +18,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FilterAggConfigRange } from '../types';
 
 const BUTTON_SIZE = 40;
+
+// The config prop of the component, to be used for the `updateConfig` function.
+type FilterRangeFormConfig = ComponentProps<
+  Exclude<FilterAggConfigRange['aggTypeConfig']['FilterAggFormComponent'], undefined>
+>['config'];
+
 /**
  * Form component for the range filter aggregation for number type fields.
  */
@@ -31,7 +37,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
   const includeTo = config?.includeTo ?? false;
 
   const updateConfig = useCallback(
-    (update: any) => {
+    (update: FilterRangeFormConfig) => {
       onChange({
         config: {
           ...config,
