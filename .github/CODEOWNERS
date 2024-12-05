@@ -519,7 +519,6 @@ packages/kbn-ui-actions-browser @elastic/appex-sharedux
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
-packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 packages/kbn-unsaved-changes-prompt @elastic/kibana-management
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 packages/kbn-user-profile-components @elastic/kibana-security
@@ -606,6 +605,7 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
+src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
