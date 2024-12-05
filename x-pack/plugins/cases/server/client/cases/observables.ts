@@ -127,9 +127,19 @@ export const updateObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService },
+    services: { caseService, licensingService },
     authorization,
   } = clientArgs;
+
+  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+  if (!hasPlatinumLicenseOrGreater) {
+    throw Boom.forbidden(
+      'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
+    );
+  }
+
+  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
     const paramArgs = decodeWithExcessOrThrow(UpdateObservableRequestRt)(params);
@@ -187,9 +197,19 @@ export const deleteObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService },
+    services: { caseService, licensingService },
     authorization,
   } = clientArgs;
+
+  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+  if (!hasPlatinumLicenseOrGreater) {
+    throw Boom.forbidden(
+      'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
+    );
+  }
+
+  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
     const retrievedCase = await caseService.getCase({ id: caseId });
