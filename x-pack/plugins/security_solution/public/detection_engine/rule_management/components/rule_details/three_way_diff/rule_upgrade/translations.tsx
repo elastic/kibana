@@ -74,13 +74,26 @@ export const UPGRADE_STATUS = i18n.translate(
   }
 );
 
+export const RULE_HAS_NON_SOLVABLE_AND_SOLVABLE_CONFLICTS = (
+  numOfNonSolvableConflicts: number,
+  numOfSolvableConflicts: number
+) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSolvableAndNonSolvableConflicts',
+    {
+      values: { numOfNonSolvableConflicts, numOfSolvableConflicts },
+      defaultMessage:
+        '{numOfNonSolvableConflicts} {numOfNonSolvableConflicts, plural, one {field has an unsolved conflict} other {fields have unsolved conflicts}} and {numOfSolvableConflicts} {numOfSolvableConflicts, plural, one {field has a solved conflict} other {fields have solved conflicts}}. Please review and provide a final update.',
+    }
+  );
+
 export const RULE_HAS_NON_SOLVABLE_CONFLICTS = (count: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasNonSolvableConflicts',
     {
       values: { count },
       defaultMessage:
-        '{count} {count, plural, one {field has a unsolved conflict} other {fields have unsolved conflicts}}. Please review and provide a final update.',
+        '{count} {count, plural, one {field has an unsolved conflict} other {fields have unsolved conflicts}}. Please review and provide a final update.',
     }
   );
 
@@ -88,7 +101,7 @@ export const RULE_HAS_NON_SOLVABLE_CONFLICTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasNonSolvableConflictsDescription',
   {
     defaultMessage:
-      'Please provide an input for the unsolved conflict. You can also keep the current without the updates, or accept the Elastic update but lose your modifications.',
+      'Please provide an input for the unsolved conflict. You can also keep the current version without the updates, or accept the Elastic update but lose your modifications.',
   }
 );
 

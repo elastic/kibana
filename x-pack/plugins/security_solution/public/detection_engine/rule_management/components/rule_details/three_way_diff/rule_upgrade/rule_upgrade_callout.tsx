@@ -30,7 +30,12 @@ export function RuleUpgradeCallout({
             &nbsp;
             <ActionRequiredBadge />
             &nbsp;
-            {i18n.RULE_HAS_NON_SOLVABLE_CONFLICTS(numOfNonSolvableConflicts)}
+            {numOfSolvableConflicts > 0
+              ? i18n.RULE_HAS_NON_SOLVABLE_AND_SOLVABLE_CONFLICTS(
+                  numOfNonSolvableConflicts,
+                  numOfSolvableConflicts
+                )
+              : i18n.RULE_HAS_NON_SOLVABLE_CONFLICTS(numOfNonSolvableConflicts)}
           </>
         }
         color="danger"
