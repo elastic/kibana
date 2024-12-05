@@ -194,9 +194,9 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 
 [float]
 [[migrate-off-scripted-fields]]
-==== Migrate off scripted fields
+==== Migrate to runtime fields or ES|QL queries
 
-The following code snippets demonstrate how an example scripted field called `computed_values` on the Kibana Sample Data Logs data view could be migrated to either a runtime field or an ES|QL query, highlighting the differences between each approach such as multi-value field handling.
+The following code snippets demonstrate how an example scripted field called `computed_values` on the Kibana Sample Data Logs data view could be migrated to either a runtime field or an ES|QL query, highlighting the differences between each approach.
 
 [float]
 [[scripted-field-example]]
@@ -239,7 +239,7 @@ return [time_of_day, response_category];
 [[runtime-field-example]]
 ===== Runtime field
 
-Unlike scripted fields, runtime fields do not need to return a single value and can emit values at any point in the script, which will be combined and returned as a multi-value field. This allows for more flexibility in the script logic and removes the need to manually manage an array of values. Otherwise the scripts are essentially identical since they both use the Painless language and the same APIs.
+Unlike scripted fields, runtime fields do not need to return a single value and can emit values at any point in the script, which will be combined and returned as a multi-value field. This allows for more flexibility in the script logic and removes the need to manually manage an array of values.
 
 [source,text]
 ----
@@ -300,7 +300,7 @@ FROM kibana_sample_data_logs
 [[update-scripted-field]]
 ==== Manage scripted fields
 
-WARNING: The ability to create new scripted fields has been removed from the *Data Views* management page in 9.0. Existing scripted fields can still be edited or deleted, and the creation UI can be accessed by navigating directly to `/app/management/kibana/dataViews/dataView/{dataViewId}/create-field`, but it is recommended to migrate to runtime fields or ES|QL instead to prepare for removal.
+WARNING: The ability to create new scripted fields has been removed from the *Data Views* management page in 9.0. Existing scripted fields can still be edited or deleted, and the creation UI can be accessed by navigating directly to `/app/management/kibana/dataViews/dataView/{dataViewId}/create-field`, but we recommend migrating to runtime fields or ES|QL queries instead to prepare for removal.
 
 . Go to the *Data Views* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
