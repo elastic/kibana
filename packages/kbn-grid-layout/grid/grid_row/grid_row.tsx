@@ -208,7 +208,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
       (
         panelId: string,
         type: PanelInteractionEvent['type'] | 'drop',
-        e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>
+        e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
       ) => {
         e.stopPropagation();
 
@@ -251,38 +251,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
           rowIndex={rowIndex}
           gridLayoutStateManager={gridLayoutStateManager}
           renderPanelContents={renderPanelContents}
-          interactionStart={(type, e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Disable interactions when a panel is expanded
-            const isInteractive = gridLayoutStateManager.expandedPanelId$.value === undefined;
-            if (!isInteractive) return;
-
-            const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            if (!panelRef) return;
-
-            const panelRect = panelRef.getBoundingClientRect();
-            if (type === 'drop') {
-              setInteractionEvent(undefined);
-              // Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction.
-              // the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility reasons (screen readers and focus management).
-              syncPanelIds();
-            } else {
-              setInteractionEvent({
-                type,
-                id: panelId,
-                panelDiv: panelRef,
-                targetRowIndex: rowIndex,
-                mouseOffsets: {
-                  top: e.clientY - panelRect.top,
-                  left: e.clientX - panelRect.left,
-                  right: e.clientX - panelRect.right,
-                  bottom: e.clientY - panelRect.bottom,
-                },
-              });
-            }
-          }}
+          interactionStart={interactionStart}
           ref={(element) => {
             if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
               gridLayoutStateManager.panelRefs.current[rowIndex] = {};
@@ -291,14 +260,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
           }}
         />
       ));
-    }, [
-      panelIds,
-      rowIndex,
-      gridLayoutStateManager,
-      renderPanelContents,
-      setInteractionEvent,
-      syncPanelIds,
-    ]);
+    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, interactionStart]);
 
     return (
       <div ref={rowContainer}>

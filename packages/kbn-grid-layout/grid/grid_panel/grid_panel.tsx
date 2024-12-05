@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import { EuiPanel, euiFullHeight, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
-import { DragHandle } from './drag_handle';
+import { DragHandle, DragHandleApi } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
 
 export interface GridPanelProps {
@@ -39,11 +38,9 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
-    // const resizeHandleRef = useRef<HTMLDivElement | null>(null);
-    const removeEventListenersRef = useRef<(() => void) | null>(null);
-    const [dragHandleCount, setDragHandleCount] = useState<number>(0);
-    const dragHandleRefs = useRef<Array<HTMLElement | null>>([]);
+    const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
 
+    // const resizeHandleRef = useRef<HTMLDivElement | null>(null);
     const startIneraction = useCallback(
       (
         type: PanelInteractionEvent['type'] | 'drop',
@@ -68,8 +65,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         /**
          * By adding the "drop" event listener to the document rather than the drag/resize event handler,
          * we prevent the element from getting "stuck" in an interaction; however, we only attach this event
-         * listener **when the drag/resize event starts**, and it only executes once, which means we don't
-         * have to remove the `mouseup` event listener
+         * listener **when the drag/resize event starts**, and it only executes once (i.e. it removes itself
+         * once it executes, so we don't have to manually remove it outside of the unmount condition)
          */
         document.addEventListener('mouseup', onDropEventHandler, {
           once: true,
@@ -82,50 +79,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         document.removeEventListener('mouseup', onDropEventHandler); // removes the event listener on row change
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    /**
-     * We need to memoize the `onMouseDown` callback so that we don't assign a new `onMouseDown` event handler
-     * every time `setDragHandles` is called
-     */
-    const onMouseDown = useCallback(
-      (e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        if (gridLayoutStateManager.accessMode$.getValue() !== 'EDIT' || e.button !== 0) {
-          // ignore anything but left clicks, and ignore clicks when not in edit mode
-          return;
-        }
-        e.stopPropagation();
-        interactionStart(panelId, 'drag', e);
-      },
-      [interactionStart, panelId, gridLayoutStateManager.accessMode$]
-    );
-
-    const setDragHandles = useCallback(
-      (dragHandles: Array<HTMLElement | null>) => {
-        setDragHandleCount(dragHandles.length);
-        dragHandleRefs.current = dragHandles;
-
-        for (const handle of dragHandles) {
-          if (handle === null) return;
-          handle.addEventListener('mousedown', onMouseDown, { passive: true });
-        }
-
-        removeEventListenersRef.current = () => {
-          for (const handle of dragHandles) {
-            if (handle === null) return;
-            handle.removeEventListener('mousedown', onMouseDown);
-          }
-        };
-      },
-      [onMouseDown]
-    );
-
-    useEffect(() => {
-      return () => {
-        if (removeEventListenersRef.current) {
-          removeEventListenersRef.current();
-        }
-      };
     }, []);
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
@@ -279,32 +232,28 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
      * Memoize panel contents to prevent unnecessary re-renders
      */
     const panelContents = useMemo(() => {
+      const setDragHandles = dragHandleApi?.setDragHandles;
+      if (!setDragHandles) return null;
       return renderPanelContents(panelId, setDragHandles);
-    }, [panelId, setDragHandles, renderPanelContents]);
+    }, [panelId, renderPanelContents, dragHandleApi]);
 
     return (
       <div ref={panelRef} css={initialStyles} className="kbnGridPanel">
-        <EuiPanel
-          hasShadow={false}
-          hasBorder={true}
+        <div
           css={css`
             padding: 0;
-            position: relative;
             height: 100%;
+            position: relative;
           `}
         >
-          {!Boolean(dragHandleCount) && <DragHandle interactionStart={startIneraction} />}
-          <div
-            css={css`
-              ${euiFullHeight()}
-              ${useEuiOverflowScroll('y', false)}
-              ${useEuiOverflowScroll('x', false)}
-            `}
-          >
-            {panelContents}
-          </div>
+          <DragHandle
+            ref={setDragHandleApi}
+            gridLayoutStateManager={gridLayoutStateManager}
+            interactionStart={startIneraction}
+          />
+          {panelContents}
           <ResizeHandle interactionStart={startIneraction} />
-        </EuiPanel>
+        </div>
       </div>
     );
   }
