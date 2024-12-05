@@ -985,7 +985,6 @@ x-pack/plugins/streams @elastic/streams-program-team
 x-pack/plugins/streams_app @elastic/streams-program-team
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
-x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/plugins/transform @elastic/ml-ui
 x-pack/plugins/translations @elastic/kibana-localization
@@ -994,6 +993,7 @@ x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/security/packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops

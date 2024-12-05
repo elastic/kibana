@@ -127,7 +127,7 @@ If changes are made to how developers build, test, interact with, or release cod
 
 **Unit tests:**
 
-`npm run test:jest --config ./x-pack/plugins/threat_intelligence`
+`npm run test:jest --config ./x-pack/solutions/security/plugins/threat_intelligence`
 
 **E2E tests:**
 
