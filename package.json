@@ -639,7 +639,7 @@
     "@kbn/management-settings-components-form": "link:packages/kbn-management/settings/components/form",
     "@kbn/management-settings-field-definition": "link:packages/kbn-management/settings/field_definition",
     "@kbn/management-settings-ids": "link:src/platform/packages/shared/kbn-management/settings/setting_ids",
-    "@kbn/management-settings-section-registry": "link:packages/kbn-management/settings/section_registry",
+    "@kbn/management-settings-section-registry": "link:src/platform/packages/shared/kbn-management/settings/section_registry",
     "@kbn/management-settings-types": "link:packages/kbn-management/settings/types",
     "@kbn/management-settings-utilities": "link:packages/kbn-management/settings/utilities",
     "@kbn/management-test-plugin": "link:test/plugin_functional/plugins/management_test_plugin",
