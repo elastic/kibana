@@ -538,14 +538,14 @@ export const getEndpointConsoleCommands = ({
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
-      exampleUsage: `C:\\> runscript -Raw=\`\`\`Get-ChildItem .\`\`\` -CommandLine=""`,
-      helpUsage: `C:\\> runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true"
+      exampleUsage: `runscript -Raw=\`\`\`Get-ChildItem .\`\`\` -CommandLine=""`,
+      helpUsage: `runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true"
       Run a script saved to the CrowdStrike cloud with the specified command line arguments
-      C:\\> runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true" -Timeout=180
+      runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true" -Timeout=180
       Run a script saved to the CrowdStrike cloud with the specified command line arguments and 180 seconds timeout
-      C:\\> runscript -Raw=\`\`\`Get-ChildItem .\`\`\` -CommandLine=""
+      runscript -Raw=\`\`\`Get-ChildItem .\`\`\` -CommandLine=""
       Run a raw script whose entire contents are provided in the "-Raw=" flag
-      C:\\> runscript -HostPath="C:\\temp\\LocalScript.ps1" -CommandLine="-Verbose true"
+      runscript -HostPath="C:\\temp\\LocalScript.ps1" -CommandLine="-Verbose true"
       Run a script from a path on the remote host with the specified command line arguments`,
       exampleInstruction: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
       validate: capabilitiesAndPrivilegesValidator(agentType),
