@@ -113,14 +113,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   };
 
   if (status.isDisabled) {
-    return (
-      <EnableRiskScore
-        {...status}
-        entityType={riskEntity}
-        refetch={refetch}
-        timerange={timerange}
-      />
-    );
+    return <EnableRiskScore {...status} entityType={riskEntity} />;
   }
 
   if (hasEngineBeenInstalled && severitySelectionRedux.length === 0 && data && data.length === 0) {

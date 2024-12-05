@@ -100,12 +100,7 @@ export const UserRiskScoreQueryTabBody = ({
   if (isDisabled) {
     return (
       <EuiPanel hasBorder>
-        <EnableRiskScore
-          isDisabled={isDisabled}
-          entityType={RiskScoreEntity.host}
-          refetch={refetch}
-          timerange={timerange}
-        />
+        <EnableRiskScore isDisabled={isDisabled} entityType={RiskScoreEntity.host} />
       </EuiPanel>
     );
   }

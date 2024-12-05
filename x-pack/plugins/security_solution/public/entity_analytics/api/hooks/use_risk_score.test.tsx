@@ -32,7 +32,7 @@ const defaultRisk = {
   inspect: {},
   isInspected: false,
   isAuthorized: true,
-  isModuleEnabled: true,
+  hasEngineBeenInstalled: true,
   isDeprecated: false,
   totalCount: 0,
 };
@@ -77,7 +77,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       expect(result.current).toEqual({
         loading: false,
         ...defaultRisk,
-        isModuleEnabled: false,
+        hasEngineBeenInstalled: false,
         refetch: result.current.refetch,
       });
     });
@@ -112,7 +112,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       expect(result.current).toEqual({
         loading: false,
         ...defaultRisk,
-        isModuleEnabled: false,
+        hasEngineBeenInstalled: false,
         refetch: result.current.refetch,
         error: {
           attributes: {

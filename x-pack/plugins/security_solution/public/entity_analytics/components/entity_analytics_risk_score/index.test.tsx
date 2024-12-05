@@ -54,7 +54,7 @@ const defaultProps = {
   data: undefined,
   inspect: null,
   refetch: () => {},
-  isModuleEnabled: true,
+  hasEngineBeenInstalled: true,
   isAuthorized: true,
   loading: false,
 };
@@ -88,8 +88,8 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       mockUseRiskScore.mockReturnValue(defaultProps);
     });
 
-    it('renders enable button when module is disable', () => {
-      mockUseRiskScore.mockReturnValue({ ...defaultProps, isModuleEnabled: false });
+    it.only('renders enable button when module is disable', () => {
+      mockUseRiskScore.mockReturnValue({ ...defaultProps, hasEngineBeenInstalled: false });
       const { getByTestId } = render(
         <TestProviders>
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />

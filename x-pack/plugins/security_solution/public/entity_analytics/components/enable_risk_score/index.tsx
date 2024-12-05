@@ -6,30 +6,22 @@
  */
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
-import type { inputsModel } from '../../../common/store';
 import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
 import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_link';
 import { RiskScoreHeaderTitle } from '../risk_score_header_title';
-import { RiskScoreEnableButton } from '../risk_score_enable_button';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
+import { SecurityPageName } from '../../../../common/constants';
 
 const EnableRiskScoreComponent = ({
   isDisabled,
   entityType,
-  refetch,
-  timerange,
 }: {
   isDisabled: boolean;
   entityType: RiskScoreEntity;
-  refetch: inputsModel.Refetch;
-  timerange: {
-    from: string;
-    to: string;
-  };
 }) => {
-  const { signalIndexExists } = useCheckSignalIndex();
   if (!isDisabled) {
     return null;
   }
@@ -47,13 +39,18 @@ const EnableRiskScoreComponent = ({
           </>
         }
         actions={
-          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-            <RiskScoreEnableButton
-              disabled={!signalIndexExists}
-              refetch={refetch}
-              riskScoreEntity={entityType}
-              timerange={timerange}
-            />
+          <EuiToolTip content={i18n.ENABLE_RISK_SCORE_POPOVER}>
+            <SecuritySolutionLinkButton
+              color="primary"
+              fill
+              deepLinkId={SecurityPageName.entityAnalyticsManagement}
+              data-test-subj={`enable_risk_score`}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.riskScore.enableButtonTitle"
+                defaultMessage="Enable"
+              />
+            </SecuritySolutionLinkButton>
           </EuiToolTip>
         }
       />

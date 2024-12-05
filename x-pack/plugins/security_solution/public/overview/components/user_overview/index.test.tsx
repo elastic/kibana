@@ -19,7 +19,7 @@ const defaultProps = {
   data: undefined,
   inspect: null,
   refetch: () => {},
-  isModuleEnabled: true,
+  hasEngineBeenInstalled: true,
   isAuthorized: true,
   loading: false,
 };
@@ -59,7 +59,7 @@ describe('User Summary Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRiskScore.mockReturnValue({ ...defaultProps, loading: true, isModuleEnabled: false });
+    mockRiskScore.mockReturnValue({ ...defaultProps, loading: true, hasEngineBeenInstalled: false });
   });
 
   test('it renders the default User Summary', () => {

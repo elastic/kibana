@@ -14,8 +14,7 @@ import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 import {
-  ENABLE_HOST_RISK_SCORE_BUTTON,
-  ENABLE_USER_RISK_SCORE_BUTTON,
+  ENABLE_RISK_SCORE_BUTTON,
   HOSTS_DONUT_CHART,
   HOSTS_TABLE_ROWS,
   HOST_RISK_SCORE_NO_DATA_DETECTED,
@@ -73,10 +72,8 @@ describe.skip('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, (
         visitWithTimeRange(ENTITY_ANALYTICS_URL);
       });
 
-      it('shows enable host and user risk button', () => {
-        cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('be.visible');
-
-        cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('be.visible');
+      it('shows enable risk button', () => {
+        cy.get(ENABLE_RISK_SCORE_BUTTON).should('be.visible');
       });
     });
 

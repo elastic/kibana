@@ -21,7 +21,6 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { StyledBasicTable } from '../styled_basic_table';
-import { useRefetchQueries } from '../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../common/components/loader';
 import { Panel } from '../../../common/components/panel';
 import { useEntityInfo } from './use_entity';
@@ -158,8 +157,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     setUpdatedAt(Date.now());
   }, [isTableLoading, isKpiLoading]); // Update the time when data loads
 
-  const refreshPage = useRefetchQueries();
-
   const privileges = useMissingRiskEnginePrivileges(['read']);
 
   if (!isAuthorized) {
@@ -177,14 +174,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   }
 
   if (isDisabled) {
-    return (
-      <EnableRiskScore
-        isDisabled={isDisabled}
-        entityType={riskEntity}
-        refetch={refreshPage}
-        timerange={timerange}
-      />
-    );
+    return <EnableRiskScore isDisabled={isDisabled} entityType={riskEntity} />;
   }
 
   if (hasEngineBeenInstalled && selectedSeverity.length === 0 && data && data.length === 0) {
