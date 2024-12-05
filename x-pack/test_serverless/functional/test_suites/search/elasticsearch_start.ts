@@ -21,13 +21,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const es = getService('es');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   const deleteAllTestIndices = async () => {
     await esDeleteAllIndices(['search-*', 'test-*']);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/200020
-  describe.skip('Elasticsearch Start [Onboarding Empty State]', function () {
+  describe('Elasticsearch Start [Onboarding Empty State]', function () {
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
@@ -96,7 +96,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should show the api key in code view', async () => {
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
         await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        // sometimes the API key exists in the cluster and its lost in sessionStorage
+        // if fails we retry to delete the API key and refresh the browser
+        await retry.try(
+          async () => {
+            await pageObjects.svlApiKeys.expectAPIKeyExists();
+          },
+          async () => {
+            await pageObjects.svlApiKeys.deleteAPIKeys();
+            await browser.refresh();
+            await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+          }
+        );
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+
         const apiKeyUI = await pageObjects.svlApiKeys.getAPIKeyFromUI();
         const apiKeySession = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
 

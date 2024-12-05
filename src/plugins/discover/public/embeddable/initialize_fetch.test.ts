@@ -69,6 +69,7 @@ describe('initialize fetch', () => {
       ].map((hit) => buildDataTableRecord(hit, dataViewMock))
     );
     expect(stateManager.totalHitCount.getValue()).toEqual(2);
+    expect(stateManager.inspectorAdapters.getValue().requests).toBeDefined();
   });
 
   it('should catch and emit error', async () => {
