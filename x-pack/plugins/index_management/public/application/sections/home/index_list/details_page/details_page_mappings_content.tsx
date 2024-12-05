@@ -27,7 +27,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import {
@@ -85,7 +85,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     overlays,
     history,
   } = useAppContext();
-
+  const editFieldButtonRef = useRef<HTMLButtonElement>(null);
   const [isPlatinumLicense, setIsPlatinumLicense] = useState<boolean>(false);
   useEffect(() => {
     const subscription = licensing?.license$.subscribe((license: ILicense) => {
@@ -597,11 +597,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                         onCancelAddingNewFields={onCancelAddingNewFields}
                         isAddingFields={isAddingFields}
                         semanticTextInfo={semanticTextInfo}
+                        editFieldButtonRef={editFieldButtonRef}
                       />
                     ) : (
                       <DocumentFields
                         isAddingFields={isAddingFields}
                         semanticTextInfo={semanticTextInfo}
+                        editFieldButtonRef={editFieldButtonRef}
                       />
                     )}
                   </EuiPanel>

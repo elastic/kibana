@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 
 import { useDispatch, useMappingsState } from '../../mappings_state_context';
 import { CreateField, FieldsList, SemanticTextInfo } from './fields';
@@ -28,13 +28,16 @@ export const DocumentFieldsTreeEditor = ({
     fields: { byId, rootLevelFields },
     documentFields: { status, fieldToAddFieldTo },
   } = useMappingsState();
-
+  const createFieldFormRef = useRef<HTMLDivElement>(null);
   const getField = useCallback((fieldId: string) => byId[fieldId], [byId]);
   const fields = useMemo(() => rootLevelFields.map(getField), [rootLevelFields, getField]);
 
   const addField = useCallback(() => {
     dispatch({ type: 'documentField.createField' });
-  }, [dispatch]);
+    if (createFieldFormRef.current) {
+      createFieldFormRef.current.focus();
+    }
+  }, [dispatch, createFieldFormRef.current]);
 
   const renderCreateField = () => {
     // The "fieldToAddFieldTo" is undefined when adding to the top level "properties" object.
@@ -52,6 +55,7 @@ export const DocumentFieldsTreeEditor = ({
         onCancelAddingNewFields={onCancelAddingNewFields}
         isAddingFields={isAddingFields}
         semanticTextInfo={semanticTextInfo}
+        createFieldFormRef={createFieldFormRef}
       />
     );
   };

@@ -29,6 +29,7 @@ export const FieldsListItemContainer = ({
   isAddingFields,
 }: Props) => {
   const dispatch = useDispatch();
+  const createFieldFormRef = useRef<HTMLDivElement>(null);
   const listElement = useRef<HTMLLIElement | null>(null);
   const {
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },
@@ -58,6 +59,10 @@ export const FieldsListItemContainer = ({
       type: 'documentField.createField',
       value: fieldId,
     });
+    // console.log('Field_list_item_container createFieldFormRef.current', createFieldFormRef.current);
+    // if (createFieldFormRef.current) {
+    //   createFieldFormRef.current.focus();
+    // }
   }, [fieldId, dispatch]);
 
   const editField = useCallback(() => {
@@ -110,6 +115,7 @@ export const FieldsListItemContainer = ({
       toggleExpand={toggleExpand}
       state={state}
       isAddingFields={isAddingFields}
+      createFieldFormRef={createFieldFormRef}
     />
   );
 };

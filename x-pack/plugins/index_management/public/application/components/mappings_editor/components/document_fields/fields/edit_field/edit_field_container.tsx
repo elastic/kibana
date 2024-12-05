@@ -25,9 +25,10 @@ export const defaultFlyoutProps = {
 
 export interface Props {
   exitEdit: () => void;
+  editFieldButtonRef: React.RefObject<HTMLButtonElement>;
 }
 
-export const EditFieldContainer = React.memo(({ exitEdit }: Props) => {
+export const EditFieldContainer = React.memo(({ exitEdit, editFieldButtonRef }: Props) => {
   const { fields, documentFields } = useMappingsState();
   const dispatch = useDispatch();
   const { updateField, modal } = useUpdateField();
@@ -78,6 +79,7 @@ export const EditFieldContainer = React.memo(({ exitEdit }: Props) => {
         exitEdit={exitEdit}
         updateField={updateField}
         kibanaVersion={kibanaVersion.get()}
+        // editFieldButtonRef={editFieldButtonRef}
       />
       {renderModal()}
     </>

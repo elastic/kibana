@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FormDataProvider } from '../../../../shared_imports';
@@ -19,6 +19,7 @@ interface Props {
   defaultValue: Field;
   isRootLevelField: boolean;
   isMultiField: boolean;
+  fieldTypeInputRef: React.MutableRefObject<HTMLInputElement | null>;
 }
 
 const getTypeDefinition = (type: MainType, subType: SubType): DataTypeDefinition | undefined => {
@@ -41,7 +42,7 @@ const getTypeDefinition = (type: MainType, subType: SubType): DataTypeDefinition
 };
 
 export const EditFieldHeaderForm = React.memo(
-  ({ defaultValue, isRootLevelField, isMultiField }: Props) => {
+  ({ defaultValue, isRootLevelField, isMultiField, fieldTypeInputRef }: Props) => {
     return (
       <>
         <EuiFlexGroup gutterSize="s">
@@ -52,7 +53,11 @@ export const EditFieldHeaderForm = React.memo(
 
           {/* Field type */}
           <EuiFlexItem>
-            <TypeParameter isRootLevelField={isRootLevelField} isMultiField={isMultiField} />
+            <TypeParameter
+              isRootLevelField={isRootLevelField}
+              isMultiField={isMultiField}
+              fieldTypeInputRef={fieldTypeInputRef}
+            />
           </EuiFlexItem>
 
           {/* Field subType (if any) */}

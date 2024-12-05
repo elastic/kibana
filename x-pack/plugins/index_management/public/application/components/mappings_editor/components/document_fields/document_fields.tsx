@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { deNormalize } from '../../lib';
 import { useDispatch, useMappingsState } from '../../mappings_state_context';
@@ -27,6 +27,7 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
+  editFieldButtonRef: React.RefObject<HTMLButtonElement>;
 }
 export const DocumentFields = React.memo(
   ({
@@ -35,6 +36,7 @@ export const DocumentFields = React.memo(
     onCancelAddingNewFields,
     isAddingFields,
     semanticTextInfo,
+    editFieldButtonRef,
   }: Props) => {
     const { fields, documentFields } = useMappingsState();
     const dispatch = useDispatch();
@@ -64,14 +66,14 @@ export const DocumentFields = React.memo(
     const exitEdit = useCallback(() => {
       dispatch({ type: 'documentField.changeStatus', value: 'idle' });
     }, [dispatch]);
-
+    // const editFieldButtonRef = useRef<HTMLButtonElement>(null);
     useEffect(() => {
       if (isEditing) {
         // Open the flyout with the <EditField /> content
         addContentToGlobalFlyout<EditFieldContainerProps>({
           id: 'mappingsEditField',
           Component: EditFieldContainer,
-          props: { exitEdit },
+          props: { exitEdit, editFieldButtonRef },
           flyoutProps: { ...defaultFlyoutProps, onClose: exitEdit },
           cleanUpFunc: exitEdit,
         });

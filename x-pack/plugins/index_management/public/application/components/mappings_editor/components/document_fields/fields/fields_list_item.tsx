@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useRef } from 'react';
 import classNames from 'classnames';
 import {
   EuiFlexGroup,
@@ -64,6 +64,7 @@ interface Props {
   treeDepth: number;
   state: State;
   isAddingFields?: boolean;
+  createFieldFormRef: React.RefObject<HTMLDivElement>;
 }
 
 function FieldListItemComponent(
@@ -85,6 +86,7 @@ function FieldListItemComponent(
     state,
     isAddingFields,
     setPreviousState,
+    createFieldFormRef,
   }: Props,
   ref: React.Ref<HTMLLIElement>
 ) {
@@ -130,6 +132,7 @@ function FieldListItemComponent(
         paddingLeft={indentCreateField}
         maxNestedDepth={maxNestedDepth}
         isAddingFields={isAddingFields}
+        createFieldFormRef={createFieldFormRef}
       />
     );
   };
@@ -141,7 +144,6 @@ function FieldListItemComponent(
 
     const { addMultiFieldButtonLabel, addPropertyButtonLabel, editButtonLabel, deleteButtonLabel } =
       i18nTexts;
-
     return (
       <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
         {canHaveMultiFields && (
@@ -177,6 +179,7 @@ function FieldListItemComponent(
               onClick={editField}
               data-test-subj="editFieldButton"
               aria-label={editButtonLabel}
+              buttonRef={editFieldButtonRef}
             />
           </EuiToolTip>
         </EuiFlexItem>
