@@ -162,7 +162,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
       expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
-        'Setting xpack.task_manager.poll_interval to a value greater than the default (500 ms) can increase task latency and reduce overall throughput. Do not override the default unless it is explicitly required.'
+        'By default, task manager polls occur every 500ms and increases to 3s when the demand is low. Setting xpack.task_manager.poll_interval to a value greater than the default (500 ms) can increase task latency and reduce overall throughput; it is not recommended.'
       );
     });
   });
