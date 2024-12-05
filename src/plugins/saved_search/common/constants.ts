@@ -8,7 +8,10 @@
  */
 
 export const SavedSearchType = 'search';
-export const SavedSearchTypeDisplayName = 'discover session / search'; // It's a new SO name for "search" SO
+// While the SO name is "search" the display name can be customized.
+// We can allow users to filter their SOs by the old `search` name and the new `discover session` name
+// if we define the display name as a combination of them: "discover session / search".
+export const SavedSearchTypeDisplayName = 'discover session / search';
 
 export const LATEST_VERSION = 1;
 
