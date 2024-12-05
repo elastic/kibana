@@ -184,7 +184,7 @@ const mockNavLinks = [
   },
   {
     id: 'enterpriseSearchContent:webCrawlers',
-    title: 'Web crawlers',
+    title: 'Web Crawlers',
     url: '/app/elasticsearch/content/crawlers',
   },
   {
