@@ -11,21 +11,29 @@ import { LLMChain } from 'langchain/chains';
 import { OutputFixingParser } from 'langchain/output_parsers';
 
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import type { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type {
+  DefendInsight,
+  DefendInsightType,
+  DefendInsightsPostRequestBody,
+} from '@kbn/elastic-assistant-common';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import { DEFEND_INSIGHTS_TOOL_ID } from '@kbn/elastic-assistant-common';
 
 import { APP_UI_ID } from '../../../../common';
+import { securityWorkflowInsightsService } from '../../../endpoint/services';
 import { getAnonymizedEvents } from './get_events';
 import { getDefendInsightsOutputParser } from './output_parsers';
 import { getDefendInsightsPrompt } from './prompts';
+import { buildWorkflowInsights } from './workflow_insights_builders';
 
 export const DEFEND_INSIGHTS_TOOL_DESCRIPTION = 'Call this for Elastic Defend insights.';
 
 export interface DefendInsightsToolParams extends AssistantToolParams {
   endpointIds: string[];
   insightType: DefendInsightType;
+  request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
 }
 
 /**
@@ -55,6 +63,7 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
       llm,
       onNewReplacements,
       replacements,
+      request,
     } = params as DefendInsightsToolParams;
 
     return new DynamicTool({
@@ -104,7 +113,13 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
           }),
           timeout: langChainTimeout,
         });
-        const insights = result.records;
+        const insights: DefendInsight[] = result.records;
+
+        const workflowInsights = buildWorkflowInsights({
+          defendInsights: insights,
+          request,
+        });
+        workflowInsights.map(securityWorkflowInsightsService.create);
 
         return JSON.stringify({ eventsContextCount, insights }, null, 2);
       },

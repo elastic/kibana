@@ -85,9 +85,29 @@ describe('getSuppressionTerms', () => {
         alertSuppression: {
           groupBy: ['host.name'],
         },
-        fields: { 'host.name': 'localhost-1' },
+        input: { 'host.name': 'localhost-1' },
       })
     ).toEqual([{ field: 'host.name', value: 'localhost-1' }]);
+  });
+  it('should return suppression terms when using source', () => {
+    expect(
+      getSuppressionTerms({
+        alertSuppression: {
+          groupBy: ['host.name'],
+        },
+        input: { host: { name: 'localhost-1' } },
+      })
+    ).toEqual([{ field: 'host.name', value: 'localhost-1' }]);
+  });
+  it('should return suppression terms when using source and mixed notation', () => {
+    expect(
+      getSuppressionTerms({
+        alertSuppression: {
+          groupBy: ['host.something.name'],
+        },
+        input: { 'host.something': { name: 'localhost-1' } },
+      })
+    ).toEqual([{ field: 'host.something.name', value: 'localhost-1' }]);
   });
   it('should return suppression terms array when fields do not have matches', () => {
     expect(
@@ -95,7 +115,7 @@ describe('getSuppressionTerms', () => {
         alertSuppression: {
           groupBy: ['host.name'],
         },
-        fields: { 'host.ip': '127.0.0.1' },
+        input: { 'host.ip': '127.0.0.1' },
       })
     ).toEqual([{ field: 'host.name', value: null }]);
   });
@@ -105,7 +125,7 @@ describe('getSuppressionTerms', () => {
         alertSuppression: {
           groupBy: ['host.name'],
         },
-        fields: { 'host.name': ['localhost-2', 'localhost-1'] },
+        input: { 'host.name': ['localhost-2', 'localhost-1'] },
       })
     ).toEqual([{ field: 'host.name', value: ['localhost-1', 'localhost-2'] }]);
   });
@@ -115,7 +135,7 @@ describe('getSuppressionTerms', () => {
         alertSuppression: {
           groupBy: ['host.name', 'host.ip'],
         },
-        fields: { 'host.name': ['localhost-1'], 'agent.name': 'test', 'host.ip': '127.0.0.1' },
+        input: { 'host.name': ['localhost-1'], 'agent.name': 'test', 'host.ip': '127.0.0.1' },
       })
     ).toEqual([
       { field: 'host.name', value: ['localhost-1'] },
