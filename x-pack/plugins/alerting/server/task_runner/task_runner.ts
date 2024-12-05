@@ -611,7 +611,6 @@ export class TaskRunner<
           this.alertingEventLogger.reportGap({
             gap,
           });
-          this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
         }
 
         if (!this.cancelled) {
@@ -632,6 +631,10 @@ export class TaskRunner<
             lastRun: lastRunToRaw(lastRun),
             monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
           });
+
+          if (gap) {
+            this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
+          }
         }
 
         if (startedAt) {
