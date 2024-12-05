@@ -14,15 +14,16 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import * as i18n from '../translations';
 import { RiskInformationFlyout } from './risk_information';
 
+const StyledList = styled.ul`
+  list-style-type: disc;
+  padding-left: ${euiThemeVars.euiSizeM};
+`;
+
 export const RiskScoreUsefulLinksSection = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const handleOnOpen = () => setIsFlyoutVisible(true);
   const handleOnClose = () => setIsFlyoutVisible(false);
-  const StyledList = styled.ul`
-    list-style-type: disc;
-    padding-left: ${euiThemeVars.euiSizeM};
-  `;
 
   return (
     <>

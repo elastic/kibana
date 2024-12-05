@@ -14,7 +14,6 @@ import * as i18n from '../translations';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
 
-// jest.mock('../../common/containers/query_toggle');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/hooks/use_app_toasts');
 jest.mock('../api/hooks/use_configure_risk_engine_saved_object');

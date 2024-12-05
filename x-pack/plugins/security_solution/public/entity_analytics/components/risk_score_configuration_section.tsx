@@ -18,12 +18,11 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
-import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
+import { VerticalSeparator } from './styled_vertical_seperator';
 
 export const RiskScoreConfigurationSection = ({
   includeClosedAlerts,
@@ -54,14 +53,6 @@ export const RiskScoreConfigurationSection = ({
   const [savedStart, setSavedStart] = useLocalStorage('savedFrom', from);
   const [savedEnd, setSavedEnd] = useLocalStorage('savedto', to);
 
-  const VerticalSeparator = styled.div`
-    :before {
-      content: '';
-      height: ${euiThemeVars.euiSizeM};
-      border-left: ${euiThemeVars.euiBorderWidthThin} solid ${euiThemeVars.euiColorLightShade};
-    }
-  `;
-
   useEffect(() => {
     if (savedIncludeClosedAlerts !== null && savedIncludeClosedAlerts !== undefined) {
       initialIncludeClosedAlerts.current = savedIncludeClosedAlerts;
@@ -73,8 +64,7 @@ export const RiskScoreConfigurationSection = ({
       setFrom(savedStart);
       setTo(savedEnd);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savedIncludeClosedAlerts, savedStart, savedEnd]);
+  }, [savedIncludeClosedAlerts, savedStart, savedEnd, setIncludeClosedAlerts]);
 
   const onRefresh = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
     setFrom(newStart);
@@ -138,7 +128,7 @@ export const RiskScoreConfigurationSection = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSwitch
-            label="Include closed alerts for risk scoring"
+            label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
             checked={includeClosedAlerts}
             onChange={handleToggle}
             data-test-subj="includeClosedAlertsSwitch"
@@ -167,7 +157,7 @@ export const RiskScoreConfigurationSection = ({
           paddingSize="s"
           position="fixed"
           css={css`
-            margin-left: calc(${euiThemeVars.euiSizeXXL} * 6 + ${euiThemeVars.euiSizeM});
+            margin-left: 15.67vw;
           `}
         >
           <EuiFlexGroup justifyContent="spaceBetween">

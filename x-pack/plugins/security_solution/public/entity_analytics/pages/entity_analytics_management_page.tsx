@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,8 +15,6 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
 import moment from 'moment';
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
@@ -29,45 +27,48 @@ import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useScheduleNowRiskEngineMutation } from '../api/hooks/use_schedule_now_risk_engine_mutation';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
+import { VerticalSeparator } from '../components/styled_vertical_seperator';
+
+const TEN_SECONDS = 10000;
 
 export const EntityAnalyticsManagementPage = () => {
   const privileges = useMissingRiskEnginePrivileges();
   const [includeClosedAlerts, setIncludeClosedAlerts] = useState(false);
   const [from, setFrom] = useState(localStorage.getItem('dateStart') || 'now-30m');
   const [to, setTo] = useState(localStorage.getItem('dateEnd') || 'now');
-  const { data: riskEngineStatus } = useRiskEngineStatus();
+  const { data: riskEngineStatus } = useRiskEngineStatus({
+    refetchInterval: TEN_SECONDS,
+    structuralSharing: false, // Force the component to rerender after every Risk Engine Status API call
+  });
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
   const runEngineEnabled = currentRiskEngineStatus === 'ENABLED';
   const [isLoading, setIsLoading] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
-  const { addSuccess } = useAppToasts();
-  const VerticalSeparator = styled.div`
-    :before {
-      content: '';
-      height: ${euiThemeVars.euiSizeM};
-      border-left: ${euiThemeVars.euiBorderWidthThin} solid ${euiThemeVars.euiColorLightShade};
-    }
-  `;
+  const { addSuccess, addError } = useAppToasts();
 
   const handleRunEngineClick = async () => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
       scheduleNowRiskEngine();
 
       if (!isLoading) {
         addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
       }
     } catch (error) {
-      addSuccess(i18n.RISK_SCORE_ENGINE_RUN_FAILURE, { toastLifeTimeMs: 5000 });
+      addError(error, {
+        title: i18n.RISK_SCORE_ENGINE_RUN_FAILURE,
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleIncludeClosedAlertsToggle = (value: boolean) => {
-    setIncludeClosedAlerts(value);
-  };
+  const handleIncludeClosedAlertsToggle = useCallback(
+    (value: boolean) => {
+      setIncludeClosedAlerts(value);
+    },
+    [setIncludeClosedAlerts]
+  );
 
   const handleDateChange = ({ start, end }: { start: string; end: string }) => {
     setFrom(start);
@@ -87,17 +88,12 @@ export const EntityAnalyticsManagementPage = () => {
     if (!time) {
       return '';
     }
-    const scheduleTime = moment(time);
-    return i18n.RISK_ENGINE_NEXT_RUN_TIME(scheduleTime.fromNow(true));
+    return i18n.RISK_ENGINE_NEXT_RUN_TIME(moment(time).fromNow(true));
   };
 
-  const countDownText = useMemo(
-    () =>
-      isRunning
-        ? 'Now running'
-        : formatTimeFromNow(riskEngineStatus?.risk_engine_task_status?.runAt),
-    [isRunning, riskEngineStatus?.risk_engine_task_status?.runAt]
-  );
+  const countDownText = isRunning
+    ? 'Now running'
+    : formatTimeFromNow(riskEngineStatus?.risk_engine_task_status?.runAt);
 
   return (
     <>

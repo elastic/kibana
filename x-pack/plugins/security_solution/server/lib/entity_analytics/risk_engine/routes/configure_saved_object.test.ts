@@ -29,7 +29,7 @@ describe('riskEnginConfigureSavedObjectRoute', () => {
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     mockRiskEngineDataClient = riskEngineDataClientMock.create();
-    mockRiskEngineDataClient.update_risk_engine_saved_object = jest.fn();
+    mockRiskEngineDataClient.updateRiskEngineSavedObject = jest.fn();
     context = requestContextMock.convertContext(
       requestContextMock.create({
         ...clients,
@@ -58,7 +58,7 @@ describe('riskEnginConfigureSavedObjectRoute', () => {
   it('should call the router with the correct route and handler', async () => {
     const request = buildRequest({});
     await server.inject(request, context);
-    expect(mockRiskEngineDataClient.update_risk_engine_saved_object).toHaveBeenCalled();
+    expect(mockRiskEngineDataClient.updateRiskEngineSavedObject).toHaveBeenCalled();
   });
 
   it('returns a 200 when the saved object is updated successfully', async () => {
@@ -70,7 +70,7 @@ describe('riskEnginConfigureSavedObjectRoute', () => {
     const response = await server.inject(request, context);
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ risk_engine_saved_object_configured: true });
-    expect(mockRiskEngineDataClient.update_risk_engine_saved_object).toHaveBeenCalledWith({
+    expect(mockRiskEngineDataClient.updateRiskEngineSavedObject).toHaveBeenCalledWith({
       excludeAlertStatuses: ['open'],
       range: { start: 'now-30d', end: 'now' },
       excludeAlertTags: ['tag1'],

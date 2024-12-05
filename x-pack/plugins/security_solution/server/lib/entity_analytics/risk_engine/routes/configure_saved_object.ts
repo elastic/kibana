@@ -11,7 +11,11 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { ConfigureRiskEngineSavedObjectResponse } from '../../../../../common/api/entity_analytics';
 import { ConfigureRiskEngineSavedObjectRequestBody } from '../../../../../common/api/entity_analytics';
-import { RISK_ENGINE_CONFIGURE_SO_URL, APP_ID } from '../../../../../common/constants';
+import {
+  RISK_ENGINE_CONFIGURE_SO_URL,
+  APP_ID,
+  API_VERSIONS,
+} from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -34,7 +38,7 @@ export const riskEngineConfigureSavedObjectRoute = (
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: { body: buildRouteValidationWithZod(ConfigureRiskEngineSavedObjectRequestBody) },
         },
@@ -85,7 +89,7 @@ export const riskEngineConfigureSavedObjectRoute = (
           }
 
           try {
-            await riskEngineClient.update_risk_engine_saved_object({
+            await riskEngineClient.updateRiskEngineSavedObject({
               excludeAlertStatuses: request.body.exclude_alert_statuses,
               range: request.body.range,
               excludeAlertTags: request.body.exclude_alert_tags,

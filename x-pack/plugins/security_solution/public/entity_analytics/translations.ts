@@ -317,6 +317,13 @@ export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
   }
 );
 
+export const INCLUDE_CLOSED_ALERTS_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.includeClosedAlertsLabel',
+  {
+    defaultMessage: 'Include closed alerts for risk scoring',
+  }
+);
+
 export const RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.riskScore.includeClosedAlertsDescription',
   {

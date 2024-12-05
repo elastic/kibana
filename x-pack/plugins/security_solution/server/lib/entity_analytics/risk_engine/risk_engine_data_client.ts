@@ -323,27 +323,24 @@ export class RiskEngineDataClient {
     return RiskEngineStatusEnum.ENABLED;
   }
 
-  public async update_risk_engine_saved_object(attributes: {}) {
+  public async updateRiskEngineSavedObject(attributes: {}) {
     try {
+      const configuration = await this.getConfiguration();
+      if (!configuration) {
+        await initSavedObjects({
+          savedObjectsClient: this.options.soClient,
+          namespace: this.options.namespace,
+        });
+      }
       return await updateSavedObjectAttribute({
         savedObjectsClient: this.options.soClient,
         attributes,
       });
     } catch (e) {
-      this.options.logger.error(`Error updating saved object attribute: ${e.message}`);
-      try {
-        await initSavedObjects({
-          savedObjectsClient: this.options.soClient,
-          namespace: this.options.namespace,
-        });
-        return await updateSavedObjectAttribute({
-          savedObjectsClient: this.options.soClient,
-          attributes,
-        });
-      } catch (initError) {
-        this.options.logger.error(`Error initializing saved object: ${initError.message}`);
-        throw initError;
-      }
+      this.options.logger.error(
+        `Error updating risk score engine saved object attributes: ${e.message}`
+      );
+      throw e;
     }
   }
 }
