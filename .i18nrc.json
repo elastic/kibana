@@ -22,7 +22,7 @@
     "cloud": "packages/cloud",
     "domDragDrop": "packages/kbn-dom-drag-drop",
     "controls": "src/plugins/controls",
-    "data": "src/plugins/data",
+    "data": "src/platform/plugins/shared/data",
     "observabilityAlertDetails": "x-pack/packages/observability/alert_details",
     "dataViews": "src/plugins/data_views",
     "defaultNavigation": "packages/default-nav",

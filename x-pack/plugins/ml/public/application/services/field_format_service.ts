@@ -29,7 +29,7 @@ export class FieldFormatService {
   // specified IDs. List of Kibana data views is passed, with a title
   // attribute set in each pattern which will be compared to the indices
   // configured in the datafeed of each job.
-  // Builds a map of Kibana FieldFormats (plugins/data/common/field_formats)
+  // Builds a map of Kibana FieldFormats (platform/plugins/shared/data/common/field_formats)
   // against detector index by job ID.
   async populateFormats(jobIds: string[]): Promise<FormatsByJobId> {
     // Populate a map of data view IDs against job ID, by finding the ID of the data

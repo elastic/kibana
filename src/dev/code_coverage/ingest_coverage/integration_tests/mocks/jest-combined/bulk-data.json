@@ -1897,7 +1897,7 @@
       "pct": 100
     }
   },
-  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/data/public/actions/filters/create_filters_from_event.js": {
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_platform/plugins/shared/data/public/actions/filters/create_filters_from_event.js": {
     "lines": {
       "total": 39,
       "covered": 3,
@@ -1923,7 +1923,7 @@
       "pct": 0
     }
   },
-  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/data/public/search/expressions/create_filter.js": {
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_platform/plugins/shared/data/public/search/expressions/create_filter.js": {
     "lines": {
       "total": 25,
       "covered": 0,

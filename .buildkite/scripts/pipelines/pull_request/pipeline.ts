@@ -48,7 +48,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^src\/plugins\/data/,
+        /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/plugins\/actions/,
         /^x-pack\/plugins\/alerting/,
         /^x-pack\/plugins\/event_log/,
@@ -241,7 +241,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^package.json/,
         /^packages\/kbn-securitysolution-.*/,
         /^x-pack\/plugins\/alerting/,
-        /^x-pack\/plugins\/data_views\/common/,
+        /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/plugins\/lists/,
         /^x-pack\/plugins\/rule_registry\/common/,
         /^x-pack\/plugins\/security_solution/,
@@ -307,8 +307,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/core/,
         /^src\/platform\/plugins\/shared\/charts/,
         /^src\/plugins\/controls/,
-        /^src\/plugins\/data/,
-        /^src\/plugins\/data_views/,
+        /^src\/platform\/plugins\/shared\/data/,
+        /^src\/platform\/plugins\/shared\/data_views/,
         /^src\/plugins\/discover/,
         /^src\/plugins\/field_formats/,
         /^src\/plugins\/inspector/,
@@ -323,7 +323,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/packages\/security-solution/,
         /^x-pack\/plugins\/alerting/,
         /^x-pack\/plugins\/cases/,
-        /^x-pack\/plugins\/data_views\/common/,
+        /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/plugins\/elastic_assistant/,
         /^x-pack\/plugins\/lists/,
         /^x-pack\/plugins\/rule_registry\/common/,
