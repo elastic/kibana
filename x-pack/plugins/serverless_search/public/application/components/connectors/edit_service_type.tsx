@@ -251,9 +251,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         selectedOptions={initialOptions
           .filter((option) => option.value?.serviceType === connector.service_type)
           .slice(0, 1)}
-        onChange={(selectedItem) => {
-          onSelectedOptionChange(selectedItem);
-        }}
+        onChange={onSelectedOptionChange}
         renderOption={renderOption}
         rowHeight={(euiTheme.base / 2) * 5}
       />
