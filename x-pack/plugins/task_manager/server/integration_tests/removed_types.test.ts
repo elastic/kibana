@@ -28,7 +28,8 @@ jest.mock('../monitoring/workload_statistics', () => {
   };
 });
 
-describe('unrecognized task types', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/194208
+describe.skip('unrecognized task types', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManagerPlugin: TaskManagerStartContract;

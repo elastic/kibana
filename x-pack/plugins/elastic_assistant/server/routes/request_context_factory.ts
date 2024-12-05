@@ -78,7 +78,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
-
+      llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
 
       telemetry: core.analytics,
@@ -109,6 +109,16 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAttackDiscoveryDataClient: memoize(() => {
         const currentUser = getCurrentUser();
         return this.assistantService.createAttackDiscoveryDataClient({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          currentUser,
+        });
+      }),
+
+      getDefendInsightsDataClient: memoize(() => {
+        const currentUser = getCurrentUser();
+        return this.assistantService.createDefendInsightsDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
           logger: this.logger,

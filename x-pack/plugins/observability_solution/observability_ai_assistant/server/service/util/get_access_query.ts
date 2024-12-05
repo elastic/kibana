@@ -17,10 +17,7 @@ export function getAccessQuery({
         filter: [
           {
             bool: {
-              should: [
-                { term: { public: true } },
-                ...(user ? [{ term: { 'user.name': user.name } }] : []),
-              ],
+              should: [{ term: { public: true } }, ...getUserAccessFilters(user)],
               minimum_should_match: 1,
             },
           },
@@ -48,4 +45,24 @@ export function getAccessQuery({
       },
     },
   ];
+}
+
+function getUserAccessFilters(user?: { name: string; id?: string }) {
+  if (!user) {
+    return [];
+  }
+
+  if (user.id) {
+    return [
+      { term: { 'user.id': user.id } },
+      {
+        bool: {
+          must_not: { exists: { field: 'user.id' } },
+          must: { term: { 'user.name': user.name } },
+        },
+      },
+    ];
+  }
+
+  return [{ term: { 'user.name': user.name } }];
 }

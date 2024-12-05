@@ -6,7 +6,7 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
@@ -20,21 +20,22 @@ import {
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import {
-  AI_ASSISTANT_KB_INFERENCE_ID,
   createInferenceEndpoint,
   deleteInferenceEndpoint,
-  getInferenceEndpoint,
+  getElserModelStatus,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
-import { recallFromConnectors } from './recall_from_connectors';
+import { recallFromSearchConnectors } from './recall_from_search_connectors';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { ObservabilityAIAssistantConfig } from '../../config';
 
 interface Dependencies {
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: {
     asInternalUser: ElasticsearchClient;
   };
   logger: Logger;
-  getSearchConnectorModelId: () => Promise<string>;
-  enabled: boolean;
+  config: ObservabilityAIAssistantConfig;
 }
 
 export interface RecalledEntry {
@@ -59,13 +60,13 @@ export class KnowledgeBaseService {
     },
     modelId: string | undefined
   ) {
-    await deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger }).catch((e) => {}); // ensure existing inference endpoint is deleted
+    await deleteInferenceEndpoint({ esClient }).catch((e) => {}); // ensure existing inference endpoint is deleted
     return createInferenceEndpoint({ esClient, logger: this.dependencies.logger, modelId });
   }
 
   async reset(esClient: { asCurrentUser: ElasticsearchClient }) {
     try {
-      await deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger });
+      await deleteInferenceEndpoint({ esClient });
     } catch (error) {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
         return;
@@ -141,14 +142,13 @@ export class KnowledgeBaseService {
     esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
     uiSettingsClient: IUiSettingsClient;
   }): Promise<RecalledEntry[]> => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
     }
 
     this.dependencies.logger.debug(
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
-    const modelId = await this.dependencies.getSearchConnectorModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
       this.recallFromKnowledgeBase({
@@ -162,11 +162,11 @@ export class KnowledgeBaseService {
         }
         throw error;
       }),
-      recallFromConnectors({
+      recallFromSearchConnectors({
         esClient,
         uiSettingsClient,
         queries,
-        modelId,
+        core: this.dependencies.core,
         logger: this.dependencies.logger,
       }).catch((error) => {
         this.dependencies.logger.debug('Error getting data from search indices');
@@ -214,7 +214,7 @@ export class KnowledgeBaseService {
     namespace: string,
     user?: { name: string }
   ): Promise<Array<Instruction & { public?: boolean }>> => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
     }
     try {
@@ -257,7 +257,7 @@ export class KnowledgeBaseService {
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
     }
     try {
@@ -330,7 +330,7 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }) => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return null;
     }
     const res = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
@@ -393,7 +393,7 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }): Promise<void> => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return;
     }
 
@@ -404,7 +404,7 @@ export class KnowledgeBaseService {
         document: {
           '@timestamp': new Date().toISOString(),
           ...doc,
-          semantic_text: doc.text,
+          ...(doc.text ? { semantic_text: doc.text } : {}),
           user,
           namespace,
         },
@@ -436,58 +436,10 @@ export class KnowledgeBaseService {
   };
 
   getStatus = async () => {
-    let errorMessage = '';
-    const endpoint = await getInferenceEndpoint({
+    return getElserModelStatus({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
-    }).catch((error) => {
-      if (!isInferenceEndpointMissingOrUnavailable(error)) {
-        throw error;
-      }
-      this.dependencies.logger.error(`Failed to get inference endpoint: ${error.message}`);
-      errorMessage = error.message;
+      config: this.dependencies.config,
     });
-
-    const enabled = this.dependencies.enabled;
-    if (!endpoint) {
-      return { ready: false, enabled, errorMessage };
-    }
-
-    const modelId = endpoint.service_settings?.model_id;
-    const modelStats = await this.dependencies.esClient.asInternalUser.ml
-      .getTrainedModelsStats({ model_id: modelId })
-      .catch((error) => {
-        this.dependencies.logger.error(`Failed to get model stats: ${error.message}`);
-        errorMessage = error.message;
-      });
-
-    if (!modelStats) {
-      return { ready: false, enabled, errorMessage };
-    }
-
-    const elserModelStats = modelStats.trained_model_stats.find(
-      (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
-    );
-    const deploymentState = elserModelStats?.deployment_stats?.state;
-    const allocationState = elserModelStats?.deployment_stats?.allocation_status.state;
-    const allocationCount =
-      elserModelStats?.deployment_stats?.allocation_status.allocation_count ?? 0;
-    const ready =
-      deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
-
-    this.dependencies.logger.debug(
-      `Model deployment state: ${deploymentState}, allocation state: ${allocationState}, ready: ${ready}`
-    );
-
-    return {
-      endpoint,
-      ready,
-      enabled,
-      model_stats: {
-        allocation_count: allocationCount,
-        deployment_state: deploymentState,
-        allocation_state: allocationState,
-      },
-    };
   };
 }

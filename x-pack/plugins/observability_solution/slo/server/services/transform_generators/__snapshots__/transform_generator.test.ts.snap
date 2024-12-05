@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Transform Generator builds common runtime mappings and group by with single group by 1`] = `Object {}`;
-
-exports[`Transform Generator builds common runtime mappings and group by with single group by 2`] = `
+exports[`Transform Generator buildCommonGroupBy builds common groupBy with single group by 1`] = `
 Object {
   "@timestamp": Object {
     "date_histogram": Object {
@@ -18,9 +16,7 @@ Object {
 }
 `;
 
-exports[`Transform Generator builds common runtime mappings and group by with single group by 3`] = `Object {}`;
-
-exports[`Transform Generator builds common runtime mappings and group by with single group by 4`] = `
+exports[`Transform Generator buildCommonGroupBy builds common groupBy with single group by 2`] = `
 Object {
   "@timestamp": Object {
     "date_histogram": Object {
@@ -36,9 +32,7 @@ Object {
 }
 `;
 
-exports[`Transform Generator builds common runtime mappings without multi group by 1`] = `Object {}`;
-
-exports[`Transform Generator builds common runtime mappings without multi group by 2`] = `
+exports[`Transform Generator buildCommonGroupBy builds common groupBy with single group by 3`] = `
 Object {
   "@timestamp": Object {
     "date_histogram": Object {
@@ -59,9 +53,7 @@ Object {
 }
 `;
 
-exports[`Transform Generator builds empty runtime mappings without group by 1`] = `Object {}`;
-
-exports[`Transform Generator builds empty runtime mappings without group by 2`] = `
+exports[`Transform Generator buildCommonGroupBy builds empty runtime mappings without group by 1`] = `
 Object {
   "@timestamp": Object {
     "date_histogram": Object {
@@ -69,5 +61,13 @@ Object {
       "fixed_interval": "1m",
     },
   },
+}
+`;
+
+exports[`Transform Generator settings builds the transform settings 1`] = `
+Object {
+  "frequency": "2m",
+  "sync_delay": "10m",
+  "sync_field": "my_timestamp_sync_field",
 }
 `;

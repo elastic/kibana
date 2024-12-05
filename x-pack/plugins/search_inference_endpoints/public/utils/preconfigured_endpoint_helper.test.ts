@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { PRECONFIGURED_ENDPOINTS } from '../components/all_inference_endpoints/constants';
 import { isEndpointPreconfigured } from './preconfigured_endpoint_helper';
 
 describe('Preconfigured Endpoint helper', () => {
   it('return true for preconfigured elser', () => {
-    expect(isEndpointPreconfigured(PRECONFIGURED_ENDPOINTS.ELSER)).toEqual(true);
+    expect(isEndpointPreconfigured('.preconfigured_elser')).toEqual(true);
   });
 
   it('return true for preconfigured e5', () => {
-    expect(isEndpointPreconfigured(PRECONFIGURED_ENDPOINTS.E5)).toEqual(true);
+    expect(isEndpointPreconfigured('.preconfigured_e5')).toEqual(true);
   });
 
   it('return false for other endpoints', () => {

@@ -594,21 +594,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.DOC_TABLE_LEGACY_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DOC_TABLE_LEGACY_ID",
-        "description": [],
-        "signature": [
-          "\"doc_table:legacy\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.ENABLE_ESQL_ID",
         "type": "string",
         "tags": [],
@@ -1871,6 +1856,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.THEME_NAME_ID",
+        "type": "string",
+        "tags": [],
+        "label": "THEME_NAME_ID",
+        "description": [],
+        "signature": [
+          "\"theme:name\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.TIMELION_ES_DEFAULT_INDEX_ID",
         "type": "string",
         "tags": [],
@@ -1983,21 +1983,6 @@
         "description": [],
         "signature": [
           "\"timepicker:timeDefaults\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.TRUNCATE_MAX_HEIGHT_ID",
-        "type": "string",
-        "tags": [],
-        "label": "TRUNCATE_MAX_HEIGHT_ID",
-        "description": [],
-        "signature": [
-          "\"truncate:maxHeight\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

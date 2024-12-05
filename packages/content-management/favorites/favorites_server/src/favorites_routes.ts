@@ -14,12 +14,9 @@ import {
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { FavoritesService } from './favorites_service';
+import { FavoritesService, FavoritesLimitExceededError } from './favorites_service';
 import { favoritesSavedObjectType } from './favorites_saved_object';
-
-// only dashboard is supported for now
-// TODO: make configurable or allow any string
-const typeSchema = schema.oneOf([schema.literal('dashboard')]);
+import { FavoritesRegistry } from './favorites_registry';
 
 /**
  * @public
@@ -27,9 +24,45 @@ const typeSchema = schema.oneOf([schema.literal('dashboard')]);
  */
 export interface GetFavoritesResponse {
   favoriteIds: string[];
+  favoriteMetadata?: Record<string, object>;
 }
 
-export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; logger: Logger }) {
+export interface AddFavoriteResponse {
+  favoriteIds: string[];
+}
+
+export interface RemoveFavoriteResponse {
+  favoriteIds: string[];
+}
+
+export function registerFavoritesRoutes({
+  core,
+  logger,
+  favoritesRegistry,
+}: {
+  core: CoreSetup;
+  logger: Logger;
+  favoritesRegistry: FavoritesRegistry;
+}) {
+  const typeSchema = schema.string({
+    validate: (type) => {
+      if (!favoritesRegistry.hasType(type)) {
+        return `Unknown favorite type: ${type}`;
+      }
+    },
+  });
+
+  const metadataSchema = schema.maybe(
+    schema.object(
+      {
+        // validated later by the registry depending on the type
+      },
+      {
+        unknowns: 'allow',
+      }
+    )
+  );
+
   const router = core.http.createRouter();
 
   const getSavedObjectClient = (coreRequestHandlerContext: CoreRequestHandlerContext) => {
@@ -49,6 +82,13 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
           id: schema.string(),
           type: typeSchema,
         }),
+        body: schema.maybe(
+          schema.nullable(
+            schema.object({
+              metadata: metadataSchema,
+            })
+          )
+        ),
       },
       // we don't protect the route with any access tags as
       // we only give access to the current user's favorites ids
@@ -67,13 +107,35 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
       const favorites = new FavoritesService(type, userId, {
         savedObjectClient: getSavedObjectClient(coreRequestHandlerContext),
         logger,
+        favoritesRegistry,
       });
 
-      const favoriteIds: GetFavoritesResponse = await favorites.addFavorite({
-        id: request.params.id,
-      });
+      const id = request.params.id;
+      const metadata = request.body?.metadata;
 
-      return response.ok({ body: favoriteIds });
+      try {
+        favoritesRegistry.validateMetadata(type, metadata);
+      } catch (e) {
+        return response.badRequest({ body: { message: e.message } });
+      }
+
+      try {
+        const favoritesResult = await favorites.addFavorite({
+          id,
+          metadata,
+        });
+        const addFavoritesResponse: AddFavoriteResponse = {
+          favoriteIds: favoritesResult.favoriteIds,
+        };
+
+        return response.ok({ body: addFavoritesResponse });
+      } catch (e) {
+        if (e instanceof FavoritesLimitExceededError) {
+          return response.forbidden({ body: { message: e.message } });
+        }
+
+        throw e; // unexpected error, let the global error handler deal with it
+      }
     }
   );
 
@@ -102,12 +164,18 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
       const favorites = new FavoritesService(type, userId, {
         savedObjectClient: getSavedObjectClient(coreRequestHandlerContext),
         logger,
+        favoritesRegistry,
       });
 
-      const favoriteIds: GetFavoritesResponse = await favorites.removeFavorite({
+      const favoritesResult: GetFavoritesResponse = await favorites.removeFavorite({
         id: request.params.id,
       });
-      return response.ok({ body: favoriteIds });
+
+      const removeFavoriteResponse: RemoveFavoriteResponse = {
+        favoriteIds: favoritesResult.favoriteIds,
+      };
+
+      return response.ok({ body: removeFavoriteResponse });
     }
   );
 
@@ -135,12 +203,18 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
       const favorites = new FavoritesService(type, userId, {
         savedObjectClient: getSavedObjectClient(coreRequestHandlerContext),
         logger,
+        favoritesRegistry,
       });
 
-      const getFavoritesResponse: GetFavoritesResponse = await favorites.getFavorites();
+      const favoritesResult = await favorites.getFavorites();
+
+      const favoritesResponse: GetFavoritesResponse = {
+        favoriteIds: favoritesResult.favoriteIds,
+        favoriteMetadata: favoritesResult.favoriteMetadata,
+      };
 
       return response.ok({
-        body: getFavoritesResponse,
+        body: favoritesResponse,
       });
     }
   );

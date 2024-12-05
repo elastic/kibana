@@ -25,8 +25,10 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
     .get({
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL_FIND,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -49,7 +51,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
 
           const rules = await findRules({
             rulesClient,

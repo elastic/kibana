@@ -151,7 +151,7 @@ export const sharedOas = {
         tags: ['versioned'],
       },
     },
-    '/foo/{id}/{path*}': {
+    '/foo/{id}/{path}': {
       get: {
         description: 'route description',
         operationId: 'get-foo-id-path',

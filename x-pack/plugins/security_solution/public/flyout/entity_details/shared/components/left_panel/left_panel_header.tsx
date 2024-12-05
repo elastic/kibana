@@ -28,6 +28,7 @@ export enum EntityDetailsLeftPanelTab {
 export enum CspInsightLeftPanelSubTab {
   MISCONFIGURATIONS = 'misconfigurationTabId',
   VULNERABILITIES = 'vulnerabilitiesTabId',
+  ALERTS = 'alertsTabId',
 }
 
 export interface PanelHeaderProps {

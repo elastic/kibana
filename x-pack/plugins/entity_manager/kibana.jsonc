@@ -8,9 +8,14 @@
   "plugin": {
     "id": "entityManager",
     "configPath": ["xpack", "entityManager"],
-    "requiredPlugins": ["security", "encryptedSavedObjects", "licensing"],
     "browser": true,
     "server": true,
+    "requiredPlugins": [
+      "security",
+      "encryptedSavedObjects",
+      "licensing",
+      "features"
+    ],
     "requiredBundles": []
   }
 }

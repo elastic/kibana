@@ -15,7 +15,7 @@ import type { IRouter } from '@kbn/core-http-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
 import { type ServiceStatus, type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
-import { StatusResponse } from '@kbn/core-status-common-internal';
+import type { StatusResponse } from '@kbn/core-status-common';
 import { calculateLegacyStatus, type LegacyStatusInfo } from '../legacy_status';
 import { statusResponse, type RedactedStatusHttpBody } from './status_response_schemas';
 

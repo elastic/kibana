@@ -21,8 +21,6 @@ export type GetAttackDiscoveryGraph = (
   params: GetDefaultAttackDiscoveryGraphParams
 ) => DefaultAttackDiscoveryGraph;
 
-export type GraphType = 'assistant' | 'attack-discovery';
-
 export interface AssistantGraphMetadata {
   getDefaultAssistantGraph: GetAssistantGraph;
   graphType: 'assistant';

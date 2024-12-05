@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useCreateTimeline } from './use_create_timeline';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { RowRendererCount, TimelineTypeEnum } from '../../../common/api/timeline';
