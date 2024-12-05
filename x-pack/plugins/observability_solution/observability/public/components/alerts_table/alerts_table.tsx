@@ -9,6 +9,7 @@ import React from 'react';
 import { ALERT_DURATION } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { ObservabilityPublicStart } from '../..';
 import AlertActions from '../alert_actions/alert_actions';
 import { useKibana } from '../../utils/kibana_react';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
@@ -50,7 +51,7 @@ export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTablePro
     cases,
     settings,
     observability,
-  } = useKibana().services;
+  } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
   return (
