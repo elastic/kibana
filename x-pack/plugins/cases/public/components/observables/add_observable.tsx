@@ -42,11 +42,9 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
 
   const handleCreateObservable = useCallback(
     async (observable: ObservablePost) => {
-      await postObservables(
-        {
-          observable,
-        },
-      );
+      await postObservables({
+        observable,
+      });
 
       showSuccessToast(i18n.OBSERVABLE_CREATED);
       refreshCaseViewPage();

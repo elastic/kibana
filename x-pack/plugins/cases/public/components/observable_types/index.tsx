@@ -38,8 +38,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   observableTypes,
 }) => {
   const { permissions } = useCasesContext();
-  const canAddObservableTypes =
-    !disabled && permissions.settings;
+  const canAddObservableTypes = !disabled && permissions.settings;
   const [error, setError] = useState<boolean>(false);
 
   const onAddCustomField = useCallback(() => {
