@@ -15,7 +15,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
-import { calculateFromValueWithRuleScheduleFields } from '../../../rule_types/utils/utils';
+import { calculateFromValue } from '../../../rule_types/utils/utils';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -255,10 +255,7 @@ const applyBulkActionEditToRuleParams = (
     }
     // update look-back period in from and meta.from fields
     case BulkActionEditTypeEnum.set_schedule: {
-      const from = calculateFromValueWithRuleScheduleFields(
-        action.value.interval,
-        action.value.lookback
-      );
+      const from = calculateFromValue(action.value.interval, action.value.lookback);
 
       ruleParams = {
         ...ruleParams,
@@ -266,7 +263,7 @@ const applyBulkActionEditToRuleParams = (
           ...ruleParams.meta,
           from: action.value.lookback,
         },
-        from: `now-${from}s`,
+        from,
       };
 
       break;

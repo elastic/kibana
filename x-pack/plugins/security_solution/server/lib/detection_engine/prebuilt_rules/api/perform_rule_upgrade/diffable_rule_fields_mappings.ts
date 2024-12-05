@@ -15,7 +15,7 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import { type AllFieldsDiff } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import { calculateFromValueWithRuleScheduleFields } from '../../../rule_types/utils/utils';
+import { calculateFromValue } from '../../../rule_types/utils/utils';
 
 /**
  * Retrieves and transforms the value for a specific field from a DiffableRule group.
@@ -202,11 +202,8 @@ export const transformDiffableFieldValues = (
   diffableFieldValue: RuleSchedule | InlineKqlQuery | unknown
 ): TransformValuesReturnType => {
   if (fieldName === 'from' && isRuleSchedule(diffableFieldValue)) {
-    const from = calculateFromValueWithRuleScheduleFields(
-      diffableFieldValue.interval,
-      diffableFieldValue.lookback
-    );
-    return { type: 'TRANSFORMED_FIELD', value: `now-${from}s` };
+    const from = calculateFromValue(diffableFieldValue.interval, diffableFieldValue.lookback);
+    return { type: 'TRANSFORMED_FIELD', value: from };
   } else if (fieldName === 'to') {
     return { type: 'TRANSFORMED_FIELD', value: `now` };
   } else if (fieldName === 'saved_id' && isInlineQuery(diffableFieldValue)) {
