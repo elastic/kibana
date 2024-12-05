@@ -16,7 +16,7 @@
     "xpack.stackConnectors": "plugins/stack_connectors",
     "xpack.apm": "plugins/observability_solution/apm",
     "xpack.apmDataAccess": "plugins/observability_solution/apm_data_access",
-    "xpack.banners": "plugins/banners",
+    "xpack.banners": "platform/plugins/private/banners",
     "xpack.canvas": "plugins/canvas",
     "xpack.cases": "plugins/cases",
     "xpack.cloud": "plugins/cloud",
