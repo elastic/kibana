@@ -316,7 +316,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/plugins\/kibana_utils/,
         /^src\/platform\/plugins\/shared\/saved_search/,
         /^src\/plugins\/ui_actions/,
-        /^src\/plugins\/unified_histogram/,
+        /^src\/platform\/plugins\/shared\/unified_histogram/,
         /^src\/plugins\/unified_search/,
         /^x-pack\/packages\/kbn-elastic-assistant/,
         /^x-pack\/packages\/kbn-elastic-assistant-common/,
