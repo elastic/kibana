@@ -305,7 +305,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/react/,
         /^packages\/shared-ux/,
         /^src\/core/,
-        /^src\/plugins\/charts/,
+        /^src\/platform\/plugins\/shared\/charts/,
         /^src\/plugins\/controls/,
         /^src\/plugins\/data/,
         /^src\/plugins\/data_views/,
