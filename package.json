@@ -884,7 +884,7 @@
     "@kbn/shared-ux-error-boundary": "link:src/platform/packages/shared/shared-ux/error_boundary",
     "@kbn/shared-ux-file-context": "link:src/platform/packages/shared/shared-ux/file/context",
     "@kbn/shared-ux-file-image": "link:src/platform/packages/shared/shared-ux/file/image/impl",
-    "@kbn/shared-ux-file-image-mocks": "link:packages/shared-ux/file/image/mocks",
+    "@kbn/shared-ux-file-image-mocks": "link:src/platform/packages/shared/shared-ux/file/image/mocks",
     "@kbn/shared-ux-file-mocks": "link:packages/shared-ux/file/mocks",
     "@kbn/shared-ux-file-picker": "link:packages/shared-ux/file/file_picker/impl",
     "@kbn/shared-ux-file-types": "link:packages/shared-ux/file/types",
