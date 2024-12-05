@@ -550,7 +550,6 @@ packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/kbn-zod @elastic/kibana-core
-packages/kbn-zod-helpers @elastic/security-detection-rule-management
 packages/presentation/presentation_containers @elastic/kibana-presentation
 packages/presentation/presentation_publishing @elastic/kibana-presentation
 packages/react/kibana_context/common @elastic/appex-sharedux
@@ -623,6 +622,7 @@ packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
+src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
