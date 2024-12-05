@@ -7,31 +7,33 @@
 
 import React from 'react';
 
-import { EuiHealth, EuiTextColor, transparentize } from '@elastic/eui';
+import { EuiHealth, EuiTextColor, useEuiTheme } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
-import { euiLightVars } from '@kbn/ui-theme';
 
 import { RISK_SEVERITY_COLOUR } from '../../../common/utils';
 import { HoverPopover } from '../../../../common/components/hover_popover';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
-const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: boolean }>`
+const RiskBadge = styled.div<{
+  $severity: RiskSeverity;
+  $hideBackgroundColor: boolean;
+}>`
   ${({ theme, $severity, $hideBackgroundColor }) => css`
     width: fit-content;
-    padding-right: ${theme.eui.euiSizeS};
-    padding-left: ${theme.eui.euiSizeXS};
+    padding-right: ${theme.size.xs};
+    padding-left: ${theme.size.xs};
 
     ${($severity === 'Critical' || $severity === 'High') &&
     !$hideBackgroundColor &&
     css`
-      background-color: ${transparentize(theme.eui.euiColorDanger, 0.2)};
+      background-color: ${theme.colors.backgroundLightDanger};
       border-radius: 999px; // pill shaped
     `};
   `}
 `;
 const TooltipContainer = styled.div`
-  padding: ${({ theme }) => theme.eui.euiSizeS};
+  padding: ${({ theme }) => theme.size.s};
 `;
 
 export const RiskScoreLevel: React.FC<{
@@ -68,18 +70,21 @@ const RiskScoreBadge: React.FC<{
   severity: RiskSeverity;
   hideBackgroundColor?: boolean;
   ['data-test-subj']?: string;
-}> = React.memo(({ severity, hideBackgroundColor = false, 'data-test-subj': dataTestSubj }) => (
-  <RiskBadge
-    color={euiLightVars.euiColorDanger}
-    $severity={severity}
-    $hideBackgroundColor={hideBackgroundColor}
-    data-test-subj={dataTestSubj ?? 'risk-score'}
-  >
-    <EuiTextColor color="default">
-      <EuiHealth className="eui-alignMiddle" color={RISK_SEVERITY_COLOUR[severity]}>
-        {severity}
-      </EuiHealth>
-    </EuiTextColor>
-  </RiskBadge>
-));
+}> = React.memo(({ severity, hideBackgroundColor = false, 'data-test-subj': dataTestSubj }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <RiskBadge
+      color={euiTheme.colors.danger}
+      $severity={severity}
+      $hideBackgroundColor={hideBackgroundColor}
+      data-test-subj={dataTestSubj ?? 'risk-score'}
+    >
+      <EuiTextColor color="default">
+        <EuiHealth className="eui-alignMiddle" color={RISK_SEVERITY_COLOUR[severity]}>
+          {severity}
+        </EuiHealth>
+      </EuiTextColor>
+    </RiskBadge>
+  );
+});
 RiskScoreBadge.displayName = 'RiskScoreBadge';
