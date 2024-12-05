@@ -9,21 +9,9 @@ import { useMemo } from 'react';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
-import type { TrainedModelStat } from '../../../../common/types/trained_models';
 import type { ManagementListResponse } from '../../../../common/types/management';
 
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-
-export interface InferenceQueryParams {
-  decompress_definition?: boolean;
-  from?: number;
-  include_model_definition?: boolean;
-  size?: number;
-  tags?: string;
-  // Custom kibana endpoint query params
-  with_pipelines?: boolean;
-  include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
-}
 
 export interface InferenceStatsQueryParams {
   from?: number;
@@ -35,11 +23,6 @@ export interface IngestStats {
   time_in_millis: number;
   current: number;
   failed: number;
-}
-
-export interface InferenceStatsResponse {
-  count: number;
-  trained_model_stats: TrainedModelStat[];
 }
 
 /**
