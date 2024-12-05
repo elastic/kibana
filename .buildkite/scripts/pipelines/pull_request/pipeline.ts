@@ -113,30 +113,42 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) {
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
     }
 
     if (
-      await doAnyChangesMatch([
+      (await doAnyChangesMatch([
         /^x-pack\/plugins\/observability_solution\/synthetics/,
         /^x-pack\/plugins\/observability_solution\/exploratory_view/,
-      ])
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
     }
 
     if (
-      await doAnyChangesMatch([
+      (await doAnyChangesMatch([
         /^x-pack\/plugins\/observability_solution\/ux/,
         /^x-pack\/plugins\/observability_solution\/exploratory_view/,
-      ])
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution/])) {
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/observability_solution/,
+        /^package.json/,
+        /^yarn.lock/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/slo_plugin_e2e.yml'));
     }
 

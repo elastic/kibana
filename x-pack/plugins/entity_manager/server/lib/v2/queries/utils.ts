@@ -65,3 +65,7 @@ export function mergeEntitiesList(
 
   return Object.values(instances);
 }
+
+export function asKeyword(field: string) {
+  return `${field}::keyword`;
+}
