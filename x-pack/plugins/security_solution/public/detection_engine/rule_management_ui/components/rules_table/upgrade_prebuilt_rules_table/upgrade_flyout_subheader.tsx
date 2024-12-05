@@ -49,7 +49,9 @@ export const UpgradeFlyoutSubHeader = memo(function UpgradeFlyoutSubHeader({
   );
 
   const customized = ruleUpgradeState.current_rule.rule_source.type === 'external' &&
-    ruleUpgradeState.current_rule.rule_source.is_customized && <ModifiedBadge />;
+    ruleUpgradeState.current_rule.rule_source.is_customized && (
+      <ModifiedBadge tooltip={i18n.RULE_MODIFIED_BADGE_DESCRIPTION} />
+    );
 
   const fieldsDiff: FieldsDiff<Record<string, unknown>> = ruleUpgradeState.diff.fields;
   const fieldsNamesWithUpdates = Object.keys(ruleUpgradeState.fieldsUpgradeState).filter(
