@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/react/kibana_context/root'],
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/react/kibana_context/root'],
 };
