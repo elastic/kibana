@@ -6320,7 +6320,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-in-memory-table@link:x-pack/packages/ml/in_memory_table":
+"@kbn/ml-in-memory-table@link:x-pack/platform/packages/private/ml/in_memory_table":
   version "0.0.0"
   uid ""
 
