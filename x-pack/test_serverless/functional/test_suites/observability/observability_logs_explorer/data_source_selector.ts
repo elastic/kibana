@@ -617,9 +617,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
               );
 
-            expect(menuEntries.length).to.be(2);
+            expect(menuEntries.length).to.be(4);
             expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[3].getVisibleText()).to.be(sortedExpectedDataViews[3]);
           });
 
           // Test back all filter

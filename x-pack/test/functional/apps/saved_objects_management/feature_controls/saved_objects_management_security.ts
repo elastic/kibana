@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(objects.sort()).to.eql(
             [
               'Log Threshold Alerting Rule Source',
-              'Metric AND Inventory Alerting Rule Source',
+              'Metric AND Inventory Threshold Alerting Rule Source',
               'logstash-*',
               'A Pie',
               'A Dashboard',
@@ -95,11 +95,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             [
               {
                 title: 'Log Threshold Alerting Rule Source',
-                canViewInApp: false,
+                canViewInApp: true,
               },
               {
                 title: 'Metric AND Inventory Threshold Alerting Rule Source',
-                canViewInApp: false,
+                canViewInApp: true,
               },
               {
                 title: 'logstash-*',
@@ -217,7 +217,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(objects.sort()).to.eql(
             [
               'Log Threshold Alerting Rule Source',
-              'Metric AND Inventory Alerting Rule Source',
+              'Metric AND Inventory Threshold Alerting Rule Source',
               'logstash-*',
               'A Pie',
               'A Dashboard',

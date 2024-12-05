@@ -401,6 +401,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
+        await dashboard.selectIndexPattern('logstash-*');
         await dashboard.loadSavedDashboard(myDashboardName);
         await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
         await testSubjects.click('cases-table-add-case-filter-bar');
