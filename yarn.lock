@@ -6376,7 +6376,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
+"@kbn/ml-string-hash@link:x-pack/platform/packages/private/ml/string_hash":
   version "0.0.0"
   uid ""
 
