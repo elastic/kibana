@@ -4,16 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { css } from '@emotion/css';
 import type { TimeRange } from '@kbn/es-query';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
-
-const parentClassName = css`
-  width: 100%;
-`;
 
 interface Props {
   query?: string;
@@ -47,32 +42,30 @@ export function StreamsAppSearchBar({
   const showQueryInput = query === undefined;
 
   return (
-    <div className={parentClassName}>
-      <unifiedSearch.ui.SearchBar
-        appName="streamsApp"
-        onQuerySubmit={({ dateRange, query: nextQuery }, isUpdate) => {
-          onQuerySubmit?.(
-            { dateRange, query: (nextQuery?.query as string | undefined) ?? '' },
-            isUpdate
-          );
-        }}
-        onQueryChange={({ dateRange, query: nextQuery }) => {
-          onQueryChange?.({ dateRange, query: (nextQuery?.query as string | undefined) ?? '' });
-        }}
-        query={queryObj}
-        showQueryInput={showQueryInput}
-        showFilterBar={false}
-        showQueryMenu={false}
-        showDatePicker={Boolean(dateRangeFrom && dateRangeTo)}
-        showSubmitButton={true}
-        dateRangeFrom={dateRangeFrom}
-        dateRangeTo={dateRangeTo}
-        onRefresh={onRefresh}
-        displayStyle="inPage"
-        disableQueryLanguageSwitcher
-        placeholder={placeholder}
-        indexPatterns={dataViews}
-      />
-    </div>
+    <unifiedSearch.ui.SearchBar
+      appName="streamsApp"
+      onQuerySubmit={({ dateRange, query: nextQuery }, isUpdate) => {
+        onQuerySubmit?.(
+          { dateRange, query: (nextQuery?.query as string | undefined) ?? '' },
+          isUpdate
+        );
+      }}
+      onQueryChange={({ dateRange, query: nextQuery }) => {
+        onQueryChange?.({ dateRange, query: (nextQuery?.query as string | undefined) ?? '' });
+      }}
+      query={queryObj}
+      showQueryInput={showQueryInput}
+      showFilterBar={false}
+      showQueryMenu={false}
+      showDatePicker={Boolean(dateRangeFrom && dateRangeTo)}
+      showSubmitButton={true}
+      dateRangeFrom={dateRangeFrom}
+      dateRangeTo={dateRangeTo}
+      onRefresh={onRefresh}
+      displayStyle="inPage"
+      disableQueryLanguageSwitcher
+      placeholder={placeholder}
+      indexPatterns={dataViews}
+    />
   );
 }

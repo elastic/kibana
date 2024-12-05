@@ -1001,6 +1001,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.EsqlQuery.Unnamed.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "errors",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.EditorError",
+                    "text": "EditorError"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-esql-ast/src/query/query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -14429,6 +14451,22 @@
             "description": [],
             "signature": [
               "\"command\""
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLCommand.commandType",
+            "type": "string",
+            "tags": [],
+            "label": "commandType",
+            "description": [
+              "\nThe subtype of the command. For example, the `JOIN` command can be: (1)\nLOOKUP JOIN, (2) LEFT JOIN, (3) RIGHT JOIN."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
