@@ -6272,7 +6272,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-anomaly-utils@link:x-pack/packages/ml/anomaly_utils":
+"@kbn/ml-anomaly-utils@link:x-pack/platform/packages/shared/ml/anomaly_utils":
   version "0.0.0"
   uid ""
 

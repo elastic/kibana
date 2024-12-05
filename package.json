@@ -650,7 +650,7 @@
     "@kbn/maps-vector-tile-utils": "link:x-pack/packages/maps/vector_tile_utils",
     "@kbn/metrics-data-access-plugin": "link:x-pack/plugins/observability_solution/metrics_data_access",
     "@kbn/ml-agg-utils": "link:x-pack/platform/packages/private/ml/agg_utils",
-    "@kbn/ml-anomaly-utils": "link:x-pack/packages/ml/anomaly_utils",
+    "@kbn/ml-anomaly-utils": "link:x-pack/platform/packages/shared/ml/anomaly_utils",
     "@kbn/ml-cancellable-search": "link:x-pack/packages/ml/cancellable_search",
     "@kbn/ml-category-validator": "link:x-pack/packages/ml/category_validator",
     "@kbn/ml-chi2test": "link:x-pack/packages/ml/chi2test",
