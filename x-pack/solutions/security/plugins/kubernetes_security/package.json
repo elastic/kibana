@@ -5,7 +5,7 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "test:jest": "node ../../scripts/jest",
-    "test:coverage": "node ../../scripts/jest --coverage"
+    "test:jest": "node ../../../../scripts/jest",
+    "test:coverage": "node ../../../../scripts/jest --coverage"
   }
 }

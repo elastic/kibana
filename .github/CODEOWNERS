@@ -905,7 +905,6 @@ x-pack/plugins/index_management @elastic/kibana-management
 x-pack/plugins/inference @elastic/appex-ai-infra
 x-pack/plugins/ingest_pipelines @elastic/kibana-management
 x-pack/plugins/integration_assistant @elastic/security-scalability
-x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/license_api_guard @elastic/kibana-management
 x-pack/plugins/license_management @elastic/kibana-management
@@ -994,6 +993,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/ki
 x-pack/solutions/security/plugins/asset_inventory @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops

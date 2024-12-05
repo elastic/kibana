@@ -6076,7 +6076,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kubernetes-security-plugin@link:x-pack/plugins/kubernetes_security":
+"@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
   version "0.0.0"
   uid ""
 
