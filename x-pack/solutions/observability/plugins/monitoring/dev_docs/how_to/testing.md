@@ -4,7 +4,7 @@ See the [Kibana Testing guide](https://www.elastic.co/guide/en/kibana/master/dev
 
 We mainly use:
 1. Jest unit tests - located in sibling files to the source code 
-2. [api_integration tests](../../../../test/api_integration/apis/monitoring)
-3. [functional tests](../../../../test/functional/apps/monitoring)
+2. [api_integration tests](../../../../../../test/api_integration/apis/monitoring)
+3. [functional tests](../../../../../../test/functional/apps/monitoring)
 
 The functional and api integration tests are both under a 'Monitoring' description, so you can use `--grep Monitoring` to run only our tests.
