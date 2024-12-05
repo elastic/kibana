@@ -7057,7 +7057,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-features@link:x-pack/packages/security-solution/features":
+"@kbn/security-solution-features@link:x-pack/solutions/security/packages/security-solution/features":
   version "0.0.0"
   uid ""
 
