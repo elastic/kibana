@@ -503,6 +503,7 @@ packages/kbn-server-route-repository @elastic/obs-knowledge-team
 packages/kbn-server-route-repository-client @elastic/obs-knowledge-team
 packages/kbn-server-route-repository-utils @elastic/obs-knowledge-team
 packages/kbn-set-map @elastic/kibana-operations
+packages/kbn-shared-gen-ai-ui @elastic/response-ops
 packages/kbn-shared-svg @elastic/obs-ux-infra_services-team
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 packages/kbn-some-dev-log @elastic/kibana-operations
