@@ -33,23 +33,26 @@ const parseNDJSON = (fileContent: string): SplunkRow[] => {
   return fileContent
     .split(/\n(?=\{)/) // split at newline followed by '{'.
     .filter((entry) => entry.trim() !== '') // Remove empty entries.
-    .map((entry) => JSON.parse(entry)); // Parse each entry as JSON.
+    .map(parseJSON); // Parse each entry as JSON.
 };
 
 const parseJSONArray = (fileContent: string): SplunkRow[] => {
-  let parsedContent: SplunkResult;
+  const parsedContent = parseJSON(fileContent);
+  if (!Array.isArray(parsedContent)) {
+    throw new Error(i18n.RULES_DATA_INPUT_FILE_UPLOAD_ERROR.NOT_ARRAY);
+  }
+  return parsedContent;
+};
+
+const parseJSON = (fileContent: string) => {
   try {
-    parsedContent = JSON.parse(fileContent);
+    return JSON.parse(fileContent);
   } catch (error) {
     if (error instanceof RangeError) {
       throw new Error(i18n.RULES_DATA_INPUT_FILE_UPLOAD_ERROR.TOO_LARGE_TO_PARSE);
     }
     throw new Error(i18n.RULES_DATA_INPUT_FILE_UPLOAD_ERROR.CAN_NOT_PARSE);
   }
-  if (!Array.isArray(parsedContent)) {
-    throw new Error(i18n.RULES_DATA_INPUT_FILE_UPLOAD_ERROR.NOT_ARRAY);
-  }
-  return parsedContent;
 };
 
 const convertFormat = (row: SplunkRow): OriginalRule => {
