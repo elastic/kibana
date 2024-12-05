@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { MAX_LINES_CLASSIC_TABLE, MIN_HEIGHT } from './source';
+import { MIN_HEIGHT } from './source';
 
 // Displayed margin of the tab content to the window bottom
 export const DEFAULT_MARGIN_BOTTOM = 16;
@@ -28,7 +28,6 @@ export function getTabContentAvailableHeight(
 
 export function getHeight(
   editor: monaco.editor.IStandaloneCodeEditor,
-  useDocExplorer: boolean,
   decreaseAvailableHeightBy: number
 ) {
   const editorElement = editor?.getDomNode();
@@ -36,17 +35,6 @@ export function getHeight(
     return 0;
   }
 
-  let result;
-  if (useDocExplorer) {
-    result = getTabContentAvailableHeight(editorElement, decreaseAvailableHeightBy);
-  } else {
-    // takes care of the classic table, display a maximum of 500 lines
-    // why not display it all? Due to performance issues when the browser needs to render it all
-    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-    const lineCount = editor.getModel()?.getLineCount() || 1;
-    const displayedLineCount =
-      lineCount > MAX_LINES_CLASSIC_TABLE ? MAX_LINES_CLASSIC_TABLE : lineCount;
-    result = editor.getTopForLineNumber(displayedLineCount + 1) + lineHeight;
-  }
+  const result = getTabContentAvailableHeight(editorElement, decreaseAvailableHeightBy);
   return Math.max(result, MIN_HEIGHT);
 }

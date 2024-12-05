@@ -34,6 +34,7 @@ import {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   TaskInstance,
+  TaskStatus,
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
@@ -842,7 +843,12 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
   const originalQuery = opts.query;
   const filterToOnlyTasks = {
     bool: {
-      filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+      filter: {
+        bool: {
+          must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+          must_not: [{ term: { 'task.status': TaskStatus.Unrecognized } }],
+        },
+      },
     },
   };
   const query = originalQuery

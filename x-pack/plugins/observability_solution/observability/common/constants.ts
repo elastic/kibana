@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+  OBSERVABILITY_RULE_TYPE_IDS,
+} from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleCreationValidConsumer } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -20,6 +24,7 @@ export const observabilityAlertFeatureIds: ValidFeatureId[] = [
   AlertConsumers.UPTIME,
   AlertConsumers.SLO,
   AlertConsumers.OBSERVABILITY,
+  AlertConsumers.ALERTS,
 ];
 
 export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[] = [
@@ -29,3 +34,8 @@ export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[
 ];
 
 export const EventsAsUnit = 'events';
+
+export const OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES = [
+  ...OBSERVABILITY_RULE_TYPE_IDS,
+  ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+];

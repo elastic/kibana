@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpStart } from '@kbn/core/public';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { DashboardContextProvider } from '../context/dashboard_context';
 import { useFetchSecurityDashboards } from './use_fetch_security_dashboards';
 import { getTagsByName } from '../../common/containers/tags/api';
@@ -26,14 +26,6 @@ const renderUseFetchSecurityDashboards = () =>
     wrapper: DashboardContextProvider,
   });
 
-const asyncRenderUseFetchSecurityDashboards = async () => {
-  const renderedHook = renderUseFetchSecurityDashboards();
-  await act(async () => {
-    await renderedHook.waitForNextUpdate();
-  });
-  return renderedHook;
-};
-
 describe('useFetchSecurityDashboards', () => {
   beforeAll(() => {
     useKibana().services.http = mockHttp as unknown as HttpStart;
@@ -49,34 +41,43 @@ describe('useFetchSecurityDashboards', () => {
   });
 
   it('should fetch Security Solution tags', async () => {
-    await asyncRenderUseFetchSecurityDashboards();
-    expect(getTagsByName).toHaveBeenCalledTimes(1);
+    renderUseFetchSecurityDashboards();
+
+    await waitFor(() => {
+      expect(getTagsByName).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should fetch Security Solution dashboards', async () => {
-    await asyncRenderUseFetchSecurityDashboards();
+    renderUseFetchSecurityDashboards();
 
-    expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
-    expect(getDashboardsByTagIds).toHaveBeenCalledWith(
-      {
-        http: mockHttp,
-        tagIds: [MOCK_TAG_ID],
-      },
-      expect.any(Object)
-    );
+    await waitFor(() => {
+      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+      expect(getDashboardsByTagIds).toHaveBeenCalledWith(
+        {
+          http: mockHttp,
+          tagIds: [MOCK_TAG_ID],
+        },
+        expect.any(Object)
+      );
+    });
   });
 
   it('should fetch Security Solution dashboards with abort signal', async () => {
-    await asyncRenderUseFetchSecurityDashboards();
+    renderUseFetchSecurityDashboards();
 
-    expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
-    expect((getDashboardsByTagIds as jest.Mock).mock.calls[0][1]).toEqual(mockAbortSignal);
+    await waitFor(() => {
+      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+      expect((getDashboardsByTagIds as jest.Mock).mock.calls[0][1]).toEqual(mockAbortSignal);
+    });
   });
 
   it('should return Security Solution dashboards', async () => {
-    const { result } = await asyncRenderUseFetchSecurityDashboards();
+    const { result } = renderUseFetchSecurityDashboards();
 
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.dashboards).toEqual(DEFAULT_DASHBOARDS_RESPONSE);
+    await waitFor(() => {
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.dashboards).toEqual(DEFAULT_DASHBOARDS_RESPONSE);
+    });
   });
 });

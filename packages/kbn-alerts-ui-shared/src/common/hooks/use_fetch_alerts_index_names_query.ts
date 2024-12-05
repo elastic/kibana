@@ -16,7 +16,9 @@ import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_type
 
 export type UseFetchAlertsIndexNamesQueryParams = FetchAlertsIndexNamesParams;
 
-export const queryKeyPrefix = ['alerts', fetchAlertsIndexNames.name];
+// Query key prefix MUST contain explicit strings, not fetchAlertsIndexNames.name
+// Production builds cannot guarantee a unique function name
+export const queryKeyPrefix = ['alerts', 'fetchAlertsIndexNames'];
 
 /**
  * Fetch alerts index names feature ids
@@ -25,16 +27,16 @@ export const queryKeyPrefix = ['alerts', fetchAlertsIndexNames.name];
  * @external https://tanstack.com/query/v4/docs/framework/react/guides/testing
  */
 export const useFetchAlertsIndexNamesQuery = (
-  { http, featureIds }: UseFetchAlertsIndexNamesQueryParams,
+  { http, ruleTypeIds }: UseFetchAlertsIndexNamesQueryParams,
   options?: Pick<
     QueryOptionsOverrides<typeof fetchAlertsIndexNames>,
     'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
   >
 ) => {
   return useQuery({
-    queryKey: queryKeyPrefix.concat(featureIds),
-    queryFn: () => fetchAlertsIndexNames({ http, featureIds }),
-    enabled: featureIds.length > 0,
+    queryKey: queryKeyPrefix.concat(ruleTypeIds),
+    queryFn: () => fetchAlertsIndexNames({ http, ruleTypeIds }),
+    enabled: ruleTypeIds.length > 0,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     ...options,

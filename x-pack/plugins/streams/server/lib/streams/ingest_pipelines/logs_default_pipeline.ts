@@ -20,4 +20,9 @@ export const logsDefaultPipelineProcessors = [
       ignore_missing_pipeline: true,
     },
   },
+  {
+    dot_expander: {
+      field: '*',
+    },
+  },
 ];

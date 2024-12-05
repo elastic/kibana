@@ -5,56 +5,54 @@
  * 2.0.
  */
 
-import React, { useReducer, useState, useEffect, useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyout,
-  EuiFlyoutFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
   EuiFlyoutBody,
-  EuiPortal,
-  EuiCallOut,
-  EuiSpacer,
-  EuiLoadingSpinner,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiIconTip,
+  EuiLoadingSpinner,
+  EuiPortal,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { cloneDeep, omit } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import { updateRule } from '@kbn/alerts-ui-shared/src/common/apis/update_rule';
-import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
+import { RuleNotifyWhen, parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
-import {
-  Rule,
-  RuleFlyoutCloseReason,
-  RuleEditProps,
-  IErrorObject,
-  RuleType,
-  RuleTypeParams,
-  RuleTypeMetaData,
-  TriggersActionsUiConfig,
-  RuleNotifyWhenType,
-  RuleUiAction,
-  RuleAction,
-} from '../../../types';
-import { RuleForm } from './rule_form';
-import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
-import { getRuleReducer } from './rule_reducer';
-import { loadRuleTypes } from '../../lib/rule_api/rule_types';
-import { HealthCheck } from '../../components/health_check';
-import { HealthContextProvider } from '../../context/health_context';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { fetchUiConfig as triggersActionsUiConfig, updateRule } from '@kbn/response-ops-rule-form';
+import { cloneDeep, omit } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
+import {
+  IErrorObject,
+  Rule,
+  RuleAction,
+  RuleEditProps,
+  RuleFlyoutCloseReason,
+  RuleNotifyWhenType,
+  RuleType,
+  RuleTypeMetaData,
+  RuleTypeParams,
+  RuleUiAction,
+  TriggersActionsUiConfig,
+} from '../../../types';
+import { HealthCheck } from '../../components/health_check';
+import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+import { HealthContextProvider } from '../../context/health_context';
+import { loadRuleTypes } from '../../lib/rule_api/rule_types';
+import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { ConfirmRuleClose } from './confirm_rule_close';
 import { hasRuleChanged } from './has_rule_changed';
-import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
+import { RuleForm } from './rule_form';
+import { getRuleReducer } from './rule_reducer';
 import { ShowRequestModal } from './show_request_modal';
 
 const defaultUpdateRuleErrorMessage = i18n.translate(

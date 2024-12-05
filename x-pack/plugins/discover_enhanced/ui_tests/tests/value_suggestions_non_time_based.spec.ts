@@ -17,12 +17,11 @@ test.describe(
       await kbnClient.importExport.load(testData.KBN_ARCHIVES.NO_TIME_FIELD);
       await uiSettings.set({
         defaultIndex: 'without-timefield',
-        'doc_table:legacy': false,
       });
     });
 
     test.afterAll(async ({ kbnClient, uiSettings }) => {
-      await uiSettings.unset('doc_table:legacy', 'defaultIndex');
+      await uiSettings.unset('defaultIndex');
       await kbnClient.savedObjects.cleanStandardList();
     });
 

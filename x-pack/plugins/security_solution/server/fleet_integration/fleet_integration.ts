@@ -7,7 +7,7 @@
 
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostDeleteCallback,
@@ -119,7 +119,7 @@ export const getPackagePolicyCreateCallback = (
   logger: Logger,
   manifestManager: ManifestManager,
   securitySolutionRequestContextFactory: IRequestContextFactory,
-  alerts: AlertsStartContract,
+  alerts: AlertingServerStart,
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined,
   cloud: CloudSetup,

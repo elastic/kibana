@@ -33,9 +33,6 @@ const statsTableCss = css({
   width: '100%',
   height: '100%',
   overflowY: 'auto',
-  '.kbnDocTableWrapper': {
-    overflowX: 'hidden',
-  },
 });
 
 const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);

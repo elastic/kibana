@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -38,13 +37,12 @@ beforeEach(() => {
 describe('getAADFields()', () => {
   test('should throw an error when a rule type belong to security solution', async () => {
     getRuleTypeMock.mockImplementation(() => ({
-      producer: AlertConsumers.SIEM,
       fieldsForAAD: [],
     }));
     const alertsClient = new AlertsClient(alertsClientParams);
 
     await expect(
-      alertsClient.getAADFields({ ruleTypeId: 'security-type' })
+      alertsClient.getAADFields({ ruleTypeId: 'siem.esqlRule' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Security solution rule type is not supported"`);
   });
 });

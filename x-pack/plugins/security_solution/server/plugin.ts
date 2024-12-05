@@ -396,7 +396,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeOptions,
       previewRuleDataClient,
       this.telemetryReceiver,
-      this.pluginContext.env.packageInfo.buildFlavor === 'serverless'
+      this.pluginContext.env.packageInfo.buildFlavor === 'serverless',
+      this.endpointContext
     );
 
     registerEndpointRoutes(router, this.endpointContext);

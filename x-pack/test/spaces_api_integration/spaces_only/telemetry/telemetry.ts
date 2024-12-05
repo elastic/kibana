@@ -100,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
         dataQuality: 0,
+        entityManager: 0,
       });
     });
 

@@ -93,6 +93,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
+                // @ts-expect-error this chart needs to be migrated to the new chart theming system, comment should be removed once https://github.com/elastic/kibana/issues/202138 is resolved
                 chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id={'threshold-ratio-chart'}
@@ -160,6 +161,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
+                // @ts-expect-error this chart needs to be migrated to the new chart theming system, comment should be removed once https://github.com/elastic/kibana/issues/202138 is resolved
                 chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id="logCountThreshold"

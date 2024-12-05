@@ -9,7 +9,7 @@
 
 import { Page, test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { ScoutPage, KibanaUrl } from '../types';
+import { ScoutPage, KibanaUrl, ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
 
 /**
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
@@ -95,17 +95,20 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
  * await page.gotoApp('discover);
  * ```
  */
-export const scoutPageFixture = base.extend<{ page: ScoutPage; kbnUrl: KibanaUrl }>({
-  page: async ({ page, kbnUrl }, use) => {
+export const scoutPageFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures>({
+  page: async (
+    { page, kbnUrl }: { page: Page; kbnUrl: KibanaUrl },
+    use: (extendedPage: ScoutPage) => Promise<void>
+  ) => {
+    const extendedPage = page as ScoutPage;
     // Extend page with '@kbn/test-subj-selector' support
-    page.testSubj = extendPageWithTestSubject(page);
-
+    extendedPage.testSubj = extendPageWithTestSubject(page);
     // Method to navigate to specific Kibana apps
-    page.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+    extendedPage.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+    // Method to wait for global loading indicator to be hidden
+    extendedPage.waitForLoadingIndicatorHidden = () =>
+      extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', { state: 'attached' });
 
-    page.waitForLoadingIndicatorHidden = () =>
-      page.testSubj.waitForSelector('globalLoadingIndicator-hidden', { state: 'attached' });
-
-    await use(page);
+    await use(extendedPage);
   },
 });

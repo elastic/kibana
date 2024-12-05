@@ -9,14 +9,19 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import { RuleCreationValidConsumer } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
 
 const mockConsumers: RuleCreationValidConsumer[] = ['logs', 'infrastructure', 'stackAlerts'];
 
 const mockOnChange = jest.fn();
 
+jest.mock('../../../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
 describe('RuleFormConsumerSelectionModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useKibanaMock().services.isServerless = false;
   });
 
   it('renders correctly', async () => {
@@ -162,19 +167,6 @@ describe('RuleFormConsumerSelectionModal', () => {
     expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
   });
 
-  it('should display nothing if observability is one of the consumers', () => {
-    render(
-      <RuleFormConsumerSelection
-        selectedConsumer={null}
-        consumers={['logs', 'observability']}
-        onChange={mockOnChange}
-        errors={{}}
-      />
-    );
-
-    expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
-  });
-
   it('should display the initial selected consumer', () => {
     render(
       <RuleFormConsumerSelection
@@ -198,5 +190,33 @@ describe('RuleFormConsumerSelectionModal', () => {
       />
     );
     expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('');
+  });
+
+  it('should not show the role visibility dropdown on serverless on an o11y project', () => {
+    useKibanaMock().services.isServerless = true;
+
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={'logs'}
+        consumers={['stackAlerts', 'infrastructure', 'observability']}
+        onChange={mockOnChange}
+        errors={{}}
+      />
+    );
+    expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
+  });
+
+  it('should set the consumer correctly on an o11y project', () => {
+    useKibanaMock().services.isServerless = true;
+
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={'logs'}
+        consumers={['stackAlerts', 'infrastructure', 'observability']}
+        onChange={mockOnChange}
+        errors={{}}
+      />
+    );
+    expect(mockOnChange).toHaveBeenLastCalledWith('observability');
   });
 });

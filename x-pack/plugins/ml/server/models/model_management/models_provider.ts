@@ -8,10 +8,11 @@
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
-import { flatten } from 'lodash';
+import { flatten, groupBy, isEmpty } from 'lodash';
 import type {
   InferenceInferenceEndpoint,
   InferenceTaskType,
+  MlGetTrainedModelsRequest,
   TasksTaskInfo,
   TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -24,22 +25,50 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   ELASTIC_MODEL_DEFINITIONS,
+  ELASTIC_MODEL_TAG,
+  MODEL_STATE,
   type GetModelDownloadConfigOptions,
   type ModelDefinitionResponse,
+  ELASTIC_MODEL_TYPE,
+  BUILT_IN_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
-import type { ModelDownloadState, PipelineDefinition } from '../../../common/types/trained_models';
+import { isDefined } from '@kbn/ml-is-defined';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
+import type { MlFeatures } from '../../../common/constants/app';
+import type {
+  DFAModelItem,
+  ExistingModelBase,
+  ModelDownloadItem,
+  NLPModelItem,
+  TrainedModelItem,
+  TrainedModelUIItem,
+  TrainedModelWithPipelines,
+} from '../../../common/types/trained_models';
+import { isBuiltInModel, isExistingModel } from '../../../common/types/trained_models';
+import {
+  isDFAModelItem,
+  isElasticModel,
+  isNLPModelItem,
+  type ModelDownloadState,
+  type PipelineDefinition,
+  type TrainedModelConfigResponse,
+} from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
+import { filterForEnabledFeatureModels } from '../../routes/trained_models';
+import { mlLog } from '../../lib/log';
+import { getModelDeploymentState } from './get_model_state';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
 export const modelsProvider = (
   client: IScopedClusterClient,
   mlClient: MlClient,
-  cloud: CloudSetup
-) => new ModelsProvider(client, mlClient, cloud);
+  cloud: CloudSetup,
+  enabledFeatures: MlFeatures
+) => new ModelsProvider(client, mlClient, cloud, enabledFeatures);
 
 interface ModelMapResult {
   ingestPipelines: Map<string, Record<string, PipelineDefinition> | null>;
@@ -66,7 +95,8 @@ export class ModelsProvider {
   constructor(
     private _client: IScopedClusterClient,
     private _mlClient: MlClient,
-    private _cloud: CloudSetup
+    private _cloud: CloudSetup,
+    private _enabledFeatures: MlFeatures
   ) {}
 
   private async initTransformData() {
@@ -108,6 +138,291 @@ export class ModelsProvider {
     nodeType: (typeof JOB_MAP_NODE_TYPES)[keyof typeof JOB_MAP_NODE_TYPES]
   ): string {
     return `${elementOriginalId}-${nodeType}`;
+  }
+
+  /**
+   * Assigns inference endpoints to trained models
+   * @param trainedModels
+   * @param asInternal
+   */
+  async assignInferenceEndpoints(trainedModels: ExistingModelBase[], asInternal: boolean = false) {
+    const esClient = asInternal ? this._client.asInternalUser : this._client.asCurrentUser;
+
+    try {
+      // Check if model is used by an inference service
+      const { endpoints } = await esClient.inference.get({
+        inference_id: '_all',
+      });
+
+      const inferenceAPIMap = groupBy(
+        endpoints,
+        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
+      );
+
+      for (const model of trainedModels) {
+        const inferenceApis = inferenceAPIMap[model.model_id];
+        model.hasInferenceServices = !!inferenceApis;
+        if (model.hasInferenceServices && !asInternal) {
+          model.inference_apis = inferenceApis;
+        }
+      }
+    } catch (e) {
+      if (!asInternal && e.statusCode === 403) {
+        // retry with internal user to get an indicator if models has associated inference services, without mentioning the names
+        await this.assignInferenceEndpoints(trainedModels, true);
+      } else {
+        mlLog.error(e);
+      }
+    }
+  }
+
+  /**
+   * Assigns trained model stats to trained models
+   * @param trainedModels
+   */
+  async assignModelStats(trainedModels: ExistingModelBase[]): Promise<TrainedModelItem[]> {
+    const { trained_model_stats: modelsStatsResponse } = await this._mlClient.getTrainedModelsStats(
+      {
+        size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+      }
+    );
+
+    const groupByModelId = groupBy(modelsStatsResponse, 'model_id');
+
+    return trainedModels.map<TrainedModelItem>((model) => {
+      const modelStats = groupByModelId[model.model_id];
+
+      const completeModelItem: TrainedModelItem = {
+        ...model,
+        // @ts-ignore FIXME: fix modelStats type
+        stats: {
+          ...modelStats[0],
+          ...(isNLPModelItem(model)
+            ? { deployment_stats: modelStats.map((d) => d.deployment_stats).filter(isDefined) }
+            : {}),
+        },
+      };
+
+      if (isNLPModelItem(completeModelItem)) {
+        // Extract deployment ids from deployment stats
+        completeModelItem.deployment_ids = modelStats
+          .map((v) => v.deployment_stats?.deployment_id)
+          .filter(isDefined);
+
+        completeModelItem.state = getModelDeploymentState(completeModelItem);
+
+        completeModelItem.stateDescription = completeModelItem.stats.deployment_stats.reduce(
+          (acc, c) => {
+            if (acc) return acc;
+            return c.reason ?? '';
+          },
+          ''
+        );
+      }
+
+      return completeModelItem;
+    });
+  }
+
+  /**
+   * Merges the list of models with the list of models available for download.
+   */
+  async includeModelDownloads(resultItems: TrainedModelUIItem[]): Promise<TrainedModelUIItem[]> {
+    const idMap = new Map<string, TrainedModelUIItem>(
+      resultItems.map((model) => [model.model_id, model])
+    );
+    /**
+     * Fetches model definitions available for download
+     */
+    const forDownload = await this.getModelDownloads();
+
+    const notDownloaded: TrainedModelUIItem[] = forDownload
+      .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer }) => {
+        if (idMap.has(modelId)) {
+          const model = idMap.get(modelId)! as NLPModelItem;
+          if (recommended) {
+            model.recommended = true;
+          }
+          model.supported = supported;
+          model.disclaimer = disclaimer;
+        }
+        return !idMap.has(modelId) && !hidden;
+      })
+      .map<ModelDownloadItem>((modelDefinition) => {
+        return {
+          model_id: modelDefinition.model_id,
+          type: modelDefinition.type,
+          tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
+          putModelConfig: modelDefinition.config,
+          description: modelDefinition.description,
+          state: MODEL_STATE.NOT_DOWNLOADED,
+          recommended: !!modelDefinition.recommended,
+          modelName: modelDefinition.modelName,
+          os: modelDefinition.os,
+          arch: modelDefinition.arch,
+          softwareLicense: modelDefinition.license,
+          licenseUrl: modelDefinition.licenseUrl,
+          supported: modelDefinition.supported,
+          disclaimer: modelDefinition.disclaimer,
+        } as ModelDownloadItem;
+      });
+
+    // show model downloads first
+    return [...notDownloaded, ...resultItems];
+  }
+
+  /**
+   * Assigns pipelines to trained models
+   */
+  async assignPipelines(trainedModels: TrainedModelItem[]): Promise<void> {
+    // For each model create a dict with model aliases and deployment ids for faster lookup
+    const modelToAliasesAndDeployments: Record<string, Set<string>> = Object.fromEntries(
+      trainedModels.map((model) => [
+        model.model_id,
+        new Set([
+          model.model_id,
+          ...(model.metadata?.model_aliases ?? []),
+          ...(isNLPModelItem(model) ? model.deployment_ids : []),
+        ]),
+      ])
+    );
+
+    // Set of unique model ids, aliases, and deployment ids.
+    const modelIdsAndAliases: string[] = Object.values(modelToAliasesAndDeployments).flatMap((s) =>
+      Array.from(s)
+    );
+
+    try {
+      // Get all pipelines first in one call:
+      const modelPipelinesMap = await this.getModelsPipelines(modelIdsAndAliases);
+
+      trainedModels.forEach((model) => {
+        const modelAliasesAndDeployments = modelToAliasesAndDeployments[model.model_id];
+        // Check model pipelines map for any pipelines associated with the model
+        for (const [modelEntityId, pipelines] of modelPipelinesMap) {
+          if (modelAliasesAndDeployments.has(modelEntityId)) {
+            // Merge pipeline definitions into the model
+            model.pipelines = model.pipelines
+              ? Object.assign(model.pipelines, pipelines)
+              : pipelines;
+          }
+        }
+      });
+    } catch (e) {
+      // the user might not have required permissions to fetch pipelines
+      // log the error to the debug log as this might be a common situation and
+      // we don't need to fill kibana's log with these messages.
+      mlLog.debug(e);
+    }
+  }
+
+  /**
+   * Assigns indices to trained models
+   */
+  async assignModelIndices(trainedModels: TrainedModelItem[]): Promise<void> {
+    // Get a list of all uniquer pipeline ids to retrieve mapping with indices
+    const pipelineIds = new Set<string>(
+      trainedModels
+        .filter((model): model is TrainedModelWithPipelines => isDefined(model.pipelines))
+        .flatMap((model) => Object.keys(model.pipelines))
+    );
+
+    const pipelineToIndicesMap = await this.getPipelineToIndicesMap(pipelineIds);
+
+    trainedModels.forEach((model) => {
+      if (!isEmpty(model.pipelines)) {
+        model.indices = Object.entries(pipelineToIndicesMap)
+          .filter(([pipelineId]) => !isEmpty(model.pipelines?.[pipelineId]))
+          .flatMap(([_, indices]) => indices);
+      }
+    });
+  }
+
+  /**
+   * Assign a check for each DFA model if origin job exists
+   */
+  async assignDFAJobCheck(trainedModels: DFAModelItem[]): Promise<void> {
+    try {
+      const dfaJobIds = trainedModels
+        .map((model) => {
+          const id = model.metadata?.analytics_config?.id;
+          if (id) {
+            return `${id}*`;
+          }
+        })
+        .filter(isDefined);
+
+      if (dfaJobIds.length > 0) {
+        const { data_frame_analytics: jobs } = await this._mlClient.getDataFrameAnalytics({
+          id: dfaJobIds.join(','),
+          allow_no_match: true,
+        });
+
+        trainedModels.forEach((model) => {
+          const dfaId = model?.metadata?.analytics_config?.id;
+          if (dfaId !== undefined) {
+            // if this is a dfa model, set origin_job_exists
+            model.origin_job_exists = jobs.find((job) => job.id === dfaId) !== undefined;
+          }
+        });
+      }
+    } catch (e) {
+      return;
+    }
+  }
+
+  /**
+   * Returns a complete list of entities for the Trained Models UI
+   */
+  async getTrainedModelList(): Promise<TrainedModelUIItem[]> {
+    const resp = await this._mlClient.getTrainedModels({
+      size: 1000,
+    } as MlGetTrainedModelsRequest);
+
+    let resultItems: TrainedModelUIItem[] = [];
+
+    // Filter models based on enabled features
+    const filteredModels = filterForEnabledFeatureModels(
+      resp.trained_model_configs,
+      this._enabledFeatures
+    ) as TrainedModelConfigResponse[];
+
+    const formattedModels = filteredModels.map<ExistingModelBase>((model) => {
+      return {
+        ...model,
+        // Extract model types
+        type: [
+          model.model_type,
+          ...(isBuiltInModel(model) ? [BUILT_IN_MODEL_TYPE] : []),
+          ...(isElasticModel(model) ? [ELASTIC_MODEL_TYPE] : []),
+          ...(typeof model.inference_config === 'object'
+            ? Object.keys(model.inference_config)
+            : []),
+        ].filter(isDefined),
+      };
+    });
+
+    // Update inference endpoints info
+    await this.assignInferenceEndpoints(formattedModels);
+
+    // Assign model stats
+    resultItems = await this.assignModelStats(formattedModels);
+
+    if (this._enabledFeatures.nlp) {
+      resultItems = await this.includeModelDownloads(resultItems);
+    }
+
+    const existingModels = resultItems.filter(isExistingModel);
+
+    // Assign pipelines to existing models
+    await this.assignPipelines(existingModels);
+
+    // Assign indices
+    await this.assignModelIndices(existingModels);
+
+    await this.assignDFAJobCheck(resultItems.filter(isDFAModelItem));
+
+    return resultItems;
   }
 
   /**
@@ -170,12 +485,13 @@ export class ModelsProvider {
   }
 
   /**
-   * Retrieves the map of model ids and aliases with associated pipelines.
+   * Retrieves the map of model ids and aliases with associated pipelines,
+   * where key is a model, alias or deployment id, and value is a map of pipeline ids and pipeline definitions.
    * @param modelIds - Array of models ids and model aliases.
    */
   async getModelsPipelines(modelIds: string[]) {
-    const modelIdsMap = new Map<string, Record<string, PipelineDefinition> | null>(
-      modelIds.map((id: string) => [id, null])
+    const modelIdsMap = new Map<string, Record<string, PipelineDefinition>>(
+      modelIds.map((id: string) => [id, {}])
     );
 
     try {
@@ -209,6 +525,53 @@ export class ModelsProvider {
   }
 
   /**
+   * Match pipelines to indices based on the default_pipeline setting in the index settings.
+   */
+  async getPipelineToIndicesMap(pipelineIds: Set<string>): Promise<Record<string, string[]>> {
+    const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
+
+    let indicesPermissions;
+    let indicesSettings;
+
+    try {
+      indicesSettings = await this._client.asInternalUser.indices.getSettings();
+      const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
+        index: [
+          {
+            names: Object.keys(indicesSettings),
+            privileges: ['read'],
+          },
+        ],
+      });
+      indicesPermissions = hasPrivilegesResponse.index;
+    } catch (e) {
+      // Possible that the user doesn't have permissions to view
+      if (e.meta?.statusCode !== 403) {
+        mlLog.error(e);
+      }
+      return pipelineIdsToDestinationIndices;
+    }
+
+    // From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
+    for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
+      const defaultPipeline = settings?.index?.default_pipeline;
+      if (
+        defaultPipeline &&
+        pipelineIds.has(defaultPipeline) &&
+        indicesPermissions[indexName]?.read === true
+      ) {
+        if (Array.isArray(pipelineIdsToDestinationIndices[defaultPipeline])) {
+          pipelineIdsToDestinationIndices[defaultPipeline].push(indexName);
+        } else {
+          pipelineIdsToDestinationIndices[defaultPipeline] = [indexName];
+        }
+      }
+    }
+
+    return pipelineIdsToDestinationIndices;
+  }
+
+  /**
    * Retrieves the network map and metadata of model ids, pipelines, and indices that are tied to the model ids.
    * @param modelIds - Array of models ids and model aliases.
    */
@@ -229,7 +592,6 @@ export class ModelsProvider {
     };
 
     let pipelinesResponse;
-    let indicesSettings;
 
     try {
       pipelinesResponse = await this.getModelsPipelines([modelId]);
@@ -264,44 +626,8 @@ export class ModelsProvider {
         }
 
         if (withIndices === true) {
-          const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
-
-          let indicesPermissions;
-          try {
-            indicesSettings = await this._client.asInternalUser.indices.getSettings();
-            const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
-              index: [
-                {
-                  names: Object.keys(indicesSettings),
-                  privileges: ['read'],
-                },
-              ],
-            });
-            indicesPermissions = hasPrivilegesResponse.index;
-          } catch (e) {
-            // Possible that the user doesn't have permissions to view
-            // If so, gracefully exit
-            if (e.meta?.statusCode !== 403) {
-              // eslint-disable-next-line no-console
-              console.error(e);
-            }
-            return result;
-          }
-
-          // 2. From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
-          for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
-            if (
-              settings?.index?.default_pipeline &&
-              pipelineIds.has(settings.index.default_pipeline) &&
-              indicesPermissions[indexName]?.read === true
-            ) {
-              if (Array.isArray(pipelineIdsToDestinationIndices[settings.index.default_pipeline])) {
-                pipelineIdsToDestinationIndices[settings.index.default_pipeline].push(indexName);
-              } else {
-                pipelineIdsToDestinationIndices[settings.index.default_pipeline] = [indexName];
-              }
-            }
-          }
+          const pipelineIdsToDestinationIndices: Record<string, string[]> =
+            await this.getPipelineToIndicesMap(pipelineIds);
 
           // 3. Grab index information for all the indices found, and add their info to the map
           for (const [pipelineId, indexIds] of Object.entries(pipelineIdsToDestinationIndices)) {

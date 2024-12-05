@@ -23,8 +23,8 @@ ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
 1. Copy and edit the template in the right section of this file. Most recent entries should be at the top of the section, search for sections using the text "[float]".
 2. Edit the anchor ID [[REPO-PR]] of the template with proper values.
 3. Don't hardcode the link to the new entry. Instead, make it available through the doc link service files:
-  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/get_doc_links.ts
-  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/types.ts
+  - https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-doc-links/src/get_doc_links.ts
+  - https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-doc-links/src/types.ts
 
 The entry in the main links file should look like this:
 

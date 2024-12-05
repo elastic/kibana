@@ -33,7 +33,8 @@ export const cloneRuleRoute = (
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
           const params: CloneRuleRequestParamsV1 = req.params;
           try {
             // TODO (http-versioning): Remove this cast, this enables us to move forward

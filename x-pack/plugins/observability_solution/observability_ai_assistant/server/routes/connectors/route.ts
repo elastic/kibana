@@ -10,8 +10,10 @@ import { createObservabilityAIAssistantServerRoute } from '../create_observabili
 
 const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/connectors',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<FindActionResult[]> => {
     const { request, plugins } = resources;

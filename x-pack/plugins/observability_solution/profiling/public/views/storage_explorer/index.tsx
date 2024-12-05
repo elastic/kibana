@@ -97,6 +97,7 @@ export function StorageExplorerView() {
         <EuiFlexItem grow={false}>
           <EuiTabs>
             <EuiTab
+              data-test-subj="storageExplorer_hostBreakdownTab"
               onClick={() => {
                 setSelectedTab('host_breakdown');
               }}
@@ -107,6 +108,7 @@ export function StorageExplorerView() {
               })}
             </EuiTab>
             <EuiTab
+              data-test-subj="storageExplorer_dataBreakdownTab"
               onClick={() => {
                 setSelectedTab('data_breakdown');
               }}

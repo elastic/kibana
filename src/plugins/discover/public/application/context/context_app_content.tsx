@@ -8,8 +8,7 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useState, FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
+import { EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
@@ -45,7 +44,6 @@ import { ActionBar } from './components/action_bar/action_bar';
 import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
-import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
@@ -73,7 +71,6 @@ export interface ContextAppContentProps {
   successorsStatus: LoadingStatus;
   interceptedWarnings: SearchResponseWarning[];
   useNewFieldsApi: boolean;
-  isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
 }
@@ -85,7 +82,6 @@ export function clamp(value: number) {
 }
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
-const DocTableContextMemoized = React.memo(DocTableContext);
 const ActionBarMemoized = React.memo(ActionBar);
 
 export function ContextAppContent({
@@ -105,7 +101,6 @@ export function ContextAppContent({
   successorsStatus,
   interceptedWarnings,
   useNewFieldsApi,
-  isLegacy,
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
@@ -126,17 +121,6 @@ export function ContextAppContent({
     [config, dataView]
   );
   const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
-
-  const loadingFeedback = () => {
-    if (isLegacy && isAnchorLoading) {
-      return (
-        <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
-          <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />
-        </EuiText>
-      );
-    }
-    return null;
-  };
 
   const onChangeCount = useCallback(
     (type: SurrDocType, count: number) => {
@@ -224,59 +208,42 @@ export function ContextAppContent({
           isLoading={arePredecessorsLoading}
           isDisabled={isAnchorLoading}
         />
-        {loadingFeedback()}
       </WrapperWithPadding>
-      {isLegacy && rows && rows.length !== 0 && (
-        <DocTableContextMemoized
-          columns={columns}
-          dataView={dataView}
-          rows={rows}
-          isLoading={isAnchorLoading}
-          onFilter={addFilter}
-          onAddColumn={onAddColumn}
-          onRemoveColumn={onRemoveColumn}
-          sort={sort}
-          useNewFieldsApi={useNewFieldsApi}
-          dataTestSubj="contextDocTable"
-        />
-      )}
-      {!isLegacy && (
-        <div className="dscDocsGrid">
-          <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-            <DiscoverGridMemoized
-              ariaLabelledBy="surDocumentsAriaLabel"
-              cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
-              cellActionsMetadata={cellActionsMetadata}
-              cellActionsHandling="append"
-              columns={columns}
-              rows={rows}
-              dataView={dataView}
-              expandedDoc={expandedDoc}
-              loadingState={isAnchorLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-              sampleSizeState={0}
-              sort={sort as SortOrder[]}
-              isSortEnabled={false}
-              showTimeCol={showTimeCol}
-              useNewFieldsApi={useNewFieldsApi}
-              isPaginationEnabled={false}
-              rowsPerPageState={getDefaultRowsPerPage(services.uiSettings)}
-              controlColumnIds={controlColumnIds}
-              setExpandedDoc={setExpandedDoc}
-              onFilter={addFilter}
-              onSetColumns={onSetColumns}
-              configRowHeight={configRowHeight}
-              showMultiFields={services.uiSettings.get(SHOW_MULTIFIELDS)}
-              maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-              renderDocumentView={renderDocumentView}
-              services={services}
-              configHeaderRowHeight={3}
-              settings={grid}
-              onResize={onResize}
-              externalCustomRenderers={cellRenderers}
-            />
-          </CellActionsProvider>
-        </div>
-      )}
+      <div className="dscDocsGrid">
+        <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
+          <DiscoverGridMemoized
+            ariaLabelledBy="surDocumentsAriaLabel"
+            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+            cellActionsMetadata={cellActionsMetadata}
+            cellActionsHandling="append"
+            columns={columns}
+            rows={rows}
+            dataView={dataView}
+            expandedDoc={expandedDoc}
+            loadingState={isAnchorLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+            sampleSizeState={0}
+            sort={sort as SortOrder[]}
+            isSortEnabled={false}
+            showTimeCol={showTimeCol}
+            useNewFieldsApi={useNewFieldsApi}
+            isPaginationEnabled={false}
+            rowsPerPageState={getDefaultRowsPerPage(services.uiSettings)}
+            controlColumnIds={controlColumnIds}
+            setExpandedDoc={setExpandedDoc}
+            onFilter={addFilter}
+            onSetColumns={onSetColumns}
+            configRowHeight={configRowHeight}
+            showMultiFields={services.uiSettings.get(SHOW_MULTIFIELDS)}
+            maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+            renderDocumentView={renderDocumentView}
+            services={services}
+            configHeaderRowHeight={3}
+            settings={grid}
+            onResize={onResize}
+            externalCustomRenderers={cellRenderers}
+          />
+        </CellActionsProvider>
+      </div>
       <WrapperWithPadding>
         <ActionBarMemoized
           type={SurrDocType.SUCCESSORS}

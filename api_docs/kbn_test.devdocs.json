@@ -2169,6 +2169,112 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.cleanupElasticsearch",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanupElasticsearch",
+        "description": [],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.ICluster",
+            "text": "ICluster"
+          },
+          ", isServerless: boolean, logsDir: string | undefined, log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.cleanupElasticsearch.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.ICluster",
+                "text": "ICluster"
+              }
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.cleanupElasticsearch.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isServerless",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.cleanupElasticsearch.$3",
+            "type": "string",
+            "tags": [],
+            "label": "logsDir",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.cleanupElasticsearch.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.createAsyncInstance",
         "type": "Function",
         "tags": [],

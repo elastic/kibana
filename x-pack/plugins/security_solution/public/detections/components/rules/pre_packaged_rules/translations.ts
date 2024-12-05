@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const PRE_BUILT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.prePackagedRules.emptyPromptTitle',
   {
-    defaultMessage: 'Load Elastic prebuilt detection rules',
+    defaultMessage: 'Install and enable Elastic prebuilt detection rules',
   }
 );
 
@@ -18,7 +18,7 @@ export const PRE_BUILT_MSG = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.prePackagedRules.emptyPromptMessage',
   {
     defaultMessage:
-      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are met. By default, all prebuilt rules except the Endpoint Security rule are disabled. You can select additional rules you want to enable.',
+      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are met. To start using them, choose rules to install and enable.',
   }
 );
 

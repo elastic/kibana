@@ -23,7 +23,9 @@ import {
 import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { RouteMethod } from '@kbn/core/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
@@ -265,6 +267,11 @@ export class MonitoringPlugin
   }
 
   registerPluginInUI(plugins: PluginsSetup) {
+    const alertingFeatures = RULES.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: ['monitoring', ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY],
+    }));
+
     plugins.features.registerKibanaFeature({
       id: 'monitoring',
       name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
@@ -275,7 +282,7 @@ export class MonitoringPlugin
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
-      alerting: RULES,
+      alerting: alertingFeatures,
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
@@ -292,10 +299,10 @@ export class MonitoringPlugin
               },
               alerting: {
                 rule: {
-                  all: RULES,
+                  all: alertingFeatures,
                 },
                 alert: {
-                  all: RULES,
+                  all: alertingFeatures,
                 },
               },
               ui: [],
@@ -335,7 +342,7 @@ export class MonitoringPlugin
             payload: req.body,
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => coreContext.uiSettings.client,
-            getActionTypeRegistry: () => actionContext?.listTypes(),
+            getActionTypeRegistry: () => actionContext?.listTypes() ?? [],
             getRulesClient: () => {
               try {
                 return plugins.alerting.getRulesClientWithRequest(req);
