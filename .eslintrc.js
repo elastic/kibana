@@ -967,7 +967,7 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/aiops/**/*.tsx',
+        'x-pack/platform/plugins/shared/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
         'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'src/plugins/ai_assistant_management/**/*.tsx',
@@ -1073,7 +1073,7 @@ module.exports = {
      */
     {
       files: [
-        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/aiops/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/data_visualizer/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',

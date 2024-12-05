@@ -3876,7 +3876,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-plugin@link:x-pack/plugins/aiops":
+"@kbn/aiops-plugin@link:x-pack/platform/plugins/shared/aiops":
   version "0.0.0"
   uid ""
 

@@ -454,7 +454,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/aiops/README.md[aiops]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/aiops/README.md[aiops]
 |The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team.
 
 

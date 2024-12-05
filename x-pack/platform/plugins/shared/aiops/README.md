@@ -6,7 +6,7 @@ The plugin provides APIs and components for AIOps features, including the “Log
 
 ## Log Rate Analysis
 
-Here's some notes on the structure of the code for the API endpoint `/internal/aiops/log_rate_analysis`. The endpoint uses the `@kbn/ml-response-stream` package to return the request's response as a HTTP stream of JSON objects. The files are located in `x-pack/plugins/aiops/server/routes/log_rate_analysis/`.
+Here's some notes on the structure of the code for the API endpoint `/internal/aiops/log_rate_analysis`. The endpoint uses the `@kbn/ml-response-stream` package to return the request's response as a HTTP stream of JSON objects. The files are located in `x-pack/platform/plugins/shared/aiops/server/routes/log_rate_analysis/`.
 
 `define_route.ts:defineRoute()` is the outer most wrapper that's used to define the route and its versions. It calls `route_handler_factory:routeHandlerFactory()` for each version.
 
