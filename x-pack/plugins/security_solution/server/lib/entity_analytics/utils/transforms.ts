@@ -13,6 +13,7 @@ import type {
   TransformGetTransformTransformSummary,
   TransformPutTransformRequest,
   TransformGetTransformStatsTransformStats,
+  AcknowledgedResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   getRiskScoreLatestIndex,
@@ -25,6 +26,7 @@ import {
 } from '../../../../common/utils/risk_score_modules';
 import type { TransformOptions } from '../risk_score/configurations';
 import { getTransformOptions } from '../risk_score/configurations';
+import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 export const getLegacyTransforms = async ({
   namespace,
@@ -106,6 +108,72 @@ export const createTransform = async ({
   }
 };
 
+export const stopTransform = async ({
+  esClient,
+  logger,
+  transformId,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  transformId: string;
+}): Promise<AcknowledgedResponseBase> =>
+  retryTransientEsErrors(
+    () =>
+      esClient.transform.stopTransform(
+        {
+          transform_id: transformId,
+          wait_for_completion: true,
+          force: true,
+        },
+        { ignore: [409, 404] }
+      ),
+    { logger }
+  );
+
+export const deleteTransform = async ({
+  esClient,
+  logger,
+  transformId,
+  deleteData = false,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  transformId: string;
+  deleteData?: boolean;
+}): Promise<AcknowledgedResponseBase> =>
+  retryTransientEsErrors(
+    () =>
+      esClient.transform.deleteTransform(
+        {
+          transform_id: transformId,
+          force: true,
+          delete_dest_index: deleteData,
+        },
+        { ignore: [404] }
+      ),
+    { logger }
+  );
+
+export const reinstallTransform = async ({
+  esClient,
+  logger,
+  config,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  config: TransformPutTransformRequest;
+}): Promise<void> => {
+  const transformId = config.transform_id;
+
+  await stopTransform({ esClient, logger, transformId });
+  await deleteTransform({ esClient, logger, transformId });
+  await createTransform({
+    esClient,
+    logger,
+    transform: config,
+  });
+};
+
 export const getLatestTransformId = (namespace: string): string =>
   `risk_score_latest_transform_${namespace}`;
 
@@ -166,14 +234,18 @@ const upgradeLatestTransformIfNeeded = async ({
   });
 
   if (isTransformOutdated(response.transforms[0], newConfig)) {
-    logger.info(`Upgrading transform ${transformId}`);
+    if (doesTransformRequireReinstall(response.transforms[0], newConfig)) {
+      logger.info(`Reinstalling transform ${transformId}`);
+      reinstallTransform({ esClient, logger, config: { ...newConfig, transform_id: transformId } });
+    } else {
+      logger.info(`Upgrading transform ${transformId}`);
+      const { latest: _unused, ...changes } = newConfig;
 
-    const { latest: _unused, ...changes } = newConfig;
-
-    await esClient.transform.updateTransform({
-      transform_id: transformId,
-      ...changes,
-    });
+      await esClient.transform.updateTransform({
+        transform_id: transformId,
+        ...changes,
+      });
+    }
   }
 };
 
@@ -199,11 +271,12 @@ export const scheduleLatestTransformNow = async ({
   await scheduleTransformNow({ esClient, transformId });
 };
 
-/**
- * Whitelist the transform fields that we can update.
- */
-
 const isTransformOutdated = (
   transform: TransformGetTransformTransformSummary,
   newConfig: TransformOptions
 ): boolean => transform._meta?.version !== newConfig._meta?.version;
+
+const doesTransformRequireReinstall = (
+  transform: TransformGetTransformTransformSummary,
+  newConfig: TransformOptions
+): boolean => JSON.stringify(transform.latest) !== JSON.stringify(newConfig.latest);

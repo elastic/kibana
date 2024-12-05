@@ -126,7 +126,6 @@ export const riskScoreFieldMap: FieldMap = {
     required: false,
   },
   ...buildIdentityRiskFields(RiskScoreEntity.user),
-  // TODO - MIGRATION? feature flag?
   'service.name': {
     type: 'keyword',
     array: false,
@@ -171,7 +170,6 @@ export const getTransformOptions = ({
   },
   latest: {
     sort: '@timestamp',
-    // TODO UPGRADE TRANSFORM? increase the version?
     unique_key: [`host.name`, `user.name`, `service.name`],
   },
   source: {
@@ -188,7 +186,7 @@ export const getTransformOptions = ({
     unattended: true, // In unattended mode, the transform retries indefinitely in case of an error
   },
   _meta: {
-    version: 7, // When this field is updated we automatically update the transform
+    version: 3, // When this field is updated we automatically update the transform
     managed: true, // Metadata that identifies the transform. It has no functionality
     managed_by: 'security-entity-analytics', // Metadata that identifies the transform. It has no functionality
   },

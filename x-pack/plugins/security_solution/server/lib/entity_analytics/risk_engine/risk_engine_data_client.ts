@@ -24,6 +24,7 @@ import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks
 import { RiskEngineAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { getRiskScoringTaskStatus, scheduleNow } from '../risk_score/tasks/risk_scoring_task';
+import type { RiskEngineConfiguration } from '../types';
 
 interface InitOpts {
   namespace: string;
@@ -107,6 +108,12 @@ export class RiskEngineDataClient {
   public getConfiguration = () =>
     getConfiguration({
       savedObjectsClient: this.options.soClient,
+    });
+
+  public updateConfiguration = (config: Partial<RiskEngineConfiguration>) =>
+    updateSavedObjectAttribute({
+      savedObjectsClient: this.options.soClient,
+      attributes: config,
     });
 
   public async getStatus({
