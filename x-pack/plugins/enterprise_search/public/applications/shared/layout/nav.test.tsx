@@ -62,7 +62,7 @@ const baseNavItems = [
         href: '/app/enterprise_search/content/crawlers',
         id: 'crawlers',
         items: undefined,
-        name: 'Web crawlers',
+        name: 'Web Crawlers',
       },
     ],
     name: 'Content',
@@ -184,7 +184,7 @@ const mockNavLinks = [
   },
   {
     id: 'enterpriseSearchContent:webCrawlers',
-    title: 'Web crawlers',
+    title: 'Web Crawlers',
     url: '/app/enterprise_search/content/crawlers',
   },
   {

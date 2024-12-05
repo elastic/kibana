@@ -38,7 +38,7 @@ describe('generateSideNavItems', () => {
     },
     'enterpriseSearchContent:webCrawlers': {
       id: 'enterpriseSearchContent:webCrawlers',
-      title: 'Web crawlers',
+      title: 'Web Crawlers',
       url: '/app/enterprise_search/content/crawlers',
     },
   } as unknown as Record<string, ChromeNavLink | undefined>;
