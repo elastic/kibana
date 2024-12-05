@@ -624,6 +624,7 @@ packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/plugins/shared/controls @elastic/kibana-presentation
+src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
@@ -639,7 +640,6 @@ src/plugins/charts @elastic/kibana-visualizations
 src/plugins/console @elastic/kibana-management
 src/plugins/content_management @elastic/appex-sharedux
 src/plugins/custom_integrations @elastic/fleet
-src/plugins/dashboard @elastic/kibana-presentation
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
