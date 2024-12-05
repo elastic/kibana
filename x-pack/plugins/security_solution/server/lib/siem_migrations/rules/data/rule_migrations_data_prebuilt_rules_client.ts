@@ -53,9 +53,11 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
         .filter((id) => id) as string[];
 
       filteredRules.push({
-        ...rule,
-        ...(mitreAttackIds && mitreAttackIds.length > 0 && { mitre_attack_ids: mitreAttackIds }),
+        rule_id: rule.rule_id,
+        name: rule.name,
+        description: rule.description,
         elser_embedding: `${rule.name} - ${rule.description}`,
+        ...(mitreAttackIds && mitreAttackIds.length > 0 && { mitre_attack_ids: mitreAttackIds }),
       });
     });
 
