@@ -28,6 +28,7 @@ import {
 import * as StatusCheckStates from './status_check_states';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
 
 class InstructionSetUi extends React.Component {
   constructor(props) {
@@ -277,9 +278,7 @@ class InstructionSetUi extends React.Component {
     return (
       <EuiSplitPanel.Outer>
         <EuiSplitPanel.Inner color="subdued" paddingSize="none">
-          <EuiTabs css={({ euiTheme }) => ({ padding: `0 ${euiTheme.size.l}` })}>
-            {this.renderTabs()}
-          </EuiTabs>
+          <EuiTabs css={{ padding: `0 ${euiThemeVars.euiSizeL}` }}>{this.renderTabs()}</EuiTabs>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="l">
           {this.renderHeader()}
