@@ -17,10 +17,12 @@ import {
   EuiSpacer,
   EuiLink,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isRetentionBiggerThan } from './validations';
 import { editDataRetentionFormSchema } from './schema';
 import {
   useForm,
@@ -128,7 +130,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 
         const successMessage = isSingleDataStream
           ? i18n.translate(
-              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
+              'xpack.idxMgmt.dataStreams.editDataRetentionModal.successDataRetentionNotification',
               {
                 defaultMessage:
                   'Data retention {disabledDataRetention, plural, one { disabled } other { updated } }',
@@ -136,7 +138,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               }
             )
           : i18n.translate(
-              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successBulkDataRetentionNotification',
+              'xpack.idxMgmt.dataStreams.editDataRetentionModal.successBulkDataRetentionNotification',
               {
                 defaultMessage:
                   'Data retention has been updated for {dataStreamCount, plural, one {one data stream} other {{dataStreamCount} data streams}}.',
@@ -151,14 +153,14 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       if (error) {
         const errorMessage = isSingleDataStream
           ? i18n.translate(
-              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
+              'xpack.idxMgmt.dataStreams.editDataRetentionModal.errorDataRetentionNotification',
               {
                 defaultMessage: "Error updating data retention: ''{error}''",
                 values: { error: error.message },
               }
             )
           : i18n.translate(
-              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorBulkDataRetentionNotification',
+              'xpack.idxMgmt.dataStreams.editDataRetentionModal.errorBulkDataRetentionNotification',
               {
                 defaultMessage:
                   'There was an error updating the retention period. Try again later.',
@@ -171,17 +173,30 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     });
   };
 
+  const affectedDataStreams = dataStreams
+    .filter(
+      (ds: DataStream) =>
+        formData.dataRetention &&
+        formData.timeUnit &&
+        (!ds.lifecycle?.data_retention ||
+          isRetentionBiggerThan(
+            ds.lifecycle.data_retention,
+            `${formData.dataRetention}${formData.timeUnit}`
+          ))
+    )
+    .map(({ name }: DataStream) => name);
+
   return (
     <EuiModal
       onClose={() => onClose()}
       data-test-subj="editDataRetentionModal"
-      css={{ minWidth: 450 }}
+      css={{ minWidth: isSingleDataStream ? 450 : 650, maxWidth: 650 }}
     >
       <Form form={form} data-test-subj="editDataRetentionForm">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
+              id="xpack.idxMgmt.dataStreams.editDataRetentionModal.modalTitleText"
               defaultMessage="Edit data retention {dataStreamCount, plural, one {} other {for {dataStreamCount} data streams}}"
               values={{ dataStreamCount: dataStreams?.length }}
             />
@@ -206,7 +221,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             lifecycle?.globalMaxRetention && (
               <>
                 <FormattedMessage
-                  id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
+                  id="xpack.idxMgmt.dataStreams.editDataRetentionModal.modalTitleText"
                   defaultMessage="Maximum data retention period is {maxRetention} {unitText}"
                   values={{
                     maxRetention: globalMaxRetention.size,
@@ -236,7 +251,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               <EuiText size="xs">
                 <EuiLink href={documentationService.getUpdateExistingDS()} target="_blank" external>
                   {i18n.translate(
-                    'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText',
+                    'xpack.idxMgmt.dataStreams.editDataRetentionModal.learnMoreLinkText',
                     {
                       defaultMessage: 'How does this work?',
                     }
@@ -248,7 +263,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               !isSingleDataStream &&
               globalMaxRetention && (
                 <FormattedMessage
-                  id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText"
+                  id="xpack.idxMgmt.dataStreams.editDataRetentionModal.learnMoreLinkText"
                   defaultMessage="Maximum data retention period for this project is {maxRetention} {unitText}. {manageSettingsLink}"
                   values={{
                     maxRetention: globalMaxRetention.size,
@@ -256,7 +271,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                     manageSettingsLink: (
                       <EuiLink href={cloud?.deploymentUrl} external>
                         {i18n.translate(
-                          'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.manageProjectSettingsLinkText',
+                          'xpack.idxMgmt.dataStreams.editDataRetentionModal.manageProjectSettingsLinkText',
                           {
                             defaultMessage: 'Manage project settings.',
                           }
@@ -286,7 +301,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                     euiFieldProps={{
                       'data-test-subj': 'timeUnit',
                       'aria-label': i18n.translate(
-                        'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.unitsAriaLabel',
+                        'xpack.idxMgmt.dataStreams.editDataRetentionModal.unitsAriaLabel',
                         {
                           defaultMessage: 'Time unit',
                         }
@@ -303,7 +318,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             component={ToggleField}
             data-test-subj="infiniteRetentionPeriod"
             label={i18n.translate(
-              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField',
+              'xpack.idxMgmt.dataStreams.editDataRetentionModal.infiniteRetentionPeriodField',
               {
                 defaultMessage:
                   'Keep data {withProjectLevelRetention, plural, one {up to maximum retention period} other {indefinitely}}',
@@ -318,12 +333,47 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           />
 
           <EuiSpacer />
+
+          {affectedDataStreams.length > 0 && (
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutTitle',
+                {
+                  defaultMessage: 'Some data will be deleted',
+                }
+              )}
+              color="danger"
+              iconType="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutText"
+                  defaultMessage="The retention period will be reduced for {affectedDataStreamCount} data streams. Data older than then new
+                retention period will be permanently deleted."
+                  values={{
+                    affectedDataStreamCount: affectedDataStreams.length,
+                  }}
+                />
+              </p>
+              {affectedDataStreams.length <= 10 && (
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutList"
+                    defaultMessage="Affected data streams: {affectedDataStreams}"
+                    values={{
+                      affectedDataStreams: <b>{affectedDataStreams.join(', ')}</b>,
+                    }}
+                  />
+                </p>
+              )}
+            </EuiCallOut>
+          )}
         </EuiModalBody>
 
         <EuiModalFooter>
           <EuiButtonEmpty data-test-subj="cancelButton" onClick={() => onClose()}>
             <FormattedMessage
-              id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.cancelButtonLabel"
+              id="xpack.idxMgmt.dataStreams.editDataRetentionModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -337,7 +387,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             onClick={onSubmitForm}
           >
             <FormattedMessage
-              id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.saveButtonLabel"
+              id="xpack.idxMgmt.dataStreams.editDataRetentionModal.saveButtonLabel"
               defaultMessage="Save"
             />
           </EuiButton>

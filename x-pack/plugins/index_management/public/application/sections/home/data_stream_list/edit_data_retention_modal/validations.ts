@@ -40,7 +40,10 @@ const convertToSeconds = (value: string) => {
   }
 };
 
-const isRetentionBiggerThan = (valueA: string, valueB: string) => {
+/*
+TODO: add documentation
+ */
+export const isRetentionBiggerThan = (valueA: string, valueB: string) => {
   const secondsA = convertToSeconds(valueA);
   const secondsB = convertToSeconds(valueB);
 
