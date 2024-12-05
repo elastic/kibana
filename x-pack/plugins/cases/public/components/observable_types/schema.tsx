@@ -15,7 +15,7 @@ export const schema = {
   key: {
     validations: [
       {
-        validator: emptyField(i18n.REQUIRED_FIELD(i18n.OBSERVABLE_TYPE_LABEL)),
+        validator: emptyField('key')),
       },
     ],
   },
