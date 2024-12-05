@@ -18,6 +18,7 @@ export type TestFailure = FailedTestCase['$'] & {
   githubIssue?: string;
   failureCount?: number;
   commandLine?: string;
+  owners?: string;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {

@@ -40,6 +40,8 @@ export interface TestSuite {
     'metadata-json'?: string;
     /* the command that ran this suite */
     'command-line'?: string;
+    /* the codeowners of the file */
+    owners?: string;
   };
   testcase?: TestCase[];
 }
