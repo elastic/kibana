@@ -138,6 +138,16 @@ const invalid: RuleTester.InvalidTestCase[] = [
     errors: [{ messageId: 'noCssColorSpecific' }],
   },
   {
+    name: 'Raises an error when a CSS color for the color property is used in with the tagged template css function',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+    import { css } from '@emotion/css';
+
+    const codeColor = css\` color: #dd4040; \`;
+    `,
+    errors: [{ messageId: 'noCssColor' }],
+  },
+  {
     name: 'Raises an error when a CSS color for the color property is used in a JSX css attribute for EuiComponents with the css template function',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
@@ -150,6 +160,24 @@ const invalid: RuleTester.InvalidTestCase[] = [
       )
     }`,
     errors: [{ messageId: 'noCssColor' }],
+  },
+  {
+    name: 'Raises an error when a CSS color for the color property is used in a JSX className attribute for EuiComponents with the css template function defined outside the scope of the component',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+    import React from 'react';
+    import { css } from '@emotion/css';
+
+    const codeCss = css({
+      color: '#dd4040',
+    })
+    
+    function TestComponent() {
+      return (
+        <EuiCode css={codeCss}>This is a test</EuiCode>
+      )
+    }`,
+    errors: [{ messageId: 'noCSSColorSpecificDeclaredVariable' }],
   },
   {
     name: 'Raises an error when a CSS color for the color property is used in a JSX className attribute for EuiComponents with the css template function defined outside the scope of the component',
@@ -192,16 +220,6 @@ const invalid: RuleTester.InvalidTestCase[] = [
       )
     }`,
     errors: [{ messageId: 'noCssColorSpecific' }],
-  },
-  {
-    name: 'Raises an error when a CSS color for the color property is used in with the tagged template css function',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
-    code: `
-    import { css } from '@emotion/css';
-
-    const codeColor = css\` color: #dd4040; \`;
-    `,
-    errors: [{ messageId: 'noCssColor' }],
   },
   {
     name: 'Raises an error when a CSS color for the color property is used in a JSX className attribute for EuiComponents with the css template function',

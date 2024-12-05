@@ -211,6 +211,10 @@ export const NoCssColor: Rule.RuleModule = {
          * @example
          * const codeStyle = { color: '#dd4040' };
          * <EuiCode css={codeStyle}>This is an example</EuiCode>
+         *
+         * @example
+         * const codeStyle = css({ color: '#dd4040' });
+         * <EuiCode css={codeStyle}>This is an example</EuiCode>
          */
         if (
           node.value?.type === 'JSXExpressionContainer' &&
@@ -220,36 +224,53 @@ export const NoCssColor: Rule.RuleModule = {
 
           const nodeScope = context.sourceCode.getScope(node.value.expression);
 
-          let variableDeclarationMatches = nodeScope.variables.find(
-            (variable) => variable.name === styleVariableName
-          );
+          const variableDeclarationMatches = nodeScope.references.find(
+            (ref) => ref.identifier.name === styleVariableName
+          )?.resolved;
 
-          if (!variableDeclarationMatches) {
-            // identifier was probably not declared in the current scope, hence we'll give it another try to find it in the parent scope
-            variableDeclarationMatches = nodeScope.upper?.variables.find(
-              (variable) => variable.name === styleVariableName
-            );
-          }
+          let variableInitializationNode;
 
-          // we assume there's only one definition of the variable
-          const variableInitializationNode = variableDeclarationMatches?.defs?.[0]?.node?.init;
-
-          if (variableInitializationNode.type === 'ObjectExpression') {
-            // @ts-ignore
-            variableInitializationNode.properties.forEach((property) => {
-              handleObjectProperties(context, node, property, {
-                loc: node.loc,
-                messageId: 'noCSSColorSpecificDeclaredVariable',
-                data: {
-                  property:
-                    property.type === 'SpreadElement'
-                      ? String(property.argument.name)
-                      : String(property.key.name),
-                  variableName: styleVariableName,
-                  line: String(property.loc.start.line),
-                },
+          if ((variableInitializationNode = variableDeclarationMatches?.defs?.[0]?.node?.init)) {
+            if (variableInitializationNode.type === 'ObjectExpression') {
+              // @ts-ignore
+              variableInitializationNode.properties.forEach((property) => {
+                handleObjectProperties(context, node, property, {
+                  loc: property.loc,
+                  messageId: 'noCSSColorSpecificDeclaredVariable',
+                  data: {
+                    property:
+                      property.type === 'SpreadElement'
+                        ? String(property.argument.name)
+                        : String(property.key.name),
+                    variableName: styleVariableName,
+                    line: String(property.loc.start.line),
+                  },
+                });
               });
-            });
+            } else if (
+              variableInitializationNode.type === 'CallExpression' &&
+              variableInitializationNode.callee.name === 'css'
+            ) {
+              const cssFunctionArgument = variableInitializationNode.arguments[0];
+
+              if (cssFunctionArgument.type === 'ObjectExpression') {
+                // @ts-ignore
+                cssFunctionArgument.properties.forEach((property) => {
+                  handleObjectProperties(context, node, property, {
+                    loc: node.loc,
+                    messageId: 'noCSSColorSpecificDeclaredVariable',
+                    data: {
+                      property:
+                        property.type === 'SpreadElement'
+                          ? String(property.argument.name)
+                          : String(property.key.name),
+                      variableName: styleVariableName,
+                      line: String(property.loc.start.line),
+                    },
+                  });
+                });
+              }
+            }
           }
 
           return;
