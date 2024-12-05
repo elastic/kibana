@@ -39,7 +39,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
   const isRuleUpgrading = loadingRules.length > 0;
   const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
   const everyFieldHasConflict = ruleUpgradeStates.every(
-    ({ diff }) => diff.num_fields_with_conflicts > 0
+    ({ hasUnresolvedConflicts }) => hasUnresolvedConflicts
   );
   const doAllSelectedRulesHaveConflicts =
     isPrebuiltRulesCustomizationEnabled && everyFieldHasConflict;
