@@ -36,4 +36,4 @@ export const NavControls = () => {
       <AssistantNavLink />
     </InPortal>
   );
-}
+};
