@@ -59,7 +59,7 @@
     "files": "src/platform/plugins/shared/files",
     "filesManagement": "src/platform/plugins/private/files_management",
     "flot": "packages/kbn-flot-charts/lib",
-    "generateCsv": "packages/kbn-generate-csv",
+    "generateCsv": "src/platform/packages/private/kbn-generate-csv",
     "grouping": "packages/kbn-grouping/src",
     "alertsGrouping": "packages/kbn-alerts-grouping",
     "guidedOnboarding": "src/plugins/guided_onboarding",
