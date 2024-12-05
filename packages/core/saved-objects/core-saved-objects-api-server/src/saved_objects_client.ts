@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server/src/extensions/spaces';
 import type { SavedObject } from '..';
 import type {
   SavedObjectsBaseOptions,
@@ -427,4 +428,12 @@ export interface SavedObjectsClientContract {
    * Returns the namespace associated with the client. If the namespace is the default one, this method returns `undefined`.
    */
   getCurrentNamespace(): string | undefined;
+
+  getSearchableNamespaces: ISavedObjectsSpacesExtension['getSearchableNamespaces'];
+
+  /**
+   * Returns a new Saved Objects client scoped to the new namespace.
+   * @param namespace Space to switch to.
+   */
+  asScopedToNamespace(namespace: string): SavedObjectsClientContract;
 }

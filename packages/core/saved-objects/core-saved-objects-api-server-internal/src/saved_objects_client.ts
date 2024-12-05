@@ -216,4 +216,14 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   getCurrentNamespace() {
     return this._repository.getCurrentNamespace();
   }
+
+  /** {@inheritDoc SavedObjectsClientContract.getSearchableNamespaces} */
+  getSearchableNamespaces(namespaces?: string[]) {
+    return this._repository.getSearchableNamespaces(namespaces);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.asScopedToNamespace} */
+  asScopedToNamespace(namespace: string) {
+    return new SavedObjectsClient(this._repository.asScopedToNamespace(namespace));
+  }
 }

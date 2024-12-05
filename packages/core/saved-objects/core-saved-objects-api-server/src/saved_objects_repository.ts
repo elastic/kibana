@@ -8,6 +8,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server/src/extensions/spaces';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -552,4 +553,12 @@ export interface ISavedObjectsRepository {
    * namespace.
    */
   getCurrentNamespace(namespace?: string): string | undefined;
+
+  getSearchableNamespaces: ISavedObjectsSpacesExtension['getSearchableNamespaces'];
+
+  /**
+   * Returns a new Saved Objects repository scoped to the new namespace.
+   * @param namespace Space to switch to.
+   */
+  asScopedToNamespace(namespace: string): ISavedObjectsRepository;
 }
