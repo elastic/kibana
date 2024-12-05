@@ -5944,7 +5944,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inference_integration_flyout@link:x-pack/packages/ml/inference_integration_flyout":
+"@kbn/inference_integration_flyout@link:x-pack/platform/packages/private/ml/inference_integration_flyout":
   version "0.0.0"
   uid ""
 
