@@ -78,14 +78,6 @@ export const getUsageMetricsHandler = (
           dataStreamsResponse = chunkedDataStreams.flatMap((ds) => ds.data_streams);
         }
       } catch (error) {
-        if (error.message.includes('security_exception')) {
-          return errorHandler(logger, response, new NoPrivilegeMeteringError());
-        }
-
-        if (error.message.includes('index_not_found_exception')) {
-          return errorHandler(logger, response, new NoIndicesMeteringError());
-        }
-
         return errorHandler(
           logger,
           response,
