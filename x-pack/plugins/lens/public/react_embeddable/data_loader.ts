@@ -7,7 +7,6 @@
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { fetch$, type FetchContext } from '@kbn/presentation-publishing';
-import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import {
   BehaviorSubject,
@@ -262,7 +261,7 @@ export function loadEmbeddableData(
     // on data change from the parentApi, reload
     fetch$(api).pipe(
       tap((data) => {
-        const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+        const searchSessionId = data.searchSessionId || api.searchSessionId$.getValue();
         unifiedSearch$.next({
           query: data.query,
           filters: data.filters,

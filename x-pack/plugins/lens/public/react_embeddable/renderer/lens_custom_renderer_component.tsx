@@ -59,6 +59,7 @@ export function LensRenderer({
   filters,
   timeRange,
   disabledActions,
+  searchSessionId,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -71,6 +72,7 @@ export function LensRenderer({
   }, []);
   const disabledActionIds$ = useObservableVariable(disabledActions);
   const viewMode$ = useObservableVariable(viewMode);
+  const searchSessionId$ = useObservableVariable(searchSessionId);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -135,6 +137,7 @@ export function LensRenderer({
         ...props,
         // forward the unified search context
         ...searchApi,
+        searchSessionId$,
         disabledActionIds: disabledActionIds$,
         setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
         viewMode: viewMode$,
