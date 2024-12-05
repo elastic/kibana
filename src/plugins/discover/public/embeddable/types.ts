@@ -9,6 +9,7 @@
 
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   EmbeddableApiContext,
   HasEditCapabilities,
@@ -47,6 +48,7 @@ export type SearchEmbeddableState = Pick<
   rows: DataTableRecord[];
   columnsMeta: DataTableColumnsMeta | undefined;
   totalHitCount: number | undefined;
+  inspectorAdapters: Record<string, unknown>;
 };
 
 export type SearchEmbeddableStateManager = {
@@ -55,7 +57,7 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddableState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource'
+  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource'>;
 
@@ -90,6 +92,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
   PublishesUnifiedSearch &
   HasInPlaceLibraryTransforms &
   HasTimeRange &
+  HasInspectorAdapters &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
 
 export interface PublishesSavedSearch {
