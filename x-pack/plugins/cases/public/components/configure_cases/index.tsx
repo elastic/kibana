@@ -619,8 +619,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
       <CommonFlyout<ObservableTypeConfiguration>
         isLoading={loadingCaseConfigure || isPersistingConfiguration}
         disabled={
-          !permissions.create ||
-          !permissions.update ||
+          !permissions.settings
           loadingCaseConfigure ||
           isPersistingConfiguration
         }
