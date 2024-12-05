@@ -140,7 +140,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
             )}
           </EuiBadge>
         );
-        _ariaLabelAppend += `, ${TECH_PREVIEW_LABEL}`;
+        _ariaLabelAppend += ` ${TECH_PREVIEW_LABEL}`;
       }
       if (conn.isBeta) {
         _append.push(
@@ -148,7 +148,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
             {BETA_LABEL}
           </EuiBadge>
         );
-        _ariaLabelAppend += `, ${BETA_LABEL}`;
+        _ariaLabelAppend += ` ${BETA_LABEL}`;
       }
       return {
         key: key.toString(),
