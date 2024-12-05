@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiCode,
   EuiLink,
+  EuiConfirmModal,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -123,9 +124,54 @@ const i18nTexts = {
   },
 };
 
+const ConfirmModal: React.FC<{
+  onCancel: () => void;
+  onConfirm: () => void;
+}> = ({ onCancel, onConfirm }) => (
+  <EuiConfirmModal
+    title={i18n.translate('xpack.upgradeAssistant.overview.systemIndices.confirmModal.title', {
+      defaultMessage: 'Migrate Indices',
+    })}
+    onCancel={onCancel}
+    onConfirm={onConfirm}
+    cancelButtonText={i18n.translate(
+      'xpack.upgradeAssistant.overview.systemIndices.confirmModal.cancelButton.label',
+      {
+        defaultMessage: 'Cancel',
+      }
+    )}
+    confirmButtonText={i18n.translate(
+      'xpack.upgradeAssistant.overview.systemIndices.confirmModal.confirmButton.label',
+      {
+        defaultMessage: 'Confirm',
+      }
+    )}
+    defaultFocusedButton="confirm"
+    data-test-subj="migrationConfirmModal"
+  >
+    {i18n.translate('xpack.upgradeAssistant.overview.systemIndices.confirmModal.description', {
+      defaultMessage: 'Migrating system indices may lead to downtime while they are reindexed.',
+    })}
+  </EuiConfirmModal>
+);
+
 const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   const { beginSystemIndicesMigration, startMigrationStatus, migrationStatus, setShowFlyout } =
     useMigrateSystemIndices();
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const openMigrationModal = () => {
+    setIsModalVisible(true);
+  };
+  const onCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  const confirmMigrationAction = () => {
+    beginSystemIndicesMigration();
+    setIsModalVisible(false);
+  };
 
   useEffect(() => {
     setIsComplete(migrationStatus.data?.migration_status === 'NO_MIGRATION_NEEDED');
@@ -206,12 +252,14 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
         </>
       )}
 
+      {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={confirmMigrationAction} />}
+
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
             isLoading={isMigrating}
             isDisabled={isButtonDisabled}
-            onClick={beginSystemIndicesMigration}
+            onClick={openMigrationModal}
             data-test-subj="startSystemIndicesMigrationButton"
           >
             {isMigrating ? i18nTexts.inProgressButtonLabel : i18nTexts.startButtonLabel}
