@@ -239,7 +239,7 @@ describe('CaseViewTabs', () => {
     appMockRenderer = createAppMockRenderer();
 
     appMockRenderer.render(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
     );
 
     expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
