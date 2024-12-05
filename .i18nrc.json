@@ -28,7 +28,7 @@
     "defaultNavigation": "packages/default-nav",
     "devTools": "src/plugins/dev_tools",
     "discover": ["src/platform/plugins/shared/discover", "src/platform/packages/shared/kbn-discover-utils", "packages/kbn-discover-contextual-components"],
-    "savedSearch": "src/plugins/saved_search",
+    "savedSearch": "src/platform/plugins/shared/saved_search",
     "embeddableApi": "src/plugins/embeddable",
     "presentationPanel": "src/plugins/presentation_panel",
     "embeddableExamples": "examples/embeddable_examples",
