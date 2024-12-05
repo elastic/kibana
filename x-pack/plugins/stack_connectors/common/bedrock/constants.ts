@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getServiceProvider } from '@kbn/ai-service-providers';
 
 export const BEDROCK_TITLE = i18n.translate(
   'xpack.stackConnectors.components.bedrock.connectorTypeTitle',
@@ -13,7 +14,9 @@ export const BEDROCK_TITLE = i18n.translate(
     defaultMessage: 'Amazon Bedrock',
   }
 );
-export const BEDROCK_CONNECTOR_ID = '.bedrock';
+
+export const { connectorId: BEDROCK_CONNECTOR_ID } = getServiceProvider('bedrock');
+
 export enum SUB_ACTION {
   RUN = 'run',
   INVOKE_AI = 'invokeAI',

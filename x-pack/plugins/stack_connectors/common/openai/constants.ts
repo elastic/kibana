@@ -6,6 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getServiceProvider } from '@kbn/ai-service-providers';
+
+export const { connectorId: OPENAI_CONNECTOR_ID } = getServiceProvider('openai');
 
 export const OPENAI_TITLE = i18n.translate(
   'xpack.stackConnectors.components.genAi.connectorTypeTitle',
@@ -13,7 +16,7 @@ export const OPENAI_TITLE = i18n.translate(
     defaultMessage: 'OpenAI',
   }
 );
-export const OPENAI_CONNECTOR_ID = '.gen-ai';
+
 export enum SUB_ACTION {
   RUN = 'run',
   INVOKE_AI = 'invokeAI',

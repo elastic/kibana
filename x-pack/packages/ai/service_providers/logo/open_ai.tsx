@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { LogoProps } from '../types';
 
-const Logo = (props: LogoProps) => (
+const OpenAI = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     fill="#000000"
@@ -24,4 +23,4 @@ const Logo = (props: LogoProps) => (
 );
 
 // eslint-disable-next-line import/no-default-export
-export { Logo as default };
+export { OpenAI as default };

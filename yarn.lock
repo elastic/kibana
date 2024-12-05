@@ -3852,7 +3852,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-assistant-service-providers@link:x-pack/packages/kbn-ai-assistant/packages/service_providers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant@link:x-pack/packages/kbn-ai-assistant":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ai-service-providers@link:x-pack/packages/ai/service_providers":
   version "0.0.0"
   uid ""
 

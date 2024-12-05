@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getServiceProvider } from '@kbn/ai-service-providers';
 
 export const GEMINI_TITLE = i18n.translate(
   'xpack.stackConnectors.components.gemini.connectorTypeTitle',
@@ -13,7 +14,9 @@ export const GEMINI_TITLE = i18n.translate(
     defaultMessage: 'Google Gemini',
   }
 );
-export const GEMINI_CONNECTOR_ID = '.gemini';
+
+export const { connectorId: GEMINI_CONNECTOR_ID } = getServiceProvider('gemini');
+
 export enum SUB_ACTION {
   RUN = 'run',
   DASHBOARD = 'getDashboard',

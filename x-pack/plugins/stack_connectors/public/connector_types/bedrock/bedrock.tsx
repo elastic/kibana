@@ -8,6 +8,7 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { getReactComponentLogo } from '@kbn/ai-service-providers';
 import { SUB_ACTION } from '../../../common/bedrock/constants';
 import { BEDROCK_CONNECTOR_ID, BEDROCK_TITLE } from '../../../common/bedrock/constants';
 import { BedrockActionParams, BedrockConnector } from './types';
@@ -19,7 +20,7 @@ interface ValidationErrors {
 export function getConnectorType(): BedrockConnector {
   return {
     id: BEDROCK_CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: getReactComponentLogo('bedrock'),
     selectMessage: i18n.translate('xpack.stackConnectors.components.bedrock.selectMessageText', {
       defaultMessage: 'Send a request to Amazon Bedrock.',
     }),
