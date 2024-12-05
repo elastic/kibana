@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/doc-links",
-  "owner": [
-    "@elastic/docs"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}
