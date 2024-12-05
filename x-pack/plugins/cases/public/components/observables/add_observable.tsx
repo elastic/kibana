@@ -46,7 +46,6 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
         {
           observable,
         },
-        {}
       );
 
       showSuccessToast(i18n.OBSERVABLE_CREATED);
