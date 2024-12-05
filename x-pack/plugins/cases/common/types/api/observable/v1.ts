@@ -18,8 +18,8 @@ export const ObservablePatchRt = rt.strict({
   description: rt.union([rt.string, rt.null]),
 });
 
-export type ObservablePatchType = rt.TypeOf<typeof ObservablePatchRt>;
-export type ObservablePostType = rt.TypeOf<typeof ObservablePostRt>;
+export type ObservablePatch = rt.TypeOf<typeof ObservablePatchRt>;
+export type ObservablePost = rt.TypeOf<typeof ObservablePostRt>;
 
 export const AddObservableRequestRt = rt.strict({
   observable: ObservablePostRt,

@@ -7,7 +7,7 @@
 
 import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import React, { type FC } from 'react';
-import type { ObservablePatchType } from '../../../common/types/api/observable/v1';
+import type { ObservablePatch } from '../../../common/types/api/observable/v1';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import { ObservableForm } from './observable_form';
 import * as i18n from './translations';
@@ -15,7 +15,7 @@ import * as i18n from './translations';
 export interface EditObservableModalProps {
   closeModal: VoidFunction;
   isLoading: boolean;
-  handleUpdateObservable: (observable: ObservablePatchType) => Promise<void>;
+  handleUpdateObservable: (observable: ObservablePatch) => Promise<void>;
   observable: Observable;
 }
 

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 
-import type { ObservablePostType } from '../../../common/types/api/observable/v1';
+import type { ObservablePost } from '../../../common/types/api/observable/v1';
 import type { CaseUI } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -41,7 +41,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
   const showModal = () => setIsModalVisible(true);
 
   const handleCreateObservable = useCallback(
-    async (observable: ObservablePostType) => {
+    async (observable: ObservablePost) => {
       await postObservables(
         {
           observable,
