@@ -18,7 +18,7 @@ import '@testing-library/jest-dom';
 import { configure } from '@testing-library/react';
 
 // instead of default 'data-testid', use kibana's 'data-test-subj'
-configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });
+configure({ testIdAttribute: 'data-test-subj' });
 
 /* eslint-env jest */
 
