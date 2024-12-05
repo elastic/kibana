@@ -99,8 +99,7 @@ export const ObservableForm: FC<ObservableFormProps> = ({
 
   const handleSubmitClick = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>) => {
-      const isValid = await form.validate();
-      const { data } = await form.submit(e);
+      const { isValid, data } = await form.submit(e);
 
       if (isValid) {
         return onSubmit({
