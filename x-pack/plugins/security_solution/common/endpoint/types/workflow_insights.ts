@@ -74,5 +74,5 @@ export interface SearchParams {
   sourceIds?: string[];
   targetTypes?: TargetType[];
   targetIds?: string[];
-  actionTypes: ActionType[];
+  actionTypes?: ActionType[];
 }

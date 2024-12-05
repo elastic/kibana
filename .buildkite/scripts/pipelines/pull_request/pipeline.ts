@@ -113,31 +113,57 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) {
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
     }
 
     if (
-      await doAnyChangesMatch([
+      (await doAnyChangesMatch([
         /^x-pack\/plugins\/observability_solution\/synthetics/,
         /^x-pack\/plugins\/observability_solution\/exploratory_view/,
-      ])
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
     }
 
     if (
-      await doAnyChangesMatch([
+      (await doAnyChangesMatch([
         /^x-pack\/plugins\/observability_solution\/ux/,
         /^x-pack\/plugins\/observability_solution\/exploratory_view/,
-      ])
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution/])) {
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/observability_solution/,
+        /^package.json/,
+        /^yarn.lock/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/slo_plugin_e2e.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/packages\/ai-infra/,
+        /^x-pack\/plugins\/ai_infra/,
+        /^x-pack\/plugins\/inference/,
+        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/bedrock/,
+        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/gemini/,
+        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/openai/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml'));
     }
 
     if (

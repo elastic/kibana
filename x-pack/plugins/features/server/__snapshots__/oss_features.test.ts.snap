@@ -548,6 +548,8 @@ Array [
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
+        "savedQuery:manage",
+        "savedQuery:read",
         "store_search_session",
       ],
       "app": Array [
@@ -607,6 +609,7 @@ Array [
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
+        "savedQuery:read",
       ],
       "app": Array [
         "dashboards",
@@ -709,6 +712,8 @@ Array [
       },
       "api": Array [
         "fileUpload:analyzeFile",
+        "savedQuery:manage",
+        "savedQuery:read",
         "store_search_session",
       ],
       "app": Array [
@@ -757,6 +762,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
       "app": Array [
         "discover",
         "kibana",
@@ -1004,6 +1012,10 @@ exports[`buildOSSFeatures with a basic license returns the savedQueryManagement 
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:manage",
+        "savedQuery:read",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1022,10 +1034,14 @@ Array [
   },
   Object {
     "privilege": Object {
-      "disabled": true,
+      "api": Array [
+        "savedQuery:read",
+      ],
       "savedObject": Object {
         "all": Array [],
-        "read": Array [],
+        "read": Array [
+          "query",
+        ],
       },
       "ui": Array [],
     },
@@ -1048,7 +1064,10 @@ Array [
           "read": Array [],
         },
       },
-      "api": Array [],
+      "api": Array [
+        "savedQuery:manage",
+        "savedQuery:read",
+      ],
       "app": Array [
         "visualize",
         "lens",
@@ -1094,6 +1113,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
       "app": Array [
         "visualize",
         "lens",
@@ -1190,6 +1212,8 @@ Array [
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
+        "savedQuery:manage",
+        "savedQuery:read",
         "store_search_session",
       ],
       "app": Array [
@@ -1249,6 +1273,7 @@ Array [
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
+        "savedQuery:read",
       ],
       "app": Array [
         "dashboards",
@@ -1351,6 +1376,8 @@ Array [
       },
       "api": Array [
         "fileUpload:analyzeFile",
+        "savedQuery:manage",
+        "savedQuery:read",
         "store_search_session",
       ],
       "app": Array [
@@ -1399,6 +1426,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
       "app": Array [
         "discover",
         "kibana",
@@ -1646,6 +1676,10 @@ exports[`buildOSSFeatures with a enterprise license returns the savedQueryManage
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:manage",
+        "savedQuery:read",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1664,10 +1698,14 @@ Array [
   },
   Object {
     "privilege": Object {
-      "disabled": true,
+      "api": Array [
+        "savedQuery:read",
+      ],
       "savedObject": Object {
         "all": Array [],
-        "read": Array [],
+        "read": Array [
+          "query",
+        ],
       },
       "ui": Array [],
     },
@@ -1690,7 +1728,10 @@ Array [
           "read": Array [],
         },
       },
-      "api": Array [],
+      "api": Array [
+        "savedQuery:manage",
+        "savedQuery:read",
+      ],
       "app": Array [
         "visualize",
         "lens",
@@ -1736,6 +1777,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
       "app": Array [
         "visualize",
         "lens",
