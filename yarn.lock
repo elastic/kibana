@@ -5296,7 +5296,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-ml@link:packages/deeplinks/ml":
+"@kbn/deeplinks-ml@link:src/platform/packages/shared/deeplinks/ml":
   version "0.0.0"
   uid ""
 
