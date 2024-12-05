@@ -534,7 +534,6 @@ packages/kbn-unsaved-changes-prompt @elastic/kibana-management
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 packages/kbn-user-profile-components @elastic/kibana-security
 packages/kbn-utility-types @elastic/kibana-core
-packages/kbn-utils @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-visualization-ui-components @elastic/kibana-visualizations
 packages/kbn-visualization-utils @elastic/kibana-visualizations
@@ -623,6 +622,7 @@ src/platform/packages/shared/kbn-repo-info @elastic/kibana-operations
 src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 src/platform/packages/shared/kbn-ui-theme @elastic/kibana-operations
 src/platform/packages/shared/kbn-utility-types-jest @elastic/kibana-operations
+src/platform/packages/shared/kbn-utils @elastic/kibana-operations
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
