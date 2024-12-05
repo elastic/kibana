@@ -66,6 +66,7 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
           : []),
         {
           validator: debounceAsync(esqlQueryValidatorFactory({ queryClient }), 300),
+          isAsync: true,
         },
       ],
     }),

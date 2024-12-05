@@ -88,6 +88,7 @@ export function EqlQueryEdit({
                   }
             )(data);
           }, 300),
+          isAsync: true,
         },
       ],
     }),
