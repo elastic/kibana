@@ -89,7 +89,7 @@
       "platform/packages/private/ml/creation_wizard_utils",
       "platform/packages/private/ml/data_grid",
       "platform/packages/private/ml/data_view_utils",
-      "packages/ml/date_picker",
+      "platform/packages/private/ml/date_picker",
       "packages/ml/field_stats_flyout",
       "platform/packages/private/ml/inference_integration_flyout",
       "packages/ml/trained_models_utils",

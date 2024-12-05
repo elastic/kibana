@@ -6304,7 +6304,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
+"@kbn/ml-date-picker@link:x-pack/platform/packages/private/ml/date_picker":
   version "0.0.0"
   uid ""
 
