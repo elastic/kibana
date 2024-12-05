@@ -47,8 +47,8 @@ const TECH_PREVIEW_LABEL = i18n.translate('xpack.serverlessSearch.techPreviewLab
 });
 
 interface ConnectorDataSource {
-  _append: React.ReactNode[];
-  _prepend: React.ReactNode;
+  _icon: React.ReactNode[];
+  _badges: React.ReactNode;
   serviceType: string;
 }
 
@@ -124,10 +124,10 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
 
   const getInitialOptions = (): ExpandedComboBoxOption[] => {
     return allConnectors.map((conn, key) => {
-      const _append: React.ReactNode[] = [];
+      const _icon: React.ReactNode[] = [];
       let _ariaLabelAppend = '';
       if (conn.isTechPreview) {
-        _append.push(
+        _icon.push(
           <EuiBadge
             aria-label={TECH_PREVIEW_LABEL}
             key={key + '-preview'}
@@ -143,7 +143,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         _ariaLabelAppend += ` ${TECH_PREVIEW_LABEL}`;
       }
       if (conn.isBeta) {
-        _append.push(
+        _icon.push(
           <EuiBadge aria-label={BETA_LABEL} key={key + '-beta'} iconType={'beta'} color="hollow">
             {BETA_LABEL}
           </EuiBadge>
@@ -154,8 +154,8 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         key: key.toString(),
         label: conn.name,
         value: {
-          _append,
-          _prepend: <EuiIcon size="l" type={conn.iconPath} />,
+          _icon,
+          _badges: <EuiIcon size="l" type={conn.iconPath} />,
           serviceType: conn.serviceType,
         },
         'aria-label': conn.name + _ariaLabelAppend,
@@ -172,7 +172,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
     contentClassName: string
   ) => {
     const {
-      value: { _append, _prepend, serviceType } = { _append: [], _prepend: null, serviceType: '' },
+      value: { _icon, _badges, serviceType } = { _icon: [], _badges: null, serviceType: '' },
       key,
       label,
     } = option;
@@ -184,7 +184,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         responsive={false}
         direction="row"
       >
-        <EuiFlexItem grow={false}>{_prepend}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{_badges}</EuiFlexItem>
         <EuiFlexItem
           css={css`
             overflow: auto;
@@ -197,7 +197,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadgeGroup gutterSize="xs">{_append}</EuiBadgeGroup>
+          <EuiBadgeGroup gutterSize="xs">{_icon}</EuiBadgeGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
