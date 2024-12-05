@@ -7077,7 +7077,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:x-pack/packages/security-solution/side_nav":
+"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/security-solution/side_nav":
   version "0.0.0"
   uid ""
 
