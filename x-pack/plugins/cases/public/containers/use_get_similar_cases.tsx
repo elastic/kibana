@@ -34,7 +34,7 @@ export const useGetSimilarCases = (params: {
       return getSimilarCases({
         caseId: params.caseData.id,
         perPage: params.pageSize,
-        page: params.pageIndex + 1,
+        page: params.pageIndex,
         signal,
       });
     },
