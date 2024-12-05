@@ -26,7 +26,7 @@ export interface GridLayoutProps {
   gridSettings: GridSettings;
   renderPanelContents: (
     panelId: string,
-    setDragHandles: (refs: Array<HTMLElement | null>) => void
+    setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;

@@ -23,7 +23,7 @@ export interface GridPanelProps {
   rowIndex: number;
   renderPanelContents: (
     panelId: string,
-    setDragHandles: (refs: Array<HTMLElement | null>) => void
+    setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
   interactionStart: (
     panelId: string,
@@ -232,9 +232,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
      * Memoize panel contents to prevent unnecessary re-renders
      */
     const panelContents = useMemo(() => {
-      const setDragHandles = dragHandleApi?.setDragHandles;
-      if (!setDragHandles) return null;
-      return renderPanelContents(panelId, setDragHandles);
+      return renderPanelContents(panelId, dragHandleApi?.setDragHandles);
     }, [panelId, renderPanelContents, dragHandleApi]);
 
     return (

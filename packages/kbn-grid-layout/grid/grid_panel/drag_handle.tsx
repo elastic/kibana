@@ -53,6 +53,7 @@ export const DragHandle = React.forwardRef<
 
   const setDragHandles = useCallback(
     (dragHandles: Array<HTMLElement | null>) => {
+      console.log('setDragHandles');
       setDragHandleCount(dragHandles.length);
       dragHandleRefs.current = dragHandles;
 
