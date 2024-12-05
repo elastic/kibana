@@ -18,6 +18,7 @@ export type TestFailure = FailedTestCase['$'] & {
   githubIssue?: string;
   failureCount?: number;
   commandLine?: string;
+  owners?: string;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -74,6 +75,7 @@ export function getFailures(report: TestReport) {
   const failures: TestFailure[] = [];
 
   const commandLine = getCommandLineFromReport(report);
+  const owners = getOwner(report);
 
   for (const testCase of makeFailedTestCaseIter(report)) {
     const failure = getText(testCase.failure);
@@ -87,6 +89,7 @@ export function getFailures(report: TestReport) {
       likelyIrrelevant,
       'system-out': getText(testCase['system-out']),
       commandLine,
+      owners,
     };
 
     // cleaning up duplicates
@@ -104,4 +107,14 @@ function getCommandLineFromReport(report: TestReport) {
   } else {
     return report.testsuite?.$['command-line'] || '';
   }
+}
+
+function getOwner(report: TestReport) {
+  // TODO-TRE: Remove comments and update logic
+  // if ('testsuites' in report) {
+  //   return report.testsuites?.testsuite?.[0]?.$['command-line'] || '';
+  // } else {
+  //   return report.testsuite?.$['command-line'] || '';
+  // }
+   if ('testsuites' in report) return report.testsuites?.testsuite?.[0]?.testcase?.[0].$.owners;
 }

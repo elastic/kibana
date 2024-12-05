@@ -40,6 +40,8 @@ export interface TestSuite {
     'metadata-json'?: string;
     /* the command that ran this suite */
     'command-line'?: string;
+    /* the codeowners of the file */
+    owners?: string;
   };
   testcase?: TestCase[];
 }
@@ -56,6 +58,8 @@ export interface TestCase {
     'metadata-json'?: string;
     /* the command that ran this suite */
     'command-line'?: string;
+    /* the codeowners of the file */
+    owners?: string;
   };
   /* contents of system-out elements */
   'system-out'?: Array<string | { _: string }>;
