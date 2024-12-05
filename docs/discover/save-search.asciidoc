@@ -1,5 +1,5 @@
 [[save-open-search]]
-== Save a search for reuse
+== Save a Discover Session for reuse
 
 A saved Discover Session is a convenient way to reuse a search
 that you've created in *Discover*.
