@@ -17,6 +17,7 @@ import { mergeSecurityRequirements } from './merge_security_requirements';
 import { mergeTags } from './merge_tags';
 import { getOasVersion } from '../../utils/get_oas_version';
 import { getOasDocumentVersion } from '../../utils/get_oas_document_version';
+import { enrichWithVersionMimeParam } from './enrich_with_version_mime_param';
 import { MergeOptions } from './merge_options';
 
 interface MergeDocumentsOptions extends MergeOptions {
@@ -32,6 +33,10 @@ export async function mergeDocuments(
     ? splitByVersion(resolvedDocuments)
     : new Map([['', resolvedDocuments]]);
   const mergedByVersion = new Map<string, OpenAPIV3.Document>();
+
+  if (!options.splitDocumentsByVersion) {
+    enrichWithVersionMimeParam(resolvedDocuments);
+  }
 
   for (const [apiVersion, documentsGroup] of documentsByVersion.entries()) {
     validateSameOasVersion(documentsGroup);
