@@ -2876,6 +2876,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/202940
+    // FLAKY: https://github.com/elastic/kibana/issues/202945
     describe.skip('@skipInServerless sequence queries with suppression duration', () => {
       it('suppresses alerts across two rule executions when the suppression duration exceeds the rule interval', async () => {
         const id = uuidv4();
