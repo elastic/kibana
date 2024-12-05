@@ -23,7 +23,7 @@ image::images/dashboard_controlsRangeSlider_8.3.0.png[Range slider control for t
 +
 For example, you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, and the global time filter is *Last 7 days*. When you add the time slider, you can click the previous and next buttons to advance the time range backward or forward, and click the play button to watch how the data changes over the last 7 days. 
 [role="screenshot"]
-image::images/dashboard_timeSliderControl_8.7.0.gif[Time slider control for the the Last 7 days]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt672f3aaadf9ea5a6/6750dd6c2452f972af0a88b4/dashboard_timeslidercontrol_8.17.0.gif[Time slider control for the the Last 7 days]
 
 [float]
 [[create-and-add-options-list-and-range-slider-controls]]

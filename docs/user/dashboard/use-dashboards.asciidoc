@@ -113,7 +113,7 @@ Filter the data within a specified range of time.
 . To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
 
 [role="screenshot"]
-image::images/dashboard_timeSliderControl_8.7.0.gif[Time slider control]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt672f3aaadf9ea5a6/6750dd6c2452f972af0a88b4/dashboard_timeslidercontrol_8.17.0.gif[Time slider control]
 
 [float]
 === Use filter pills
@@ -128,7 +128,7 @@ image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=50%]
 
 You can interact with some panel visualizations to explore specific data more in depth. Upon clicking, filter pills are added and applied to the entire dashboard, so that surrounding panels and visualizations also reflect your browsing.
 
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt3636aae815d783f9/66c467d346b3f438b396fafa/dashboard-filter-pills.gif[Browsing a chart creates a filter dynamically]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt93fcc34395a310d4/6750e7e9b09fe993fbc0824a/add-filter-pills-8.17.gif[Browsing a chart creates a filter dynamically]
 
 [float]
 ==== Add pills using the filter editor
@@ -181,7 +181,7 @@ You can display dashboards in full screen mode to gain visual space and view or 
 
 image::images/dashboard-full-screen.png[A dashboard in full screen mode]
 
-If you need to focus on a particular panel, you can maximize it. To do that, open the panel menu, and select **More** > **Maximize**. You can minimize it again the same way.
+If you need to focus on a particular panel, you can maximize it by opening the panel menu and selecting **Maximize**. You can minimize it again the same way.
 
 TIP: When sharing a dashboard with a link while a panel is in maximized view, the generated link will also open the dashboard on the same maximized panel view.
 

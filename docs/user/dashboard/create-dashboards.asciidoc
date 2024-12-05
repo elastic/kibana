@@ -56,7 +56,7 @@ image::images/add_content_to_dashboard_8.15.0.png[Options to add content to your
 .. Click *Apply*.
 +
 [role="screenshot"]
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt532d6c9ca72817d6/66f31b1f80b55f3a20e1a329/dashboard_settings_8.15.0.gif[Change and apply dashboard settings, width 30%]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt4a6e9807f1fac9f8/6750ee9cef6d5a250c229e50/dashboard-settings-8.17.0.gif[Change and apply dashboard settings, width 30%]
 
 . Click **Save**  to save the dashboard.
 
@@ -74,14 +74,14 @@ TIP: When looking for a specific dashboard, you can filter them by tag or by cre
 . Make sure that you are in **Edit** mode to be able to make changes to the dashboard. You can switch between **Edit** and **View** modes from the toolbar.
 +
 [role="screenshot"]
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltf75cdb828cef8b5a/66f5cfcfad4f59f38b73ba64/switch-to-view-mode-8.15.0.gif[Switch between Edit and View modes, width 30%]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt619b284e92c2be27/6750f3a512a5eae780936fe3/switch-to-view-mode-8.17.0.gif[Switch between Edit and View modes, width 30%]
 . Make the changes that you need to the dashboard:
 
 ** Adjust the dashboard's settings
 ** <<panels-editors,Add, remove, move, or edit panels>>
 ** <<add-controls,Change the available controls>>
 [[save-dashboards]]
-. **Save** the dashboard. You can then leave the **Edit** mode and *Switch to view mode*. 
+. **Save** the dashboard. You automatically switch to *View* mode upon saving. 
 
 NOTE: Managed dashboards can't be edited directly, but you can <<duplicate-dashboards,duplicate>> them and edit these duplicates.
 
@@ -98,7 +98,7 @@ NOTE: Once changes are saved, you can no longer revert them in one click, and in
 
 +
 [role="screenshot"]
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltcd3dbda9caf48a9b/66f4957fc9f9c71ce7533774/reset-dashboard-8.15.0.gif[Reset dashboard to revert unsaved changes, width 30%]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte0c08bede75b3874/6750f5566cdeea14b273b048/reset-dashboard-8.17.0.gif[Reset dashboard to revert unsaved changes, width 30%]
 
 include::dashboard-controls.asciidoc[leveloffset=-1]
 
