@@ -28,6 +28,7 @@ export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
     execute: 'endpointResponseActionsConsole-commandList-Responseactions-execute',
     upload: 'endpointResponseActionsConsole-commandList-Responseactions-upload',
     scan: 'endpointResponseActionsConsole-commandList-Responseactions-scan',
+    runscript: 'endpointResponseActionsConsole-commandList-Responseactions-runscript',
   };
 };
 
