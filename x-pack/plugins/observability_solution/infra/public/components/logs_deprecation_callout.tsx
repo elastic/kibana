@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { css } from '@emotion/css';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
@@ -46,6 +47,8 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
     },
   } = useKibanaContextForPlugin();
 
+  const { euiTheme } = useEuiTheme();
+
   const { dismissalStorageKey, message } = pageConfigurations[page];
 
   const [isDismissed, setDismissed] = useLocalStorage(dismissalStorageKey, false);
@@ -65,9 +68,9 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
       iconType="iInCircle"
       heading="h2"
       onDismiss={() => setDismissed(true)}
-      css={({ euiTheme }) => ({
-        marginBottom: euiTheme.size.l,
-      })}
+      className={css`
+        margin-bottom: ${euiTheme.size.l};
+      `}
     >
       <p>{message}</p>
       <EuiButton
