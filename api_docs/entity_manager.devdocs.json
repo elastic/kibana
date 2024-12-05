@@ -21,7 +21,7 @@
             "label": "repositoryClient",
             "description": [],
             "signature": [
-              "<TEndpoint extends \"GET /internal/entities/managed/enablement\" | \"PUT /internal/entities/managed/enablement\" | \"DELETE /internal/entities/managed/enablement\" | \"POST /internal/entities/definition\" | \"DELETE /internal/entities/definition/{id}\" | \"GET /internal/entities/definition/{id?}\" | \"POST /internal/entities/definition/{id}/_reset\" | \"PATCH /internal/entities/definition/{id}\" | \"POST /internal/entities/v2/_search\" | \"POST /internal/entities/v2/_search/preview\">(endpoint: TEndpoint, ...args: MaybeOptionalArgs<",
+              "<TEndpoint extends \"GET /internal/entities/managed/enablement\" | \"PUT /internal/entities/managed/enablement\" | \"DELETE /internal/entities/managed/enablement\" | \"POST /internal/entities/definition\" | \"DELETE /internal/entities/definition/{id}\" | \"GET /internal/entities/definition/{id?}\" | \"POST /internal/entities/definition/{id}/_reset\" | \"PATCH /internal/entities/definition/{id}\" | \"POST /internal/entities/v2/_search\" | \"POST /internal/entities/v2/_search/preview\" | \"POST /internal/entities/v2/definitions/types\" | \"GET /internal/entities/v2/definitions/types\" | \"POST /internal/entities/v2/definitions/sources\" | \"GET /internal/entities/v2/definitions/sources\">(endpoint: TEndpoint, ...args: MaybeOptionalArgs<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -29,7 +29,25 @@
                 "section": "def-common.ClientRequestParamsOf",
                 "text": "ClientRequestParamsOf"
               },
-              "<{ \"POST /internal/entities/v2/_search/preview\": ",
+              "<{ \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
+              "EntityManagerRouteHandlerResources",
+              ", undefined, ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<{ sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; security?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteSecurity",
+                "text": "RouteSecurity"
+              },
+              " | undefined; }; \"POST /internal/entities/v2/definitions/sources\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -37,7 +55,61 @@
                 "section": "def-common.ServerRoute",
                 "text": "ServerRoute"
               },
-              "<\"POST /internal/entities/v2/_search/preview\", Zod.ZodObject<{ body: Zod.ZodObject<{ sources: Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodString; timestamp_field: Zod.ZodOptional<Zod.ZodString>; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>, \"many\">; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; limit: number; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; limit?: number | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; limit: number; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }; }, { body: { sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; limit?: number | undefined; }; }>, ",
+              "<\"POST /internal/entities/v2/definitions/sources\", Zod.ZodObject<{ body: Zod.ZodObject<{ source: Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }>, ",
+              "EntityManagerRouteHandlerResources",
+              ", ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<{ source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
+              "EntityManagerRouteHandlerResources",
+              ", undefined, ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<{ types: { id: string; }[]; }>>; security?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteSecurity",
+                "text": "RouteSecurity"
+              },
+              " | undefined; }; \"POST /internal/entities/v2/definitions/types\": ",
+              {
+                "pluginId": "@kbn/server-route-repository-utils",
+                "scope": "common",
+                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+                "section": "def-common.ServerRoute",
+                "text": "ServerRoute"
+              },
+              "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; }; }, { type: { id: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; }; }; }, { body: { type: { id: string; }; }; }>, ",
+              "EntityManagerRouteHandlerResources",
+              ", ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<any>, undefined>; \"POST /internal/entities/v2/_search/preview\": ",
+              {
+                "pluginId": "@kbn/server-route-repository-utils",
+                "scope": "common",
+                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+                "section": "def-common.ServerRoute",
+                "text": "ServerRoute"
+              },
+              "<\"POST /internal/entities/v2/_search/preview\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ sources: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
               {
@@ -63,7 +135,7 @@
                 "section": "def-common.ServerRoute",
                 "text": "ServerRoute"
               },
-              "<\"POST /internal/entities/v2/_search\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodString; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { type: string; start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { type: string; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: string; start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }; }, { body: { type: string; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }; }>, ",
+              "<\"POST /internal/entities/v2/_search\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { type: string; }, { type: string; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { type: string; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { type: string; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
               {
@@ -377,7 +449,25 @@
                 "section": "def-common.ReturnOf",
                 "text": "ReturnOf"
               },
-              "<{ \"POST /internal/entities/v2/_search/preview\": ",
+              "<{ \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
+              "EntityManagerRouteHandlerResources",
+              ", undefined, ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<{ sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; security?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteSecurity",
+                "text": "RouteSecurity"
+              },
+              " | undefined; }; \"POST /internal/entities/v2/definitions/sources\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -385,7 +475,61 @@
                 "section": "def-common.ServerRoute",
                 "text": "ServerRoute"
               },
-              "<\"POST /internal/entities/v2/_search/preview\", Zod.ZodObject<{ body: Zod.ZodObject<{ sources: Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodString; timestamp_field: Zod.ZodOptional<Zod.ZodString>; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>, \"many\">; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; limit: number; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; limit?: number | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; limit: number; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }; }, { body: { sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; limit?: number | undefined; }; }>, ",
+              "<\"POST /internal/entities/v2/definitions/sources\", Zod.ZodObject<{ body: Zod.ZodObject<{ source: Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }>, ",
+              "EntityManagerRouteHandlerResources",
+              ", ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<{ source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
+              "EntityManagerRouteHandlerResources",
+              ", undefined, ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<{ types: { id: string; }[]; }>>; security?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteSecurity",
+                "text": "RouteSecurity"
+              },
+              " | undefined; }; \"POST /internal/entities/v2/definitions/types\": ",
+              {
+                "pluginId": "@kbn/server-route-repository-utils",
+                "scope": "common",
+                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+                "section": "def-common.ServerRoute",
+                "text": "ServerRoute"
+              },
+              "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; }; }, { type: { id: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; }; }; }, { body: { type: { id: string; }; }; }>, ",
+              "EntityManagerRouteHandlerResources",
+              ", ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<any>, undefined>; \"POST /internal/entities/v2/_search/preview\": ",
+              {
+                "pluginId": "@kbn/server-route-repository-utils",
+                "scope": "common",
+                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+                "section": "def-common.ServerRoute",
+                "text": "ServerRoute"
+              },
+              "<\"POST /internal/entities/v2/_search/preview\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ sources: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
               {
@@ -411,7 +555,7 @@
                 "section": "def-common.ServerRoute",
                 "text": "ServerRoute"
               },
-              "<\"POST /internal/entities/v2/_search\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodString; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { type: string; start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { type: string; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: string; start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }; }, { body: { type: string; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }; }>, ",
+              "<\"POST /internal/entities/v2/_search\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { type: string; }, { type: string; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { type: string; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { type: string; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
               {
@@ -1263,6 +1407,36 @@
     "misc": [
       {
         "parentPluginId": "entityManager",
+        "id": "def-server.CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE",
+        "description": [],
+        "signature": [
+          "\"create_entity_source_definition\""
+        ],
+        "path": "x-pack/plugins/entity_manager/server/lib/v2/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-server.CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE",
+        "description": [],
+        "signature": [
+          "\"create_entity_type_definition\""
+        ],
+        "path": "x-pack/plugins/entity_manager/server/lib/v2/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
         "id": "def-server.EntityManagerConfig",
         "type": "Type",
         "tags": [],
@@ -1284,7 +1458,25 @@
         "label": "EntityManagerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"POST /internal/entities/v2/_search/preview\": ",
+          "{ \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
+          "EntityManagerRouteHandlerResources",
+          ", undefined, ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<{ sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; security?: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteSecurity",
+            "text": "RouteSecurity"
+          },
+          " | undefined; }; \"POST /internal/entities/v2/definitions/sources\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1292,7 +1484,61 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"POST /internal/entities/v2/_search/preview\", Zod.ZodObject<{ body: Zod.ZodObject<{ sources: Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodString; timestamp_field: Zod.ZodOptional<Zod.ZodString>; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>, \"many\">; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; limit: number; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; limit?: number | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; limit: number; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }; }, { body: { sources: { type: string; filters: string[]; metadata_fields: string[]; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; limit?: number | undefined; }; }>, ",
+          "<\"POST /internal/entities/v2/definitions/sources\", Zod.ZodObject<{ body: Zod.ZodObject<{ source: Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<{ source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
+          "EntityManagerRouteHandlerResources",
+          ", undefined, ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<{ types: { id: string; }[]; }>>; security?: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteSecurity",
+            "text": "RouteSecurity"
+          },
+          " | undefined; }; \"POST /internal/entities/v2/definitions/types\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; }; }, { type: { id: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; }; }; }, { body: { type: { id: string; }; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<any>, undefined>; \"POST /internal/entities/v2/_search/preview\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/entities/v2/_search/preview\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ sources: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
           {
@@ -1318,7 +1564,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"POST /internal/entities/v2/_search\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodString; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { type: string; start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { type: string; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: string; start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }; }, { body: { type: string; start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }; }>, ",
+          "<\"POST /internal/entities/v2/_search\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { type: string; }, { type: string; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { type: string; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { type: string; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
           {
@@ -1619,6 +1865,51 @@
           " | undefined; }; }"
         ],
         "path": "x-pack/plugins/entity_manager/server/routes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-server.READ_ENTITIES_PRIVILEGE",
+        "type": "string",
+        "tags": [],
+        "label": "READ_ENTITIES_PRIVILEGE",
+        "description": [],
+        "signature": [
+          "\"read_entities\""
+        ],
+        "path": "x-pack/plugins/entity_manager/server/lib/v2/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-server.READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE",
+        "type": "string",
+        "tags": [],
+        "label": "READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE",
+        "description": [],
+        "signature": [
+          "\"read_entity_source_definition\""
+        ],
+        "path": "x-pack/plugins/entity_manager/server/lib/v2/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-server.READ_ENTITY_TYPE_DEFINITION_PRIVILEGE",
+        "type": "string",
+        "tags": [],
+        "label": "READ_ENTITY_TYPE_DEFINITION_PRIVILEGE",
+        "description": [],
+        "signature": [
+          "\"read_entity_type_definition\""
+        ],
+        "path": "x-pack/plugins/entity_manager/server/lib/v2/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -19,7 +19,7 @@ export const startMigrationCardConfig: OnboardingCardConfig = {
   Component: React.lazy(
     () =>
       import(
-        /* webpackChunkName: "onboarding_siem_migrations_upload_rules_card" */
+        /* webpackChunkName: "onboarding_siem_migrations_start_migration_card" */
         './start_migration_card'
       )
   ),

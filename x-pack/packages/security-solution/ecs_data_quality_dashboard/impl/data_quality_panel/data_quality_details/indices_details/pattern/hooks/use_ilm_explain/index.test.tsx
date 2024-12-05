@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import React from 'react';
 
 import { DataQualityProvider } from '../../../../../data_quality_context';
 import { mockIlmExplain } from '../../../../../mock/ilm_explain/mock_ilm_explain';
 import { ERROR_LOADING_ILM_EXPLAIN } from '../../../../../translations';
-import { useIlmExplain, UseIlmExplain } from '.';
+import { useIlmExplain } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { Theme } from '@elastic/charts';
 
@@ -23,60 +23,62 @@ const mockTelemetryEvents = {
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
 const { toasts } = notificationServiceMock.createSetupContract();
-const ContextWrapper: React.FC<{ children: React.ReactNode; isILMAvailable: boolean }> = ({
+const ContextWrapper: React.FC<React.PropsWithChildren<{ isILMAvailable?: boolean }>> = ({
   children,
   isILMAvailable = true,
-}) => (
-  <DataQualityProvider
-    httpFetch={mockHttpFetch}
-    telemetryEvents={mockTelemetryEvents}
-    isILMAvailable={isILMAvailable}
-    toasts={toasts}
-    addSuccessToast={jest.fn()}
-    canUserCreateAndReadCases={jest.fn(() => true)}
-    endDate={null}
-    formatBytes={jest.fn()}
-    formatNumber={jest.fn()}
-    isAssistantEnabled={true}
-    lastChecked={'2023-03-28T22:27:28.159Z'}
-    openCreateCaseFlyout={jest.fn()}
-    patterns={['auditbeat-*']}
-    setLastChecked={jest.fn()}
-    startDate={null}
-    theme={{
-      background: {
-        color: '#000',
-      },
-    }}
-    baseTheme={
-      {
+}) => {
+  return (
+    <DataQualityProvider
+      httpFetch={mockHttpFetch}
+      telemetryEvents={mockTelemetryEvents}
+      isILMAvailable={isILMAvailable}
+      toasts={toasts}
+      addSuccessToast={jest.fn()}
+      canUserCreateAndReadCases={jest.fn(() => true)}
+      endDate={null}
+      formatBytes={jest.fn()}
+      formatNumber={jest.fn()}
+      isAssistantEnabled={true}
+      lastChecked={'2023-03-28T22:27:28.159Z'}
+      openCreateCaseFlyout={jest.fn()}
+      patterns={['auditbeat-*']}
+      setLastChecked={jest.fn()}
+      startDate={null}
+      theme={{
         background: {
           color: '#000',
         },
-      } as Theme
-    }
-    ilmPhases={['hot', 'warm', 'unmanaged']}
-    selectedIlmPhaseOptions={[
-      {
-        label: 'Hot',
-        value: 'hot',
-      },
-      {
-        label: 'Warm',
-        value: 'warm',
-      },
-      {
-        label: 'Unmanaged',
-        value: 'unmanaged',
-      },
-    ]}
-    setSelectedIlmPhaseOptions={jest.fn()}
-    defaultStartTime={'now-7d'}
-    defaultEndTime={'now'}
-  >
-    {children}
-  </DataQualityProvider>
-);
+      }}
+      baseTheme={
+        {
+          background: {
+            color: '#000',
+          },
+        } as Theme
+      }
+      ilmPhases={['hot', 'warm', 'unmanaged']}
+      selectedIlmPhaseOptions={[
+        {
+          label: 'Hot',
+          value: 'hot',
+        },
+        {
+          label: 'Warm',
+          value: 'warm',
+        },
+        {
+          label: 'Unmanaged',
+          value: 'unmanaged',
+        },
+      ]}
+      setSelectedIlmPhaseOptions={jest.fn()}
+      defaultStartTime={'now-7d'}
+      defaultEndTime={'now'}
+    >
+      {children}
+    </DataQualityProvider>
+  );
+};
 
 const pattern = 'packetbeat-*';
 
@@ -86,125 +88,107 @@ describe('useIlmExplain', () => {
   });
 
   describe('successful response from the ilm api', () => {
-    let ilmExplainResult: UseIlmExplain | undefined;
-
-    beforeEach(async () => {
+    function setup() {
       mockHttpFetch.mockResolvedValue(mockIlmExplain);
-
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+      return renderHook(() => useIlmExplain(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
-      ilmExplainResult = await result.current;
-    });
+    }
 
     test('it returns the expected ilmExplain map', async () => {
-      expect(ilmExplainResult?.ilmExplain).toEqual(mockIlmExplain);
+      const { result } = setup();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.ilmExplain).toEqual(mockIlmExplain);
+      });
     });
 
     test('it returns loading: false, because the data has loaded', async () => {
-      expect(ilmExplainResult?.loading).toBe(false);
+      const { result } = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
     });
 
     test('it returns a null error, because no errors occurred', async () => {
-      expect(ilmExplainResult?.error).toBeNull();
+      const { result } = setup();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBeNull();
+      });
     });
   });
 
   describe('skip ilm api when isILMAvailable is false', () => {
-    let ilmExplainResult: UseIlmExplain | undefined;
-
-    beforeEach(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-          <DataQualityProvider
-            httpFetch={mockHttpFetch}
-            telemetryEvents={mockTelemetryEvents}
-            isILMAvailable={false}
-            toasts={toasts}
-            addSuccessToast={jest.fn()}
-            canUserCreateAndReadCases={jest.fn(() => true)}
-            endDate={null}
-            formatBytes={jest.fn()}
-            formatNumber={jest.fn()}
-            isAssistantEnabled={true}
-            lastChecked={'2023-03-28T22:27:28.159Z'}
-            openCreateCaseFlyout={jest.fn()}
-            patterns={['auditbeat-*']}
-            setLastChecked={jest.fn()}
-            startDate={null}
-            theme={{
-              background: {
-                color: '#000',
-              },
-            }}
-            baseTheme={
-              {
-                background: {
-                  color: '#000',
-                },
-              } as Theme
-            }
-            ilmPhases={['hot', 'warm', 'unmanaged']}
-            selectedIlmPhaseOptions={[
-              {
-                label: 'Hot',
-                value: 'hot',
-              },
-              {
-                label: 'Warm',
-                value: 'warm',
-              },
-              {
-                label: 'Unmanaged',
-                value: 'unmanaged',
-              },
-            ]}
-            setSelectedIlmPhaseOptions={jest.fn()}
-            defaultStartTime={'now-7d'}
-            defaultEndTime={'now'}
-          >
-            {children}
-          </DataQualityProvider>
-        ),
+    function setup() {
+      mockHttpFetch.mockResolvedValue(mockIlmExplain);
+      return renderHook(() => useIlmExplain(pattern), {
+        wrapper: (props) => <ContextWrapper {...props} isILMAvailable={false} />,
       });
-      await waitForNextUpdate();
-      ilmExplainResult = await result.current;
-    });
+    }
 
     test('it returns the expected ilmExplain map', async () => {
-      expect(ilmExplainResult?.ilmExplain).toEqual(null);
+      const { result } = setup();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.ilmExplain).toEqual(null);
+      });
     });
 
     test('it returns loading: false, because the request is aborted', async () => {
-      expect(ilmExplainResult?.loading).toBe(false);
+      const { result } = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
     });
   });
 
   describe('fetch rejects with an error', () => {
-    let ilmExplainResult: UseIlmExplain | undefined;
     const errorMessage = 'simulated error';
-
-    beforeEach(async () => {
+    function setup() {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
-
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+      return renderHook(() => useIlmExplain(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
-      ilmExplainResult = await result.current;
-    });
+    }
 
     test('it returns a null ilmExplain, because an error occurred', async () => {
-      expect(ilmExplainResult?.ilmExplain).toBeNull();
+      const { result } = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.ilmExplain).toBeNull();
+      });
     });
 
     test('it returns loading: false, because data loading reached a terminal state', async () => {
-      expect(ilmExplainResult?.loading).toBe(false);
+      const { result } = setup();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
     });
 
     test('it returns the expected error', async () => {
-      expect(ilmExplainResult?.error).toEqual(ERROR_LOADING_ILM_EXPLAIN(errorMessage));
+      const { result } = setup();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toEqual(ERROR_LOADING_ILM_EXPLAIN(errorMessage));
+      });
     });
   });
 });

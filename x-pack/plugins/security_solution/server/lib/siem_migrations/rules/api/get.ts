@@ -14,6 +14,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import type { RuleMigrationGetOptions } from '../data/rule_migrations_data_rules_client';
 import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsGetRoute = (
@@ -43,14 +44,13 @@ export const registerSiemRuleMigrationsGetRoute = (
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const from = page && perPage ? page * perPage : 0;
-          const size = perPage;
+          const options: RuleMigrationGetOptions = {
+            filters: { searchTerm },
+            size: perPage,
+            from: page && perPage ? page * perPage : 0,
+          };
 
-          const result = await ruleMigrationsClient.data.rules.get(
-            { migrationId, searchTerm },
-            from,
-            size
-          );
+          const result = await ruleMigrationsClient.data.rules.get(migrationId, options);
 
           return res.ok({ body: result });
         } catch (err) {
