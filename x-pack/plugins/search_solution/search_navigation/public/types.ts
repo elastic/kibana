@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
@@ -20,6 +20,13 @@ export interface SearchNavigationPluginStart {
   // This is temporary until we can migrate building the class nav item list out of `enterprise_search` plugin
   setGetBaseClassicNavItems: (classicNavItemsFn: () => ClassicNavItem[]) => void;
   useClassicNavigation: (history: ScopedHistory<unknown>) => SolutionNavProps | undefined;
+  breadcrumbs: {
+    setSearchBreadCrumbs: (
+      breadcrumbs: ChromeBreadcrumb[],
+      options?: SearchNavigationSetBreadcrumbsOptions
+    ) => void;
+    clearBreadcrumbs: () => void;
+  };
 }
 
 export interface AppPluginSetupDependencies {
@@ -49,3 +56,10 @@ export type ClassicNavigationFactoryFn = (
   core: CoreStart,
   history: ScopedHistory<unknown>
 ) => SolutionNavProps | undefined;
+
+export interface SearchNavigationSetBreadcrumbsOptions {
+  // When set to `true` breadcrumbs are only set when chrome style is set to classic.
+  // This option is for pages who rely on Solution Navigation for breadcrumbs, but still
+  // need to explicitly set the page breadcrumbs for classic solution view.
+  forClassicChromeStyle?: boolean;
+}
