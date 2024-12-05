@@ -7236,7 +7236,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/session-view-plugin@link:x-pack/plugins/session_view":
+"@kbn/session-view-plugin@link:x-pack/solutions/security/plugins/session_view":
   version "0.0.0"
   uid ""
 

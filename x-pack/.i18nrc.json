@@ -149,7 +149,7 @@
     "xpack.securitySolution": "plugins/security_solution",
     "xpack.securitySolutionEss": "plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
-    "xpack.sessionView": "plugins/session_view",
+    "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.streams": [
       "plugins/streams_app"
     ],

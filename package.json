@@ -869,7 +869,7 @@
     "@kbn/serverless-security-settings": "link:packages/serverless/settings/security_project",
     "@kbn/serverless-types": "link:packages/serverless/types",
     "@kbn/session-notifications-plugin": "link:test/plugin_functional/plugins/session_notifications",
-    "@kbn/session-view-plugin": "link:x-pack/plugins/session_view",
+    "@kbn/session-view-plugin": "link:x-pack/solutions/security/plugins/session_view",
     "@kbn/set-map": "link:packages/kbn-set-map",
     "@kbn/share-examples-plugin": "link:examples/share_examples",
     "@kbn/share-plugin": "link:src/plugins/share",
