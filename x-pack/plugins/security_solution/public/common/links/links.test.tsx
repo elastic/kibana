@@ -441,18 +441,20 @@ describe('Security links', () => {
     });
 
     it('returns true when the capability requested is specified as a single value', () => {
-      expect(hasCapabilities(createCapabilities({ siem: { show: true } }), siemShow)).toBeTruthy();
+      expect(
+        hasCapabilities(createCapabilities({ siemV2: { show: true } }), siemShow)
+      ).toBeTruthy();
     });
 
     it('returns true when the capability requested is a single entry in an array', () => {
       expect(
-        hasCapabilities(createCapabilities({ siem: { show: true } }), [siemShow])
+        hasCapabilities(createCapabilities({ siemV2: { show: true } }), [siemShow])
       ).toBeTruthy();
     });
 
     it("returns true when the capability requested is a single entry in an AND'd array format", () => {
       expect(
-        hasCapabilities(createCapabilities({ siem: { show: true } }), [[siemShow]])
+        hasCapabilities(createCapabilities({ siemV2: { show: true } }), [[siemShow]])
       ).toBeTruthy();
     });
 
@@ -460,7 +462,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { create_cases: false },
           }),
           [siemShow, createCases]
@@ -472,7 +474,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: false },
+            siemV2: { show: false },
             securitySolutionCasesV2: { create_cases: true },
           }),
           [siemShow, createCases]
@@ -484,7 +486,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { create_cases: false },
           }),
           [readCases, createCases]
@@ -496,7 +498,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { read_cases: true, create_cases: true },
           }),
           [[readCases, createCases]]
@@ -508,7 +510,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: false },
+            siemV2: { show: false },
             securitySolutionCasesV2: { read_cases: false, create_cases: true },
           }),
           [siemShow, [readCases, createCases]]
@@ -520,7 +522,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { read_cases: false, create_cases: true },
           }),
           [siemShow, [readCases, createCases]]
@@ -532,7 +534,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { read_cases: false, create_cases: true, push_cases: false },
           }),
           [

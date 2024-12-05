@@ -49,7 +49,7 @@ jest.mock('react-redux', () => {
 describe('<Notes />', () => {
   beforeEach(() => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true },
+      notesPrivileges: { crud: true },
     });
     jest.clearAllMocks();
   });
@@ -306,7 +306,7 @@ describe('<Notes />', () => {
 
   it('should show View note button if user does not have the correct privileges but notes have already been created', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false },
+      notesPrivileges: { crud: false },
     });
 
     const mockOpenLeftPanel = jest.fn();
@@ -350,7 +350,7 @@ describe('<Notes />', () => {
 
   it('should show a - if user does not have the correct privileges and no notes have been created', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false },
+      notesPrivileges: { crud: false },
     });
 
     const { getByText, queryByTestId } = render(

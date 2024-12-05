@@ -178,7 +178,7 @@ export function calculatePackagePrivilegesFromCapabilities(
     (acc, [privilege, { privilegeName }]) => {
       acc[privilege] = {
         executePackageAction:
-          (capabilities.siem && (capabilities.siemV2[privilegeName] as boolean)) || false,
+          (capabilities.siemV2 && (capabilities.siemV2[privilegeName] as boolean)) || false,
       };
       return acc;
     },
