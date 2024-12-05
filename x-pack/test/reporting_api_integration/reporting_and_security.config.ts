@@ -36,7 +36,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.screenshotting.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
         `--xpack.reporting.capture.maxAttempts=1`,
         `--xpack.reporting.csv.maxSizeBytes=6000`,
-        '--xpack.reporting.roles.enabled=false', // Reporting access control is implemented by sub-feature application privileges
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
       ],

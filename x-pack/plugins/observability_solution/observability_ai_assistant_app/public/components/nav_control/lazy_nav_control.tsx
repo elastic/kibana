@@ -20,12 +20,14 @@ interface NavControlInitiatorProps {
   appService: AIAssistantAppService;
   coreStart: CoreStart;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+  isServerless?: boolean;
 }
 
 export const NavControlInitiator = ({
   appService,
   coreStart,
   pluginsStart,
+  isServerless,
 }: NavControlInitiatorProps) => {
   const { isVisible } = useIsNavControlVisible({ coreStart, pluginsStart });
 
@@ -38,6 +40,7 @@ export const NavControlInitiator = ({
       appService={appService}
       coreStart={coreStart}
       pluginsStart={pluginsStart}
+      isServerless={isServerless}
     />
   );
 };
