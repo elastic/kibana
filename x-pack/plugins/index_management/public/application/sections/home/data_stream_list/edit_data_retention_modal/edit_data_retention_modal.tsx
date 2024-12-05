@@ -123,27 +123,44 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           return onClose({ hasUpdatedDataRetention: true });
         }
 
-        const successMessage = i18n.translate(
-          'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
-          {
-            defaultMessage:
-              'Data retention {disabledDataRetention, plural, one { disabled } other { updated } }',
-            values: { disabledDataRetention: !data.dataRetentionEnabled ? 1 : 0 },
-          }
-        );
+        const successMessage = isSingleDataStream
+          ? i18n.translate(
+              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
+              {
+                defaultMessage:
+                  'Data retention {disabledDataRetention, plural, one { disabled } other { updated } }',
+                values: { disabledDataRetention: !data.dataRetentionEnabled ? 1 : 0 },
+              }
+            )
+          : i18n.translate(
+              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successBulkDataRetentionNotification',
+              {
+                defaultMessage:
+                  'Data retention has been updated for {dataStreamCount, plural, one {one data stream} other {{dataStreamCount} data streams}}.',
+                values: { dataStreamCount: dataStreams.length },
+              }
+            );
         notificationService.showSuccessToast(successMessage);
 
         return onClose({ hasUpdatedDataRetention: true });
       }
 
       if (error) {
-        const errorMessage = i18n.translate(
-          'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
-          {
-            defaultMessage: "Error updating data retention: ''{error}''",
-            values: { error: error.message },
-          }
-        );
+        const errorMessage = isSingleDataStream
+          ? i18n.translate(
+              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
+              {
+                defaultMessage: "Error updating data retention: ''{error}''",
+                values: { error: error.message },
+              }
+            )
+          : i18n.translate(
+              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorBulkDataRetentionNotification',
+              {
+                defaultMessage:
+                  'There was an error updating the retention period. Try again later.',
+              }
+            );
         notificationService.showDangerToast(errorMessage);
       }
 
