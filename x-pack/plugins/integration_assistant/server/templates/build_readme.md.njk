@@ -2,7 +2,7 @@
 {% for data_stream in fields %}
 ### {{ data_stream.datastream }}
 
-Insert a description of the datastream here.
+{{ data_stream.description }}
 
 {% raw %}{{fields {% endraw %}"{{ data_stream.datastream }}"{% raw %}}}{% endraw %}
 {% endfor %}
