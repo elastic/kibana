@@ -19,31 +19,27 @@ const statusToColorMap: Record<RuleMigrationTranslationResult, string> = {
   untranslatable: euiColorVis9,
 };
 
-interface Props {
+interface StatusBadgeProps {
   value?: RuleMigrationTranslationResult;
   installedRuleId?: string;
   'data-test-subj'?: string;
 }
 
-const StatusBadgeComponent: React.FC<Props> = ({
-  value,
-  installedRuleId,
-  'data-test-subj': dataTestSubj = 'translation-result',
-}) => {
-  const translationResult = installedRuleId ? 'full' : value ?? 'untranslatable';
-  const displayValue = convertTranslationResultIntoText(translationResult);
-  const color = statusToColorMap[translationResult];
+export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
+  ({ value, installedRuleId, 'data-test-subj': dataTestSubj = 'translation-result' }) => {
+    const translationResult = installedRuleId ? 'full' : value ?? 'untranslatable';
+    const displayValue = convertTranslationResultIntoText(translationResult);
+    const color = statusToColorMap[translationResult];
 
-  return (
-    <HealthTruncateText
-      healthColor={color}
-      tooltipContent={displayValue}
-      dataTestSubj={dataTestSubj}
-    >
-      {displayValue}
-    </HealthTruncateText>
-  );
-};
-
-export const StatusBadge = React.memo(StatusBadgeComponent);
+    return (
+      <HealthTruncateText
+        healthColor={color}
+        tooltipContent={displayValue}
+        dataTestSubj={dataTestSubj}
+      >
+        {displayValue}
+      </HealthTruncateText>
+    );
+  }
+);
 StatusBadge.displayName = 'StatusBadge';
