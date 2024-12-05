@@ -6696,7 +6696,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-info@link:packages/kbn-repo-info":
+"@kbn/repo-info@link:src/platform/packages/shared/kbn-repo-info":
   version "0.0.0"
   uid ""
 
