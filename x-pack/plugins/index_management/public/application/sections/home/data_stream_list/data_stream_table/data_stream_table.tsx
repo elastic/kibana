@@ -24,6 +24,7 @@ import {
 import { ScopedHistory } from '@kbn/core/public';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
+import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import { DataStream } from '../../../../../../common/types';
@@ -39,6 +40,8 @@ import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import { FilterListButton, Filters } from '../../components';
 import { type DataStreamFilterName } from '../data_stream_list';
+import { DataStreamActionsMenu } from '../data_stream_actions_menu';
+import { EditDataRetentionModal } from '../edit_data_retention_modal';
 
 interface TableDataStream extends DataStream {
   isDataStreamFullyManagedByILM: boolean;
@@ -70,6 +73,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 }) => {
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
+  const [dataStreamsToEditDataRetention, setDataStreamsToEditDataRetention] = useState<
+    DataStream[]
+  >([]);
   const { config } = useAppContext();
 
   const data = useMemo(() => {
@@ -284,25 +290,34 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     onSelectionChange: setSelection,
   };
 
+  const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [
+    {
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.bulkEditDataRetentionButtonLabel', {
+        defaultMessage: 'Edit data retention',
+      }),
+      icon: 'pencil',
+      onClick: () => setDataStreamsToEditDataRetention(selection),
+    },
+    {
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.deleteDataStreamsButtonLabel', {
+        defaultMessage: 'Delete data streams',
+      }),
+      icon: 'trash',
+      onClick: () => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name)),
+    },
+  ];
+
   const searchConfig = {
     query: filters,
     box: {
       incremental: true,
     },
     toolsLeft:
-      selection.length > 0 &&
-      selection.every((dataStream: DataStream) => dataStream.privileges.delete_index) ? (
-        <EuiButton
-          data-test-subj="deleteDataStreamsButton"
-          onClick={() => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name))}
-          color="danger"
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.dataStreamList.table.deleteDataStreamsButtonLabel"
-            defaultMessage="Delete {count, plural, one {data stream} other {data streams} }"
-            values={{ count: selection.length }}
-          />
-        </EuiButton>
+      selection.length > 0 ? (
+        <DataStreamActionsMenu
+          dataStreamActions={dataStreamActions}
+          selectedDataStreamsCount={selection.length}
+        />
       ) : undefined,
     toolsRight: [
       <EuiFlexGroup gutterSize="s">
@@ -365,6 +380,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 
   return (
     <>
+      {dataStreamsToEditDataRetention && dataStreamsToEditDataRetention.length > 0 ? (
+        <EditDataRetentionModal
+          onClose={() => setDataStreamsToEditDataRetention([])}
+          dataStream={dataStreamsToEditDataRetention[0]}
+          ilmPolicyLink=""
+          ilmPolicyName="Test"
+        />
+      ) : null}
       {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
         <DeleteDataStreamConfirmationModal
           onClose={(res) => {
