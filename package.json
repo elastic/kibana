@@ -754,7 +754,7 @@
     "@kbn/reporting-mocks-server": "link:src/platform/packages/private/kbn-reporting/mocks_server",
     "@kbn/reporting-plugin": "link:x-pack/platform/plugins/private/reporting",
     "@kbn/reporting-public": "link:src/platform/packages/private/kbn-reporting/public",
-    "@kbn/reporting-server": "link:packages/kbn-reporting/server",
+    "@kbn/reporting-server": "link:src/platform/packages/private/kbn-reporting/server",
     "@kbn/resizable-layout": "link:packages/kbn-resizable-layout",
     "@kbn/resizable-layout-examples-plugin": "link:examples/resizable_layout_examples",
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
