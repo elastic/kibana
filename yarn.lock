@@ -6364,7 +6364,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-response-stream@link:x-pack/packages/ml/response_stream":
+"@kbn/ml-response-stream@link:x-pack/platform/packages/shared/ml/response_stream":
   version "0.0.0"
   uid ""
 
