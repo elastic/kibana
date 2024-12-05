@@ -265,7 +265,7 @@ describe('CaseViewTabs', () => {
       appMockRenderer = createAppMockRenderer();
 
       appMockRenderer.render(
-        <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+        <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.SIMILAR_CASES} />
       );
 
       expect(await screen.findByTestId('case-view-tab-title-similar_cases')).toBeInTheDocument();
