@@ -13,14 +13,14 @@ Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`
 ==== Configuring the product documentation for air-gapped environments
 
 The product documentation requires network access to its artifact repository to be installed and enabled.
-For air-gapped environments, or environments where remote network traffic may be blocked or filtered,
+For air-gapped environments, or environments where remote network traffic is blocked or filtered,
 the artifact repository must be manually deployed somewhere accessible by the Kibana deployment.
 
-Deploying a custom product documentation repository can be done in 2 ways:
+Deploying a custom product documentation repository can be done in 2 ways: using a s3 bucket, or using a CDN.
 
 ===== Deploying using a s3 bucket
 
-*1. Download the artifact for your current Kibana version*
+*1. Download the artifacts for your current Kibana version*
 
 The artifact names are following this pattern: `kb-product-doc-{productName}-{versionMajor}.{versionMinor}.zip`
 
@@ -39,7 +39,7 @@ For example, for Kibana 8.16:
 - `kb-product-doc-observability-8.16.zip`
 - `kb-product-doc-security-8.16.zip`
 
-*2. Upload the artifact to your local s3 bucket*
+*2. Upload the artifacts to your local s3 bucket*
 
 Upload the artifact files to you custom s3 bucket, then make sure that they are properly listed in the bucket's index, similar to
 the bucket listing displayed when accessing `https://kibana-knowledge-base-artifacts.elastic.co/` in a browser.
@@ -55,20 +55,20 @@ xpack.productDocBase.artifactRepositoryUrl: "{url-to-my-bucket-root}"
 
 *4. Restart Kibana*
 
-You should then be able to install the product documentation feature from the corresponding management page.
+You should then be able to install the product documentation feature from the AI assistant management page.
 
 ===== Deploying using a CDN
 
 Deploying using a CDN is quite similar to the s3 bucket approach. The main difference will be that we will need to manually
 generate the bucket listing and set it as the CDN folder's index page.
 
-*1. Download the artifact for your current Kibana version*
+*1. Download the artifacts for your current Kibana version*
 
 Following the step from the `Deploying using a s3 bucket` section
 
-*2. Upload the artifact to the CDN*
+*2. Upload the artifacts to the CDN*
 
-Create a folder in your CDN, and upload the artifact to it.
+Create a folder in your CDN, and upload the artifacts to it.
 
 *3. Create and upload the bucket listing*
 
@@ -99,7 +99,7 @@ For example for Kibana 8.17, replace all `8.16` occurrences in the file with `8.
 ----
 
 Then upload that xml file to the same CDN folder where the artifacts were uploaded, and then configure the folder to have that file
-served at the folder's index.
+served as the folder's index.
 
 *4. Configure Kibana to use the custom repository*
 
@@ -112,4 +112,4 @@ xpack.productDocBase.artifactRepositoryUrl: "{url-to-my-bucket-root}"
 
 *5. Restart Kibana*
 
-You should then be able to install the product documentation feature from the corresponding management page.
+You should then be able to install the product documentation feature from the AI assistant management page.
