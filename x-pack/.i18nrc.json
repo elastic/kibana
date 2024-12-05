@@ -63,7 +63,7 @@
     "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
     "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
     "xpack.logsShared": "plugins/observability_solution/logs_shared",
-    "xpack.fleet": "plugins/fleet",
+    "xpack.fleet": "platform/plugins/shared/fleet",
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
     "xpack.integrationAssistant": "plugins/integration_assistant",
     "xpack.inference": "plugins/inference",
