@@ -10,7 +10,7 @@
 import { pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, map, Observable, skip } from 'rxjs';
-
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataTableRecord } from '@kbn/discover-utils/types';
@@ -114,6 +114,7 @@ export const initializeSearchEmbeddableApi = async (
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
+  const inspectorAdapters$ = new BehaviorSubject<Adapters>({});
 
   /**
    * The state manager is used to modify the state of the saved search - this should never be
@@ -132,6 +133,7 @@ export const initializeSearchEmbeddableApi = async (
     totalHitCount: totalHitCount$,
     viewMode: savedSearchViewMode$,
     density: density$,
+    inspectorAdapters: inspectorAdapters$,
   };
 
   /** The saved search should be the source of truth for all state  */

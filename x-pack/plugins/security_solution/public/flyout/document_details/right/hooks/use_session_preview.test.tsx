@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseSessionPreviewParams } from './use_session_preview';
 import { useSessionPreview } from './use_session_preview';
 import type { SessionViewConfig } from '@kbn/securitysolution-data-table/common/types';
@@ -15,7 +15,7 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { mockFieldData, mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 
 describe('useSessionPreview', () => {
-  let hookResult: RenderHookResult<UseSessionPreviewParams, SessionViewConfig | null>;
+  let hookResult: RenderHookResult<SessionViewConfig | null, UseSessionPreviewParams>;
 
   it(`should return a session view config object if alert ancestor index is available`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
