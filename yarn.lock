@@ -6028,7 +6028,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/json-schemas@link:x-pack/packages/ml/json_schemas":
+"@kbn/json-schemas@link:x-pack/platform/packages/private/ml/json_schemas":
   version "0.0.0"
   uid ""
 
