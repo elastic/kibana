@@ -13,3 +13,10 @@ export const THREAT_MATCH_INDEX_FIELD_VALIDATION_REQUIRED_ERROR = i18n.translate
     defaultMessage: 'A minimum of one index pattern is required.',
   }
 );
+
+export const THREAT_MATCH_INDEX_FIELD_VALIDATION_FORBIDDEN_PATTERN_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchIndexForbiddenError',
+  {
+    defaultMessage: 'The index pattern cannot be "*". Please choose a more specific index pattern.',
+  }
+);
