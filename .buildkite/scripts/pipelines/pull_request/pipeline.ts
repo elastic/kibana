@@ -153,6 +153,20 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
+      (await doAnyChangesMatch([
+        /^x-pack\/packages\/ai-infra/,
+        /^x-pack\/plugins\/ai_infra/,
+        /^x-pack\/plugins\/inference/,
+        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/bedrock/,
+        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/gemini/,
+        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/openai/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml'));
+    }
+
+    if (
       GITHUB_PR_LABELS.includes('ci:deploy-cloud') ||
       GITHUB_PR_LABELS.includes('ci:cloud-deploy') ||
       GITHUB_PR_LABELS.includes('ci:cloud-redeploy')

@@ -1452,6 +1452,7 @@
     "@kbn/ftr-common-functional-services": "link:packages/kbn-ftr-common-functional-services",
     "@kbn/ftr-common-functional-ui-services": "link:packages/kbn-ftr-common-functional-ui-services",
     "@kbn/ftr-screenshot-filename": "link:packages/kbn-ftr-screenshot-filename",
+    "@kbn/gen-ai-functional-testing": "link:packages/kbn-gen-ai-functional-testing",
     "@kbn/generate": "link:packages/kbn-generate",
     "@kbn/get-repo-files": "link:packages/kbn-get-repo-files",
     "@kbn/import-locator": "link:packages/kbn-import-locator",
