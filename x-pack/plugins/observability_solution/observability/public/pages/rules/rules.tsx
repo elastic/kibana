@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { RuleTypeModal } from '@kbn/alerts-ui-shared/src/rule_type_modal';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form/src/rule_type_modal';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

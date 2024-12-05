@@ -333,6 +333,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
+  const isAnalysisControlsDisabled = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
+
   return (
     <div data-test-subj="aiopsLogRateAnalysisResults">
       <ProgressControls
@@ -345,6 +347,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         onReset={onReset}
         shouldRerunAnalysis={shouldRerunAnalysis || searchQueryUpdated}
         analysisInfo={<LogRateAnalysisInfoPopover />}
+        isAnalysisControlsDisabled={isAnalysisControlsDisabled}
       >
         <>
           {embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (

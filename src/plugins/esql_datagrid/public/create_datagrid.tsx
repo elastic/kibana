@@ -44,7 +44,7 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
   }, []);
 
   const getWrapper = (children: JSX.Element) => {
-    return props.fullHeight ? <div style={{ height: 500 }}>{children}</div> : <>{children}</>;
+    return props.fullHeight ? <div css={{ height: 500 }}>{children}</div> : <>{children}</>;
   };
 
   const deps = value?.[0];

@@ -140,8 +140,14 @@ Divide the query up into separate section and go through each section one at a t
 
 <example_response>
 A: Please find the modified SPL query below:
-\`\`\`json
-{{"match": "Linux User Account Creation"}}
+\`\`\`spl
+sourcetype="linux:audit" \`linux_auditd_normalized_proctitle_process\`
+| rename host as dest 
+| where LIKE (process_exec, "%chown root%") 
+| stats count min(_time) as firstTime max(_time) as lastTime by process_exec proctitle normalized_proctitle_delimiter dest 
+| convert timeformat="%Y-%m-%dT%H:%M:%S" ctime(firstTime) 
+| convert timeformat="%Y-%m-%dT%H:%M:%S" ctime(lastTime)
+| search *
 \`\`\`
 </example_response>
 
