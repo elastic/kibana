@@ -187,6 +187,8 @@
     "@kbn/core-deprecations-common",
     "@kbn/usage-collection-plugin",
     "@kbn/palettes",
+    "@kbn/sse-utils-server",
+    "@kbn/gen-ai-functional-testing",
     "@kbn/integration-assistant-plugin"
   ]
 }

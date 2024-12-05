@@ -67,6 +67,7 @@ const mockContext = {
       actions: {
         getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
       },
+      llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
       getRegisteredTools: jest.fn(() => []),
       getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
       logger: loggingSystemMock.createLogger(),
