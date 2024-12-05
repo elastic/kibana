@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
-import { ChromeStart } from '@kbn/core/public';
+import { ChromeNavControls } from '@kbn/core/public';
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,7 @@ import { UseAssistantContext } from '.';
 
 interface Props {
   hasAssistantPrivilege: UseAssistantContext['assistantAvailability']['hasAssistantPrivilege'];
-  navControls: ChromeStart['navControls'];
+  navControls: ChromeNavControls;
   showAssistantOverlay: UseAssistantContext['showAssistantOverlay'];
 }
 
