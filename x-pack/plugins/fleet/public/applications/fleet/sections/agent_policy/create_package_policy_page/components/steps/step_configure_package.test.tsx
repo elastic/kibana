@@ -17,156 +17,157 @@ import { validatePackagePolicy } from '../../services';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
 
-// FLAKY: https://github.com/elastic/kibana/issues/201598
-describe.skip('StepConfigurePackage', () => {
-  let packageInfo: PackageInfo;
-  let packagePolicy: NewPackagePolicy;
-  const mockUpdatePackagePolicy = jest.fn().mockImplementation((val: any) => {
-    packagePolicy = {
-      ...val,
-      ...packagePolicy,
+for (let i = 0; i < 1000; i++) {
+  describe(`StepConfigurePackage ${i + 1}`, () => {
+    let packageInfo: PackageInfo;
+    let packagePolicy: NewPackagePolicy;
+    const mockUpdatePackagePolicy = jest.fn().mockImplementation((val: any) => {
+      packagePolicy = {
+        ...val,
+        ...packagePolicy,
+      };
+    });
+
+    let testRenderer: TestRenderer;
+    let renderResult: ReturnType<typeof testRenderer.render>;
+    const render = () => {
+      const validationResults = validatePackagePolicy(packagePolicy, packageInfo, load);
+
+      renderResult = testRenderer.render(
+        <StepConfigurePackagePolicy
+          packageInfo={packageInfo}
+          packagePolicy={packagePolicy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+        />
+      );
     };
-  });
 
-  let testRenderer: TestRenderer;
-  let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () => {
-    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, load);
-
-    renderResult = testRenderer.render(
-      <StepConfigurePackagePolicy
-        packageInfo={packageInfo}
-        packagePolicy={packagePolicy}
-        updatePackagePolicy={mockUpdatePackagePolicy}
-        validationResults={validationResults}
-        submitAttempted={false}
-      />
-    );
-  };
-
-  beforeEach(() => {
-    packageInfo = {
-      name: 'nginx',
-      title: 'Nginx',
-      version: '1.3.0',
-      release: 'ga',
-      description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
-      format_version: '',
-      owner: { github: '' },
-      assets: {} as any,
-      policy_templates: [
-        {
-          name: 'nginx',
-          title: 'Nginx logs and metrics',
-          description: 'Collect logs and metrics from Nginx instances',
-          inputs: [
-            {
-              type: 'logfile',
-              title: 'Collect logs from Nginx instances',
-              description: 'Collecting Nginx access and error logs',
-            },
-          ],
-          multiple: true,
-        },
-      ],
-      data_streams: [
-        {
-          type: 'logs',
-          dataset: 'nginx.access',
-          title: 'Nginx access logs',
-          release: 'experimental',
-          ingest_pipeline: 'default',
-          streams: [
-            {
-              input: 'logfile',
-              vars: [
-                {
-                  name: 'paths',
-                  type: 'text',
-                  title: 'Paths',
-                  multi: true,
-                  required: true,
-                  show_user: true,
-                  default: ['/var/log/nginx/access.log*'],
-                },
-              ],
-              template_path: 'stream.yml.hbs',
-              title: 'Nginx access logs',
-              description: 'Collect Nginx access logs',
-              enabled: true,
-            },
-          ],
-          package: 'nginx',
-          path: 'access',
-        },
-      ],
-      latestVersion: '1.3.0',
-      keepPoliciesUpToDate: false,
-      status: 'not_installed',
-    };
-    packagePolicy = {
-      name: 'nginx-1',
-      description: 'desc',
-      namespace: 'default',
-      policy_id: '',
-      policy_ids: [''],
-      enabled: true,
-      inputs: [
-        {
-          type: 'logfile',
-          policy_template: 'nginx',
-          enabled: true,
-          streams: [
-            {
-              enabled: true,
-              data_stream: { type: 'logs', dataset: 'nginx.access' },
-              vars: {
-                paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                tags: { value: ['nginx-access'], type: 'text' },
-                preserve_original_event: { value: false, type: 'bool' },
-                processors: { type: 'yaml' },
+    beforeEach(() => {
+      packageInfo = {
+        name: 'nginx',
+        title: 'Nginx',
+        version: '1.3.0',
+        release: 'ga',
+        description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
+        format_version: '',
+        owner: { github: '' },
+        assets: {} as any,
+        policy_templates: [
+          {
+            name: 'nginx',
+            title: 'Nginx logs and metrics',
+            description: 'Collect logs and metrics from Nginx instances',
+            inputs: [
+              {
+                type: 'logfile',
+                title: 'Collect logs from Nginx instances',
+                description: 'Collecting Nginx access and error logs',
               },
-            },
-          ],
-        },
-      ],
-    };
-    testRenderer = createFleetTestRendererMock();
-  });
+            ],
+            multiple: true,
+          },
+        ],
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'nginx.access',
+            title: 'Nginx access logs',
+            release: 'experimental',
+            ingest_pipeline: 'default',
+            streams: [
+              {
+                input: 'logfile',
+                vars: [
+                  {
+                    name: 'paths',
+                    type: 'text',
+                    title: 'Paths',
+                    multi: true,
+                    required: true,
+                    show_user: true,
+                    default: ['/var/log/nginx/access.log*'],
+                  },
+                ],
+                template_path: 'stream.yml.hbs',
+                title: 'Nginx access logs',
+                description: 'Collect Nginx access logs',
+                enabled: true,
+              },
+            ],
+            package: 'nginx',
+            path: 'access',
+          },
+        ],
+        latestVersion: '1.3.0',
+        keepPoliciesUpToDate: false,
+        status: 'not_installed',
+      };
+      packagePolicy = {
+        name: 'nginx-1',
+        description: 'desc',
+        namespace: 'default',
+        policy_id: '',
+        policy_ids: [''],
+        enabled: true,
+        inputs: [
+          {
+            type: 'logfile',
+            policy_template: 'nginx',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'nginx.access' },
+                vars: {
+                  paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                  tags: { value: ['nginx-access'], type: 'text' },
+                  preserve_original_event: { value: false, type: 'bool' },
+                  processors: { type: 'yaml' },
+                },
+              },
+            ],
+          },
+        ],
+      };
+      testRenderer = createFleetTestRendererMock();
+    });
 
-  it('should show nothing to configure if no matching integration', async () => {
-    packageInfo.policy_templates = [];
-    render();
+    it('should show nothing to configure if no matching integration', async () => {
+      packageInfo.policy_templates = [];
+      render();
 
-    await waitFor(async () => {
-      expect(await renderResult.findByText('Nothing to configure')).toBeInTheDocument();
+      await waitFor(async () => {
+        expect(await renderResult.findByText('Nothing to configure')).toBeInTheDocument();
+      });
+    });
+
+    it('should show inputs of policy templates and update package policy with input enabled: false', async () => {
+      render();
+
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByText('Collect logs from Nginx instances')
+        ).toBeInTheDocument();
+      });
+      act(() => {
+        fireEvent.click(renderResult.getByRole('switch'));
+      });
+      expect(mockUpdatePackagePolicy.mock.calls[0][0].inputs[0].enabled).toEqual(false);
+    });
+
+    it('should render without data streams or vars', async () => {
+      packageInfo.data_streams = [];
+      packagePolicy.inputs[0].streams = [];
+
+      render();
+
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByText('Collect logs from Nginx instances')
+        ).toBeInTheDocument();
+      });
     });
   });
-
-  it('should show inputs of policy templates and update package policy with input enabled: false', async () => {
-    render();
-
-    await waitFor(async () => {
-      expect(
-        await renderResult.findByText('Collect logs from Nginx instances')
-      ).toBeInTheDocument();
-    });
-    act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
-    });
-    expect(mockUpdatePackagePolicy.mock.calls[0][0].inputs[0].enabled).toEqual(false);
-  });
-
-  it('should render without data streams or vars', async () => {
-    packageInfo.data_streams = [];
-    packagePolicy.inputs[0].streams = [];
-
-    render();
-
-    await waitFor(async () => {
-      expect(
-        await renderResult.findByText('Collect logs from Nginx instances')
-      ).toBeInTheDocument();
-    });
-  });
-});
+}
