@@ -42,7 +42,6 @@ import {
   HasDataMap,
   appLabels,
 } from '../../context/has_data_context/has_data_context';
-import { AlertActions } from '../../components/alert_actions/alert_actions';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
@@ -251,7 +250,6 @@ export function OverviewPage() {
               query={esQuery}
               initialPageSize={ALERTS_PER_PAGE}
               columns={tableColumns}
-              renderActionsCell={AlertActions}
               showInspectButton
             />
           </SectionContainer>
