@@ -15,8 +15,6 @@ import {
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
-  isEqlRule,
-  isEqlSequenceQuery,
   isEsqlRule,
   isNewTermsRule,
   isThreatMatchRule,
@@ -42,7 +40,6 @@ import {
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
-  EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
 import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
@@ -391,31 +388,11 @@ export const schema: FormSchema<DefineStepRule> = {
         validator: (...args: Parameters<ValidationFunc>) => {
           const [{ formData }] = args;
           const needsValidation = isSuppressionRuleConfiguredWithGroupBy(formData.ruleType);
-
           if (!needsValidation) {
             return;
           }
 
           return alertSuppressionFieldsValidatorFactory()(...args);
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData, value }] = args;
-
-          if (!isEqlRule(formData.ruleType) || !Array.isArray(value) || value.length === 0) {
-            return;
-          }
-
-          const query: string = formData.queryBar?.query?.query ?? '';
-
-          if (isEqlSequenceQuery(query)) {
-            return {
-              message: EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
-            };
-          }
         },
       },
     ],

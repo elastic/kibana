@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
-import type { ModelItem } from '../../../model_management/models_list';
+import type { DFAModelItem } from '../../../../../common/types/trained_models';
 import {
   EDIT_MESSAGE,
   CANCEL_EDIT_MESSAGE,
@@ -56,9 +56,9 @@ interface Props {
   condition?: string;
   fieldMap: MlInferenceState['fieldMap'];
   handleAdvancedConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;
-  inferenceConfig: ModelItem['inference_config'];
-  modelInferenceConfig: ModelItem['inference_config'];
-  modelInputFields: ModelItem['input'];
+  inferenceConfig: DFAModelItem['inference_config'];
+  modelInferenceConfig: DFAModelItem['inference_config'];
+  modelInputFields: DFAModelItem['input'];
   modelType?: InferenceModelTypes;
   setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
   tag?: string;
