@@ -236,6 +236,6 @@
     "@kbn/react-hooks",
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
-    "@kbn/core-chrome-browser-internal"
+    "@kbn/core-chrome-browser-mocks"
   ]
 }
