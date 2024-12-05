@@ -39,7 +39,7 @@ import { getLensInspectorService } from '../../../lens_inspector_service';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
 import { Ast, toExpression } from '@kbn/interpreter';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },

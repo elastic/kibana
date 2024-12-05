@@ -63,7 +63,29 @@
               "section": "def-common.RouteRepositoryClient",
               "text": "RouteRepositoryClient"
             },
-            "<{ \"POST /api/streams/_disable\": ",
+            "<{ \"POST /api/streams/{id}/_sample\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/{id}/_sample\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
+            "Condition",
+            ", Zod.ZodTypeDef, ",
+            "Condition",
+            ">>; start: Zod.ZodOptional<Zod.ZodNumber>; end: Zod.ZodOptional<Zod.ZodNumber>; number: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+            "Condition",
+            "; }, { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+            "Condition",
+            "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+            "Condition",
+            "; }; }, { path: { id: string; }; body: { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+            "Condition",
+            "; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { documents: unknown[]; }, undefined>; \"POST /api/streams/_disable\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -177,7 +199,7 @@
             "Condition",
             "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
-            "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } & { inheritedFields: ({ type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; } & { from: string; })[]; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
+            "; }[]; inheritedFields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; from: string; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -292,17 +314,6 @@
         "children": [
           {
             "parentPluginId": "streams",
-            "id": "def-server.ListStreamResponse.total",
-            "type": "number",
-            "tags": [],
-            "label": "total",
-            "description": [],
-            "path": "x-pack/plugins/streams/server/lib/streams/stream_crud.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "streams",
             "id": "def-server.ListStreamResponse.definitions",
             "type": "Array",
             "tags": [],
@@ -348,7 +359,29 @@
         "label": "StreamsRouteRepository",
         "description": [],
         "signature": [
-          "{ \"POST /api/streams/_disable\": ",
+          "{ \"POST /api/streams/{id}/_sample\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/{id}/_sample\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
+          "Condition",
+          ", Zod.ZodTypeDef, ",
+          "Condition",
+          ">>; start: Zod.ZodOptional<Zod.ZodNumber>; end: Zod.ZodOptional<Zod.ZodNumber>; number: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+          "Condition",
+          "; }, { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+          "Condition",
+          "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+          "Condition",
+          "; }; }, { path: { id: string; }; body: { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+          "Condition",
+          "; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { documents: unknown[]; }, undefined>; \"POST /api/streams/_disable\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -462,7 +495,7 @@
           "Condition",
           "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
-          "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } & { inheritedFields: ({ type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; } & { from: string; })[]; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
+          "; }[]; inheritedFields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; from: string; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -576,6 +609,25 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.ReadStreamDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ReadStreamDefinition",
+        "description": [],
+        "signature": [
+          "{ id: string; children: { id: string; condition?: ",
+          "Condition",
+          "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+          "Condition",
+          "; }[]; inheritedFields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; from: string; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
+        ],
+        "path": "x-pack/plugins/streams/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "streams",
         "id": "def-common.StreamDefinition",
