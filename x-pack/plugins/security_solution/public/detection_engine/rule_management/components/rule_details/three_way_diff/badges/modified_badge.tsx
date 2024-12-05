@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 
-export function ModifiedBadge(): JSX.Element {
+interface ModifiedBadgeProps {
+  tooltip?: ReactNode;
+}
+
+export function ModifiedBadge({ tooltip }: ModifiedBadgeProps): JSX.Element {
   return (
-    <EuiBadge color="hollow" iconType="indexEdit" iconSide="left">
-      {i18n.MODIFIED}
-    </EuiBadge>
+    <EuiToolTip content={tooltip}>
+      <EuiBadge color="hollow" iconType="indexEdit" iconSide="left">
+        {i18n.MODIFIED}
+      </EuiBadge>
+    </EuiToolTip>
   );
 }

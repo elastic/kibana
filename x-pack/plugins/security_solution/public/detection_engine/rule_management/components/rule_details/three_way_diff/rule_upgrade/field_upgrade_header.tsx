@@ -12,6 +12,7 @@ import { fieldToDisplayNameMap } from '../../diff_components/translations';
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ModifiedBadge } from '../badges/modified_badge';
 import { FieldUpgradeStateInfo } from './field_upgrade_state_info';
+import * as i18n from './translations';
 
 interface FieldUpgradeHeaderProps {
   fieldName: string;
@@ -36,7 +37,7 @@ export function FieldUpgradeHeader({
       <EuiFlexGroup alignItems="center" gutterSize="s">
         {isCustomized && (
           <EuiFlexItem grow={false}>
-            <ModifiedBadge />
+            <ModifiedBadge tooltip={i18n.FIELD_MODIFIED_BADGE_DESCRIPTION} />
           </EuiFlexItem>
         )}
         <FieldUpgradeStateInfo state={fieldUpgradeState} />
