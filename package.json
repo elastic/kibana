@@ -124,7 +124,7 @@
     "@elastic/numeral": "^2.5.1",
     "@elastic/react-search-ui": "^1.20.2",
     "@elastic/react-search-ui-views": "^1.20.2",
-    "@elastic/request-converter": "^8.16.2",
+    "@elastic/request-converter": "^8.17.0",
     "@elastic/request-crypto": "^2.0.3",
     "@elastic/search-ui": "^1.20.2",
     "@elastic/search-ui-app-search-connector": "^1.20.2",
