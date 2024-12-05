@@ -9,7 +9,10 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/private/transform'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/transform',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/transform',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/private/transform/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/plugins/private/transform/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

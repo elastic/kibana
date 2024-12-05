@@ -11,5 +11,7 @@ module.exports = {
   roots: ['<rootDir>/x-pack/platform/plugins/shared/ml'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/ml',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/shared/ml/{common,public,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/plugins/shared/ml/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
 };
