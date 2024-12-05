@@ -215,7 +215,6 @@ xpack.task_manager.metrics_reset_interval: 120000
 # Reporting feature
 xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
-xpack.reporting.roles.enabled: false
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
 
