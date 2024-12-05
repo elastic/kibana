@@ -7,7 +7,7 @@
 
 
 ```ts
-import { createStateContainer, createStateContainerReactHelpers } from 'src/plugins/kibana_utils';
+import { createStateContainer, createStateContainerReactHelpers } from 'src/platform/plugins/shared/kibana_utils';
 
 const container = createStateContainer({});
 export const {

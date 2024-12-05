@@ -38,7 +38,7 @@ export class MyStateManager {
 
 ```ts
 // app.ts
-import { syncState, createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
+import { syncState, createKbnUrlStateStorage } from 'src/platform/plugins/shared/kibana_utils/public';
 import { MyStateManager } from './my_state_manager';
 
 const myStateManager = new MyStateManager();

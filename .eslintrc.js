@@ -290,7 +290,7 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
