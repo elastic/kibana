@@ -11,12 +11,19 @@ import {
   MicrosoftDefenderEndpointSecretsSchema,
   MicrosoftDefenderEndpointConfigSchema,
   MicrosoftDefenderEndpointActionParamsSchema,
+  MicrosoftDefenderEndpointBaseApiResponseSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
+
 export type MicrosoftDefenderEndpointSecrets = TypeOf<
   typeof MicrosoftDefenderEndpointSecretsSchema
 >;
+
+export type MicrosoftDefenderEndpointBaseApiResponse = TypeOf<
+  typeof MicrosoftDefenderEndpointBaseApiResponseSchema
+>;
+
 export type MicrosoftDefenderEndpointActionParams = TypeOf<
   typeof MicrosoftDefenderEndpointActionParamsSchema
 >;

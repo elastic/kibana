@@ -17,16 +17,31 @@ export const MicrosoftDefenderEndpointSecretsSchema = schema.object({
 });
 
 // ----------------------------------
+// Connector Methods
+// ----------------------------------
+export const MicrosoftDefenderEndpointBaseApiResponseSchema = schema.maybe(
+  schema.object({}, { unknowns: 'allow' })
+);
+
+export const IsolateHostParamsSchema = schema.object({
+  // FIXME:PT define params once we know them
+});
+
+export const ReleaseHostParamsSchema = schema.object({
+  // FIXME:PT define params once we know them
+});
+
+// ----------------------------------
 // Connector Sub-Actions
 // ----------------------------------
 const IsolateHostSchema = schema.object({
   subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST),
-  subActionParams: schema.any(), // TODO: define type and add it here
+  subActionParams: IsolateHostParamsSchema,
 });
 
 const ReleaseHostSchema = schema.object({
   subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST),
-  subActionParams: schema.any(), // TODO: define type and add it here
+  subActionParams: ReleaseHostParamsSchema,
 });
 
 export const MicrosoftDefenderEndpointActionParamsSchema = schema.oneOf([
