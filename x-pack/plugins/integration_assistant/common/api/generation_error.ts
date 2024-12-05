@@ -13,6 +13,12 @@ export interface GenerationErrorBody {
   attributes: GenerationErrorAttributes;
 }
 
+export interface ErrorMessageWithLink {
+  link: string;
+  linkText: string;
+  errorMessage: string;
+}
+
 export function isGenerationErrorBody(obj: unknown | undefined): obj is GenerationErrorBody {
   return (
     typeof obj === 'object' &&
@@ -27,7 +33,8 @@ export function isGenerationErrorBody(obj: unknown | undefined): obj is Generati
 
 export interface GenerationErrorAttributes {
   errorCode: GenerationErrorCode;
-  underlyingMessages: string[] | undefined;
+  underlyingMessages?: string[] | undefined;
+  errorMessageWithLink?: ErrorMessageWithLink | undefined;
 }
 
 export function isGenerationErrorAttributes(obj: unknown): obj is GenerationErrorAttributes {

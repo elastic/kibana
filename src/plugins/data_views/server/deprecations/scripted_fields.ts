@@ -27,6 +27,7 @@ export const createScriptedFieldsDeprecationsConfig: (
         type: 'index-pattern',
         perPage: 1000,
         fields: ['title', 'fields'],
+        namespaces: ['*'],
       });
 
     const indexPatternsWithScriptedFields: IndexPatternAttributesWithFields[] = [];

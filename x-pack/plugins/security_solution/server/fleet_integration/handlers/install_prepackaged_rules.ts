@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { createDetectionIndex } from '../../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../../lib/detection_engine/prebuilt_rules';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../types';
@@ -16,7 +16,7 @@ export interface InstallPrepackagedRulesProps {
   logger: Logger;
   context: SecuritySolutionApiRequestHandlerContext;
   request: KibanaRequest;
-  alerts: AlertsStartContract;
+  alerts: AlertingServerStart;
   exceptionsClient: ExceptionListClient;
 }
 
@@ -45,11 +45,8 @@ export const installPrepackagedRules = async ({
   try {
     // this checks to make sure index exists first, safe to try in case of failure above
     // may be able to recover from minor errors
-    await createPrepackagedRules(
-      context,
-      alerts.getRulesClientWithRequest(request),
-      exceptionsClient
-    );
+    const rulesClient = await alerts.getRulesClientWithRequest(request);
+    await createPrepackagedRules(context, rulesClient, exceptionsClient);
   } catch (err) {
     logger.error(
       `Unable to create detection rules automatically (${err.statusCode}): ${err.message}`

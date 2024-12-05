@@ -15,9 +15,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_STATUS_ACTIVE, AlertConsumers, type AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, type AlertStatus } from '@kbn/rule-data-utils';
+import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import React, { type FC, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { ML_VALID_CONSUMERS } from '../../../../common/constants/alerts';
+import { ML_RULE_TYPE_IDS } from '../../../../common';
 import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
 import { CollapsiblePanel } from '../../components/collapsible_panel';
 import { useMlKibana } from '../../contexts/kibana';
@@ -42,13 +45,13 @@ export const AlertsPanel: FC = () => {
   const alertsQuery = useObservable(anomalyDetectionAlertsStateService.alertsQuery$, {});
   const isLoading = useObservable(anomalyDetectionAlertsStateService.isLoading$, true);
 
-  const alertStateProps = {
+  const alertStateProps: AlertsTableStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi!.alertsTableConfigurationRegistry,
     configurationId: ML_ALERTS_CONFIG_ID,
     id: `ml-details-alerts`,
-    featureIds: [AlertConsumers.ML],
+    ruleTypeIds: ML_RULE_TYPE_IDS,
+    consumers: ML_VALID_CONSUMERS,
     query: alertsQuery,
-    showExpandToDetails: true,
     showAlertStatusWithFlapping: true,
     cellContext: {
       fieldFormats,

@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { InventoryRouteHandlerResources } from '../../routes/types';
 
 export type AlertsClient = Awaited<ReturnType<typeof createAlertsClient>>;
@@ -18,13 +19,7 @@ export async function createAlertsClient({
 }: Pick<InventoryRouteHandlerResources, 'plugins' | 'request'>) {
   const ruleRegistryPluginStart = await plugins.ruleRegistry.start();
   const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(request);
-  const alertsIndices = await alertsClient.getAuthorizedAlertsIndices([
-    'logs',
-    'infrastructure',
-    'apm',
-    'slo',
-    'observability',
-  ]);
+  const alertsIndices = await alertsClient.getAuthorizedAlertsIndices(OBSERVABILITY_RULE_TYPE_IDS);
 
   if (!alertsIndices || isEmpty(alertsIndices)) {
     throw Error('No alert indices exist');

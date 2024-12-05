@@ -9,22 +9,23 @@ import React, { useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SecurityPageName } from '../../../app/types';
 
 import * as i18n from './translations';
-import { RulesTable } from '../components/rules_table';
+import { MigrationRulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
 import { UnknownMigration } from '../components/unknown_migration';
 import { useLatestStats } from '../hooks/use_latest_stats';
 
-type RulesMigrationPageProps = RouteComponentProps<{ migrationId?: string }>;
+type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
-export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
+export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
   ({
     match: {
       params: { migrationId },
@@ -34,13 +35,13 @@ export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
 
     const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
 
-    const migrationsIds = useMemo(() => {
+    const finishedRuleMigrationsStats = useMemo(() => {
       if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
         return [];
       }
-      return ruleMigrationsStatsAll
-        .filter((migration) => migration.status === 'finished')
-        .map((migration) => migration.id);
+      return ruleMigrationsStatsAll.filter(
+        (migration) => migration.status === SiemMigrationTaskStatus.FINISHED
+      );
     }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
     useEffect(() => {
@@ -49,27 +50,30 @@ export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
       }
 
       // Navigate to landing page if there are no migrations
-      if (!migrationsIds.length) {
+      if (!finishedRuleMigrationsStats.length) {
         navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
         return;
       }
 
       // Navigate to the most recent migration if none is selected
       if (!migrationId) {
-        navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: migrationsIds[0] });
+        navigateTo({
+          deepLinkId: SecurityPageName.siemMigrationsRules,
+          path: finishedRuleMigrationsStats[0].id,
+        });
       }
-    }, [isLoadingMigrationsStats, migrationId, migrationsIds, navigateTo]);
+    }, [isLoadingMigrationsStats, migrationId, finishedRuleMigrationsStats, navigateTo]);
 
     const onMigrationIdChange = (selectedId?: string) => {
       navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
     };
 
     const content = useMemo(() => {
-      if (!migrationId || !migrationsIds.includes(migrationId)) {
+      if (!migrationId || !finishedRuleMigrationsStats.some((stats) => stats.id === migrationId)) {
         return <UnknownMigration />;
       }
-      return <RulesTable migrationId={migrationId} />;
-    }, [migrationId, migrationsIds]);
+      return <MigrationRulesTable migrationId={migrationId} />;
+    }, [migrationId, finishedRuleMigrationsStats]);
 
     return (
       <>
@@ -79,7 +83,7 @@ export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <HeaderButtons
-              migrationsIds={migrationsIds}
+              ruleMigrationsStats={finishedRuleMigrationsStats}
               selectedMigrationId={migrationId}
               onMigrationIdChange={onMigrationIdChange}
             />
@@ -99,4 +103,4 @@ export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
     );
   }
 );
-RulesPage.displayName = 'RulesPage';
+MigrationRulesPage.displayName = 'MigrationRulesPage';

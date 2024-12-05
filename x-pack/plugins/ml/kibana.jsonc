@@ -63,7 +63,8 @@
       "lens",
       "maps",
       "savedObjectsFinder",
-      "usageCollection"
+      "usageCollection",
+      "alerting"
     ],
     "extraPublicDirs": [
       "common"
