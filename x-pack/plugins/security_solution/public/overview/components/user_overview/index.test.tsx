@@ -59,7 +59,11 @@ describe('User Summary Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRiskScore.mockReturnValue({ ...defaultProps, loading: true, hasEngineBeenInstalled: false });
+    mockRiskScore.mockReturnValue({
+      ...defaultProps,
+      loading: true,
+      hasEngineBeenInstalled: false,
+    });
   });
 
   test('it renders the default User Summary', () => {
