@@ -47,7 +47,7 @@
     "expressionXY": "src/platform/plugins/shared/chart_expressions/expression_xy",
     "expressionRepeatImage": "src/plugins/expression_repeat_image",
     "expressionRevealImage": "src/plugins/expression_reveal_image",
-    "expressions": "src/plugins/expressions",
+    "expressions": "src/platform/plugins/shared/expressions",
     "expressionShape": "src/plugins/expression_shape",
     "expressionTagcloud": "src/platform/plugins/shared/chart_expressions/expression_tagcloud",
     "eventAnnotation": "src/platform/plugins/private/event_annotation",
