@@ -873,7 +873,7 @@
       "enabled": true
     },
     {
-      "groupName": "micomatch/minimatch",
+      "groupName": "micromatch/minimatch",
       "matchDepNames": [
         "micromatch",
         "minimatch",
