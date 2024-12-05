@@ -9,10 +9,36 @@
 import { NonEmptyString } from './primitives.gen';
 
 describe('NonEmptyString', () => {
-  test('accepts newline chars', () => {
-    expect(() => NonEmptyString.parse('hello \nworld')).not.toThrow();
+  describe('accepts ', () => {
+    // \t\r\n\f
+    test('accepts newline chars', () => {
+      expect(() => NonEmptyString.parse('hello \nworld')).not.toThrow();
+    });
+    test('accepts tab chars', () => {
+      expect(() => NonEmptyString.parse('hello \tworld')).not.toThrow();
+    });
+    test('accepts carriage return chars', () => {
+      expect(() => NonEmptyString.parse('hello \rworld')).not.toThrow();
+    });
+    test('accepts form feed return chars', () => {
+      expect(() => NonEmptyString.parse('hello \fworld')).not.toThrow();
+    });
   });
-  test('rejects comment with just spaces', () => {
-    expect(() => NonEmptyString.parse('    ')).toThrow();
+  describe('rejects', () => {
+    test('rejects only tab chars chars', () => {
+      expect(() => NonEmptyString.parse('\t\t\t\t')).toThrow();
+    });
+    test('rejects only newline chars chars', () => {
+      expect(() => NonEmptyString.parse('\n\n\n\n\n')).toThrow();
+    });
+    test('rejects only carriage return chars chars', () => {
+      expect(() => NonEmptyString.parse('\r\r\r\r')).toThrow();
+    });
+    test('rejects only form feed chars chars', () => {
+      expect(() => NonEmptyString.parse('\f\f\f\f\f')).toThrow();
+    });
+    test('rejects comment with just spaces', () => {
+      expect(() => NonEmptyString.parse('    ')).toThrow();
+    });
   });
 });

@@ -8,9 +8,9 @@ components:
   schemas:
     NonEmptyString:
       type: string
-      pattern: ^(?! *$).+$
+      format: nonempty
       minLength: 1
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace
 
     UUID:
       type: string
@@ -33,4 +33,3 @@ components:
       enum:
         - 'asc'
         - 'desc'
-

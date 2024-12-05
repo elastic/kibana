@@ -8,7 +8,8 @@
  */
 
 import * as z from '@kbn/zod';
-export function isNonEmptyString(input: string, ctx: z.RefinementCtx) {
+
+export function isNonEmptyString(input: string, ctx: z.RefinementCtx): void {
   if (input.trim() === '') {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
