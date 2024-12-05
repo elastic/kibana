@@ -8,7 +8,6 @@
  */
 
 import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
-import { unsafeConsole } from '@kbn/security-hardening';
 
 /**
  *
@@ -27,7 +26,6 @@ export class ConsoleAppender implements DisposableAppender {
    * @param record `LogRecord` instance to be logged.
    */
   public append(record: LogRecord) {
-    // eslint-disable-next-line @kbn/eslint/no_unsafe_console
     // unsafeConsole.log(this.layout.format(record));
   }
 
