@@ -14,7 +14,7 @@ system_indices_superuser:
 #--------------------------------------------------------------------------------------------------
 #
 # FILE SOURCE AT:
-# https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
+# https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
 #
 # !!!! IMPORTANT !!!!       DO NOT MAKE CHANGES TO THIS FILE, UNLESS THOSE CHANGES
 #                           HAVE ALSO BEEN MADE TO PROJECT CONTROLLER (path above)
