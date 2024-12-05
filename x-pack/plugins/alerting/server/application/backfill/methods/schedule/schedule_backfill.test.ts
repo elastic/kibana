@@ -251,12 +251,15 @@ describe('scheduleBackfill()', () => {
     const mockData = [getMockData(), getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' })];
     const result = await rulesClient.scheduleBackfill(mockData);
 
-    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
-      fieldNames: {
-        consumer: 'alert.attributes.consumer',
-        ruleTypeId: 'alert.attributes.alertTypeId',
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'alert.attributes.consumer',
+          ruleTypeId: 'alert.attributes.alertTypeId',
+        },
+        type: 'kql',
       },
-      type: 'kql',
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({

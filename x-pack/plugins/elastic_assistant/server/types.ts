@@ -20,6 +20,7 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -46,6 +47,7 @@ import {
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
@@ -111,10 +113,12 @@ export interface ElasticAssistantPluginSetupDependencies {
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
   licensing: LicensingPluginStart;
+  productDocBase: ProductDocBaseStartContract;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -134,6 +138,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getDefendInsightsDataClient: () => Promise<DefendInsightsDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   telemetry: AnalyticsServiceSetup;
 }
@@ -230,6 +235,7 @@ export interface AssistantToolParams {
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
   llm?: ActionsClientLlm | AssistantToolLlm;
+  llmTasks?: LlmTasksPluginStart;
   isOssModel?: boolean;
   logger: Logger;
   onNewReplacements?: (newReplacements: Replacements) => void;
