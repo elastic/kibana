@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/serverless/project_switcher'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/serverless/project_switcher'],
 };
