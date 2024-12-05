@@ -678,7 +678,7 @@
     "@kbn/ml-runtime-field-utils": "link:x-pack/platform/packages/shared/ml/runtime_field_utils",
     "@kbn/ml-string-hash": "link:x-pack/platform/packages/private/ml/string_hash",
     "@kbn/ml-time-buckets": "link:x-pack/platform/packages/private/ml/time_buckets",
-    "@kbn/ml-trained-models-utils": "link:x-pack/packages/ml/trained_models_utils",
+    "@kbn/ml-trained-models-utils": "link:x-pack/platform/packages/shared/ml/trained_models_utils",
     "@kbn/ml-ui-actions": "link:x-pack/packages/ml/ui_actions",
     "@kbn/ml-url-state": "link:x-pack/packages/ml/url_state",
     "@kbn/ml-validators": "link:x-pack/packages/ml/validators",

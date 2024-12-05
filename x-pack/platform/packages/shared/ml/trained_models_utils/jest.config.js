@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ml/trained_models_utils'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/ml/trained_models_utils'],
 };

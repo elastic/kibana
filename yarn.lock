@@ -6384,7 +6384,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-trained-models-utils@link:x-pack/packages/ml/trained_models_utils":
+"@kbn/ml-trained-models-utils@link:x-pack/platform/packages/shared/ml/trained_models_utils":
   version "0.0.0"
   uid ""
 
