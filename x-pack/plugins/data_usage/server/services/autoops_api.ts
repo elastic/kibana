@@ -24,8 +24,7 @@ import { AutoOpsConfig } from '../types';
 import { AutoOpsError } from './errors';
 import { appContextService } from './app_context';
 
-const AUTO_OPS_FAILED_ERROR = 'AutoOps API request failed';
-const AUTO_OPS_REQUEST_PREFIX = '[AutoOps API] Request failed';
+const AUTO_OPS_REQUEST_FAILED_PREFIX = '[AutoOps API] Request failed';
 const AUTO_OPS_MISSING_CONFIG_ERROR = 'Missing autoops configuration';
 
 const getAutoOpsAPIRequestUrl = (url?: string, projectId?: string): string =>
@@ -120,7 +119,7 @@ export class AutoOpsAPIService {
       (error: Error | AxiosError) => {
         if (!axios.isAxiosError(error)) {
           this.logger.error(
-            `${AUTO_OPS_REQUEST_PREFIX} with an error ${error} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_REQUEST_FAILED_PREFIX} with an error ${error}, request config: ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
           throw new AutoOpsError(withRequestIdMessage(error.message));
@@ -131,9 +130,9 @@ export class AutoOpsAPIService {
         if (error.response) {
           // The request was made and the server responded with a status code and error data
           this.logger.error(
-            `${AUTO_OPS_REQUEST_PREFIX} because the AutoOps API responded with a status code that falls out of the range of 2xx: ${JSON.stringify(
+            `${AUTO_OPS_REQUEST_FAILED_PREFIX} because the AutoOps API responded with a status code that falls out of the range of 2xx: ${JSON.stringify(
               error.response.status
-            )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebugStatus}`,
+            )}} ${JSON.stringify(error.response.data)}}, request config: ${requestConfigDebugStatus}`,
             {
               ...errorMetadataWithRequestConfig,
               http: {
@@ -149,18 +148,18 @@ export class AutoOpsAPIService {
         } else if (error.request) {
           // The request was made but no response was received
           this.logger.error(
-            `${AUTO_OPS_REQUEST_PREFIX} while sending the request to the AutoOps API: ${errorLogCodeCause} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_REQUEST_FAILED_PREFIX} while sending the request to the AutoOps API: ${errorLogCodeCause}, request config: ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
           throw new AutoOpsError(withRequestIdMessage(`no response received from the AutoOps API`));
         } else {
           // Something happened in setting up the request that triggered an Error
           this.logger.error(
-            `${AUTO_OPS_REQUEST_PREFIX} to be created ${errorLogCodeCause} ${requestConfigDebugStatus} ${error.toJSON()}`,
+            `${AUTO_OPS_REQUEST_FAILED_PREFIX} with ${errorLogCodeCause}, request config: ${requestConfigDebugStatus}, error: ${error.toJSON()}`,
             errorMetadataWithRequestConfig
           );
           throw new AutoOpsError(
-            withRequestIdMessage(`${AUTO_OPS_FAILED_ERROR}, ${error.message}`)
+            withRequestIdMessage(`${AUTO_OPS_REQUEST_FAILED_PREFIX}, ${error.message}`)
           );
         }
       }
