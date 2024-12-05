@@ -93,7 +93,7 @@ export interface DashboardCreationOptions {
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
 
-export interface DashboardState {
+export interface DashboardState extends DashboardOptions {
   // filter context to be passed to children
   query: Query;
   filters: Filter[];
@@ -107,12 +107,7 @@ export interface DashboardState {
   viewMode: ViewMode;
   description?: string;
 
-  // settings
-  hidePanelTitles: DashboardOptions['hidePanelTitles'];
-  syncTooltips: DashboardOptions['syncTooltips'];
-  useMargins: DashboardOptions['useMargins'];
-  syncColors: DashboardOptions['syncColors'];
-  syncCursor: DashboardOptions['syncCursor'];
+  // settings from DashboardOptions
 
   // dashboard contents
   panels: DashboardPanelMap;
