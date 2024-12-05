@@ -120,7 +120,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/196153
-  describe('create alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/196153
+  // Failing: See https://github.com/elastic/kibana/issues/202328
+  describe.skip('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
     before(async () => {

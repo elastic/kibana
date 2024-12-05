@@ -21,7 +21,8 @@ import { authorizedUserPreRouting } from './authorized_user_pre_routing';
 let mockCore: ReportingCore;
 let mockSetupDeps: ReportingInternalSetup;
 let mockStartDeps: ReportingInternalStart;
-let mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
+
+const mockReportingConfig = createMockConfigSchema();
 
 const getMockContext = () =>
   ({
@@ -110,90 +111,6 @@ describe('authorized_user_pre_routing', function () {
       requestHandler(getMockContext(), getMockRequest(), getMockResponseFactory())
     ).resolves.toMatchObject({
       body: `Sorry, you aren't authenticated`,
-    });
-  });
-
-  describe('Deprecated: security roles for access control', () => {
-    beforeEach(async () => {
-      mockReportingConfig = createMockConfigSchema({
-        roles: {
-          allow: ['reporting_user'],
-          enabled: true,
-        },
-      });
-    });
-
-    it(`should return with 403 when security is enabled but user doesn't have the allowed role`, async function () {
-      mockStartDeps = await createMockPluginStart(
-        {
-          securityService: {
-            authc: {
-              getCurrentUser: () => ({ id: '123', roles: ['peasant'], username: 'Tom Riddle' }),
-            },
-          },
-        },
-        mockReportingConfig
-      );
-      mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
-      const mockHandler = () => {
-        throw new Error('Handler callback should not be called');
-      };
-
-      expect(
-        await authorizedUserPreRouting(mockCore, mockHandler)(
-          getMockContext(),
-          getMockRequest(),
-          getMockResponseFactory()
-        )
-      ).toMatchObject({
-        body: `Ask your administrator for access to reporting features. <a href=https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#grant-user-access style=\"font-weight: 600;\"
-                    target=\"_blank\" rel=\"noopener\">Learn more</a>.`,
-      });
-    });
-
-    it('should return from handler when security is enabled and user has explicitly allowed role', async function () {
-      mockStartDeps = await createMockPluginStart(
-        {
-          securityService: {
-            authc: {
-              getCurrentUser: () => ({ username: 'friendlyuser', roles: ['reporting_user'] }),
-            },
-          },
-        },
-        mockReportingConfig
-      );
-      mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
-
-      let handlerCalled = false;
-      await authorizedUserPreRouting(mockCore, (user: unknown) => {
-        expect(user).toMatchObject({ roles: ['reporting_user'], username: 'friendlyuser' });
-        handlerCalled = true;
-        return Promise.resolve({ status: 200, options: {} });
-      })(getMockContext(), getMockRequest(), getMockResponseFactory());
-      expect(handlerCalled).toBe(true);
-    });
-
-    it('should return from handler when security is enabled and user has superuser role', async function () {
-      mockStartDeps = await createMockPluginStart(
-        {
-          securityService: {
-            authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['superuser'] }) },
-          },
-        },
-        mockReportingConfig
-      );
-      mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
-
-      const handler = jest.fn().mockResolvedValue({ status: 200, options: {} });
-      await authorizedUserPreRouting(mockCore, handler)(
-        getMockContext(),
-        getMockRequest(),
-        getMockResponseFactory()
-      );
-
-      expect(handler).toHaveBeenCalled();
-      const [[user]] = handler.mock.calls;
-      expect(user).toMatchObject({ roles: ['superuser'], username: 'friendlyuser' });
     });
   });
 });
