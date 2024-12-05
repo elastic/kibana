@@ -52,7 +52,7 @@
     "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
     "eventAnnotation": "src/plugins/event_annotation",
     "eventAnnotationListing": "src/plugins/event_annotation_listing",
-    "eventAnnotationCommon": "packages/kbn-event-annotation-common",
+    "eventAnnotationCommon": "src/platform/packages/shared/kbn-event-annotation-common",
     "eventAnnotationComponents": "packages/kbn-event-annotation-components",
     "fieldUtils": "packages/kbn-field-utils",
     "fieldFormats": "src/plugins/field_formats",
