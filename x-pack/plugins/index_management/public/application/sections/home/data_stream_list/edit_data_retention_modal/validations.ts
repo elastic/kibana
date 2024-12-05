@@ -41,7 +41,7 @@ const convertToSeconds = (value: string) => {
 };
 
 /*
-TODO: add documentation
+True if the first retention period is bigger than the latter one.
  */
 export const isRetentionBiggerThan = (valueA: string, valueB: string) => {
   const secondsA = convertToSeconds(valueA);

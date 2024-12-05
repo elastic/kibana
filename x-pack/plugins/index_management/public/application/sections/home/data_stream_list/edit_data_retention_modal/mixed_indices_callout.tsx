@@ -16,7 +16,7 @@ import { useAppContext } from '../../../../app_context';
 
 interface MixedIndicesCalloutProps {
   history: ScopedHistory;
-  ilmPolicyLink?: string;
+  ilmPolicyLink: string;
   ilmPolicyName?: string;
   dataStreamName: string;
 }

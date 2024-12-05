@@ -179,6 +179,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         formData.dataRetention &&
         formData.timeUnit &&
         (!ds.lifecycle?.data_retention ||
+          ds.lifecycle?.data_retention === -1 ||
           isRetentionBiggerThan(
             ds.lifecycle.data_retention,
             `${formData.dataRetention}${formData.timeUnit}`
@@ -204,7 +205,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          {isSingleDataStream && isDSLWithILMIndices(dataStreams[0]) && (
+          {isSingleDataStream && ilmPolicyLink && isDSLWithILMIndices(dataStreams[0]) && (
             <>
               <MixedIndicesCallout
                 history={history}
