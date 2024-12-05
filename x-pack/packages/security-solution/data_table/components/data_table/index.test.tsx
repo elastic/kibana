@@ -78,7 +78,7 @@ describe('DataTable', () => {
       onChangeItemsPerPage: jest.fn(),
       onChangePage: jest.fn(),
     },
-    fieldsBrowserComponent: jest.fn(),
+    fieldsBrowserComponent: jest.fn().mockReturnValue(<div />),
   };
 
   beforeEach(() => {
