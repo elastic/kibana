@@ -7,7 +7,7 @@
 
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
-import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
+import { excludeTiersQuery } from '@kbn/observability-utils/es/queries/exclude_tiers_query';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { isNoSuchRemoteClusterMessage, NoSuchRemoteClusterError } from '../../sources/errors';
 import type { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_status';
