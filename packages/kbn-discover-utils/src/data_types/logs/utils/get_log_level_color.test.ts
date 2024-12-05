@@ -32,16 +32,16 @@ describe('getLogLevelColor', () => {
       '#d6bf57'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.error, euiTheme as EuiThemeComputed)).toBe(
-      '#e7664c'
+      '#e18774'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.critical, euiTheme as EuiThemeComputed)).toBe(
-      '#dc5640'
+      '#dd7b67'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.alert, euiTheme as EuiThemeComputed)).toBe(
-      '#d24635'
+      '#d76f5b'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.emergency, euiTheme as EuiThemeComputed)).toBe(
-      '#c73729'
+      '#d2634e'
     );
     // other
     expect(getLogLevelColor(LogLevelCoalescedValue.trace, euiTheme as EuiThemeComputed)).toBe(

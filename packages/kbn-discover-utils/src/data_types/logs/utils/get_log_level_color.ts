@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeComputed, euiPaletteForTemperature, euiPaletteForStatus } from '@elastic/eui';
+import {
+  EuiThemeComputed,
+  euiPaletteForTemperature,
+  euiPaletteForStatus,
+  euiPaletteRed,
+} from '@elastic/eui';
 import { LogLevelCoalescedValue } from './get_log_level_coalesed_value';
 
 export const getLogLevelColor = (
@@ -16,6 +21,7 @@ export const getLogLevelColor = (
 ): string | undefined => {
   const euiPaletteForTemperature6 = euiPaletteForTemperature(6);
   const euiPaletteForStatus9 = euiPaletteForStatus(9);
+  const euiPaletteRed9 = euiPaletteRed(14);
 
   switch (logLevelCoalescedValue) {
     case LogLevelCoalescedValue.trace:
@@ -29,15 +35,15 @@ export const getLogLevelColor = (
     case LogLevelCoalescedValue.warning:
       return euiPaletteForStatus9[4];
     case LogLevelCoalescedValue.error:
-      return euiPaletteForStatus9[6];
+      return euiPaletteRed9[9];
     case LogLevelCoalescedValue.critical:
-      return '#dc5640'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
+      return euiPaletteRed9[10];
     case LogLevelCoalescedValue.alert:
-      return '#d24635'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
+      return euiPaletteRed9[11];
     case LogLevelCoalescedValue.emergency:
-      return '#c73729'; // This hardcoded value doesn't correspond to any token, it will be updated in v9 with an appropriate token-based scale for borealis theme
+      return euiPaletteRed9[12];
     case LogLevelCoalescedValue.fatal:
-      return euiTheme.colors.danger;
+      return euiPaletteRed9[13];
     default:
       return euiTheme.colors.mediumShade;
   }
