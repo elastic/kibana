@@ -46,13 +46,13 @@ const TECH_PREVIEW_LABEL = i18n.translate('xpack.serverlessSearch.techPreviewLab
   defaultMessage: 'Tech preview',
 });
 
-interface CustomOptionData {
+interface ConnectorDataSource {
   _append: React.ReactNode[];
   _prepend: React.ReactNode;
   serviceType: string;
 }
 
-type ExpandedComboBoxOption = EuiComboBoxOptionOption<CustomOptionData>;
+type ExpandedComboBoxOption = EuiComboBoxOptionOption<ConnectorDataSource>;
 
 interface GeneratedConnectorNameResult {
   connectorName: string;
@@ -204,7 +204,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
   };
 
   const onSelectedOptionChange = useCallback(
-    (selectedItem: Array<EuiComboBoxOptionOption<CustomOptionData>>) => {
+    (selectedItem: Array<EuiComboBoxOptionOption<ConnectorDataSource>>) => {
       if (selectedItem.length === 0) {
         return;
       }
@@ -222,7 +222,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
       data-test-subj="serverlessSearchEditConnectorType"
       fullWidth
     >
-      <EuiComboBox<CustomOptionData>
+      <EuiComboBox<ConnectorDataSource>
         aria-label={i18n.translate(
           'xpack.serverlessSearch.connectors.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
           { defaultMessage: 'Select a data source for your connector to use.' }
