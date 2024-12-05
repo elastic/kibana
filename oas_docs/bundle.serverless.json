@@ -5421,18 +5421,6 @@
         "operationId": "get-dashboards-dashboard",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "The page number to return. Default is \"1\".",
             "in": "query",
             "name": "page",
@@ -5458,7 +5446,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -5608,18 +5596,6 @@
         "operationId": "delete-dashboards-dashboard-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -5651,18 +5627,6 @@
         "operationId": "get-dashboards-dashboard-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A unique identifier for the dashboard.",
             "in": "path",
             "name": "id",
@@ -5675,7 +5639,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -6311,18 +6275,6 @@
         "operationId": "post-dashboards-dashboard-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -6344,7 +6296,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -6879,7 +6831,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -7487,18 +7439,6 @@
         "operationId": "put-dashboards-dashboard-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -7520,7 +7460,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -8049,7 +7989,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
