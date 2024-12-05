@@ -11,7 +11,7 @@ import type { ComponentType, ReactElement } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+import type { Capabilities, ToastsSetup } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -127,7 +127,6 @@ export interface ShareMenuItemV2 extends ShareMenuItemBase {
    * Not applicable for exports that do not call a remote API (i.e Lens CSV export)
    */
   generateExportUrl?: (args: ScreenshotExportOpts) => string | undefined;
-  theme?: ThemeServiceSetup;
   renderLayoutOptionSwitch?: boolean;
   layoutOption?: 'print';
   generateCopyUrl?: URL;

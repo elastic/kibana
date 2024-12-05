@@ -135,8 +135,6 @@ export class ShareMenuManager {
             onClose();
             unmount();
           },
-          theme,
-          i18n,
         }}
       />,
       { i18n, theme }
