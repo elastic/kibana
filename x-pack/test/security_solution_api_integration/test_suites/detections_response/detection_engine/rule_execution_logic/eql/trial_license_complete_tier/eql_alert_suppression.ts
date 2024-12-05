@@ -8,8 +8,12 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import sortBy from 'lodash/sortBy';
+import partition from 'lodash/partition';
 
-import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  DetectionAlert,
+  EqlRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
@@ -23,6 +27,8 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_U
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   createRule,
   deleteAllRules,
@@ -45,11 +51,13 @@ import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/ut
 
 const getQuery = (id: string) => `any where id == "${id}"`;
 const getSequenceQuery = (id: string) =>
-  `sequence by id [any where id == "${id}"] [any where id == "${id}"]`;
+  `sequence [any where id == "${id}"] [any where id == "${id}"]`;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
   const es = getService('es');
   const log = getService('log');
   const {
@@ -61,6 +69,10 @@ export default ({ getService }: FtrProviderContext) => {
     log,
   });
 
+  const partitionSequenceBuildingBlocks = (
+    alerts: Array<SearchHit<DetectionAlert & RiskEnrichmentFields>>
+  ) => partition(alerts, (alert) => alert?._source?.['kibana.alert.group.index'] == null);
+
   // NOTE: Add to second quality gate after feature is GA
   describe('@ess @serverless Alert Suppression for EQL rules', () => {
     before(async () => {
@@ -69,10 +81,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esDeleteAllIndices('.preview.alerts*');
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log, es);
+      await deleteAllAlerts(supertest, log, es, [
+        '.preview.alerts-security.alerts-*',
+        '.alerts-security.alerts-*',
+      ]);
       await deleteAllRules(supertest, log);
     });
 
@@ -1778,19 +1794,1110 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('sequence queries', () => {
-      it('logs a warning if suppression is configured', async () => {
+    describe('@skipInServerless sequence queries with suppression "per rule execution"', () => {
+      it('suppresses alerts in a given rule execution', async () => {
         const id = uuidv4();
-        await indexGeneratedSourceDocuments({
-          docsCount: 10,
-          seed: () => ({ id }),
-        });
+        const timestamp = '2020-10-28T06:50:00.000Z';
+        const laterTimestamp = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+        };
+
+        const doc2WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': laterTimestamp2,
+        };
+
+        // sequence alert 1 is made up of doc1 and doc1WithLaterTimestamp,
+        // sequence alert 2 is made up of doc1WithLaterTimestamp and doc2WithLaterTimestamp
+        // sequence alert 2 is suppressed because it shares the same
+        // host.name value as sequence alert 1
+
+        await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc2WithLaterTimestamp]);
 
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['ecs_compliant']),
           query: getSequenceQuery(id),
           alert_suppression: {
-            group_by: ['agent.name'],
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        // we expect one created alert and one suppressed alert
+        // and two building block alerts, let's confirm that
+        expect(previewAlerts.length).toEqual(3);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it('suppresses alerts when the rule is a building block type rule', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:50:00.000Z';
+        const laterTimestamp = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+        };
+
+        const doc2WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': laterTimestamp2,
+        };
+
+        // sequence alert 1 is made up of doc1 and doc1WithLaterTimestamp,
+        // sequence alert 2 is made up of doc1WithLaterTimestamp and doc2WithLaterTimestamp
+        // sequence alert 2 is suppressed because it shares the same
+        // host.name value as sequence alert 1
+
+        await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc2WithLaterTimestamp]);
+
+        const buildingBlockRuleType: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          building_block_type: 'default',
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule: buildingBlockRuleType,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        // we expect one created alert and one suppressed alert
+        // and two building block alerts, let's confirm that
+        expect(previewAlerts.length).toEqual(3);
+        const [sequenceAlert, buildingBlockAlerts] = partition(
+          previewAlerts,
+          (alert) => alert?._source?.[ALERT_SUPPRESSION_DOCS_COUNT] != null
+        );
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it('suppresses alerts in a given rule execution when a subsequent event for a sequence has the suppression field undefined', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:50:00.000Z';
+        const laterTimestamp = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+        };
+
+        const doc2WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp2,
+          host: undefined,
+        };
+
+        // sequence alert 1 will be doc1 and doc1WithLaterTimestamp
+        // sequence alert 2 will be doc1WithLaterTimestamp and doc2WithNoHost
+        // the second sequence alert will have null as the value for
+        // suppression field host.name because of logic defined in the
+        // objectPairIntersection function defined in
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
+
+        await indexListOfSourceDocuments([
+          doc1,
+          doc1WithLaterTimestamp,
+          doc2WithNoHost,
+          { ...doc2WithNoHost, '@timestamp': '2020-10-28T06:53:01.000Z' },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        // we expect two sequence alerts
+        // each sequence alert having two building block alerts
+        expect(previewAlerts.length).toEqual(6);
+        const [sequenceAlerts, buildingBlockAlerts] =
+          partitionSequenceBuildingBlocks(previewAlerts);
+        expect(buildingBlockAlerts.length).toEqual(4);
+        expect(sequenceAlerts.length).toEqual(2);
+
+        expect(sequenceAlerts[0]?._source).toEqual({
+          ...sequenceAlerts[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        });
+        expect(sequenceAlerts[1]?._source).toEqual({
+          ...sequenceAlerts[1]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: null,
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it('does not suppress alerts in a given rule execution when doNotSuppress is set and more than one sequence has the suppression field undefined', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:50:00.000Z';
+        const laterTimestamp = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const laterTimestamp3 = '2020-10-28T06:53:01.000Z';
+
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+        };
+
+        const doc2WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp2,
+          host: undefined,
+        };
+
+        const doc3WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp3,
+          host: undefined,
+        };
+
+        // this should generate three sequence alerts
+        // sequence alert 1 will be doc1 and doc1WithLaterTimestamp
+        // sequence alert 2 will be doc1WithLaterTimestamp and doc2WithNoHost
+        // sequence alert 3 will be doc2WithNoHost and doc3WithNoHost
+        // This logic is defined in objectPairIntersection
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
+        // Any sequence comprised of events where one field contains a value, followed by any number of
+        // events in the sequence where the value is null or undefined will have that field
+        // stripped from the sequence alert. So given that, we expect three alerts here
+        // The sequence comprised of [doc1, doc1WithLaterTimestamp] will have
+        // host.name and 'host-a' as the suppression values
+        // the other two sequence alerts comprised of [doc1WithLaterTimestamp, doc2WithNoHost]
+        // and [doc2WithNoHost, doc3WithNoHost] will have no suppression values set because
+        // of the logic outlined above
+        await indexListOfSourceDocuments([
+          doc1,
+          doc1WithLaterTimestamp,
+          doc2WithNoHost,
+          doc3WithNoHost,
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'doNotSuppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [TIMESTAMP],
+        });
+        // we expect one alert and one suppressed alert
+        // and two building block alerts per shell alert, let's confirm that
+        const [sequenceAlerts, buildingBlockAlerts] =
+          partitionSequenceBuildingBlocks(previewAlerts);
+        expect(buildingBlockAlerts.length).toEqual(6);
+        expect(sequenceAlerts.length).toEqual(3);
+        const [suppressedSequenceAlerts] = partition(
+          sequenceAlerts,
+          (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
+        );
+        expect(suppressedSequenceAlerts.length).toEqual(1);
+
+        expect(suppressedSequenceAlerts[0]._source).toEqual({
+          ...suppressedSequenceAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        });
+      });
+
+      it('does not suppress alerts when suppression field value is undefined for a sequence alert in a given rule execution', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:50:00.000Z';
+        const laterTimestamp = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+          host: undefined,
+        };
+
+        const doc2WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp2,
+          host: undefined,
+        };
+
+        await indexListOfSourceDocuments([doc1, doc1WithNoHost, doc2WithNoHost]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'doNotSuppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_SUPPRESSION_START], // sorting on null fields was preventing the alerts from yielding
+        });
+        // we expect one alert and two suppressed alerts
+        // and two building block alerts, let's confirm that
+        expect(previewAlerts.length).toEqual(6);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+        const [suppressedSequenceAlerts] = partition(
+          sequenceAlert,
+          (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
+        );
+        expect(buildingBlockAlerts.length).toEqual(4);
+        expect(sequenceAlert.length).toEqual(2);
+        expect(suppressedSequenceAlerts.length).toEqual(0);
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: undefined,
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: undefined,
+        });
+      });
+
+      it('suppresses alerts when suppression field value is undefined for a sequence alert in a given rule execution', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:50:00.000Z';
+        const laterTimestamp = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const laterTimestamp3 = '2020-10-28T06:53:01.000Z';
+
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+          host: undefined,
+        };
+
+        const doc2WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp2,
+          host: undefined,
+        };
+
+        const doc3WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp3,
+          host: undefined,
+        };
+
+        await indexListOfSourceDocuments([doc1, doc1WithNoHost, doc2WithNoHost, doc3WithNoHost]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        // we expect one alert and two suppressed alerts
+        // and two building block alerts, let's confirm that
+        expect(previewAlerts.length).toEqual(3);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+        const [suppressedSequenceAlerts] = partition(
+          sequenceAlert,
+          (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
+        );
+        expect(suppressedSequenceAlerts.length).toEqual(1);
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: null,
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+        });
+      });
+
+      it('does not suppress alerts when "doNotSuppress" is set and suppression field value is undefined for a sequence alert in a given rule execution', async () => {
+        // This logic should be understood within the confines of the
+        // objectPairIntersection function defined in
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
+        // Any sequence comprised of events where one field contains a value, followed by any number of
+        // events in the sequence where the value is null or undefined will have that field
+        // stripped from the sequence alert. So given that, we expect three alerts here
+        // all with the suppression value as undefined
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:50:00.000Z';
+        const laterTimestamp = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const laterTimestamp3 = '2020-10-28T06:53:01.000Z';
+
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+          host: { name: undefined },
+        };
+
+        const doc2WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp2,
+          host: { name: undefined },
+        };
+
+        const doc3WithNoHost = {
+          ...doc1,
+          '@timestamp': laterTimestamp3,
+          host: { name: undefined },
+        };
+
+        await indexListOfSourceDocuments([doc1, doc1WithNoHost, doc2WithNoHost, doc3WithNoHost]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'doNotSuppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+
+        expect(previewAlerts.length).toEqual(9);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+        const [suppressedSequenceAlerts] = partition(
+          sequenceAlert,
+          (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
+        );
+        // no alerts should be suppressed because doNotSuppress is set
+        expect(suppressedSequenceAlerts.length).toEqual(0);
+        expect(buildingBlockAlerts.length).toEqual(6);
+        // 3 sequence alerts comprised of
+        // (doc1 + doc1WithNoHost), (doc1WithNoHost + doc2WithNoHost), (doc2WithNoHost + doc3WithNoHost)
+        expect(sequenceAlert.length).toEqual(3);
+
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: undefined,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: undefined,
+        });
+      });
+
+      it('does not suppress alerts outside of the current rule execution search range', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:05:00.000Z'; // this should not count towards events
+        const laterTimestamp = '2020-10-28T06:50:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp3 = '2020-10-28T06:53:00.000Z';
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+        };
+        const doc2WithLaterTimestamp = { ...doc1WithLaterTimestamp, '@timestamp': laterTimestamp2 };
+        const doc3WithLaterTimestamp = { ...doc2WithLaterTimestamp, '@timestamp': laterTimestamp3 };
+
+        await indexListOfSourceDocuments([
+          doc1,
+          doc1WithLaterTimestamp,
+          doc2WithLaterTimestamp,
+          doc3WithLaterTimestamp,
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        // we expect one alert and two suppressed alerts
+        // and two building block alerts, let's confirm that
+        expect(previewAlerts.length).toEqual(3);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it('suppresses sequence alert with suppression value of "null" when all events have unique values for suppression field', async () => {
+        /*
+        Sequence alerts only contain values which make up the intersection of
+        a given field in all events for that sequence.
+
+        So for a sequence alert where the two events contain host name values of
+        host-a and host-b, the sequence alert will have 'null' for that value and will
+        suppress on null values if missing_fields_strategy is set to 'suppress'
+        */
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:50:00.000Z';
+        const laterTimestamp = '2020-10-28T06:50:01.000Z';
+        const laterTimestamp2 = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp3 = '2020-10-28T06:53:00.000Z';
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+          host: { name: 'host-b' },
+        };
+        const doc2WithLaterTimestamp = {
+          ...doc1WithLaterTimestamp,
+          '@timestamp': laterTimestamp2,
+          host: { name: 'host-c' },
+        };
+        const doc3WithLaterTimestamp = {
+          ...doc2WithLaterTimestamp,
+          '@timestamp': laterTimestamp3,
+          host: { name: 'host-d' },
+        };
+        await indexListOfSourceDocuments([
+          doc1,
+          doc1WithLaterTimestamp,
+          doc2WithLaterTimestamp,
+          doc3WithLaterTimestamp,
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        // we expect one alert and two suppressed alerts
+        // and two building block alerts, let's confirm that
+        expect(previewAlerts.length).toEqual(3);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: null,
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+        });
+      });
+
+      it('suppresses alerts on a field with array values', async () => {
+        const id = uuidv4();
+
+        const timestamp = '2020-10-28T06:45:00.000Z';
+        const timestamp2 = '2020-10-28T06:46:00.000Z';
+        const timestamp3 = '2020-10-28T06:47:00.000Z';
+
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: ['host-a', 'host-b'] },
+        };
+
+        await indexListOfSourceDocuments([
+          doc1,
+          { ...doc1, '@timestamp': timestamp2 },
+          { ...doc1, '@timestamp': timestamp3 },
+        ]);
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        const [sequenceAlert] = partitionSequenceBuildingBlocks(previewAlerts);
+        expect(previewAlerts.length).toEqual(3); // one sequence, two building block
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: ['host-a', 'host-b'],
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it('suppresses alerts with missing fields and multiple suppress by fields', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+        const timestamp2 = '2020-10-28T06:45:01.000Z';
+        const timestamp3 = '2020-10-28T06:45:02.000Z';
+        const timestamp4 = '2020-10-28T06:45:03.000Z';
+        const timestamp5 = '2020-10-28T06:45:04.000Z';
+        const timestamp6 = '2020-10-28T06:45:05.000Z';
+        const timestamp7 = '2020-10-28T06:45:06.000Z';
+        const timestamp8 = '2020-10-28T06:45:07.000Z';
+        const timestamp9 = '2020-10-28T06:45:08.000Z';
+        const timestamp10 = '2020-10-28T06:45:09.000Z';
+        const timestamp11 = '2020-10-28T06:45:10.000Z';
+        const timestamp12 = '2020-10-28T06:45:11.000Z';
+
+        const noMissingFieldsDoc = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+          agent: { name: 'agent-a', version: 10 },
+        };
+
+        const missingNameFieldsDoc = {
+          ...noMissingFieldsDoc,
+          agent: { version: 10 },
+        };
+
+        const missingVersionFieldsDoc = {
+          ...noMissingFieldsDoc,
+          agent: { name: 'agent-a' },
+        };
+
+        const missingAgentFieldsDoc = {
+          ...noMissingFieldsDoc,
+          agent: undefined,
+        };
+
+        // 4 alerts should be suppressed: 1 for each pair of documents
+        await indexListOfSourceDocuments([
+          noMissingFieldsDoc,
+          { ...noMissingFieldsDoc, '@timestamp': timestamp2 },
+          { ...noMissingFieldsDoc, '@timestamp': timestamp3 },
+
+          { ...missingNameFieldsDoc, '@timestamp': timestamp4 },
+          { ...missingNameFieldsDoc, '@timestamp': timestamp5 },
+          { ...missingNameFieldsDoc, '@timestamp': timestamp6 },
+
+          { ...missingVersionFieldsDoc, '@timestamp': timestamp7 },
+          { ...missingVersionFieldsDoc, '@timestamp': timestamp8 },
+          { ...missingVersionFieldsDoc, '@timestamp': timestamp9 },
+
+          { ...missingAgentFieldsDoc, '@timestamp': timestamp10 },
+          { ...missingAgentFieldsDoc, '@timestamp': timestamp11 },
+          { ...missingAgentFieldsDoc, '@timestamp': timestamp12 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['agent.name', 'agent.version'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 100,
+          sort: [ALERT_SUPPRESSION_START], // sorting on null fields was preventing the alerts from yielding
+        });
+        const [sequenceAlert] = partitionSequenceBuildingBlocks(previewAlerts);
+
+        // for sequence alerts if neither of the fields are there, we cannot suppress
+        expect(sequenceAlert.length).toEqual(4);
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: 'agent-a',
+            },
+            {
+              field: 'agent.version',
+              value: 10,
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+
+        expect(sequenceAlert[1]._source).toEqual({
+          ...sequenceAlert[1]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: null,
+            },
+            {
+              field: 'agent.version',
+              value: 10,
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+        });
+
+        expect(sequenceAlert[2]._source).toEqual({
+          ...sequenceAlert[2]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: null,
+            },
+            {
+              field: 'agent.version',
+              value: null,
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+        });
+
+        expect(sequenceAlert[3]._source).toEqual({
+          ...sequenceAlert[3]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: 'agent-a',
+            },
+            {
+              field: 'agent.version',
+              value: null,
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it('does not suppress alerts when "doNotSuppress" is set and we have alerts with missing fields and multiple suppress by fields', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+        const timestamp2 = '2020-10-28T06:45:01.000Z';
+        const timestamp3 = '2020-10-28T06:45:02.000Z';
+        const timestamp4 = '2020-10-28T06:45:03.000Z';
+        const timestamp5 = '2020-10-28T06:45:04.000Z';
+        const timestamp6 = '2020-10-28T06:45:05.000Z';
+        const timestamp7 = '2020-10-28T06:45:06.000Z';
+        const timestamp8 = '2020-10-28T06:45:07.000Z';
+        const timestamp9 = '2020-10-28T06:45:08.000Z';
+        const timestamp10 = '2020-10-28T06:45:09.000Z';
+        const timestamp11 = '2020-10-28T06:45:10.000Z';
+        const timestamp12 = '2020-10-28T06:45:11.000Z';
+
+        const noMissingFieldsDoc = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+          agent: { name: 'agent-a', version: 10 },
+        };
+
+        const missingNameFieldsDoc = {
+          ...noMissingFieldsDoc,
+          agent: { version: 10 },
+        };
+
+        const missingVersionFieldsDoc = {
+          ...noMissingFieldsDoc,
+          agent: { name: 'agent-a' },
+        };
+
+        const missingAgentFieldsDoc = {
+          ...noMissingFieldsDoc,
+          agent: undefined,
+        };
+
+        // 4 alerts should be suppressed: 1 for each pair of documents
+        await indexListOfSourceDocuments([
+          noMissingFieldsDoc,
+          { ...noMissingFieldsDoc, '@timestamp': timestamp2 },
+          { ...noMissingFieldsDoc, '@timestamp': timestamp3 },
+
+          { ...missingNameFieldsDoc, '@timestamp': timestamp4 },
+          { ...missingNameFieldsDoc, '@timestamp': timestamp5 },
+          { ...missingNameFieldsDoc, '@timestamp': timestamp6 },
+
+          { ...missingVersionFieldsDoc, '@timestamp': timestamp7 },
+          { ...missingVersionFieldsDoc, '@timestamp': timestamp8 },
+          { ...missingVersionFieldsDoc, '@timestamp': timestamp9 },
+
+          { ...missingAgentFieldsDoc, '@timestamp': timestamp10 },
+          { ...missingAgentFieldsDoc, '@timestamp': timestamp11 },
+          { ...missingAgentFieldsDoc, '@timestamp': timestamp12 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['agent.name', 'agent.version'],
+            missing_fields_strategy: 'doNotSuppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 100,
+        });
+        const [sequenceAlert] = partitionSequenceBuildingBlocks(previewAlerts);
+
+        // for sequence alerts if neither of the fields are there, we cannot suppress
+        const [suppressedSequenceAlerts] = partition(
+          sequenceAlert,
+          (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
+        );
+        expect(suppressedSequenceAlerts.length).toEqual(1);
+        expect(suppressedSequenceAlerts[0]._source).toEqual({
+          ...suppressedSequenceAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: 'agent-a',
+            },
+            {
+              field: 'agent.version',
+              value: 10,
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it('deduplicates multiple alerts while suppressing on rule interval only', async () => {
+        const id = uuidv4();
+        const firstTimestamp = '2020-10-28T05:45:00.000Z';
+        const secondTimestamp = '2020-10-28T06:10:00.000Z';
+        const secondTimestamp2 = '2020-10-28T06:10:01.000Z';
+        const secondTimestamp3 = '2020-10-28T06:10:02.000Z';
+        const secondTimestamp4 = '2020-10-28T06:10:03.000Z';
+        const secondTimestamp5 = '2020-10-28T06:10:04.000Z';
+        const secondTimestamp6 = '2020-10-28T06:10:05.000Z';
+
+        const doc1 = {
+          id,
+          '@timestamp': firstTimestamp,
+          host: { name: 'host-a' },
+        };
+
+        // 4 alert should be suppressed
+        await indexListOfSourceDocuments([
+          doc1,
+          { ...doc1, '@timestamp': secondTimestamp },
+          { ...doc1, '@timestamp': secondTimestamp2 },
+          { ...doc1, '@timestamp': secondTimestamp3 },
+          { ...doc1, '@timestamp': secondTimestamp4 },
+          { ...doc1, '@timestamp': secondTimestamp5 },
+          { ...doc1, '@timestamp': secondTimestamp6 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          // large look-back time covers all docs
+          from: 'now-50m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 2, // 2 invocations so we can see that the same sequences are not generated / suppressed again.
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['host.name', ALERT_ORIGINAL_TIME],
+        });
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 5, // if deduplication failed this would 12, or the previewAlerts count would be double
+        });
+      });
+    });
+
+    describe('@skipInServerless sequence queries with suppression duration', () => {
+      it('suppresses alerts across two rule executions when the suppression duration exceeds the rule interval', async () => {
+        const id = uuidv4();
+        const firstTimestamp = new Date(Date.now() - 1000).toISOString();
+        const firstTimestamp2 = new Date().toISOString();
+
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          host: {
+            name: 'host-a',
+          },
+        };
+        await indexListOfSourceDocuments([
+          firstDocument,
+          { ...firstDocument, '@timestamp': firstTimestamp2 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
             duration: {
               value: 300,
               unit: 'm',
@@ -1800,18 +2907,396 @@ export default ({ getService }: FtrProviderContext) => {
           from: 'now-35m',
           interval: '30m',
         };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
-        const { logs } = await previewRule({
+        expect(alerts.hits.hits.length).toEqual(3);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
+          alerts.hits.hits
+        );
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
+
+        // suppression start equal to alert timestamp
+        const suppressionStart = sequenceAlert[0]._source?.[TIMESTAMP];
+
+        expect(sequenceAlert[0]._source).toEqual(
+          expect.objectContaining({
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: 'host-a',
+              },
+            ],
+            // suppression boundaries equal to original event time, since no alert been suppressed
+            [ALERT_SUPPRESSION_START]: suppressionStart,
+            [ALERT_SUPPRESSION_END]: suppressionStart,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+          })
+        );
+
+        // index an event that happened 1 second before the next event in the sequence
+        const secondTimestamp = new Date(Date.now() - 1000).toISOString();
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          host: {
+            name: 'host-a',
+          },
+        };
+
+        // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
+        // trigger an update to the existing alert without changing the timestamp
+        await indexListOfSourceDocuments([secondDocument]);
+        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+        const afterTimestamp = new Date();
+        const secondAlerts = await getOpenAlerts(
           supertest,
-          rule,
-          invocationCount: 1,
+          log,
+          es,
+          createdRule,
+          RuleExecutionStatusEnum.succeeded,
+          undefined,
+          afterTimestamp
+        );
+
+        const [sequenceAlert2] = partitionSequenceBuildingBlocks(secondAlerts.hits.hits);
+
+        expect(sequenceAlert2.length).toEqual(1);
+        expect(sequenceAlert2[0]._source).toEqual({
+          ...sequenceAlert2[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // 1 alert from second rule run, that's why 1 suppressed
+        });
+        // suppression end value should be greater than second document timestamp, but lesser than current time
+        const suppressionEnd = new Date(
+          sequenceAlert2[0]._source?.[ALERT_SUPPRESSION_END] as string
+        ).getTime();
+        expect(suppressionEnd).toBeLessThan(new Date().getTime());
+        expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
+      });
+
+      // Skipped here: https://github.com/elastic/kibana/issues/202945
+      it.skip('does not suppress alerts outside of duration', async () => {
+        const id = uuidv4();
+        // this timestamp is 1 minute in the past
+        const firstTimestamp = new Date(Date.now() - 5000).toISOString();
+        const firstTimestamp2 = new Date(Date.now() - 5500).toISOString();
+
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          host: {
+            name: 'host-a',
+          },
+        };
+        await indexListOfSourceDocuments([
+          firstDocument,
+          { ...firstDocument, '@timestamp': firstTimestamp2 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 7,
+              unit: 's',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-10s',
+          interval: '5s',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(3);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
+          alerts.hits.hits
+        );
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
 
-        const [{ warnings }] = logs;
+        const secondTimestamp = new Date(Date.now() - 1000).toISOString();
+        const secondTimestamp2 = new Date(Date.now()).toISOString();
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          host: {
+            name: 'host-a',
+          },
+        };
 
-        expect(warnings).toContain(
-          'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
+        // Add a new document, then disable and re-enable to trigger another rule run.
+        // the second rule run should generate a new alert
+        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+
+        await indexListOfSourceDocuments([
+          secondDocument,
+          { ...secondDocument, '@timestamp': secondTimestamp2 },
+        ]);
+        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+        const afterTimestamp = new Date(Date.now() + 5000);
+        const secondAlerts = await getOpenAlerts(
+          supertest,
+          log,
+          es,
+          createdRule,
+          RuleExecutionStatusEnum.succeeded,
+          undefined,
+          afterTimestamp
         );
+
+        const [sequenceAlert2] = partitionSequenceBuildingBlocks(secondAlerts.hits.hits);
+
+        expect(sequenceAlert2.length).toEqual(2);
+        expect(sequenceAlert2[0]._source).toEqual({
+          ...sequenceAlert2[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // 1 alert from second rule run, that's why 1 suppressed
+        });
+        expect(sequenceAlert2[1]._source).toEqual({
+          ...sequenceAlert2[1]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // 1 alert from second rule run, that's why 1 suppressed
+        });
+      });
+
+      it('suppresses alerts when query has 3 sequences', async () => {
+        // the first sequence alert is comprised of events [timestamp1, ...2, ...3]
+        // the other suppressed alerts will be made up of the following sequences
+        // [timestamp2, timestamp3, timestamp4]
+        // [timestamp3, timestamp4, timestamp5]
+        // [timestamp4, timestamp5, timestamp6]
+        const id = uuidv4();
+        const dateNow = Date.now();
+        const timestamp1 = new Date(dateNow - 5000).toISOString();
+        const timestamp2 = new Date(dateNow - 5500).toISOString();
+        const timestamp3 = new Date(dateNow - 5800).toISOString();
+        const timestamp4 = new Date(dateNow - 6000).toISOString();
+        const timestamp5 = new Date(dateNow - 6100).toISOString();
+        const timestamp6 = new Date(dateNow - 6200).toISOString();
+
+        const firstSequenceEvent = {
+          id,
+          '@timestamp': timestamp1,
+          host: {
+            name: 'host-a',
+          },
+        };
+        await indexListOfSourceDocuments([
+          firstSequenceEvent,
+          { ...firstSequenceEvent, '@timestamp': timestamp2 },
+          { ...firstSequenceEvent, '@timestamp': timestamp3 },
+        ]);
+
+        const secondSequenceEvent = {
+          id,
+          '@timestamp': timestamp4,
+          host: {
+            name: 'host-a',
+          },
+        };
+
+        await indexListOfSourceDocuments([
+          secondSequenceEvent,
+          { ...secondSequenceEvent, '@timestamp': timestamp5 },
+          { ...secondSequenceEvent, '@timestamp': timestamp6 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: `sequence [any where id == "${id}"] [any where id == "${id}"] [any where id == "${id}"]`,
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 10,
+              unit: 's',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-30s',
+          interval: '10s',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+        // we expect one shell alert
+        // and three building block alerts
+        expect(alerts.hits.hits.length).toEqual(4);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
+          alerts.hits.hits
+        );
+        expect(buildingBlockAlerts.length).toEqual(3);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+        });
+      });
+
+      // Skipped here: https://github.com/elastic/kibana/issues/202945
+      it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+        const id = uuidv4();
+        const dateNow = Date.now();
+        const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
+        const timestampSequenceEvent2 = new Date(dateNow - 5500).toISOString();
+        const timestampSequenceEvent3 = new Date(dateNow - 5800).toISOString();
+
+        const firstSequenceEvent = {
+          id,
+          '@timestamp': timestampSequenceEvent1,
+          host: {
+            name: 'host-a',
+          },
+        };
+        await indexListOfSourceDocuments([
+          firstSequenceEvent,
+          { ...firstSequenceEvent, '@timestamp': timestampSequenceEvent2 },
+          { ...firstSequenceEvent, '@timestamp': timestampSequenceEvent3 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: `sequence [any where id == "${id}"] [any where id == "${id}"] [any where id == "${id}"]`,
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 7,
+              unit: 's',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-10s',
+          interval: '5s',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+        // we expect one shell alert
+        // and three building block alerts
+        expect(alerts.hits.hits.length).toEqual(4);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
+          alerts.hits.hits
+        );
+        expect(buildingBlockAlerts.length).toEqual(3);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        });
+
+        const dateNow2 = Date.now();
+        const secondTimestampEventSequence = new Date(dateNow2 - 2000).toISOString();
+        const secondTimestampEventSequence2 = new Date(dateNow2 - 1000).toISOString();
+        const secondTimestampEventSequence3 = new Date(dateNow2).toISOString();
+
+        const secondSequenceEvent = {
+          id,
+          '@timestamp': secondTimestampEventSequence,
+          host: {
+            name: 'host-a',
+          },
+        };
+
+        // Add a new document, then disable and re-enable to trigger another rule run.
+        // the second rule run should generate a new alert
+        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+
+        await indexListOfSourceDocuments([
+          secondSequenceEvent,
+          { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence2 },
+          { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence3 },
+        ]);
+        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+        const afterTimestamp2 = new Date(dateNow2 + 55000);
+        const secondAlerts = await getOpenAlerts(
+          supertest,
+          log,
+          es,
+          createdRule,
+          RuleExecutionStatusEnum.succeeded,
+          undefined,
+          afterTimestamp2
+        );
+
+        const [sequenceAlert2, buildingBlockAlerts2] = partitionSequenceBuildingBlocks(
+          secondAlerts.hits.hits
+        );
+
+        // two sequence alerts because the second one happened
+        // outside of the rule's suppression duration
+        expect(sequenceAlert2.length).toEqual(2);
+        expect(buildingBlockAlerts2.length).toEqual(6);
+        // timestamps should be different for two alerts, showing they were
+        // created in different rule executions
+        expect(sequenceAlert2[0]?._source?.[TIMESTAMP]).not.toEqual(
+          sequenceAlert2[1]?._source?.[TIMESTAMP]
+        );
+
+        expect(sequenceAlert2[0]._source).toEqual({
+          ...sequenceAlert2[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // only one alert created, so zero documents are suppressed
+        });
+        expect(sequenceAlert2[1]._source).toEqual({
+          ...sequenceAlert2[1]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // only one alert created, so zero documents are suppressed
+        });
       });
     });
   });
