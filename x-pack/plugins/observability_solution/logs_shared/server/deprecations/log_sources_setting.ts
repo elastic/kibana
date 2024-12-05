@@ -61,7 +61,7 @@ export const getLogSourcesSettingDeprecationInfoForSpaceFactory = ({
           title: i18n.translate(
             'xpack.logsShared.deprecations.migrateLogViewSettingsToLogSourcesSetting.title',
             {
-              defaultMessage: 'Log sources setting in space "{spaceId}"',
+              defaultMessage: 'Log sources setting in the space "{spaceId}"',
               values: { spaceId },
             }
           ),
@@ -71,7 +71,7 @@ export const getLogSourcesSettingDeprecationInfoForSpaceFactory = ({
             'xpack.logsShared.deprecations.migrateLogViewSettingsToLogSourcesSetting.message',
             {
               defaultMessage:
-                'Indices and Data view options previously provided via the Logs UI settings page are now deprecated. Please migrate to using the Kibana log sources advanced setting in space "{spaceId}".',
+                'Indices and Data view options previously provided via the Logs UI settings page are now deprecated. Please migrate to using the Kibana log sources advanced setting in the space "{spaceId}".',
               values: { spaceId },
             }
           ),
@@ -81,7 +81,7 @@ export const getLogSourcesSettingDeprecationInfoForSpaceFactory = ({
                 'xpack.logsShared.deprecations.migrateLogViewSettingsToLogSourcesSetting.message.manualStepMessage',
                 {
                   defaultMessage:
-                    'In space "{spaceId}" update the Log sources Kibana advanced setting (via Management > Advanced Settings) to match the setting previously provided via the Logs UI settings page. Then via the Logs UI settings page use the Kibana log sources advanced setting option.',
+                    'While in the space "{spaceId}" update the Log sources Kibana advanced setting (via Management > Advanced Settings) to match the setting previously provided via the Logs UI settings page. Then via the Logs UI settings page use the Kibana log sources advanced setting option.',
                   values: { spaceId },
                 }
               ),
