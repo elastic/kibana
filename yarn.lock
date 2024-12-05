@@ -6276,7 +6276,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-cancellable-search@link:x-pack/packages/ml/cancellable_search":
+"@kbn/ml-cancellable-search@link:x-pack/platform/packages/private/ml/cancellable_search":
   version "0.0.0"
   uid ""
 
