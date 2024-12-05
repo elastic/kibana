@@ -28,7 +28,7 @@ export const usePostObservable = (caseId: string) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
       onSuccess: () => {
-        refreshCases();
+        refreshCaseViewPage();
       },
     }
   );
