@@ -4176,7 +4176,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture/public":
+"@kbn/cloud-security-posture@link:x-pack/solutions/security/packages/kbn-cloud-security-posture/public":
   version "0.0.0"
   uid ""
 
