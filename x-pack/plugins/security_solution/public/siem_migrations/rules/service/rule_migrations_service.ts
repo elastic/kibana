@@ -12,7 +12,7 @@ import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/cons
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
-import { getRuleMigrationsStatsAll, startRuleMigration } from '../api/api';
+import { getRuleMigrationsStatsAll, startRuleMigration } from '../api';
 import type { RuleMigrationTask } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
