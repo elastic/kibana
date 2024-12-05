@@ -51,7 +51,7 @@ export interface GetProfilesOptions {
   record?: DataTableRecord;
 }
 
-export enum ContextProfileLevel {
+export enum ContextualProfileLevel {
   rootLevel = 'rootLevel',
   dataSourceLevel = 'dataSourceLevel',
   documentLevel = 'documentLevel',
@@ -110,7 +110,7 @@ export class ProfilesManager {
     try {
       context = await this.rootProfileService.resolve(params);
     } catch (e) {
-      logResolutionError(ContextProfileLevel.rootLevel, serializedParams, e);
+      logResolutionError(ContextualProfileLevel.rootLevel, serializedParams, e);
     }
 
     if (abortController.signal.aborted) {
@@ -148,7 +148,7 @@ export class ProfilesManager {
         rootContext: this.rootContext$.getValue(),
       });
     } catch (e) {
-      logResolutionError(ContextProfileLevel.dataSourceLevel, serializedParams, e);
+      logResolutionError(ContextualProfileLevel.dataSourceLevel, serializedParams, e);
     }
 
     if (abortController.signal.aborted) {
@@ -186,7 +186,7 @@ export class ProfilesManager {
             });
           } catch (e) {
             logResolutionError(
-              ContextProfileLevel.documentLevel,
+              ContextualProfileLevel.documentLevel,
               { recordId: params.record.id },
               e
             );
@@ -194,8 +194,8 @@ export class ProfilesManager {
           }
         }
 
-        this.ebtManager.trackContextProfileResolvedEvent({
-          profileLevel: ContextProfileLevel.documentLevel,
+        this.ebtManager.trackContextualProfileResolvedEvent({
+          profileLevel: ContextualProfileLevel.documentLevel,
           profileId: context.profileId,
         });
 
@@ -239,12 +239,12 @@ export class ProfilesManager {
     const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
 
     this.ebtManager.updateProfilesContextWith(dscProfiles);
-    this.ebtManager.trackContextProfileResolvedEvent({
-      profileLevel: ContextProfileLevel.rootLevel,
+    this.ebtManager.trackContextualProfileResolvedEvent({
+      profileLevel: ContextualProfileLevel.rootLevel,
       profileId: rootContextProfileId,
     });
-    this.ebtManager.trackContextProfileResolvedEvent({
-      profileLevel: ContextProfileLevel.dataSourceLevel,
+    this.ebtManager.trackContextualProfileResolvedEvent({
+      profileLevel: ContextualProfileLevel.dataSourceLevel,
       profileId: dataSourceContextProfileId,
     });
   }
@@ -280,7 +280,7 @@ const recordHasContext = (
 };
 
 const logResolutionError = <TParams, TError>(
-  profileLevel: ContextProfileLevel,
+  profileLevel: ContextualProfileLevel,
   params: TParams,
   error: TError
 ) => {

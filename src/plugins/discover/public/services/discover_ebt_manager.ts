@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { ContextProfileLevel } from '../context_awareness/profiles_manager';
+import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 
 /**
  * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
@@ -43,7 +43,7 @@ const CONTEXT_PROFILE_LEVEL = 'profileLevel';
 const CONTEXT_PROFILE_ID = 'profileId';
 
 interface ContextProfileResolvedEventData {
-  [CONTEXT_PROFILE_LEVEL]: ContextProfileLevel;
+  [CONTEXT_PROFILE_LEVEL]: ContextualProfileLevel;
   [CONTEXT_PROFILE_ID]: string;
 }
 
@@ -57,16 +57,16 @@ export class DiscoverEBTManager {
   private customContext$: DiscoverEBTContext | undefined;
   private reportEvent: CoreSetup['analytics']['reportEvent'] | undefined;
   private lastResolvedContextProfiles: {
-    [ContextProfileLevel.rootLevel]: string | undefined;
-    [ContextProfileLevel.dataSourceLevel]: string | undefined;
-    [ContextProfileLevel.documentLevel]: string | undefined;
+    [ContextualProfileLevel.rootLevel]: string | undefined;
+    [ContextualProfileLevel.dataSourceLevel]: string | undefined;
+    [ContextualProfileLevel.documentLevel]: string | undefined;
   };
 
   constructor() {
     this.lastResolvedContextProfiles = {
-      [ContextProfileLevel.rootLevel]: undefined,
-      [ContextProfileLevel.dataSourceLevel]: undefined,
-      [ContextProfileLevel.documentLevel]: undefined,
+      [ContextualProfileLevel.rootLevel]: undefined,
+      [ContextualProfileLevel.dataSourceLevel]: undefined,
+      [ContextualProfileLevel.documentLevel]: undefined,
     };
   }
 
@@ -263,11 +263,11 @@ export class DiscoverEBTManager {
     });
   }
 
-  public trackContextProfileResolvedEvent({
+  public trackContextualProfileResolvedEvent({
     profileLevel,
     profileId,
   }: {
-    profileLevel: ContextProfileLevel;
+    profileLevel: ContextualProfileLevel;
     profileId: string;
   }) {
     if (!this.reportEvent) {
