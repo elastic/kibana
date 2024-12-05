@@ -626,6 +626,7 @@ src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 src/platform/packages/shared/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
+src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_heatmap @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_legacy_metric @elastic/kibana-visualizations
@@ -698,7 +699,6 @@ src/plugins/ui_actions @elastic/appex-sharedux
 src/plugins/ui_actions_enhanced @elastic/appex-sharedux
 src/plugins/unified_doc_viewer @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
-src/plugins/url_forwarding @elastic/kibana-visualizations
 src/plugins/usage_collection @elastic/kibana-core
 src/plugins/vis_default_editor @elastic/kibana-visualizations
 src/plugins/vis_type_markdown @elastic/kibana-presentation
