@@ -205,6 +205,11 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
     },
     [mutate, allConnectors]
   );
+  const selectedOptions = useMemo(() => {
+    return initialOptions.find((option) => option.value?.serviceType === connector.service_type)
+      ? [initialOptions.find((option) => option.value?.serviceType === connector.service_type)]
+      : [];
+  }, [initialOptions, connector.service_type]);
 
   return (
     <EuiFormRow
@@ -240,9 +245,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           { defaultMessage: 'Choose a data source' }
         )}
         options={initialOptions}
-        selectedOptions={initialOptions
-          .filter((option) => option.value?.serviceType === connector.service_type)
-          .slice(0, 1)}
+        selectedOptions={selectedOptions}
         onChange={onSelectedOptionChange}
         renderOption={renderOption}
         rowHeight={(euiTheme.base / 2) * 5}
