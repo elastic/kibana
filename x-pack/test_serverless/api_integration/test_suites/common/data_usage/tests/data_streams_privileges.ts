@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('privileges with custom roles', function () {
     // custom role testing is not supported in MKI
     // the metering api which this route calls requires one of: monitor,view_index_metadata,manage,all
-    this.tags(['skipMKI']);
+    this.tags(['skipSvlOblt', 'skipMKI']);
     before(async () => {
       await svlDatastreamsHelpers.createDataStream(testDataStreamName);
       await svlDatastreamsHelpers.createDataStream(otherTestDataStreamName);
