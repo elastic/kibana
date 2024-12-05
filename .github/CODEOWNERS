@@ -2148,6 +2148,7 @@ x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elasti
 /x-pack/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
+/x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
