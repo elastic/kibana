@@ -19,7 +19,7 @@ import { getCreateConversationSchemaMock } from '../server/__mocks__/conversatio
 
 /**
  * Developer script for creating conversations.
- * node x-pack/plugins/elastic_assistant/scripts/create_conversations
+ * node x-pack/solutions/security/plugins/elastic_assistant/scripts/create_conversations
  */
 export const create = async () => {
   const logger = new ToolingLog({

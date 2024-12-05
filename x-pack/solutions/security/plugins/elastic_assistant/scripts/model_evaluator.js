@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('../../../../src/setup_node_env');
+require('../../../../../../src/setup_node_env');
 require('./model_evaluator_script').evaluateModels();

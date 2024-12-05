@@ -5420,7 +5420,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/elastic-assistant-plugin@link:x-pack/plugins/elastic_assistant":
+"@kbn/elastic-assistant-plugin@link:x-pack/solutions/security/plugins/elastic_assistant":
   version "0.0.0"
   uid ""
 

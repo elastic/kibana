@@ -2,7 +2,7 @@
 
 This package provides common code consumed in both the browser, i.e. the
 `platform/packages/shared/kbn-elastic-assistant` package and `plugins/security_solution` plugin, and on the server, i.e. the
-`plugins/elastic_assistant` plugin.
+`solutions/security/plugins/elastic_assistant` plugin.
 
 For example, the data anonymization functions exported by this package
 are be used in both the browser, and on the server.
