@@ -20,6 +20,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { ModelService } from '../model_management/models_provider';
 import { modelsProvider } from '../model_management';
@@ -38,7 +39,6 @@ import {
   isTransformLinkReturnType,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
-import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
@@ -51,7 +51,12 @@ export class AnalyticsManager {
     private readonly _enabledFeatures: MlFeatures,
     cloud: CloudSetup
   ) {
-    this._modelsProvider = modelsProvider(this._client, this._mlClient, cloud);
+    this._modelsProvider = modelsProvider(
+      this._client,
+      this._mlClient,
+      cloud,
+      this._enabledFeatures
+    );
   }
 
   private async initData() {
