@@ -110,6 +110,8 @@ export const initializeSearchEmbeddableApi = async (
     searchSource.getField('query')
   );
 
+  const canEditUnifiedSearch = () => false;
+
   /** This is the state that has to be fetched */
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
@@ -189,6 +191,7 @@ export const initializeSearchEmbeddableApi = async (
       setFilters,
       query$,
       setQuery,
+      canEditUnifiedSearch,
     },
     stateManager,
     comparators: {
