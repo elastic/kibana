@@ -145,12 +145,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
       if (conn.isBeta) {
         _append.push(
           <EuiBadge aria-label={BETA_LABEL} key={key + '-beta'} iconType={'beta'} color="hollow">
-            {i18n.translate(
-              'xpack.serverlessSearch.connectors.chooseConnectorSelectable.BetaBadgeLabel',
-              {
-                defaultMessage: 'Beta',
-              }
-            )}
+            {BETA_LABEL}
           </EuiBadge>
         );
         _ariaLabelAppend += `, ${BETA_LABEL}`;
