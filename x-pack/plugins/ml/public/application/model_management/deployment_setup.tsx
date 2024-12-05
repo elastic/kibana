@@ -42,9 +42,11 @@ import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { dictionaryValidator } from '@kbn/ml-validators';
 import type { NLPSettings } from '../../../common/constants/app';
-import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
+import type {
+  NLPModelItem,
+  TrainedModelDeploymentStatsResponse,
+} from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
-import type { ModelItem } from './models_list';
 import type { MlStartTrainedModelDeploymentRequestNew } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
 
@@ -645,7 +647,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 };
 
 interface StartDeploymentModalProps {
-  model: ModelItem;
+  model: NLPModelItem;
   startModelDeploymentDocUrl: string;
   onConfigChange: (config: DeploymentParamsUI) => void;
   onClose: () => void;
@@ -845,7 +847,7 @@ export const getUserInputModelDeploymentParamsProvider =
     nlpSettings: NLPSettings
   ) =>
   (
-    model: ModelItem,
+    model: NLPModelItem,
     initialParams?: TrainedModelDeploymentStatsResponse,
     deploymentIds?: string[]
   ): Promise<MlStartTrainedModelDeploymentRequestNew | void> => {
