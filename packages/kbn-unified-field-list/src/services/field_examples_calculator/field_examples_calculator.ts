@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Adapted from src/plugins/discover/public/application/main/components/sidebar/lib/field_calculator.js
+// Adapted from src/platform/plugins/shared/discover/public/application/main/components/sidebar/lib/field_calculator.js
 
 import { map, sortBy, defaults, isObject, pick } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
