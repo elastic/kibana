@@ -174,9 +174,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     pageSize: 0,
     pageIndex: 0,
   });
-  const license = useLicense();
-
-  const canShowObservableTabs = license.isAtLeastPlatinum();
+  const { observablesAuthorized: canShowObservableTabs } = useCasesFeatures();
 
   const tabs = useMemo(
     () => [
