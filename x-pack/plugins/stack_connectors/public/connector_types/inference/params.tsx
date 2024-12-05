@@ -28,10 +28,7 @@ const InferenceServiceParamsFields: React.FunctionComponent<
 > = ({ actionParams, editAction, index, errors, actionConnector }) => {
   const { subAction, subActionParams } = actionParams;
 
-  const { taskType } = (actionConnector as unknown as InferenceActionConnector)?.config ?? {
-    // apparently preconfig connectors do not have access to config?
-    taskType: SUB_ACTION.COMPLETION,
-  };
+  const { taskType } = (actionConnector as unknown as InferenceActionConnector).config;
 
   useEffect(() => {
     if (!subAction) {
