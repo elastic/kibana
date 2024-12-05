@@ -41,7 +41,10 @@ interface TestExternalProvidersProps {
 window.scrollTo = jest.fn();
 
 /** A utility for wrapping children in the providers required to run tests */
-const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ children, navControls = chromeServiceMock.createStartContract().navControls,  }) => {
+const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({
+  children,
+  navControls = chromeServiceMock.createStartContract().navControls,
+}) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
