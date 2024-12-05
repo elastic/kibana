@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent, MutableRefObject } from 'react';
+import type { FunctionComponent } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
