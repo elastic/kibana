@@ -495,7 +495,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 It was removed, but the plugin was left behind to register no longer used config keys.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
 
 
