@@ -27,7 +27,8 @@
  * THE SOFTWARE.
  */
 
-import { monaco as monacoEditor, monaco } from '@kbn/monaco';
+import { monaco as monacoEditor, monaco, defaultThemesResolvers } from '@kbn/monaco';
+import { useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
@@ -131,6 +132,7 @@ export function MonacoEditor({
   className,
 }: MonacoEditorProps) {
   const containerElement = useRef<HTMLDivElement | null>(null);
+  const euiTheme = useEuiTheme();
 
   const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
@@ -171,6 +173,23 @@ export function MonacoEditor({
   const handleEditorWillUnmount = () => {
     editorWillUnmount?.(editor.current!, monaco);
   };
+
+  useEffect(() => {
+    // register default theme code editor theme
+    Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
+      monaco.editor.defineTheme(themeId, themeResolver(euiTheme));
+    });
+
+    // register theme configurations for supported languages
+    monaco.languages.getLanguages().forEach(({ id: languageId }) => {
+      let languageThemeDefinition;
+      if (
+        Boolean((languageThemeDefinition = monaco.editor.getLanguageThemeDefinition(languageId)))
+      ) {
+        monaco.editor.defineTheme(languageId, languageThemeDefinition(euiTheme));
+      }
+    });
+  }, [euiTheme]);
 
   const initMonaco = () => {
     const finalValue = value !== null ? value : defaultValue;
