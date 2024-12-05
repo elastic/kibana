@@ -21,19 +21,19 @@ const RiskBadge = styled.div<{
 }>`
   ${({ theme, $severity, $hideBackgroundColor }) => css`
     width: fit-content;
-    padding-right: ${theme.size.xs};
-    padding-left: ${theme.size.xs};
+    padding-right: ${theme.eui.euiSizeXS};
+    padding-left: ${theme.eui.euiSizeXS};
 
     ${($severity === 'Critical' || $severity === 'High') &&
     !$hideBackgroundColor &&
     css`
-      background-color: ${theme.colors.backgroundLightDanger};
+      background-color: ${theme.eui.euiColorDanger};
       border-radius: 999px; // pill shaped
     `};
   `}
 `;
 const TooltipContainer = styled.div`
-  padding: ${({ theme }) => theme.size.s};
+  padding: ${({ theme }) => theme.euiSizeS};
 `;
 
 export const RiskScoreLevel: React.FC<{
