@@ -9,10 +9,12 @@
 
 import React, { useCallback, useEffect, useMemo, useState, type FC } from 'react';
 
-import { EuiDataGrid, EuiPanel } from '@elastic/eui';
+import { EuiDataGrid, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 import { useFetchESQL } from '../hooks/use_fetch_esql';
+
+import { EsqlPopover } from './esql_popover';
 
 export const Logs: FC = () => {
   const state = useEventBusExampleState();
@@ -28,8 +30,8 @@ export const Logs: FC = () => {
       els.splice(1, 0, `WHERE ${filter}`);
     });
 
-    els.push('LIMIT 100');
     els.push(`KEEP ${selectedFields.join(',')}`);
+    els.push('LIMIT 100');
 
     return els.join('\n| ');
   }, [crossfilter, esql, selectedFields]);
@@ -58,7 +60,7 @@ export const Logs: FC = () => {
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
   useEffect(() => {
-    setVisibleColumns(columns.map(({ id }) => id));
+    setVisibleColumns(['message']);
   }, [columns]);
 
   const setPageIndex = useCallback(
@@ -72,7 +74,9 @@ export const Logs: FC = () => {
   );
 
   return (
-    <EuiPanel paddingSize="s" hasBorder css={{ width: '100%' }}>
+    <EuiPanel paddingSize="s" hasBorder css={{ width: '100%', position: 'relative' }}>
+      {esqlWithFilters !== null && <EsqlPopover esql={esqlWithFilters} />}
+      <EuiSpacer size="s" />
       <EuiDataGrid
         aria-label="Container constrained data grid demo"
         columns={columns}
