@@ -506,9 +506,7 @@ const fetchComparisonDriftedData = async ({
   );
 
   fieldsWithNoOverlap.forEach((field) => {
-    // @ts-expect-error upgrade typescript v4.9.5
-    if (driftedResp.aggregations) {
-      // @ts-expect-error upgrade typescript v4.9.5
+    if (driftedResp?.aggregations) {
       driftedResp.aggregations[`${field}_ks_test`] = {
         // Setting -Infinity to represent astronomically small number
         // which would be represented as < 0.000001 in table
