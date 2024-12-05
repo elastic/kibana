@@ -689,7 +689,7 @@
     "@kbn/newsfeed-plugin": "link:src/plugins/newsfeed",
     "@kbn/newsfeed-test-plugin": "link:test/common/plugins/newsfeed",
     "@kbn/no-data-page-plugin": "link:src/platform/plugins/private/no_data_page",
-    "@kbn/notifications-plugin": "link:x-pack/plugins/notifications",
+    "@kbn/notifications-plugin": "link:x-pack/platform/plugins/shared/notifications",
     "@kbn/object-versioning": "link:packages/kbn-object-versioning",
     "@kbn/object-versioning-utils": "link:packages/kbn-object-versioning-utils",
     "@kbn/observability-ai-assistant-app-plugin": "link:x-pack/plugins/observability_solution/observability_ai_assistant_app",
