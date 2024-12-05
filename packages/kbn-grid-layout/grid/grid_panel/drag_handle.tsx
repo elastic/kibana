@@ -20,7 +20,7 @@ export const DragHandle = ({
 }: {
   interactionStart: (
     type: PanelInteractionEvent['type'] | 'drop',
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
