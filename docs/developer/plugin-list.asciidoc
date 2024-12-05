@@ -290,7 +290,7 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).
 
 
-|{kib-repo}blob/{branch}/src/plugins/saved_objects/README.md[savedObjects]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/saved_objects/README.md[savedObjects]
 |NOTE: This plugin is deprecated and will be removed in 8.0. See https://github.com/elastic/kibana/issues/46435 for more information.
 
 

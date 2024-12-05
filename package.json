@@ -783,7 +783,7 @@
     "@kbn/saved-objects-hidden-from-http-apis-type-plugin": "link:test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type",
     "@kbn/saved-objects-hidden-type-plugin": "link:test/plugin_functional/plugins/saved_objects_hidden_type",
     "@kbn/saved-objects-management-plugin": "link:src/plugins/saved_objects_management",
-    "@kbn/saved-objects-plugin": "link:src/plugins/saved_objects",
+    "@kbn/saved-objects-plugin": "link:src/platform/plugins/shared/saved_objects",
     "@kbn/saved-objects-settings": "link:packages/kbn-saved-objects-settings",
     "@kbn/saved-objects-tagging-oss-plugin": "link:src/plugins/saved_objects_tagging_oss",
     "@kbn/saved-objects-tagging-plugin": "link:x-pack/plugins/saved_objects_tagging",
