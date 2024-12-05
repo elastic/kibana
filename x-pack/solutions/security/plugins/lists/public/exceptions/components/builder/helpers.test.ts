@@ -1669,7 +1669,7 @@ describe('Exception builder helpers', () => {
   });
 
   describe('#filterExceptionItems', () => {
-    // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+    // Please see `x-pack/solutions/security/plugins/lists/public/exceptions/transforms.ts` doc notes
     // for context around the temporary `id`
     test('it correctly validates entries that include a temporary `id`', () => {
       const output: ExceptionsBuilderReturnExceptionItem[] = filterExceptionItems([
