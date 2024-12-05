@@ -142,7 +142,7 @@ const useFeatureFlagTabs = () => {
   };
 };
 
-const useLogsOnlyTabs = () => {
+const useMetricsTabs = () => {
   const { asset } = useAssetDetailsRenderPropsContext();
   const { dataStreams } = useEntitySummary({
     entityType: asset.type,
@@ -166,7 +166,7 @@ const useLogsOnlyTabs = () => {
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
   const { isTabEnabled } = useFeatureFlagTabs();
-  const { hasMetricsTab } = useLogsOnlyTabs();
+  const { hasMetricsTab } = useMetricsTabs();
 
   const onTabClick = useCallback(
     (tabId: TabIds) => {

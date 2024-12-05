@@ -17,7 +17,7 @@ const LOG_ERROR_RATE = i18n.translate('xpack.infra.assetDetails.charts.logErrorR
   defaultMessage: 'Log Error Rate',
 });
 
-export const logMetric: LensConfig & { id: string } = {
+const logMetric: LensConfig & { id: string } = {
   id: 'logMetric',
   chartType: 'metric',
   title: LOG_RATE,
@@ -29,7 +29,7 @@ export const logMetric: LensConfig & { id: string } = {
   normalizeByUnit: 's',
 };
 
-export const logErrorMetric: LensConfig & { id: string } = {
+const logErrorMetric: LensConfig & { id: string } = {
   id: 'logErrorMetric',
   chartType: 'metric',
   title: LOG_ERROR_RATE,
