@@ -468,7 +468,6 @@ packages/kbn-saved-objects-settings @elastic/appex-sharedux
 packages/kbn-saved-search-component @elastic/obs-ux-logs-team
 packages/kbn-scout @elastic/appex-qa
 packages/kbn-screenshotting-server @elastic/appex-sharedux
-packages/kbn-search-api-keys-components @elastic/search-kibana
 packages/kbn-search-api-keys-server @elastic/search-kibana
 packages/kbn-search-api-panels @elastic/search-kibana
 packages/kbn-search-connectors @elastic/search-kibana
@@ -993,6 +992,7 @@ x-pack/plugins/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
+x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/test
 x-pack/test_serverless
