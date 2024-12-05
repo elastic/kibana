@@ -76,6 +76,7 @@ describe('test fetchAll', () => {
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
         resetDefaultProfileState: {
+          resetId: 'test',
           columns: false,
           rowHeight: false,
           breakdownField: false,
@@ -269,6 +270,7 @@ describe('test fetchAll', () => {
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
         resetDefaultProfileState: {
+          resetId: 'test',
           columns: false,
           rowHeight: false,
           breakdownField: false,
@@ -392,6 +394,7 @@ describe('test fetchAll', () => {
           customFilters: [],
           overriddenVisContextAfterInvalidation: undefined,
           resetDefaultProfileState: {
+            resetId: 'test',
             columns: false,
             rowHeight: false,
             breakdownField: false,

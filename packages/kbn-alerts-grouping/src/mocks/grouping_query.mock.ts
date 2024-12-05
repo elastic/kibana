@@ -11,12 +11,12 @@ export const getQuery = ({
   selectedGroup,
   uniqueValue,
   timeRange,
-  featureIds,
+  ruleTypeIds,
 }: {
   selectedGroup: string;
   uniqueValue: string;
   timeRange: { from: string; to: string };
-  featureIds: string[];
+  ruleTypeIds: string[];
 }) => ({
   _source: false,
   aggs: {
@@ -52,7 +52,7 @@ export const getQuery = ({
       },
     },
   },
-  feature_ids: featureIds,
+  rule_type_ids: ruleTypeIds,
   query: {
     bool: {
       filter: [

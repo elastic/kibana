@@ -252,11 +252,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'muteAll',
-                  'test.restricted-noop',
-                  'alertsRestrictedFixture'
-                ),
+                message: getUnauthorizedErrorMessage('muteAll', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;

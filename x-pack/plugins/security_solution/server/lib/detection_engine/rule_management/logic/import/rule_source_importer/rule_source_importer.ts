@@ -143,6 +143,8 @@ export class RuleSourceImporter implements IRuleSourceImporter {
       rule,
       prebuiltRuleAssetsByRuleId: this.matchingAssetsByRuleId,
       isKnownPrebuiltRule: this.availableRuleAssetIds.has(rule.rule_id),
+      isRuleCustomizationEnabled:
+        this.config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
     });
   }
 

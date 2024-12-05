@@ -244,12 +244,15 @@ describe('findBackfill()', () => {
   test('should successfully find backfill with no filter', async () => {
     const result = await rulesClient.findBackfill({ page: 1, perPage: 10 });
 
-    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
-      fieldNames: {
-        consumer: 'ad_hoc_run_params.attributes.rule.consumer',
-        ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+          ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+        },
+        type: 'kql',
       },
-      type: 'kql',
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
@@ -289,12 +292,15 @@ describe('findBackfill()', () => {
   test('should successfully find backfill with rule id', async () => {
     const result = await rulesClient.findBackfill({ page: 1, perPage: 10, ruleIds: 'abc' });
 
-    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
-      fieldNames: {
-        consumer: 'ad_hoc_run_params.attributes.rule.consumer',
-        ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+          ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+        },
+        type: 'kql',
       },
-      type: 'kql',
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
@@ -339,12 +345,15 @@ describe('findBackfill()', () => {
       start: '2024-03-29T02:07:55Z',
     });
 
-    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
-      fieldNames: {
-        consumer: 'ad_hoc_run_params.attributes.rule.consumer',
-        ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+          ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+        },
+        type: 'kql',
       },
-      type: 'kql',
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
@@ -403,12 +412,15 @@ describe('findBackfill()', () => {
       end: '2024-03-29T02:07:55Z',
     });
 
-    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
-      fieldNames: {
-        consumer: 'ad_hoc_run_params.attributes.rule.consumer',
-        ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+          ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+        },
+        type: 'kql',
       },
-      type: 'kql',
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
@@ -468,12 +480,15 @@ describe('findBackfill()', () => {
       end: '2024-03-29T02:07:55Z',
     });
 
-    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
-      fieldNames: {
-        consumer: 'ad_hoc_run_params.attributes.rule.consumer',
-        ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+          ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+        },
+        type: 'kql',
       },
-      type: 'kql',
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
@@ -549,12 +564,15 @@ describe('findBackfill()', () => {
       ruleIds: 'abc',
     });
 
-    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
-      fieldNames: {
-        consumer: 'ad_hoc_run_params.attributes.rule.consumer',
-        ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+          ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+        },
+        type: 'kql',
       },
-      type: 'kql',
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
@@ -747,12 +765,15 @@ describe('findBackfill()', () => {
       sortOrder: 'asc',
     });
 
-    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
-      fieldNames: {
-        consumer: 'ad_hoc_run_params.attributes.rule.consumer',
-        ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+          ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+        },
+        type: 'kql',
       },
-      type: 'kql',
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
