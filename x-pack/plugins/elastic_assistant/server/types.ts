@@ -19,6 +19,7 @@ import type {
   KibanaRequest,
   Logger,
   SecurityServiceStart,
+  AuditLogger,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -74,6 +75,10 @@ export interface ElasticAssistantPluginStart {
    */
   inference: InferenceServerStart;
   /**
+   * Security plugin start contract.
+   */
+  security: SecurityServiceStart;
+  /**
    * Register features to be used by the elastic assistant.
    *
    * Note: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted
@@ -124,6 +129,7 @@ export interface ElasticAssistantPluginStartDependencies {
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
+  auditLogger: AuditLogger;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;

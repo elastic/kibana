@@ -25,7 +25,7 @@ import {
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StructuredTool } from '@langchain/core/tools';
-import { AnalyticsServiceSetup, ElasticsearchClient } from '@kbn/core/server';
+import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
@@ -64,8 +64,10 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   manageGlobalKnowledgeBaseAIAssistant: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
+  auditLogger?: AuditLogger;
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
     super(options);
+    this.auditLogger = options.auditLogger;
   }
 
   public get isSetupInProgress() {
