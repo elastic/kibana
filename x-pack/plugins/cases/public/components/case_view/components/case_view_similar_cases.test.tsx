@@ -20,7 +20,7 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-describe('Case View Page files tab', () => {
+describe('Case View Page similar cases tab', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
