@@ -105,7 +105,6 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    console.log('==> response', response);
     return response.completion!;
   }
 
