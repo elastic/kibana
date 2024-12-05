@@ -19,7 +19,6 @@ import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
 import { DataUsageService } from '../../services';
-import { NoPrivilegeMeteringError, NoIndicesMeteringError } from '../../errors';
 
 const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes[] =>
   typeof value === 'string' ? [value] : value;
