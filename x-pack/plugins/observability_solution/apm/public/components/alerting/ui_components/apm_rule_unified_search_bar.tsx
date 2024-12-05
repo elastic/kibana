@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Query } from '@kbn/es-query';
+import { Query, fromKueryExpression } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
@@ -38,7 +38,12 @@ export function ApmRuleUnifiedSearchBar({
 
   const handleSubmit = (payload: { query?: Query }) => {
     const { query } = payload;
-    setRuleParams('searchConfiguration', { query });
+    try {
+      fromKueryExpression(query?.query as string);
+      setRuleParams('searchConfiguration', { query });
+    } catch (e) {
+      // ignore invalid queries
+    }
   };
 
   return (
