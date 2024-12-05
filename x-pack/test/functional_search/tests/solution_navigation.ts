@@ -54,7 +54,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Indices' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web Crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Behavioral Analytics' });
@@ -147,7 +147,7 @@ export default function searchSolutionNavigation({
         deepLinkId: 'enterpriseSearchContent:webCrawlers',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Web crawlers' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Web Crawlers' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'enterpriseSearchContent:webCrawlers',
       });
