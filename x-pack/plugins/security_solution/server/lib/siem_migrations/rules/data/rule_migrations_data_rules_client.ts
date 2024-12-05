@@ -38,12 +38,16 @@ export type UpdateRuleMigrationInput = { elastic_rule?: Partial<ElasticRule> } &
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
-export interface RuleMigrationFilterOptions {
-  migrationId: string;
+export interface RuleMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
   ids?: string[];
   installable?: boolean;
   searchTerm?: string;
+}
+export interface RuleMigrationGetOptions {
+  filters?: RuleMigrationFilters;
+  from?: number;
+  size?: number;
 }
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
@@ -51,21 +55,6 @@ export interface RuleMigrationFilterOptions {
  */
 const BULK_MAX_SIZE = 500 as const;
 /* The default number of rule migrations to retrieve in a single GET request. */
-const DEFAULT_GET_SIZE = 20 as const;
-
-const getInstallableConditions = (): QueryDslQueryContainer[] => {
-  return [
-    { term: { translation_result: SiemMigrationRuleTranslationResult.FULL } },
-    {
-      nested: {
-        path: 'elastic_rule',
-        query: {
-          bool: { must_not: { exists: { field: 'elastic_rule.id' } } },
-        },
-      },
-    },
-  ];
-};
 
 export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
@@ -130,12 +119,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   /** Retrieves an array of rule documents of a specific migrations */
   async get(
-    filters: RuleMigrationFilterOptions,
-    from?: number,
-    size: number = DEFAULT_GET_SIZE
+    migrationId: string,
+    { filters = {}, from, size }: RuleMigrationGetOptions = {}
   ): Promise<{ total: number; data: StoredRuleMigration[] }> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery(filters);
+    const query = this.getFilterQuery(migrationId, { ...filters });
 
     const result = await this.esClient
       .search<RuleMigration>({ index, query, sort: '_doc', from, size })
@@ -157,7 +145,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
    */
   async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery({ migrationId, status: SiemMigrationStatus.PENDING });
+    const query = this.getFilterQuery(migrationId, { status: SiemMigrationStatus.PENDING });
 
     const storedRuleMigrations = await this.esClient
       .search<RuleMigration>({ index, query, sort: '_doc', size })
@@ -236,7 +224,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     { refresh = false }: { refresh?: boolean } = {}
   ): Promise<void> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery({ migrationId, status: statusToQuery });
+    const query = this.getFilterQuery(migrationId, { status: statusToQuery });
     const script = { source: `ctx._source['status'] = '${statusToUpdate}'` };
     await this.esClient.updateByQuery({ index, query, script, refresh }).catch((error) => {
       this.logger.error(`Error updating rule migrations status: ${error.message}`);
@@ -247,24 +235,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Retrieves the translation stats for the rule migrations with the provided id */
   async getTranslationStats(migrationId: string): Promise<RuleMigrationTranslationStats> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery({ migrationId });
+    const query = this.getFilterQuery(migrationId);
 
     const aggregations = {
-      prebuilt: {
-        filter: {
-          nested: {
-            path: 'elastic_rule',
-            query: { exists: { field: 'elastic_rule.prebuilt_rule_id' } },
-          },
-        },
-      },
-      installable: {
-        filter: {
-          bool: {
-            must: getInstallableConditions(),
-          },
-        },
-      },
+      prebuilt: { filter: conditions.isPrebuilt() },
+      installable: { filter: { bool: { must: conditions.isInstallable() } } },
     };
     const result = await this.esClient
       .search({ index, query, aggregations, _source: false })
@@ -290,7 +265,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Retrieves the stats for the rule migrations with the provided id */
   async getStats(migrationId: string): Promise<RuleMigrationDataStats> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery({ migrationId });
+    const query = this.getFilterQuery(migrationId);
     const aggregations = {
       pending: { filter: { term: { status: SiemMigrationStatus.PENDING } } },
       processing: { filter: { term: { status: SiemMigrationStatus.PROCESSING } } },
@@ -360,13 +335,10 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }));
   }
 
-  private getFilterQuery({
-    migrationId,
-    status,
-    ids,
-    installable,
-    searchTerm,
-  }: RuleMigrationFilterOptions): QueryDslQueryContainer {
+  private getFilterQuery(
+    migrationId: string,
+    { status, ids, installable, searchTerm }: RuleMigrationFilters = {}
+  ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
     if (status) {
       if (Array.isArray(status)) {
@@ -379,16 +351,44 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       filter.push({ terms: { _id: ids } });
     }
     if (installable) {
-      filter.push(...getInstallableConditions());
+      filter.push(...conditions.isInstallable());
     }
     if (searchTerm?.length) {
-      filter.push({
-        nested: {
-          path: 'elastic_rule',
-          query: { match: { 'elastic_rule.title': searchTerm } },
-        },
-      });
+      filter.push(conditions.matchTitle(searchTerm));
     }
     return { bool: { filter } };
   }
 }
+
+const conditions = {
+  isFullyTranslated(): QueryDslQueryContainer {
+    return { term: { translation_result: SiemMigrationRuleTranslationResult.FULL } };
+  },
+  isInstalled(): QueryDslQueryContainer {
+    return {
+      nested: {
+        path: 'elastic_rule',
+        query: { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
+      },
+    };
+  },
+  isPrebuilt(): QueryDslQueryContainer {
+    return {
+      nested: {
+        path: 'elastic_rule',
+        query: { exists: { field: 'elastic_rule.prebuilt_rule_id' } },
+      },
+    };
+  },
+  matchTitle(title: string): QueryDslQueryContainer {
+    return {
+      nested: {
+        path: 'elastic_rule',
+        query: { match: { 'elastic_rule.title': title } },
+      },
+    };
+  },
+  isInstallable(): QueryDslQueryContainer[] {
+    return [this.isFullyTranslated(), this.isInstalled()];
+  },
+};
