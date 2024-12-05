@@ -18,6 +18,7 @@ import { ChromeNavControls, UserProfileService } from '@kbn/core/public';
 import { NavControlsService } from '@kbn/core-chrome-browser-internal/src/nav_controls';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -41,7 +42,7 @@ export const mockAssistantAvailability: AssistantAvailability = {
 /** A utility for wrapping children in the providers required to run tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   assistantAvailability = mockAssistantAvailability,
-  navControls = new NavControlsService().start(),
+  navControls = chromeServiceMock.createStartContract().navControls,
   children,
   providerContext,
 }) => {
