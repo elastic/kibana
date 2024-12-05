@@ -10,7 +10,6 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
-import { getRuleGroups } from '../../../detection_engine/prebuilt_rules/model/rule_groups/get_rule_groups';
 import type { RuleMigrationPrebuiltRule } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
@@ -23,8 +22,6 @@ interface RetrievePrebuiltRulesParams {
 const MIN_SCORE = 40 as const;
 /* The number of integrations the RAG will return, sorted by score */
 const RETURNED_RULES = 5 as const;
-
-const NO_RULES_FOUND_MESSAGE = 'No prebuilt rules was found during SIEM Migration task';
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
@@ -42,23 +39,23 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
       ruleObjectsClient,
     });
 
-    const { totalAvailableRules } = getRuleGroups(ruleVersionsMap);
-    if (totalAvailableRules.length === 0) {
-      throw new Error(NO_RULES_FOUND_MESSAGE);
-    }
     const filteredRules: RuleMigrationPrebuiltRule[] = [];
-    totalAvailableRules.forEach((rule) => {
-      const mitreAttackIds = rule?.threat
-        ?.flatMap((t) => t.technique?.map((tech) => tech.id) ?? [])
-        .filter((id) => id) as string[];
+    ruleVersionsMap.forEach((ruleVersions) => {
+      const rule = ruleVersions.target || ruleVersions.current;
+      if (rule) {
+        const mitreAttackIds = rule?.threat?.flatMap(
+          ({ technique }) => technique?.map(({ id }) => id) ?? []
+        );
 
-      filteredRules.push({
-        rule_id: rule.rule_id,
-        name: rule.name,
-        description: rule.description,
-        elser_embedding: `${rule.name} - ${rule.description}`,
-        ...(mitreAttackIds && mitreAttackIds.length > 0 && { mitre_attack_ids: mitreAttackIds }),
-      });
+        filteredRules.push({
+          rule_id: rule.rule_id,
+          name: rule.name,
+          installedRuleId: ruleVersions.current?.id,
+          description: rule.description,
+          elser_embedding: `${rule.name} - ${rule.description}`,
+          ...(mitreAttackIds?.length && { mitre_attack_ids: mitreAttackIds }),
+        });
+      }
     });
 
     const index = await this.getIndexName();

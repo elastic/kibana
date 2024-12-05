@@ -44,10 +44,7 @@ export function getTranslateRuleGraph({
     .addEdge('retrieveIntegrations', 'translateRule')
     .addEdge('translateRule', 'validation')
     .addEdge('fixQueryErrors', 'validation')
-    .addConditionalEdges('validation', validationRouter, {
-      fixQueryErrors: 'fixQueryErrors',
-      [END]: END,
-    });
+    .addConditionalEdges('validation', validationRouter, ['fixQueryErrors', END]);
 
   const graph = translateRuleGraph.compile();
   graph.name = 'Translate Rule Graph';

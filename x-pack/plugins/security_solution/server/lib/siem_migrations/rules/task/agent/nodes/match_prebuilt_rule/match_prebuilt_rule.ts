@@ -52,6 +52,7 @@ export const getMatchPrebuiltRuleNode =
           elastic_rule: {
             title: matchedRule.name,
             description: matchedRule.description,
+            id: matchedRule.installedRuleId,
             prebuilt_rule_id: matchedRule.rule_id,
           },
           translation_result: SiemMigrationRuleTranslationResult.FULL,

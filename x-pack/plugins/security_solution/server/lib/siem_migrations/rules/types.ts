@@ -25,6 +25,7 @@ export interface Integration {
 
 export interface RuleMigrationPrebuiltRule {
   rule_id: string;
+  installedRuleId?: string;
   name: string;
   description: string;
   elser_embedding: string;

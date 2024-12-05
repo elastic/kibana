@@ -44,10 +44,10 @@ export function getRuleMigrationAgent({
     .addEdge(START, 'processQuery')
     .addEdge('processQuery', 'createSemanticQuery')
     .addEdge('createSemanticQuery', 'matchPrebuiltRule')
-    .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional, {
-      [END]: END,
-      translationSubGraph: 'translationSubGraph',
-    })
+    .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional, [
+      'translationSubGraph',
+      END,
+    ])
     .addEdge('translationSubGraph', END);
 
   const graph = siemMigrationAgentGraph.compile();
