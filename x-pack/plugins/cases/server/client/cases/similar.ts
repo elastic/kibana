@@ -6,6 +6,7 @@
  */
 
 import { intersection } from 'lodash';
+import Boom from '@hapi/boom';
 import { OWNER_FIELD } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
 import { SimilarCasesSearchRequestRt, CasesSimilarResponseRt } from '../../../common/types/api';
@@ -60,10 +61,18 @@ export const similar = async (
   casesClient: CasesClient
 ): Promise<CasesSimilarResponse> => {
   const {
-    services: { caseService },
+    services: { caseService, licensingService },
     logger,
     authorization,
   } = clientArgs;
+
+  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+  if (!hasPlatinumLicenseOrGreater) {
+    throw Boom.forbidden(
+      'In order to use the similar cases feature, you must be subscribed to an Elastic Platinum license'
+    );
+  }
 
   try {
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);

@@ -10,13 +10,18 @@ import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { similar } from './similar';
 import { mockCase } from '../../../public/containers/mock';
 import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
+import Boom from '@hapi/boom';
 
-const clientArgs = createCasesClientMockArgs();
-const casesClient = createCasesClientMock();
+const mockClientArgs = createCasesClientMockArgs();
+const mockCasesClient = createCasesClientMock();
+
+const mockLicensingService = mockClientArgs.services.licensingService;
 
 describe('similar', () => {
   beforeEach(() => {
-    jest.mocked(clientArgs.services.caseService.getCase).mockResolvedValue({
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+    jest.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
       attributes: {
         ...mockCases[0].attributes,
@@ -33,14 +38,14 @@ describe('similar', () => {
       },
     });
 
-    clientArgs.services.caseService.findCases.mockResolvedValue({
+    mockClientArgs.services.caseService.findCases.mockResolvedValue({
       page: 1,
       per_page: 10,
       total: mockCases.length,
       saved_objects: [],
     });
 
-    clientArgs.services.caseConfigureService.find.mockResolvedValue({
+    mockClientArgs.services.caseConfigureService.find.mockResolvedValue({
       saved_objects: [],
       page: 1,
       per_page: 10,
@@ -59,12 +64,12 @@ describe('similar', () => {
         page: 1,
         perPage: 10,
       },
-      clientArgs,
-      casesClient
+      mockClientArgs,
+      mockCasesClient
     );
-    expect(clientArgs.services.caseService.findCases).toHaveBeenCalled();
+    expect(mockClientArgs.services.caseService.findCases).toHaveBeenCalled();
 
-    const call = clientArgs.services.caseService.findCases.mock.calls[0][0];
+    const call = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
 
     expect(call).toMatchInlineSnapshot(`
         Object {
@@ -150,8 +155,28 @@ describe('similar', () => {
       `);
   });
 
+  it('should throw an error if license is not platinum', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+    await expect(
+      similar(
+        mockCase.id,
+        {
+          page: 1,
+          perPage: 10,
+        },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow(
+      Boom.forbidden(
+        'In order to use the similar cases feature, you must be subscribed to an Elastic Platinum license'
+      )
+    );
+  });
+
   it('should not call findCases when the case has no observables', async () => {
-    jest.mocked(clientArgs.services.caseService.getCase).mockResolvedValue({
+    jest.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
       attributes: {
         ...mockCases[0].attributes,
@@ -165,9 +190,9 @@ describe('similar', () => {
         page: 1,
         perPage: 10,
       },
-      clientArgs,
-      casesClient
+      mockClientArgs,
+      mockCasesClient
     );
-    expect(clientArgs.services.caseService.findCases).not.toHaveBeenCalled();
+    expect(mockClientArgs.services.caseService.findCases).not.toHaveBeenCalled();
   });
 });
