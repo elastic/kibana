@@ -133,13 +133,13 @@ export function useSearchApi({
   }, [filters, searchApi.filters$]);
 
   useEffect(() => {
-    if (!fastIsEqual([searchApi.query$.getValue()], [query])) {
+    if (!fastIsEqual(searchApi.query$.getValue(), query)) {
       searchApi.query$.next(query);
     }
   }, [query, searchApi.query$]);
 
   useEffect(() => {
-    if (!fastIsEqual([searchApi.timeRange$.getValue()], [timeRange])) {
+    if (!fastIsEqual(searchApi.timeRange$.getValue(), timeRange)) {
       searchApi.timeRange$.next(timeRange);
     }
   }, [timeRange, searchApi.timeRange$]);
