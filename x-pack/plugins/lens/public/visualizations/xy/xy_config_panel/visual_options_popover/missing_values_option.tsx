@@ -89,7 +89,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
           {fittingFunction && fittingFunction !== FittingFunctions.NONE && (
             <>
               <EuiFormRow
-                 fullWidth
+                fullWidth
                 display="columnCompressed"
                 label={i18n.translate('xpack.lens.xyChart.endValuesLabel', {
                   defaultMessage: 'End values',
@@ -119,7 +119,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                 />
               </EuiFormRow>
               <EuiFormRow
-                 fullWidth
+                fullWidth
                 label={i18n.translate('xpack.lens.xyChart.missingValuesStyle', {
                   defaultMessage: 'Show as dotted line',
                 })}
