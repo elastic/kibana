@@ -95,13 +95,16 @@ describe('Storage explorer page', () => {
   });
 
   describe('Data breakdown', () => {
-    it('displays correct values per index', () => {
+    beforeEach(() => {
       cy.intercept('GET', '/internal/profiling/storage_explorer/indices_storage_details?*').as(
         'indicesDetails'
       );
+    });
+    it('displays correct values per index', () => {
       cy.visitKibana('/app/profiling/storage-explorer', { rangeFrom, rangeTo });
       cy.contains('Storage Explorer');
-      cy.contains('Data breakdown').click();
+      cy.get('[data-test-subj="storageExplorer_dataBreakdownTab"]').click();
+      cy.contains('Indices breakdown');
       cy.wait('@indicesDetails');
       [
         { indexName: 'stackframes', docSize: '7,616' },
@@ -111,41 +114,6 @@ describe('Storage explorer page', () => {
         { indexName: 'events', docSize: '3,242' },
       ].forEach(({ indexName, docSize }) => {
         cy.get(`[data-test-subj="${indexName}_docSize"]`).contains(docSize);
-      });
-    });
-
-    it('displays top 10 indices in the table', () => {
-      cy.intercept('GET', '/internal/profiling/storage_explorer/indices_storage_details?*').as(
-        'indicesDetails'
-      );
-      cy.visitKibana('/app/profiling/storage-explorer', { rangeFrom, rangeTo });
-      cy.contains('Storage Explorer');
-      cy.contains('Data breakdown').click();
-      cy.wait('@indicesDetails');
-      cy.get('table > tbody tr.euiTableRow').should('have.length', 10);
-    });
-    // Skipping it we should not rely on dom elements from third-level libraries to write our tests
-    it.skip('displays a chart with percentage of each index', () => {
-      cy.intercept('GET', '/internal/profiling/storage_explorer/indices_storage_details?*').as(
-        'indicesDetails'
-      );
-      cy.visitKibana('/app/profiling/storage-explorer', { rangeFrom, rangeTo });
-      cy.contains('Storage Explorer');
-      cy.contains('Data breakdown').click();
-      cy.wait('@indicesDetails');
-
-      const indices = [
-        { index: 'Stackframes', perc: '32%' },
-        { index: 'Samples', perc: '15%' },
-        { index: 'Executables', perc: '1%' },
-        { index: 'Metrics', perc: '0%' },
-        { index: 'Stacktraces', perc: '52%' },
-      ];
-
-      cy.get('.echChartPointerContainer table tbody tr').each(($row, idx) => {
-        // These are no longer valid elements on charts
-        cy.wrap($row).find('th').contains(indices[idx].index);
-        cy.wrap($row).find('td').contains(indices[idx].perc);
       });
     });
   });

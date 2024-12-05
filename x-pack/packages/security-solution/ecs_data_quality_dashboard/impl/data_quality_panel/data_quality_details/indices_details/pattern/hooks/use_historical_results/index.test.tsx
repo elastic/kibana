@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { mockHistoricalResult } from '../../../../../mock/historical_results/mock_historical_results_response';
 import { TestDataQualityProviders } from '../../../../../mock/test_providers/test_providers';
