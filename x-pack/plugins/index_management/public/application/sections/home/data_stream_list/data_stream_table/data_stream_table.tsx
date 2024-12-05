@@ -382,10 +382,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     <>
       {dataStreamsToEditDataRetention && dataStreamsToEditDataRetention.length > 0 ? (
         <EditDataRetentionModal
-          onClose={() => setDataStreamsToEditDataRetention([])}
-          dataStream={dataStreamsToEditDataRetention[0]}
-          ilmPolicyLink=""
-          ilmPolicyName="Test"
+          onClose={(res) => {
+            if (res && res.hasUpdatedDataRetention) {
+              reload();
+            } else {
+              setDataStreamsToEditDataRetention([]);
+            }
+          }}
+          dataStreams={dataStreamsToEditDataRetention}
         />
       ) : null}
       {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
