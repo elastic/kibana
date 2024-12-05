@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
-import { NonEmptyString, ConnectorId, LangSmithOptions } from '../../common.gen';
+import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import {
   ElasticRulePartial,
   RuleMigrationTranslationResult,
@@ -30,6 +30,7 @@ import {
   RuleMigrationResourceType,
   RuleMigrationResource,
 } from '../../rule_migration.gen';
+import { ConnectorId, LangSmithOptions } from '../../common.gen';
 
 export type CreateRuleMigrationRequestParams = z.infer<typeof CreateRuleMigrationRequestParams>;
 export const CreateRuleMigrationRequestParams = z.object({

@@ -36,13 +36,13 @@ components:
       properties:
         id:
           description: The original rule id.
-          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         vendor:
           description: The original rule vendor identifier.
           $ref: '#/components/schemas/OriginalRuleVendor'
         title:
           description: The original rule name.
-          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         description:
           type: string
           description: The original rule description.
@@ -82,7 +82,7 @@ components:
             - esql
         prebuilt_rule_id:
           description: The Elastic prebuilt rule id matched.
-          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         integration_ids:
           type: array
           items:
@@ -90,7 +90,7 @@ components:
           description: The Elastic integration IDs related to the rule.
         id:
           description: The Elastic rule id installed as a result.
-          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ElasticRulePartial:
       description: The partial version of the migrated elastic rule.
@@ -106,7 +106,7 @@ components:
           properties:
             id:
               description: The rule migration id
-              $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - $ref: '#/components/schemas/RuleMigrationData'
 
     RuleMigrationData:
@@ -124,10 +124,10 @@ components:
           description: The moment of creation
         migration_id:
           description: The migration id.
-          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         created_by:
           description: The username of the user who created the migration.
-          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         original_rule:
           description: The original rule to migrate.
           $ref: '#/components/schemas/OriginalRule'
@@ -163,7 +163,7 @@ components:
       properties:
         id:
           description: The migration id
-          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         status:
           description: Indicates if the migration task status.
           $ref: '#/components/schemas/RuleMigrationTaskStatus'
@@ -217,7 +217,7 @@ components:
       properties:
         id:
           description: The migration id
-          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         rules:
           type: object
           description: The rules migration translation stats.
@@ -303,10 +303,10 @@ components:
           properties:
             id:
               description: The rule resource migration id
-              $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
             migration_id:
               description: The migration id
-              $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
             updated_at:
               type: string
               description: The moment of the last update
