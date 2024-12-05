@@ -23,7 +23,7 @@ export const AiopsWrapper: FC = () => {
     if (Object.keys(filters).filter((key) => !key.startsWith('aiops_')).length === 0) {
       Object.keys(filters).forEach((key) => {
         if (key.startsWith('aiops_')) {
-          state.actions.setCrossfilter({ id: key, filter: '' });
+          state.actions.setFilter({ id: key, filter: '' });
         }
       });
     }

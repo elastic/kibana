@@ -87,9 +87,9 @@ export const Aiops: FC<AiopsProps> = ({ field }) => {
   const toggleItem = (filter: string) => {
     const filterName = `${iframeID}__${filter}`;
     if (!filters[filterName]) {
-      state.actions.setCrossfilter({ id: filterName, filter });
+      state.actions.setFilter({ id: filterName, filter });
     } else {
-      state.actions.setCrossfilter({ id: filterName, filter: '' });
+      state.actions.setFilter({ id: filterName, filter: '' });
     }
   };
 

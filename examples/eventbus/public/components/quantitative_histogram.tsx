@@ -64,7 +64,7 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
   }, [filters, iframeID]);
 
   const dispatch = debounce((filter: string) => {
-    state.actions.setCrossfilter({ id: iframeID, filter });
+    state.actions.setFilter({ id: iframeID, filter });
   }, 50);
 
   const rangeEsqlWithFilters = useMemo(() => {
@@ -229,7 +229,7 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
     });
 
     return () => {
-      state.actions.setCrossfilter({ id: iframeID, filter: '' });
+      state.actions.setFilter({ id: iframeID, filter: '' });
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -243,7 +243,7 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
           <EuiBadge
             iconType="cross"
             iconSide="right"
-            iconOnClick={() => state.actions.setCrossfilter({ id: iframeID, filter: '' })}
+            iconOnClick={() => state.actions.setFilter({ id: iframeID, filter: '' })}
             iconOnClickAriaLabel="Example of onClick event for icon within the button"
             data-test-sub="crossfilter-badge"
           >

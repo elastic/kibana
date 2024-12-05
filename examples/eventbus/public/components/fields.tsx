@@ -30,7 +30,7 @@ export const Fields: FC = () => {
   });
 
   const onCheckboxChange = (optionId: string) => {
-    state.actions.toggleSelectedFields(optionId);
+    state.actions.toggleSelectedField(optionId);
   };
 
   return (
