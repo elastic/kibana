@@ -20,10 +20,12 @@ interface UseTriggerScanPayload {
   actionTypeId: string;
 }
 
-export const useTriggerScan = (
-  onTriggerScanComplete: () => void,
-  disableScanButton: () => void
-) => {
+interface UseTriggerScanConfig {
+  onMutate: () => void;
+  onSuccess: () => void;
+}
+
+export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) => {
   const { http } = useKibana().services;
   return useMutation<DefendInsightsResponse, unknown, UseTriggerScanPayload>(
     ({ endpointId, connectorId, actionTypeId }: UseTriggerScanPayload) =>
@@ -42,12 +44,8 @@ export const useTriggerScan = (
         }),
       }),
     {
-      onMutate: () => {
-        disableScanButton();
-      },
-      onSuccess: () => {
-        onTriggerScanComplete();
-      },
+      onMutate,
+      onSuccess,
     }
   );
 };

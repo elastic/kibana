@@ -7,6 +7,7 @@
 
 import { EuiHorizontalRule, EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useState, useEffect, useCallback } from 'react';
+import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
 import { useFetchOngoingScans } from '../../../hooks/insights/use_fetch_ongoing_tasks';
 import { WorkflowInsightsResults } from './workflow_insights_results';
@@ -15,48 +16,68 @@ import { WORKFLOW_INSIGHTS } from '../../../translations';
 
 interface WorkflowInsightsProps {
   endpointId: string;
+  endpointOs?: string;
 }
 
-export const WorkflowInsights = ({ endpointId }: WorkflowInsightsProps) => {
+export const WorkflowInsights = ({ endpointId, endpointOs }: WorkflowInsightsProps) => {
   const [isScanButtonDisabled, setIsScanButtonDisabled] = useState(true);
+  const [scanCompleted, setIsScanCompleted] = useState(false);
+  const [userTriggeredScan, setUserTriggeredScan] = useState(false);
+
   const disableScanButton = () => {
     setIsScanButtonDisabled(true);
   };
+
+  const [setScanOngoing, setScanCompleted] = [
+    () => setIsScanCompleted(false),
+    () => setIsScanCompleted(true),
+  ];
+
+  const { data: insights, refetch: refetchInsights } = useFetchInsights({
+    endpointId,
+    onSuccess: setScanCompleted,
+  });
 
   const {
     data: ongoingScans,
     isLoading: isLoadingOngoingScans,
     refetch: refetchOngoingScans,
-  } = useFetchOngoingScans(isScanButtonDisabled, endpointId);
+  } = useFetchOngoingScans({
+    endpointId,
+    isPolling: isScanButtonDisabled,
+    onSuccess: refetchInsights,
+  });
 
-  const { mutate: triggerScan } = useTriggerScan(refetchOngoingScans, disableScanButton);
+  const { mutate: triggerScan } = useTriggerScan({
+    onSuccess: refetchOngoingScans,
+    onMutate: disableScanButton,
+  });
 
   useEffect(() => {
-    if ((ongoingScans && ongoingScans.length > 0) || isLoadingOngoingScans) {
-      setIsScanButtonDisabled(true);
-    } else {
-      setIsScanButtonDisabled(false);
-    }
+    setIsScanButtonDisabled(!!ongoingScans?.length || isLoadingOngoingScans);
   }, [ongoingScans, isLoadingOngoingScans]);
 
-  const results = null; // TODO: Implement this
-
   const renderLastResultsCaption = () => {
-    if (!results) {
+    // TODO: get the last scan date from the insights data
+    if (!insights?.length || !insights[0]['@timestamp']) {
       return null;
     }
     return (
       <EuiText color={'subdued'} size={'xs'}>
-        {WORKFLOW_INSIGHTS.titleRight}
+        {`${WORKFLOW_INSIGHTS.titleRight}${insights[0]['@timestamp']}`}
       </EuiText>
     );
   };
 
   const onScanButtonClick = useCallback(
     ({ actionTypeId, connectorId }: { actionTypeId: string; connectorId: string }) => {
+      setScanOngoing();
+      if (!userTriggeredScan) {
+        setUserTriggeredScan(true);
+      }
       triggerScan({ endpointId, actionTypeId, connectorId });
     },
-    [triggerScan, endpointId]
+    [setScanOngoing, userTriggeredScan, triggerScan, endpointId]
   );
 
   return (
@@ -78,7 +99,12 @@ export const WorkflowInsights = ({ endpointId }: WorkflowInsightsProps) => {
           onScanButtonClick={onScanButtonClick}
         />
         <EuiSpacer size={'m'} />
-        <WorkflowInsightsResults results={true} />
+        <WorkflowInsightsResults
+          results={insights}
+          scanCompleted={scanCompleted && userTriggeredScan}
+          endpointId={endpointId}
+          endpointOs={endpointOs}
+        />
         <EuiHorizontalRule />
       </EuiAccordion>
       <EuiSpacer size="l" />

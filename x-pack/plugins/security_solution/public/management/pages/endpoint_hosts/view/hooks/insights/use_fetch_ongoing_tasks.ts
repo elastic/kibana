@@ -11,10 +11,32 @@ import {
   DefendInsightStatusEnum,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
+import { useEffect, useRef } from 'react';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-export const useFetchOngoingScans = (isPolling: boolean, endpointId: string) => {
+interface UseFetchOngoingScansConfig {
+  isPolling: boolean;
+  endpointId: string;
+  onSuccess: () => void;
+}
+
+export const useFetchOngoingScans = ({
+  isPolling,
+  endpointId,
+  onSuccess,
+}: UseFetchOngoingScansConfig) => {
   const { http } = useKibana().services;
+
+  // Ref to track if polling was active in the previous render
+  const wasPolling = useRef(isPolling);
+
+  useEffect(() => {
+    // If polling was active and isPolling is false, it means the condition has been met and we can run onSuccess logic (i.e. refetch insights)
+    if (wasPolling.current && !isPolling) {
+      onSuccess();
+    }
+    wasPolling.current = isPolling;
+  }, [isPolling, onSuccess]);
 
   return useQuery<{ data: DefendInsightsResponse[] }, unknown, DefendInsightsResponse[]>(
     [`fetchOngoingTasks-${endpointId}`],
@@ -27,8 +49,10 @@ export const useFetchOngoingScans = (isPolling: boolean, endpointId: string) => 
         },
       }),
     {
-      refetchInterval: isPolling ? 5000 : false,
-      select: (response) => response.data,
+      refetchInterval: isPolling ? 2000 : false,
+      select: (response) => {
+        return response.data;
+      },
     }
   );
 };
