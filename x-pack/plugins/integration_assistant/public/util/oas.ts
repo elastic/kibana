@@ -110,11 +110,6 @@ const buildRefSet = (
  * Retrieves the OAS spec components down to only those utilized by the specified path.
  */
 export function reduceSpecComponents(oas: Oas, path: string): ComponentsObject | undefined {
-  // const pathidk = '/events'; // box, misp
-  // const pathidk = '/v1/device_tasks'; // eset
-  // const pathidk = '/api/v1/apps'; // okta
-  // const pathidk = '/v1/healthEvents'; // sumologic
-
   const operation = oas?.operation(path, 'get');
 
   const responses = operation?.schema.responses;
@@ -178,8 +173,9 @@ export function getAuthDetails(
   } else if (auth === CelAuthTypeEnum.header) {
     return specAuthDetails?.Header[0];
   } else if (auth === CelAuthTypeEnum.digest) {
-    return undefined;
+    return specAuthDetails?.http[0];
   } else {
+    // should never get here
     throw new Error('unsupported auth method');
   }
 }
