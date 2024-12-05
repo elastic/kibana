@@ -134,7 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             `{"tags":[],"url.port":["5678"],"observer.geo.name":["mpls"],"monitor.type":["http"]}`
           );
         } finally {
-          await supertest.delete(`/api/alerts/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
+          await supertest.delete(`/api/alerting/rule/${id}`).set('kbn-xsrf', 'true').expect(204);
         }
       });
     });
@@ -206,7 +206,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(params).to.eql({});
           expect(interval).to.eql('11m');
         } finally {
-          await supertest.delete(`/api/alerts/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
+          await supertest.delete(`/api/alerting/rule/${id}`).set('kbn-xsrf', 'true').expect(204);
         }
       });
     });

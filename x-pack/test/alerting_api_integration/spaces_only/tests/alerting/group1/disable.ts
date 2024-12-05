@@ -266,50 +266,5 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         id: createdRule.id,
       });
     });
-
-    describe('legacy', function () {
-      it('should handle disable rule request appropriately', async () => {
-        const { body: createdRule } = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData({ enabled: true }))
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-        await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdRule.id}/_disable`)
-          .set('kbn-xsrf', 'foo')
-          .expect(204);
-
-        // task doc should still exist but be disabled
-        await retry.try(async () => {
-          const taskRecord = await getScheduledTask(createdRule.scheduled_task_id);
-          expect(taskRecord.type).to.eql('task');
-          expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
-          expect(JSON.parse(taskRecord.task.params)).to.eql({
-            alertId: createdRule.id,
-            spaceId: Spaces.space1.id,
-            consumer: 'alertsFixture',
-          });
-          expect(taskRecord.task.enabled).to.eql(false);
-        });
-
-        const { body: disabledRule } = await supertestWithoutAuth
-          .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdRule.id}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
-
-        // Ensure revision was not updated
-        expect(disabledRule.revision).to.eql(0);
-
-        // Ensure AAD isn't broken
-        await checkAAD({
-          supertest: supertestWithoutAuth,
-          spaceId: Spaces.space1.id,
-          type: RULE_SAVED_OBJECT_TYPE,
-          id: createdRule.id,
-        });
-      });
-    });
   });
 }
