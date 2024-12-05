@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import {
+  expandEndpointSecurityFeaturePrivileges,
+  expandSecuritySolutionCategoryKibanaPrivileges,
+  navigateToRolePage,
+  openKibanaFeaturePrivilegesFlyout,
+  setKibanaPrivilegeSpace,
+} from '../../screens/stack_management/role_page';
 import { closeAllToasts } from '../../tasks/toasts';
 import { login, ROLE } from '../../tasks/login';
-import { loadPage } from '../../tasks/common';
 
-// FLAKY: https://github.com/elastic/kibana/issues/200967
-describe.skip('When defining a kibana role for Endpoint security access', { tags: '@ess' }, () => {
+describe('When defining a kibana role for Endpoint security access', { tags: '@ess' }, () => {
   const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
     return cy
       .get('#featurePrivilegeControls_siem')
@@ -20,11 +25,13 @@ describe.skip('When defining a kibana role for Endpoint security access', { tags
 
   beforeEach(() => {
     login(ROLE.system_indices_superuser);
-    loadPage('/app/management/security/roles/edit');
+    navigateToRolePage();
     closeAllToasts();
-    cy.getByTestSubj('addSpacePrivilegeButton').click();
-    cy.getByTestSubj('featureCategoryButton_securitySolution').closest('button').click();
-    cy.get('.featurePrivilegeName:contains("Security")').closest('button').click();
+
+    openKibanaFeaturePrivilegesFlyout();
+    setKibanaPrivilegeSpace('default');
+    expandSecuritySolutionCategoryKibanaPrivileges();
+    expandEndpointSecurityFeaturePrivileges();
   });
 
   it('should display RBAC entries with expected controls', () => {
