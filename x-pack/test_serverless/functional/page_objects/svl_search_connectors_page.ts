@@ -11,7 +11,18 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const es = getService('es');
   return {
+    helpers: {
+      async deleteAllConnectors() {
+        const connectors = await es.connector.list();
+        for (const connector of connectors.results) {
+          await es.connector.delete({
+            connector_id: connector.id!,
+          });
+        }
+      },
+    },
     connectorConfigurationPage: {
       async createConnector() {
         await testSubjects.click('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
@@ -60,8 +71,8 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       async expectConnectorIdToMatchUrl(connectorId: string) {
         expect(await browser.getCurrentUrl()).contain(`/app/connectors/${connectorId}`);
       },
-      async getConnectorId() {
-        return await testSubjects.getVisibleText('serverlessSearchConnectorConnectorId');
+      async getConnectorDetails() {
+        return await testSubjects.getVisibleText('serverlessSearchConnectorConnectorDetails');
       },
     },
     connectorOverviewPage: {
