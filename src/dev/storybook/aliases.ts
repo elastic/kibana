@@ -34,13 +34,16 @@ export const storybookAliases = {
   expandable_flyout: 'packages/kbn-expandable-flyout/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',
   expression_image: 'src/plugins/expression_image/.storybook',
-  expression_metric_vis: 'src/platform/plugins/shared/chart_expressions/expression_legacy_metric/.storybook',
+  expression_metric_vis:
+    'src/platform/plugins/shared/chart_expressions/expression_legacy_metric/.storybook',
   expression_metric: 'src/plugins/expression_metric/.storybook',
-  expression_partition_vis: 'src/platform/plugins/shared/chart_expressions/expression_partition_vis/.storybook',
+  expression_partition_vis:
+    'src/platform/plugins/shared/chart_expressions/expression_partition_vis/.storybook',
   expression_repeat_image: 'src/plugins/expression_repeat_image/.storybook',
   expression_reveal_image: 'src/plugins/expression_reveal_image/.storybook',
   expression_shape: 'src/plugins/expression_shape/.storybook',
-  expression_tagcloud: 'src/platform/plugins/shared/chart_expressions/expression_tagcloud/.storybook',
+  expression_tagcloud:
+    'src/platform/plugins/shared/chart_expressions/expression_tagcloud/.storybook',
   fleet: 'x-pack/plugins/fleet/.storybook',
   grouping: 'packages/kbn-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
