@@ -8,9 +8,13 @@
  */
 
 import { JoinCommandContext, JoinTargetContext } from '../../antlr/esql_parser';
-import { Builder } from '../../builder';
 import { ESQLAstItem, ESQLBinaryExpression, ESQLCommand, ESQLIdentifier } from '../../types';
-import { createCommand, createIdentifier } from '../factories';
+import {
+  createBinaryExpression,
+  createCommand,
+  createIdentifier,
+  createOption,
+} from '../factories';
 import { visitValueExpression } from '../walkers';
 
 const createNodeFromJoinTarget = (
@@ -24,7 +28,7 @@ const createNodeFromJoinTarget = (
   }
 
   const alias = createIdentifier(aliasCtx);
-  const renameExpression = Builder.expression.func.binary('as', [
+  const renameExpression = createBinaryExpression('as', ctx, [
     index,
     alias,
   ]) as ESQLBinaryExpression;
@@ -39,10 +43,11 @@ export const createJoinCommand = (ctx: JoinCommandContext): ESQLCommand => {
   command.commandType = (ctx._type_.text ?? '').toLocaleLowerCase();
 
   const joinTarget = createNodeFromJoinTarget(ctx.joinTarget());
-  const onOption = Builder.option({ name: 'on' });
+  const joinCondition = ctx.joinCondition();
+  const onOption = createOption('on', joinCondition);
   const joinPredicates: ESQLAstItem[] = onOption.args;
 
-  for (const joinPredicateCtx of ctx.joinCondition().joinPredicate_list()) {
+  for (const joinPredicateCtx of joinCondition.joinPredicate_list()) {
     const expression = visitValueExpression(joinPredicateCtx.valueExpression());
 
     if (expression) {

@@ -433,6 +433,13 @@ export class WrappingPrettyPrinter {
       return { txt };
     })
 
+    .on('visitIdentifierExpression', (ctx, inp: Input) => {
+      const formatted = LeafPrinter.identifier(ctx.node);
+      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
+
+      return { txt, indented };
+    })
+
     .on('visitSourceExpression', (ctx, inp: Input): Output => {
       const formatted = LeafPrinter.source(ctx.node) + (inp.suffix ?? '');
       const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
@@ -570,7 +577,14 @@ export class WrappingPrettyPrinter {
 
     .on('visitCommand', (ctx, inp: Input): Output => {
       const opts = this.opts;
-      const cmd = opts.lowercaseCommands ? ctx.node.name : ctx.node.name.toUpperCase();
+      const node = ctx.node;
+      let cmd = opts.lowercaseCommands ? node.name : node.name.toUpperCase();
+
+      if (node.commandType) {
+        const type = opts.lowercaseCommands ? node.commandType : node.commandType.toUpperCase();
+        cmd = `${type} ${cmd}`;
+      }
+
       const args = this.printArguments(ctx, {
         indent: inp.indent,
         remaining: inp.remaining - cmd.length - 1,

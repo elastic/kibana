@@ -388,7 +388,7 @@ export class BasicPrettyPrinter {
       const argsFormatted = args ? `${separator}${args}` : '';
       const optionFormatted = `${option}${argsFormatted}`;
 
-      return optionFormatted;
+      return this.decorateWithComments(ctx.node, optionFormatted);
     })
 
     .on('visitCommand', (ctx) => {
@@ -417,7 +417,7 @@ export class BasicPrettyPrinter {
       const optionsFormatted = options ? ` ${options}` : '';
       const cmdFormatted = `${cmdType}${cmd}${argsFormatted}${optionsFormatted}`;
 
-      return cmdFormatted;
+      return this.decorateWithComments(ctx.node, cmdFormatted);
     })
 
     .on('visitQuery', (ctx) => {
