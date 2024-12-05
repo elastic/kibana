@@ -464,7 +464,6 @@ packages/kbn-search-api-keys-server @elastic/search-kibana
 packages/kbn-search-api-panels @elastic/search-kibana
 packages/kbn-search-connectors @elastic/search-kibana
 packages/kbn-search-index-documents @elastic/search-kibana
-packages/kbn-search-types @elastic/kibana-data-discovery
 packages/kbn-security-hardening @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
@@ -623,6 +622,7 @@ src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-search-errors @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-search-types @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_editor @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_field_editor @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_management @elastic/kibana-data-discovery

@@ -114,7 +114,7 @@
     "searchErrors": "src/platform/packages/shared/kbn-search-errors",
     "searchIndexDocuments": "packages/kbn-search-index-documents",
     "searchResponseWarnings": "src/platform/packages/shared/kbn-search-response-warnings",
-    "searchTypes": "packages/kbn-search-types",
+    "searchTypes": "src/platform/packages/shared/kbn-search-types",
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
     "sse": ["packages/kbn-sse-utils"],
