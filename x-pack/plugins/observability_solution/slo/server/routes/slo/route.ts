@@ -609,11 +609,13 @@ const getSLOGroupingsRoute = createSloServerRoute({
   params: getSLOGroupingsParamsSchema,
   handler: async ({ context, params, request, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
-    const spaceId = await getSpaceId(plugins, request);
-
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const settings = await getSloSettings(soClient);
+    const [spaceId, settings] = await Promise.all([
+      getSpaceId(plugins, request),
+      getSloSettings(soClient),
+    ]);
+
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const definitionClient = new SloDefinitionClient(repository, esClient, logger);
 

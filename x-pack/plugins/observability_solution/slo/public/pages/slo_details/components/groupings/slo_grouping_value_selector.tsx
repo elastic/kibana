@@ -70,9 +70,9 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
 
   return (
     <EuiComboBox<string>
-      fullWidth={false}
+      fullWidth
       css={css`
-        max-width: fit-content;
+        max-width: 500px;
       `}
       isClearable={false}
       compressed

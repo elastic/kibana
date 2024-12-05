@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -16,6 +16,7 @@ import { useIsMutating } from '@tanstack/react-query';
 import dedent from 'dedent';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { LoadingState } from '../../components/loading_state';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
@@ -140,7 +141,7 @@ export function SloDetailsPage() {
     >
       <HeaderMenu />
       {isLoading ? (
-        <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />
+        <LoadingState dataTestSubj="sloDetailsLoading" />
       ) : (
         <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} selectedTabId={selectedTabId} />
       )}
