@@ -20,11 +20,6 @@ interface CaseViewSimilarCasesProps {
   caseData: CaseUI;
 }
 
-export const DEFAULT_CASE_FILES_FILTERING_OPTIONS = {
-  page: 0,
-  perPage: 10,
-};
-
 export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);
