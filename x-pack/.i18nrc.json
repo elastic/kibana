@@ -73,7 +73,7 @@
     "xpack.kubernetesSecurity": "plugins/kubernetes_security",
     "xpack.lens": "plugins/lens",
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
-    "xpack.licenseMgmt": "plugins/license_management",
+    "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "plugins/licensing",
     "xpack.lists": "plugins/lists",
     "xpack.logstash": [
