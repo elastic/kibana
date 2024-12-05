@@ -265,11 +265,13 @@ export class HttpService
       schema.arrayOf(schema.string()),
     ]);
     const querySchema = schema.object({
-      access: schema.maybe(schema.oneOf([schema.literal('public'), schema.literal('internal')])),
+      access: schema.oneOf([schema.literal('public'), schema.literal('internal')], {
+        defaultValue: 'public' as const,
+      }),
+      version: schema.maybe(schema.string()),
       excludePathsMatching: schema.maybe(stringOrStringArraySchema),
       pathStartsWith: schema.maybe(stringOrStringArraySchema),
       pluginId: schema.maybe(schema.string()),
-      version: schema.maybe(schema.string()),
     });
 
     server.route({

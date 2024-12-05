@@ -44,10 +44,12 @@ export class SearchSecureService extends FtrService {
     space,
   }: SendOptions) {
     const spaceUrl = getSpaceUrlPrefix(space);
+    const statusesWithoutRetry = [200, 400, 403, 500];
 
     const { body } = await this.retry.try(async () => {
       let result;
       const url = `${spaceUrl}/internal/search/${strategy}`;
+
       if (referer && kibanaVersion) {
         result = await supertestWithoutAuth
           .post(url)
@@ -89,9 +91,11 @@ export class SearchSecureService extends FtrService {
           .set('kbn-xsrf', 'true')
           .send(options);
       }
-      if ((result.status === 500 || result.status === 200) && result.body) {
+
+      if (statusesWithoutRetry.includes(result.status) && result.body) {
         return result;
       }
+
       throw new Error('try again');
     });
 
