@@ -667,7 +667,7 @@
     "@kbn/ml-is-populated-object": "link:x-pack/platform/packages/private/ml/is_populated_object",
     "@kbn/ml-kibana-theme": "link:x-pack/platform/packages/private/ml/kibana_theme",
     "@kbn/ml-local-storage": "link:x-pack/platform/packages/private/ml/local_storage",
-    "@kbn/ml-nested-property": "link:x-pack/packages/ml/nested_property",
+    "@kbn/ml-nested-property": "link:x-pack/platform/packages/private/ml/nested_property",
     "@kbn/ml-number-utils": "link:x-pack/packages/ml/number_utils",
     "@kbn/ml-parse-interval": "link:x-pack/packages/ml/parse_interval",
     "@kbn/ml-plugin": "link:x-pack/plugins/ml",
