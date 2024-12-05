@@ -73,7 +73,7 @@ export const casesReadAndEditSettings: Role = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['minimal_read', 'cases_settings'],
+          generalCases: ['minimal_read', 'cases_settings'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
