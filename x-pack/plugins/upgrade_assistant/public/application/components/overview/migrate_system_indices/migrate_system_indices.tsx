@@ -150,8 +150,7 @@ const ConfirmModal: React.FC<{
     data-test-subj="migrationConfirmModal"
   >
     {i18n.translate('xpack.upgradeAssistant.overview.systemIndices.confirmModal.description', {
-      defaultMessage:
-        'Migrating system indices may lead to downtime while they are reindexed.',
+      defaultMessage: 'Migrating system indices may lead to downtime while they are reindexed.',
     })}
   </EuiConfirmModal>
 );
