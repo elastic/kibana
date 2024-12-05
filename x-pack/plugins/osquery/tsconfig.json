@@ -13,9 +13,7 @@
     "server/**/*",
     "../../../typings/**/*",
     // ECS and Osquery schema files
-    "public/common/schemas/*/**.json",
-    // Emotion theme typing
-    "./emotion.d.ts"
+    "public/common/schemas/*/**.json"
   ],
   "kbn_references": [
     "@kbn/core",
