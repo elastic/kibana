@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const createReportingUser = async () => {
       await security.user.create(reporting.REPORTING_USER_USERNAME, {
         password: reporting.REPORTING_USER_PASSWORD,
-        roles: ['reporting_user', 'data_analyst', 'kibana_user'], // Deprecated: using built-in `reporting_user` role grants all Reporting privileges
+        roles: ['data_analyst', 'kibana_user'],
         full_name: 'a reporting user',
       });
     };
