@@ -55,7 +55,7 @@ const baseNavItems = [
         href: '/app/enterprise_search/content/crawlers',
         id: 'crawlers',
         items: undefined,
-        name: 'Web crawlers',
+        name: 'Web Crawlers',
       },
     ],
     name: 'Content',
@@ -145,6 +145,85 @@ const baseNavItems = [
     name: 'Enterprise Search',
   },
 ];
+
+const mockNavLinks = [
+  {
+    id: 'enterpriseSearch',
+    url: '/app/enterprise_search/overview',
+  },
+  {
+    id: 'enterpriseSearchContent:searchIndices',
+    title: 'Indices',
+    url: '/app/enterprise_search/content/search_indices',
+  },
+  {
+    id: 'enterpriseSearchContent:connectors',
+    title: 'Connectors',
+    url: '/app/enterprise_search/content/connectors',
+  },
+  {
+    id: 'enterpriseSearchContent:webCrawlers',
+    title: 'Web Crawlers',
+    url: '/app/enterprise_search/content/crawlers',
+  },
+  {
+    id: 'enterpriseSearchApplications:playground',
+    title: 'Playground',
+    url: '/app/enterprise_search/applications/playground',
+  },
+  {
+    id: 'enterpriseSearchApplications:searchApplications',
+    title: 'Search Applications',
+    url: '/app/enterprise_search/applications/search_applications',
+  },
+  {
+    id: 'enterpriseSearchAnalytics',
+    title: 'Behavioral Analytics',
+    url: '/app/enterprise_search/analytics',
+  },
+  {
+    id: 'searchInferenceEndpoints:inferenceEndpoints',
+    title: 'Inference Endpoints',
+    url: '/app/elasticsearch/relevance/inference_endpoints',
+  },
+  {
+    id: 'appSearch:engines',
+    title: 'App Search',
+    url: '/app/enterprise_search/app_search',
+  },
+  {
+    id: 'workplaceSearch',
+    title: 'Workplace Search',
+    url: '/app/enterprise_search/workplace_search',
+  },
+  {
+    id: 'enterpriseSearchElasticsearch',
+    title: 'Elasticsearch',
+    url: '/app/enterprise_search/elasticsearch',
+  },
+  {
+    id: 'enterpriseSearchVectorSearch',
+    title: 'Vector Search',
+    url: '/app/enterprise_search/vector_search',
+  },
+  {
+    id: 'enterpriseSearchSemanticSearch',
+    title: 'Semantic Search',
+    url: '/app/enterprise_search/semantic_search',
+  },
+  {
+    id: 'enterpriseSearchAISearch',
+    title: 'AI Search',
+    url: '/app/enterprise_search/ai_search',
+  },
+];
+
+const defaultMockValues = {
+  hasEnterpriseLicense: true,
+  isSidebarEnabled: true,
+  productAccess: DEFAULT_PRODUCT_ACCESS,
+  productFeatures: DEFAULT_PRODUCT_FEATURES,
+};
 
 describe('useEnterpriseSearchContentNav', () => {
   beforeEach(() => {
