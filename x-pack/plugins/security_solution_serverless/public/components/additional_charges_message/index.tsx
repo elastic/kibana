@@ -7,13 +7,13 @@
 import React from 'react';
 import type { Services } from '../../common/services';
 import { ServicesProvider } from '../../common/services';
-import { EnablementModalCallout } from './lazy';
+import { AdditionalChargesMessage } from './lazy';
 
-export const getEnablementModalCallout = (services: Services): React.ComponentType =>
-  function EnablementModalCalloutComponent() {
+export const getAdditionalChargesMessage = (services: Services): React.ComponentType =>
+  function AdditionalChargesMessageComponent() {
     return (
       <ServicesProvider services={services}>
-        <EnablementModalCallout />
+        <AdditionalChargesMessage />
       </ServicesProvider>
     );
   };
