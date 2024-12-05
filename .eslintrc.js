@@ -1663,7 +1663,9 @@ module.exports = {
     {
       // Source files only - allow `any` in test/mock files
       files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      excludedFiles: [
+        'x-pack/solutions/search/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1674,7 +1676,10 @@ module.exports = {
      */
     {
       // All files
-      files: ['x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}', 'packages/kbn-search-*'],
+      files: [
+        'x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}',
+        'packages/kbn-search-*',
+      ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
