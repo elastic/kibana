@@ -1712,20 +1712,6 @@
           },
           {
             "parentPluginId": "@kbn/reporting-public",
-            "id": "def-public.ClientConfigType.roles",
-            "type": "Object",
-            "tags": [],
-            "label": "roles",
-            "description": [],
-            "signature": [
-              "{ enabled: boolean; }"
-            ],
-            "path": "packages/kbn-reporting/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-public",
             "id": "def-public.ClientConfigType.export_types",
             "type": "Object",
             "tags": [],
