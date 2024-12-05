@@ -19,7 +19,7 @@ import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { syncSavedObjectsFactory } from '../saved_objects';
 
 export function inferenceModelRoutes(
-  { router, routeGuard }: RouteInitialization,
+  { router, routeGuard, getEnabledFeatures }: RouteInitialization,
   cloud: CloudSetup
 ) {
   router.versioned
@@ -48,7 +48,12 @@ export function inferenceModelRoutes(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
             const { inferenceId, taskType } = request.params;
-            const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
+            const body = await modelsProvider(
+              client,
+              mlClient,
+              cloud,
+              getEnabledFeatures()
+            ).createInferenceEndpoint(
               inferenceId,
               taskType as InferenceTaskType,
               request.body as InferenceInferenceEndpoint

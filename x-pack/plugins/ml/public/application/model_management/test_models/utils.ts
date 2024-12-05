@@ -11,21 +11,18 @@ import {
   SUPPORTED_PYTORCH_TASKS,
   type SupportedPytorchTasksType,
 } from '@kbn/ml-trained-models-utils';
-import type { ModelItem } from '../models_list';
+import type { TrainedModelUIItem } from '../../../../common/types/trained_models';
+import {
+  isDFAModelItem,
+  isExistingModel,
+  isNLPModelItem,
+} from '../../../../common/types/trained_models';
 
 const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
 
-export function isDfaTrainedModel(modelItem: ModelItem) {
-  return (
-    modelItem.metadata?.analytics_config !== undefined ||
-    modelItem.inference_config?.regression !== undefined ||
-    modelItem.inference_config?.classification !== undefined
-  );
-}
-
-export function isTestable(modelItem: ModelItem, checkForState = false) {
+export function isTestable(modelItem: TrainedModelUIItem, checkForState = false) {
   if (
-    modelItem.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+    isNLPModelItem(modelItem) &&
     PYTORCH_TYPES.includes(
       Object.keys(modelItem.inference_config ?? {})[0] as SupportedPytorchTasksType
     ) &&
@@ -35,9 +32,9 @@ export function isTestable(modelItem: ModelItem, checkForState = false) {
     return true;
   }
 
-  if (modelItem.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
+  if (isExistingModel(modelItem) && modelItem.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
     return true;
   }
 
-  return isDfaTrainedModel(modelItem);
+  return isDFAModelItem(modelItem);
 }
