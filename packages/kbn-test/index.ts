@@ -22,6 +22,7 @@ export {
   remapPluginPaths,
   getKibanaCliArg,
   getKibanaCliLoggers,
+  cleanupElasticsearch,
 } from './src/functional_tests/lib';
 
 export { initLogsDir } from './src/functional_tests/lib';
