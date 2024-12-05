@@ -136,6 +136,7 @@ describe('action_type_form', () => {
     const wrapper = mountWithIntl(
       getActionTypeForm({
         index: 1,
+        ruleTypeId: '.es-query',
         actionItem: {
           id: '123',
           actionTypeId: '.pagerduty',
@@ -190,6 +191,7 @@ describe('action_type_form', () => {
       <I18nProvider>
         {getActionTypeForm({
           index: 1,
+          ruleTypeId: '.es-query',
           actionItem: {
             id: '123',
             actionTypeId: '.pagerduty',
@@ -239,6 +241,7 @@ describe('action_type_form', () => {
       <I18nProvider>
         {getActionTypeForm({
           index: 1,
+          ruleTypeId: 'siem.esqlRule',
           actionItem: {
             id: '123',
             actionTypeId: '.pagerduty',
@@ -288,6 +291,7 @@ describe('action_type_form', () => {
     const wrapper = mountWithIntl(
       getActionTypeForm({
         index: 1,
+        ruleTypeId: '.es-query',
         actionItem: {
           id: '123',
           actionTypeId: '.pagerduty',
@@ -340,6 +344,7 @@ describe('action_type_form', () => {
     const wrapper = mountWithIntl(
       getActionTypeForm({
         index: 1,
+        ruleTypeId: '.es-query',
         actionItem: {
           id: '123',
           actionTypeId: '.pagerduty',
@@ -413,6 +418,7 @@ describe('action_type_form', () => {
         {getActionTypeForm({
           index: 1,
           actionItem,
+          ruleTypeId: '.es-query',
           setActionFrequencyProperty: () => {
             actionItem.frequency = {
               notifyWhen: RuleNotifyWhen.ACTIVE,
@@ -551,6 +557,7 @@ describe('action_type_form', () => {
         <IntlProvider locale="en">
           {getActionTypeForm({
             index: 1,
+            ruleTypeId: '.es-query',
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
           })}
@@ -604,6 +611,7 @@ describe('action_type_form', () => {
         <IntlProvider locale="en">
           {getActionTypeForm({
             index: 1,
+            ruleTypeId: '.es-query',
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
           })}
@@ -664,7 +672,7 @@ function getActionTypeForm({
   messageVariables?: ActionVariables;
   summaryMessageVariables?: ActionVariables;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
-  ruleTypeId?: string;
+  ruleTypeId: string;
   producerId?: string;
   featureId?: string;
 }) {
