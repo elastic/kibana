@@ -65,11 +65,8 @@ export function getDashboardApi({
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
 
   const viewModeManager = initializeViewModeManager(incomingEmbeddable, savedObjectResult);
-  // panelsManager is assigned after trackPanel
-  // eslint-disable-next-line prefer-const
-  let panelsManager: ReturnType<typeof initializePanelsManager> | undefined;
-  const trackPanel = initializeTrackPanel(async (id: string) =>
-    panelsManager ? await panelsManager.api.untilEmbeddableLoaded(id) : undefined
+  const trackPanel = initializeTrackPanel(
+    async (id: string) => await panelsManager.api.untilEmbeddableLoaded(id)
   );
   function getPanelReferences(id: string) {
     const panelReferences = getReferencesForPanelId(id, references);
@@ -77,7 +74,7 @@ export function getDashboardApi({
     // fall back to passing all references in these cases to preserve backwards compatability
     return panelReferences.length > 0 ? panelReferences : references;
   }
-  panelsManager = initializePanelsManager(
+  const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
     initialPanelsRuntimeState ?? {},
@@ -90,15 +87,11 @@ export function getDashboardApi({
     controlGroupApi$,
     panelsManager.api.children$
   );
-  // unsavedChangesManager is assigned after unifiedSearchManager
-  // eslint-disable-next-line prefer-const
-  let unsavedChangesManager: ReturnType<typeof initializeUnsavedChangesManager> | undefined;
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
     controlGroupApi$,
     dataLoadingManager.internalApi.waitForPanelsToLoad$,
-    () =>
-      unsavedChangesManager ? unsavedChangesManager.internalApi.getLastSavedState() : undefined,
+    () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
   const settingsManager = initializeSettingsManager({
@@ -106,7 +99,7 @@ export function getDashboardApi({
     setTimeRestore: unifiedSearchManager.internalApi.setTimeRestore,
     timeRestore$: unifiedSearchManager.internalApi.timeRestore$,
   });
-  unsavedChangesManager = initializeUnsavedChangesManager({
+  const unsavedChangesManager = initializeUnsavedChangesManager({
     anyMigrationRun: savedObjectResult?.anyMigrationRun ?? false,
     creationOptions,
     controlGroupApi$,
@@ -120,7 +113,7 @@ export function getDashboardApi({
     unifiedSearchManager,
   });
   async function getState() {
-    const { panels, references: panelReferences } = await panelsManager!.internalApi.getState();
+    const { panels, references: panelReferences } = await panelsManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.getState(),
       ...unifiedSearchManager.internalApi.getState(),
@@ -189,7 +182,7 @@ export function getDashboardApi({
       });
 
       if (saveResult) {
-        unsavedChangesManager!.internalApi.onSave(saveResult.savedState);
+        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
@@ -217,7 +210,7 @@ export function getDashboardApi({
         lastSavedId: savedObjectId$.value,
       });
 
-      unsavedChangesManager!.internalApi.onSave(dashboardState);
+      unsavedChangesManager.internalApi.onSave(dashboardState);
       references = saveResult.references ?? [];
 
       return;
@@ -275,7 +268,7 @@ export function getDashboardApi({
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
-      unsavedChangesManager!.cleanup();
+      unsavedChangesManager.cleanup();
     },
   };
 }
