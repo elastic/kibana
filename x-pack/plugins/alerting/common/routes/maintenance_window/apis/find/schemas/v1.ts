@@ -10,6 +10,13 @@ import { maintenanceWindowResponseSchemaV1 } from '../../../response';
 
 const MAX_DOCS = 10000;
 
+const statusSchema = schema.oneOf([
+  schema.literal('running'),
+  schema.literal('finished'),
+  schema.literal('upcoming'),
+  schema.literal('archived')
+]);
+
 export const findMaintenanceWindowsRequestQuerySchema = schema.object(
   {
     // we do not need to use schema.maybe here, because if we do not pass property page, defaultValue will be used
@@ -21,7 +28,7 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
         description: 'The page number to return.',
       },
     }),
-    // we do not need to use schema.maybe here, because if we do not pass property per_page, defaultValue will be used
+    // we do not need to use schema.maybe here, because if we do not pass property page, defaultValue will be used
     per_page: schema.number({
       defaultValue: 1000,
       min: 0,
@@ -30,21 +37,17 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
         description: 'The number of maintenance windows to return per page.',
       },
     }),
-    search: schema.string({
-      defaultValue: '',
+    search: schema.maybe(schema.string({
       meta: {
-        description: 'The search query string for filtering results.',
+        description: 'An Elasticsearch simple_query_string query that filters the objects in the response.',
       },
-    }),
+    })),
     statuses: schema.maybe(
+      schema.oneOf([
+        statusSchema,
       schema.arrayOf(
-        schema.oneOf([
-          schema.literal('running'),
-          schema.literal('finished'),
-          schema.literal('upcoming'),
-          schema.literal('archived'),
-        ])
-      )
+        statusSchema
+      )])
     )
   },
   {

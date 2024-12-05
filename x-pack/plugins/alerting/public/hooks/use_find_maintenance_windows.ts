@@ -13,18 +13,16 @@ import { type MaintenanceWindowStatus } from '../../common';
 
 interface UseFindMaintenanceWindowsProps {
   enabled?: boolean;
-  // filterOptions?: Partial<FilterOptions>;
   page: number;
   perPage: number;
-  // search: string;
-  // statuses: MaintenanceWindowStatus[]
-  filters: { searchText: string; selectedStatuses: MaintenanceWindowStatus[] }
+  searchText: string;
+  selectedStatuses: MaintenanceWindowStatus[];
 }
 
 export const useFindMaintenanceWindows = (
   params: UseFindMaintenanceWindowsProps
 ) => {
-  const { enabled = true, page, perPage, filters } = params;
+  const { enabled = true, page, perPage, searchText, selectedStatuses } = params;
 
   const {
     http,
@@ -35,18 +33,10 @@ export const useFindMaintenanceWindows = (
     // remove http from params
     return findMaintenanceWindows({
       http,
-      // filterOptions: {
-      //   ...MAINTENANCE_WINDOW_DEFAULT_FILTER_OPTIONS,
-      //   ...(filterOptions ?? {}),
-      // },
       page,
       perPage,
-      // statuses,
-      search: filters.searchText,
-      // queryParams: {
-      //   ...MAINTENANCE_WINDOW_DEFAULT_QUERY_PARAMS,
-      //   ...({ page, perPage } ?? {}), //cannot be
-      // },
+      searchText,
+      selectedStatuses
     });
   };
 
@@ -65,8 +55,8 @@ export const useFindMaintenanceWindows = (
     'findMaintenanceWindows',
     ...(page ? [page] : []),
     ...(perPage ? [perPage] : []),
-    // ...(statuses ? [statuses] : []), // add 2 last lines and everything failed!!!
-    ...(filters.searchText ? [filters.searchText] : []), // add 2 last lines and everything failed!!!
+    ...(searchText ? [searchText] : []),
+    ...(selectedStatuses ? [selectedStatuses] : [])
   ];
 
   const {
