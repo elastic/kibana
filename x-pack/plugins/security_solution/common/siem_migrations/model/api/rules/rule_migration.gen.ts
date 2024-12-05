@@ -17,21 +17,29 @@
 import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
+import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import {
-  OriginalRule,
   ElasticRulePartial,
   RuleMigrationTranslationResult,
   RuleMigrationComments,
-  PrebuiltRuleVersion,
   RuleMigrationTaskStats,
+  OriginalRule,
   RuleMigration,
   RuleMigrationTranslationStats,
+  PrebuiltRuleVersion,
   RuleMigrationResourceData,
   RuleMigrationResourceType,
   RuleMigrationResource,
 } from '../../rule_migration.gen';
-import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { ConnectorId, LangSmithOptions } from '../../common.gen';
+
+export type CreateRuleMigrationRequestParams = z.infer<typeof CreateRuleMigrationRequestParams>;
+export const CreateRuleMigrationRequestParams = z.object({
+  migration_id: NonEmptyString.optional(),
+});
+export type CreateRuleMigrationRequestParamsInput = z.input<
+  typeof CreateRuleMigrationRequestParams
+>;
 
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
 export const CreateRuleMigrationRequestBody = z.array(OriginalRule);

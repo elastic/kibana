@@ -171,15 +171,11 @@ export const installTranslated = async ({
   const detectionRulesClient = securitySolutionContext.getDetectionRulesClient();
   const ruleMigrationsClient = securitySolutionContext.getSiemRuleMigrationsClient();
 
-  const { data: rulesToInstall } = await ruleMigrationsClient.data.rules.get(
-    {
-      migrationId,
-      ids,
-      installable: true,
-    },
-    0,
-    MAX_TRANSLATED_RULES_TO_INSTALL
-  );
+  const { data: rulesToInstall } = await ruleMigrationsClient.data.rules.get(migrationId, {
+    filters: { ids, installable: true },
+    from: 0,
+    size: MAX_TRANSLATED_RULES_TO_INSTALL,
+  });
 
   const { customRulesToInstall, prebuiltRulesToInstall } = rulesToInstall.reduce(
     (acc, item) => {
