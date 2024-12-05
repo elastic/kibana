@@ -88,7 +88,7 @@
       "platform/packages/shared/ml/anomaly_utils",
       "platform/packages/private/ml/creation_wizard_utils",
       "platform/packages/private/ml/data_grid",
-      "packages/ml/data_view_utils",
+      "platform/packages/private/ml/data_view_utils",
       "packages/ml/date_picker",
       "packages/ml/field_stats_flyout",
       "platform/packages/private/ml/inference_integration_flyout",
