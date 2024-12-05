@@ -23,13 +23,13 @@ import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/cons
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
-import type { GetRuleMigrationsStatsAllParams } from '../api/api';
 import {
   createRuleMigration,
   getRuleMigrationStats,
   getRuleMigrationsStatsAll,
   startRuleMigration,
-} from '../api/api';
+  type GetRuleMigrationsStatsAllParams,
+} from '../api';
 import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
