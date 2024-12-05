@@ -789,7 +789,7 @@ describe('<SnapshotRestoreHome />', () => {
                 };
 
                 const mapStateToMessage = {
-                  [SNAPSHOT_STATE.IN_PROGRESS]: 'In Progress',
+                  [SNAPSHOT_STATE.IN_PROGRESS]: 'In progress',
                   [SNAPSHOT_STATE.FAILED]: 'Failed',
                   [SNAPSHOT_STATE.PARTIAL]: 'Partial',
                   [SNAPSHOT_STATE.SUCCESS]: 'Complete',
