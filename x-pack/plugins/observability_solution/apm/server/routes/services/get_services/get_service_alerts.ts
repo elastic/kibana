@@ -86,7 +86,6 @@ export async function getServicesAlerts({
     },
   };
 
-  console.log('APM - PARAMS', JSON.stringify(params));
 
   const result = await apmAlertsClient.search(params);
 
