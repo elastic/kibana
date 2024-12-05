@@ -12,6 +12,7 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -35,7 +36,12 @@ import {
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
-import { createGetElserId, createPipeline, pipelineExists } from './helpers';
+import {
+  createGetElserId,
+  createPipeline,
+  ensureProductDocumentationInstalled,
+  pipelineExists,
+} from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -51,6 +57,7 @@ export interface AIAssistantServiceOpts {
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
+  productDocManager: Promise<ProductDocBaseStartContract['management']>;
 }
 
 export interface CreateAIAssistantClientParams {
@@ -87,6 +94,7 @@ export class AIAssistantService {
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: boolean = false;
   private hasInitializedV2KnowledgeBase: boolean = false;
+  private productDocManager?: ProductDocBaseStartContract['management'];
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -129,6 +137,13 @@ export class AIAssistantService {
       this.initPromise,
       this.installAndUpdateSpaceLevelResources.bind(this)
     );
+    options.productDocManager
+      .then((productDocManager) => {
+        this.productDocManager = productDocManager;
+      })
+      .catch((error) => {
+        this.options.logger.warn(`Failed to initialize productDocManager: ${error.message}`);
+      });
   }
 
   public isInitialized() {
@@ -182,6 +197,11 @@ export class AIAssistantService {
     try {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
       const esClient = await this.options.elasticsearchClientPromise;
+
+      if (this.productDocManager) {
+        // install product documentation without blocking other resources
+        void ensureProductDocumentationInstalled(this.productDocManager, this.options.logger);
+      }
 
       await this.conversationsDataStream.install({
         esClient,
