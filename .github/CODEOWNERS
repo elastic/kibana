@@ -416,7 +416,6 @@ packages/kbn-management/settings/types @elastic/kibana-management
 packages/kbn-management/settings/utilities @elastic/kibana-management
 packages/kbn-management/storybook/config @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
-packages/kbn-mapbox-gl @elastic/kibana-presentation
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
@@ -621,6 +620,7 @@ packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
+src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
