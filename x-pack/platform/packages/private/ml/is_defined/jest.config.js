@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ml/is_defined'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/private/ml/is_defined'],
 };
