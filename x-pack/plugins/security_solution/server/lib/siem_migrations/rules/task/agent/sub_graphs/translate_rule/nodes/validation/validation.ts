@@ -7,8 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import { isEmpty } from 'lodash/fp';
+import { parseEsqlQuery } from '@kbn/securitysolution-utils';
 import type { GraphNode } from '../../types';
-import { parseEsqlQuery } from './esql_query';
 
 interface GetValidationNodeParams {
   logger: Logger;
