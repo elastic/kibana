@@ -132,7 +132,9 @@ export class AutoOpsAPIService {
           this.logger.error(
             `${AUTO_OPS_REQUEST_FAILED_PREFIX} because the AutoOps API responded with a status code that falls out of the range of 2xx: ${JSON.stringify(
               error.response.status
-            )}} ${JSON.stringify(error.response.data)}}, request config: ${requestConfigDebugStatus}`,
+            )}} ${JSON.stringify(
+              error.response.data
+            )}}, request config: ${requestConfigDebugStatus}`,
             {
               ...errorMetadataWithRequestConfig,
               http: {
