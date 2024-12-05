@@ -123,8 +123,6 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       }).then((unzippedFileContent) => {
         expect(unzippedFileContent).to.contain(fileContent);
       });
-
-      throw new Error('test test test');
     });
 
     it('"upload --file" - should upload a file', () => {
