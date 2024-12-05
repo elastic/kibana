@@ -14,6 +14,7 @@ import { mount } from 'enzyme';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { ModalService } from './modal_service';
 import type { OverlayModalStart } from '@kbn/core-overlays-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
@@ -22,6 +23,7 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 const analyticsMock = analyticsServiceMock.createAnalyticsServiceStart();
 const i18nMock = i18nServiceMock.createStartContract();
 const themeMock = themeServiceMock.createStartContract();
+const userProfileMock = userProfileServiceMock.createStart();
 
 beforeEach(() => {
   mockReactDomRender.mockClear();
@@ -34,6 +36,7 @@ const getServiceStart = () => {
     analytics: analyticsMock,
     i18n: i18nMock,
     theme: themeMock,
+    userProfile: userProfileMock,
     targetDomElement: document.createElement('div'),
   });
 };
