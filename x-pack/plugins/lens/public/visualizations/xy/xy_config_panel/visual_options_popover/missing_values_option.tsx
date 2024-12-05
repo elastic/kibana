@@ -119,9 +119,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                 />
               </EuiFormRow>
               <EuiFormRow
-                css={css`
-                  max-inline-size: none !important;
-                `}
+                 fullWidth
                 label={i18n.translate('xpack.lens.xyChart.missingValuesStyle', {
                   defaultMessage: 'Show as dotted line',
                 })}
