@@ -447,7 +447,7 @@
     "@kbn/deeplinks-observability": "link:packages/deeplinks/observability",
     "@kbn/deeplinks-search": "link:packages/deeplinks/search",
     "@kbn/deeplinks-security": "link:packages/deeplinks/security",
-    "@kbn/deeplinks-shared": "link:packages/deeplinks/shared",
+    "@kbn/deeplinks-shared": "link:src/platform/packages/shared/deeplinks/shared",
     "@kbn/default-nav-analytics": "link:packages/default-nav/analytics",
     "@kbn/default-nav-devtools": "link:packages/default-nav/devtools",
     "@kbn/default-nav-management": "link:packages/default-nav/management",
