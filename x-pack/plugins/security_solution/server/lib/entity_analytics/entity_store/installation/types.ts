@@ -20,7 +20,6 @@ export interface EntityEngineInstallationDescriptor {
   id: string;
   version: string;
   entityType: EntityType;
-
   identityFields: string[];
 
   /**
@@ -60,6 +59,17 @@ export interface EntityEngineInstallationDescriptor {
   pipeline:
     | IngestProcessorContainer[]
     | ((defaultProcessors: IngestProcessorContainer[]) => IngestProcessorContainer[]);
+
+  // /**
+  //  * The options for the field retention enrich policy.
+  //  * Used to determine which fields to retain.
+  //  * Values are:
+  //  * `all` - retain all fields,
+  //  * `pattern` - retain fields that match a pattern.
+  //  */
+  // retentionStrategy: { select: 'all' } | { select: 'pattern'; pattern: string };
+
+  dynamic: boolean;
 }
 
 export type FieldDescription = EntityDefinitionMetadataElement & {

@@ -70,6 +70,8 @@ export const createEngineDescription = (options: EngineDescriptionParams) => {
     update('settings', assign(settings)),
     updateIndexPatterns(indexPatterns),
     updateRetentionFields(fieldHistoryLength),
+    setDefaultFieldRetentionStrategy,
+    setDefaultDynamic,
     addIndexMappings
   ) as EntityEngineInstallationDescriptor;
 
@@ -92,3 +94,10 @@ const updateRetentionFields = (fieldHistoryLength: number) =>
 
 const addIndexMappings = (description: EntityEngineInstallationDescriptor) =>
   set('indexMappings', generateIndexMappings(description), description);
+
+const setDefaultFieldRetentionStrategy = update(
+  'retentionStrategy',
+  (strat = { select: 'all' }) => strat
+);
+
+const setDefaultDynamic = update('dynamic', (dynamic = false) => dynamic);
