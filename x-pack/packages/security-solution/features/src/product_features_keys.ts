@@ -118,6 +118,13 @@ export enum ProductFeatureTimelineFeatureKey {
   timeline = 'timeline',
 }
 
+export enum ProductFeatureNotesFeatureKey {
+  /**
+   * Enables Notes
+   */
+  notes = 'notes',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
@@ -125,6 +132,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureAssistantKey,
   ...ProductFeatureAttackDiscoveryKey,
   ...ProductFeatureTimelineFeatureKey,
+  ...ProductFeatureNotesFeatureKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -132,7 +140,8 @@ export type ProductFeatureKeyType =
   | ProductFeatureCasesKey
   | ProductFeatureAssistantKey
   | ProductFeatureAttackDiscoveryKey
-  | ProductFeatureTimelineFeatureKey;
+  | ProductFeatureTimelineFeatureKey
+  | ProductFeatureNotesFeatureKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 

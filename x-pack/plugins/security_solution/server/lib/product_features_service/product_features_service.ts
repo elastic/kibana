@@ -23,6 +23,7 @@ import {
   getCasesV2Feature,
   getSecurityV2Feature,
   getTimelineFeature,
+  getNotesFeature,
 } from '@kbn/security-solution-features/product_features';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { ExperimentalFeatures } from '../../../common';
@@ -31,6 +32,7 @@ import { ProductFeatures } from './product_features';
 import type { ProductFeaturesConfigurator } from './types';
 import {
   securityDefaultSavedObjects,
+  securityNotesSavedObjects,
   securityTimelineSavedObjects,
 } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
@@ -46,6 +48,7 @@ export class ProductFeaturesService {
   private securityAssistantProductFeatures: ProductFeatures;
   private attackDiscoveryProductFeatures: ProductFeatures;
   private timelineProductFeatures: ProductFeatures;
+  private notesProductFeatures: ProductFeatures;
   private productFeatures?: Set<ProductFeatureKeyType>;
 
   constructor(
@@ -118,12 +121,24 @@ export class ProductFeaturesService {
 
     const timelineFeature = getTimelineFeature({
       savedObjects: securityTimelineSavedObjects,
+      experimentalFeatures: {},
     });
     this.timelineProductFeatures = new ProductFeatures(
       this.logger,
       timelineFeature.subFeaturesMap,
       timelineFeature.baseKibanaFeature,
       timelineFeature.baseKibanaSubFeatureIds
+    );
+
+    const notesFeature = getNotesFeature({
+      savedObjects: securityNotesSavedObjects,
+      experimentalFeatures: {},
+    });
+    this.notesProductFeatures = new ProductFeatures(
+      this.logger,
+      notesFeature.subFeaturesMap,
+      notesFeature.baseKibanaFeature,
+      notesFeature.baseKibanaSubFeatureIds
     );
   }
 
@@ -135,6 +150,7 @@ export class ProductFeaturesService {
     this.securityAssistantProductFeatures.init(featuresSetup);
     this.attackDiscoveryProductFeatures.init(featuresSetup);
     this.timelineProductFeatures.init(featuresSetup);
+    this.notesProductFeatures.init(featuresSetup);
   }
 
   public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
@@ -155,6 +171,9 @@ export class ProductFeaturesService {
     const timelineProductFeaturesConfig = configurator.timeline();
     this.timelineProductFeatures.setConfig(timelineProductFeaturesConfig);
 
+    const notesProductFeaturesConfig = configurator.notes();
+    this.notesProductFeatures.setConfig(notesProductFeaturesConfig);
+
     this.productFeatures = new Set<ProductFeatureKeyType>(
       Object.freeze([
         ...securityProductFeaturesConfig.keys(),
@@ -162,6 +181,7 @@ export class ProductFeaturesService {
         ...securityAssistantProductFeaturesConfig.keys(),
         ...attackDiscoveryProductFeaturesConfig.keys(),
         ...timelineProductFeaturesConfig.keys(),
+        ...notesProductFeaturesConfig.keys(),
       ]) as readonly ProductFeatureKeyType[]
     );
   }
@@ -181,7 +201,8 @@ export class ProductFeaturesService {
       this.casesProductV2Features.isActionRegistered(action) ||
       this.securityAssistantProductFeatures.isActionRegistered(action) ||
       this.attackDiscoveryProductFeatures.isActionRegistered(action) ||
-      this.timelineProductFeatures.isActionRegistered(action)
+      this.timelineProductFeatures.isActionRegistered(action) ||
+      this.notesProductFeatures.isActionRegistered(action)
     );
   }
 

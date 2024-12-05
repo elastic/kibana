@@ -10,3 +10,4 @@ export { getCasesFeature, getCasesV2Feature } from './src/cases';
 export { getAssistantFeature } from './src/assistant';
 export { getAttackDiscoveryFeature } from './src/attack_discovery';
 export { getTimelineFeature } from './src/timeline';
+export { getNotesFeature } from './src/notes';

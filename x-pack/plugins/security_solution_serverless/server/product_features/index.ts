@@ -14,6 +14,7 @@ import { getCasesProductFeaturesConfigurator } from './cases_product_features_co
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
 import { getTimelineProductFeaturesConfigurator } from './timeline_product_features_config';
+import { getNotesProductFeaturesConfigurator } from './notes_product_features_config';
 import { enableRuleActions } from '../rules/enable_rule_actions';
 import type { ServerlessSecurityConfig } from '../config';
 import type { Tier, SecuritySolutionServerlessPluginSetupDeps } from '../types';
@@ -42,6 +43,7 @@ export const registerProductFeatures = (
     cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
     securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
     timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
+    notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
   });
 
   // enable rule actions based on the enabled product features

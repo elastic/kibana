@@ -27,6 +27,7 @@ import {
   CLOUD_DEFEND_APP_ID,
   SECURITY_FEATURE_ID_V2,
   TIMELINE_FEATURE_ID,
+  NOTES_FEATURE_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -92,7 +93,7 @@ export const getSecurityBaseKibanaFeature = ({
       replacedBy: [
         { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
         { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
-        // TODO: add notes
+        { feature: NOTES_FEATURE_ID, privileges: ['all'] },
       ],
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
@@ -128,7 +129,7 @@ export const getSecurityBaseKibanaFeature = ({
       replacedBy: [
         { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
         { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
-        // TODO: add notes
+        { feature: NOTES_FEATURE_ID, privileges: ['read'] },
       ],
 
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],

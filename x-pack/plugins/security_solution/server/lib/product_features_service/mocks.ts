@@ -149,6 +149,23 @@ export const createProductFeaturesServiceMock = (
           ])
         )
       ),
+      notes: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  ui: ['entity-analytics'],
+                },
+                read: {
+                  ui: ['entity-analytics'],
+                },
+              },
+            },
+          ])
+        )
+      ),
     });
   }
 

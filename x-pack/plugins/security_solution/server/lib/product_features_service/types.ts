@@ -18,4 +18,5 @@ export interface ProductFeaturesConfigurator {
   cases: () => ProductFeaturesConfig<CasesSubFeatureId>;
   securityAssistant: () => ProductFeaturesConfig<AssistantSubFeatureId>;
   timeline: () => ProductFeaturesConfig;
+  notes: () => ProductFeaturesConfig;
 }

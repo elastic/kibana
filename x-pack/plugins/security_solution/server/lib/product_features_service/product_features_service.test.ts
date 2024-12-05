@@ -91,6 +91,7 @@ describe('ProductFeaturesService', () => {
     const mockAssistantConfig = new Map() as ProductFeaturesConfig<AssistantSubFeatureId>;
     const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfig;
     const mockTimelineConfig = new Map() as ProductFeaturesConfig;
+    const mockNotesConfig = new Map() as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
       attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
@@ -98,6 +99,7 @@ describe('ProductFeaturesService', () => {
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
       timeline: jest.fn(() => mockTimelineConfig),
+      notes: jest.fn(() => mockNotesConfig),
     };
     productFeaturesService.setProductFeaturesConfigurator(configurator);
 
@@ -142,6 +144,7 @@ describe('ProductFeaturesService', () => {
       [ProductFeatureKey.attackDiscovery, {}],
     ]) as ProductFeaturesConfig;
     const mockTimelineConfig = new Map([[ProductFeatureKey.timeline, {}]]) as ProductFeaturesConfig;
+    const mockNotesConfig = new Map([[ProductFeatureKey.notes, {}]]) as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
       attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
@@ -149,6 +152,7 @@ describe('ProductFeaturesService', () => {
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
       timeline: jest.fn(() => mockTimelineConfig),
+      notes: jest.fn(() => mockNotesConfig),
     };
     productFeaturesService.setProductFeaturesConfigurator(configurator);
 

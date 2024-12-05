@@ -10,5 +10,6 @@ export { getCasesDefaultProductFeaturesConfig } from './src/cases/product_featur
 export { assistantDefaultProductFeaturesConfig } from './src/assistant/product_feature_config';
 export { attackDiscoveryDefaultProductFeaturesConfig } from './src/attack_discovery/product_feature_config';
 export { timelineDefaultProductFeaturesConfig } from './src/timeline/product_feature_config';
+export { notesDefaultProductFeaturesConfig } from './src/notes/product_feature_config';
 
 export { createEnabledProductFeaturesConfigMap } from './src/helpers';
