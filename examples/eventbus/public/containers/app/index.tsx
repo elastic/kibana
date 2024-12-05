@@ -22,6 +22,7 @@ import { Options } from '../../components/options';
 import { AiopsWrapper } from '../../components/aiops_wrapper';
 import { DateHistogram } from '../../components/date_histogram';
 import { HistogramWrapper } from '../../components/histogram_wrapper';
+import { GenAI } from '../../components/genai';
 import { Esql } from '../../components/esql';
 import { Fields } from '../../components/fields';
 import { Logs } from '../../components/logs';
@@ -43,6 +44,8 @@ export const App: FC = () => {
       .map((d) => d[0])
   );
 
+  const genaiEnabled = state.useState((s) => s.genaiEnabled);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
@@ -56,19 +59,13 @@ export const App: FC = () => {
       <State />
       <EuiPageTemplate restrictWidth={false} offset={0}>
         <EuiPageTemplate.Section>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <Esql />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <Options />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
+          <Esql />
           <EuiSpacer size="s" />
           <div data-test-id="eventBusExampleLogs" css={{ width: '100%' }}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
+                <Options />
+                <EuiSpacer size="s" />
                 <Fields />
               </EuiFlexItem>
               <EuiFlexItem css={{ minWidth: 0, overflow: 'hidden' }}>
@@ -85,6 +82,11 @@ export const App: FC = () => {
                   )}
                 </EuiResizeObserver>
               </EuiFlexItem>
+              {genaiEnabled && (
+                <EuiFlexItem grow={false}>
+                  <GenAI />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </div>
         </EuiPageTemplate.Section>
