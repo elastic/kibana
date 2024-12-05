@@ -292,7 +292,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-resizable-layout/,
         /^packages\/kbn-rison/,
         /^packages\/kbn-rule-data-utils/,
-        /^packages\/kbn-safer-lodash-set/,
+        /^src\/platform\/packages\/shared\/kbn-safer-lodash-set/,
         /^packages\/kbn-search-types/,
         /^packages\/kbn-securitysolution-.*/,
         /^packages\/kbn-securitysolution-ecs/,
