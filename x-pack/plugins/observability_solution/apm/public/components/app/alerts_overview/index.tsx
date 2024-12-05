@@ -14,8 +14,8 @@ import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  apmAlertingConsumers,
-  apmAlertingRuleTypeIds,
+  APM_ALERTING_CONSUMERS,
+  APM_ALERTING_RULE_TYPE_IDS,
 } from '../../../../common/alerting/config/apm_alerting_feature_ids';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -111,8 +111,8 @@ export function AlertsOverview() {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               id={'service-overview-alerts'}
               configurationId={AlertConsumers.OBSERVABILITY}
-              ruleTypeIds={apmAlertingRuleTypeIds}
-              consumers={apmAlertingConsumers}
+              ruleTypeIds={APM_ALERTING_RULE_TYPE_IDS}
+              consumers={APM_ALERTING_CONSUMERS}
               query={esQuery}
               showAlertStatusWithFlapping
               cellContext={{ observabilityRuleTypeRegistry }}
