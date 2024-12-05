@@ -416,6 +416,19 @@ export class AlertingEventLogger {
       })
     );
   }
+
+  public updateGap({ _id, gap }: { _id: string; gap: {} }): void {
+    // TODO: Extract function to form gap document
+    this.eventLogger.updateEvent(_id, {
+      kibana: {
+        alert: {
+          rule: {
+            gap,
+          },
+        },
+      },
+    });
+  }
 }
 
 export function createAlertRecord(

@@ -15,21 +15,20 @@ export async function getTotalUnfilledGapDuration(params: {
   logger: Logger;
 }): Promise<{
   unfiled_gap_duration_ms: {
-    "1d": number;
-    "3d": number;
-    "7d": number;
+    '1d': number;
+    '3d': number;
+    '7d': number;
   };
 }> {
   const { ruleId, timeRange, eventLog, logger } = params;
 
   try {
-    
-    const aggs = // eventLog...
+    const aggs = {}; // eventLog...
     return {
       unfiled_gap_duration_ms: {
-       "1d": 0,
-        "3d": 0,
-        "7d": 0,
+        '1d': 0,
+        '3d': 0,
+        '7d': 0,
       },
     };
   } catch (err) {

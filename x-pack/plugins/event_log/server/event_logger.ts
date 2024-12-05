@@ -107,6 +107,22 @@ export class EventLogger implements IEventLogger {
       logEventDoc(this.systemLogger, doc);
     }
   }
+
+  updateEvent(id: string, event: IEvent): void {
+    const doc: Required<Doc> = {
+      index: this.esContext.esNames.dataStream,
+      body: event,
+      id,
+    };
+
+    if (this.eventLogService.isIndexingEntries()) {
+      updateEventDoc(this.esContext, doc);
+    }
+
+    if (this.eventLogService.isLoggingEntries()) {
+      logUpdateEventDoc(this.systemLogger, doc);
+    }
+  }
 }
 
 // return the epoch millis of the start date, or null; may be NaN if garbage
@@ -161,6 +177,14 @@ function logEventDoc(logger: Logger, doc: Doc): void {
   logger.info(`event logged: ${JSON.stringify(doc.body)}`);
 }
 
+function logUpdateEventDoc(logger: Logger, doc: Doc): void {
+  logger.info(`event updated: ${JSON.stringify(doc.body)}`);
+}
+
 function indexEventDoc(esContext: EsContext, doc: Doc): void {
   esContext.esAdapter.indexDocument(doc);
+}
+
+function updateEventDoc(esContext: EsContext, doc: Required<Doc>): void {
+  esContext.esAdapter.updateDocument(doc);
 }

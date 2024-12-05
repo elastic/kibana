@@ -42,6 +42,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_o
 import { TaskRunnerFactory } from '../task_runner';
 import { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
+import { updateGaps } from '../lib/rule_gaps/update_gaps';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
 
@@ -92,6 +93,9 @@ export class BackfillClient {
     ruleTypeRegistry,
     spaceId,
     unsecuredSavedObjectsClient,
+    eventLogClient,
+    internalSavedObjectsRepository,
+    eventLogger,
   }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const adHocSOsToCreate: Array<SavedObjectsBulkCreateObject<AdHocRunSO>> = [];
 
@@ -211,10 +215,11 @@ export class BackfillClient {
 
     // Build array of tasks to schedule
     const adHocTasksToSchedule: TaskInstance[] = [];
+    const backfullsToSchedule: Backfill[] = [];
     createSOResult.forEach((result: ScheduleBackfillResult) => {
       if (!(result as ScheduleBackfillError).error) {
         const createdSO = result as Backfill;
-
+        backfullsToSchedule.push(createdSO);
         const ruleTypeTimeout = ruleTypeRegistry.get(createdSO.rule.alertTypeId).ruleTaskTimeout;
         adHocTasksToSchedule.push({
           id: createdSO.id,
@@ -232,6 +237,30 @@ export class BackfillClient {
     if (adHocTasksToSchedule.length > 0) {
       const taskManager = await this.taskManagerStartPromise;
       await taskManager.bulkSchedule(adHocTasksToSchedule);
+    }
+
+    try {
+      // TODO: make it parallel
+
+      backfullsToSchedule.forEach((backfill) => {
+        console.log('backfill client update', JSON.stringify(backfill));
+        updateGaps({
+          ruleId: backfill.rule.id,
+          start: new Date(backfill.start),
+          end: backfill?.end ? new Date(backfill.end) : new Date(),
+          eventLogger,
+          eventLogClient,
+          savedObjectsClient: internalSavedObjectsRepository,
+          logger: this.logger,
+          needToFillGaps: false,
+        });
+      });
+    } catch {
+      this.logger.warn(
+        `Error updating gaps ƒor backfill jobs: ${backfullsToSchedule
+          .map((backfill) => backfill.id)
+          .join(', ')}`
+      );
     }
 
     return createSOResult;

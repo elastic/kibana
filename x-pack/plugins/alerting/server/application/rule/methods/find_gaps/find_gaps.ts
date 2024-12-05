@@ -9,13 +9,18 @@ import Boom from '@hapi/boom';
 
 import { RulesClientContext } from '../../../../rules_client';
 
-import { findGapsByRuleId } from '../../../../lib/rule_gaps/find_gaps_by_rule_id';
+import { findGapsByRuleId } from '../../../../lib/rule_gaps/find_gaps';
 
-export async function findBackfill(context: RulesClientContext, params: FindGapsParams) {
+interface FindGapsParams {
+  ruleId: string;
+}
+
+export async function findGaps(context: RulesClientContext, params: FindGapsParams) {
   try {
+    const eventLogClient = await context.getEventLogClient();
     const gaps = await findGapsByRuleId({
       ruleId: params.ruleId,
-      eventLog: context.eventLogger,
+      eventLogClient,
       logger: context.logger,
     });
 

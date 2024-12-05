@@ -24,7 +24,7 @@ import { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task
 import { AdHocRunStatus, adHocRunStatus } from '../../common/constants';
 import { RuleRunnerErrorStackTraceLog, RuleTaskStateAndMetrics, TaskRunnerContext } from './types';
 import { getExecutorServices } from './get_executor_services';
-import { ErrorWithReason, validateRuleTypeParams } from '../lib';
+import { ErrorWithReason, parseDuration, validateRuleTypeParams } from '../lib';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -52,7 +52,7 @@ import {
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
 import { Result, isOk, asOk, asErr } from '../lib/result_type';
-import { processGapsAfterExecution } from '../lib/rule_gaps/process_gaps_after_execution';
+import { updateGaps } from '../lib/rule_gaps/update_gaps';
 
 interface ConstructorParams {
   context: TaskRunnerContext;
@@ -487,22 +487,27 @@ export class AdHocTaskRunner implements CancellableTask {
           ...(this.scheduleToRunIndex > -1 ? { schedule: this.adHocRunSchedule } : {}),
         });
 
-        // TODO: calculate end time of the interval
-        const end = new Date();
         // TODO: check if we need to fill gaps
         const needToFillGaps = true;
 
-        processGapsAfterExecution({
-          ruleId: this.ruleId,
-          executedInterval: { from: start, to: end },
-          alertingEventLogger: this.alertingEventLogger,
-          eventLogClient: this.context.eventLogger,
-          savedObjectsClient: this.internalSavedObjectsRepository,
-          logger: this.logger,
-          needToFillGaps,
-        });
+        const eventLogClient = await this.context.getEventLogClient(spaceId);
 
         if (startedAt) {
+          const intervalInMs = parseDuration(
+            this.adHocRunSchedule[this.scheduleToRunIndex].interval
+          );
+          const endGapsRange = new Date(this.adHocRunSchedule[this.scheduleToRunIndex].runAt);
+          const startGapsRange = new Date(endGapsRange.getTime() - intervalInMs);
+          await updateGaps({
+            ruleId: this.ruleId,
+            start: startGapsRange,
+            end: endGapsRange,
+            eventLogger: this.context.eventLogger,
+            eventLogClient,
+            savedObjectsClient: this.internalSavedObjectsRepository,
+            logger: this.logger,
+            needToFillGaps,
+          });
           // Capture how long it took for the rule to run after being claimed
           this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
         }

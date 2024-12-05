@@ -70,25 +70,42 @@ export type AggregateOptionsType = Pick<TypeOf<typeof queryOptionsSchema>, 'filt
     aggs: Record<string, estypes.AggregationsAggregationContainer>;
   };
 
-interface EventLogServiceCtorParams {
+interface EventLogServiceCtorBaseParams {
   esContext: EsContext;
-  savedObjectGetter: SavedObjectBulkGetterResult;
   spacesService?: SpacesServiceStart;
-  request: KibanaRequest;
 }
+type EventLogServiceCtorParams =
+  | (EventLogServiceCtorBaseParams & {
+      request: KibanaRequest;
+      savedObjectGetter: SavedObjectBulkGetterResult;
+      spaceId?: string;
+    })
+  | (EventLogServiceCtorBaseParams & {
+      spaceId: string;
+      request?: KibanaRequest;
+      savedObjectGetter?: SavedObjectBulkGetterResult;
+    });
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClient implements IEventLogClient {
   private esContext: EsContext;
-  private savedObjectGetter: SavedObjectBulkGetterResult;
+  private savedObjectGetter?: SavedObjectBulkGetterResult;
   private spacesService?: SpacesServiceStart;
-  private request: KibanaRequest;
+  private request?: KibanaRequest;
+  private spaceId?: string;
 
-  constructor({ esContext, savedObjectGetter, spacesService, request }: EventLogServiceCtorParams) {
+  constructor({
+    esContext,
+    savedObjectGetter,
+    spacesService,
+    request,
+    spaceId,
+  }: EventLogServiceCtorParams) {
     this.esContext = esContext;
     this.savedObjectGetter = savedObjectGetter;
     this.spacesService = spacesService;
     this.request = request;
+    this.spaceId = spaceId;
   }
 
   public async findEventsBySavedObjectIds(
@@ -100,7 +117,7 @@ export class EventLogClient implements IEventLogClient {
     const findOptions = queryOptionsSchema.validate(options ?? {});
 
     // verify the user has the required permissions to view this saved object
-    await this.savedObjectGetter(type, ids);
+    await this.savedObjectGetter?.(type, ids);
 
     return await this.esContext.esAdapter.queryEventsBySavedObjects({
       index: this.esContext.esNames.indexPattern,
@@ -152,7 +169,7 @@ export class EventLogClient implements IEventLogClient {
     const aggregateOptions = queryOptionsSchema.validate(omit(options, 'aggs') ?? {});
 
     // verify the user has the required permissions to view this saved object
-    await this.savedObjectGetter(type, ids);
+    await this.savedObjectGetter?.(type, ids);
 
     return await this.esContext.esAdapter.aggregateEventsBySavedObjects({
       index: this.esContext.esNames.indexPattern,
@@ -194,7 +211,12 @@ export class EventLogClient implements IEventLogClient {
   }
 
   private async getNamespace() {
-    const space = await this.spacesService?.getActiveSpace(this.request);
-    return space && this.spacesService?.spaceIdToNamespace(space.id);
+    if (this.spaceId) {
+      return this.spacesService?.spaceIdToNamespace(this.spaceId);
+    } else if (this.request) {
+      const space = await this.spacesService?.getActiveSpace(this.request);
+      return space && this.spacesService?.spaceIdToNamespace(space.id);
+    }
+    return undefined;
   }
 }

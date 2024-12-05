@@ -26,6 +26,7 @@ export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 export interface Doc {
   index: string;
   body: IEvent;
+  id?: string;
 }
 
 type Wait = () => Promise<boolean>;
@@ -98,7 +99,9 @@ type AliasAny = any;
 
 const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
 
-export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
+export class ClusterClientAdapter<
+  TDoc extends { body: AliasAny; index: string; id?: string } = Doc
+> {
   private readonly logger: Logger;
   private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;
   private readonly docBuffer$: Subject<TDoc>;
@@ -136,6 +139,10 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     await this.docsBufferedFlushed;
   }
 
+  public updateDocument(doc: Required<TDoc>) {
+    this.docBuffer$.next(doc);
+  }
+
   public indexDocument(doc: TDoc): void {
     this.docBuffer$.next(doc);
   }
@@ -153,17 +160,50 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
     const bulkBody: Array<Record<string, unknown>> = [];
 
-    for (const doc of docs) {
+    const docsToUpdate = docs.filter((doc) => doc.id && doc.body);
+    const docsToCreate = docs.filter((doc) => !doc.id);
+
+    for (const doc of docsToCreate) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: {} });
+      bulkBody.push({ create: { _index: this.esNames.dataStream } });
       bulkBody.push(doc.body);
     }
 
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const response = await esClient.bulk({
+      const originalDocsBeforeUpdate = await esClient.search({
         index: this.esNames.dataStream,
+        seq_no_primary_term: true,
+        query: {
+          terms: {
+            _id: docsToUpdate.map((doc) => doc.id),
+          },
+        },
+      });
+
+      for (const originalDoc of originalDocsBeforeUpdate?.hits?.hits ?? []) {
+        const fieldsToUpdate = docsToUpdate.find(
+          (docToUpdate) => docToUpdate.id === originalDoc._id
+        );
+        if (!fieldsToUpdate || !originalDoc._source) continue;
+
+        bulkBody.push({
+          index: {
+            _index: originalDoc._index,
+            _id: originalDoc._id,
+            if_seq_no: originalDoc._seq_no,
+            if_primary_term: originalDoc._primary_term,
+          },
+        });
+        bulkBody.push({
+          ...originalDoc._source,
+          ...fieldsToUpdate.body,
+        });
+      }
+
+      const response = await esClient.bulk({
+        // index: this.esNames.dataStream,
         body: bulkBody,
       });
 
@@ -421,7 +461,10 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         page,
         per_page: perPage,
         total: isNumber(total) ? total : total!.value,
-        data: hits.map((hit) => hit._source),
+        data: hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id,
+        })),
       };
     } catch (err) {
       throw new Error(
@@ -465,7 +508,10 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         page,
         per_page: perPage,
         total: isNumber(total) ? total : total!.value,
-        data: hits.map((hit) => hit._source),
+        data: hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id,
+        })),
       };
     } catch (err) {
       throw new Error(

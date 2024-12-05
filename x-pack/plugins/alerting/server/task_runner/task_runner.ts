@@ -612,7 +612,7 @@ export class TaskRunner<
             gap,
           });
           this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
-    
+        }
 
         if (!this.cancelled) {
           this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
@@ -627,13 +627,14 @@ export class TaskRunner<
             );
           }
 
+          // TODO: it's not working yet
           const unfiledGapDuration = await getTotalUnfilledGapDuration({
             ruleId,
             eventLog: this.context.eventLogger,
             logger: this.logger,
           });
 
-          const monitoring =  {
+          const monitoring = {
             ...this.ruleMonitoring.getMonitoring(),
             run: {
               ...this.ruleMonitoring.getMonitoring()?.run,
@@ -641,7 +642,7 @@ export class TaskRunner<
                 ...this.ruleMonitoring.getMonitoring()?.run?.last_run,
                 metrics: {
                   ...this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics,
-                  unfilled_gap_duration_ms: unfiledGapDuration.unfiled_gap_duration_ms,
+                  // unfilled_gap_duration_ms: unfiledGapDuration.unfiled_gap_duration_ms,
                 },
               },
             },
