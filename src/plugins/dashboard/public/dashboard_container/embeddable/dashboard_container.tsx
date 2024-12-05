@@ -68,6 +68,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
+import { i18n } from '@kbn/i18n';
 import { DASHBOARD_CONTAINER_TYPE, DashboardApi, DashboardLocatorParams } from '../..';
 import type { DashboardAttributes } from '../../../server/content_management';
 import { DashboardContainerInput, DashboardPanelMap, DashboardPanelState } from '../../../common';
@@ -113,7 +114,6 @@ import {
 } from './dashboard_container_factory';
 import { InitialComponentState, getDashboardApi } from '../../dashboard_api/get_dashboard_api';
 import type { DashboardCreationOptions } from '../..';
-import { i18n } from '@kbn/i18n';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -961,9 +961,11 @@ export class DashboardContainer
         if (apiPublishesUnsavedChanges(child)) {
           const success = child.resetUnsavedChanges();
           if (!success) {
-            coreServices.notifications.toasts.addWarning(i18n.translate('dashboard.reset.panelError', {
-              defaultMessage: 'Unable to reset panel changes',
-            }));
+            coreServices.notifications.toasts.addWarning(
+              i18n.translate('dashboard.reset.panelError', {
+                defaultMessage: 'Unable to reset panel changes',
+              })
+            );
           }
         }
       } else {
