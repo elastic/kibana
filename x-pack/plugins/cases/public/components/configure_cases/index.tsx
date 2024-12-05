@@ -618,11 +618,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     flyOutVisibility?.type === 'observableTypes' && flyOutVisibility?.visible ? (
       <CommonFlyout<ObservableTypeConfiguration>
         isLoading={loadingCaseConfigure || isPersistingConfiguration}
-        disabled={
-          !permissions.settings
-          loadingCaseConfigure ||
-          isPersistingConfiguration
-        }
+        disabled={!permissions.settings || loadingCaseConfigure || isPersistingConfiguration}
         onCloseFlyout={onCloseObservableTypesFlyout}
         onSaveField={onObservableTypeSave}
         renderHeader={() => (

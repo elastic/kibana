@@ -14,7 +14,7 @@ interface FormFieldsProps {
 }
 
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
-  const newLocal = useMemo(
+  const labelFieldProps = useMemo(
     () => ({
       euiFieldProps: {
         'data-test-subj': 'observable-type-label-input',
@@ -29,7 +29,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
   return (
     <>
       <UseField path="key" component={HiddenField} />
-      <UseField path="label" component={TextField} componentProps={newLocal} />
+      <UseField path="label" component={TextField} componentProps={labelFieldProps} />
     </>
   );
 };
