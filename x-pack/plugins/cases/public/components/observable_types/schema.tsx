@@ -15,7 +15,7 @@ export const schema = {
   key: {
     validations: [
       {
-        validator: emptyField('key')),
+        validator: emptyField('key'),
       },
     ],
   },
