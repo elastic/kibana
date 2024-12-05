@@ -7,7 +7,7 @@
 
 import path from 'path';
 
-export const KIBANA_ROOT = path.resolve(__dirname, '../../../..');
+export const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
 
 export const argTypes = {
   hasTemplates: {
