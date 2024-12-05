@@ -225,6 +225,8 @@ describe('query tab with unified timeline', () => {
     );
 
     (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
       kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
       endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
       detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
