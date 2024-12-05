@@ -6312,7 +6312,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-error-utils@link:x-pack/packages/ml/error_utils":
+"@kbn/ml-error-utils@link:x-pack/platform/packages/shared/ml/error_utils":
   version "0.0.0"
   uid ""
 

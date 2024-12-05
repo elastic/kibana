@@ -795,7 +795,6 @@ x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
-x-pack/packages/ml/error_utils @elastic/ml-ui
 x-pack/packages/ml/field_stats_flyout @elastic/ml-ui
 x-pack/packages/ml/in_memory_table @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
@@ -864,6 +863,7 @@ x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/anomaly_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/chi2test @elastic/ml-ui
+x-pack/platform/packages/shared/ml/error_utils @elastic/ml-ui
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/plugins/actions @elastic/response-ops
