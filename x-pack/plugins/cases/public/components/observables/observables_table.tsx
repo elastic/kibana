@@ -63,7 +63,7 @@ const getColumns = (
 const EmptyObservablesTable = ({ caseData }: { caseData: CaseUI }) => (
   <EuiEmptyPrompt
     title={<h3>{i18n.NO_OBSERVABLES}</h3>}
-    data-test-subj="cases-files-table-empty"
+    data-test-subj="cases-observables-table-empty"
     titleSize="xs"
     actions={<AddObservable caseData={caseData} />}
   />
