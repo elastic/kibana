@@ -119,7 +119,6 @@
     "@kbn/observability-utils-server",
     "@kbn/core-plugins-server",
     "@kbn/config",
-    "@kbn/observability-utils-common"
   ],
   "exclude": ["target/**/*"]
 }
