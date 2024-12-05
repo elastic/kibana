@@ -90,7 +90,7 @@ export function initializeFetch({
   stateManager: SearchEmbeddableStateManager;
   discoverServices: DiscoverServices;
 }) {
-  const requestAdapter = new RequestAdapter();
+  const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
   const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews])
@@ -127,7 +127,7 @@ export function initializeFetch({
         const searchSourceQuery = savedSearch.searchSource.getField('query');
 
         // Log request to inspector
-        requestAdapter.reset();
+        inspectorAdapters.requests.reset();
 
         try {
           api.dataLoading.next(true);
@@ -156,7 +156,7 @@ export function initializeFetch({
               filters: fetchContext.filters,
               dataView,
               abortSignal: currentAbortController.signal,
-              inspectorAdapters: discoverServices.inspector,
+              inspectorAdapters,
               data: discoverServices.data,
               expressions: discoverServices.expressions,
               profilesManager: discoverServices.profilesManager,
@@ -181,9 +181,9 @@ export function initializeFetch({
               abortSignal: currentAbortController.signal,
               sessionId: searchSessionId,
               inspector: {
-                adapter: requestAdapter,
-                title: i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
-                  defaultMessage: 'Data',
+                adapter: inspectorAdapters.requests,
+                title: i18n.translate('discover.embeddable.inspectorTableRequestTitle', {
+                  defaultMessage: 'Table',
                 }),
                 description: i18n.translate('discover.embeddable.inspectorRequestDescription', {
                   defaultMessage:
@@ -195,7 +195,7 @@ export function initializeFetch({
             })
           );
           const interceptedWarnings: SearchResponseWarning[] = [];
-          discoverServices.data.search.showWarnings(requestAdapter, (warning) => {
+          discoverServices.data.search.showWarnings(inspectorAdapters.requests, (warning) => {
             interceptedWarnings.push(warning);
             return true; // suppress the default behaviour
           });
@@ -225,6 +225,8 @@ export function initializeFetch({
 
       stateManager.rows.next(next.rows ?? []);
       stateManager.totalHitCount.next(next.hitCount);
+      stateManager.inspectorAdapters.next(inspectorAdapters);
+
       api.fetchWarnings$.next(next.warnings ?? []);
       api.fetchContext$.next(next.fetchContext);
       if (Object.hasOwn(next, 'columnsMeta')) {
