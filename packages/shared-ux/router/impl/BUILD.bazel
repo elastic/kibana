@@ -22,16 +22,12 @@ SRCS = glob(
 )
 
 DEPS = [
-  "@npm//react",
-  "@npm//tslib",
-  "@npm//@elastic/eui",
-  "//packages/core/base/core-base-common",
-  "//packages/shared-ux/router/impl:shared-ux-router",
+  
 ]
 
 js_library(
-  name = "root",
-  package_name = "@kbn/react-kibana-context-root",
+  name = "shared-ux-router",
+  package_name = "@kbn/shared-ux-router",
   srcs = ["package.json"] + SRCS,
   deps = DEPS,
   visibility = ["//visibility:public"],

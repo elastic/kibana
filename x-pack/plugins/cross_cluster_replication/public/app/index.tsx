@@ -34,6 +34,7 @@ const AppWithExecutionContext = ({
   getUrlForApp: ApplicationStart['getUrlForApp'];
   executionContext: ExecutionContextStart;
 }) => {
+  // TODO: Remove this comment after testing
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'crossClusterReplication',

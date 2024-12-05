@@ -41,6 +41,7 @@ export const useData = (
 ) => {
   const { executionContext, uiSettings } = useAiopsAppContext();
 
+  // TODO: Remove this comment after testing
   useExecutionContext(executionContext, {
     name: AIOPS_PLUGIN_ID,
     type: 'application',

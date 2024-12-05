@@ -68,6 +68,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   );
 
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
+  // TODO: Remove this comment after testing
   useExecutionContext(services.executionContext, {
     type: 'application',
     page: `editor${editorName ? `:${editorName}` : ''}`,

@@ -50,7 +50,7 @@ export interface SharedUXExecutionContextSetup {
  */
 export interface SharedUXExecutionContextSetup {
   /** {@link SharedUXExecutionContextSetup} */
-  executionContext: SharedUXExecutionContextStart;
+  executionContext?: SharedUXExecutionContextStart;
 }
 
 export type KibanaServices = Partial<SharedUXExecutionContextSetup>;
@@ -63,12 +63,12 @@ const defaultContextValue = {
   services: {},
 };
 
-export const sharedUXContext =
+export const SharedUXContext =
   createContext<SharedUXRouterContextValue<KibanaServices>>(defaultContextValue);
 
 export const useKibanaSharedUX = <Extra extends object = {}>(): SharedUXRouterContextValue<
   KibanaServices & Extra
 > =>
   useContext(
-    sharedUXContext as unknown as React.Context<SharedUXRouterContextValue<KibanaServices & Extra>>
+    SharedUXContext as unknown as React.Context<SharedUXRouterContextValue<KibanaServices & Extra>>
   );
