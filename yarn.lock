@@ -6284,7 +6284,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-chi2test@link:x-pack/packages/ml/chi2test":
+"@kbn/ml-chi2test@link:x-pack/platform/packages/shared/ml/chi2test":
   version "0.0.0"
   uid ""
 
