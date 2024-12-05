@@ -70,7 +70,14 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(
   params?: GetPackagesRequest['query']
 ): Promise<RegistrySearchResults> {
-  if (airGappedUtils().shouldSkipRegistryRequests) return [];
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    appContextService
+      .getLogger()
+      .debug(
+        'fetchList: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+      );
+    return [];
+  }
 
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
