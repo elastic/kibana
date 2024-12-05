@@ -18,6 +18,7 @@ interface EventBusExampleState {
   aiopsEnabled: boolean;
   aiopsFieldCandidates: string[];
   allFields: AllFields;
+  genaiEnabled: boolean;
   selectedFields: string[];
   filters: Record<string, string>;
 }
@@ -34,6 +35,7 @@ function getDefaultState(): EventBusExampleState {
     aiopsEnabled: false,
     aiopsFieldCandidates: [],
     allFields: {},
+    genaiEnabled: false,
     selectedFields: [],
     filters: {},
   };
@@ -57,6 +59,9 @@ export const eventBusExampleSlice = createSlice({
     },
     setAllFields: (state: EventBusExampleState, action: PayloadAction<AllFields>) => {
       state.allFields = action.payload;
+    },
+    setGenAIEnabled: (state: EventBusExampleState, action: PayloadAction<boolean>) => {
+      state.genaiEnabled = action.payload;
     },
     setSelectedFields: (state: EventBusExampleState, action: PayloadAction<string[]>) => {
       state.selectedFields = action.payload;
