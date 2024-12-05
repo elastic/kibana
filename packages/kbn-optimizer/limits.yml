@@ -2,9 +2,10 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
-  aiops: 32733
+  aiops: 17680
   alerting: 106936
   apm: 64385
+  assetInventory: 18478
   banners: 17946
   bfetch: 22837
   canvas: 29355
@@ -17,7 +18,7 @@ pageLoadAssetSize:
   cloudFullStory: 18493
   cloudLinks: 55984
   cloudSecurityPosture: 19109
-  console: 61528
+  console: 46091
   contentManagement: 16254
   controls: 60000
   core: 564663
@@ -64,7 +65,7 @@ pageLoadAssetSize:
   expressionTagcloud: 27505
   expressionXY: 45000
   features: 21723
-  fieldFormats: 81291
+  fieldFormats: 65209
   fieldsMetadata: 21885
   files: 22673
   filesManagement: 18683
