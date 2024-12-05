@@ -46,7 +46,6 @@ import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
 import { getColumns } from '../../components/alerts_table/common/get_columns';
-import { AlertActions } from '../../components/alert_actions/alert_actions';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
@@ -299,7 +298,6 @@ function InternalAlertsPage() {
                       query={mergeBoolQueries(esQuery, groupQuery)}
                       initialPageSize={ALERTS_PER_PAGE}
                       columns={tableColumns}
-                      renderActionsCell={AlertActions}
                       showInspectButton
                     />
                   );
