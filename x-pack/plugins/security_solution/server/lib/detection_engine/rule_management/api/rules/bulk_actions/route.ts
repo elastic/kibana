@@ -61,8 +61,13 @@ export const performBulkActionRoute = (
     .post({
       access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_ACTION,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
+        tags: [routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
         timeout: {
           idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },
@@ -126,7 +131,7 @@ export const performBulkActionRoute = (
             'actions',
           ]);
 
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const actionsClient = ctx.actions.getActionsClient();

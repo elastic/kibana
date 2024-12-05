@@ -23,8 +23,10 @@ export const suggestUserProfilesRoute = (
     .get({
       path: DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

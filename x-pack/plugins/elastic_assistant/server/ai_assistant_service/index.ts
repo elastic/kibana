@@ -12,7 +12,9 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
+import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
@@ -33,12 +35,18 @@ import {
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import { createGetElserId, createPipeline, pipelineExists } from './helpers';
+import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
+import {
+  createGetElserId,
+  createPipeline,
+  ensureProductDocumentationInstalled,
+  pipelineExists,
+} from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
-function getResourceName(resource: string) {
+export function getResourceName(resource: string) {
   return `.kibana-elastic-ai-assistant-${resource}`;
 }
 
@@ -49,6 +57,7 @@ export interface AIAssistantServiceOpts {
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
+  productDocManager: Promise<ProductDocBaseStartContract['management']>;
 }
 
 export interface CreateAIAssistantClientParams {
@@ -64,7 +73,8 @@ export type CreateDataStream = (params: {
     | 'conversations'
     | 'knowledgeBase'
     | 'prompts'
-    | 'attackDiscovery';
+    | 'attackDiscovery'
+    | 'defendInsights';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -79,10 +89,12 @@ export class AIAssistantService {
   private promptsDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private attackDiscoveryDataStream: DataStreamSpacesAdapter;
+  private defendInsightsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: boolean = false;
   private hasInitializedV2KnowledgeBase: boolean = false;
+  private productDocManager?: ProductDocBaseStartContract['management'];
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -112,6 +124,11 @@ export class AIAssistantService {
       kibanaVersion: options.kibanaVersion,
       fieldMap: attackDiscoveryFieldMap,
     });
+    this.defendInsightsDataStream = this.createDataStream({
+      resource: 'defendInsights',
+      kibanaVersion: options.kibanaVersion,
+      fieldMap: defendInsightsFieldMap,
+    });
 
     this.initPromise = this.initializeResources();
 
@@ -120,6 +137,13 @@ export class AIAssistantService {
       this.initPromise,
       this.installAndUpdateSpaceLevelResources.bind(this)
     );
+    options.productDocManager
+      .then((productDocManager) => {
+        this.productDocManager = productDocManager;
+      })
+      .catch((error) => {
+        this.options.logger.warn(`Failed to initialize productDocManager: ${error.message}`);
+      });
   }
 
   public isInitialized() {
@@ -174,6 +198,11 @@ export class AIAssistantService {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
       const esClient = await this.options.elasticsearchClientPromise;
 
+      if (this.productDocManager) {
+        // install product documentation without blocking other resources
+        void ensureProductDocumentationInstalled(this.productDocManager, this.options.logger);
+      }
+
       await this.conversationsDataStream.install({
         esClient,
         logger: this.options.logger,
@@ -222,6 +251,12 @@ export class AIAssistantService {
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
       });
+
+      await this.defendInsightsDataStream.install({
+        esClient,
+        logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
+      });
     } catch (error) {
       this.options.logger.warn(`Error initializing AI assistant resources: ${error.message}`);
       this.initialized = false;
@@ -240,6 +275,7 @@ export class AIAssistantService {
       prompts: getResourceName('component-template-prompts'),
       anonymizationFields: getResourceName('component-template-anonymization-fields'),
       attackDiscovery: getResourceName('component-template-attack-discovery'),
+      defendInsights: getResourceName('component-template-defend-insights'),
     },
     aliases: {
       conversations: getResourceName('conversations'),
@@ -247,6 +283,7 @@ export class AIAssistantService {
       prompts: getResourceName('prompts'),
       anonymizationFields: getResourceName('anonymization-fields'),
       attackDiscovery: getResourceName('attack-discovery'),
+      defendInsights: getResourceName('defend-insights'),
     },
     indexPatterns: {
       conversations: getResourceName('conversations*'),
@@ -254,6 +291,7 @@ export class AIAssistantService {
       prompts: getResourceName('prompts*'),
       anonymizationFields: getResourceName('anonymization-fields*'),
       attackDiscovery: getResourceName('attack-discovery*'),
+      defendInsights: getResourceName('defend-insights*'),
     },
     indexTemplate: {
       conversations: getResourceName('index-template-conversations'),
@@ -261,6 +299,7 @@ export class AIAssistantService {
       prompts: getResourceName('index-template-prompts'),
       anonymizationFields: getResourceName('index-template-anonymization-fields'),
       attackDiscovery: getResourceName('index-template-attack-discovery'),
+      defendInsights: getResourceName('index-template-defend-insights'),
     },
     pipelines: {
       knowledgeBase: getResourceName('ingest-pipeline-knowledge-base'),
@@ -388,6 +427,25 @@ export class AIAssistantService {
       currentUser: opts.currentUser,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
+      kibanaVersion: this.options.kibanaVersion,
+      spaceId: opts.spaceId,
+    });
+  }
+
+  public async createDefendInsightsDataClient(
+    opts: CreateAIAssistantClientParams
+  ): Promise<DefendInsightsDataClient | null> {
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
+
+    return new DefendInsightsDataClient({
+      logger: this.options.logger.get('defendInsights'),
+      currentUser: opts.currentUser,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      indexPatternsResourceName: this.resourceNames.aliases.defendInsights,
       kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
     });

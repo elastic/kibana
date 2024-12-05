@@ -12,10 +12,21 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
+  /*
+   * Enables experimental feature flag for eql sequence alert suppression.
+   *
+   * Ticket: https://github.com/elastic/security-team/issues/9608
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-engine
+   * Added: on October 1st, 2024 in https://github.com/elastic/kibana/pull/189725
+   * Turned: on (TBD)
+   * Expires: on (TBD)
+   */
+  alertSuppressionForSequenceEqlRuleEnabled: true,
+
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
-  kubernetesEnabled: true,
+  kubernetesEnabled: false,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -236,6 +247,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the siem migrations feature
    */
   siemMigrationsEnabled: false,
+
+  /**
+   * Enables the Defend Insights feature
+   */
+  defendInsights: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

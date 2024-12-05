@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { ApmApiError } from '../../../../../../apm_api_integration/common/apm_api_supertest';
 import { expectToReject } from '../../../../../../apm_api_integration/common/utils/expect_to_reject';
 import {

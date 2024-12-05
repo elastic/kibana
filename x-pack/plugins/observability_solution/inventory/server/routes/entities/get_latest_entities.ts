@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import type { ScalarValue } from '@elastic/elasticsearch/lib/api/types';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import {
+  ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-  ENTITY_DISPLAY_NAME,
 } from '@kbn/observability-shared-plugin/common';
-import type { QueryDslQueryContainer, ScalarValue } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityInstance } from '@kbn/entities-schema';
+import { unflattenObject } from '@kbn/observability-utils-common/object/unflatten_object';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import {
   ENTITIES_LATEST_ALIAS,
   MAX_NUMBER_OF_ENTITIES,
   type EntityColumnIds,
-  InventoryEntity,
+  type InventoryEntity,
 } from '../../../common/entities';
 import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
 
@@ -35,13 +36,13 @@ export async function getLatestEntities({
   inventoryEsClient,
   sortDirection,
   sortField,
-  esQuery,
+  kuery,
   entityTypes,
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
   sortDirection: 'asc' | 'desc';
   sortField: EntityColumnIds;
-  esQuery?: QueryDslQueryContainer;
+  kuery?: string;
   entityTypes?: string[];
 }): Promise<InventoryEntity[]> {
   // alertsCount doesn't exist in entities index. Ignore it and sort by entity.lastSeenTimestamp by default.
@@ -62,17 +63,38 @@ export async function getLatestEntities({
 
   const query = [from, ...where, sort, limit].join(' | ');
 
-  const latestEntitiesEsqlResponse = await inventoryEsClient.esql<EntityInstance>(
+  const latestEntitiesEsqlResponse = await inventoryEsClient.esql<
+    {
+      'entity.id': string;
+      'entity.type': string;
+      'entity.definition_id': string;
+      'entity.display_name': string;
+      'entity.identity_fields': string | string[];
+      'entity.last_seen_timestamp': string;
+      'entity.definition_version': string;
+      'entity.schema_version': string;
+    } & Record<string, ScalarValue | ScalarValue[]>,
+    { transform: 'plain' }
+  >(
     'get_latest_entities',
     {
       query,
-      filter: esQuery,
+      filter: { bool: { filter: kqlQuery(kuery) } },
       params,
-    }
+    },
+    { transform: 'plain' }
   );
 
-  return latestEntitiesEsqlResponse.map((lastestEntity) => {
-    const { entity, ...metadata } = lastestEntity;
+  return latestEntitiesEsqlResponse.hits.map((latestEntity) => {
+    Object.keys(latestEntity).forEach((key) => {
+      const keyOfObject = key as keyof typeof latestEntity;
+      // strip out multi-field aliases
+      if (keyOfObject.endsWith('.text') || keyOfObject.endsWith('.keyword')) {
+        delete latestEntity[keyOfObject];
+      }
+    });
+
+    const { entity, ...metadata } = unflattenObject(latestEntity);
 
     return {
       entityId: entity.id,

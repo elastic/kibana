@@ -47,7 +47,10 @@ export async function uninstallBuiltInEntityDefinitions({
   entityClient: EntityClient;
   deleteData?: boolean;
 }): Promise<EntityDefinition[]> {
-  const { definitions } = await entityClient.getEntityDefinitions({ builtIn: true });
+  const { definitions } = await entityClient.getEntityDefinitions({
+    builtIn: true,
+    perPage: 1000,
+  });
 
   await Promise.all(
     definitions.map(async ({ id }) => {

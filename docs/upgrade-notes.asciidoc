@@ -50,6 +50,108 @@ For Elastic Security release information, refer to {security-guide}/release-note
 ==== Kibana APIs
 
 [discrete]
+[[breaking-201550]]
+.Removed legacy alerting endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+--
+* `POST /api/alerts/alert/{id?}` has been replaced by `POST /api/alerting/rule/{id?}`
+* `GET /api/alerts/alert/{id}` has been replaced by `GET /api/alerting/rule/{id}`
+* `PUT /api/alerts/alert/{id}` has been replaced by `PUT /api/alerting/rule/rule/{id}`
+* `DELETE: /api/alerts/alert/{id}` has been replaced by `DELETE /api/alerting/rule/{id}`
+* `POST /api/alerts/alert/{id}/_disable` has been replaced by `POST /api/alerting/rule/{id}/_disable`
+* `POST /api/alerts/alert/{id}/_enable` has been replaced by `POST /api/alerting/rule/{id}/_enable`
+* `GET /api/alerts/_find` has been replaced by `GET /api/alerting/rules/_find`
+* `GET /api/alerts/_health` has been replaced by `GET /api/alerting/rule/_health`
+* `GET /api/alerts/list_alert_types` has been replaced by `GET /api/alerting/rule_types`
+* `POST /api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute` has been replaced by `POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute`
+* `POST /api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_unmute` has been replaced by `POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute`
+* `POST /api/alerts/alert/{id}/_mute_all` has been replaced by `POST /api/alerting/rule/{id}/_mute_all`
+* `POST /api/alerts/alert/{id}/_unmute_all` has been replaced by `POST /api/alerting/rule/{id}/_unmute_all`
+* `POST /api/alerts/alert/{id}/_update_api_key` has been replaced by `POST /api/alerting/rule/{id}/_update_api_key`
+* `GET /api/alerts/{id}/_instance_summary` has been deprecated without replacement. Will be removed in v9.0.0
+* `GET /api/alerts/{id}/state` has been deprecated without replacement. Will be removed in v9.0.0
+--
+
+*Impact* +
+Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
+
+*Action* +
+Remove references to `GET /api/alerts/{id}/_instance_summary` endpoint.
+Remove references to `GET /api/alerts/{id}/state` endpoint.
+Replace references to endpoints listed as deprecated by it's replacement. See `Details` section.
+The updated APIs can be found here https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-alerting
+====
+
+[[breaking-201004]]
+.Removed legacy cases endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+--
+* `GET /api/cases/status` has been deprecated with no replacement. Deleted in v9.0.0
+* `GET /api/cases/{case_id}/comments` has been replaced by `GET /api/cases/{case_id}/comments/_find` released in v7.13
+* `GET /api/cases/<case_id>/user_actions` has been replaced by `GET /api/cases/<case_id>/user_actions/_find` released in v8.7
+* `includeComments` parameter in `GET /api/cases/{case_id}` has been deprecated. Use `GET /api/cases/{case_id}/comments/_find` instead, released in v7.13
+--
+
+*Impact* +
+Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
+
+*Action* +
+Remove references to `GET /api/cases/status` endpoint.
+Replace references to deprecated endpoints with the replacements listed in the breaking change details.
+====
+
+[[breaking-199656]]
+.Removed all security v1 endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+All `v1` Kibana security HTTP endpoints have been removed.
+
+`GET /api/security/v1/logout` has been replaced by `GET /api/security/logout`
+`GET /api/security/v1/oidc/implicit` has been replaced by `GET /api/security/oidc/implicit`
+`GET /api/security/v1/oidc` has been replaced by GET `/api/security/oidc/callback`
+`POST /api/security/v1/oidc` has been replaced by POST `/api/security/oidc/initiate_login`
+`POST /api/security/v1/saml` has been replaced by POST `/api/security/saml/callback`
+`GET /api/security/v1/me` has been removed with no replacement.
+
+For more information, refer to {kibana-pull}199656[#199656].
+
+*Impact* + 
+Any HTTP API calls to the `v1` Kibana security endpoints will fail with a 404 status code starting from version 9.0.0.
+Third party OIDC and SAML identity providers configured with `v1` endpoints will no longer work.
+
+*Action* +
+Update any OIDC and SAML identity providers to reference the corresponding replacement endpoint listed above.
+Remove references to the `/api/security/v1/me` endpoint from any automations, applications, tooling, and scripts.
+====
+
+[discrete]
+[[breaking-193792]]
+.Access to all internal APIs is blocked (9.0.0)
+[%collapsible]
+====
+*Details* +
+Access to internal Kibana HTTP APIs is restricted from version 9.0.0. This is to ensure
+that HTTP API integrations with Kibana avoid unexpected breaking changes. 
+Refer to {kibana-pull}193792[#193792].
+
+*Impact* +
+Any HTTP API calls to internal Kibana endpoints will fail with a 400 status code starting
+from version 9.0.0.
+
+*Action* +
+**Do not integrate with internal HTTP APIs**. They may change or be removed without notice, 
+and lead to unexpected behaviors. If you would like some capability to be exposed over an
+HTTP API, https://github.com/elastic/kibana/issues/new/choose[create an issue].
+We would love to discuss your use case.
+
+====
+
+[discrete]
 [[breaking-162506]]
 .Get case metrics APIs became internal. (8.10)
 [%collapsible]
@@ -793,18 +895,6 @@ Audit logs will be written to the default location in the new ECS format. To cha
 ====
 
 [discrete]
-[[breaking-47929]]
-.[Security] Removed `/api/security/v1/saml` route. (8.0)
-[%collapsible]
-====
-*Details* +
-The `/api/security/v1/saml` route has been removed and is reflected in the kibana.yml `server.xsrf.whitelist` setting, {es}, and the Identity Provider SAML settings. For more information, refer to {kibana-pull}47929[#47929]
-
-*Impact* +
-Use the `/api/security/saml/callback` route, or wait to upgrade to 8.0.0-alpha2 when the `/api/security/saml/callback` route breaking change is reverted.
-====
-
-[discrete]
 [[breaking-41700]]
 .[Security] Legacy browsers rejected by default. (8.0)
 [%collapsible]
@@ -1420,6 +1510,35 @@ The `/agent_status` Fleet API now returns the following statuses:
 ====
 
 [discrete]
+[[kibana-150267]]
+.Deprecated Saved objects APIs. (8.7)
+[%collapsible]
+====
+*Details* +
+The following saved objects APIs have been deprecated.
+
+[source,text]
+--
+/api/saved_objects/{type}/{id}
+/api/saved_objects/resolve/{type}/{id}
+/api/saved_objects/{type}/{id?}
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_find
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_bulk_get
+/api/saved_objects/_bulk_create
+/api/saved_objects/_bulk_resolve
+/api/saved_objects/_bulk_update
+/api/saved_objects/_bulk_delete
+--
+
+For more information, refer to ({kibana-pull}150267[#150267]).
+
+*Impact* +
+Use dedicated public APIs instead, for example use <<data-views-api>> to manage Data Views.
+====
+
+[discrete]
 [[deprecation-119494]]
 .Updates Fleet API to improve consistency. (8.0)
 [%collapsible]
@@ -1618,6 +1737,18 @@ The following security_linux and security_windows job configurations are updated
 ** v3_windows_rare_user_type10_remote_login
 ====
 
+// Setup
+
+[discrete]
+[[deprecation-macos-x8664]]
+.[Setup] New versions of Kibana for macOS x86_64 will end after 8.17.
+[%collapsible]
+====
+*Details* +
+New versions of Kibana builds for macOS x86_64 are deprecated and will no longer be released after 8.17.  Kibana for macOS AArch64 is unaffected. 
+
+Use Docker to run new versions of Kibana on macOS 86x_64.
+====
 
 // Sharing & Reporting
 
@@ -1752,7 +1883,6 @@ To monitor endpoints, pages, and user journeys, go to **{observability}** -> **S
 ==== Elastic Security solution
 
 NOTE: For the complete Elastic Security solution release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-
 
 
 

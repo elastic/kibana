@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useWaffleFilters, WaffleFiltersState } from './use_waffle_filters';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
@@ -21,11 +21,11 @@ jest.mock('react-router-dom', () => ({
 
 const mockDataView = {
   id: 'mock-id',
-  title: 'mock-title',
   timeFieldName: TIMESTAMP_FIELD,
   isPersisted: () => false,
   getName: () => 'mock-data-view',
   toSpec: () => ({}),
+  getIndexPattern: () => 'mock-title',
 } as jest.Mocked<DataView>;
 
 jest.mock('../../../../containers/metrics_source', () => ({

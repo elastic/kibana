@@ -18,6 +18,7 @@ export const ENDPOINT_ACTION_RESPONSES_INDEX = `${ENDPOINT_ACTION_RESPONSES_DS}-
 export const ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN = `${ENDPOINT_ACTION_RESPONSES_DS}-*`;
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
+export const FILE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.file-*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 
 // metadata datastream
@@ -136,3 +137,11 @@ export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePolicies
 /** The list of OS types that support. Value usually found in ECS `host.os.type` */
 export const SUPPORTED_HOST_OS_TYPE = Object.freeze(['macos', 'windows', 'linux'] as const);
 export type SupportedHostOsType = (typeof SUPPORTED_HOST_OS_TYPE)[number];
+
+/**
+ * Workflow Insights
+ */
+
+export const BASE_WORKFLOW_INSIGHTS_ROUTE = `/workflow_insights`;
+export const WORKFLOW_INSIGHTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}${BASE_WORKFLOW_INSIGHTS_ROUTE}`;
+export const WORKFLOW_INSIGHTS_UPDATE_ROUTE = `${WORKFLOW_INSIGHTS_ROUTE}/{insightId}`;
