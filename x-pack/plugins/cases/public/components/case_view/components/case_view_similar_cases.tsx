@@ -31,8 +31,8 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
 
   const { data = initialData, isFetching: isLoadingCases } = useGetSimilarCases({
     caseData,
-    pageIndex,
-    pageSize,
+    page: pageIndex + 1, // increment should happen here and not inside useGetSimilarCases
+    perPage: pageSize,
   });
 
   const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {
