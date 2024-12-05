@@ -116,7 +116,7 @@
     "@kbn/entityManager-plugin",
     "@kbn/observability-utils",
     "@kbn/entities-schema",
-    "@kbn/zod"
+    "@kbn/zod",
   ],
   "exclude": ["target/**/*"]
 }
