@@ -5328,7 +5328,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-ml@link:packages/default-nav/ml":
+"@kbn/default-nav-ml@link:src/platform/packages/private/default-nav/ml":
   version "0.0.0"
   uid ""
 

@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/default-nav/ml'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/default-nav/ml'],
 };
