@@ -68,6 +68,8 @@ import { auditLoggingService } from '../../audit_logging';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
 
+import { airGappedUtils } from '../airgapped';
+
 import { createInstallableFrom } from '.';
 import {
   getPackageAssetsMapCache,
@@ -480,7 +482,7 @@ export async function getPackageInfo({
   // see https://github.com/elastic/package-registry/issues/864
   if (
     registryInfo &&
-    (skipArchive || appContextService.getConfig()?.isAirGapped) &&
+    (skipArchive || airGappedUtils().shouldSkipRegistryRequests) &&
     registryInfo.type !== 'input'
   ) {
     packageInfo = registryInfo;

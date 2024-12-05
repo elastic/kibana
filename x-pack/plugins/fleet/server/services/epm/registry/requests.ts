@@ -13,6 +13,8 @@ import { streamToString } from '../streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
 
+import { airGappedUtils } from '../airgapped';
+
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
@@ -38,8 +40,10 @@ async function registryFetch(url: string) {
 export async function getResponse(url: string, retries: number = 5): Promise<Response | null> {
   const logger = appContextService.getLogger();
 
-  if (appContextService.getConfig()?.isAirGapped) {
-    logger.debug('isAirGapped enabled, not reaching package registry');
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    logger.debug(
+      'getResponse: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+    );
     return null;
   }
 

@@ -57,6 +57,8 @@ import { verifyPackageArchiveSignature } from '../packages/package_verification'
 
 import type { ArchiveIterator } from '../../../../common/types';
 
+import { airGappedUtils } from '../airgapped';
+
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
 
@@ -68,7 +70,7 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(
   params?: GetPackagesRequest['query']
 ): Promise<RegistrySearchResults> {
-  if (appContextService.getConfig()?.isAirGapped) return [];
+  if (airGappedUtils().shouldSkipRegistryRequests) return [];
 
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
@@ -109,7 +111,7 @@ async function _fetchFindLatestPackage(
     }
 
     try {
-      if (!appContextService.getConfig()?.isAirGapped) {
+      if (!airGappedUtils().shouldSkipRegistryRequests) {
         const res = await fetchUrl(url.toString(), 1);
         const searchResults: RegistryPackage[] = JSON.parse(res);
 
@@ -122,7 +124,7 @@ async function _fetchFindLatestPackage(
           return bundledPackage;
         }
         return latestPackageFromRegistry;
-      } else if (appContextService.getConfig()?.isAirGapped && bundledPackage) {
+      } else if (airGappedUtils().shouldSkipRegistryRequests && bundledPackage) {
         return bundledPackage;
       } else {
         return null;
@@ -181,7 +183,7 @@ export async function fetchInfo(
 ): Promise<RegistryPackage | ArchivePackage> {
   const registryUrl = getRegistryUrl();
   // if isAirGapped config enabled and bundled package, use the bundled version
-  if (appContextService.getConfig()?.isAirGapped) {
+  if (airGappedUtils().shouldSkipRegistryRequests) {
     const archivePackage = await getBundledArchive(pkgName, pkgVersion);
     if (archivePackage) {
       return archivePackage.packageInfo;
@@ -232,10 +234,12 @@ export async function getFile(
 }
 
 export async function fetchFile(filePath: string): Promise<Response | null> {
-  if (appContextService.getConfig()?.isAirGapped) {
+  if (airGappedUtils().shouldSkipRegistryRequests) {
     appContextService
       .getLogger()
-      .debug('fetchFile: isAirGapped enabled, not reaching package registry');
+      .debug(
+        'fetchFile: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+      );
     return null;
   }
   const registryUrl = getRegistryUrl();
@@ -288,7 +292,14 @@ function setConstraints(url: URL) {
 export async function fetchCategories(
   params?: GetCategoriesRequest['query']
 ): Promise<CategorySummaryList> {
-  if (appContextService.getConfig()?.isAirGapped) return [];
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    appContextService
+      .getLogger()
+      .debug(
+        'fetchCategories: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+      );
+    return [];
+  }
 
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
