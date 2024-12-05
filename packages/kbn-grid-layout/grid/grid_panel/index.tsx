@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './compute_if_esql_query_aggregating';
-export * from './get_index_list_from_esql_query';
-export * from './parse_esql_query';
+export { GridPanel } from './grid_panel';
