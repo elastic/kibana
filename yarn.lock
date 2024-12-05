@@ -4168,7 +4168,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-graph@link:x-pack/packages/kbn-cloud-security-posture/graph":
+"@kbn/cloud-security-posture-graph@link:x-pack/solutions/security/packages/kbn-cloud-security-posture/graph":
   version "0.0.0"
   uid ""
 
