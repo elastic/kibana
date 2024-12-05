@@ -43,8 +43,7 @@ export const PresentationPanelInternal = <
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
-  const hoverDragHandleRef = useRef<HTMLDivElement | null>(null);
-  const headerDragHandleRef = useRef<HTMLDivElement | null>(null);
+  const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
   const viewModeSubject = (() => {
     if (apiPublishesViewMode(api)) return api.viewMode;
@@ -95,18 +94,10 @@ export const PresentationPanelInternal = <
     return attrs;
   }, [dataLoading, blockingError]);
 
-  const setHoverActionDragHandle = useCallback(
-    (ref: HTMLDivElement | null) => {
-      hoverDragHandleRef.current = ref;
-      setDragHandles?.([hoverDragHandleRef.current, headerDragHandleRef.current]);
-    },
-    [setDragHandles]
-  );
-
-  const setPanelTitleDragHandle = useCallback(
-    (ref: HTMLDivElement | null) => {
-      headerDragHandleRef.current = ref;
-      setDragHandles?.([hoverDragHandleRef.current, headerDragHandleRef.current]);
+  const setDragHandle = useCallback(
+    (id: string, ref: HTMLElement | null) => {
+      dragHandles.current[id] = ref;
+      setDragHandles?.(Object.values(dragHandles.current));
     },
     [setDragHandles]
   );
@@ -122,7 +113,7 @@ export const PresentationPanelInternal = <
         showNotifications,
         showBorder,
       }}
-      setDragHandle={setHoverActionDragHandle}
+      setDragHandle={setDragHandle}
     >
       <EuiPanel
         role="figure"
@@ -138,7 +129,7 @@ export const PresentationPanelInternal = <
         {!hideHeader && api && (
           <PresentationPanelHeader
             api={api}
-            setDragHandle={setPanelTitleDragHandle}
+            setDragHandle={setDragHandle}
             headerId={headerId}
             viewMode={viewMode}
             hideTitle={hideTitle}

@@ -10,7 +10,7 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { ViewMode } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { getAriaLabelForTitle } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
@@ -23,7 +23,7 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   hideTitle?: boolean;
   panelTitle?: string;
   panelDescription?: string;
-  setDragHandle: (ref: HTMLDivElement | null) => void;
+  setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
 } & Pick<PresentationPanelInternalProps, 'showBadges' | 'getActions' | 'showNotifications'>;
 
 export const PresentationPanelHeader = <
@@ -45,6 +45,14 @@ export const PresentationPanelHeader = <
     showBadges,
     api,
     getActions
+  );
+
+  const memoizedSetDragHandle = useCallback(
+    (ref: HTMLHeadingElement | null) => {
+      // memoize the ref callback so that we don't call `setDragHandle` on every render
+      setDragHandle('panelHeader', ref);
+    },
+    [setDragHandle]
   );
 
   const showPanelBar =
@@ -73,7 +81,7 @@ export const PresentationPanelHeader = <
       className={headerClasses}
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
     >
-      <h2 ref={setDragHandle} data-test-subj="dashboardPanelTitle" className={titleClasses}>
+      <h2 ref={memoizedSetDragHandle} data-test-subj="dashboardPanelTitle" className={titleClasses}>
         {ariaLabelElement}
         <PresentationPanelTitle
           api={api}

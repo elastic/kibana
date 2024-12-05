@@ -112,7 +112,7 @@ export const PresentationPanelHoverActions = ({
   index?: number;
   api: DefaultPresentationPanelApi | null;
   getActions: PresentationPanelInternalProps['getActions'];
-  setDragHandle: (ref: HTMLDivElement | null) => void;
+  setDragHandle: (id: string, ref: HTMLElement | null) => void;
   actionPredicate?: (actionId: string) => boolean;
   children: ReactElement;
   className?: string;
@@ -126,7 +126,7 @@ export const PresentationPanelHoverActions = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
   const hoverActionsRef = useRef<HTMLDivElement | null>(null);
-  const dragHandleRef = useRef<HTMLDivElement | null>(null);
+  const dragHandleRef = useRef<HTMLButtonElement | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
 
@@ -448,10 +448,10 @@ export const PresentationPanelHoverActions = ({
   const dragHandle = useMemo(
     /** Memoize the drag handle to avoid calling `setDragHandle` unnecessarily */
     () => (
-      <div
+      <button
         ref={(ref) => {
           dragHandleRef.current = ref;
-          setDragHandle(ref);
+          setDragHandle('hoverActions', ref);
         }}
       >
         <EuiIcon
@@ -466,7 +466,7 @@ export const PresentationPanelHoverActions = ({
             margin: ${euiThemeVars.euiSizeXS};
           `}
         />
-      </div>
+      </button>
     ),
     [setDragHandle]
   );
