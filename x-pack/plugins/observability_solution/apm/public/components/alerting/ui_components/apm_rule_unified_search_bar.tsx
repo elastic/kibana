@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFormErrorText } from '@elastic/eui';
 import { Query, fromKueryExpression } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -26,7 +27,7 @@ export function ApmRuleUnifiedSearchBar({
   setRuleParams: (key: string, value: any) => void;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
-
+  const [queryError, setQueryError] = React.useState<string>();
   const {
     unifiedSearch: {
       ui: { SearchBar },
@@ -39,31 +40,37 @@ export function ApmRuleUnifiedSearchBar({
   const handleSubmit = (payload: { query?: Query }) => {
     const { query } = payload;
     try {
+      setQueryError(undefined);
       fromKueryExpression(query?.query as string);
       setRuleParams('searchConfiguration', { query });
     } catch (e) {
-      // ignore invalid queries
+      setQueryError(e.message);
     }
   };
 
   return (
-    <SearchBar
-      appName={i18n.translate('xpack.apm.appName', {
-        defaultMessage: 'APM',
-      })}
-      iconType="search"
-      placeholder={placeholder || searchbarPlaceholder}
-      indexPatterns={dataView ? [dataView] : undefined}
-      showQueryInput={true}
-      showQueryMenu={false}
-      showFilterBar={false}
-      showDatePicker={false}
-      showSubmitButton={false}
-      displayStyle="inPage"
-      onQueryChange={handleSubmit}
-      onQuerySubmit={handleSubmit}
-      dataTestSubj="apmRuleUnifiedSearchBar"
-      query={ruleParams.searchConfiguration?.query}
-    />
+    <>
+      <SearchBar
+        appName={i18n.translate('xpack.apm.appName', {
+          defaultMessage: 'APM',
+        })}
+        iconType="search"
+        placeholder={placeholder || searchbarPlaceholder}
+        indexPatterns={dataView ? [dataView] : undefined}
+        showQueryInput={true}
+        showQueryMenu={false}
+        showFilterBar={false}
+        showDatePicker={false}
+        showSubmitButton={false}
+        displayStyle="inPage"
+        onQueryChange={handleSubmit}
+        onQuerySubmit={handleSubmit}
+        dataTestSubj="apmRuleUnifiedSearchBar"
+        query={ruleParams.searchConfiguration?.query}
+      />
+      {queryError && (
+        <EuiFormErrorText data-test-subj="apmSearchBarErrorCallout">{queryError}</EuiFormErrorText>
+      )}
+    </>
   );
 }
