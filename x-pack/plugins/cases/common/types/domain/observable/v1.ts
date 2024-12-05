@@ -15,7 +15,7 @@ export const CaseObservableBaseRt = rt.strict({
 
 export const CaseObservableRt = rt.intersection([
   rt.strict({
-    id: rt.union([rt.string, rt.null]),
+    id: rt.string,
     createdAt: rt.string,
     updatedAt: rt.union([rt.string, rt.null]),
   }),
