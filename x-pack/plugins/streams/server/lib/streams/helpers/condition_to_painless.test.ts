@@ -75,7 +75,7 @@ describe('conditionToPainless', () => {
       test('ensure number comparasion works with string values', () => {
         const condition = {
           field: 'http.response.status_code',
-          operator: 'gt',
+          operator: 'gt' as const,
           value: '500',
         };
         expect(conditionToStatement(condition)).toEqual(
@@ -85,7 +85,7 @@ describe('conditionToPainless', () => {
       test('ensure string comparasion works with number values', () => {
         const condition = {
           field: 'message',
-          operator: 'contains',
+          operator: 'contains' as const,
           value: 500,
         };
         expect(conditionToStatement(condition)).toEqual(
