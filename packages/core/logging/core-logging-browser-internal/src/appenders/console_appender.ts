@@ -28,7 +28,7 @@ export class ConsoleAppender implements DisposableAppender {
    */
   public append(record: LogRecord) {
     // eslint-disable-next-line @kbn/eslint/no_unsafe_console
-    unsafeConsole.log(this.layout.format(record));
+    // unsafeConsole.log(this.layout.format(record));
   }
 
   /**
