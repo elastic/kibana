@@ -1,3 +1,14 @@
 {
-  "properties": {}
+  "properties": {
+    "reporting": {
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
 }

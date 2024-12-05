@@ -15029,16 +15029,6 @@
         }
       }
     },
-    "reporting": {
-      "properties": {
-        "available": {
-          "type": "boolean"
-        },
-        "enabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "rollups": {
       "properties": {
         "index_patterns": {

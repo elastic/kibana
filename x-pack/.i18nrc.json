@@ -121,7 +121,7 @@
     ],
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": [
-      "plugins/reporting"
+      "platform/plugins/private/reporting"
     ],
     "xpack.rollupJobs": [
       "packages/rollup",

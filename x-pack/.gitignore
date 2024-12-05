@@ -5,9 +5,9 @@
 /test/functional/screenshots
 /test/functional/apps/**/reports/session
 /test/reporting/configs/failure_debug/
-/plugins/reporting/.chromium/
+/platform/plugins/private/reporting/.chromium/
 /plugins/screenshotting/chromium/
-/plugins/reporting/.phantom/
+/platform/plugins/private/reporting/.phantom/
 /.aws-config.json
 /.env
 /.kibana-plugin-helpers.dev.*

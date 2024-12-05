@@ -752,7 +752,7 @@
     "@kbn/reporting-export-types-png": "link:src/platform/packages/private/kbn-reporting/export_types/png",
     "@kbn/reporting-export-types-png-common": "link:src/platform/packages/private/kbn-reporting/export_types/png_common",
     "@kbn/reporting-mocks-server": "link:src/platform/packages/private/kbn-reporting/mocks_server",
-    "@kbn/reporting-plugin": "link:x-pack/plugins/reporting",
+    "@kbn/reporting-plugin": "link:x-pack/platform/plugins/private/reporting",
     "@kbn/reporting-public": "link:packages/kbn-reporting/public",
     "@kbn/reporting-server": "link:packages/kbn-reporting/server",
     "@kbn/resizable-layout": "link:packages/kbn-resizable-layout",
