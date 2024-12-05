@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/css';
 import { EuiSelect } from '@elastic/eui';
 import type { EuiSelectOption } from '@elastic/eui';
 import { BASE_OPTIONS, CURRENT_OPTIONS, TARGET_OPTIONS, SelectedVersions } from './constants';
@@ -36,6 +37,7 @@ export function VersionsPicker({
 
   return (
     <EuiSelect
+      className={VERSIONS_PICKER_STYLES}
       options={options}
       value={selectedVersions}
       onChange={handleChange}
@@ -43,3 +45,9 @@ export function VersionsPicker({
     />
   );
 }
+
+const VERSIONS_PICKER_STYLES = css`
+  // Set min-width a bit wider than default
+  // to make English text in narrow screens readable
+  min-width: 220px;
+`;
