@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const URL_LABEL = i18n.translate(
   'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.config.urlTextFieldLabel',
   {
-    defaultMessage: 'SentinelOne tenant URL',
+    defaultMessage: 'Microsoft Defender for Endpoint API URL',
   }
 );
 
