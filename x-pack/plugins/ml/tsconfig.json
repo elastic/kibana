@@ -38,7 +38,6 @@
     "@kbn/config-schema",
     "@kbn/content-management-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/core-elasticsearch-server",
     "@kbn/core-http-browser",
     "@kbn/core-http-server",
     "@kbn/core-lifecycle-browser",
