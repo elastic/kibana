@@ -139,7 +139,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
-  const { modal: saveWithErrorsModal, confirmValidationErrors } = useConfirmValidationErrorsModal();
+  const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
+    useConfirmValidationErrorsModal();
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
@@ -519,7 +520,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   return (
     <>
-      {saveWithErrorsModal}
+      {confirmSavingWithWarningModal}
       <SecuritySolutionPageWrapper>
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {

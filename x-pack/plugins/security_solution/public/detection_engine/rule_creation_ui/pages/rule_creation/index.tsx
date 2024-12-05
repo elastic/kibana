@@ -180,7 +180,8 @@ const CreateRulePageComponent: React.FC = () => {
     actionsStepDefault,
   });
 
-  const { modal: saveWithErrorsModal, confirmValidationErrors } = useConfirmValidationErrorsModal();
+  const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
+    useConfirmValidationErrorsModal();
 
   const isThreatMatchRuleValue = useMemo(
     () => isThreatMatchRule(defineStepData.ruleType),
@@ -828,7 +829,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   return (
     <>
-      {saveWithErrorsModal}
+      {confirmSavingWithWarningModal}
       <SecuritySolutionPageWrapper>
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
