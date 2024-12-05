@@ -4088,7 +4088,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cell-actions@link:packages/kbn-cell-actions":
+"@kbn/cell-actions@link:src/platform/packages/shared/kbn-cell-actions":
   version "0.0.0"
   uid ""
 
@@ -5404,11 +5404,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard-plugin@link:x-pack/plugins/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard-plugin@link:x-pack/solutions/security/plugins/ecs_data_quality_dashboard":
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard@link:x-pack/packages/security-solution/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/security-solution/ecs_data_quality_dashboard":
   version "0.0.0"
   uid ""
 
@@ -7056,7 +7056,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-features@link:x-pack/packages/security-solution/features":
+"@kbn/security-solution-features@link:x-pack/solutions/security/packages/security-solution/features":
   version "0.0.0"
   uid ""
 
@@ -7064,7 +7064,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-navigation@link:x-pack/packages/security-solution/navigation":
+"@kbn/security-solution-navigation@link:x-pack/solutions/security/packages/security-solution/navigation":
   version "0.0.0"
   uid ""
 
@@ -7076,7 +7076,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:x-pack/packages/security-solution/side_nav":
+"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/security-solution/side_nav":
   version "0.0.0"
   uid ""
 
@@ -7084,7 +7084,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-upselling@link:x-pack/packages/security-solution/upselling":
+"@kbn/security-solution-upselling@link:x-pack/solutions/security/packages/security-solution/upselling":
   version "0.0.0"
   uid ""
 
@@ -7104,7 +7104,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-ecs@link:packages/kbn-securitysolution-ecs":
+"@kbn/securitysolution-ecs@link:src/platform/packages/shared/kbn-securitysolution-ecs":
   version "0.0.0"
   uid ""
 
