@@ -99,7 +99,8 @@ export const Overview = () => {
             dataView={logs.dataView}
           />
         </EuiFlexItem>
-      ) : (
+      ) : null}
+      {!showAddMetricsCallout && isMetrics ? (
         <EuiFlexItem grow={false}>
           <KPIGrid
             assetId={asset.id}
@@ -109,7 +110,7 @@ export const Overview = () => {
           />
           {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
         </EuiFlexItem>
-      )}
+      ) : null}
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
