@@ -113,6 +113,7 @@ import {
 } from './dashboard_container_factory';
 import { InitialComponentState, getDashboardApi } from '../../dashboard_api/get_dashboard_api';
 import type { DashboardCreationOptions } from '../..';
+import { i18n } from '@kbn/i18n';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -957,7 +958,14 @@ export class DashboardContainer
     for (const panelId of Object.keys(currentChildren)) {
       if (this.getInput().panels[panelId]) {
         const child = currentChildren[panelId];
-        if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        if (apiPublishesUnsavedChanges(child)) {
+          const success = child.resetUnsavedChanges();
+          if (!success) {
+            coreServices.notifications.toasts.addWarning(i18n.translate('dashboard.reset.panelError', {
+              defaultMessage: 'Unable to reset panel changes',
+            }));
+          }
+        }
       } else {
         // if reset resulted in panel removal, we need to update the list of children
         delete currentChildren[panelId];
