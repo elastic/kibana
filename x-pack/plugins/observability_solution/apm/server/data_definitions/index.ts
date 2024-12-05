@@ -10,8 +10,29 @@ import { lastValueFrom } from 'rxjs';
 import { EsqlQueryTemplate } from '@kbn/data-definition-registry-plugin/server';
 import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { castArray } from 'lodash';
+import {
+  MsearchMultisearchBody,
+  MsearchMultisearchHeader,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 import { ApmDocumentType } from '../../common/document_type';
+import {
+  AGENT_NAME,
+  EVENT_OUTCOME,
+  EVENT_SUCCESS_COUNT,
+  METRICSET_NAME,
+  SERVICE_ENVIRONMENT,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+  SPAN_DURATION,
+  TRANSACTION_DURATION,
+  TRANSACTION_DURATION_HISTOGRAM,
+  TRANSACTION_DURATION_SUMMARY,
+  TRANSACTION_NAME,
+} from '../../common/es_fields/apm';
+import { getElasticJavaMetricQueries } from './agent_metrics/java';
 
 interface ApmDataAvailability {
   hasServiceSummaryMetrics: boolean;
@@ -22,6 +43,19 @@ interface ApmDataAvailability {
   hasErrorEvents: boolean;
 }
 
+const AGENT_METRICS = {
+  'elastic/java': {
+    term: {
+      [AGENT_NAME]: 'java',
+    },
+  },
+  'otel/java': {
+    terms: {
+      [AGENT_NAME]: ['opentelemetry/java', 'otlp/java'],
+    },
+  },
+} satisfies Record<string, QueryDslQueryContainer>;
+
 export function registerDataDefinitions({
   coreSetup,
   plugins,
@@ -31,10 +65,74 @@ export function registerDataDefinitions({
 }) {
   plugins.dataDefinitionRegistry?.registerStaticDataDefinition({
     id: 'apm_data_definition',
-    getQueries: async ({ dataStreams$, soClient }) => {
-      const [apmIndices, dataStreams] = await Promise.all([
-        plugins.apmDataAccess.getApmIndices(soClient),
+    getQueries: async ({ dataStreams$, esClient, soClient, query, index }) => {
+      const apmIndices = await plugins.apmDataAccess.getApmIndices(soClient);
+
+      const queriesForAgentMetrics = Object.entries(AGENT_METRICS).map(([name, queryForAgent]) => {
+        return {
+          name,
+          query: {
+            bool: {
+              filter: [
+                queryForAgent,
+                {
+                  term: {
+                    [METRICSET_NAME]: 'app',
+                  },
+                },
+                {
+                  terms: {
+                    _index: castArray(apmIndices.metric),
+                  },
+                },
+              ],
+            },
+          },
+        };
+      });
+
+      const [dataStreams, hasDataForAgentMetrics] = await Promise.all([
         lastValueFrom(dataStreams$),
+        esClient.asCurrentUser
+          .msearch({
+            searches: queriesForAgentMetrics.flatMap(({ name, query: queryForAgent }) => {
+              return [
+                {
+                  index,
+                } as MsearchMultisearchHeader,
+                {
+                  query: {
+                    bool: {
+                      filter: [query, queryForAgent],
+                    },
+                  },
+                  timeout: '1ms',
+                  track_total_hits: false,
+                  terminate_after: 1,
+                } as MsearchMultisearchBody,
+              ];
+            }),
+          })
+          .then(({ responses }) => {
+            return Object.fromEntries(
+              responses.map((response, idx) => {
+                const agent = queriesForAgentMetrics[idx]?.name;
+                return [
+                  agent,
+                  {
+                    has_data:
+                      'hits' in response && 'total' in response.hits
+                        ? Boolean(
+                            typeof response.hits.total === 'number'
+                              ? response.hits.total
+                              : response.hits.total?.value
+                          )
+                        : false,
+                  },
+                ];
+              })
+            ) as Record<keyof typeof AGENT_METRICS, { has_data: boolean }>;
+          }),
       ]);
 
       const allApmIndices = Object.values(apmIndices);
@@ -69,6 +167,8 @@ export function registerDataDefinitions({
       const queries: EsqlQueryTemplate[] = [
         ...getListServicesQuery(options),
         ...getTransactionQueries(options),
+        ...(hasDataForAgentMetrics ? getElasticJavaMetricQueries() : []),
+        ...getExitSpanQueries(options),
         // ...getListUpstreamDependenciesQuery(options),
         // ...getServiceNameForExitSpanQuery(options),
         // ...getExitSpanThroughputQuery(options),
@@ -97,15 +197,19 @@ function getTransactionMetricSetName(type: ApmDocumentType) {
 }
 
 function getDocumentTypeForTransactions(availability: ApmDataAvailability) {
-  if (availability.hasServiceTransactionMetrics) {
-    return ApmDocumentType.ServiceTransactionMetric;
+  // if (availability.hasServiceTransactionMetrics) {
+  //   return ApmDocumentType.ServiceTransactionMetric;
+  // }
+
+  // if (availability.hasTransactionMetrics) {
+  //   return ApmDocumentType.TransactionMetric;
+  // }
+
+  if (availability.hasTraceEvents) {
+    return ApmDocumentType.TransactionEvent;
   }
 
-  if (availability.hasTransactionMetrics) {
-    return ApmDocumentType.TransactionMetric;
-  }
-
-  return ApmDocumentType.TransactionEvent;
+  return undefined;
 }
 
 function getListServicesQuery({ availability, indices }: QueryFactoryOptions) {
@@ -114,6 +218,11 @@ function getListServicesQuery({ availability, indices }: QueryFactoryOptions) {
   const type = availability.hasServiceSummaryMetrics
     ? ApmDocumentType.ServiceSummaryMetric
     : getDocumentTypeForTransactions(availability);
+
+  if (!type) {
+    return [];
+  }
+
   return [
     {
       description,
@@ -144,9 +253,9 @@ function getSourceCommandsForDocumentType({
   ) {
     return `${getSourceCommands(
       indices.metric
-    )} | WHERE metricset.name == ${getTransactionMetricSetName(
+    )} | WHERE metricset.name == "${getTransactionMetricSetName(
       type
-    )} AND metricset.interval == "1m"`;
+    )}" AND metricset.interval == "1m"`;
   }
 
   if (type === ApmDocumentType.ServiceDestinationMetric) {
@@ -169,6 +278,10 @@ function getSourceCommandsForDocumentType({
 function getTransactionQueries({ availability, indices }: QueryFactoryOptions) {
   const type = getDocumentTypeForTransactions(availability);
 
+  if (!type) {
+    return [];
+  }
+
   const baseQuery = getSourceCommandsForDocumentType({ type, indices });
 
   return [
@@ -178,26 +291,35 @@ function getTransactionQueries({ availability, indices }: QueryFactoryOptions) {
     },
     {
       query: getTransactionLatencyAvgQuery(type),
-      description: 'Average latency for a service',
+      description: 'Average latency (ms) for a service',
     },
     {
       query: getTransactionLatencyPercentilesQuery(type),
-      description: 'Latency for a service as a percentile',
+      description: 'Latency (ms) for a service as a percentile',
     },
     {
       query: getTransactionFailureRateQuery(type),
-      description: `Failure rate for a service as 0.00 - 1.00`,
+      description: `Failure rate (%) for a service`,
     },
-    {
-      query: getTransactionGroupsForService(type),
+  ]
+    .map(({ query, description }) => {
+      return {
+        query: `${baseQuery}
+          | WHERE service.name == ?serviceName
+          | ${query} BY service.environment, transaction.type`,
+        description,
+      };
+    })
+    .concat({
+      query: getTransactionGroupsForServiceQuery({
+        type:
+          type === ApmDocumentType.TransactionEvent
+            ? ApmDocumentType.TransactionEvent
+            : ApmDocumentType.TransactionMetric,
+        indices,
+      }),
       description: `List of transaction groups for a service`,
-    },
-  ].map(({ query, description }) => {
-    return {
-      query: `${baseQuery} | ${query} BY service.environment, transaction.type`,
-      description,
-    };
-  });
+    });
 }
 
 function getTransactionThroughputQuery(type: ApmDocumentType) {
@@ -205,10 +327,10 @@ function getTransactionThroughputQuery(type: ApmDocumentType) {
     type === ApmDocumentType.ServiceTransactionMetric ||
     type === ApmDocumentType.TransactionMetric
   ) {
-    return `STATS total_throughput = SUM(transaction.duration.summary)`;
+    return `STATS total_throughput = SUM(${TRANSACTION_DURATION_SUMMARY})`;
   }
 
-  return `STATS total_throughput = SUM(transaction.duration.us) / SUM(transaction.representative_count)`;
+  return `STATS total_throughput = SUM(transaction.representative_count)`;
 }
 
 function getTransactionLatencyAvgQuery(type: ApmDocumentType) {
@@ -216,27 +338,106 @@ function getTransactionLatencyAvgQuery(type: ApmDocumentType) {
     type === ApmDocumentType.ServiceTransactionMetric ||
     type === ApmDocumentType.TransactionMetric
   ) {
-    return `STATS avg_throughput = AVG(transaction.duration.summary)`;
+    return `STATS avg_latency_ms = AVG(${TRANSACTION_DURATION_SUMMARY}) * 1000`;
   }
 
-  return `STATS avg_throughput = AVG((transaction.duration.us * transaction.representative_count) / transaction.representative_count)`;
+  return `STATS avg_latency_ms = WEIGHTED_AVG(${TRANSACTION_DURATION}, transaction.representative_count) * 1000`;
 }
 
 function getTransactionLatencyPercentilesQuery(type: ApmDocumentType) {
   if (type === ApmDocumentType.TransactionEvent) {
-    return `STATS percentile_throughput = PERCENTILES(transaction.duration.us, ?percentile)`;
+    return `STATS percentile_latency_ms = PERCENTILES(${TRANSACTION_DURATION}, ?percentile)`;
   }
-  return `STATS percentile_throughput = PERCENTILES(transaction.duration.histogram, ?percentile)`;
+  return `STATS percentile_latency_ms = PERCENTILES(${TRANSACTION_DURATION_HISTOGRAM}, ?percentile)`;
 }
 
 function getTransactionFailureRateQuery(type: ApmDocumentType) {
   if (type === ApmDocumentType.ServiceTransactionMetric) {
-    return `STATS failure_rate = COUNT(event.success_count) / SUM(event.success_count)`;
+    return `STATS failure_rate = (COUNT(${EVENT_SUCCESS_COUNT}) / SUM(${EVENT_SUCCESS_COUNT})) * 100`;
   }
 
-  return `EVAL is_failed = CASE(event.outcome == "failed", 0, event.outcome == "success", 1, NULL) | STATS failure_rate = AVG(is_failed)`;
+  return `EVAL is_failed = CASE(${EVENT_OUTCOME} == "failure", 0, ${EVENT_OUTCOME} == "success", 1, NULL) | STATS failure_rate = AVG(is_failed) * 100`;
 }
 
-function getTransactionGroupsForService(type: ApmDocumentType) {
-  return `STATS transaction_groups = VALUES(transaction.name)`;
+function getTransactionGroupsForServiceQuery(options: {
+  type: ApmDocumentType;
+  indices: APMIndices;
+}) {
+  return `${getSourceCommandsForDocumentType(options)}
+    | WHERE service.name == ?serviceName
+    | STATS transaction_groups = VALUES(${TRANSACTION_NAME})`;
+}
+
+function getDocumentTypeForExitSpans(availability: ApmDataAvailability) {
+  if (availability.hasExitSpanMetrics) {
+    return ApmDocumentType.ServiceDestinationMetric;
+  }
+
+  if (availability.hasTraceEvents) {
+    return ApmDocumentType.SpanEvent;
+  }
+  return undefined;
+}
+
+function getExitSpanQueries({ availability, indices }: QueryFactoryOptions) {
+  const type = getDocumentTypeForExitSpans(availability);
+
+  if (!type) {
+    return [];
+  }
+
+  const baseQuery = getSourceCommandsForDocumentType({ type, indices });
+
+  return [
+    {
+      description: 'Total throughput from service to upstream dependency',
+      query: getExitSpanThroughputQuery(type),
+    },
+    {
+      description: 'Failure rate from service to upstream dependency',
+      query: getExitSpanFailureRateQuery(type),
+    },
+    {
+      description: `Average latency (ms) from service to upstream dependency`,
+      query: getExitSpanAvgLatencyQuery(type),
+    },
+  ]
+    .map(({ description, query }) => {
+      return {
+        description,
+        query: `${baseQuery} | ${query} BY ${SPAN_DESTINATION_SERVICE_RESOURCE}, ${SERVICE_ENVIRONMENT}`,
+      };
+    })
+    .concat({
+      description: 'List upstream dependencies for service',
+      query: `${baseQuery} | VALUES(${SPAN_DESTINATION_SERVICE_RESOURCE}) BY ${SERVICE_ENVIRONMENT}`,
+    });
+}
+
+function getExitSpanThroughputQuery(type: ApmDocumentType) {
+  const multiplierField =
+    type === ApmDocumentType.ServiceDestinationMetric
+      ? SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT
+      : 'span.representative_count';
+
+  return `STATS total_throughput = SUM(${multiplierField})`;
+}
+
+function getExitSpanFailureRateQuery(type: ApmDocumentType) {
+  const multiplierField =
+    type === ApmDocumentType.ServiceDestinationMetric
+      ? SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT
+      : 'span.representative_count';
+
+  return `STATS failure_rate =
+      SUM(CASE(${EVENT_OUTCOME} == "failure", ${multiplierField}, NULL)
+      / SUM(CASE(${EVENT_OUTCOME} IN ("failure", "success"), ${multiplierField}, NULL)`;
+}
+
+function getExitSpanAvgLatencyQuery(type: ApmDocumentType) {
+  if (type === ApmDocumentType.ServiceDestinationMetric) {
+    return `STATS avg_latency_ms = SUM(${SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM}) / SUM(${SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT}) * 1000`;
+  }
+
+  return `STATS avg_latency_ms = WEIGHTED_AVG(${SPAN_DURATION}, span.representative_count) * 1000`;
 }

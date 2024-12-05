@@ -45,8 +45,8 @@ interface DataStreamOptions {
   }>;
 }
 
-type InternalGetQueriesOptions = DataStreamOptions & KibanaClientOptions;
-type InternalGetAssetsOptions = DataStreamOptions & KibanaClientOptions;
+type InternalGetQueriesOptions = DataStreamOptions & KibanaClientOptions & QueryOptions;
+type InternalGetAssetsOptions = DataStreamOptions & KibanaClientOptions & QueryOptions;
 
 type GetAssetOptions = TimeRangeOptions & QueryOptions;
 type GetQueriesOptions = TimeRangeOptions & QueryOptions;

@@ -70,6 +70,7 @@ export function createPlugin(
         core: coreSetup,
         logger,
         dependencies: {
+          registry,
           plugins: mapValues(pluginsSetup, (value, key) => {
             return {
               start: () =>

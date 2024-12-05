@@ -39,10 +39,8 @@ export interface DataDefinitionRouteHandlerResources {
 }
 
 export interface DataDefinitionRouteCreateOptions {
-  options: {
-    timeout?: {
-      idleSocket?: number;
-    };
-    tags: Array<'access:dataDefinition'>;
+  timeout?: {
+    idleSocket?: number;
   };
+  tags: Array<'access:dataDefinition'>;
 }

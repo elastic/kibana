@@ -89,6 +89,8 @@ export function createDataDefinitionRegistry({
             start,
             end,
             dataStreams$: createDataStreams$({ query, index }),
+            query,
+            index,
             ...withClients,
           };
 
@@ -110,6 +112,8 @@ export function createDataDefinitionRegistry({
             start,
             end,
             dataStreams$: createDataStreams$({ query, index }),
+            query,
+            index,
             ...withClients,
           };
 

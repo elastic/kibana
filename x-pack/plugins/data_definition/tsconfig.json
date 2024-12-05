@@ -12,6 +12,16 @@
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    
+    "@kbn/core-plugins-browser",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
+    "@kbn/core",
+    "@kbn/data-definition-registry-plugin",
+    "@kbn/server-route-repository",
+    "@kbn/licensing-plugin",
+    "@kbn/logging",
+    "@kbn/datemath",
+    "@kbn/zod",
+    "@kbn/es-query",
   ]
 }
