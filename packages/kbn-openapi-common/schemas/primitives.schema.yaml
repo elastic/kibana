@@ -10,7 +10,7 @@ components:
       type: string
       minLength: 1
       format: nonempty
-      description: A string that does not contain only whitespace
+      description: A string that does not contain only whitespace characters
 
     UUID:
       type: string

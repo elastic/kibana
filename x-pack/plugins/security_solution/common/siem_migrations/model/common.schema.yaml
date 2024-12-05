@@ -10,7 +10,7 @@ components:
       type: string
       format: nonempty
       minLength: 1
-      description: A string that does not contain only whitespace
+      description: A string that does not contain only whitespace characters
     ConnectorId:
       type: string
       description: The GenAI connector id to use.
