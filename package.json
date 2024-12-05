@@ -75,7 +75,6 @@
     "**/@types/react": "^16.14.25",
     "**/@types/react-dom": "^16.9.8",
     "**/@typescript-eslint/utils": "5.62.0",
-    "**/axios": "1.7.4",
     "**/chokidar": "^3.4.3",
     "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@1.4.2",
     "**/follow-redirects": "^1.15.6",
