@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { cloneDeep } from 'lodash';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiDescriptionList,
@@ -24,6 +25,7 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
+import { isDataView } from '../../../../common/components/query_bar';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   EqlOptionalFields,
@@ -92,8 +94,16 @@ export const Filters = ({
     ? { dataViewId }
     : { indexPatterns: index ?? defaultIndexPattern };
   const { dataView } = useDataView(useDataViewParams);
-
-  const flattenedFilters = mapAndFlattenFilters(filters);
+  const isEsql = filters.some((filter) => filter?.query?.language === 'esql');
+  const searchBarFilters = useMemo(() => {
+    if (!index || isDataView(index) || isEsql) {
+      return filters;
+    }
+    const updatedFilters = cloneDeep(filters);
+    updatedFilters.forEach((filter) => (filter.meta.index = index.join(',')));
+    return updatedFilters;
+  }, [filters, index, isEsql]);
+  const flattenedFilters = mapAndFlattenFilters(searchBarFilters);
   const styles = filtersStyles;
 
   return (
