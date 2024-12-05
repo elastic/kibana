@@ -682,7 +682,7 @@
     "@kbn/ml-ui-actions": "link:x-pack/packages/ml/ui_actions",
     "@kbn/ml-url-state": "link:x-pack/packages/ml/url_state",
     "@kbn/ml-validators": "link:x-pack/packages/ml/validators",
-    "@kbn/monaco": "link:packages/kbn-monaco",
+    "@kbn/monaco": "link:src/platform/packages/shared/kbn-monaco",
     "@kbn/monitoring-collection-plugin": "link:x-pack/plugins/monitoring_collection",
     "@kbn/monitoring-plugin": "link:x-pack/plugins/monitoring",
     "@kbn/navigation-plugin": "link:src/plugins/navigation",
