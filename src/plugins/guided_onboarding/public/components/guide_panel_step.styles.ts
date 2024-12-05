@@ -17,9 +17,7 @@ export const getGuidePanelStepStyles = (euiTheme: EuiThemeComputed, stepStatus: 
     height: 24px;
     border-radius: 50%;
     border: 2px solid
-      ${stepStatus === 'inactive'
-        ? euiTheme.colors.borderBasePlain
-        : euiTheme.colors.accentSecondary};
+      ${stepStatus === 'inactive' ? euiTheme.colors.borderBasePlain : euiTheme.colors.success};
     font-weight: ${euiTheme.font.weight.medium};
     text-align: center;
     line-height: 1.4;
