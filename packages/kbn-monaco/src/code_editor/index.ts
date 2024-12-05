@@ -6,17 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { CODE_EDITOR_DEFAULT_THEME_ID, CODE_EDITOR_TRANSPARENT_THEME_ID } from './constants';
 
-export {
-  CODE_EDITOR_LIGHT_THEME_ID,
-  CODE_EDITOR_DARK_THEME_ID,
-  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
-  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
-} from './constants';
+import { buildTheme, buildTransparentTheme } from './theme';
 
-export {
-  buildLightTheme,
-  buildDarkTheme,
-  buildLightTransparentTheme,
-  buildDarkTransparentTheme,
-} from './theme';
+// export these so that they are consumed by the actual code editor implementation
+export const defaultThemesResolvers = {
+  [CODE_EDITOR_DEFAULT_THEME_ID]: buildTheme,
+  [CODE_EDITOR_TRANSPARENT_THEME_ID]: buildTransparentTheme,
+};
+
+export { CODE_EDITOR_DEFAULT_THEME_ID, CODE_EDITOR_TRANSPARENT_THEME_ID };

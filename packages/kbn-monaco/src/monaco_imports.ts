@@ -53,4 +53,47 @@ export {
   language as yamlLanguage,
 } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
 
+import type { CustomLangModuleType } from './types';
+
+const languageThemeDefinitions = new Map<string, CustomLangModuleType['languageThemeResolver']>();
+
+declare module 'monaco-editor/esm/vs/editor/editor.api' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  export namespace editor {
+    // augment monaco editor types
+    function registerLanguageThemeDefinition(
+      langId: string,
+      languageThemeDefinition: CustomLangModuleType['languageThemeResolver']
+    ): void;
+    function getLanguageThemeDefinition(
+      langId: string
+    ): CustomLangModuleType['languageThemeResolver'];
+  }
+}
+
+// add custom methods to monaco editor
+Object.defineProperties(monaco.editor, {
+  /**
+   * @description Registers language theme definition for a language
+   */
+  registerLanguageThemeDefinition: {
+    value: (
+      langId: string,
+      languageThemeDefinition: CustomLangModuleType['languageThemeResolver']
+    ) => {
+      languageThemeDefinitions.set(langId, languageThemeDefinition);
+    },
+    enumerable: true,
+    configurable: false,
+  },
+  /**
+   * @description Returns language theme definition for a language
+   */
+  getLanguageThemeDefinition: {
+    value: (langId: string) => languageThemeDefinitions.get(langId),
+    enumerable: true,
+    configurable: false,
+  },
+});
+
 export { monaco };
