@@ -14,12 +14,14 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { UserProfileService } from '@kbn/core/public';
+import { ChromeStart, UserProfileService } from '@kbn/core/public';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
+import { chromeServiceMock } from '@kbn/core/public/mocks';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
+  chromeStart?: ChromeStart;
   children: React.ReactNode;
   providerContext?: Partial<AssistantProviderProps>;
 }
@@ -39,6 +41,7 @@ export const mockAssistantAvailability: AssistantAvailability = {
 /** A utility for wrapping children in the providers required to run tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   assistantAvailability = mockAssistantAvailability,
+  chromeStart = chromeServiceMock.createStartContract(),
   children,
   providerContext,
 }) => {
@@ -85,6 +88,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
             {...providerContext}
             currentAppId={'test'}
             userProfileService={jest.fn() as unknown as UserProfileService}
+            navControls={chromeStart.navControls}
           >
             {children}
           </AssistantProvider>

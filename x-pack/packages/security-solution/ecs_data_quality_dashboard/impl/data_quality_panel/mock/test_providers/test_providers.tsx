@@ -16,7 +16,7 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
 
-import { UserProfileService } from '@kbn/core/public';
+import { ChromeStart, UserProfileService } from '@kbn/core/public';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -31,15 +31,17 @@ import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
+import { chromeServiceMock } from '@kbn/core/public/mocks';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
+  chromeStart: ChromeStart
 }
 
 window.scrollTo = jest.fn();
 
 /** A utility for wrapping children in the providers required to run tests */
-const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ children }) => {
+const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ children, chromeStart = chromeServiceMock.createStartContract(),  }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
@@ -84,6 +86,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
             navigateToApp={mockNavigateToApp}
             currentAppId={'securitySolutionUI'}
             userProfileService={jest.fn() as unknown as UserProfileService}
+            navControls={chromeStart.navControls}
           >
             {children}
           </AssistantProvider>
