@@ -6332,7 +6332,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-kibana-theme@link:x-pack/packages/ml/kibana_theme":
+"@kbn/ml-kibana-theme@link:x-pack/platform/packages/private/ml/kibana_theme":
   version "0.0.0"
   uid ""
 
