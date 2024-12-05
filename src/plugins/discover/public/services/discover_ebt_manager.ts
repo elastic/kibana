@@ -11,7 +11,11 @@ import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { ContextProfileLevel } from '../context_awareness/profiles_manager';
 
+/**
+ * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
+ */
 const FIELD_USAGE_EVENT_TYPE = 'discover_field_usage';
 const FIELD_USAGE_EVENT_NAME = 'eventName';
 const FIELD_USAGE_FIELD_NAME = 'fieldName';
@@ -30,6 +34,19 @@ interface FieldUsageEventData {
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
 }
 
+/**
+ * Context profile resolved event i.e. when a different context awareness profile is resolved at root, data source, or document level
+ * Duplicated events for the same profile level will not be sent.
+ */
+const CONTEXT_PROFILE_RESOLVED_EVENT_TYPE = 'discover_profile_resolved';
+const CONTEXT_PROFILE_LEVEL = 'profileLevel';
+const CONTEXT_PROFILE_ID = 'profileId';
+
+interface ContextProfileResolvedEventData {
+  [CONTEXT_PROFILE_LEVEL]: ContextProfileLevel;
+  [CONTEXT_PROFILE_ID]: string;
+}
+
 export interface DiscoverEBTContextProps {
   discoverProfiles: string[]; // Discover Context Awareness Profiles
 }
@@ -39,8 +56,19 @@ export class DiscoverEBTManager {
   private isCustomContextEnabled: boolean = false;
   private customContext$: DiscoverEBTContext | undefined;
   private reportEvent: CoreSetup['analytics']['reportEvent'] | undefined;
+  private lastResolvedContextProfiles: {
+    [ContextProfileLevel.rootLevel]: string | undefined;
+    [ContextProfileLevel.dataSourceLevel]: string | undefined;
+    [ContextProfileLevel.documentLevel]: string | undefined;
+  };
 
-  constructor() {}
+  constructor() {
+    this.lastResolvedContextProfiles = {
+      [ContextProfileLevel.rootLevel]: undefined,
+      [ContextProfileLevel.dataSourceLevel]: undefined,
+      [ContextProfileLevel.documentLevel]: undefined,
+    };
+  }
 
   // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
   public initialize({
@@ -100,6 +128,24 @@ export class DiscoverEBTManager {
             _meta: {
               description: "Operation type when a filter is added i.e. '+', '-', '_exists_'",
               optional: true,
+            },
+          },
+        },
+      });
+      core.analytics.registerEventType({
+        eventType: CONTEXT_PROFILE_RESOLVED_EVENT_TYPE,
+        schema: {
+          [CONTEXT_PROFILE_LEVEL]: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'The profile level at which it was resolved i.e. rootLevel, dataSourceLevel, documentLevel',
+            },
+          },
+          [CONTEXT_PROFILE_ID]: {
+            type: 'keyword',
+            _meta: {
+              description: 'The resolved name of the active profile',
             },
           },
         },
@@ -215,5 +261,33 @@ export class DiscoverEBTManager {
       fieldsMetadata,
       filterOperation,
     });
+  }
+
+  public trackContextProfileResolvedEvent({
+    profileLevel,
+    profileId,
+  }: {
+    profileLevel: ContextProfileLevel;
+    profileId: string;
+  }) {
+    if (!this.reportEvent) {
+      return;
+    }
+
+    if (this.lastResolvedContextProfiles[profileLevel] === profileId) {
+      // avoid sending duplicate events to EBT
+      return;
+    }
+
+    this.lastResolvedContextProfiles[profileLevel] = profileId;
+
+    const eventData: ContextProfileResolvedEventData = {
+      [CONTEXT_PROFILE_LEVEL]: profileLevel,
+      [CONTEXT_PROFILE_ID]: profileId,
+    };
+
+    console.log('eventData', eventData);
+
+    this.reportEvent(CONTEXT_PROFILE_RESOLVED_EVENT_TYPE, eventData);
   }
 }
