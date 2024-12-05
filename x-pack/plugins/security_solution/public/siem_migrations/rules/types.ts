@@ -11,14 +11,3 @@ export interface RuleMigrationTask extends RuleMigrationTaskStats {
   /** The sequential number of the migration */
   number: number;
 }
-
-export interface InstallRulesProps {
-  migrationId: string;
-  ids: string[];
-  signal?: AbortSignal;
-}
-
-export interface InstallTranslatedRulesProps {
-  migrationId: string;
-  signal?: AbortSignal;
-}
