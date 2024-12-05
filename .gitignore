@@ -106,3 +106,5 @@ renovate.json5
 /packages/*/package-map.json
 /packages/*/config-paths.json
 /x-pack/plugins/screenshotting/chromium
+
+.devcontainer/.env

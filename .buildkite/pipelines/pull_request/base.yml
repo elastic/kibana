@@ -17,6 +17,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c2-standard-16
+      diskSizeGb: 125
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60

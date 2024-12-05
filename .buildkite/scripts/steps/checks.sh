@@ -22,3 +22,4 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/steps/checks/test_projects.sh
 .buildkite/scripts/steps/checks/test_hardening.sh
 .buildkite/scripts/steps/checks/prettier_topology.sh
+.buildkite/scripts/steps/checks/yarn_deduplicate.sh
