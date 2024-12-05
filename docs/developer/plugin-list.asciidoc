@@ -629,7 +629,7 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 |This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/grokdebugger/README.md[grokdebugger]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/grokdebugger/README.md[grokdebugger]
 |This plugin helps users define Grok patterns,
 which are particularly useful for ingesting logs.
 
