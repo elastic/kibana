@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 
 export const ELSER_MODEL_ID = '.elser_model_2';
@@ -308,14 +309,7 @@ export type InferenceServiceSettings =
       };
     };
 
-export type InferenceAPIConfigResponse = {
-  // Refers to a deployment id
-  inference_id: string;
-  task_type: 'sparse_embedding' | 'text_embedding';
-  task_settings: {
-    model?: string;
-  };
-} & InferenceServiceSettings;
+export type InferenceAPIConfigResponse = InferenceInferenceEndpointInfo & InferenceServiceSettings;
 
 export function isLocalModel(
   model: InferenceServiceSettings
