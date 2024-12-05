@@ -8,6 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { UseEuiTheme } from '@elastic/eui';
 import { monaco } from './monaco_imports';
 
 export interface LangModuleType {
@@ -41,6 +42,7 @@ export interface CustomLangModuleType<Deps = unknown>
   extends Omit<LangModuleType, 'getSuggestionProvider'>,
     LanguageProvidersModule<Deps> {
   onLanguage: () => void;
+  languageThemeResolver: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
 }
 
 export interface MonacoEditorError {
