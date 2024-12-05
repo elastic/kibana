@@ -18,7 +18,7 @@ import { z } from '@kbn/zod';
 import { isNonEmptyString } from '@kbn/zod-helpers';
 
 /**
- * A string that does not contain only whitespace
+ * A string that does not contain only whitespace characters
  */
 export type NonEmptyString = z.infer<typeof NonEmptyString>;
 export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
