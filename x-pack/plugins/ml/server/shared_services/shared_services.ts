@@ -19,7 +19,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { CompatibleModule } from '../../common/constants/app';
+import type { CompatibleModule, MlFeatures } from '../../common/constants/app';
 import type { MlLicense } from '../../common/license';
 
 import { licenseChecks } from './license_checks';
@@ -113,7 +113,8 @@ export function createSharedServices(
   getDataViews: () => DataViewsPluginStart,
   getAuditService: () => CoreAuditService | null,
   isMlReady: () => Promise<void>,
-  compatibleModuleType: CompatibleModule | null
+  compatibleModuleType: CompatibleModule | null,
+  enabledFeatures: MlFeatures
 ): {
   sharedServicesProviders: SharedServices;
   internalServicesProviders: MlServicesProviders;
@@ -191,7 +192,7 @@ export function createSharedServices(
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
-      ...getTrainedModelsProvider(getGuards, cloud),
+      ...getTrainedModelsProvider(getGuards, cloud, enabledFeatures),
     },
     /**
      * Services providers for ML internal usage
