@@ -623,6 +623,7 @@ src/core @elastic/kibana-core
 src/platform/packages/private/kbn-handlebars @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-doc-links @elastic/docs
+src/platform/plugins/private/interactive_setup @elastic/kibana-security
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
@@ -670,7 +671,6 @@ src/plugins/home @elastic/appex-sharedux
 src/plugins/image_embeddable @elastic/appex-sharedux
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
-src/plugins/interactive_setup @elastic/kibana-security
 src/plugins/kibana_overview @elastic/appex-sharedux
 src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
