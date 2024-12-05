@@ -176,7 +176,7 @@
                     "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<object, unknown>, config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<object, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -184,7 +184,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -200,7 +200,7 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -208,7 +208,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
                 ],
                 "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
                 "deprecated": false,
@@ -597,7 +597,7 @@
                     "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<object, unknown>, config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<object, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -605,7 +605,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -621,7 +621,7 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -629,7 +629,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
                 ],
                 "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
                 "deprecated": false,
