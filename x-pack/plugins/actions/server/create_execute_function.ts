@@ -168,7 +168,7 @@ export function createBulkExecutionEnqueuerFunction({
           executionId: actionToExecute.executionId,
           consumer: actionToExecute.consumer,
           relatedSavedObjects: relatedSavedObjectWithRefs,
-          ...(actionToExecute.apiKeyId ? { apiKeyId: actionToExecute.apiKeyId } : {}),
+          apiKeyId: actionToExecute.apiKeyId,
           ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,
