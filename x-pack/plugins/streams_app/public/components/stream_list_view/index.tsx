@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiSearchBar } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
@@ -36,27 +36,33 @@ export function StreamListView() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <StreamsAppPageHeader
-        title={
-          <StreamsAppPageHeaderTitle
-            title={i18n.translate('xpack.streams.streamsListViewPageHeaderTitle', {
-              defaultMessage: 'Streams',
-            })}
-          />
-        }
-      />
+      <EuiFlexItem grow={false}>
+        <StreamsAppPageHeader
+          title={
+            <StreamsAppPageHeaderTitle
+              title={i18n.translate('xpack.streams.streamsListViewPageHeaderTitle', {
+                defaultMessage: 'Streams',
+              })}
+            />
+          }
+        />
+      </EuiFlexItem>
       <StreamsAppPageBody>
         <EuiFlexGroup direction="column">
-          <EuiSearchBar
-            query={query}
-            box={{
-              incremental: true,
-            }}
-            onChange={(nextQuery) => {
-              setQuery(nextQuery.queryText);
-            }}
-          />
-          <StreamsTable listFetch={streamsListFetch} query={query} />
+          <EuiFlexItem grow={false}>
+            <EuiSearchBar
+              query={query}
+              box={{
+                incremental: true,
+              }}
+              onChange={(nextQuery) => {
+                setQuery(nextQuery.queryText);
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <StreamsTable listFetch={streamsListFetch} query={query} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </StreamsAppPageBody>
     </EuiFlexGroup>

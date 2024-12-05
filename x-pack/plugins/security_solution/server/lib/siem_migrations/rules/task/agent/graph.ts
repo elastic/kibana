@@ -20,7 +20,7 @@ export function getRuleMigrationAgent({
   connectorId,
   logger,
 }: MigrateRuleGraphParams) {
-  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({ model, prebuiltRulesMap, logger });
+  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({ model, prebuiltRulesMap });
   const translationSubGraph = getTranslateRuleGraph({
     model,
     inferenceClient,
@@ -30,16 +30,16 @@ export function getRuleMigrationAgent({
     logger,
   });
 
-  const translateRuleGraph = new StateGraph(migrateRuleState)
+  const siemMigrationAgentGraph = new StateGraph(migrateRuleState)
     // Nodes
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
-    .addNode('translation', translationSubGraph)
+    .addNode('translationSubGraph', translationSubGraph)
     // Edges
     .addEdge(START, 'matchPrebuiltRule')
     .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional)
-    .addEdge('translation', END);
+    .addEdge('translationSubGraph', END);
 
-  const graph = translateRuleGraph.compile();
+  const graph = siemMigrationAgentGraph.compile();
   graph.name = 'Rule Migration Graph'; // Customizes the name displayed in LangSmith
   return graph;
 }
@@ -48,5 +48,5 @@ const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;
   }
-  return 'translation';
+  return 'translationSubGraph';
 };

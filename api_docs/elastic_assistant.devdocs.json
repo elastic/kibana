@@ -1571,6 +1571,27 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.llmTasks",
+            "type": "Object",
+            "tags": [],
+            "label": "llmTasks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "llmTasks",
+                "scope": "server",
+                "docId": "kibLlmTasksPluginApi",
+                "section": "def-server.LlmTasksPluginStart",
+                "text": "LlmTasksPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.isOssModel",
             "type": "CompoundType",
             "tags": [],
@@ -1864,6 +1885,26 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginStartDependencies.llmTasks",
+            "type": "Object",
+            "tags": [],
+            "label": "llmTasks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "llmTasks",
+                "scope": "server",
+                "docId": "kibLlmTasksPluginApi",
+                "section": "def-server.LlmTasksPluginStart",
+                "text": "LlmTasksPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.ElasticAssistantPluginStartDependencies.inference",
             "type": "Object",
             "tags": [],
@@ -1937,6 +1978,26 @@
                 "docId": "kibLicensingPluginApi",
                 "section": "def-server.LicensingPluginStart",
                 "text": "LicensingPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginStartDependencies.productDocBase",
+            "type": "Object",
+            "tags": [],
+            "label": "productDocBase",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "productDocBase",
+                "scope": "server",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-server.ProductDocBaseStartContract",
+                "text": "ProductDocBaseStartContract"
               }
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",

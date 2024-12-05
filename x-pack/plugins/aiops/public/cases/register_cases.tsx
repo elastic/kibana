@@ -12,8 +12,10 @@ import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '@kbn/aiops-change-point-detection/constants';
 import { CASES_ATTACHMENT_LOG_PATTERN } from '@kbn/aiops-log-pattern-analysis/constants';
+import { CASES_ATTACHMENT_LOG_RATE_ANALYSIS } from '@kbn/aiops-log-rate-analysis/constants';
 import {
   getChangePointDetectionComponent,
+  getLogRateAnalysisEmbeddableWrapperComponent,
   getPatternAnalysisComponent,
 } from '../shared_components';
 import type { AiopsPluginStartDeps } from '../types';
@@ -47,6 +49,14 @@ export function registerCases(
         };
       }),
     }),
+    getAttachmentRemovalObject: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.aiops.changePointDetection.cases.attachmentRemovalEvent"
+          defaultMessage="removed change point chart"
+        />
+      ),
+    }),
   });
 
   const LogPatternAttachmentComponent = getPatternAnalysisComponent(coreStart, pluginStart);
@@ -70,6 +80,54 @@ export function registerCases(
 
         return { default: initComponent(pluginStart.fieldFormats, LogPatternAttachmentComponent) };
       }),
+    }),
+    getAttachmentRemovalObject: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.aiops.logPatternAnalysis.cases.attachmentRemovalEvent"
+          defaultMessage="removed log pattern analysis"
+        />
+      ),
+    }),
+  });
+
+  const LogRateAnalysisEmbeddableWrapperComponent = getLogRateAnalysisEmbeddableWrapperComponent(
+    coreStart,
+    pluginStart
+  );
+
+  cases.attachmentFramework.registerPersistableState({
+    id: CASES_ATTACHMENT_LOG_RATE_ANALYSIS,
+    icon: 'machineLearningApp',
+    displayName: i18n.translate('xpack.aiops.logRateAnalysis.cases.attachmentName', {
+      defaultMessage: 'Log rate analysis',
+    }),
+    getAttachmentViewObject: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.aiops.logRateAnalysis.cases.attachmentEvent"
+          defaultMessage="added log rate analysis"
+        />
+      ),
+      timelineAvatar: 'machineLearningApp',
+      children: React.lazy(async () => {
+        const { initComponent } = await import('./log_rate_analysis_attachment');
+
+        return {
+          default: initComponent(
+            pluginStart.fieldFormats,
+            LogRateAnalysisEmbeddableWrapperComponent
+          ),
+        };
+      }),
+    }),
+    getAttachmentRemovalObject: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.aiops.logRateAnalysis.cases.attachmentRemovalEvent"
+          defaultMessage="removed log rate analysis"
+        />
+      ),
     }),
   });
 }

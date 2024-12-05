@@ -17,6 +17,7 @@ export * from './delete_connector';
 export * from './delete_connector_secret';
 export * from './fetch_connectors';
 export * from './fetch_sync_jobs';
+export * from './generate_connector_name';
 export * from './update_filtering';
 export * from './update_filtering_draft';
 export * from './update_native';

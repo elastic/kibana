@@ -79,53 +79,45 @@ export class ObservabilityOnboardingPlugin
   public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
     const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
-    const {
-      ui: { enabled: isObservabilityOnboardingUiEnabled },
-    } = config;
     const isServerlessBuild = this.ctx.env.packageInfo.buildFlavor === 'serverless';
     const isDevEnvironment = this.ctx.env.mode.dev;
     const pluginSetupDeps = plugins;
 
-    // set xpack.observability_onboarding.ui.enabled: true
-    // and go to /app/observabilityOnboarding
-    if (isObservabilityOnboardingUiEnabled) {
-      core.application.register({
-        id: PLUGIN_ID,
-        title: 'Observability Onboarding',
-        order: 8500,
-        euiIconType: 'logoObservability',
-        category: DEFAULT_APP_CATEGORIES.observability,
-        keywords: [],
-        async mount(appMountParameters: AppMountParameters) {
-          // Load application bundle and Get start service
-          const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-            import('./application/app'),
-            core.getStartServices(),
-          ]);
+    core.application.register({
+      id: PLUGIN_ID,
+      title: 'Observability Onboarding',
+      order: 8500,
+      euiIconType: 'logoObservability',
+      category: DEFAULT_APP_CATEGORIES.observability,
+      keywords: [],
+      async mount(appMountParameters: AppMountParameters) {
+        // Load application bundle and Get start service
+        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
+          import('./application/app'),
+          core.getStartServices(),
+        ]);
 
-          const { createCallApi } = await import('./services/rest/create_call_api');
+        const { createCallApi } = await import('./services/rest/create_call_api');
 
-          createCallApi(core);
+        createCallApi(core);
 
-          return renderApp({
-            core: coreStart,
-            deps: pluginSetupDeps,
-            appMountParameters,
-            corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
-            config,
-            context: {
-              isDev: isDevEnvironment,
-              isCloud: Boolean(pluginSetupDeps.cloud?.isCloudEnabled),
-              isServerless:
-                Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
-              stackVersion,
-              cloudServiceProvider: pluginSetupDeps.cloud?.csp,
-            },
-          });
-        },
-        visibleIn: [],
-      });
-    }
+        return renderApp({
+          core: coreStart,
+          deps: pluginSetupDeps,
+          appMountParameters,
+          corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
+          config,
+          context: {
+            isDev: isDevEnvironment,
+            isCloud: Boolean(pluginSetupDeps.cloud?.isCloudEnabled),
+            isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
+            stackVersion,
+            cloudServiceProvider: pluginSetupDeps.cloud?.csp,
+          },
+        });
+      },
+      visibleIn: [],
+    });
 
     this.locators = {
       onboarding: plugins.share.url.locators.create(new ObservabilityOnboardingLocatorDefinition()),

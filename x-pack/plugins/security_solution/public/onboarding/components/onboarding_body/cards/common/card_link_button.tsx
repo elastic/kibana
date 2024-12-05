@@ -19,13 +19,13 @@ export const withReportCardLinkClick = <T extends { onClick?: React.MouseEventHa
   WrappedComponent: React.ComponentType<T>
 ): React.FC<T & CardLinkButtonProps> =>
   React.memo(function WithReportCardLinkClick({ onClick, cardId, linkId, ...rest }) {
-    const { reportCardLinkClicked } = useOnboardingContext();
+    const { telemetry } = useOnboardingContext();
     const onClickWithReport = useCallback<React.MouseEventHandler>(
       (ev) => {
-        reportCardLinkClicked(cardId, linkId);
+        telemetry.reportCardLinkClicked(cardId, linkId);
         onClick?.(ev);
       },
-      [reportCardLinkClicked, cardId, linkId, onClick]
+      [telemetry, cardId, linkId, onClick]
     );
     return <WrappedComponent {...({ onClick: onClickWithReport, ...rest } as unknown as T)} />;
   });

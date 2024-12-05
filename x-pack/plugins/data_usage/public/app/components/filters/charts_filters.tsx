@@ -20,6 +20,7 @@ import { FilterName } from '../../hooks';
 export interface ChartFiltersProps {
   dateRangePickerState: DateRangePickerValues;
   isDataLoading: boolean;
+  isUpdateDisabled: boolean;
   filterOptions: Record<FilterName, ChartsFilterProps['filterOptions']>;
   onRefresh: () => void;
   onRefreshChange: (evt: OnRefreshChangeProps) => void;
@@ -33,6 +34,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
   ({
     dateRangePickerState,
     isDataLoading,
+    isUpdateDisabled,
     filterOptions,
     onClick,
     onRefresh,
@@ -59,7 +61,8 @@ export const ChartFilters = memo<ChartFiltersProps>(
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 
     return (
-      <EuiFlexGroup responsive gutterSize="m">
+      <EuiFlexGroup responsive gutterSize="m" alignItems="center" justifyContent="flexEnd">
+        <EuiFlexItem grow={2} />
         <EuiFlexItem grow={1}>
           <EuiFilterGroup>{filters}</EuiFilterGroup>
         </EuiFlexItem>
@@ -78,6 +81,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
             data-test-subj={getTestId('super-refresh-button')}
             fill={false}
             isLoading={isDataLoading}
+            isDisabled={isUpdateDisabled}
             onClick={onClickRefreshButton}
           />
         </EuiFlexItem>
