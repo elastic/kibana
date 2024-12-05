@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/kbn-entities-schema'],
-};
+require('../../../../../../src/setup_node_env');
+
+const { generateOAS } = require('./generate_oas');
+const { writeFileSync } = require('fs');
+
+const spec = generateOAS({ format: '.yaml' });
+writeFileSync('oas.yaml', spec);
