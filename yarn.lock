@@ -6380,7 +6380,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-time-buckets@link:x-pack/packages/ml/time_buckets":
+"@kbn/ml-time-buckets@link:x-pack/platform/packages/private/ml/time_buckets":
   version "0.0.0"
   uid ""
 
