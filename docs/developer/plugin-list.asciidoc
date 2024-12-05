@@ -242,7 +242,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |An overview page highlighting Kibana apps
 
 
-|{kib-repo}blob/{branch}/src/plugins/kibana_react/README.md[kibanaReact]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/kibana_react/README.md[kibanaReact]
 |Tools for building React applications in Kibana.
 
 

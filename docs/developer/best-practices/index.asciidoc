@@ -92,7 +92,7 @@ syncing] and
 container] utilities provided by
 * {kib-repo}tree/{branch}/src/plugins/kibana_utils/README.md[kibana_utils]
 if you want to sync your application state to the URL?
-** {kib-repo}tree/{branch}/src/plugins/kibana_react/README.md[kibana_react]
+** {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_react/README.md[kibana_react]
 for react specific helpers
 
 Re-using these services will help create a consistent experience across
