@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { waitFor } from '@testing-library/react';
 import { last, merge, repeat } from 'lodash';
@@ -27,7 +27,9 @@ import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
-import { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
+import type { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
+import type { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
@@ -177,6 +179,8 @@ describe('Observability AI Assistant client', () => {
     functionClientMock.getAdhocInstructions.mockReturnValue([]);
 
     return new ObservabilityAIAssistantClient({
+      config: {} as ObservabilityAIAssistantConfig,
+      core: {} as CoreSetup<ObservabilityAIAssistantPluginStartDependencies>,
       actionsClient: actionsClientMock,
       uiSettingsClient: uiSettingsClientMock,
       esClient: {
