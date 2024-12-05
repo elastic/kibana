@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   NoIndicesMeteringError,
   NoPrivilegeMeteringError,
-} from '@kbn/data-usage-plugin/server/common/errors';
+} from '@kbn/data-usage-plugin/server/errors';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
