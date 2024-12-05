@@ -143,6 +143,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
     userProfile,
+    chrome
   } = useKibana().services;
   const basePath = useBasePath();
 
@@ -193,7 +194,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
             await createBasePrompts(notifications, http);
           }
           // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch (e) { }
       }
     });
     createSecurityPrompts();
@@ -227,8 +228,9 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
       userProfileService={userProfile}
+      navControls={chrome.navControls}
     >
-      {children}
+        {children}
     </ElasticAssistantProvider>
   );
 };

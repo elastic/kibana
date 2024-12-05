@@ -7,14 +7,14 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -43,6 +43,7 @@ import {
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { SettingsTabs } from '../assistant/settings/types';
+import { AssistantNavLink } from './assistant_nav_link';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -77,6 +78,7 @@ export interface AssistantProviderProps {
   toasts?: IToasts;
   currentAppId: string;
   userProfileService: UserProfileService;
+  navControls: ChromeStart['navControls'];
 }
 
 export interface UserAvatar {
@@ -151,6 +153,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   toasts,
   currentAppId,
   userProfileService,
+  navControls
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -222,7 +225,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Global Assistant Overlay actions
    */
-  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
+  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => { });
 
   /**
    * Current User Avatar
@@ -248,7 +251,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Setting code block ref that can be used to store callback from parent components
    */
-  const codeBlockRef = useRef(() => {});
+  const codeBlockRef = useRef(() => { });
 
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
@@ -341,8 +344,13 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     ]
   );
 
-  return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;
+  return <AssistantContext.Provider value={value}>
+    <AssistantNavLink hasAssistantPrivilege={assistantAvailability.hasAssistantPrivilege} showAssistantOverlay={showAssistantOverlay} navControls={navControls} />
+    {children}
+  </AssistantContext.Provider>;
 };
+
+
 
 export const useAssistantContext = () => {
   const context = React.useContext(AssistantContext);
