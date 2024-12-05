@@ -63,6 +63,9 @@ export class ElasticAssistantPlugin
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      productDocManager: core
+        .getStartServices()
+        .then(([_, { productDocBase }]) => productDocBase.management),
       pluginStop$: this.pluginStop$,
     });
 
