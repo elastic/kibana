@@ -49,7 +49,7 @@
     "expressionRevealImage": "src/plugins/expression_reveal_image",
     "expressions": "src/plugins/expressions",
     "expressionShape": "src/plugins/expression_shape",
-    "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
+    "expressionTagcloud": "src/platform/plugins/shared/chart_expressions/expression_tagcloud",
     "eventAnnotation": "src/platform/plugins/private/event_annotation",
     "eventAnnotationListing": "src/platform/plugins/private/event_annotation_listing",
     "eventAnnotationCommon": "src/platform/packages/shared/kbn-event-annotation-common",
