@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import type { ValidationFunc } from '../../../../../shared_imports';
-import { customValidators } from '../../../../../common/components/threat_match/helpers';
+import { type FormData, type ValidationFunc } from '../../../../../shared_imports';
+import * as i18n from './translations';
 
-export const forbiddenIndexPatternValidator: ValidationFunc = (...args) => {
-  const [{ value }] = args;
+export const forbiddenIndexPatternValidator: ValidationFunc<FormData, string, string[]> = (
+  ...args
+) => {
+  const [{ value, path }] = args;
 
-  return customValidators.forbiddenField(value, '*');
+  if (Array.isArray(value) && value.includes('*')) {
+    return {
+      code: 'ERR_FIELD_FORMAT',
+      path,
+      message: i18n.THREAT_MATCH_INDEX_FIELD_VALIDATION_FORBIDDEN_PATTERN_ERROR,
+    };
+  }
 };

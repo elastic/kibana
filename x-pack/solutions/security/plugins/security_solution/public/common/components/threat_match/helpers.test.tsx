@@ -16,7 +16,6 @@ import {
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
-  customValidators,
 } from './helpers';
 
 jest.mock('uuid', () => ({
@@ -328,21 +327,6 @@ describe('Helpers', () => {
         },
       };
       expect(output).toEqual(expected);
-    });
-  });
-
-  describe('customValidators.forbiddenField', () => {
-    const FORBIDDEN = '*';
-
-    test('it returns expected value when a forbidden value is passed in', () => {
-      expect(customValidators.forbiddenField('*', FORBIDDEN)).toEqual({
-        code: 'ERR_FIELD_FORMAT',
-        message: 'The index pattern cannot be *. Please choose a more specific index pattern.',
-      });
-    });
-
-    test('it returns undefined when a non-forbidden value is passed in', () => {
-      expect(customValidators.forbiddenField('.test-index', FORBIDDEN)).not.toBeDefined();
     });
   });
 });
