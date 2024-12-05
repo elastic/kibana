@@ -72,7 +72,7 @@ export const Notes = memo(() => {
   const dispatch = useDispatch();
   const { eventId, indexName, scopeId, isPreview, isPreviewMode } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const { notesPrivileges } = useUserPrivileges();
 
   const { openLeftPanel } = useExpandableFlyoutApi();
   const openExpandedFlyoutNotesTab = useCallback(
@@ -148,7 +148,7 @@ export const Notes = memo(() => {
       <EuiButtonIcon
         onClick={openExpandedFlyoutNotesTab}
         iconType="plusInCircle"
-        disabled={isPreviewMode || isPreview || !kibanaSecuritySolutionsPrivileges.crud}
+        disabled={isPreviewMode || isPreview || !notesPrivileges.crud}
         css={css`
           margin-left: ${euiTheme.size.xs};
         `}
@@ -156,13 +156,7 @@ export const Notes = memo(() => {
         data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
       />
     ),
-    [
-      euiTheme.size.xs,
-      isPreview,
-      isPreviewMode,
-      kibanaSecuritySolutionsPrivileges.crud,
-      openExpandedFlyoutNotesTab,
-    ]
+    [euiTheme.size.xs, isPreview, isPreviewMode, notesPrivileges.crud, openExpandedFlyoutNotesTab]
   );
 
   return (
@@ -184,14 +178,14 @@ export const Notes = memo(() => {
           ) : (
             <>
               {notes.length === 0 ? (
-                <>{kibanaSecuritySolutionsPrivileges.crud ? addNoteButton : getEmptyTagValue()}</>
+                <>{notesPrivileges.crud ? addNoteButton : getEmptyTagValue()}</>
               ) : (
                 <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
                   <EuiFlexItem data-test-subj={NOTES_COUNT_TEST_ID}>
                     <FormattedCount count={notes.length} />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    {kibanaSecuritySolutionsPrivileges.crud ? addNoteButtonIcon : viewNotesButton}
+                    {notesPrivileges.crud ? addNoteButtonIcon : viewNotesButton}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}

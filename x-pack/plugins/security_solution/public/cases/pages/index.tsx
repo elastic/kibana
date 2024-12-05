@@ -21,6 +21,7 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
@@ -33,6 +34,8 @@ const CaseContainerComponent: React.FC = () => {
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { timelinePrivileges } = useUserPrivileges();
+  const canSeeTimeline = timelinePrivileges.read || timelinePrivileges.crud;
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
@@ -129,7 +132,10 @@ const CaseContainerComponent: React.FC = () => {
             editor_plugins: {
               parsingPlugin: timelineMarkdownPlugin.parser,
               processingPluginRenderer: timelineMarkdownPlugin.renderer,
-              uiPlugin: timelineMarkdownPlugin.plugin({ interactionsUpsellingMessage }),
+              uiPlugin: timelineMarkdownPlugin.plugin({
+                interactionsUpsellingMessage,
+                canSeeTimeline,
+              }),
             },
             hooks: {
               useInsertTimeline,

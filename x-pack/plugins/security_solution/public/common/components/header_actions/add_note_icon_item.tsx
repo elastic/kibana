@@ -52,7 +52,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   eventId,
   notesCount,
 }) => {
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const { notesPrivileges } = useUserPrivileges();
 
   const NOTES_TOOLTIP = useMemo(
     () => (notesCount > 0 ? NOTES_COUNT_TOOLTIP({ notesCount }) : NOTES_ADD_TOOLTIP),
@@ -64,7 +64,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
       <NotesButton
         ariaLabel={ariaLabel}
         data-test-subj="add-note"
-        isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
+        isDisabled={notesPrivileges.crud === false}
         timelineType={timelineType}
         toggleShowNotes={toggleShowNotes}
         toolTip={timelineType === TimelineTypeEnum.template ? NOTES_DISABLE_TOOLTIP : NOTES_TOOLTIP}

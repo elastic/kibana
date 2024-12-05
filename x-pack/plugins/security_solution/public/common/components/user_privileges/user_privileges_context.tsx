@@ -13,6 +13,7 @@ import { useFetchDetectionEnginePrivileges } from '../../../detections/component
 import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endpoint';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 import { extractTimelineCapabilities } from '../../utils/timeline_capabilities';
+import { extractNotesCapabilities } from '../../utils/notes_capabilities';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
@@ -20,6 +21,7 @@ export interface UserPrivilegesState {
   endpointPrivileges: EndpointPrivileges;
   kibanaSecuritySolutionsPrivileges: { crud: boolean; read: boolean };
   timelinePrivileges: { crud: boolean; read: boolean };
+  notesPrivileges: { crud: boolean; read: boolean };
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
@@ -28,6 +30,7 @@ export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   endpointPrivileges: getEndpointPrivilegesInitialState(),
   kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
   timelinePrivileges: { crud: false, read: false },
+  notesPrivileges: { crud: false, read: false },
 });
 export const UserPrivilegesContext = createContext<UserPrivilegesState>(
   initialUserPrivilegesState()
@@ -56,6 +59,19 @@ export const UserPrivilegesProvider = ({
   const [timelinePrivileges, setTimelinePrivileges] = useState(
     extractTimelineCapabilities(kibanaCapabilities)
   );
+  const [notesPrivileges, setNotesPrivileges] = useState(
+    extractNotesCapabilities(kibanaCapabilities)
+  );
+
+  useEffect(() => {
+    setNotesPrivileges((currPrivileges) => {
+      const { read: notesRead, crud: notesCrud } = extractNotesCapabilities(kibanaCapabilities);
+      if (currPrivileges.read !== notesRead || currPrivileges.crud !== notesCrud) {
+        return { read: notesRead, crud: notesCrud };
+      }
+      return currPrivileges;
+    });
+  }, [kibanaCapabilities]);
 
   useEffect(() => {
     setTimelinePrivileges((currPrivileges) => {
@@ -85,6 +101,7 @@ export const UserPrivilegesProvider = ({
         endpointPrivileges,
         kibanaSecuritySolutionsPrivileges,
         timelinePrivileges,
+        notesPrivileges,
       }}
     >
       {children}
