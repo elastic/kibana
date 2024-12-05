@@ -16,7 +16,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { IClusterClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { CoreAuditService } from '@kbn/core-security-server';
-import type { CompatibleModule } from '../../common/constants/app';
+import type { CompatibleModule, MlFeatures } from '../../common/constants/app';
 import type { MlLicense } from '../../common/license';
 
 import { licenseChecks } from './license_checks';
@@ -110,7 +110,8 @@ export function createSharedServices(
   getDataViews: () => DataViewsPluginStart,
   getAuditService: () => CoreAuditService | null,
   isMlReady: () => Promise<void>,
-  compatibleModuleType: CompatibleModule | null
+  compatibleModuleType: CompatibleModule | null,
+  enabledFeatures: MlFeatures
 ): {
   sharedServicesProviders: SharedServices;
   internalServicesProviders: MlServicesProviders;
@@ -188,7 +189,7 @@ export function createSharedServices(
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
-      ...getTrainedModelsProvider(getGuards, cloud),
+      ...getTrainedModelsProvider(getGuards, cloud, enabledFeatures),
     },
     /**
      * Services providers for ML internal usage
