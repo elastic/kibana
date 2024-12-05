@@ -95,7 +95,7 @@
       "packages/ml/trained_models_utils",
       "platform/packages/private/ml/category_validator",
       "packages/ml/ui_actions",
-      "plugins/ml"
+      "platform/plugins/shared/ml"
     ],
     "xpack.monitoring": [
       "plugins/monitoring"

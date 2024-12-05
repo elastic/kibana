@@ -670,7 +670,7 @@
     "@kbn/ml-nested-property": "link:x-pack/platform/packages/private/ml/nested_property",
     "@kbn/ml-number-utils": "link:x-pack/platform/packages/private/ml/number_utils",
     "@kbn/ml-parse-interval": "link:x-pack/platform/packages/private/ml/parse_interval",
-    "@kbn/ml-plugin": "link:x-pack/plugins/ml",
+    "@kbn/ml-plugin": "link:x-pack/platform/plugins/shared/ml",
     "@kbn/ml-query-utils": "link:x-pack/packages/ml/query_utils",
     "@kbn/ml-random-sampler-utils": "link:x-pack/packages/ml/random_sampler_utils",
     "@kbn/ml-response-stream": "link:x-pack/packages/ml/response_stream",

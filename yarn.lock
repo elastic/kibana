@@ -6352,7 +6352,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-plugin@link:x-pack/plugins/ml":
+"@kbn/ml-plugin@link:x-pack/platform/plugins/shared/ml":
   version "0.0.0"
   uid ""
 

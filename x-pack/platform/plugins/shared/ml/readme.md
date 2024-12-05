@@ -69,7 +69,7 @@ These data sets are now ready be analyzed in ML jobs in Kibana.
 
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
-Run the test following jest tests from `kibana/x-pack/plugins/ml`.
+Run the test following jest tests from `kibana/x-pack/platform/plugins/shared/ml`.
 
 New snapshots, all plugins:
 
@@ -173,23 +173,23 @@ Note: We are in the process of moving shared code to packages, for example `@kbn
 You can find the ML shared functions in the following files in GitHub:
 
 ```
-https://github.com/elastic/kibana/blob/main/x-pack/plugins/ml/public/shared.ts
+https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ml/public/shared.ts
 ```
 
 ```
-https://github.com/elastic/kibana/blob/main/x-pack/plugins/ml/server/shared.ts
+https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ml/server/shared.ts
 ```
 
 These functions are shared from the root of the ML plugin, you can import them with an import statement. For example:
 
 ```
-import { MlPluginSetup } from '../../../../ml/server';
+import { MlPluginSetup } from '../../../../../../ml/server';
 ```
 
 or
 
 ```
-import { ML_ANOMALY_SEVERITY } from '../../ml/common';
+import { ML_ANOMALY_SEVERITY } from '../../../../ml/common';
 ```
 
 Functions are shared from the following directories:

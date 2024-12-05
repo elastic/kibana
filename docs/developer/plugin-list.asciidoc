@@ -726,7 +726,7 @@ using the CURL scripts in the scripts folder.
 |Exposes utilities to access metrics data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ml/readme.md[ml]
 |This plugin provides access to the machine learning features provided by
 Elastic.
 
