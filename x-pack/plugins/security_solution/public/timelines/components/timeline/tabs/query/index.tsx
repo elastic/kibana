@@ -59,6 +59,7 @@ const compareQueryProps = (prevProps: Props, nextProps: Props) =>
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
+// changing just for PR deployment
 export const QueryTabContentComponent: React.FC<Props> = ({
   activeTab,
   columns,
