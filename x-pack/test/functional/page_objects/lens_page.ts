@@ -1509,6 +1509,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await dataViews.createFromSearchBar({ name: '*stash*', adHoc: true });
       }
 
+      await dashboard.selectIndexPattern('log*');
+
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
