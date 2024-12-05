@@ -561,6 +561,9 @@ packages/react/kibana_context/root @elastic/appex-sharedux
 packages/react/kibana_context/styled @elastic/appex-sharedux
 packages/react/kibana_context/theme @elastic/appex-sharedux
 packages/react/kibana_mount @elastic/appex-sharedux
+packages/response-ops/alerts_apis @elastic/response-ops
+packages/response-ops/alerts_fields_browser @elastic/response-ops
+packages/response-ops/alerts_table @elastic/response-ops
 packages/response-ops/feature_flag_service @elastic/response-ops
 packages/response-ops/rule_form @elastic/response-ops
 packages/response-ops/rule_params @elastic/response-ops
