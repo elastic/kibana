@@ -39,7 +39,13 @@ import type {
 } from './types';
 import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations';
 
-import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION, SERVER_APP_ID } from '../common/constants';
+import {
+  APP_ID,
+  APP_UI_ID,
+  APP_PATH,
+  APP_ICON_SOLUTION,
+  SECURITY_FEATURE_ID,
+} from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import { updateAppLinks, type LinksPermissions } from './common/links';
@@ -436,7 +442,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
     // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
-    if (!capabilities[SERVER_APP_ID]?.show && !capabilities.securitySolutionCasesV2?.read_cases) {
+    if (
+      !capabilities[SECURITY_FEATURE_ID]?.show &&
+      !capabilities.securitySolutionCasesV2?.read_cases
+    ) {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,
         visibleIn: [],

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NOTES_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
+import { NOTES_PATH, SecurityPageName, SECURITY_FEATURE_ID } from '../../common/constants';
 import { NOTES } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
@@ -18,7 +18,7 @@ export const links: LinkItem = {
     defaultMessage:
       'Oversee, revise, and revisit the notes attached to alerts, events and Timelines.',
   }),
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   landingIcon: 'filebeatApp',
   skipUrlState: true,
   hideTimeline: true,

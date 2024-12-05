@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
+import { CASES_FEATURE_ID, SecurityPageName, SECURITY_FEATURE_ID } from '../../../common/constants';
 import type { Capabilities } from '@kbn/core/types';
 import { mockGlobalState, TestProviders } from '../mock';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
@@ -53,7 +53,7 @@ const mockExperimentalDefaults = mockGlobalState.app.enableExperimental;
 
 const mockCapabilities = {
   [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
-  [SERVER_APP_ID]: { show: true },
+  [SECURITY_FEATURE_ID]: { show: true },
 } as unknown as Capabilities;
 
 const fakePageId = 'fakePage';
@@ -116,7 +116,7 @@ describe('Security links', () => {
         id: SecurityPageName.network,
         title: 'Network',
         path: '/network',
-        capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${SERVER_APP_ID}.show`],
+        capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${SECURITY_FEATURE_ID}.show`],
         experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
         hideWhenExperimentalKey: 'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
         licenseType: 'basic' as const,
@@ -431,7 +431,7 @@ describe('Security links', () => {
   });
 
   describe('hasCapabilities', () => {
-    const siemShow = 'siem.show';
+    const siemShow = 'siemV2.show';
     const createCases = 'securitySolutionCasesV2.create_cases';
     const readCases = 'securitySolutionCasesV2.read_cases';
     const pushCases = 'securitySolutionCasesV2.push_cases';

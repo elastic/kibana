@@ -66,7 +66,7 @@ jest.mock(
 
 jest.mock('../../common/links', () => ({
   useLinkInfo: jest.fn().mockReturnValue({
-    capabilities: ['siem.show'],
+    capabilities: ['siemV2.show'],
     globalNavPosition: 4,
     globalSearchKeywords: ['Attack discovery'],
     id: 'attack_discovery',

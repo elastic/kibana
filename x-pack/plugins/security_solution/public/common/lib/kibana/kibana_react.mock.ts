@@ -32,7 +32,7 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
 } from '../../../../common/constants';
 import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -201,7 +201,7 @@ export const createStartServicesMock = (
       ...core.application,
       capabilities: {
         ...core.application.capabilities,
-        [SERVER_APP_ID]: {
+        [SECURITY_FEATURE_ID]: {
           crud: true,
           read: true,
         },

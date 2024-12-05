@@ -7,7 +7,7 @@
 
 import React, { createContext, useEffect, useState } from 'react';
 import type { Capabilities } from '@kbn/core/types';
-import { SERVER_APP_ID } from '../../../../common/constants';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endpoint';
@@ -42,8 +42,8 @@ export const UserPrivilegesProvider = ({
   kibanaCapabilities,
   children,
 }: UserPrivilegesProviderProps) => {
-  const crud: boolean = kibanaCapabilities[SERVER_APP_ID].crud === true;
-  const read: boolean = kibanaCapabilities[SERVER_APP_ID].show === true;
+  const crud: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].crud === true;
+  const read: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].show === true;
   const [kibanaSecuritySolutionsPrivileges, setKibanaSecuritySolutionsPrivileges] = useState({
     crud,
     read,

@@ -12,7 +12,7 @@ import {
   ENTITY_ANALYTICS_PATH,
   OVERVIEW_PATH,
   SecurityPageName,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
 } from '../../common/constants';
 import { DATA_QUALITY, DETECTION_RESPONSE, OVERVIEW, ENTITY_ANALYTICS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
@@ -30,7 +30,7 @@ export const overviewLinks: LinkItem = {
       'Summary of your security environment activity, including alerts, events, recent items, and a news feed!',
   }),
   path: OVERVIEW_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.overview', {
       defaultMessage: 'Overview',
@@ -47,7 +47,7 @@ export const detectionResponseLinks: LinkItem = {
       'Information about your Alerts and Cases within the Security Solution, including Hosts and Users with Alerts.',
   }),
   path: DETECTION_RESPONSE_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.detectionAndResponse', {
       defaultMessage: 'Detection & Response',
@@ -64,7 +64,7 @@ export const entityAnalyticsLinks: LinkItem = {
       'Entity analytics, anomalies, and threats to narrow down the monitoring surface area.',
   }),
   path: ENTITY_ANALYTICS_PATH,
-  capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   isBeta: false,
   licenseType: 'platinum',
   globalSearchKeywords: [ENTITY_ANALYTICS],
@@ -82,7 +82,7 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
     }
   ),
   path: DATA_QUALITY_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.ecsDataQualityDashboard', {
       defaultMessage: 'Data Quality',
