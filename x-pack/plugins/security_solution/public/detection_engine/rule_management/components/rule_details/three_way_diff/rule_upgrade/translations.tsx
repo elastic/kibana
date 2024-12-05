@@ -50,7 +50,7 @@ export function RuleUpgradeHelper(): JSX.Element {
       },
     },
   } = useKibana().services;
-  const manageDetectionRulesSnoozeSection = `${manageDetectionRules}#edit-rules-settings`;
+  const manageDetectionRulesUpdateRulesSection = `${manageDetectionRules}#edit-rules-settings`;
 
   return (
     <FormattedMessage
@@ -58,7 +58,7 @@ export function RuleUpgradeHelper(): JSX.Element {
       defaultMessage="Understand how to&nbsp;{docsLink}."
       values={{
         docsLink: (
-          <EuiLink href={manageDetectionRulesSnoozeSection} target="_blank">
+          <EuiLink href={manageDetectionRulesUpdateRulesSection} target="_blank">
             {UPGRADE_RULES_DOCS_LINK}
           </EuiLink>
         ),
