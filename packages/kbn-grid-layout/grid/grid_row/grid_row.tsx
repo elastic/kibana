@@ -10,39 +10,40 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { DragPreview } from './drag_preview';
-import { GridPanel } from './grid_panel';
-import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from './types';
+import { cloneDeep } from 'lodash';
+import { DragPreview } from '../drag_preview';
+import { GridPanel } from '../grid_panel';
+import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from '../types';
+import { getKeysInOrder } from '../utils/resolve_grid_row';
+import { GridRowHeader } from './grid_row_header';
 
-export const GridRow = forwardRef<
-  HTMLDivElement,
-  {
-    rowIndex: number;
-    toggleIsCollapsed: () => void;
-    renderPanelContents: (panelId: string) => React.ReactNode;
-    setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
-    gridLayoutStateManager: GridLayoutStateManager;
-  }
->(
-  (
-    {
-      rowIndex,
-      toggleIsCollapsed,
-      renderPanelContents,
-      setInteractionEvent,
-      gridLayoutStateManager,
-    },
-    gridRef
-  ) => {
+export interface GridRowProps {
+  rowIndex: number;
+  renderPanelContents: (panelId: string) => React.ReactNode;
+  setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
+  gridLayoutStateManager: GridLayoutStateManager;
+}
+
+export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
+  ({ rowIndex, renderPanelContents, setInteractionEvent, gridLayoutStateManager }, gridRef) => {
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
-    const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
+
+    const [panelIds, setPanelIds] = useState<string[]>(() => getKeysInOrder(currentRow.panels));
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
+
+    /** Syncs panel IDs in order after a change in the grid layout, such as adding, removing, or reordering panels. */
+    const syncPanelIds = useCallback(() => {
+      const newPanelIds = getKeysInOrder(gridLayoutStateManager.gridLayout$.value[rowIndex].panels);
+      const hasOrderChanged = JSON.stringify(panelIds) !== JSON.stringify(newPanelIds);
+      if (hasOrderChanged) {
+        setPanelIds(newPanelIds);
+      }
+    }, [setPanelIds, gridLayoutStateManager.gridLayout$, rowIndex, panelIds]);
 
     const getRowCount = useCallback(
       (row: GridRowData) => {
@@ -147,9 +148,14 @@ export const GridRow = forwardRef<
           });
 
         /**
-         * The things that should trigger a re-render are title, collapsed state, and panel ids - panel positions
-         * are being controlled via CSS styles, so they do not need to trigger a re-render. This subscription ensures
-         * that the row will re-render when one of those three things changes.
+         * This subscription ensures that the row will re-render when one of the following changes:
+         * - Title
+         * - Collapsed state
+         * - Panel IDs (adding/removing/replacing, but not reordering)
+         *
+         * Note: During dragging or resizing actions, the row should not re-render because panel positions are controlled via CSS styles for performance reasons.
+         * However, once the user finishes the interaction, the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility reasons (screen readers and focus management).
+         * This is handled in the syncPanelIds callback.
          */
         const rowStateSubscription = gridLayoutStateManager.gridLayout$
           .pipe(
@@ -157,7 +163,7 @@ export const GridRow = forwardRef<
               return {
                 title: gridLayout[rowIndex].title,
                 isCollapsed: gridLayout[rowIndex].isCollapsed,
-                panelIds: Object.keys(gridLayout[rowIndex].panels),
+                panelIds: getKeysInOrder(gridLayout[rowIndex].panels),
               };
             }),
             pairwise()
@@ -212,6 +218,9 @@ export const GridRow = forwardRef<
             const panelRect = panelRef.getBoundingClientRect();
             if (type === 'drop') {
               setInteractionEvent(undefined);
+              // Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction.
+              // the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility reasons (screen readers and focus management).
+              syncPanelIds();
             } else {
               setInteractionEvent({
                 type,
@@ -235,14 +244,25 @@ export const GridRow = forwardRef<
           }}
         />
       ));
-    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
+    }, [
+      panelIds,
+      rowIndex,
+      gridLayoutStateManager,
+      renderPanelContents,
+      setInteractionEvent,
+      syncPanelIds,
+    ]);
 
     return (
       <div ref={rowContainer}>
         {rowIndex !== 0 && (
           <GridRowHeader
             isCollapsed={isCollapsed}
-            toggleIsCollapsed={toggleIsCollapsed}
+            toggleIsCollapsed={() => {
+              const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+              newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
+              gridLayoutStateManager.gridLayout$.next(newLayout);
+            }}
             rowTitle={rowTitle}
           />
         )}
@@ -264,33 +284,3 @@ export const GridRow = forwardRef<
     );
   }
 );
-
-const GridRowHeader = ({
-  isCollapsed,
-  toggleIsCollapsed,
-  rowTitle,
-}: {
-  isCollapsed: boolean;
-  toggleIsCollapsed: () => void;
-  rowTitle?: string;
-}) => {
-  return (
-    <>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s">
-        <EuiButtonIcon
-          color="text"
-          aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
-            defaultMessage: 'Toggle collapse',
-          })}
-          iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-          onClick={toggleIsCollapsed}
-        />
-        <EuiTitle size="xs">
-          <h2>{rowTitle}</h2>
-        </EuiTitle>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-    </>
-  );
-};

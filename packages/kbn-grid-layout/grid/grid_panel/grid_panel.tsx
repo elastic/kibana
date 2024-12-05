@@ -10,39 +10,30 @@
 import React, { forwardRef, useEffect, useMemo } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import {
-  EuiIcon,
-  EuiPanel,
-  euiFullHeight,
-  transparentize,
-  useEuiOverflowScroll,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel, euiFullHeight, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
+import { getKeysInOrder } from '../utils/resolve_grid_row';
+import { DragHandle } from './drag_handle';
+import { ResizeHandle } from './resize_handle';
 
-import { GridLayoutStateManager, PanelInteractionEvent } from './types';
-import { getKeysInOrder } from './utils/resolve_grid_row';
+export interface GridPanelProps {
+  panelId: string;
+  rowIndex: number;
+  renderPanelContents: (panelId: string) => React.ReactNode;
+  interactionStart: (
+    type: PanelInteractionEvent['type'] | 'drop',
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void;
+  gridLayoutStateManager: GridLayoutStateManager;
+}
 
-export const GridPanel = forwardRef<
-  HTMLDivElement,
-  {
-    panelId: string;
-    rowIndex: number;
-    renderPanelContents: (panelId: string) => React.ReactNode;
-    interactionStart: (
-      type: PanelInteractionEvent['type'] | 'drop',
-      e: React.MouseEvent<HTMLDivElement, MouseEvent>
-    ) => void;
-    gridLayoutStateManager: GridLayoutStateManager;
-  }
->(
+export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
   (
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
-    const { euiTheme } = useEuiTheme();
-
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
       const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
@@ -158,7 +149,7 @@ export const GridPanel = forwardRef<
             const panel = allPanels[panelId];
             if (!ref || !panel) return;
 
-            const sortedKeys = getKeysInOrder(gridLayout[rowIndex]);
+            const sortedKeys = getKeysInOrder(gridLayout[rowIndex].panels);
             const currentPanelPosition = sortedKeys.indexOf(panelId);
             const sortedKeysBefore = sortedKeys.slice(0, currentPanelPosition);
             const responsiveGridRowStart = sortedKeysBefore.reduce(
@@ -180,7 +171,6 @@ export const GridPanel = forwardRef<
       // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
-
     /**
      * Memoize panel contents to prevent unnecessary re-renders
      */
@@ -189,93 +179,29 @@ export const GridPanel = forwardRef<
     }, [panelId, renderPanelContents]);
 
     return (
-      <>
-        <div ref={panelRef} css={initialStyles}>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={true}
+      <div ref={panelRef} css={initialStyles} className="kbnGridPanel">
+        <EuiPanel
+          hasShadow={false}
+          hasBorder={true}
+          css={css`
+            padding: 0;
+            position: relative;
+            height: 100%;
+          `}
+        >
+          <DragHandle interactionStart={interactionStart} />
+          <div
             css={css`
-              padding: 0;
-              position: relative;
-              height: 100%;
+              ${euiFullHeight()}
+              ${useEuiOverflowScroll('y', false)}
+              ${useEuiOverflowScroll('x', false)}
             `}
           >
-            {/* drag handle */}
-            <div
-              className="kbnGridPanel__dragHandle"
-              css={css`
-                opacity: 0;
-                display: flex;
-                cursor: move;
-                position: absolute;
-                align-items: center;
-                justify-content: center;
-                top: -${euiThemeVars.euiSizeL};
-                width: ${euiThemeVars.euiSizeL};
-                height: ${euiThemeVars.euiSizeL};
-                z-index: ${euiThemeVars.euiZLevel3};
-                margin-left: ${euiThemeVars.euiSizeS};
-                border: 1px solid ${euiTheme.border.color};
-                background-color: ${euiTheme.colors.emptyShade};
-                border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
-                &:hover {
-                  cursor: grab;
-                  opacity: 1 !important;
-                }
-                &:active {
-                  cursor: grabbing;
-                  opacity: 1 !important;
-                }
-                .kbnGrid--static & {
-                  opacity: 0 !important;
-                  display: none;
-                }
-              `}
-              onMouseDown={(e) => interactionStart('drag', e)}
-              onMouseUp={(e) => interactionStart('drop', e)}
-            >
-              <EuiIcon type="grabOmnidirectional" />
-            </div>
-            {/* Resize handle */}
-            <div
-              className="kbnGridPanel__resizeHandle"
-              onMouseDown={(e) => interactionStart('resize', e)}
-              onMouseUp={(e) => interactionStart('drop', e)}
-              css={css`
-                right: 0;
-                bottom: 0;
-                opacity: 0;
-                margin: -2px;
-                position: absolute;
-                width: ${euiThemeVars.euiSizeL};
-                height: ${euiThemeVars.euiSizeL};
-                transition: opacity 0.2s, border 0.2s;
-                border-radius: 7px 0 7px 0;
-                border-bottom: 2px solid ${euiThemeVars.euiColorSuccess};
-                border-right: 2px solid ${euiThemeVars.euiColorSuccess};
-                :hover {
-                  opacity: 1;
-                  background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
-                  cursor: se-resize;
-                }
-                .kbnGrid--static & {
-                  opacity: 0 !important;
-                  display: none;
-                }
-              `}
-            />
-            <div
-              css={css`
-                ${euiFullHeight()}
-                ${useEuiOverflowScroll('y', false)}
-            ${useEuiOverflowScroll('x', false)}
-              `}
-            >
-              {panelContents}
-            </div>
-          </EuiPanel>
-        </div>
-      </>
+            {panelContents}
+          </div>
+          <ResizeHandle interactionStart={interactionStart} />
+        </EuiPanel>
+      </div>
     );
   }
 );
