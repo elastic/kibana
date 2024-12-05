@@ -34,6 +34,10 @@ export interface CalculateRiskScoreAggregations {
     after_key: EntityAfterKey;
     buckets: RiskScoreBucket[];
   };
+  service?: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreBucket[];
+  };
 }
 
 export interface SearchHitRiskInput {
