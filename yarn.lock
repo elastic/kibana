@@ -6268,7 +6268,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-agg-utils@link:x-pack/packages/ml/agg_utils":
+"@kbn/ml-agg-utils@link:x-pack/platform/packages/private/ml/agg_utils":
   version "0.0.0"
   uid ""
 
