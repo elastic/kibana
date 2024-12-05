@@ -3,17 +3,17 @@ With https://github.com/elastic/kibana/pull/186566, we've introduced a few sampl
 You can read more about `http` files [here](https://www.jetbrains.com/help/webstorm/http-client-in-product-code-editor.html) and for the spec see this repo [here](https://github.com/JetBrains/http-request-in-editor-spec/blob/master/spec.md). If we find these useful, we could add support to our [OpenAPI Generator](https://openapi-generator.tech/docs/generators/jetbrains-http-client) to create these automatically. They currently live co-located next to the OAS and generated schema files here:
 
 ```
-x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/entries/bulk_crud_knowledge_base_entries_route.http
-x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.http
+x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/entries/bulk_crud_knowledge_base_entries_route.http
+x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.http
 ```
 
 and the main config here in this directory:
 
 ```
-x-pack/packages/kbn-elastic-assistant-common/env/http-client.env.json
+x-pack/platform/packages/shared/kbn-elastic-assistant-common/env/http-client.env.json
 ```
 
-The `x-pack/packages/kbn-elastic-assistant-common/.gitignore` has been updated to ignore `http-client.private.env.json` files locally, which is how you can override the config as you'd like. This is helpful to add variables like `basePath` as below:
+The `x-pack/platform/packages/shared/kbn-elastic-assistant-common/.gitignore` has been updated to ignore `http-client.private.env.json` files locally, which is how you can override the config as you'd like. This is helpful to add variables like `basePath` as below:
 
 ```
 {
