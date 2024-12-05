@@ -430,8 +430,8 @@ function getExitSpanFailureRateQuery(type: ApmDocumentType) {
       : 'span.representative_count';
 
   return `STATS failure_rate =
-      SUM(CASE(${EVENT_OUTCOME} == "failure", ${multiplierField}, NULL)
-      / SUM(CASE(${EVENT_OUTCOME} IN ("failure", "success"), ${multiplierField}, NULL)`;
+      SUM(CASE(${EVENT_OUTCOME} == "failure", ${multiplierField}, NULL))
+      / SUM(CASE(${EVENT_OUTCOME} IN ("failure", "success"), ${multiplierField}, NULL))`;
 }
 
 function getExitSpanAvgLatencyQuery(type: ApmDocumentType) {
