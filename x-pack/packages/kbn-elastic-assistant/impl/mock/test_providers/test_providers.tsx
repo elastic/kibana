@@ -15,9 +15,9 @@ import { ThemeProvider } from 'styled-components';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChromeNavControls, UserProfileService } from '@kbn/core/public';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
