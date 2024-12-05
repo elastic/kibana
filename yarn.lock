@@ -6392,7 +6392,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
+"@kbn/ml-url-state@link:x-pack/platform/packages/private/ml/url_state":
   version "0.0.0"
   uid ""
 
