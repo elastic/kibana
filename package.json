@@ -914,7 +914,7 @@
     "@kbn/shared-ux-page-solution-nav": "link:src/platform/packages/shared/shared-ux/page/solution_nav",
     "@kbn/shared-ux-prompt-no-data-views": "link:src/platform/packages/private/shared-ux/prompt/no_data_views/impl",
     "@kbn/shared-ux-prompt-no-data-views-mocks": "link:src/platform/packages/private/shared-ux/prompt/no_data_views/mocks",
-    "@kbn/shared-ux-prompt-no-data-views-types": "link:packages/shared-ux/prompt/no_data_views/types",
+    "@kbn/shared-ux-prompt-no-data-views-types": "link:src/platform/packages/shared/shared-ux/prompt/no_data_views/types",
     "@kbn/shared-ux-prompt-not-found": "link:packages/shared-ux/prompt/not_found",
     "@kbn/shared-ux-router": "link:packages/shared-ux/router/impl",
     "@kbn/shared-ux-router-mocks": "link:packages/shared-ux/router/mocks",
