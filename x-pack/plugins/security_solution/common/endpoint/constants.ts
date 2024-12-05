@@ -129,3 +129,11 @@ export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePolicies
 /** The list of OS types that support. Value usually found in ECS `host.os.type` */
 export const SUPPORTED_HOST_OS_TYPE = Object.freeze(['macos', 'windows', 'linux'] as const);
 export type SupportedHostOsType = (typeof SUPPORTED_HOST_OS_TYPE)[number];
+
+/**
+ * Workflow Insights
+ */
+
+export const BASE_WORKFLOW_INSIGHTS_ROUTE = `/workflow_insights`;
+export const WORKFLOW_INSIGHTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}${BASE_WORKFLOW_INSIGHTS_ROUTE}`;
+export const WORKFLOW_INSIGHTS_UPDATE_ROUTE = `${WORKFLOW_INSIGHTS_ROUTE}/{insightId}`;
