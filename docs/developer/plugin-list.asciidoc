@@ -238,7 +238,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |This plugin provides UI and APIs for interactive setup mode a.k.a "enrollment flow".
 
 
-|{kib-repo}blob/{branch}/src/plugins/kibana_overview/README.md[kibanaOverview]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/kibana_overview/README.md[kibanaOverview]
 |An overview page highlighting Kibana apps
 
 
