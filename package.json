@@ -239,7 +239,7 @@
     "@kbn/content-management-plugin": "link:src/platform/plugins/shared/content_management",
     "@kbn/content-management-tabbed-table-list-view": "link:src/platform/packages/private/content-management/tabbed_table_list_view",
     "@kbn/content-management-table-list-view": "link:src/platform/packages/shared/content-management/table_list_view",
-    "@kbn/content-management-table-list-view-common": "link:packages/content-management/table_list_view_common",
+    "@kbn/content-management-table-list-view-common": "link:src/platform/packages/shared/content-management/table_list_view_common",
     "@kbn/content-management-table-list-view-table": "link:packages/content-management/table_list_view_table",
     "@kbn/content-management-user-profiles": "link:packages/content-management/user_profiles",
     "@kbn/content-management-utils": "link:packages/kbn-content-management-utils",
