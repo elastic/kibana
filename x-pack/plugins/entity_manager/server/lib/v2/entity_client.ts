@@ -98,7 +98,7 @@ export class EntityClient {
           );
         }
 
-        const query = getEntityInstancesQuery({
+        const { query, filter } = getEntityInstancesQuery({
           source: {
             ...source,
             metadata_fields: availableMetadataFields,
@@ -109,10 +109,13 @@ export class EntityClient {
           sort,
           limit,
         });
-        this.options.logger.debug(`Entity query: ${query}`);
+        this.options.logger.debug(
+          `Entity query:\n${query}\nfilter:${JSON.stringify(filter, null, 2)}`
+        );
 
         const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
           query,
+          filter,
           esClient: this.options.clusterClient.asCurrentUser,
           logger: this.options.logger,
         });

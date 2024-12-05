@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { asKeyword } from './utils';
 import { EntitySourceDefinition, SortBy } from '../types';
 
@@ -21,7 +22,7 @@ const sourceCommand = ({ source }: { source: EntitySourceDefinition }) => {
   return query;
 };
 
-const whereCommand = ({
+const dslFilter = ({
   source,
   start,
   end,
@@ -30,10 +31,7 @@ const whereCommand = ({
   start: string;
   end: string;
 }) => {
-  const filters = [
-    source.identity_fields.map((field) => `${asKeyword(field)} IS NOT NULL`).join(' AND '),
-    ...source.filters,
-  ];
+  const filters = [...source.filters, ...source.identity_fields.map((field) => `${field}: *`)];
 
   if (source.timestamp_field) {
     filters.push(
@@ -41,7 +39,8 @@ const whereCommand = ({
     );
   }
 
-  return filters.map((filter) => `WHERE ${filter}`).join(' | ');
+  const kuery = filters.map((filter) => '(' + filter + ')').join(' AND ');
+  return toElasticsearchQuery(fromKueryExpression(kuery));
 };
 
 const statsCommand = ({ source }: { source: EntitySourceDefinition }) => {
@@ -108,16 +107,16 @@ export function getEntityInstancesQuery({
   start: string;
   end: string;
   sort?: SortBy;
-}): string {
+}) {
   const commands = [
     sourceCommand({ source }),
-    whereCommand({ source, start, end }),
     statsCommand({ source }),
     renameCommand({ source }),
     evalCommand({ source }),
     sortCommand({ source, sort }),
     `LIMIT ${limit}`,
   ];
+  const filter = dslFilter({ source, start, end });
 
-  return commands.join(' | ');
+  return { query: commands.join(' | '), filter };
 }

@@ -7,6 +7,7 @@
 
 import { withSpan } from '@kbn/apm-utils';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ESQLColumn, ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
 
 export interface SourceAs<T> {
@@ -19,19 +20,24 @@ export async function runESQLQuery<T>(
     esClient,
     logger,
     query,
+    filter,
   }: {
     esClient: ElasticsearchClient;
     logger: Logger;
     query: string;
+    filter: QueryDslQueryContainer;
   }
 ): Promise<T[]> {
-  logger.trace(() => `Request (${operationName}):\n${query}`);
+  logger.trace(
+    () => `Request (${operationName}):\nquery: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
+  );
   return withSpan(
     { name: operationName, labels: { plugin: '@kbn/entityManager-plugin' } },
     async () =>
       esClient.esql.query(
         {
           query,
+          filter,
           format: 'json',
         },
         { querystring: { drop_null_columns: true } }
@@ -62,8 +68,7 @@ function rowToObject(row: ESQLRow, columns: ESQLColumn[]) {
       return object;
     }
 
-    // Removes the type suffix from the column name
-    const name = column.name.replace(/\.(text|keyword)$/, '');
+    const name = column.name;
     if (!object[name]) {
       object[name] = value;
     }
