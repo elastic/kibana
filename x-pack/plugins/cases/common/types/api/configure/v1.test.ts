@@ -992,7 +992,7 @@ describe('configure', () => {
       expect(PathReporter.report(result).join()).not.toContain('No errors!');
     });
 
-    it('should invalidate an observable types configuration with an empty array', () => {
+    it('should accept an observable types configuration with an empty array', () => {
       const invalidData: unknown[] = [];
 
       const result = ObservableTypesConfigurationRt.decode(invalidData);
