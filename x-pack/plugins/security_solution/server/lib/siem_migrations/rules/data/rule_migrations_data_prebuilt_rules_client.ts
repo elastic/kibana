@@ -48,10 +48,13 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
     }
     const filteredRules: RuleMigrationPrebuiltRule[] = [];
     totalAvailableRules.forEach((rule) => {
+      const mitreAttackIds = rule?.threat
+        ?.flatMap((t) => t.technique?.map((tech) => tech.id) ?? [])
+        .filter((id) => id) as string[];
+
       filteredRules.push({
         ...rule,
-        mitre_attack_ids:
-          rule?.threat?.flatMap((t) => t.technique?.map((tech) => tech.id) ?? []) ?? [],
+        ...(mitreAttackIds && mitreAttackIds.length > 0 && { mitre_attack_ids: mitreAttackIds }),
         elser_embedding: `${rule.name} - ${rule.description}`,
       });
     });

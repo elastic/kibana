@@ -69,7 +69,7 @@ export class RuleMigrationsTaskClient {
     this.prepare({ ...params, abortController })
       .then((agent) => this.run({ ...params, agent, abortController }))
       .catch((error) => {
-        this.logger.error(`Error starting migration ID:${migrationId}`, error);
+        this.logger.error(`Error starting migration ID:${migrationId} with error:${error}`, error);
       });
 
     return { exists: true, started: true };
