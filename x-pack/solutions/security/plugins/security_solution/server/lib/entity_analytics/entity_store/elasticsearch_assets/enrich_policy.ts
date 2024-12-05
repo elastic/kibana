@@ -32,6 +32,10 @@ export const createFieldRetentionEnrichPolicy = async ({
   description: EntityEngineInstallationDescriptor;
   options: { namespace: string };
 }) => {
+  const enrichFields = description.dynamic
+    ? ['*']
+    : description.fields.map(({ destination }) => destination);
+
   return esClient.enrich.putPolicy({
     name: getFieldRetentionEnrichPolicyName({
       namespace: options.namespace,
@@ -40,8 +44,8 @@ export const createFieldRetentionEnrichPolicy = async ({
     }),
     match: {
       indices: getEntitiesIndexName(description.entityType, options.namespace),
-      match_field: description.identityField,
-      enrich_fields: description.fields.map(({ destination }) => destination),
+      match_field: description.identityFields[0], // TODO figure out what happens when there are multiple identity fields
+      enrich_fields: enrichFields,
     },
   });
 };
