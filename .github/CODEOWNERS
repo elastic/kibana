@@ -873,7 +873,6 @@ x-pack/plugins/banners @elastic/appex-sharedux
 x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/plugins/cases @elastic/response-ops
 x-pack/plugins/cloud @elastic/kibana-core
-x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/kibana-management
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
@@ -994,6 +993,7 @@ x-pack/plugins/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/security/plugins/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops

@@ -4140,7 +4140,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-defend-plugin@link:x-pack/plugins/cloud_defend":
+"@kbn/cloud-defend-plugin@link:x-pack/solutions/security/plugins/cloud_defend":
   version "0.0.0"
   uid ""
 
