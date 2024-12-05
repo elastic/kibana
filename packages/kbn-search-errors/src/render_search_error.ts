@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { ReactNode } from 'react';
-import { BfetchRequestError } from '@kbn/bfetch-error';
 import { EsError } from './es_error';
 
 export function renderSearchError(
@@ -25,7 +24,7 @@ export function renderSearchError(
     };
   }
 
-  if (error.constructor.name === 'HttpFetchError' || error instanceof BfetchRequestError) {
+  if (error.constructor.name === 'HttpFetchError') {
     const defaultMsg = i18n.translate('searchErrors.errors.fetchError', {
       defaultMessage: 'Check your network connection and try again.',
     });

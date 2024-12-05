@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'bfetch:disable': true,
         enableESQL: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();

@@ -8,8 +8,6 @@
  */
 
 // General settings
-export const DISABLE_REQUEST_BATCHING_ID = 'bfetch:disable';
-export const DISABLE_BATCH_COMPRESSION_ID = 'bfetch:disableCompression';
 export const CSV_QUOTE_VALUES_ID = 'csv:quoteValues';
 export const CSV_SEPARATOR_ID = 'csv:separator';
 export const DATE_FORMAT_ID = 'dateFormat';

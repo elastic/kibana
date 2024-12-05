@@ -59,7 +59,6 @@
     "@kbn/features-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/security-plugin",
-    "@kbn/bfetch-plugin",
     "@kbn/alerts-as-data-utils",
     "@kbn/std",
     "@kbn/utility-types",
