@@ -36,7 +36,7 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   { value: 'aws-s3', label: 'AWS S3' },
   { value: 'azure-blob-storage', label: 'Azure Blob Storage' },
   { value: 'azure-eventhub', label: 'Azure Event Hub' },
-  { value: 'cel', label: 'Common Expression Language (CEL)' },
+  { value: 'cel', label: 'API (CEL Input)' },
   { value: 'cloudfoundry', label: 'Cloud Foundry' },
   { value: 'filestream', label: 'File Stream' },
   { value: 'gcp-pubsub', label: 'GCP Pub/Sub' },
