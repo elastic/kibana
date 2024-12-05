@@ -536,7 +536,7 @@
     "@kbn/file-upload-plugin": "link:x-pack/plugins/file_upload",
     "@kbn/files-example-plugin": "link:examples/files_example",
     "@kbn/files-management-plugin": "link:src/platform/plugins/private/files_management",
-    "@kbn/files-plugin": "link:src/plugins/files",
+    "@kbn/files-plugin": "link:src/platform/plugins/shared/files",
     "@kbn/fleet-plugin": "link:x-pack/plugins/fleet",
     "@kbn/flot-charts": "link:packages/kbn-flot-charts",
     "@kbn/foo-plugin": "link:x-pack/test/ui_capabilities/common/plugins/foo_plugin",
