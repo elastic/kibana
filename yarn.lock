@@ -6360,7 +6360,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-random-sampler-utils@link:x-pack/packages/ml/random_sampler_utils":
+"@kbn/ml-random-sampler-utils@link:x-pack/platform/packages/shared/ml/random_sampler_utils":
   version "0.0.0"
   uid ""
 
