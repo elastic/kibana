@@ -96,7 +96,7 @@
     "links": "src/plugins/links",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
-    "randomSampling": "x-pack/packages/kbn-random-sampling",
+    "randomSampling": "x-pack/platform/packages/private/kbn-random-sampling",
     "reactPackages": "packages/react",
     "esqlEditor": "packages/kbn-esql-editor",
     "esqlUtils": "packages/kbn-esql-utils",
