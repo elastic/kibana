@@ -3864,7 +3864,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
+"@kbn/aiops-components@link:x-pack/platform/packages/private/ml/aiops_components":
   version "0.0.0"
   uid ""
 
