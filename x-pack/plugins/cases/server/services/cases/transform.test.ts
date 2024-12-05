@@ -614,5 +614,17 @@ describe('case transforms', () => {
         ]
       `);
     });
+
+    it('returns observables array when it is not defined', () => {
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
+        overrides: {
+          observables: undefined,
+        },
+      });
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.observables
+      ).toMatchInlineSnapshot(`Array []`);
+    });
   });
 });
