@@ -927,7 +927,7 @@
     "@kbn/slo-plugin": "link:x-pack/plugins/observability_solution/slo",
     "@kbn/slo-schema": "link:x-pack/packages/kbn-slo-schema",
     "@kbn/snapshot-restore-plugin": "link:x-pack/plugins/snapshot_restore",
-    "@kbn/sort-predicates": "link:packages/kbn-sort-predicates",
+    "@kbn/sort-predicates": "link:src/platform/packages/shared/kbn-sort-predicates",
     "@kbn/spaces-plugin": "link:x-pack/plugins/spaces",
     "@kbn/spaces-test-plugin": "link:x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin",
     "@kbn/sse-utils": "link:packages/kbn-sse-utils",
