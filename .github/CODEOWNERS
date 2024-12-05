@@ -305,7 +305,6 @@ packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-cases-components @elastic/response-ops
 packages/kbn-cbor @elastic/kibana-operations
 packages/kbn-cell-actions @elastic/security-threat-hunting-explore
-packages/kbn-chart-icons @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-core @elastic/kibana-operations
@@ -622,6 +621,7 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
