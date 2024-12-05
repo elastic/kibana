@@ -15,6 +15,8 @@ export const SIEM_RULE_MIGRATION_PATH = `${SIEM_RULE_MIGRATIONS_PATH}/{migration
 export const SIEM_RULE_MIGRATION_START_PATH = `${SIEM_RULE_MIGRATION_PATH}/start` as const;
 export const SIEM_RULE_MIGRATION_RETRY_PATH = `${SIEM_RULE_MIGRATION_PATH}/retry` as const;
 export const SIEM_RULE_MIGRATION_STATS_PATH = `${SIEM_RULE_MIGRATION_PATH}/stats` as const;
+export const SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH =
+  `${SIEM_RULE_MIGRATION_PATH}/translation_stats` as const;
 export const SIEM_RULE_MIGRATION_STOP_PATH = `${SIEM_RULE_MIGRATION_PATH}/stop` as const;
 export const SIEM_RULE_MIGRATION_INSTALL_PATH = `${SIEM_RULE_MIGRATION_PATH}/install` as const;
 export const SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH =
@@ -44,3 +46,11 @@ export enum SiemMigrationRuleTranslationResult {
 
 export const DEFAULT_TRANSLATION_RISK_SCORE = 21;
 export const DEFAULT_TRANSLATION_SEVERITY: Severity = 'low';
+
+export const DEFAULT_TRANSLATION_FIELDS = {
+  risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
+  severity: DEFAULT_TRANSLATION_SEVERITY,
+  from: 'now-360s',
+  to: 'now',
+  interval: '5m',
+} as const;

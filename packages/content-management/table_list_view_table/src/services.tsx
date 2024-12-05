@@ -24,7 +24,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { UserProfileService, UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
@@ -100,6 +100,7 @@ interface TableListViewStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 /**
