@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
+  rootDir: '../../../../../../../..',
   roots: ['<rootDir>/packages/shared-ux/page/analytics_no_data'],
 };
