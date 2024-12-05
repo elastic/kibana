@@ -909,7 +909,7 @@
     "@kbn/shared-ux-page-no-data-config": "link:src/platform/packages/shared/shared-ux/page/no_data_config/impl",
     "@kbn/shared-ux-page-no-data-config-mocks": "link:src/platform/packages/shared/shared-ux/page/no_data_config/mocks",
     "@kbn/shared-ux-page-no-data-config-types": "link:src/platform/packages/shared/shared-ux/page/no_data_config/types",
-    "@kbn/shared-ux-page-no-data-mocks": "link:packages/shared-ux/page/no_data/mocks",
+    "@kbn/shared-ux-page-no-data-mocks": "link:src/platform/packages/shared/shared-ux/page/no_data/mocks",
     "@kbn/shared-ux-page-no-data-types": "link:packages/shared-ux/page/no_data/types",
     "@kbn/shared-ux-page-solution-nav": "link:packages/shared-ux/page/solution_nav",
     "@kbn/shared-ux-prompt-no-data-views": "link:packages/shared-ux/prompt/no_data_views/impl",
