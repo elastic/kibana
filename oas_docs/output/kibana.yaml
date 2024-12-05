@@ -46650,9 +46650,9 @@ components:
         - assistant
       type: string
     Security_AI_Assistant_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_AI_Assistant_API_NormalizedAnonymizationFieldError:
       type: object
@@ -49596,9 +49596,9 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateFields'
     Security_Detections_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Detections_API_NormalizedRuleAction:
       additionalProperties: false
@@ -52807,7 +52807,7 @@ components:
         - text
       type: string
     Security_Endpoint_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
       format: nonempty
       minLength: 1
       type: string
@@ -53110,9 +53110,9 @@ components:
       required:
         - hostStatuses
     Security_Endpoint_Management_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Management_API_NoParametersRequestSchema:
       type: object
@@ -54293,7 +54293,7 @@ components:
         - text
       type: string
     Security_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
       format: nonempty
       minLength: 1
       type: string
@@ -54539,7 +54539,7 @@ components:
         - text
       type: string
     Security_Lists_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
       format: nonempty
       minLength: 1
       type: string
