@@ -311,7 +311,7 @@ oss plugins.
 |Contains the saved search saved object definition and helpers.
 
 
-|{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/screenshot_mode/README.md[screenshotMode]
 |The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
 
 

@@ -790,7 +790,7 @@
     "@kbn/saved-search-component": "link:packages/kbn-saved-search-component",
     "@kbn/saved-search-plugin": "link:src/plugins/saved_search",
     "@kbn/screenshot-mode-example-plugin": "link:examples/screenshot_mode_example",
-    "@kbn/screenshot-mode-plugin": "link:src/plugins/screenshot_mode",
+    "@kbn/screenshot-mode-plugin": "link:src/platform/plugins/shared/screenshot_mode",
     "@kbn/screenshotting-example-plugin": "link:x-pack/examples/screenshotting_example",
     "@kbn/screenshotting-plugin": "link:x-pack/plugins/screenshotting",
     "@kbn/screenshotting-server": "link:packages/kbn-screenshotting-server",
