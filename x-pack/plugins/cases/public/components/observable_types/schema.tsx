@@ -7,7 +7,7 @@
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from './translations';
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
+import { MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH } from '../../../common/constants';
 
 const { emptyField, maxLengthField } = fieldValidators;
 
@@ -27,10 +27,10 @@ export const schema = {
       },
       {
         validator: maxLengthField({
-          length: MAX_CUSTOM_FIELD_LABEL_LENGTH,
+          length: MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH,
           message: i18n.MAX_LENGTH_ERROR(
             i18n.OBSERVABLE_TYPE_LABEL.toLocaleLowerCase(),
-            MAX_CUSTOM_FIELD_LABEL_LENGTH
+            MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH
           ),
         }),
       },

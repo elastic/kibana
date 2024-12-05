@@ -12,6 +12,7 @@ import { ObservableTypesForm, type ObservableTypesFormProps } from './form';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type { FormState } from '../configure_cases/flyout';
 import type { ObservableTypeConfiguration } from '../../../common/types/domain/configure/v1';
+import { MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH } from '../../../common/constants';
 
 describe('ObservableTypesForm ', () => {
   let appMock: AppMockRenderer;
@@ -62,7 +63,7 @@ describe('ObservableTypesForm ', () => {
       expect(data.label).toEqual('changed label');
     });
 
-    it('should not allow empty labels', async () => {
+    it('should not allow invalid labels', async () => {
       appMock.render(
         <ObservableTypesForm
           onChange={onChangeState}
@@ -85,6 +86,14 @@ describe('ObservableTypesForm ', () => {
       const { isValid } = await formState!.submit();
 
       expect(isValid).toEqual(false);
+
+      fireEvent.change(labelInput, {
+        target: { value: 'a'.repeat(MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH + 1) },
+      });
+
+      const { isValid: isValidWithTooLongLabel } = await formState!.submit();
+
+      expect(isValidWithTooLongLabel).toEqual(false);
     });
   });
 

@@ -149,6 +149,7 @@ export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
+export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 
 /**
  * Cases features
