@@ -55,6 +55,45 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/sse-utils-server",
+        "id": "def-common.supertestToObservable",
+        "type": "Function",
+        "tags": [],
+        "label": "supertestToObservable",
+        "description": [
+          "\nConvert a supertest response to an SSE observable.\n\nNote: the supertest response should *NOT* be awaited when using that utility,\nor at least not before calling it.\n"
+        ],
+        "signature": [
+          "(response: ",
+          "Test",
+          ") => ",
+          "Observable",
+          "<T>"
+        ],
+        "path": "packages/kbn-sse-utils-server/src/supertest_to_observable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sse-utils-server",
+            "id": "def-common.supertestToObservable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Test"
+            ],
+            "path": "packages/kbn-sse-utils-server/src/supertest_to_observable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
