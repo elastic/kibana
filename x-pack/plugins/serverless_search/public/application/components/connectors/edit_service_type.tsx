@@ -25,6 +25,8 @@ import { Connector as BaseConnector } from '@kbn/search-connectors';
 import { css } from '@emotion/react';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
+import { BETA_LABEL, TECH_PREVIEW_LABEL } from '../../../../common/i18n_string';
+
 interface Connector extends BaseConnector {
   iconPath?: string;
 }
@@ -36,16 +38,6 @@ interface EditServiceTypeProps {
   connector: Connector;
   isDisabled?: boolean;
 }
-
-// TODO move these constants to a common file in Serverless as we have in Stack
-const BETA_LABEL = i18n.translate('xpack.serverlessSearch.betaLabel', {
-  defaultMessage: 'Beta',
-});
-
-const TECH_PREVIEW_LABEL = i18n.translate('xpack.serverlessSearch.techPreviewLabel', {
-  defaultMessage: 'Tech preview',
-});
-
 interface ConnectorDataSource {
   _icon: React.ReactNode[];
   _badges: React.ReactNode;
