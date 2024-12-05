@@ -76,6 +76,13 @@ export interface ESQLAstNodeFormatting {
 
 export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   type: 'command';
+
+  /**
+   * The subtype of the command. For example, the `JOIN` command can be: (1)
+   * LOOKUP JOIN, (2) LEFT JOIN, (3) RIGHT JOIN.
+   */
+  commandType?: string;
+
   args: ESQLAstItem[];
 }
 

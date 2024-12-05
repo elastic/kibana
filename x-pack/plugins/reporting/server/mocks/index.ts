@@ -9,7 +9,6 @@ import { ReportingStart } from '../types';
 
 export const reportingMock = {
   createStart: (): ReportingStart => ({
-    usesUiCapabilities: () => false,
     registerExportTypes: () => {},
   }),
 };
