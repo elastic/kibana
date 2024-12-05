@@ -15,13 +15,13 @@ import { AssistantAvatar } from '@kbn/elastic-assistant';
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const TOOLTIP_CONTENT = i18n.translate(
-  'xpack.securitySolution.globalHeader.assistantHeaderLinkShortcutTooltip',
+  'xpack.securitySolution.assistant.assistantNavLinkShortcutTooltip',
   {
     values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
     defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
   }
 );
-const LINK_LABEL = i18n.translate('xpack.securitySolution.globalHeader.assistantHeaderLink', {
+const LINK_LABEL = i18n.translate('xpack.securitySolution.assistant.assistantNavLink', {
   defaultMessage: 'AI Assistant',
 });
 

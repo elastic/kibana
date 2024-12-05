@@ -27,7 +27,7 @@ import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_mo
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
 import { AssistantOverlay } from '../../assistant/overlay';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
-import NavControls from './nav_controls';
+import { NavControls } from './nav_controls';
 
 interface HomePageProps {
   children: React.ReactNode;

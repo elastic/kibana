@@ -12,7 +12,7 @@ import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal'
 import { useNavigationContext } from '@kbn/security-solution-navigation/src/context';
 import { AssistantNavLink } from '../../../assistant/nav_link';
 
-export default function NavControls() {
+export const NavControls = () => {
   const services = useNavigationContext();
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
 
@@ -29,7 +29,7 @@ export default function NavControls() {
     };
 
     registerPortalNode();
-  }, []);
+  }, [portalNode, services.chrome.navControls]);
 
   return (
     <InPortal node={portalNode}>

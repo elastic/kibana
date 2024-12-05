@@ -1,6 +1,6 @@
 import React, { FC, PropsWithChildren } from 'react';
 import { render, renderHook } from '@testing-library/react';
-import NavControls from '.';
+import { NavControls } from '.';
 import { ChromeNavControl } from '@kbn/core/public';
 import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { TestProviders } from '@kbn/elastic-assistant/impl/mock/test_providers/test_providers';
