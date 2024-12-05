@@ -64,7 +64,7 @@ function buildWindowAgg(
     : OCCURRENCE_AGGS;
 
   return {
-    [`${id}_${type}`]: {
+    [generateStatsKey(id, type)]: {
       filter: {
         range: {
           '@timestamp': {
@@ -78,8 +78,8 @@ function buildWindowAgg(
     [generateBurnRateKey(id, type)]: {
       bucket_script: {
         buckets_path: {
-          good: `${id}_${type}>good`,
-          total: `${id}_${type}>total`,
+          good: `${generateStatsKey(id, type)}>good`,
+          total: `${generateStatsKey(id, type)}>total`,
         },
         script: {
           source:
