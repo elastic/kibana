@@ -60,20 +60,21 @@ export const State: FC = () => {
           version: '1',
           // headers,
           body: JSON.stringify({
-            start: 1731199142912,
-            end: 1736459126749,
+            start: 0,
+            end: 2736459126749,
             searchQuery: '{"match_all":{}}',
-            timeFieldName: 'timestamp',
+            timeFieldName: '@timestamp',
             index,
             grouping: false,
             flushFix: true,
-            baselineMin: 1733097600000,
-            baselineMax: 1734652800000,
-            deviationMin: 1734739200000,
-            deviationMax: 1734825600000,
+            baselineMin: 0,
+            baselineMax: 1,
+            deviationMin: 2,
+            deviationMax: 2734825600000,
             sampleProbability: 1,
           }),
         });
+        console.log('resp.keywordFieldCandidates', resp);
         state.actions.setAiopsFieldCandidates(resp.keywordFieldCandidates);
       } catch (e) {
         // eslint-disable-next-line no-console
