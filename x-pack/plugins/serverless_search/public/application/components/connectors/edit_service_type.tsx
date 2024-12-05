@@ -206,9 +206,10 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
     [mutate, allConnectors]
   );
   const selectedOptions = useMemo(() => {
-    return initialOptions.find((option) => option.value?.serviceType === connector.service_type)
-      ? [initialOptions.find((option) => option.value?.serviceType === connector.service_type)]
-      : [];
+    const selectedOption = initialOptions.find(
+      (option) => option.value?.serviceType === connector.service_type
+    );
+    return selectedOption ? [selectedOption] : [];
   }, [initialOptions, connector.service_type]);
 
   return (
