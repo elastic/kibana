@@ -4008,7 +4008,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/asset-inventory-plugin@link:x-pack/plugins/asset_inventory":
+"@kbn/asset-inventory-plugin@link:x-pack/solutions/security/plugins/asset_inventory":
   version "0.0.0"
   uid ""
 

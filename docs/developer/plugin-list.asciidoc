@@ -470,7 +470,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/asset_inventory/README.md[assetInventory]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/asset_inventory/README.md[assetInventory]
 |Centralized asset inventory experience within the Elastic Security solution. A central place for users to view and manage all their assets from different environments.
 
 
