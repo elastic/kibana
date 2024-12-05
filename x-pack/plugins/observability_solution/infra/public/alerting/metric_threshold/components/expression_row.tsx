@@ -47,15 +47,15 @@ interface ExpressionRowProps {
 }
 
 const NegativeHorizontalMarginDiv = styled.div`
-  margin: 0 -${(props) => props.theme.euiTheme.size.xs};
+  margin: 0 -4px;
 `;
 
 const StyledExpression = styled.div`
-  padding: 0 ${(props) => props.theme.euiTheme.size.xs};
+  padding: 0 4px;
 `;
 
 const StyledHealth = styled(EuiHealth)`
-  margin-left: ${(props) => props.theme.euiTheme.size.xs};
+  margin-left: 4px;
 `;
 
 export const ExpressionRow = ({
