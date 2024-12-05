@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ml/aiops_test_utils'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/private/ml/aiops_test_utils'],
 };
