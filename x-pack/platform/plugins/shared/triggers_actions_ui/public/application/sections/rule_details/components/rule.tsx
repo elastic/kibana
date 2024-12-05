@@ -11,6 +11,7 @@ import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic
 import { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
+import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
@@ -36,7 +37,7 @@ import {
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
-const AlertsTable = lazy(() => import('@kbn/response-ops-alerts-table/components/alerts_table'));
+const AlertsTable = lazy(() => import('@kbn/response-ops-alerts-table')) as AlertsTableType;
 
 export type RuleComponentProps = {
   rule: Rule;
