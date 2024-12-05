@@ -136,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
             'securitySolutionCasesV2',
             'fleet',
             'fleetv2',
+            'entityManager',
           ].sort()
         );
       });
@@ -186,6 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           'securitySolutionCasesV2',
           'fleet',
           'fleetv2',
+          'entityManager',
         ];
 
         const features = body.filter(

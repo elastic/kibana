@@ -14,15 +14,17 @@ export async function convertRequestToLanguage({
   requests,
   language,
   esHost,
+  kibanaHost,
 }: {
   language: string;
   esHost: string;
+  kibanaHost: string;
   requests: EditorRequest[];
 }) {
   return sendRequest({
     path: `/api/console/convert_request_to_language`,
     method: 'post',
-    query: { language, esHost },
+    query: { language, esHost, kibanaHost },
     body: requests,
   });
 }
