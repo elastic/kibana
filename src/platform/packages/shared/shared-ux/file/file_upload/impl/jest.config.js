@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/packages/shared-ux/file/file_upload/impl'],
+  rootDir: '../../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/file/file_upload/impl'],
 };
