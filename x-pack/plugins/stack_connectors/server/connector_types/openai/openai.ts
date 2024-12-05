@@ -210,6 +210,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     );
 
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
+
     const response = await this.request(
       {
         url: this.url,
