@@ -519,7 +519,6 @@ packages/kbn-ui-actions-browser @elastic/appex-sharedux
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
-packages/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 packages/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 packages/kbn-unified-field-list @elastic/kibana-data-discovery
 packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
@@ -623,6 +622,7 @@ src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-search-errors @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-search-types @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 src/platform/plugins/shared/data_view_editor @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_field_editor @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_management @elastic/kibana-data-discovery
