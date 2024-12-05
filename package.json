@@ -674,7 +674,7 @@
     "@kbn/ml-query-utils": "link:x-pack/platform/packages/private/ml/query_utils",
     "@kbn/ml-random-sampler-utils": "link:x-pack/platform/packages/shared/ml/random_sampler_utils",
     "@kbn/ml-response-stream": "link:x-pack/platform/packages/shared/ml/response_stream",
-    "@kbn/ml-route-utils": "link:x-pack/packages/ml/route_utils",
+    "@kbn/ml-route-utils": "link:x-pack/platform/packages/private/ml/route_utils",
     "@kbn/ml-runtime-field-utils": "link:x-pack/packages/ml/runtime_field_utils",
     "@kbn/ml-string-hash": "link:x-pack/packages/ml/string_hash",
     "@kbn/ml-time-buckets": "link:x-pack/packages/ml/time_buckets",
