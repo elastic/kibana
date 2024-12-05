@@ -743,7 +743,7 @@
     "@kbn/rendering-plugin": "link:test/plugin_functional/plugins/rendering_plugin",
     "@kbn/repo-info": "link:packages/kbn-repo-info",
     "@kbn/repo-packages": "link:packages/kbn-repo-packages",
-    "@kbn/reporting-common": "link:packages/kbn-reporting/common",
+    "@kbn/reporting-common": "link:src/platform/packages/private/kbn-reporting/common",
     "@kbn/reporting-csv-share-panel": "link:packages/kbn-reporting/get_csv_panel_actions",
     "@kbn/reporting-export-types-csv": "link:packages/kbn-reporting/export_types/csv",
     "@kbn/reporting-export-types-csv-common": "link:packages/kbn-reporting/export_types/csv_common",
