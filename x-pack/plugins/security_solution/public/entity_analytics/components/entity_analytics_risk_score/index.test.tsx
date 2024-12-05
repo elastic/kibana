@@ -88,7 +88,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       mockUseRiskScore.mockReturnValue(defaultProps);
     });
 
-    it.only('renders enable button when module is disable', () => {
+    it('renders enable button when module is disable', () => {
       mockUseRiskScore.mockReturnValue({ ...defaultProps, hasEngineBeenInstalled: false });
       const { getByTestId } = render(
         <TestProviders>
@@ -96,7 +96,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         </TestProviders>
       );
 
-      expect(getByTestId(`enable_${riskEntity}_risk_score`)).toBeInTheDocument();
+      expect(getByTestId(`enable_risk_score`)).toBeInTheDocument();
     });
 
     it("doesn't render enable button when module is enable", () => {
@@ -106,7 +106,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         </TestProviders>
       );
 
-      expect(queryByTestId(`enable_${riskEntity}_risk_score`)).not.toBeInTheDocument();
+      expect(queryByTestId(`enable_risk_score`)).not.toBeInTheDocument();
     });
 
     it('queries when toggleStatus is true', () => {
