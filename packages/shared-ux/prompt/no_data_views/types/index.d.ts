@@ -23,7 +23,7 @@ type DataView = unknown;
 /**
  * A subset of the `DataViewEditorOptions` interface relevant to our service and components.
  *
- * @see: src/plugins/data_view_editor/public/types.ts
+ * @see: src/platform/plugins/shared/data_view_editor/public/types.ts
  */
 interface DataViewEditorOptions {
   /** Handler to be invoked when the Data View Editor completes a save operation. */
