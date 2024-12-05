@@ -153,7 +153,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   toasts,
   currentAppId,
   userProfileService,
-  navControls
+  navControls,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -225,7 +225,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Global Assistant Overlay actions
    */
-  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => { });
+  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
 
   /**
    * Current User Avatar
@@ -251,7 +251,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Setting code block ref that can be used to store callback from parent components
    */
-  const codeBlockRef = useRef(() => { });
+  const codeBlockRef = useRef(() => {});
 
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
@@ -344,13 +344,17 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     ]
   );
 
-  return <AssistantContext.Provider value={value}>
-    <AssistantNavLink hasAssistantPrivilege={assistantAvailability.hasAssistantPrivilege} showAssistantOverlay={showAssistantOverlay} navControls={navControls} />
-    {children}
-  </AssistantContext.Provider>;
+  return (
+    <AssistantContext.Provider value={value}>
+      <AssistantNavLink
+        hasAssistantPrivilege={assistantAvailability.hasAssistantPrivilege}
+        showAssistantOverlay={showAssistantOverlay}
+        navControls={navControls}
+      />
+      {children}
+    </AssistantContext.Provider>
+  );
 };
-
-
 
 export const useAssistantContext = () => {
   const context = React.useContext(AssistantContext);

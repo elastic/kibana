@@ -11,8 +11,8 @@ import ReactDOM from 'react-dom';
 import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
 import { ChromeNavControls } from '@kbn/core/public';
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
+import { AssistantAvatar } from '../..';
 import { UseAssistantContext } from '.';
 
 interface Props {

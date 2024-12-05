@@ -16,7 +16,8 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
 
-import { ChromeNavControls, ChromeStart, UserProfileService } from '@kbn/core/public';
+import { ChromeNavControls, UserProfileService } from '@kbn/core/public';
+import { NavControlsService } from '@kbn/core-chrome-browser-internal/src/nav_controls';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -31,17 +32,19 @@ import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
-import { NavControlsService } from '@kbn/core-chrome-browser-internal/src/nav_controls';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
-  navControls: ChromeNavControls
+  navControls: ChromeNavControls;
 }
 
 window.scrollTo = jest.fn();
 
 /** A utility for wrapping children in the providers required to run tests */
-const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ children, navControls = new NavControlsService().start(),  }) => {
+const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({
+  children,
+  navControls = new NavControlsService().start(),
+}) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });

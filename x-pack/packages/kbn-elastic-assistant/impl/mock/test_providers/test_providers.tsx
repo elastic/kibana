@@ -15,9 +15,9 @@ import { ThemeProvider } from 'styled-components';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChromeNavControls, UserProfileService } from '@kbn/core/public';
+import { NavControlsService } from '@kbn/core-chrome-browser-internal/src/nav_controls';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
-import { NavControlsService } from '@kbn/core-chrome-browser-internal/src/nav_controls';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;

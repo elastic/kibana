@@ -53,7 +53,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
       <ConsoleManager>
         <TourContextProvider>
-          <>      
+          <>
             <GlobalHeader />
             <DragDropContextWrapper browserFields={browserFields}>
               {children}
