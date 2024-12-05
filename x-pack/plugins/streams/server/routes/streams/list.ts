@@ -52,9 +52,11 @@ export interface StreamTree {
   children: StreamTree[];
 }
 
-function asTrees(definitions: Array<{ id: string }>) {
+function asTrees(definitions: Array<{ id: string; managed?: boolean }>) {
   const trees: StreamTree[] = [];
-  const ids = definitions.map((definition) => definition.id);
+  const ids = definitions
+    .filter((definition) => definition.managed)
+    .map((definition) => definition.id);
 
   ids.sort((a, b) => a.split('.').length - b.split('.').length);
 
