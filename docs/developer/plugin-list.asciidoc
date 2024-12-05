@@ -621,7 +621,7 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 |The GlobalSearchBar plugin provides a search interface for navigating Kibana. (It is the UI to the GlobalSearch plugin.)
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/global_search_providers/README.md[globalSearchProviders]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/global_search_providers/README.md[globalSearchProviders]
 |The globalSearchProviders plugin provides Kibana default search providers for the GlobalSearch plugin.
 
 
