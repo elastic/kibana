@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiComboBox, EuiComboBoxOptionOption, EuiCopy } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiCopy,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -69,60 +75,64 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
   };
 
   return (
-    <EuiComboBox<string>
-      fullWidth
-      css={css`
-        max-width: 500px;
-      `}
-      isClearable={false}
-      compressed
-      prepend={groupingKey}
-      append={
-        currentValue ? (
-          <EuiCopy textToCopy={currentValue}>
-            {(copy) => (
-              <EuiButtonIcon
-                data-test-subj="sloSLOGroupingValueSelectorButton"
-                color="text"
-                iconType="copyClipboard"
-                onClick={copy}
-                aria-label={i18n.translate('xpack.slo.sLOGroupingValueSelector.copyButton.label', {
-                  defaultMessage: 'Copy value to clipboard',
-                })}
-              />
-            )}
-          </EuiCopy>
-        ) : (
-          <EuiButtonIcon
-            data-test-subj="sloSLOGroupingValueSelectorButton"
-            color="text"
-            disabled={true}
-            iconType="copyClipboard"
-            aria-label={i18n.translate(
-              'xpack.slo.sLOGroupingValueSelector.copyButton.noValueLabel',
-              { defaultMessage: 'Select a value before' }
-            )}
-          />
-        )
-      }
-      singleSelection={{ asPlainText: true }}
-      options={options}
-      isLoading={isLoading}
-      isDisabled={isError || !isAvailable}
-      placeholder={i18n.translate('xpack.slo.sLOGroupingValueSelector.placeholder', {
-        defaultMessage: 'Select a group value',
-      })}
-      selectedOptions={currentValue ? [toField(currentValue)] : []}
-      onChange={onChange}
-      truncationProps={{
-        truncation: 'end',
-      }}
-      onSearchChange={(searchValue: string) => {
-        if (searchValue !== '') {
-          setSearch(searchValue);
+    <EuiFlexItem grow={false}>
+      <EuiComboBox<string>
+        css={css`
+          max-width: 500px;
+        `}
+        isClearable={false}
+        compressed
+        prepend={groupingKey}
+        append={
+          currentValue ? (
+            <EuiCopy textToCopy={currentValue}>
+              {(copy) => (
+                <EuiButtonIcon
+                  data-test-subj="sloSLOGroupingValueSelectorButton"
+                  color="text"
+                  iconType="copyClipboard"
+                  onClick={copy}
+                  aria-label={i18n.translate(
+                    'xpack.slo.sLOGroupingValueSelector.copyButton.label',
+                    {
+                      defaultMessage: 'Copy value to clipboard',
+                    }
+                  )}
+                />
+              )}
+            </EuiCopy>
+          ) : (
+            <EuiButtonIcon
+              data-test-subj="sloSLOGroupingValueSelectorButton"
+              color="text"
+              disabled={true}
+              iconType="copyClipboard"
+              aria-label={i18n.translate(
+                'xpack.slo.sLOGroupingValueSelector.copyButton.noValueLabel',
+                { defaultMessage: 'Select a value before' }
+              )}
+            />
+          )
         }
-      }}
-    />
+        singleSelection={{ asPlainText: true }}
+        options={options}
+        isLoading={isLoading}
+        isDisabled={isError || !isAvailable}
+        placeholder={i18n.translate('xpack.slo.sLOGroupingValueSelector.placeholder', {
+          defaultMessage: 'Select a group value',
+        })}
+        selectedOptions={currentValue ? [toField(currentValue)] : []}
+        onChange={onChange}
+        truncationProps={{
+          truncation: 'end',
+        }}
+        onSearchChange={(searchValue: string) => {
+          if (searchValue !== '') {
+            setSearch(searchValue);
+          }
+        }}
+      />
+    </EuiFlexItem>
   );
 }
 
