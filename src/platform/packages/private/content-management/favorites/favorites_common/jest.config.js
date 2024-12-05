@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/content-management/favorites/favorites_common'],
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/content-management/favorites/favorites_common'],
 };
