@@ -11,10 +11,12 @@ import { PassThrough } from 'stream';
 import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const CHAT_API_URL = `/internal/observability_ai_assistant/chat`;
 
@@ -182,6 +184,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(response.error.message).to.be(
         `Token limit reached. Token limit is 8192, but the current conversation has 11036 tokens.`
       );
+    });
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: `POST ${CHAT_API_URL}`,
+            params: {
+              body: {
+                name: 'my_api_call',
+                messages,
+                connectorId,
+                functions: [],
+                scopes: ['all'],
+              },
+            },
+          });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
+      });
     });
   });
 }

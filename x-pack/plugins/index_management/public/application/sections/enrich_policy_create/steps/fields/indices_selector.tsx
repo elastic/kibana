@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { uniq, isEmpty } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import type { EuiComboBoxProps } from '@elastic/eui';
-import { getMatchingIndices } from '../../../../services/api';
+import { getMatchingDataStreams, getMatchingIndices } from '../../../../services/api';
 import type { FieldHook } from '../../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 
@@ -25,23 +25,76 @@ interface Props {
   [key: string]: any;
 }
 
-const getIndexOptions = async (patternString: string) => {
-  const options: IOption[] = [];
+interface GetMatchingOptionsParams {
+  matches: string[];
+  optionsMessage: string;
+  noMatchingMessage: string;
+}
 
+const i18nTexts = {
+  indices: {
+    options: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.optionsLabel', {
+      defaultMessage: 'Based on your indices',
+    }),
+    noMatches: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.noMatchingOption', {
+      defaultMessage: 'No indices match your search criteria.',
+    }),
+  },
+  dataStreams: {
+    options: i18n.translate(
+      'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.dataStream.optionsLabel',
+      {
+        defaultMessage: 'Based on your data streams',
+      }
+    ),
+    noMatches: i18n.translate(
+      'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.dataStream.noMatchingOption',
+      {
+        defaultMessage: 'No data streams match your search criteria.',
+      }
+    ),
+  },
+  sourcePlaceholder: i18n.translate(
+    'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.placeholder',
+    {
+      defaultMessage: 'Select source indices and data streams.',
+    }
+  ),
+};
+
+const getIndexOptions = async (patternString: string) => {
   if (!patternString) {
-    return options;
+    return [];
   }
 
-  const { data } = await getMatchingIndices(patternString);
-  const matchingIndices = data.indices;
+  const { data: indicesData } = await getMatchingIndices(patternString);
+  const { data: dataStreamsData } = await getMatchingDataStreams(patternString);
 
-  if (matchingIndices.length) {
-    const matchingOptions = uniq([...matchingIndices]);
+  const indices = getMatchingOptions({
+    matches: indicesData.indices,
+    optionsMessage: i18nTexts.indices.options,
+    noMatchingMessage: i18nTexts.indices.noMatches,
+  });
+  const dataStreams = getMatchingOptions({
+    matches: dataStreamsData.dataStreams,
+    optionsMessage: i18nTexts.dataStreams.options,
+    noMatchingMessage: i18nTexts.dataStreams.noMatches,
+  });
+
+  return [...indices, ...dataStreams];
+};
+
+const getMatchingOptions = ({
+  matches,
+  optionsMessage,
+  noMatchingMessage,
+}: GetMatchingOptionsParams) => {
+  const options: IOption[] = [];
+  if (matches.length) {
+    const matchingOptions = uniq([...matches]);
 
     options.push({
-      label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.optionsLabel', {
-        defaultMessage: 'Based on your indices',
-      }),
+      label: optionsMessage,
       options: matchingOptions
         .map((match) => {
           return {
@@ -53,13 +106,10 @@ const getIndexOptions = async (patternString: string) => {
     });
   } else {
     options.push({
-      label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.noMatchingOption', {
-        defaultMessage: 'No indices match your search criteria.',
-      }),
+      label: noMatchingMessage,
       options: [],
     });
   }
-
   return options;
 };
 
@@ -71,7 +121,6 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
   const onSearchChange = useCallback(
     async (search: string) => {
       const indexPattern = isEmpty(search) ? '*' : search;
-
       setIsIndiciesLoading(true);
       setIndexOptions(await getIndexOptions(indexPattern));
       setIsIndiciesLoading(false);
@@ -98,6 +147,7 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
     >
       <EuiComboBox
         async
+        placeholder={i18nTexts.sourcePlaceholder}
         isLoading={isIndiciesLoading}
         options={indexOptions}
         noSuggestions={!indexOptions.length}

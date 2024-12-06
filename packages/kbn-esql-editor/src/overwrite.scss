@@ -29,15 +29,11 @@
   @include euiTextBreakWord;
 }
 
-// All scrollable containers (e.g. main container and suggest menu)
-.ESQLEditor .monaco-editor .monaco-scrollable-element {
-  margin-left: $euiSizeS;
+// Space between the autocomplete menu and expanded suggestion details
+.ESQLEditor .monaco-editor .suggest-details {
+  padding-left: $euiSizeS;
 }
 
-.ESQLEditor .monaco-editor .monaco-list .monaco-scrollable-element {
-  margin-left: 0;
-
-  .monaco-list-row.focused {
-    border-radius: $euiBorderRadius;
-  }
+.ESQLEditor .monaco-editor .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
+  border-radius: $euiBorderRadius;
 }

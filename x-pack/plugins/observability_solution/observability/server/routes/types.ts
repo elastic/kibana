@@ -24,7 +24,7 @@ export interface ObservabilityRouteHandlerResources {
 }
 
 export interface ObservabilityRouteCreateOptions {
-  tags: string[];
+  tags?: string[];
   access?: 'public' | 'internal';
 }
 

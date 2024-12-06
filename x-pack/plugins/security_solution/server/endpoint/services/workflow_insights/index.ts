@@ -7,13 +7,24 @@
 
 import { ReplaySubject, firstValueFrom, combineLatest } from 'rxjs';
 
+import type {
+  SearchHit,
+  UpdateResponse,
+  WriteResponseBase,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 
+import type {
+  SearchParams,
+  SecurityWorkflowInsight,
+} from '../../../../common/endpoint/types/workflow_insights';
+
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
-import { createDatastream, createPipeline } from './helpers';
+import { buildEsQueryParams, createDatastream, createPipeline } from './helpers';
 import { DATA_STREAM_NAME } from './constants';
+
+const DEFAULT_PAGE_SIZE = 10;
 
 interface SetupInterface {
   kibanaVersion: string;
@@ -30,7 +41,7 @@ class SecurityWorkflowInsightsService {
   private start$ = new ReplaySubject<void>(1);
   private stop$ = new ReplaySubject<void>(1);
   private ds: DataStreamSpacesAdapter | undefined;
-  // private _esClient: ElasticsearchClient | undefined;
+  private _esClient: ElasticsearchClient | undefined;
   private _logger: Logger | undefined;
   private _isInitialized: Promise<[void, void]> = firstValueFrom(
     combineLatest<[void, void]>([this.setup$, this.start$])
@@ -64,7 +75,7 @@ class SecurityWorkflowInsightsService {
       return;
     }
 
-    // this._esClient = esClient;
+    this._esClient = esClient;
     await firstValueFrom(this.setup$);
 
     try {
@@ -97,26 +108,75 @@ class SecurityWorkflowInsightsService {
     this.stop$.complete();
   }
 
-  public async create() {
+  public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase> {
     await this.isInitialized;
+
+    const response = await this.esClient.index<SecurityWorkflowInsight>({
+      index: DATA_STREAM_NAME,
+      body: insight,
+      refresh: 'wait_for',
+    });
+
+    return response;
   }
 
-  public async update() {
+  public async update(
+    id: string,
+    insight: Partial<SecurityWorkflowInsight>,
+    backingIndex?: string
+  ): Promise<UpdateResponse> {
     await this.isInitialized;
+
+    let index = backingIndex;
+    if (!index) {
+      const retrievedInsight = (await this.fetch({ ids: [id] }))[0];
+      index = retrievedInsight?._index;
+    }
+
+    if (!index) {
+      throw new Error('invalid backing index for updating workflow insight');
+    }
+
+    const response = await this.esClient.update<SecurityWorkflowInsight>({
+      index,
+      id,
+      body: { doc: insight },
+      refresh: 'wait_for',
+    });
+
+    return response;
   }
 
-  public async fetch() {
+  public async fetch(params?: SearchParams): Promise<Array<SearchHit<SecurityWorkflowInsight>>> {
     await this.isInitialized;
+
+    const size = params?.size ?? DEFAULT_PAGE_SIZE;
+    const from = params?.from ?? 0;
+
+    const termFilters = params ? buildEsQueryParams(params) : [];
+    const response = await this.esClient.search<SecurityWorkflowInsight>({
+      index: DATA_STREAM_NAME,
+      body: {
+        query: {
+          bool: {
+            must: termFilters,
+          },
+        },
+        size,
+        from,
+      },
+    });
+
+    return response?.hits?.hits ?? [];
   }
 
-  // to be used in create/update/fetch above
-  // private get esClient(): ElasticsearchClient {
-  //   if (!this._esClient) {
-  //     throw new SecurityWorkflowInsightsFailedInitialized('no elasticsearch client found');
-  //   }
+  private get esClient(): ElasticsearchClient {
+    if (!this._esClient) {
+      throw new SecurityWorkflowInsightsFailedInitialized('no elasticsearch client found');
+    }
 
-  //   return this._esClient;
-  // }
+    return this._esClient;
+  }
 
   private get logger(): Logger {
     if (!this._logger) {

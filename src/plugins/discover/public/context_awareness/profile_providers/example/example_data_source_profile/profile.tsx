@@ -220,6 +220,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ];
     },
     getDefaultAppState: () => () => ({
+      breakdownField: 'log.level',
       columns: [
         {
           name: '@timestamp',

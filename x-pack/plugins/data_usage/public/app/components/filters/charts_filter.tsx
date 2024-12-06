@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { orderBy, findKey } from 'lodash/fp';
+import { orderBy } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiPopoverTitle, EuiSelectable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP } from '../../../../common/rest_types';
+import { METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP } from '../../../../common/rest_types';
 import { UX_LABELS } from '../../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
 import { ToggleAllButton } from './toggle_all_button';
@@ -171,7 +171,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       if (isMetricsFilter) {
         setUrlMetricTypesFilter(
           optionsToSelect
-            .map((option) => findKey(METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP, option))
+            .map((option) => METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP[option])
             .join(',')
         );
       }

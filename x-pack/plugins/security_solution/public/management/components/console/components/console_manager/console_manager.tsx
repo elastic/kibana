@@ -113,13 +113,9 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       validateIdOrThrow(id);
 
       setConsoleStorage((prevState) => {
-        return {
-          ...prevState,
-          [id]: {
-            ...prevState[id],
-            isOpen: false,
-          },
-        };
+        const newState = { ...prevState };
+        newState[id].isOpen = false;
+        return newState;
       });
     },
     [validateIdOrThrow] // << IMPORTANT: this callback should have only immutable dependencies

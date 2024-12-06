@@ -45,7 +45,7 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
 
           const responseData = await handleCoverageOverviewRequest({
             params: request.body,
-            deps: { rulesClient: ctx.alerting.getRulesClient() },
+            deps: { rulesClient: await ctx.alerting.getRulesClient() },
           });
 
           return response.ok({

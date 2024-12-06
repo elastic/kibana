@@ -470,7 +470,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput0', '1');
-      await testSubjects.click('saveEditedRuleButton');
+      await testSubjects.click('rulePageFooterSaveButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertResults(RULE_NAME);
@@ -622,8 +622,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitFor('rule name value is correct', async () => {
-        await testSubjects.setValue('ruleNameInput', newAlert);
-        const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+        await testSubjects.setValue('ruleDetailsNameInput', newAlert);
+        const ruleName = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
         return ruleName === newAlert;
       });
 
@@ -641,10 +641,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await sourceDataViewOption.click();
 
-      await testSubjects.click('saveRuleButton');
+      await testSubjects.click('rulePageFooterSaveButton');
 
       await retry.waitFor('confirmation modal', async () => {
-        return await testSubjects.exists('confirmModalConfirmButton');
+        return await testSubjects.exists('rulePageConfirmCreateRule');
       });
 
       await testSubjects.click('confirmModalConfirmButton');

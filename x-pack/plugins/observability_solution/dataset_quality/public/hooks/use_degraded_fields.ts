@@ -77,10 +77,11 @@ export function useDegradedFields() {
     return renderedItems.find((item) => item.name === expandedDegradedField);
   }, [expandedDegradedField, renderedItems]);
 
-  const isDegradedFieldsLoading = useSelector(service, (state) =>
-    state.matches(
-      'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.dataStreamDegradedFields.fetching'
-    )
+  const isDegradedFieldsLoading = useSelector(
+    service,
+    (state) =>
+      state.matches('initializing.dataStreamSettings.fetchingDataStreamSettings') ||
+      state.matches('initializing.dataStreamSettings.fetchingDataStreamDegradedFields')
   );
 
   const closeDegradedFieldFlyout = useCallback(
