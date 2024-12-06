@@ -92,6 +92,13 @@ export const RULE_TYPE_CHANGE_CALLOUT_TITLE = i18n.translate(
 export const RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeCalloutDescription',
   {
+    defaultMessage: 'Elastic update has rule type changed.',
+  }
+);
+
+export const RULE_TYPE_CHANGE_WITH_CUSTOMIZATIONS_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeWithCustomizationCalloutDescription',
+  {
     defaultMessage:
       'Your customization will be lost at update. Please take note of your customization or clone this rule before updating.',
   }
