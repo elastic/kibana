@@ -35,16 +35,16 @@ interface FieldUsageEventData {
 }
 
 /**
- * Context profile resolved event i.e. when a different context awareness profile is resolved at root, data source, or document level
+ * Contextual profile resolved event i.e. when a different contextual profile is resolved at root, data source, or document level
  * Duplicated events for the same profile level will not be sent.
  */
-const CONTEXT_PROFILE_RESOLVED_EVENT_TYPE = 'discover_profile_resolved';
-const CONTEXT_PROFILE_LEVEL = 'profileLevel';
-const CONTEXT_PROFILE_ID = 'profileId';
+const CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE = 'discover_profile_resolved';
+const CONTEXTUAL_PROFILE_LEVEL = 'profileLevel';
+const CONTEXTUAL_PROFILE_ID = 'profileId';
 
-interface ContextProfileResolvedEventData {
-  [CONTEXT_PROFILE_LEVEL]: ContextualProfileLevel;
-  [CONTEXT_PROFILE_ID]: string;
+interface ContextualProfileResolvedEventData {
+  [CONTEXTUAL_PROFILE_LEVEL]: ContextualProfileLevel;
+  [CONTEXTUAL_PROFILE_ID]: string;
 }
 
 export interface DiscoverEBTContextProps {
@@ -133,16 +133,16 @@ export class DiscoverEBTManager {
         },
       });
       core.analytics.registerEventType({
-        eventType: CONTEXT_PROFILE_RESOLVED_EVENT_TYPE,
+        eventType: CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
         schema: {
-          [CONTEXT_PROFILE_LEVEL]: {
+          [CONTEXTUAL_PROFILE_LEVEL]: {
             type: 'keyword',
             _meta: {
               description:
                 'The profile level at which it was resolved i.e. rootLevel, dataSourceLevel, documentLevel',
             },
           },
-          [CONTEXT_PROFILE_ID]: {
+          [CONTEXTUAL_PROFILE_ID]: {
             type: 'keyword',
             _meta: {
               description: 'The resolved name of the active profile',
@@ -286,11 +286,11 @@ export class DiscoverEBTManager {
 
     this.lastResolvedContextProfiles[profileLevel] = profileId;
 
-    const eventData: ContextProfileResolvedEventData = {
-      [CONTEXT_PROFILE_LEVEL]: profileLevel,
-      [CONTEXT_PROFILE_ID]: profileId,
+    const eventData: ContextualProfileResolvedEventData = {
+      [CONTEXTUAL_PROFILE_LEVEL]: profileLevel,
+      [CONTEXTUAL_PROFILE_ID]: profileId,
     };
 
-    this.reportEvent(CONTEXT_PROFILE_RESOLVED_EVENT_TYPE, eventData);
+    this.reportEvent(CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE, eventData);
   }
 }
