@@ -7,7 +7,7 @@
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-// Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
+// Based on ML Job/Datafeed States from x-pack/legacy/platform/plugins/shared/ml/common/constants/states.js
 const enabledStates = ['started', 'opened'];
 const loadingStates = ['starting', 'stopping', 'opening', 'closing'];
 const failureStates = ['deleted', 'failed'];
