@@ -21,7 +21,7 @@ const MAP_SHAPES = {
 } as const;
 type MapShapes = (typeof MAP_SHAPES)[keyof typeof MAP_SHAPES];
 
-function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShapes {
+function shapeForNode(el: cytoscape.NodeSingular): MapShapes {
   const type = el.data('type');
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS:
@@ -68,7 +68,7 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
     case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
       return theme.euiColorFullShade;
     case JOB_MAP_NODE_TYPES.ANALYTICS:
-      return theme.euiColorAccentSecondary;
+      return theme.euiColorVis0;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
       return theme.euiColorVis1;
     case JOB_MAP_NODE_TYPES.INDEX:
@@ -109,7 +109,7 @@ export const getCytoscapeOptions = (theme: EuiThemeType): cytoscape.CytoscapeOpt
           'font-size': theme.euiFontSizeXS,
           'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
           label: 'data(label)',
-          shape: (el: cytoscape.NodeSingular) => shapeForNode(el, theme),
+          shape: (el: cytoscape.NodeSingular) => shapeForNode(el),
           'text-background-color': theme.euiColorLightestShade,
           'text-background-opacity': 0,
           'text-background-padding': theme.euiSizeXS,
