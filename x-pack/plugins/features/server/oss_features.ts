@@ -345,9 +345,16 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['saveQuery'],
+          api: ['savedQuery:manage', 'savedQuery:read'],
         },
-        // No read-only mode supported
-        read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+        read: {
+          savedObject: {
+            all: [],
+            read: ['query'],
+          },
+          ui: [],
+          api: ['savedQuery:read'],
+        },
       },
     },
   ];
@@ -360,13 +367,17 @@ const getBaseDiscoverFeature = ({
   includeReporting: boolean;
   version: 'v1' | 'v2';
 }): Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> => {
+  const apiAllPrivileges = ['fileUpload:analyzeFile'];
   const savedObjectAllPrivileges = ['search'];
   const uiAllPrivileges = ['show', 'save'];
+  const apiReadPrivileges = [];
   const savedObjectReadPrivileges = ['index-pattern', 'search'];
 
   if (version === 'v1') {
+    apiAllPrivileges.push('savedQuery:manage', 'savedQuery:read');
     savedObjectAllPrivileges.push('query');
     uiAllPrivileges.push('saveQuery');
+    apiReadPrivileges.push('savedQuery:read');
     savedObjectReadPrivileges.push('query');
   }
 
@@ -382,7 +393,7 @@ const getBaseDiscoverFeature = ({
     privileges: {
       all: {
         app: ['discover', 'kibana'],
-        api: ['fileUpload:analyzeFile'],
+        api: apiAllPrivileges,
         catalogue: ['discover'],
         savedObject: {
           all: savedObjectAllPrivileges,
@@ -398,6 +409,7 @@ const getBaseDiscoverFeature = ({
       },
       read: {
         app: ['discover', 'kibana'],
+        api: apiReadPrivileges,
         catalogue: ['discover'],
         savedObject: {
           all: [],
@@ -484,13 +496,17 @@ const getBaseVisualizeFeature = ({
   includeReporting: boolean;
   version: 'v1' | 'v2';
 }): Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> => {
+  const apiAllPrivileges = [];
   const savedObjectAllPrivileges = ['visualization', 'lens'];
   const uiAllPrivileges = ['show', 'delete', 'save'];
+  const apiReadPrivileges = [];
   const savedObjectReadPrivileges = ['index-pattern', 'search', 'visualization', 'lens', 'tag'];
 
   if (version === 'v1') {
+    apiAllPrivileges.push('savedQuery:manage', 'savedQuery:read');
     savedObjectAllPrivileges.push('query');
     uiAllPrivileges.push('saveQuery');
+    apiReadPrivileges.push('savedQuery:read');
     savedObjectReadPrivileges.push('query');
   }
 
@@ -505,6 +521,7 @@ const getBaseVisualizeFeature = ({
     privileges: {
       all: {
         app: ['visualize', 'lens', 'kibana'],
+        api: apiAllPrivileges,
         catalogue: ['visualize'],
         savedObject: {
           all: savedObjectAllPrivileges,
@@ -520,6 +537,7 @@ const getBaseVisualizeFeature = ({
       },
       read: {
         app: ['visualize', 'lens', 'kibana'],
+        api: apiReadPrivileges,
         catalogue: ['visualize'],
         savedObject: {
           all: [],
@@ -575,8 +593,10 @@ const getBaseDashboardFeature = ({
   includeReporting: boolean;
   version: 'v1' | 'v2';
 }): Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> => {
+  const apiAllPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
   const savedObjectAllPrivileges = ['dashboard'];
   const uiAllPrivileges = ['createNew', 'show', 'showWriteControls'];
+  const apiReadPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
   const savedObjectReadPrivileges = [
     'index-pattern',
     'search',
@@ -590,8 +610,10 @@ const getBaseDashboardFeature = ({
   ];
 
   if (version === 'v1') {
+    apiAllPrivileges.push('savedQuery:manage', 'savedQuery:read');
     savedObjectAllPrivileges.push('query');
     uiAllPrivileges.push('saveQuery');
+    apiReadPrivileges.push('savedQuery:read');
     savedObjectReadPrivileges.push('query');
   }
 
@@ -622,7 +644,7 @@ const getBaseDashboardFeature = ({
           ],
         },
         ui: uiAllPrivileges,
-        api: ['bulkGetUserProfiles', 'dashboardUsageStats'],
+        api: apiAllPrivileges,
         ...(version === 'v1' && {
           replacedBy: [
             { feature: 'dashboard_v2', privileges: ['all'] },
@@ -638,7 +660,7 @@ const getBaseDashboardFeature = ({
           read: savedObjectReadPrivileges,
         },
         ui: ['show'],
-        api: ['bulkGetUserProfiles', 'dashboardUsageStats'],
+        api: apiReadPrivileges,
         ...(version === 'v1' && {
           replacedBy: [
             { feature: 'dashboard_v2', privileges: ['read'] },

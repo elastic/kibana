@@ -172,13 +172,17 @@ export class MapsPlugin implements Plugin {
     const getBaseMapsFeature = (
       version: 'v1' | 'v2'
     ): Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> => {
+      const apiAllPrivileges = [];
       const savedObjectAllPrivileges = [MAP_SAVED_OBJECT_TYPE];
       const uiAllPrivileges = ['save', 'show'];
+      const apiReadPrivileges = [];
       const savedObjectReadPrivileges = [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'tag'];
 
       if (version === 'v1') {
+        apiAllPrivileges.push('savedQuery:manage', 'savedQuery:read');
         savedObjectAllPrivileges.push('query');
         uiAllPrivileges.push('saveQuery');
+        apiReadPrivileges.push('savedQuery:read');
         savedObjectReadPrivileges.push('query');
       }
 
@@ -190,6 +194,7 @@ export class MapsPlugin implements Plugin {
         privileges: {
           all: {
             app: [APP_ID, 'kibana'],
+            api: apiAllPrivileges,
             catalogue: [APP_ID],
             savedObject: {
               all: savedObjectAllPrivileges,
@@ -205,6 +210,7 @@ export class MapsPlugin implements Plugin {
           },
           read: {
             app: [APP_ID, 'kibana'],
+            api: apiReadPrivileges,
             catalogue: [APP_ID],
             savedObject: {
               all: [],
