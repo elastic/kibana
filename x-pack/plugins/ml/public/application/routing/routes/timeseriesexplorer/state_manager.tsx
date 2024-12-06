@@ -189,6 +189,27 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const getJobSelection = useJobSelectionFlyout();
 
+  const handleJobSelectionChange = useCallback(
+    ({
+      jobIds,
+      groups,
+      time,
+    }: {
+      jobIds: string[];
+      groups: string[];
+      time?: { from: string; to: string };
+    }) => {
+      setGlobalState({
+        ml: {
+          jobIds,
+          groups,
+        },
+        ...(time !== undefined ? { time } : {}),
+      });
+    },
+    [setGlobalState]
+  );
+
   // Use a side effect to clear appState when changing jobs.
   useEffect(() => {
     if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
@@ -306,6 +327,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         zoom: zoomProp,
         invalidTimeRangeError,
         functionDescription: selectedFunctionDescription,
+        handleJobSelectionChange,
       }}
     />
   );

@@ -72,13 +72,13 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
-import type { ExplorerState } from './reducers';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
 import { useMlIndexUtils } from '../util/index_service';
+import type { ExplorerState } from './explorer_data';
 
 const AnnotationFlyout = dynamic(async () => ({
   default: (await import('../components/annotations/annotation_flyout')).AnnotationFlyout,
@@ -155,6 +155,7 @@ interface ExplorerUIProps {
   timeBuckets: TimeBuckets;
   selectedCells: AppStateSelectedCells | undefined | null;
   swimLaneSeverity?: number;
+  noInfluencersConfigured?: boolean;
 }
 
 export function getDefaultPanelsState() {
@@ -182,6 +183,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   swimLaneSeverity,
   explorerState,
   overallSwimlaneData,
+  noInfluencersConfigured,
 }) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
@@ -387,15 +389,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
-  const {
-    annotations,
-    filterPlaceHolder,
-    indexPattern,
-    influencers,
-    loading,
-    noInfluencersConfigured,
-    tableData,
-  } = explorerState;
+  const { annotations, filterPlaceHolder, indexPattern, influencers, loading, tableData } =
+    explorerState;
 
   const chartsData = useObservable(
     chartsStateService.getChartsData$(),
@@ -442,11 +437,31 @@ export const Explorer: FC<ExplorerUIProps> = ({
       </EuiBadge>
     );
 
+  const handleJobSelectionChange = useCallback(
+    ({
+      jobIds,
+      groups,
+      time,
+    }: {
+      jobIds: string[];
+      groups: string[];
+      time?: { from: string; to: string };
+    }) => {
+      anomalyExplorerCommonStateService.setSelectedJobs(jobIds, time);
+    },
+    [anomalyExplorerCommonStateService]
+  );
+
+  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
+
   const jobSelectorProps = {
     dateFormatTz: getDateFormatTz(uiSettings),
-  } as JobSelectorProps;
+    onSelectionChange: handleJobSelectionChange,
+    selectedJobIds,
+  } as unknown as JobSelectorProps;
 
   const noJobsSelected = !selectedJobs || selectedJobs.length === 0;
+
   const hasResults: boolean =
     !!overallSwimlaneData?.points && overallSwimlaneData.points.length > 0;
   const hasResultsWithAnomalies =
@@ -454,7 +469,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
     tableData.anomalies?.length > 0;
 
   const hasActiveFilter = isDefined(swimLaneSeverity);
-  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
 
   useEffect(() => {
     if (!noJobsSelected) {

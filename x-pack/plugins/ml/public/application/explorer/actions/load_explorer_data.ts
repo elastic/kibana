@@ -31,7 +31,7 @@ import {
   loadTopInfluencers,
   loadOverallAnnotations,
 } from '../explorer_utils';
-import type { ExplorerState } from '../reducers';
+
 import { useMlApi, useUiSettings } from '../../contexts/kibana';
 import type { MlResultsService } from '../../services/results_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
@@ -39,6 +39,7 @@ import type { AnomalyExplorerChartsService } from '../../services/anomaly_explor
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import type { MlApi } from '../../services/ml_api_service';
 import { useMlJobService, type MlJobService } from '../../services/job_service';
+import type { ExplorerState } from '../explorer_data';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument

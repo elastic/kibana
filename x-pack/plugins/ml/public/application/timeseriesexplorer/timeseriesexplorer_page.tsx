@@ -20,11 +20,22 @@ import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { getAnnotationStyles, getTimeseriesExplorerStyles } from './styles';
+import type { GroupObj } from '../components/job_selector/job_selector';
 
 interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
   resizeRef?: any;
   noSingleMetricJobsFound?: boolean;
+  handleJobSelectionChange?: ({
+    jobIds,
+    groups,
+    time,
+  }: {
+    jobIds: string[];
+    groups: GroupObj[];
+    time?: { from: string; to: string };
+  }) => void;
+  selectedJobId?: string[];
 }
 
 const timeseriesExplorerStyles = getTimeseriesExplorerStyles();
@@ -35,6 +46,8 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
   dateFormatTz,
   resizeRef,
   noSingleMetricJobsFound,
+  handleJobSelectionChange,
+  selectedJobId = [],
 }) => {
   const {
     services: { cases, docLinks },
@@ -66,7 +79,13 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
         </MlPageHeader>
 
         {noSingleMetricJobsFound ? null : (
-          <JobSelector dateFormatTz={dateFormatTz!} singleSelection={true} timeseriesOnly={true} />
+          <JobSelector
+            dateFormatTz={dateFormatTz!}
+            singleSelection={true}
+            timeseriesOnly={true}
+            onSelectionChange={handleJobSelectionChange}
+            selectedJobIds={selectedJobId}
+          />
         )}
         <CasesContext owner={[]} permissions={casesPermissions!}>
           {children}

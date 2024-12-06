@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUrlState } from '@kbn/ml-url-state';
 import './_index.scss';
 
 import { useStorage } from '@kbn/ml-local-storage';
@@ -29,7 +28,7 @@ import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detect
 import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 import { FeedBackButton } from '../feedback_button';
 
-interface GroupObj {
+export interface GroupObj {
   groupId: string;
   jobIds: string[];
 }
@@ -78,6 +77,17 @@ export interface JobSelectorProps {
   dateFormatTz: string;
   singleSelection: boolean;
   timeseriesOnly: boolean;
+  onSelectionChange?: ({
+    jobIds,
+    groups,
+    time,
+  }: {
+    jobIds: string[];
+    groups: GroupObj[];
+    time?: { from: string; to: string };
+  }) => void;
+  selectedJobIds?: string[];
+  selectedGroups?: GroupObj[];
 }
 
 export interface JobSelectionMaps {
@@ -85,23 +95,27 @@ export interface JobSelectionMaps {
   groupsMap: Dictionary<string[]>;
 }
 
-export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: JobSelectorProps) {
-  const [globalState, setGlobalState] = useUrlState('_g');
+export function JobSelector({
+  dateFormatTz,
+  singleSelection,
+  timeseriesOnly,
+  selectedJobIds = [],
+  selectedGroups = [],
+  onSelectionChange,
+}: JobSelectorProps) {
   const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
     ML_APPLY_TIME_RANGE_CONFIG,
     true
   );
 
-  const selectedJobIds = globalState?.ml?.jobIds ?? [];
-  const selectedGroups = globalState?.ml?.groups ?? [];
-
   const [maps, setMaps] = useState<JobSelectionMaps>({
-    groupsMap: getInitialGroupsMap(selectedGroups),
+    groupsMap: {},
     jobsMap: {},
   });
   const [selectedIds, setSelectedIds] = useState(
     mergeSelection(selectedJobIds, selectedGroups, singleSelection)
   );
+
   const [showAllBarBadges, setShowAllBarBadges] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
@@ -127,17 +141,10 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
     ({ newSelection, jobIds, groups: newGroups, time }) => {
       setSelectedIds(newSelection);
 
-      setGlobalState({
-        ml: {
-          jobIds,
-          groups: newGroups,
-        },
-        ...(time !== undefined ? { time } : {}),
-      });
-
+      onSelectionChange?.({ jobIds, groups: newGroups, time });
       closeFlyout();
     },
-    [setGlobalState, setSelectedIds]
+    [onSelectionChange]
   );
 
   function renderJobSelectionBar() {
