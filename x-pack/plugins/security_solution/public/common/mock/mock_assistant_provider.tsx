@@ -16,6 +16,7 @@ import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversatio
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
+  isServerless?: boolean;
   navControls?: ChromeNavControls;
   children: React.ReactNode;
 }
@@ -26,6 +27,7 @@ window.HTMLElement.prototype.scrollIntoView = jest.fn();
 /** A utility for wrapping children in the providers required to run tests */
 export const MockAssistantProviderComponent: React.FC<Props> = ({
   assistantAvailability,
+  isServerless = false,
   navControls = chromeServiceMock.createStartContract().navControls,
   children,
 }) => {
@@ -58,6 +60,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       currentAppId={'test'}
       userProfileService={jest.fn() as unknown as UserProfileService}
       navControls={navControls}
+      isServerless={isServerless}
     >
       {children}
     </AssistantProvider>

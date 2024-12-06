@@ -28,6 +28,7 @@ describe('AssistantNavLink', () => {
         hasAssistantPrivilege
         showAssistantOverlay={mockShowAssistantOverlay}
         navControls={mockNavControls}
+        isServerless={false}
       />
     );
     expect(mockNavControls.registerRight).toHaveBeenCalledTimes(1);
@@ -49,6 +50,7 @@ describe('AssistantNavLink', () => {
           hasAssistantPrivilege
           showAssistantOverlay={mockShowAssistantOverlay}
           navControls={mockNavControls}
+          isServerless={false}
         />
       </>
     );
@@ -72,6 +74,7 @@ describe('AssistantNavLink', () => {
           hasAssistantPrivilege={false}
           showAssistantOverlay={mockShowAssistantOverlay}
           navControls={mockNavControls}
+          isServerless={false}
         />
       </>
     );
@@ -95,6 +98,7 @@ describe('AssistantNavLink', () => {
           hasAssistantPrivilege
           showAssistantOverlay={mockShowAssistantOverlay}
           navControls={mockNavControls}
+          isServerless={false}
         />
       </>
     );

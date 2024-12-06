@@ -70,6 +70,7 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       currentAppId={'security'}
       userProfileService={jest.fn() as unknown as UserProfileService}
       navControls={chromeServiceMock.createStartContract().navControls}
+      isServerless={false}
     >
       {children}
     </AssistantProvider>

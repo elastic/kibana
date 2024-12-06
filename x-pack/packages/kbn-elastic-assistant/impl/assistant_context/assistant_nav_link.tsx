@@ -10,7 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
 import { ChromeNavControls } from '@kbn/core/public';
-import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AssistantAvatar } from '../..';
 import { UseAssistantContext } from '.';
@@ -19,6 +19,7 @@ interface Props {
   hasAssistantPrivilege: UseAssistantContext['assistantAvailability']['hasAssistantPrivilege'];
   navControls: ChromeNavControls;
   showAssistantOverlay: UseAssistantContext['showAssistantOverlay'];
+  isServerless: boolean
 }
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -38,6 +39,7 @@ export const AssistantNavLink: FC<Props> = ({
   showAssistantOverlay,
   hasAssistantPrivilege,
   navControls,
+  isServerless
 }) => {
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
 
@@ -65,13 +67,14 @@ export const AssistantNavLink: FC<Props> = ({
     return null;
   }
 
+  const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton
+
   return (
     <InPortal node={portalNode}>
       <EuiToolTip content={TOOLTIP_CONTENT}>
-        <EuiButton
+        <EuiButtonBasicOrEmpty
           onClick={showOverlay}
           color="primary"
-          fill
           size="s"
           data-test-subj="assistantNavLink"
         >
@@ -81,7 +84,7 @@ export const AssistantNavLink: FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
           </EuiFlexGroup>
-        </EuiButton>
+        </EuiButtonBasicOrEmpty>
       </EuiToolTip>
     </InPortal>
   );
