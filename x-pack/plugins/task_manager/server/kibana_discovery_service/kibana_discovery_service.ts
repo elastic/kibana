@@ -71,6 +71,9 @@ export class KibanaDiscoveryService {
           this.started = true;
         }
       } catch (e) {
+        if (isClusterBlockException(e)) {
+          retryInterval = DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS;
+        }
         if (!this.started) {
           this.logger.error(
             `Kibana Discovery Service couldn't be started and will be retried in ${retryInterval}ms, error:${e.message}`
@@ -79,9 +82,6 @@ export class KibanaDiscoveryService {
           this.logger.error(
             `Kibana Discovery Service couldn't update this node's last_seen timestamp. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
           );
-        }
-        if (isClusterBlockException(e)) {
-          retryInterval = DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS;
         }
       } finally {
         this.timer = setTimeout(

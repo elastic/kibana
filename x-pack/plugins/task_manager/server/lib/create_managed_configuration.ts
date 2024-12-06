@@ -83,38 +83,45 @@ export function createManagedConfiguration({
 }
 
 function createCapacityScan(config: TaskManagerConfig, logger: Logger, startingCapacity: number) {
-  return scan((previousCapacity: number, { count: errorCount }: ErrorScanResult) => {
-    let newCapacity: number;
-    if (errorCount > 0) {
-      const minCapacity = getMinCapacity(config);
-      // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than minCapacity.
-      // Using Math.floor to make sure the number is different than previous while not being a decimal value.
-      newCapacity = Math.max(
-        Math.floor(previousCapacity * CAPACITY_DECREASE_PERCENTAGE),
-        minCapacity
-      );
-    } else {
-      // Increase capacity by CAPACITY_INCREASE_PERCENTAGE while making sure it doesn't go
-      // higher than the starting value. Using Math.ceil to make sure the number is different than
-      // previous while not being a decimal value
-      newCapacity = Math.min(
-        startingCapacity,
-        Math.ceil(previousCapacity * CAPACITY_INCREASE_PERCENTAGE)
-      );
-    }
-
-    if (newCapacity !== previousCapacity) {
-      logger.debug(
-        `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
-      );
-      if (previousCapacity === startingCapacity) {
-        logger.warn(
-          `Capacity configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
-        );
+  return scan(
+    (previousCapacity: number, { count: errorCount, isBlockException }: ErrorScanResult) => {
+      let newCapacity: number;
+      if (isBlockException) {
+        newCapacity = previousCapacity;
+      } else {
+        if (errorCount > 0) {
+          const minCapacity = getMinCapacity(config);
+          // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than minCapacity.
+          // Using Math.floor to make sure the number is different than previous while not being a decimal value.
+          newCapacity = Math.max(
+            Math.floor(previousCapacity * CAPACITY_DECREASE_PERCENTAGE),
+            minCapacity
+          );
+        } else {
+          // Increase capacity by CAPACITY_INCREASE_PERCENTAGE while making sure it doesn't go
+          // higher than the starting value. Using Math.ceil to make sure the number is different than
+          // previous while not being a decimal value
+          newCapacity = Math.min(
+            startingCapacity,
+            Math.ceil(previousCapacity * CAPACITY_INCREASE_PERCENTAGE)
+          );
+        }
       }
-    }
-    return newCapacity;
-  }, startingCapacity);
+
+      if (newCapacity !== previousCapacity) {
+        logger.debug(
+          `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
+        );
+        if (previousCapacity === startingCapacity) {
+          logger.warn(
+            `Capacity configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
+          );
+        }
+      }
+      return newCapacity;
+    },
+    startingCapacity
+  );
 }
 
 function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
