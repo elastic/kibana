@@ -23,7 +23,6 @@ import { DataViewsServerPluginStart } from '@kbn/data-plugin/server';
 import { LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
-import { DEFAULT_LOG_SOURCES } from '@kbn/logs-data-access-plugin/common/constants';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { registerRoutes } from './infra_server';
@@ -112,17 +111,26 @@ export class InfraServerPlugin
     logsShared: LogsSharedPluginStart,
     logsDataAccess: LogsDataAccessPluginStart
   ) {
+    const LOG_RULES_DATA_VIEW_ID = 'log_rules_data_view';
+    const METRIC_RULES_DATA_VIEW_ID = 'infra_rules_data_view';
+
+    const LOG_RULES_DATA_VIEW_NAME = 'Log Threshold Alerting Rule Source';
+    const METRIC_RULES_DATA_VIEW_NAME = 'Metric AND Inventory Threshold Alerting Rule Source';
+
+    const override = false;
+    const skipFetchFields = false;
+    const displayErrors = true;
+    const setAsDefault = false;
+
+    const savedObjectsClient = core.savedObjects.createInternalRepository();
+    const esClient = core.elasticsearch.client.asInternalUser;
+
     const dataViewsService = await dataViews.dataViewsServiceFactory(
-      core.savedObjects.createInternalRepository(),
-      core.elasticsearch.client.asInternalUser,
+      savedObjectsClient,
+      esClient,
       undefined,
       true
     );
-
-    const savedObjectsClient = core.savedObjects.createInternalRepository();
-
-    const LOG_RULES_DATA_VIEW = 'log_rules_data_view';
-    const METRIC_RULES_DATA_VIEW = 'metric_rules_data_view';
 
     // get log indices
     const logSourcesService =
@@ -133,16 +141,22 @@ export class InfraServerPlugin
       .getResolvedLogView(DEFAULT_LOG_VIEW);
 
     // create default data view for Log threshold rules
-    const logDataViewExists = await dataViewsService.get(LOG_RULES_DATA_VIEW).catch(() => false);
+    const logDataViewExists = await dataViewsService.get(LOG_RULES_DATA_VIEW_ID).catch(() => false);
 
     if (!logDataViewExists) {
-      await dataViewsService.createAndSave({
-        allowNoIndex: false,
-        name: LOG_RULES_DATA_VIEW,
-        title: logIndices === '' ? DEFAULT_LOG_SOURCES.join(',') : logIndices,
-        id: LOG_RULES_DATA_VIEW,
-        timeFieldName: timestampField,
-      });
+      await dataViewsService.createAndSave(
+        {
+          allowNoIndex: false,
+          name: LOG_RULES_DATA_VIEW_NAME,
+          title: logIndices,
+          id: LOG_RULES_DATA_VIEW_ID,
+          timeFieldName: timestampField,
+        },
+        override,
+        skipFetchFields,
+        displayErrors,
+        setAsDefault
+      );
     }
 
     // get metric indices
@@ -151,17 +165,23 @@ export class InfraServerPlugin
 
     // create default data view for Metric and Inventory threshold rules
     const metricDataViewExists = await dataViewsService
-      .get(METRIC_RULES_DATA_VIEW)
+      .get(METRIC_RULES_DATA_VIEW_ID)
       .catch(() => false);
 
     if (!metricDataViewExists) {
-      await dataViewsService.createAndSave({
-        allowNoIndex: false,
-        name: METRIC_RULES_DATA_VIEW,
-        title: metricIndices,
-        id: METRIC_RULES_DATA_VIEW,
-        timeFieldName: '@timestamp',
-      });
+      await dataViewsService.createAndSave(
+        {
+          allowNoIndex: false,
+          name: METRIC_RULES_DATA_VIEW_NAME,
+          title: metricIndices,
+          id: METRIC_RULES_DATA_VIEW_ID,
+          timeFieldName: '@timestamp',
+        },
+        override,
+        skipFetchFields,
+        displayErrors,
+        setAsDefault
+      );
     }
   }
 
