@@ -38,7 +38,7 @@ import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
+describe('test Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
   let savedQueryName: string;
   let nomappingSavedQueryId: string;
